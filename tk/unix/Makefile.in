@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.14 1996/11/20 04:13:16 markd Exp $
+# $Id: Makefile.in,v 8.1 1996/12/17 08:16:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -81,7 +81,7 @@ all: ${TKX_STLIB_NAME} wishx RUNTIME tktest runtest \
 
 static: wishx.static
 
-wishx: tkXAppInit.o SHLIB_@BUILD_SHARED@ ${LIBTCLX}
+wishx: tkXAppInit.o SHLIB_@BUILD_SHARED@ ${TKX_STLIB_NAME} ${LIBTCLX}
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -166,7 +166,7 @@ help:
 # Generate the test program.
 #
 
-tktest: ${TEST_OBJS} SHLIB_@BUILD_SHARED@  ${LIBTCLX}
+tktest: ${TEST_OBJS} SHLIB_@BUILD_SHARED@ ${TKX_STLIB_NAME} ${LIBTCLX}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 

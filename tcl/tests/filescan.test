@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 7.6 1996/10/04 15:30:20 markd Exp $
+# $Id: filescan.test,v 8.1 1996/12/17 08:09:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -465,6 +465,30 @@ loop cnt 1 101 2 {
 
 close $testChkFH
 close $testChk2FH
+
+
+#
+# Test for the problem De Clarke found with Boyer-Moore.
+#
+
+Test 9.1 {filescan tests} {
+    set testFH [open TEST.TMP w]
+    puts $testFH \
+            {Sun Dec 01 14:56:08 1996 mask1a.ps kelson bigdog.ucolick.org 1}
+    close $testFH
+
+    set linesMatched {}
+    set testCH [scancontext create]
+    scanmatch $testCH {[A-z] Dec [0-9]* [0123456789:]* 1996 } {
+        lappend linesMatched $matchInfo(line)
+    }
+    set testFH [open TEST.TMP]
+    scanfile $testCH $testFH
+    close $testFH
+    set linesMatched
+} 0 {{Sun Dec 01 14:56:08 1996 mask1a.ps kelson bigdog.ucolick.org 1}}
+
+
 
 TestRemove TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.7 1996/10/04 04:25:18 markd Exp $
+ * $Id: tclXlib.c,v 8.1 1996/12/14 14:56:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1267,7 +1267,7 @@ LoadITclImportProc (interp, command)
 {
     static char importCmd [] = "import all";
     Tcl_DString tmpResult, fullName;
-    char **nsSearchPathv;
+    char **nsSearchPathv = NULL;
     int nsSearchPathc, idx, nameSpaceLen;
     char *nameSpace, *nextPtr, *loadCmd;
 
@@ -1319,12 +1319,15 @@ LoadITclImportProc (interp, command)
     if (Tcl_GlobalEval (interp, loadCmd) == TCL_ERROR)
         goto errorExit;
 
+    ckfree (nsSearchPathv);
     Tcl_DStringFree (&tmpResult);
     Tcl_DStringFree (&fullName);
     return TCL_OK;
 
     
   errorExit:
+    if (nsSearchPathv != NULL)
+        ckfree (nsSearchPathv);
     Tcl_DStringFree (&tmpResult);
     Tcl_DStringFree (&fullName);
     return TCL_ERROR;
