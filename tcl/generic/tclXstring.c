@@ -179,17 +179,13 @@ TclX_CconcatObjCmd (dummy, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
+    Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
     int idx, strLen;
     char *str;
 
-    /*
-     * FIX: It would be faster if we calculated up how much space we needed all
-     * at once.  Also we could iterate a pointer into objv until NULL
-     */
     for (idx = 1; idx < objc; idx++) {
-	str = Tcl_GetStringFromObj (objv [idx], &strLen);
-	Tcl_AppendToObj (resultPtr, str, strLen);
+	str = Tcl_GetStringFromObj(objv[idx], &strLen);
+	Tcl_AppendToObj(resultPtr, str, strLen);
     }
     return TCL_OK;
 }
@@ -279,7 +275,7 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     char *string2;
     int string2Len;
 
-    /*FIX: Not utf clean (FIXUTF) */
+    /*FIX: Not utf clean (FIXUTF), can it ever be... */
     if ((objc < 3) || (objc > 4))
         return TclX_WrongArgs (interp, objv[0], "?options? string1 string2");
 
@@ -371,57 +367,68 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj      *varValueObj;
-    Tcl_DString   string;
-    char         *varValue;
-    char         *startPtr;
-    char         *tokenString;
-    int           tokenLen;
-    int           varValueLen;
-    int           tokenStrLen;
-    Tcl_Obj      *newVarValueObj;
+    Tcl_Obj* stringVarObj;
+    char* string;
+    int strByteLen;
+    int strByteIdx;
+    char* separators;
+    int separatorsLen;
+    int tokenByteIdx;
+    int tokenByteLen;
+    Tcl_DString token;
+    Tcl_UniChar uniChar;
+    int utfBytes;
+    Tcl_Obj *newVarValueObj;
 
-    /*FIX: Not UTF safe (FIXUTF) */
-    if (objc != 3)
-        return TclX_WrongArgs (interp, objv[0], "strvar separators");
+    if (objc != 3) {
+        return TclX_WrongArgs(interp, objv[0], "strvar separators");
+    }
     
-    varValueObj = Tcl_ObjGetVar2(interp, objv[1], NULL,
+    stringVarObj = Tcl_ObjGetVar2(interp, objv[1], NULL,
                                   TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1);
-
-    varValue = Tcl_GetStringFromObj (varValueObj, &varValueLen);
-
-    if (varValue == NULL)
-        return TCL_ERROR;
-
-    Tcl_DStringInit (&string);
-    Tcl_DStringAppend (&string, varValue, varValueLen);
-
-    tokenString = Tcl_GetStringFromObj (objv [2], &tokenStrLen);
-
-    if ((strlen (varValue) != (size_t) varValueLen) ||
-        (strlen (tokenString) != (size_t) tokenStrLen)) {
-        TclX_AppendObjResult (interp, "The ",
-                              Tcl_GetStringFromObj (objv [0], NULL),
-                              " command does not support binary data",
-                              (char *) NULL);
+    if (stringVarObj == NULL) {
         return TCL_ERROR;
     }
+    string = Tcl_GetStringFromObj(stringVarObj, &strByteLen);
+    separators = Tcl_GetStringFromObj(objv[2], &separatorsLen);
 
-    startPtr = string.string + strspn (string.string, tokenString);
-    tokenLen = strcspn (startPtr, tokenString);
+    /* Find the start of the token */
+    strByteIdx = 0;
+    while (strByteIdx < strByteLen) {
+        utfBytes = Tcl_UtfToUniChar(string+strByteIdx, &uniChar);
+        if (Tcl_UtfFindFirst(separators, uniChar) == NULL) {
+            break;  /* Reached a separator */
+        }
+        strByteIdx += utfBytes;
+    }
+    tokenByteIdx = strByteIdx;
 
-    newVarValueObj = Tcl_NewStringObj (startPtr + tokenLen, -1);
+    /* Find end of the token */
+    while (strByteIdx < strByteLen) {
+        utfBytes = Tcl_UtfToUniChar(string+strByteIdx, &uniChar);
+        if (Tcl_UtfFindFirst(separators, uniChar) != NULL) {
+            break;  /* Reached a separator */
+        }
+        strByteIdx += utfBytes;
+    }
+    tokenByteLen = strByteIdx-tokenByteIdx;
 
-    if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv [1], NULL), NULL,
+    /* Copy token, before replacing variable, as its coming from old var */
+    Tcl_DStringInit(&token);
+    Tcl_DStringAppend(&token, string+tokenByteIdx, tokenByteLen);
+
+    /* Set variable argument to new string. */
+    newVarValueObj = Tcl_NewStringObj(string+strByteIdx,
+                                      strByteLen-strByteIdx);
+    if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv[1], NULL), NULL,
                       newVarValueObj,
                       TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1) == NULL) {
-        Tcl_DStringFree (&string);
+        Tcl_DStringFree (&token);
         Tcl_DecrRefCount (newVarValueObj);
         return TCL_ERROR;
     }
 
-    Tcl_SetStringObj (Tcl_GetObjResult (interp), startPtr, tokenLen);
-    Tcl_DStringFree (&string);
+    Tcl_DStringResult(interp, &token);
     return TCL_OK;
 }
 
@@ -673,6 +680,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     }
 
     /*FIX: Split into multiple procs */
+    /*FIX: Should use UtfNext to walk string */
 
     if (objc < 3) {
         goto wrongNumArgs;
