@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.7 1997/06/30 03:55:52 markd Exp $
+ * $Id: tclExtdInt.h,v 8.8 1997/06/30 06:07:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -257,9 +257,9 @@ TclX_GetOpenChannelObj _ANSI_ARGS_((Tcl_Interp *interp,
                                     int         chanAccess));
 
 extern int
-TclX_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
-                            CONST char *string,
-                            off_t      *offsetPtr));
+TclX_GetOffsetFromObj _ANSI_ARGS_((Tcl_Interp *interp,
+                                   Tcl_Obj    *objPtr,
+                                   off_t      *offsetPtr));
 
 extern void
 TclX_RegExpClean _ANSI_ARGS_((TclX_regexp *regExpPtr));
@@ -308,6 +308,8 @@ TclX_WrongArgs _ANSI_ARGS_((Tcl_Interp *interp,
 
 extern void
 TclX_StringAppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
+/*FIX: NewName */
+#define TclX_AppendResult TclX_StringAppendObjResult
 
 extern int
 TclX_IsNullObj _ANSI_ARGS_((Tcl_Obj *objPtr));

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.5 1997/06/30 01:29:05 markd Exp $
+ * $Id: tclXutil.c,v 8.6 1997/06/30 06:07:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -501,55 +501,22 @@ TclX_GetUnsigned(interp, string, unsignedPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_GetOffset --
- *
- *      Given a string, produce the corresponding off_t value.
- *
- * Results:
- *      The return value is normally TCL_OK;  in this case *timepPtr
- *      will be set to the integer value equivalent to string.  If
- *      string is improperly formed then TCL_ERROR is returned and
- *      an error message will be left in interp->result.
- *
- * Side effects:
- *      None.
+ * TclX_GetOffsetFromObj --
+ *   Get the value of an integer objects asn an off_t.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_GetOffset(interp, string, offsetPtr)
+TclX_GetOffsetFromObj (interp, objPtr, offsetPtr)
     Tcl_Interp *interp;
-    CONST char *string;
+    Tcl_Obj    *objPtr;
     off_t      *offsetPtr;
 {
-    char *end, *p;
-    long i;
-
-    errno = 0;
-    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
-        /* Empty loop body. */
-    }
-    i = strtol(p, &end, 0);
-    if (end == p) {
-        goto badOffset;
-    }
-    if (errno == ERANGE) {
-        return ReturnOverflow (interp);
-    }
-    while ((*end != '\0') && isspace(UCHAR(*end))) {
-        end++;
-    }
-    if (*end != '\0') {
-        goto badOffset;
-    }
-    *offsetPtr = (off_t) i;
-    if (*offsetPtr != i)
-        goto badOffset;
+    int intOff;
+    
+    if (Tcl_GetIntFromObj (interp, objPtr, &intOff) != TCL_OK)
+        return TCL_ERROR;
+    *offsetPtr = intOff;
     return TCL_OK;
-
-  badOffset:
-    Tcl_AppendResult (interp, "expected integer offset but got \"", 
-                      string, "\"", (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------

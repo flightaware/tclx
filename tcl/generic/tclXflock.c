@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 8.2 1997/06/12 21:08:18 markd Exp $
+ * $Id: tclXflock.c,v 8.3 1997/06/30 03:55:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Need to add an interface to F_GETLK */
@@ -24,16 +24,22 @@
  */
 static int
 ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp     *interp,
-                                 int             argc,
-                                 char          **argv,
+                                 int             objc,
+                                 Tcl_Obj *CONST  objv[],
                                  int             argIdx,
                                  TclX_FlockInfo *lockInfoPtr));
 
 static int
-TclX_FlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+TclX_FlockObjCmd _ANSI_ARGS_((ClientData clientData, 
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
 
 static int
-TclX_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+TclX_FunlockObjCmd _ANSI_ARGS_((ClientData clientData, 
+                             Tcl_Interp *interp,
+                             int objc,
+                             Tcl_Obj *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -45,8 +51,8 @@ TclX_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  *
  * Parameters:
  *   o interp - Pointer to the interpreter, errors returned in result.
- *   o argc - Count of arguments supplied to the comment.
- *   o argv - Commant argument vector.
+ *   o objc - Count of arguments supplied to the comment.
+ *   o objv - Commant argument vector.
  *   o argIdx - Index of the first common agument to parse.
  *   o access - Set of TCL_READABLE or TCL_WRITABLE or zero to
  *     not do error checking.
@@ -58,10 +64,10 @@ TclX_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  *-----------------------------------------------------------------------------
  */
 static int
-ParseLockUnlockArgs (interp, argc, argv, argIdx, lockInfoPtr)
+ParseLockUnlockArgs (interp, objc, objv, argIdx, lockInfoPtr)
     Tcl_Interp     *interp;
-    int             argc;
-    char          **argv;
+    int             objc;
+    Tcl_Obj *CONST  objv[];
     int             argIdx;
     TclX_FlockInfo *lockInfoPtr;
 {
@@ -69,44 +75,43 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, lockInfoPtr)
     lockInfoPtr->len    = 0;
     lockInfoPtr->whence = 0;
 
-    lockInfoPtr->channel = TclX_GetOpenChannel (interp, argv [argIdx],
-                                                lockInfoPtr->access);
+    lockInfoPtr->channel = TclX_GetOpenChannelObj (interp, objv [argIdx],
+                                                   lockInfoPtr->access);
     if (lockInfoPtr->channel == NULL)
         return TCL_ERROR;
     argIdx++;
 
-    if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
-        if (TclX_GetOffset (interp, argv [argIdx],
-                           &lockInfoPtr->start) != TCL_OK)
+    if ((argIdx < objc) && !TclX_IsNullObj (objv [argIdx])) {
+        if (TclX_GetOffsetFromObj (interp, objv [argIdx],
+                                   &lockInfoPtr->start) != TCL_OK)
             return TCL_ERROR;
     }
     argIdx++;
 
-    if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
-        if (TclX_GetOffset (interp, argv [argIdx],
-                           &lockInfoPtr->len) != TCL_OK)
+    if ((argIdx < objc) && !TclX_IsNullObj (objv [argIdx])) {
+        if (TclX_GetOffsetFromObj (interp, objv [argIdx],
+                                   &lockInfoPtr->len) != TCL_OK)
             return TCL_ERROR;
     }
     argIdx++;
 
-    if (argIdx < argc) {
-        if (STREQU (argv [argIdx], "start"))
+    if (argIdx < objc) {
+        char *originStr = Tcl_GetStringFromObj (objv [argIdx], NULL);
+        if (STREQU (originStr, "start")) {
             lockInfoPtr->whence = 0;
-        else if (STREQU (argv [argIdx], "current"))
+        } else if (STREQU (originStr, "current")) {
             lockInfoPtr->whence = 1;
-        else if (STREQU (argv [argIdx], "end"))
+        } else if (STREQU (originStr, "end")) {
             lockInfoPtr->whence = 2;
-        else
-            goto badOrgin;
+        } else {
+            TclX_AppendResult (interp, "bad origin \"",  originStr,
+                               "\": should be \"start\", \"current\", ",
+                               "or \"end\"",  (char *) NULL);
+            return TCL_ERROR;
+        }
     }
 
     return TCL_OK;
-
-  badOrgin:
-    Tcl_AppendResult(interp, "bad origin \"", argv [argIdx],
-                     "\": should be \"start\", \"current\", or \"end\"",
-                     (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -114,22 +119,19 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, lockInfoPtr)
  *
  * Implements the `flock' Tcl command:
  *    flock ?-read|-write? ?-nowait? fileId ?start? ?length? ?origin?
- *
- * Results:
- *      A standard Tcl result.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_FlockCmd (notUsed, interp, argc, argv)
-    ClientData   notUsed;
+TclX_FlockObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj     *CONST objv[];
 {
     int argIdx;
     TclX_FlockInfo lockInfo;
 
-    if (argc < 2)
+    if (objc < 2)
         goto invalidArgs;
 
     lockInfo.access = 0;
@@ -138,24 +140,35 @@ TclX_FlockCmd (notUsed, interp, argc, argv)
     /*
      * Parse off the options.
      */
-    for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
-        if (STREQU (argv [argIdx], "-read")) {
+    for (argIdx = 1; argIdx < objc; argIdx++) {
+        char *optStr = Tcl_GetStringFromObj (objv [argIdx], NULL);
+        if (optStr [0] != '-')
+            break;
+        if (STREQU (optStr, "-read")) {
             lockInfo.access |= TCL_READABLE;
             continue;
         }
-        if (STREQU (argv [argIdx], "-write")) {
+        if (STREQU (optStr, "-write")) {
             lockInfo.access |= TCL_WRITABLE;
             continue;
         }
-        if (STREQU (argv [argIdx], "-nowait")) {
+        if (STREQU (optStr, "-nowait")) {
             lockInfo.block = FALSE;
             continue;
         }
-        goto invalidOption;
+        TclX_AppendResult (interp, "invalid option \"", optStr,
+                           "\" expected one of \"-read\", \"-write\", or ",
+                           "\"-nowait\"", (char *) NULL);
+        return TCL_ERROR;
     }
 
-    if (lockInfo.access == (TCL_READABLE | TCL_WRITABLE))
-        goto bothReadAndWrite;
+    if (lockInfo.access == (TCL_READABLE | TCL_WRITABLE)) {
+        TclX_AppendResult (interp,
+                           "can not specify both \"-read\" and \"-write\"",
+                           (char *) NULL);
+        return TCL_ERROR;
+    }
+
     if (lockInfo.access == 0)
         lockInfo.access = TCL_WRITABLE;
 
@@ -163,42 +176,27 @@ TclX_FlockCmd (notUsed, interp, argc, argv)
      * Make sure there are enough arguments left and then parse the 
      * positional ones.
      */
-    if ((argIdx > argc - 1) || (argIdx < argc - 4))
+    if ((argIdx > objc - 1) || (argIdx < objc - 4))
         goto invalidArgs;
 
-    if (ParseLockUnlockArgs (interp, argc, argv, argIdx, &lockInfo) != TCL_OK)
+    if (ParseLockUnlockArgs (interp, objc, objv, argIdx, &lockInfo) != TCL_OK)
         return TCL_ERROR;
 
     if (TclXOSFlock (interp, &lockInfo) != TCL_OK)
         return TCL_ERROR;
 
-    if (!lockInfo.block)
-        Tcl_SetResult (interp, lockInfo.gotLock ? "1" : "0", TCL_STATIC);
-
+    if (!lockInfo.block) {
+        Tcl_SetBooleanObj (Tcl_GetObjResult (interp),
+                           lockInfo.gotLock);
+    }
     return TCL_OK;
 
     /*
      * Code to return error messages.
      */
   invalidArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?-read|-write? ",
-                      "?-nowait? fileId ?start? ?length? ?origin?",
-                      (char *) NULL);
-    return TCL_ERROR;
-
-    /*
-     * Invalid option found at argv [argIdx].
-     */
-  invalidOption:
-    Tcl_AppendResult (interp, "invalid option \"", argv [argIdx],
-                      "\" expected one of \"-read\", \"-write\", or ",
-                      "\"-nowait\"", (char *) NULL);
-    return TCL_ERROR;
-
-  bothReadAndWrite:
-    Tcl_AppendResult (interp, "can not specify both \"-read\" and \"-write\"",
-                      (char *) NULL);
-    return TCL_ERROR;
+    return TclX_WrongArgs (interp, objv [0],
+               "?-read|-write? ?-nowait? fileId ?start? ?length? ?origin?");
 }
 
 /*-----------------------------------------------------------------------------
@@ -206,34 +204,27 @@ TclX_FlockCmd (notUsed, interp, argc, argv)
  *
  * Implements the `funlock' Tcl command:
  *    funlock fileId ?start? ?length? ?origin?
- *
- * Results:
- *      A standard Tcl result.
- *
  *-----------------------------------------------------------------------------
  */
 int
-TclX_FunlockCmd (notUsed, interp, argc, argv)
-    ClientData   notUsed;
+TclX_FunlockObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj     *CONST objv[];
 {
     TclX_FlockInfo lockInfo;
 
-    if ((argc < 2) || (argc > 5))
-        goto invalidArgs;
+    if ((objc < 2) || (objc > 5)) {
+        return TclX_WrongArgs (interp, objv [0], 
+                               "fileId ?start? ?length? ?origin?");
+    }
 
     lockInfo.access = 0;  /* Read or write */
-    if (ParseLockUnlockArgs (interp, argc, argv, 1, &lockInfo) != TCL_OK)
+    if (ParseLockUnlockArgs (interp, objc, objv, 1, &lockInfo) != TCL_OK)
         return TCL_ERROR;
 
     return TclXOSFunlock (interp, &lockInfo);
-
-  invalidArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " fileId ?start? ?length? ?origin?", (char *) NULL);
-    return TCL_ERROR;
 }
 
 
@@ -246,16 +237,16 @@ void
 TclX_FlockInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateCommand (interp,
-		       "flock",
-		       TclX_FlockCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+                          "flock",
+                          TclX_FlockObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateCommand (interp, 
-		       "funlock",
-		       TclX_FunlockCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, 
+                          "funlock",
+                          TclX_FunlockObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
 }
 

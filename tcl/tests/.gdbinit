@@ -3,7 +3,7 @@ set env TK_LIBRARY  ../../../tk8.0b1/library
 
 set env TCLX_LIBRARY ../../tcl/unix
 set env TKX_LIBRARY ../../tk/unix
-set env TCL_PROGRAM ../../tcl/unix/tcl
+set env TCL_PROGRAM ../../tcl/unix/tclXtest
 
 set env MALLOC_OPTIONS A
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 8.0.4.1 1997/04/14 02:02:22 markd Exp $
+# $Id: flock.test,v 8.1 1997/04/17 04:59:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -71,15 +71,15 @@ Test flock-1.5 {flock argument checking} {
 
 Test flock-1.6 {flock argument checking} {
     flock -read $readFH x
-} 1 {expected integer offset but got "x"}
+} 1 {expected integer but got "x"}
 
 Test flock-1.7 {flock argument checking} {
     flock -read $readFH 1 x
-} 1 {expected integer offset but got "x"}
+} 1 {expected integer but got "x"}
 
 Test flock-1.8 {flock argument checking} {
     flock -read $readFH {} x
-} 1 {expected integer offset but got "x"}
+} 1 {expected integer but got "x"}
 
 Test flock-1.9 {flock argument checking} {
     flock -read $readFH {} 1 bad
@@ -114,15 +114,15 @@ Test flock-2.4 {funlock argument checking} {
 
 Test flock-2.5 {funlock argument checking} {
     funlock $readFH x
-} 1 {expected integer offset but got "x"}
+} 1 {expected integer but got "x"}
 
 Test flock-2.6 {funlock argument checking} {
     funlock $readFH 1 x
-} 1 {expected integer offset but got "x"}
+} 1 {expected integer but got "x"}
 
 Test flock-2.7 {funlock argument checking} {
     funlock $readFH {} x
-} 1 {expected integer offset but got "x"}
+} 1 {expected integer but got "x"}
 
 Test flock-2.8 {funlock argument checking} {
     funlock $readFH {} 1 bad
