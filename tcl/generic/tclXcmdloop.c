@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.0 1992/10/16 04:50:29 markd Rel markd $
+ * $Id: tclXcmdloop.c,v 2.1 1993/03/06 21:42:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -57,13 +57,12 @@ SetPromptVar _ANSI_ARGS_((Tcl_Interp  *interp,
 
 /*
  *-----------------------------------------------------------------------------
- *
  * IsSetVarCmd --
  *
- *      Determine if the current command is a `set' command that set
- *      a variable (i.e. two arguments).  This routine should only be
- *      called if the command returned TCL_OK.
- *
+ *      Determine if the current command is a `set' command that sets a
+ * variable (i.e. two arguments).  This routine should only be called if the
+ * command returned TCL_OK.  Returns TRUE if it sets a variable, FALSE if its
+ * some other command.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -72,23 +71,24 @@ IsSetVarCmd (interp, command)
     char       *command;
 {
     char  *nextPtr;
+    int    wordCnt;
 
     if ((!STRNEQU (command, "set", 3)) || (!isspace (command [3])))
         return FALSE;  /* Quick check */
 
-    nextPtr = TclWordEnd (command, FALSE);
-    if (*nextPtr == '\0')
-        return FALSE;
-    nextPtr = TclWordEnd (nextPtr, FALSE);
-    if (*nextPtr == '\0')
-        return FALSE;
-
+    /*
+     * Loop to count the words in the command.
+     */
+    wordCnt = 0;
+    nextPtr = command;
     while (*nextPtr != '\0') {
-        if (!isspace (*nextPtr))
-            return TRUE;
-        nextPtr++;
+        nextPtr = TclWordEnd (nextPtr, FALSE);
+        nextPtr++;  /* Character after the word */
+        while ((*nextPtr != '\0') && (isspace (*nextPtr)))
+            nextPtr++;
+        wordCnt++;
     }
-    return FALSE;
+    return wordCnt > 2 ? TRUE : FALSE;
 }
 
 /*
