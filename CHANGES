@@ -1043,7 +1043,7 @@
 -------------------------------------------------------------------------------
 10 Jan 96:
   o Added help page searching code provided by Jan Nijtmans
-    <nijtmans@nici.kun.nl>.
+    <nijtmans@worldaccess.nl>.
 -------------------------------------------------------------------------------
 09 Feb 96:
   o Integrated with Tcl 7.5 beta 1, which includes the new Tcl I/O system.
@@ -1109,7 +1109,7 @@
   o Added event loop support for the TclX shell.  If any event sources are
     created the shell will enter an event loop at the end of the top level
     script instead of exiting.  Suggested by Jan Nijtmans
-    <nijtmans@nici.kun.nl>.
+    <nijtmans@worldaccess.nl>.
   o Changed TclX version numbering scheme to append a decimal and a number
     to the base Tcl version instead of a letter.  This makes it compatible
     with the Tcl package versioning mechanism.
@@ -1214,7 +1214,7 @@
 -------------------------------------------------------------------------------
  3 Oct 96:
   o Integrated support for building both shared and static libraries at the
-    same time from Jan Nijtmans' <nijtmans@nici.kun.nl> TclX plus patch.
+    same time from Jan Nijtmans' <nijtmans@worldaccess.nl> TclX plus patch.
   o Deprecated the mkdir, rmdir, unlink and frename commands in favor of the
     new file subcommands. Compatability with these commands is still supported
     for old scripts via procedures in the TclX library.
@@ -1229,7 +1229,7 @@
 ===============================================================================
 15 Nov 96:
   o Major clean up of shared library build, including fixes from Jan Nijtmans'
-    <nijtmans@nici.kun.nl> TclX plus patch.
+    <nijtmans@worldaccess.nl> TclX plus patch.
   o More work on Windows port, including make from a single makefile and
     install rules.
 -------------------------------------------------------------------------------
@@ -1329,7 +1329,7 @@
     deleting the interp when the shell exits.
 -------------------------------------------------------------------------------
 16 Aug 97:
-  o Integrated several build fixes from Jan Nijtmans' <nijtmans@nici.kun.nl>
+  o Integrated several build fixes from Jan Nijtmans' <nijtmans@worldaccess.nl>
     TclX plus patch.
 -------------------------------------------------------------------------------
 17 Aug 97:
