@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.1 1992/11/17 06:26:44 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.2 1992/12/19 21:21:14 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -93,15 +93,6 @@ static struct {char *name;
 typedef SIG_PROC_RET_TYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
 
 /*
- * Include for 386BSD, since they don't have SIG_ERR right now.
- */
-
-#if defined(BADSIG) && !defined(SIG_ERR)
-#    define SIG_ERR BADSIG
-#endif
-
-
-/*
  * Class of actions that can be set by the signal command.
  */
 #define SIGACT_SET     1   /* Set the signal     */
@@ -142,8 +133,9 @@ static char *signalTrapCmds [MAXSIG];
 static int
 SigNameToNum _ANSI_ARGS_((char *sigName));
 
-static signalProcPtr_t
-GetSignalState _ANSI_ARGS_((int signalNum));
+static int
+GetSignalState _ANSI_ARGS_((int              signalNum,
+                            signalProcPtr_t *sigProcPtr));
 
 static int
 SetSignalAction _ANSI_ARGS_((int             signalNum,
@@ -292,37 +284,40 @@ exitPoint:
 /*
  *-----------------------------------------------------------------------------
  *
- * GetSignalState --
+ * GetSignal[State --
  *     Get the current state of the specified signal.
  * Parameters:
  *   o signalNum (I) - Signal number to query.
+ *   o sigProcPtr (O) - The signal function is returned here.
  * Results
- *   The signal function or SIG_DFL or SIG_IGN.  If an error occures,
- *   SIG_ERR is returned (check errno);
+ *   TCL_OK or TCL_ERROR (check errno).
  *-----------------------------------------------------------------------------
  */
-static signalProcPtr_t
-GetSignalState (signalNum)
-    int signalNum;
+static int
+GetSignalState (signalNum, sigProcPtr)
+    int              signalNum;
+    signalProcPtr_t *sigProcPtr;
 {
 #ifdef TCL_POSIX_SIG
     struct sigaction currentState;
 
     if (sigaction (signalNum, NULL, &currentState) < 0)
-        return SIG_ERR;
-    return currentState.sa_handler;
+        return TCL_ERROR;
+    *sigProcPtr = currentState.sa_handler;
+    return TCL_OK;
 #else
     signalProcPtr_t  actionFunc;
 
     if (signalNum == SIGKILL)
-        return SIG_DFL;
-
-    actionFunc = signal (signalNum, SIG_DFL);
+         actionFunc = SIG_DFL;
+    else
+        actionFunc = signal (signalNum, SIG_DFL);
     if (actionFunc == SIG_ERR)
-        return SIG_ERR;
+        return TCL_ERROR;
     if (actionFunc != SIG_DFL)
         signal (signalNum, actionFunc);  /* reset */
-    return actionFunc;
+    *sigProcPtr = actionFunc;
+    return TCL_OK;
 #endif
 }
 
@@ -735,8 +730,7 @@ GetSignalStates (interp, signalListSize, signalList)
     for (idx = 0; idx < signalListSize; idx ++) {
         signalNum = signalList [idx];
 
-        actionFunc = GetSignalState (signalNum);
-        if (actionFunc == SIG_ERR)
+        if (GetSignalState (signalNum, &actionFunc) == TCL_ERROR)
             goto unixSigError;
         
         sigState [2] = NULL;
@@ -1019,7 +1013,10 @@ SignalCmdCleanUp (clientData)
 void
 Tcl_SetupSigInt ()
 {
-    if (GetSignalState (SIGINT) == SIG_DFL)
+    signalProcPtr_t  actionFunc;
+
+    if ((GetSignalState (SIGINT, &actionFunc) == TCL_OK) &&
+        (actionFunc == SIG_DFL))
         SetSignalAction (SIGINT, TclSignalTrap);
 }
 
