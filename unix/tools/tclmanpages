@@ -84,6 +84,7 @@ return {
     {pkgMkIndex.n   tcl/libraries/pkgMkIndex}
     {socket.n       tcl/sockets/socket}
     {update.n       tcl/events/update}
+    {variable.n     tcl/variables/variable}
     {vwait.n        tcl/events/vwait}
 }
 
