@@ -1,0 +1,8 @@
+1999-08-20  Scott Stanton  <stanton@scriptics.com>
+
+	* win/aclocal.m4: Updated from latest tcl.m4.
+
+	* win/Makefile.in: Various changes to support Windows builds.
+	Fixed to properly generate pkgIndex.tcl for tkx.  Added
+	Makefile/configure rules.
+
