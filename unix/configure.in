@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 3.9 1994/03/02 07:26:19 markd Exp markd $
+dnl $Id: configure.in,v 3.10 1994/03/09 16:05:31 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 3.9 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 3.10 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -147,6 +147,10 @@ AC_COMPILE_CHECK([tm_gmtoff in struct tm], [#include <time.h>],
 
 AC_HAVE_FUNCS(gettimeofday)
 
+#
+# Its important to include time.h in this check, as some systems (like convex)
+# have timezone functions, etc.
+#
 AC_COMPILE_CHECK([timezone variable], , [
 #include <time.h>
 extern long timezone;
