@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 3.0 1993/11/19 06:57:26 markd Rel markd $
+# $Id: filecmds.test,v 3.1 1994/01/23 16:58:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -177,6 +177,22 @@ Test filecmds-5.4 {frename tests} {
     list [catch {frename IOTEST5.TMP IOTEST6.TMP} msg] [string tolower $msg]
 } 0 {1 {rename "iotest5.tmp" to "iotest6.tmp" failed: no such file or directory}}
 
-catch {unlink [glob IOTEST*.TMP]}
+Test filecmds-6.1 {readdir tests} {
+    readdir
+} 1 {wrong # args: readdir dirPath}
 
+Test filecmds-6.2 {readdir tests} {
+    readdir x y
+} 1 {wrong # args: readdir dirPath}
+
+tcltouch READDIR.TMP/AAA
+tcltouch READDIR.TMP/BBB
+tcltouch READDIR.TMP/CCC
+tcltouch READDIR.TMP/DDD
+
+Test filecmds-6.3 {readdir tests} {
+    lsort [readdir READDIR.TMP]
+} 0 {AAA BBB CCC DDD}
+
+catch {exec rm -rf  [glob -nocomplain *.TMP]}
 
