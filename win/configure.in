@@ -2,7 +2,7 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.2 1999/06/26 04:22:12 markd Exp $
+# RCS: @(#) $Id: configure.in,v 1.3 1999/06/26 19:33:12 redman Exp $
 
 AC_INIT(../tcl/generic/tclExtend.h)
 
@@ -95,13 +95,6 @@ eval "TKX_LIB_FILE=tkx$VER${LIBSUFFIX}"
 eval "TKX_DLL_FILE=tkx$VER${DLLSUFFIX}"
 eval "TKX_STUB_LIB_FILE="
 
-eval "TK_DLL_FILE=tk$VER${DLLSUFFIX}"
-eval "TK_LIB_FILE=tk$VER${LIBSUFFIX}"
-eval "TK_STUB_LIB_FILE=tkstub$VER${LIBSUFFIX}"
-
-eval "TCL_DLL_FILE=tcl$VER${DLLSUFFIX}"
-eval "TCL_LIB_FILE=tcl$VER${LIBSUFFIX}"
-eval "TCL_STUB_LIB_FILE=tclstub$VER${LIBSUFFIX}"
 
 AC_SUBST(TCLX_VERSION)
 AC_SUBST(TCLX_MAJOR_VERSION)
