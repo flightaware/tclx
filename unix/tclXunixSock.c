@@ -3,7 +3,7 @@
  *
  * Deprecated server creation commands, which are not supported on platforms
  * other than Unix. These commands are deprecated in favor of the Tcl socket
- * functionallity, however they can't be implemented as backwards
+ * functionality, however they can't be implemented as backwards
  * compatibility procs.
  *---------------------------------------------------------------------------
  * Copyright 1991-1999 Karl Lehenbauer and Mark Diekhans.
@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 8.5 1999/03/31 06:37:54 markd Exp $
+ * $Id: tclXunixSock.c,v 8.1 2001/10/24 23:31:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -358,7 +358,7 @@ TclX_ServerInit (interp)
 {
     /*
      * These commands are deprecated in favor of the Tcl socket -server
-     * functionallity, however they can't be implemented as backwards
+     * functionality, however they can't be implemented as backwards
      * compatibility procs.
      */
     Tcl_CreateCommand (interp, "server_accept", TclX_ServerAcceptCmd,

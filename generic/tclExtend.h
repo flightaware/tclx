@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 1.3 2002/04/03 02:50:35 hobbs Exp $
+ * $Id: tclExtend.h,v 1.4 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -63,7 +63,7 @@ typedef void *void_pt;
  * not currently a generic interface, but should be. Only one maybe active.
  * This is an undocumented interface.  Its in the external file in case
  * someone needs this facility.	 It might change in the future.	 Let us
- * know if you need this functionallity.
+ * know if you need this functionality.
  */
 typedef int
 (*TclX_AppSignalErrorHandler) _ANSI_ARGS_((Tcl_Interp *interp,

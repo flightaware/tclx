@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXstring.c,v 1.2 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -358,7 +358,7 @@ TclX_ReplicateObjCmd (dummy, interp, objc, objv)
  * Results:
  *      Returns the first token and removes it from the string variable.
  * FIX: Add command to make a list.  Better yet, a new cparse command thats
- * more flexable and includes this functionallity.
+ * more flexable and includes this functionality.
  *-----------------------------------------------------------------------------
  */
 static int

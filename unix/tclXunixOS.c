@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.9 1999/03/31 06:37:53 markd Exp $
+ * $Id: tclXunixOS.c,v 8.1 2001/10/24 23:31:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -308,7 +308,7 @@ TclXOSsetitimer (interp, seconds, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsleep --
- *   System dependent interface to sleep functionallity.
+ *   System dependent interface to sleep functionality.
  *
  * Parameters:
  *   o seconds - Seconds to sleep.
@@ -334,7 +334,7 @@ TclXOSsync ()
 
 /*-----------------------------------------------------------------------------
  * TclXOSfsync --
- *   System dependent interface to fsync functionallity.  Does a sync if fsync
+ *   System dependent interface to fsync functionality.  Does a sync if fsync
  * is not available.
  *
  * Parameters:
@@ -368,7 +368,7 @@ TclXOSfsync (interp, channel)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsystem --
- *   System dependent interface to system functionallity (executing a command
+ *   System dependent interface to system functionality (executing a command
  * with the standard system shell).
  *
  * Parameters:
@@ -470,7 +470,7 @@ TclXOSsystem (interp, command, exitCode)
 
 /*-----------------------------------------------------------------------------
  * TclX_OSlink --
- *   System dependent interface to link functionallity.
+ *   System dependent interface to link functionality.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -499,7 +499,7 @@ TclX_OSlink (interp, srcPath, targetPath, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclX_OSsymlink --
- *   System dependent interface to symlink functionallity.
+ *   System dependent interface to symlink functionality.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -578,7 +578,7 @@ TclXOSElapsedTime (realTime, cpuTime)
 
 /*-----------------------------------------------------------------------------
  * TclXOSkill --
- *   System dependent interface to functionallity.
+ *   System dependent interface to functionality.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -840,7 +840,7 @@ TclXOSftruncate (interp, channel, newSize, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSfork --
- *   System dependent interface to fork functionallity.
+ *   System dependent interface to fork functionality.
  *
  * Parameters:
  *   o interp - A format process id or errors are returned in result.
@@ -869,7 +869,7 @@ TclXOSfork (interp, funcNameObj)
 
 /*-----------------------------------------------------------------------------
  * TclXOSexecl --
- *   System dependent interface to execl functionallity.
+ *   System dependent interface to execl functionality.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -932,7 +932,7 @@ TclXOSInetAtoN (interp, strAddress, inAddress)
 
 /*-----------------------------------------------------------------------------
  * TclXOSgetpeername --
- *   System dependent interface to getpeername functionallity.
+ *   System dependent interface to getpeername functionality.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -962,7 +962,7 @@ TclXOSgetpeername (interp, channel, sockaddr, sockaddrSize)
  
  /*-----------------------------------------------------------------------------
   * TclXOSgetsockname --
-  *   System dependent interface to getsockname functionallity.
+  *   System dependent interface to getsockname functionality.
   *
   * Parameters:
   *   o interp - Errors are returned in result.
@@ -1053,7 +1053,7 @@ TclXOSsetsockopt (interp, channel, option, value)
 
 /*-----------------------------------------------------------------------------
  * TclXOSchmod --
- *   System dependent interface to chmod functionallity.
+ *   System dependent interface to chmod functionality.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -1079,7 +1079,7 @@ TclXOSchmod (interp, fileName, mode)
 
 /*-----------------------------------------------------------------------------
  * TclXOSfchmod --
- *   System dependent interface to fchmod functionallity.
+ *   System dependent interface to fchmod functionality.
  *
  * Parameters:
  *   o interp - Errors returned in result.
