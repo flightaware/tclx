@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXprocess.c,v 2.0 1992/10/16 04:51:04 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -152,7 +152,8 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int  pid, returnedPid, status;
+    WAIT_STATUS_TYPE  status;
+    int               pid, returnedPid
 
 
     if (argc != 2) {
@@ -164,7 +165,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     if (Tcl_GetInt (interp, argv [1], &pid) != TCL_OK)
         return TCL_ERROR;
 
-    returnedPid = Tcl_WaitPids (1, &pid, &status);
+    returnedPid = Tcl_WaitPids (1, &pid, (WAIT_STATUS_TYPE *) &status);
 
     if (returnedPid < 0) {
         interp->result = Tcl_UnixError (interp);
