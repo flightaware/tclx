@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.10 1998/01/28 18:41:25 markd Exp $
+ * $Id: tclXfilescan.c,v 8.11 1998/02/27 06:38:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -423,7 +423,7 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
 {
     scanContext_t  *contextPtr, **tableEntryPtr;
     matchDef_t     *newmatch;
-    int             regExpFlags = 0;
+    int             regExpFlags = REG_ADVANCED;
     int             firstArg = 1;
 
     if (objc < 3)
