@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 3.3 1994/07/15 04:38:29 markd Exp markd $
+# $Id: profile.test,v 4.0 1994/07/16 05:25:43 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -33,7 +33,7 @@ if {[lindex $profData($idx) 1] == 0} {
     puts "*** The profile command is returning real time values of"
     puts "*** zero.  This suggests that your `times' system call does"
     puts "*** not return elapsed real time.  The configure script"
-    puts "*** did not properly detect this.  Try defining the flag"
+    puts "*** did not properly detect this.  Try undefining the flag"
     puts "*** TIMES_RETS_REAL_TIME in src/tclXconfig.h and reporting"
     puts "*** this to the maintainers"
 }
