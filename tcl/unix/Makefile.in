@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.16 1993/08/07 23:46:23 markd Exp markd $
+# $Id: Makefile.in,v 2.17 1993/08/13 15:01:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -24,6 +24,7 @@ SHELL = /bin/sh
 # Autoconfig defines that can be overridden in Config.mk
 
 RANLIB = @RANLIB@
+MCS    = @MCS_CMD@
 srcdir = @srcdir@
 VPATH  = @srcdir@
 LIBS   = @LIBS@
@@ -35,8 +36,10 @@ LIBS   = @LIBS@
 
 #------------------------------------------------------------------------------
 
-LIBTCLX.A = ../tclmaster/lib/libtclx.a
-TCL       = ../tclmaster/bin/tcl
+LIBTCLX.A   = ../tclmaster/lib/libtclx.a
+TCL         = ../tclmaster/bin/tcl
+TCLEXTEND_H = ../tclmaster/include/tclExtend.h
+TCLPP_H     = ../tclmaster/include/tcl++.h
 
 LDLIBS = ${LIBTCLX.A} -lm ${LIBS}
 
@@ -60,13 +63,13 @@ OBJS= \
  
 #------------------------------------------------------------------------------
 
-all: made.tmp ${TCL}
+all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H}
 
 ${TCL}: main.o ${LIBTCLX.A} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} main.o ${LDLIBS} ${XLDLIBS} -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
-	    ${MCS_CMD} ${TCL}; \
+	    ${MCS} ${TCL}; \
 	else \
 	    exit 0 ;\
 	fi
@@ -88,6 +91,18 @@ tclXgetdate.c: tclXgetdate.y
 
 tcl++.o: tcl++.C tcl++.h
 	${CCPLUS} -c ${CC_FLAGS} $(srcdir)/tcl++.C
+
+#------------------------------------------------------------------------------
+# Copy include files to the master directory.
+#
+
+${TCLEXTEND_H}: tclExtend.h
+	rm -f ${TCLEXTEND_H}
+	cp tclExtend.h ${TCLEXTEND_H}
+
+${TCLPP_H}: tcl++.h
+	rm -f ${TCLPP_H}
+	cp tcl++.h ${TCLPP_H}
 
 #------------------------------------------------------------------------------
 # This is just to test if it compiles.

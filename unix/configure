@@ -130,6 +130,10 @@ configure_args="$*"
 
 
 
+#------------------------------------------------------------------------------
+#     Check for various programs used during the build.
+#------------------------------------------------------------------------------
+
 for p in 'bison -y' byacc
 do
 if test -z "$YACC"; then
@@ -219,7 +223,30 @@ fi
 test -z "$RANLIB" && RANLIB=":"
 test -n "$RANLIB" -a -n "$verbose" && echo "	setting RANLIB to $RANLIB"
 
+if test -z "$MCS_CMD"; then
+  # Extract the first word of `"mcs"', so it can be a program name with args.
+  set dummy "mcs"; word=$2
+  echo checking for $word
+  IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
+  for dir in $PATH; do
+    test -z "$dir" && dir=.
+    if test -f $dir/$word; then
+      MCS_CMD=""mcs""
+      break
+    fi
+  done
+  IFS="$saveifs"
+fi
+test -z "$MCS_CMD" && MCS_CMD=""touch""
+test -n "$MCS_CMD" -a -n "$verbose" && echo "	setting MCS_CMD to $MCS_CMD"
 
+
+#------------------------------------------------------------------------------
+#       Some make programs require includes to be 
+#         .include "file"
+#     others...
+#         include file
+#------------------------------------------------------------------------------
 
 echo checking how make handles includes
 rm -fr conftestdir
@@ -247,6 +274,12 @@ fi
 
 
 
+#------------------------------------------------------------------------------
+#       If a system doesn't have an opendir function (man, that's old!)
+#       then we use the version of dirent.h Ouster supplied, which
+#       is compatible with the substitute version of opendir that's
+#       provided.  This version only works with V7-style directories.
+#------------------------------------------------------------------------------
 
 echo checking for opendir
 cat > conftest.c <<EOF
@@ -282,6 +315,15 @@ rm -f conftest*
 
 
 
+#------------------------------------------------------------------------------
+#       Do we have the catgets call (X/PG3 message catalogs)?
+#       Do we have the getcwd system call?
+#       Do we have the select system call?
+#       Do we have the setitimer system call?
+#       Do we have the setlinebuf call?
+#       Do we have the sigaction call?
+#       Do we have the getpgid call?
+#------------------------------------------------------------------------------
 for func in catgets getcwd select setitimer setlinebuf
 do
 trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
@@ -352,6 +394,13 @@ done
 
 
 
+#------------------------------------------------------------------------------
+#       Check for bzero.  We don't use bzero directly, but older SCO
+#       systems have a select FD_ZERO macro that calls bzero, which is
+#       only in the X library.  We redefine bzero as a memset call if
+#       there is no bzero.  If its not needed, it doesn't hurt
+#       anything.
+#------------------------------------------------------------------------------
 for func in bzero
 do
 trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
@@ -387,6 +436,11 @@ rm -f conftest*
 done
 
 
+#------------------------------------------------------------------------------
+#       Check for missing functions that we need.  They will be
+#       compiled in the osSupport directory. Must check for SCO
+#       -lintl, which is were strftime is hidden.
+#------------------------------------------------------------------------------
 
 echo checking for SCO UNIX libintl
 cat > conftest.c <<EOF
@@ -452,6 +506,15 @@ rm -f conftest*
 
 
 
+#------------------------------------------------------------------------------
+#       Supply substitutes for missing POSIX header files.  Special
+#       notes:
+#           - Sprite's dirent.h exists but is bogus.
+#           - stdlib.h doesn't define strtol, strtoul, or
+#             strtod insome versions of SunOS
+#           - some versions of string.h don't declare procedures such
+#             as strstr
+#------------------------------------------------------------------------------
 
 echo checking for unistd.h
 cat > conftest.c <<EOF
@@ -795,6 +858,13 @@ fi
 rm -f conftest*
 
 
+#------------------------------------------------------------------------------
+#       Include sys/select.h if it exists and if it supplies things
+#       that appear to be useful.  This appears to be true only on
+#       the RS/6000 under AIX.  Some systems like OSF/1 have a
+#       sys/select.h that's of no use, and other systems like SCO
+#       UNIX have a sys/select.h that's pernicious.
+#------------------------------------------------------------------------------
 
 echo checking for sys/select.h
 echo '#include <sys/select.h>' > conftest.c
@@ -815,6 +885,9 @@ fi
 rm -f conftest*
 
 
+#------------------------------------------------------------------------------
+#       Check for missing typedefs.
+#------------------------------------------------------------------------------
 
 echo checking for pid_t in sys/types.h
 echo '#include <sys/types.h>' > conftest.c
@@ -948,8 +1021,53 @@ SEDDEFS="${SEDDEFS}\${SEDdA}gid_t\${SEDdB}gid_t\${SEDdC}int\${SEDdD}
 fi
 rm -f conftest*
 
+echo checking for mode_t in sys/types.h
+echo '#include <sys/types.h>' > conftest.c
+eval "$CPP \$DEFS conftest.c > conftest.out 2>&1"
+if egrep "mode_t" conftest.out >/dev/null 2>&1; then
+  :
+else
+  
+{
+test -n "$verbose" && \
+echo "	defining mode_t to be int"
+DEFS="$DEFS -Dmode_t=int"
+SEDDEFS="${SEDDEFS}\${SEDdA}mode_t\${SEDdB}mode_t\${SEDdC}int\${SEDdD}
+\${SEDuA}mode_t\${SEDuB}mode_t\${SEDuC}int\${SEDuD}
+\${SEDeA}mode_t\${SEDeB}mode_t\${SEDeC}int\${SEDeD}
+"
+}
+
+fi
+rm -f conftest*
+
+echo checking for time_t
+cat > conftest.c <<EOF
+#include <sys/types.h>
+int main() { exit(0); }
+int t() {  }
+EOF
+if eval $compile; then
+  :
+else
+  
+{
+test -n "$verbose" && \
+echo "	defining time_t to be long"
+DEFS="$DEFS -Dtime_t=long"
+SEDDEFS="${SEDDEFS}\${SEDdA}time_t\${SEDdB}time_t\${SEDdC}long\${SEDdD}
+\${SEDuA}time_t\${SEDuB}time_t\${SEDuC}long\${SEDuD}
+\${SEDeA}time_t\${SEDeB}time_t\${SEDeC}long\${SEDeD}
+"
+}
+
+fi
+rm -f conftest*
 
 
+#------------------------------------------------------------------------------
+#       Make "const" work no matter what.
+#------------------------------------------------------------------------------
 
 prog='/* Ultrix mips cc rejects this.  */
 typedef int charset[2]; const charset x;
@@ -1010,7 +1128,9 @@ fi
 rm -f conftest*
 
 
-
+#------------------------------------------------------------------------------
+#       What type do signals return?
+#------------------------------------------------------------------------------
 
 echo checking for return type of signal handlers
 cat > conftest.c <<EOF
@@ -1053,6 +1173,9 @@ rm -f conftest*
 
 
 
+#------------------------------------------------------------------------------
+#       Find out all about time handling differences.
+#------------------------------------------------------------------------------
 
 echo checking for whether time.h and sys/time.h may both be included
 cat > conftest.c <<EOF
@@ -1267,6 +1390,10 @@ fi
 rm -f conftest*
 
 
+#------------------------------------------------------------------------------
+#     Test to see if "times" returns a status or the amount of
+#     elapsed real time.
+#------------------------------------------------------------------------------
 
 echo "checking to see if 'times' returns the elapsed real time"
 cat > conftest.c <<EOF
@@ -1300,6 +1427,10 @@ SEDDEFS="${SEDDEFS}\${SEDdA}TIMES_RETS_REAL_TIME\${SEDdB}TIMES_RETS_REAL_TIME\${
 fi
 rm -f conftest*
 
+#------------------------------------------------------------------------------
+#     Determine if "." is used as separator for the manual directory
+#     names.  i.e. man/man.1 vs man/man1
+#------------------------------------------------------------------------------
 
 echo "checking man directory/section separator (man/man.1 vs man/man1)"
 mandirs="/usr/man/man.1 /usr/man/cat.1 /usr/share/man.1 /usr/share/man.1 
@@ -1337,6 +1468,13 @@ else
 fi
 
 
+#------------------------------------------------------------------------------
+#       The check below checks whether <sys/wait.h> defines the type
+#       "union wait" correctly.  It's needed because of weirdness in
+#       HP-UX where "union wait" is defined in both the BSD and SYS-V
+#       environments.  Checking the usability of WIFEXITED seems to do
+#       the trick.
+#------------------------------------------------------------------------------
 
 echo checking for union wait
 cat > conftest.c <<EOF
@@ -1345,8 +1483,8 @@ cat > conftest.c <<EOF
 int main() { exit(0); }
 int t() { 
 union wait x;
-WIFEXITED(x);		/* Generates compiler error if WIFEXITED
-			 * uses an int. */
+WIFEXITED(x);           /* Generates compiler error if WIFEXITED
+                         * uses an int. */
  }
 EOF
 if eval $compile; then
@@ -1367,6 +1505,10 @@ fi
 rm -f conftest*
 
 
+#------------------------------------------------------------------------------
+#       Add socket and nsl libraries, if found.  
+#       Use C shared library if possible.
+#------------------------------------------------------------------------------
 
 LIBS_save="${LIBS}"
 LIBS="${LIBS} -lsocket"
@@ -1429,6 +1571,9 @@ else
 fi
 
 
+#------------------------------------------------------------------------------
+#       Locate the X11 header files and the X11 library archive.
+#------------------------------------------------------------------------------
 
 echo checking for X11 header files
 XINCLUDES="# no special path needed"
@@ -1445,9 +1590,9 @@ rm -f conftest*
 if test "$XINCLUDES" = nope; then
     dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include"
     for i in $dirs ; do
-	if test -r $i/X11/Intrinsic.h; then
-	    XINCLUDES=" -I$i"
-	fi
+        if test -r $i/X11/Intrinsic.h; then
+            XINCLUDES=" -I$i"
+        fi
     done
 fi
 if test "$XINCLUDES" = nope; then
@@ -1500,9 +1645,9 @@ fi
 if test "$XLIBSW" = nope; then
     dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib"
     for i in $dirs ; do
-	if test -r $i/libX11.a; then
-	    XLIBSW="-L$i -lX11"
-	fi
+        if test -r $i/libX11.a; then
+            XLIBSW="-L$i -lX11"
+        fi
     done
 fi
 if test "$XLIBSW" = nope ; then
@@ -1533,6 +1678,11 @@ if test "$XLIBSW" = nope ; then
 fi
 
 
+#------------------------------------------------------------------------------
+#       The code below cleans up the DEFS variable to eliminate
+#       duplicate entries.  This makes the eventual make output
+#       look a bit cleaner.
+#------------------------------------------------------------------------------
 
 newDefs=""
 for i in $DEFS; do
@@ -1587,6 +1737,7 @@ YACC='$YACC'
 CC='$CC'
 CPP='$CPP'
 RANLIB='$RANLIB'
+MCS_CMD='$MCS_CMD'
 MAKEINCLUDE='$MAKEINCLUDE'
 MAKEQUOTE='$MAKEQUOTE'
 LIBOBJS='$LIBOBJS'
@@ -1625,6 +1776,7 @@ s%@YACC@%$YACC%g
 s%@CC@%$CC%g
 s%@CPP@%$CPP%g
 s%@RANLIB@%$RANLIB%g
+s%@MCS_CMD@%$MCS_CMD%g
 s%@MAKEINCLUDE@%$MAKEINCLUDE%g
 s%@MAKEQUOTE@%$MAKEQUOTE%g
 s%@LIBOBJS@%$LIBOBJS%g

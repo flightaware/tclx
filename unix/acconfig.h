@@ -108,6 +108,8 @@
 #undef uid_t
 #undef gid_t
 #undef pid_t
+#undef mode_t
+#undef time_t
 
 /* Define to empty if the keyword does not work.  */
 #undef const

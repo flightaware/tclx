@@ -21,6 +21,9 @@
 #undef HAVE_UNISTD_H
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
+#undef mode_t
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
 /* Define as the return type of signal handlers (int or void).  */
@@ -70,6 +73,8 @@
 #undef uid_t
 #undef gid_t
 #undef pid_t
+#undef mode_t
+#undef time_t
 
 /* Define to empty if the keyword does not work.  */
 #undef const
