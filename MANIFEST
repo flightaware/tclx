@@ -205,6 +205,7 @@
 ./tclhelp/tcl/status/showproc
 ./tclhelp/tcl/status/umask
 ./tclhelp/tcl/strings/append
+./tclhelp/tcl/strings/cequal
 ./tclhelp/tcl/strings/cexpand
 ./tclhelp/tcl/strings/cindex
 ./tclhelp/tcl/strings/clength
