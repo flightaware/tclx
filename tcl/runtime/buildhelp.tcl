@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.2 1992/12/19 05:43:20 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.3 1992/12/30 17:34:25 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -79,8 +79,9 @@
 #   subdirectories that don't exists will be created.  helpDir should be
 #   cleaned up before the start of manual page generation, as this program
 #   will not overwrite existing files.
-# o file-n are the nroff manual pages (.man) or .tcl or .tlib files to extract
-#   the help files from.
+# o file-n are the nroff manual pages, or .tcl, .tlib files to extract
+#   the help files from. If the suffix is not .tcl or .tlib, a nroff manual
+#   page is assumed.
 #
 #-----------------------------------------------------------------------------
 
@@ -158,11 +159,18 @@ proc ExtractNroffHelp {manPageFH manLine} {
     set helpFH [open "| nroff -man | col $G_colArgs > $helpFile" w]
     echo "    creating help file $helpName"
 
-    # Nroff commands from .TH macro to get the formatting right.  The `\n'
-    # are newline separators to output, the `\\n' become `\n' in the text.
+    # Nroff commands from .TH macro to get the formatting right.  
+    # The `\\n' become `\n' in the text.
         
-    puts $helpFH ".ad b\n.PD\n.nrIN \\n()Mu\n.nr)R 0\n.nr)I \\n()Mu"
-    puts $helpFH ".nr)R 0\n.\}E\n.DT\n.na\n.nh"
+    puts $helpFH ".ad b"
+    puts $helpFH ".PD"
+    puts $helpFH ".nrIN \\n()Mu"
+    puts $helpFH ".nr)R 0"
+    puts $helpFH ".nr)I \\n()Mu"
+    puts $helpFH ".nr)R 0"
+    puts $helpFH ".\}E"
+    puts $helpFH ".DT"
+    puts $helpFH ".hy14"
     puts $helpFH $nroffHeader
     set foundBrief 0
     while {[gets $manPageFH manLine] >= 0} {
@@ -385,10 +393,10 @@ proc GenerateHelp {helpDirPath briefFile mergeTree sourceFiles} {
     foreach manFile $sourceFiles {
         set manFile [glob $manFile]
         set ext [file extension $manFile]
-        if {"$ext" == ".man"} {
-            set status [catch {ProcessNroffFile $manFile} msg]
-        } else {
+        if {$ext == ".tcl" || $ext == ".tlib"} {
             set status [catch {ProcessTclScript $manFile} msg]
+        } else {
+            set status [catch {ProcessNroffFile $manFile} msg]
         }
         if {$status != 0} {
             echo "Error extracting help from: $manFile"
@@ -414,11 +422,11 @@ proc Usage {} {
 }
 
 #-----------------------------------------------------------------------------
-# Main program body, decides if help is interactive or batch.
+# Main program body, process command line unless sourced interactively
 
 if {$interactiveSession} {
     echo "To extract help, use the command:"
-    echo {GenerateHelp helpdir -m mergetree file-1 file-2 ...}
+    echo {GenerateHelp helpDirPath briefFile mergeTree sourceFiles}
 } else {
     set mergeTree {}
     set briefFile {}
