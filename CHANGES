@@ -334,4 +334,5 @@
     is union wait.
   o Fixed minor manual page problems.
   o Corrected problems in RS/6000 config file.
+  o Fixed problem with buildhelp.tcl always truncating filenames.
 -------------------------------------------------------------------------------
