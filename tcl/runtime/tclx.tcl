@@ -1,11 +1,18 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 1.1 1992/09/20 23:28:10 markd Exp markd $
+# $Id: TclInit.tcl,v 2.0 1992/10/16 04:51:37 markd Rel markd $
 #-----------------------------------------------------------------------------
 
-global env TCLENV
 set TCLENV(inUnknown) 0
+
+# Added site-specific path directories to the second set of TCLPATH
+
+if [info exists env(TCLPATH)] {
+    set TCLPATH $env(TCLPATH)
+} else {
+    set TCLPATH [file dirname $TCLINIT]
+}
 
 #
 # Unknown command trap handler.

@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.2 1992/12/11 04:48:07 markd Exp markd $
+# $Id: Makefile,v 2.3 1993/01/05 02:58:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -49,7 +49,7 @@ made.tmp: $(OBJS) main.o $(CPLUSOBJS)
 	touch made.tmp
 
 tclXstartup.o: patchlevel.h tclXstartup.c
-	$(CC) -c $(CFLAGS) -DTCL_DEFAULT=\"$(TCL_DEFAULT)\" tclXstartup.c
+	$(CC) -c $(CFLAGS) -DTCL_MASTERDIR=\"$(TCL_MASTERDIR)\" tclXstartup.c
 
 main.o: patchlevel.h main.c
 	$(CC) -c $(CFLAGS) $(HISTORY_FLAG) main.c

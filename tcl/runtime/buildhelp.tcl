@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.3 1992/12/30 17:34:25 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.4 1993/03/10 20:40:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -68,13 +68,10 @@
 # 
 # To run this program:
 #
-#   tcl buildhelp.tcl [-m mergeTree] -b brief.brf helpDir file-1 file-2 ...
+#   tcl buildhelp.tcl -b brief.brf helpDir file-1 file-2 ...
 #
-# o -m mergeTree is a tree of help code, plus a brief file to merge with the
-#   help files that are to be extracted.  This will become part of the new
-#   help tree.  Used to merge in the documentation from UCB Tcl.
 # o -b specified the name of the brief file to create form the @brief entries.
-#   It must have an extension of ".brf".
+#   It must have an extension of ".brf".  It will be created in helpDir.
 # o helpDir is the help tree root directory.  helpDir should  exists, but any
 #   subdirectories that don't exists will be created.  helpDir should be
 #   cleaned up before the start of manual page generation, as this program
@@ -279,45 +276,12 @@ proc ProcessTclScript {pathName} {
 }
 
 #-----------------------------------------------------------------------------
-# Proc to copy the help merge tree, excluding the brief file and RCS files
-# 
-
-proc CopyMergeTree {helpDirPath mergeTree} {
-    if {"[cindex $helpDirPath 0]" != "/"} {
-        set helpDirPath "[pwd]/$helpDirPath"
-    }
-    set oldDir [pwd]
-    cd $mergeTree
-
-    set curHelpDir "."
-
-    for_recursive_glob mergeFile {.} {
-        if [string match "*/RCS/*" $mergeFile] continue
-
-        set helpFile "$helpDirPath/$mergeFile"
-        if [file isdirectory $mergeFile] continue
-
-        if {[file exists $helpFile]} {
-            error "Help file already exists: $helpFile"}
-        EnsureDirs $helpFile
-        set inFH [open $mergeFile r]
-        set outFH [open $helpFile w]
-        copyfile $inFH $outFH
-        close $outFH
-        close $inFH
-        chmod a-w,a+r $helpFile
-    }
-    cd $oldDir
-}
-
-#-----------------------------------------------------------------------------
 # GenerateHelp: main procedure.  Generates help from specified files.
 #    helpDirPath - Directory were the help files go.
-#    mergeTree - Help file tree to merge with the extracted help files.
 #    briefFile - The name of the brief file to create.
 #    sourceFiles - List of files to extract help files from.
 
-proc GenerateHelp {helpDirPath briefFile mergeTree sourceFiles} {
+proc GenerateHelp {helpDirPath briefFile sourceFiles} {
     global G_helpDir G_truncFileNames G_nroffScanCT
     global G_scriptScanCT G_briefHelpFH G_colArgs
 
@@ -374,12 +338,6 @@ proc GenerateHelp {helpDirPath briefFile mergeTree sourceFiles} {
         ExtractScriptHelp $matchInfo(handle) $matchInfo(line)
     }
 
-    if ![lempty $mergeTree] {
-        echo "    Merging tree: $mergeTree"
-        CopyMergeTree $helpDirPath $mergeTree
-    }
-
-
     if {[file extension $briefFile] != ".brf"} {
         puts stderr "Brief file \"$briefFile\" must have an extension \".brf\""
         exit 1
@@ -417,7 +375,7 @@ proc GenerateHelp {helpDirPath briefFile mergeTree sourceFiles} {
 #-----------------------------------------------------------------------------
 # Print a usage message and exit the program
 proc Usage {} {
-    puts stderr {Wrong args: [-m mergetree] -b briefFile helpdir manfile1 [manfile2..]}
+    puts stderr {Wrong args: -b briefFile helpdir manfile1 [manfile2..]}
     exit 1
 }
 
@@ -426,14 +384,12 @@ proc Usage {} {
 
 if {$interactiveSession} {
     echo "To extract help, use the command:"
-    echo {GenerateHelp helpDirPath briefFile mergeTree sourceFiles}
+    echo {GenerateHelp helpDirPath briefFile sourceFiles}
 } else {
-    set mergeTree {}
     set briefFile {}
     while {[string match "-*" [lindex $argv 0]]} {
         set flag [lvarpop argv 0]
         case $flag in {
-            "-m" {set mergeTree [lvarpop argv]}
             "-b" {set briefFile [lvarpop argv]}
             default Usage
         }
@@ -445,6 +401,6 @@ if {$interactiveSession} {
        puts stderr {must specify -b argument}
        Usage 
     }
-    GenerateHelp [lindex $argv 0] $briefFile $mergeTree [lrange $argv 1 end]
+    GenerateHelp [lindex $argv 0] $briefFile [lrange $argv 1 end]
    
 }

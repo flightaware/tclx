@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.7 1993/02/22 04:11:05 markd Exp markd $
+.\" $Id: TclX.man,v 2.8 1993/03/06 21:43:53 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -692,7 +692,7 @@ Executes \fIcommand\fR via the \fIsystem\fR(3) call.  Differs from \fBexec\fR
 in that \fBsystem\fR doesn't return the executed command's standard output
 as the
 result string, and
-\fBsystem\fR goes through the default shell to provide wildcard
+\fBsystem\fR goes through the Unix shell to provide wildcard
 expansion, redirection, etc,
 as is normal from an \fBsh\fR command line.  The exit code of
 the command is returned.
@@ -1806,7 +1806,7 @@ invokes an interactive Tcl shell, allowing the user to interact
 directly with Tcl, executing any Tcl commands at will and viewing
 their results.
 .PP
-If \fIscript\fR is specified, then the script is executed noninteractively
+If \fIscript\fR is specified, then the script is executed non-interactively
 with any additional arguments, \fIargs\fR, being supplied in the
 global Tcl
 variable `\fBargv\fR'.  If 
@@ -1827,9 +1827,9 @@ line parser:
 .TP
 .B \-q
 Quick initialization flag.  If this flag is set the only initialization step
-performed is to locate the Tcl default file and save its name in the Tcl
-variable TCLDEFAULT.  The file is not evaluated nor is the TclInit.tcl file.
-This provides for a fast startup, but does not make any of the standard
+performed is to locate the Tcl initialization file and save its path in the Tcl
+variable TCLINIT.  The file is not evaluated.
+This provides for a fast startup, but does not make any of the Extended
 Tcl procedures and facilities available.
 .TP
 .B \-n
@@ -1929,59 +1929,32 @@ the \fBregexp\fR command).
 '
 .SH "TCL SHELL INITIALIZATION SEQUENCE"
 '@help: tclshell/initialize
-'@brief: Tcl shell initialization sequence.
+'@brief: Tcl shell initialization.
 .PP
-The standard Tcl shell initialization consists of the following steps:
-.IP
-Search for a default file.  The default file is a Tcl script that is executed
-to set important Tcl variables that govern startup, such as \fBTCLPATH\fR.
-The current Extended Tcl version, represented by \fI$ver\fR,
-is included
-in the default file name to allow multiple Tcl versions to exists on a
-system.  Note that the Extended Tcl version is the standard Tcl version number
-with an alphabetic character added to indicated the version of Extended Tcl.
-(The \fBinfox version\fR command will return this version number.)
+When Extended Tcl is installed, the standard runtime files are places in the
+Tcl master directory, which is configured when Tcl is built.  This master
+directory normally contains the Tcl initialization file (TclInit.tcl), the
+standard Tcl library files (tcl.tlib, tk.tlib) and the help files.
+The Tcl master directory is named after the version of Tcl it is associated
+with, e.g. \fB/usr/local/tclX7.0a\fR.  The path to the Tcl master directory
+is available from the \fBinfo library\fR command.
 .PP
-The Tcl default file is searched for using the following algorithm:
-.sp
-.RS 10
-- An environment variable, \fBTCLDEFAULT\fR, is checked for.  If present,
-it is used as the name of the
-default file.
-.sp
-- A global default file, which
-is usually either \fB/etc/default/tcl\fI$ver\fR or
-\fB/usr/local/lib/tcldefault\fI$ver\fR.  (Tcl may be compiled to use a
-different directory if desired).
-.RE
-.IP
-First, \fBTcl\fR executes the default file.  This file normally sets at 
-least two Tcl variables:
-\fBTCLPATH\fR, which contains a list of directories that contain tcl source
-files and libraries, and \fBTCLINIT\fR, the
-full pathname of the Tcl source file that performs Tcl initialization.
-Other site-specific variables may also be set in
-this file.
-.IP
-Next, \fBtcl\fR executes the initialization file specified by the Tcl 
-variable \fBTCLINIT\fR.
-This is normally the \fBTclInit.Tcl\fR file distributed with Tcl.  This
-file defines the Tcl environment, including standard Extended
-Tcl procedures and variables.
-'@endhelp
-'
-.SH "TCL INITIALIZATION FILE"
-'@help: tclshell/tclinit
-'@brief: Tcl shell initialization file.
+The first step in initializing the Tcl shell is to locate the Tcl
+initialization file, normally \fBTclInit.tcl\fR.  If an environment variable
+\fBTCLINIT\fR exists, it contains the path to the Tcl initialization file.
+If the \fBTCLINIT\fR environment variable is not set, the file
+\fBTclInit.tcl\fR is used from the default Tcl master directory.
 .PP
-The Tcl initialization file, normally \fITclInit.tcl\fR in the main Tcl script
-directory, initializes the Tcl shell.  It defines various Tcl procedures
-that are required to implement loading of Tcl source from libraries via the
-\fIpackage library\fR and \fIautoload\fR facilities.
+\fBTcl\fR then executes the Tcl initialization file.  This file sets
+The \fBTCLPATH\fR variable, which contains a list of directories that contain
+Other site-specific variables may also be set in this file.  The \fBTCLPATH\fR
+maybe overridden with an environment variable \fBTCLPATH\fR containing a
+space-separated directory list.  Other procedures and variables used by
+the Extended Tcl shell are also set by this file.
 .PP
 If the Tcl is invoked interactively, it will source a file
 named \fI.tclrc\fR in the
-user's home directory, if it exists.  Tcl is viewed primarly as a programming
+user's home directory, if it exists.  Tcl is viewed primarily as a programming
 language, not an interactive shell, so the \fI.tclrc\fR is intended for use for
 loading development utilities, not to support applications,
 which should not have
@@ -2015,9 +1988,15 @@ attempt to exec an non-existent command as a shell command.
 The name that the Tcl shell is executing as.  All directory
 components are removed from the program name.
 .TP
-.B TCLDEFAULT
-Name of the default file that was used to locate all other files used by the
-Tcl shell.
+.B TCLINIT
+The path to the file that initializes, and does startup processing of,
+Tcl.  This can be overridden by an environmental variable \fBTCLINIT\fR.
+.TP
+.B TCLPATH
+Path to search to locate Tcl scripts.  Used by the \fBload\fR and 
+\fBdemand_load\fR commands.  The path is a Tcl list (i.e.
+zero or more space-separated directory names).
+This can be overridden by an environmental variable \fBTCLPATH\fR.
 .TP
 .B TCLENV
 Array that contains information used internally by various Tcl procedures that
@@ -2033,15 +2012,6 @@ used for the prompt.
 Contains code to run to generate the prompt used when interactively prompting
 for continuation of an incomplete command.  The code in this hook
 will be evaluated and the result will be used for the prompt
-.TP
-.B TCLINIT
-The name of the file that initializes, and does startup processing of,
-Tcl.
-.TP
-.B TCLPATH
-Path to search to locate Tcl scripts.  Used by the \fBload\fR and 
-\fBdemand_load\fR commands.  The path is a Tcl list (i.e.
-zero or more space-separated directory names).
 '@endhelp
 '
 .SH "TCL SHELL PROCEDURES"
@@ -2052,13 +2022,15 @@ generally useful:
 '@help: libraries/load
 '@brief: Search the TCLPATH for a file to source.
 .B load \fIfile\fR
+.br
 Source a file, as with the \fBsource\fR command, except search \fBTCLPATH\fR
 for the file.
 '@endhelp
 .TP
-'@help: libraries/utilprocs
+'@help: libraries/searchpath
 '@brief: Search a path list for a file.
 .B searchpath \fIpath file\fR
+.br
 Search all directories in the specified path, which is a Tcl list, for the
 specified file.  Returns the full path name of the file, or an empty string
 if the requested file could not be found.
@@ -2156,9 +2128,7 @@ built with the \fBbuildpackageindex\fR procedure.
 .PP
 Demand loading is also supported from indexes build by the \fBmkindex.tcl\fR
 program, supplied with standard Tcl.  However, \fBinit.tcl\fR
-is not loaded.  Note that the \fBinfo library\fR command is not used to locate
-libraries by this shell; the \fBTCLPATH\fR variable is set by the default file
-and is used to locate the libraries.
+is not loaded.
 '@endhelp
 '
 .SS "PACKAGE LIBRARY MANAGEMENT COMMANDS"
@@ -2364,12 +2334,14 @@ pushed, but remains unchanged.
 '@help: files/read_file
 '@brief: Read in a file to a string.
 .TP
-.B read_file \fIfileName\fR ?\fInumBytes\fR|\fInonewline\fR?
+.B read_file ?\fB-nonewline\fR? \fIfileName\fR
+.br
+.B read_file \fIfileName\fR \fInumBytes\fR
 .br
 Read the file \fIfileName\fR and returns the contents as a string.  If
-\fBnonewline\fR is specified as an additional argument, then the last
-character of the file is discarded if it is a newline.  Otherwise the second
-argument specifies exactly how many bytes will be read and returned, unless
+\fB-nonewline\fR is specified, then the last
+character of the file is discarded if it is a newline.  The second
+form specifies exactly how many bytes will be read and returned, unless
 there are fewer than \fInumBytes\fR bytes left in the file; in this case, all
 the remaining bytes are returned.
 '@endhelp

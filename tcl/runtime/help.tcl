@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 2.0 1992/10/16 04:52:01 markd Rel markd $
+# $Id: help.tcl,v 2.1 1993/03/10 20:51:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -104,15 +104,15 @@ proc help:DisplayFile {filepath} {
 }    
 
 #------------------------------------------------------------------------------
-# Procedure to return contents of a directory.  A list is returned, consisting
-# of two lists.  The first list are all the directories (subjects) in the
-# specified directory.  The second is all of the help files.  Eash sub-list
-# is sorted in alphabetical order.
-#
+# Procedure to return contents of a directory.  The directories are returned
+# in dirListVar and the files are returned in fileListVar.  Each will be
+# sorted in alphabetical order.
 
-proc help:ListDir {dirPath} {
+proc help:ListDir {dirPath dirListVar fileListVar} {
+    upvar $dirListVar dirList $fileListVar fileList
     set dirList {}
     set fileList {}
+
     if {[catch {set dirFiles [glob $dirPath/*]}] != 0} {
         error "No files in subject directory: $dirPath"}
     foreach fileName $dirFiles {
@@ -124,7 +124,8 @@ proc help:ListDir {dirPath} {
             }
         }
     }
-   return [list [lsort $dirList] [lsort $fileList]]
+    set dirList  [lsort $dirList]
+    set fileList [lsort $fileList]
 }
 
 #------------------------------------------------------------------------------
@@ -178,9 +179,7 @@ proc help {{subject {}}} {
         error "Help:\"$request\" does not exist"}
     
     if [file isdirectory $requestPath] {
-        set dirList [help:ListDir $requestPath]
-        set subList  [lindex $dirList 0]
-        set fileList [lindex $dirList 1]
+        help:ListDir $requestPath subList fileList
         if {[llength $subList] != 0} {
             help:Display "\nSubjects available in $request:"
             help:DisplayColumns $subList

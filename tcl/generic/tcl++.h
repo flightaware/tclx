@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.2 1993/02/11 04:40:46 markd Exp markd $
+ * $Id: tcl++.h,v 2.3 1993/02/13 17:19:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -456,19 +456,19 @@ public:
                   int          argc,
                   const char **argv,
                   int          interactive,
-                  const char  *defaultFile)
+                  const char  *initFile)
      {
          return Tcl_ShellEnvInit (interp, options, programName, argc, argv,
-                                  interactive, defaultFile);
+                                  interactive, initFile);
      }
 
     inline void 
     Startup (int          argc,
              const char **argv,
-             const char  *defaultFile,
+             const char  *initFile,
              unsigned     options = 0) 
     {
-        Tcl_Startup (interp, argc, argv, defaultFile, options);
+        Tcl_Startup (interp, argc, argv, initFile, options);
     }
 
     inline int

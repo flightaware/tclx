@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.0 1992/10/16 04:51:29 markd Rel markd $
+ * $Id: tclExtend.h,v 2.1 1992/11/15 07:00:57 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,9 +34,8 @@ typedef void *void_pt;
 /*
  * Flags for Tcl shell startup.
  */
-#define TCLSH_QUICK_STARTUP       1   /* Don't process default & init files. */
+#define TCLSH_QUICK_STARTUP       1   /* Don't process Tcl init file.        */
 #define TCLSH_ABORT_STARTUP_ERR   2   /* Abort on an error.                  */
-#define TCLSH_NO_INIT_FILE        4   /* Don't process the init file.        */
 #define TCLSH_NO_STACK_DUMP       8   /* Don't dump the proc stack on error. */
 
 /*
@@ -188,7 +187,7 @@ EXTERN void
 Tcl_Startup _ANSI_ARGS_((Tcl_Interp   *interp,
                          int           argc,
                          CONST char  **argv,
-                         CONST char   *defaultFile,
+                         CONST char   *initFile,
                          unsigned      options));
 
 EXTERN int
@@ -198,7 +197,7 @@ Tcl_ShellEnvInit _ANSI_ARGS_((Tcl_Interp  *interp,
                               int          argc,
                               CONST char **argv,
                               int          interactive,
-                              CONST char  *defaultFile));
+                              CONST char  *initFile));
 
 EXTERN int
 Tcl_System _ANSI_ARGS_((Tcl_Interp *interp,

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.4 1992/11/19 15:29:29 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.5 1993/03/06 21:43:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,21 +38,19 @@ typedef struct tclParms_t {
 /*
  * Prototypes of internal functions.
  */
-void
+static void
 ParseCmdArgs _ANSI_ARGS_((int          argc,
                           char       **argv,
                           tclParms_t  *tclParmsPtr));
 
-int
-FindDefaultFile _ANSI_ARGS_((Tcl_Interp  *interp,
-                             char        *defaultFile));
+static int
+FindInitFile _ANSI_ARGS_((Tcl_Interp  *interp,
+                          char        *initFile));
 
-int
-ProcessDefaultFile _ANSI_ARGS_((Tcl_Interp  *interp,
-                                char        *defaultFile));
+static int
+ProcessInitFile _ANSI_ARGS_((Tcl_Interp  *interp,
+                             char        *initFile));
 
-int
-ProcessInitFile _ANSI_ARGS_((Tcl_Interp  *interp));
 
 
 /*
@@ -187,37 +185,37 @@ usageError:
 
 /*
  *-----------------------------------------------------------------------------
- * FindDefaultFile --
+ * FindInitFile --
  *
- *   Find the Tcl default file.  If is looked for in the following order:
- *       o A environment variable named `TCLDEFAULT'.
+ *   Find the Tcl initialization file.  If is looked for in the following
+ * order:
+ *       o A environment variable named `TCLINIT'.
  *       o The specified defaultFile (which normally has an version number
  *         appended.
- *   A tcl variable `TCLDEFAULT', will contain the path of the default file
+ *   A tcl variable `TCLINIT', will contain the path of the init  file
  *   to use after this procedure is executed, or a null string if it is not
  *   found.
  * Parameters
  *   o interp (I) - A pointer to the interpreter.
- *   o defaultFile (I) - The file name of the default file to use, it
- *     normally contains a version number.
+ *   o initFile (I) - The path of the init file to use.
  * Returns:
  *     TCL_OK if all is ok, TCL_ERROR if a error occured.
  *-----------------------------------------------------------------------------
  */
 static int
-FindDefaultFile (interp, defaultFile)
+FindInitFile (interp, initFile)
     Tcl_Interp  *interp;
-    char        *defaultFile;
+    char        *initFile;
 {
-    char        *defaultFileToUse;
+    char        *initFileToUse;
     struct stat  statBuf;
 
-    if ((defaultFileToUse = getenv ("TCLDEFAULT")) == NULL)
-        defaultFileToUse = defaultFile;
+    if ((initFileToUse = getenv ("TCLINIT")) == NULL)
+        initFileToUse = initFile;
 
-    if (stat (defaultFileToUse, &statBuf) < 0)
-        defaultFileToUse = "";
-    if (Tcl_SetVar (interp, "TCLDEFAULT", defaultFileToUse,
+    if (stat (initFileToUse, &statBuf) < 0)
+        initFileToUse = "";
+    if (Tcl_SetVar (interp, "TCLINIT", initFileToUse,
                     TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
     else
@@ -226,73 +224,41 @@ FindDefaultFile (interp, defaultFile)
 
 /*
  *-----------------------------------------------------------------------------
- * ProcessDefaultFile --
+ * ProcessInitFile --
  *
- *   Process the Tcl default file and TclInit files.  The default file
- * is the only file at a fixed path. It is a script file that usaually 
- * defines a variable "TCLINIT", which has the path of the  full
- * initialization file. The default file can also set things such as path
- * variables.  If the TCLINIT variable is set, that file is then evaluated.
- * If usually does the full Tcl initialization.
+ *   Process the Tcl initialization file.  The TclInit file is the only file
+ *  at a fixed path. This file defines the TCLPATH variable and other variabies
+ * and procedures. If usually does the full Tcl initialization.
  *
  * Parameters
  *   o interp  (I) - A pointer to the interpreter.
- *   o defaultFile (I) - The file name of the default file to use, it
+ *   o initFile (I) - The file name of the init file to use, it
  *     normally contains a version number.
  * Returns:
  *   TCL_OK if all is ok, TCL_ERROR if an error occured.
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessDefaultFile (interp, defaultFile)
+ProcessInitFile (interp, initFile)
     Tcl_Interp  *interp;
-    char        *defaultFile;
+    char        *initFile;
 {
-    char *defaultFileToUse;
+    char *initFileToUse;
 
-    defaultFileToUse = Tcl_GetVar (interp, "TCLDEFAULT", 1);
-    if (*defaultFileToUse == '\0') {
+    initFileToUse = Tcl_GetVar (interp, "TCLINIT", 1);
+    if (*initFileToUse == '\0') {
         Tcl_AppendResult (interp,
-                          "Can't access Tcl default file,\n",
+                          "Can't access Tcl initialization file,\n",
                           "  Located in one of the following ways:\n",
-                          "    Environment variable: `TCLDEFAULT' or,\n",
-                          "    File `", defaultFile, "'.\n", 
+                          "    Environment variable: `TCLINIT' or,\n",
+                          "    File `", initFile, "'.\n", 
                           (char *) NULL);
         return TCL_ERROR;
     }
-    if (Tcl_EvalFile (interp, defaultFileToUse) != TCL_OK)
+    if (Tcl_EvalFile (interp, initFileToUse) != TCL_OK)
         return TCL_ERROR;
     Tcl_ResetResult (interp);
 
-    return TCL_OK;
-}
-
-/*
- *-----------------------------------------------------------------------------
- * ProcessInitFile --
- *
- *    Process the Tcl init file, its abolute patch should be contained in
- * a Tcl variable "TCLINIT".  If the variable is not found, the file will
- * not be evaulated.
- *
- * Parameters
- *   o interp  (I) - A pointer to the interpreter.
- * Returns:
- *   TCL_OK if all is ok, TCL_ERROR if an error occured.
- *-----------------------------------------------------------------------------
- */
-static int
-ProcessInitFile (interp)
-    Tcl_Interp  *interp;
-{
-    char *initFile;
-
-    initFile = Tcl_GetVar (interp, "TCLINIT", 1);
-    if (initFile != NULL) {
-        if (Tcl_EvalFile (interp, initFile) != TCL_OK)
-            return TCL_ERROR;
-    }
-    Tcl_ResetResult (interp);
     return TCL_OK;
 }
 
@@ -301,10 +267,9 @@ ProcessInitFile (interp)
  *
  * Tcl_ShellEnvInit --
  *
- *   Process the Tcl default file.  The default file is the only file at a
- * fixed path. It is a script file that usaually defines a variable "TCLINIT",
- * which has the path of the full initialization file. The default file can
- * also set things such as path variables.  
+ *   Process the Tcl init file.  The init file is the only file at a
+ * fixed path. It is a script file that usaually defines a variable "TCLPATH",
+ * which has the path use to find libraries.
  *
  * If this is an interactive Tcl session, SIGINT is set to generate a Tcl
  * error.
@@ -313,13 +278,10 @@ ProcessInitFile (interp)
  *   o interp - A pointer to the interpreter.
  *   o options - Flags to control the behavior of this routine, the following
  *     option is supported:
- *       o TCLSH_QUICK_STARTUP - Don't source the default file or Tcl init
+ *       o TCLSH_QUICK_STARTUP - Don't source the init file or Tcl init
  *         file.
  *       o TCLSH_ABORT_STARTUP_ERR - If set, abort the process if an error
  *         occurs.
- *       o TCLSH_NO_INIT_FILE - If set, process the default file, but not the
- *         init file.  This can be used to make the default file do all
- *         initialization.
  *       o TCLSH_NO_STACK_DUMP - If an error occurs, don't dump out the
  *         procedure call stack, just print an error message.
  *   o programName (I) - The name of the program being executed, usually
@@ -332,8 +294,8 @@ ProcessInitFile (interp)
  *     variable. TRUE if an interactive Tcl command loop will be entered,
  *     FALSE if a script will be executed .  The function does not enter the
  *     command loop, it just sets the variable.
- *   o defaultFile (I) - The file name of the default file to use.  If NULL,
- *     then the standard Tcl default file is used, which is formed from a
+ *   o initFile (I) - The file name of the init file to use.  If NULL,
+ *     then the standard Tcl init file is used, which is formed from a
  *     location specified at compile time and the Extended Tcl version
  *     number.
  * Notes:
@@ -346,30 +308,34 @@ ProcessInitFile (interp)
  */
 int
 Tcl_ShellEnvInit (interp, options, programName, argc, argv, interactive,
-                  defaultFile)
+                  initFile)
     Tcl_Interp  *interp;
     unsigned     options;
     CONST char  *programName; 
     int          argc;
     CONST char **argv;
     int          interactive;
-    CONST char  *defaultFile;
+    CONST char  *initFile;
 {
-    int   result = TCL_OK;
-    char *defaultFilePath;
+    int          result = TCL_OK;
+    char        *initFilePath;
+    static char *TCL_INITFILE = "TclInit.tcl";
 
     /*
-     * Setup patch to default file, if not specified.
+     * Setup patch to init file, if not specified.
      */
-    if (defaultFile == NULL) {
-        defaultFilePath = ckalloc (strlen (TCL_DEFAULT) +
-                                   strlen (TCL_VERSION) +
-                                   strlen (TCL_EXTD_VERSION_SUFFIX) + 1);
-        strcpy (defaultFilePath, TCL_DEFAULT);
-        strcat (defaultFilePath, TCL_VERSION);
-        strcat (defaultFilePath, TCL_EXTD_VERSION_SUFFIX);
+    if (initFile == NULL) {
+        initFilePath = ckalloc (strlen (TCL_MASTERDIR) +
+                                strlen (TCL_VERSION) +
+                                strlen (TCL_EXTD_VERSION_SUFFIX) +
+                                strlen (TCL_INITFILE) + 2);
+        strcpy (initFilePath, TCL_MASTERDIR);
+        strcat (initFilePath, TCL_VERSION);
+        strcat (initFilePath, TCL_EXTD_VERSION_SUFFIX);
+        strcat (initFilePath, "/");
+        strcat (initFilePath, TCL_INITFILE);
     } else {
-        defaultFilePath = (char *) defaultFile;
+        initFilePath = (char *) initFile;
     }
 
     if (programName != NULL) {
@@ -416,22 +382,17 @@ Tcl_ShellEnvInit (interp, options, programName, argc, argv, interactive,
         tclAppVersion = tclxVersion;
 
     /*
-     * Locate the default file and save in Tcl var TCLDEFAULT.  If not quick
-     * startup, process the Tcl default file and execute the Tcl
-     * initialization file.
+     * Locate the init file and save in Tcl var TCLINIT.  If not quick
+     * startup, process the Tcl init file.
      */
-    if (FindDefaultFile (interp, (char *) defaultFilePath) != TCL_OK)
+    if (FindInitFile (interp, (char *) initFilePath) != TCL_OK)
         goto errorExit;
     if (!(options & TCLSH_QUICK_STARTUP)) {
-        if (ProcessDefaultFile (interp, defaultFilePath) != TCL_OK)
+        if (ProcessInitFile (interp, initFilePath) != TCL_OK)
             goto errorExit;
-        if (!(options & TCLSH_NO_INIT_FILE)) {
-            if (ProcessInitFile (interp) != TCL_OK)
-                goto errorExit;
-        }
     }
-    if (defaultFilePath != defaultFile)
-        ckfree (defaultFilePath);
+    if (initFilePath != initFile)
+        ckfree (initFilePath);
 
     if (interactive)
         Tcl_SetupSigInt ();
@@ -439,8 +400,8 @@ Tcl_ShellEnvInit (interp, options, programName, argc, argv, interactive,
     return TCL_OK;
 
 errorExit:
-    if (defaultFilePath != defaultFile)
-        ckfree (defaultFilePath);
+    if (initFilePath != initFile)
+        ckfree (initFilePath);
     if (options & TCLSH_ABORT_STARTUP_ERR)
         Tcl_ErrorAbort (interp, options & TCLSH_NO_STACK_DUMP, 255);
     return TCL_ERROR;
@@ -452,19 +413,17 @@ errorExit:
  * Tcl_Startup --
  *
  *    Initializes the Tcl extended environment.  This function processes the
- * standard command line arguments and locates the Tcl default file.  It then
- * sources the default file and initialization file pointed to by the default
- * file.  Either an interactive command loop is created or a Tcl script file
- * is executed depending on the command line.  This functions calls
- * Tcl_ShellEnvInit, so it should not be called separately.
+ * standard command line arguments and locates the Tcl initialzation file.  It
+ * then sources the initialization file  Either an interactive command loop is
+ * created or a Tcl script file is executed depending on the command line.
+ * This functions calls Tcl_ShellEnvInit, so it should not be called
+ * separately.
  *
  * Parameters
  *   o interp - A pointer to the interpreter.
  *   o argc, argv - Arguments passed to main for the command line.
- *   o defaultFile (I) - The file name of the default file to use.  If NULL,
- *     then the standard Tcl default file is used, which is formed from a
- *     location specified at compile time and the Extended Tcl version
- *     number.
+ *   o initFile (I) - The file name of the init file to use.  If NULL,
+ *     then the standard Tcl init file is used
  *   o options (I) - Options that control startup behavior.  None are
  *     currently defined.
  * Notes:
@@ -473,11 +432,11 @@ errorExit:
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_Startup (interp, argc, argv, defaultFile, options)
+Tcl_Startup (interp, argc, argv, initFile, options)
     Tcl_Interp  *interp;
     int          argc;
     CONST char **argv;
-    CONST char  *defaultFile;
+    CONST char  *initFile;
     unsigned     options;
 {
     char       *cmdBuf;
@@ -494,7 +453,7 @@ Tcl_Startup (interp, argc, argv, defaultFile, options)
                           tclParms.programName,
                           tclParms.tclArgc, tclParms.tclArgv,
                           (tclParms.execStr == NULL),
-                          defaultFile) != TCL_OK)
+                          initFile) != TCL_OK)
         goto errorAbort;
 
     /*

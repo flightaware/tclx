@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.1 1992/12/19 05:36:07 markd Exp markd $
+# $Id: Makefile,v 2.2 1993/02/18 03:53:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -35,7 +35,7 @@ CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) \
 
 #------------------------------------------------------------------------------
 
-all: tcl TCLDEFAULT runtcl $(TCL_TK_SHELL)
+all: tcl runtcl $(TCL_TK_SHELL)
 
 
 #------------------------------------------------------------------------------
@@ -80,23 +80,14 @@ libtk.a: $(TCL_TK_DIR)/libtk.a
 
 
 #------------------------------------------------------------------------------
-# Generate a temporary TCLDEFAULT file so Tcl can be run in this directory.
-# Also generate a script to point the TCLDEFAULT environment variable
-# at this file for testing Tcl before its installed.
-
-TCLDEFAULT:
-	@echo "	-       Generating temporary TCLDEFAULT file.     -"
-	@echo "	- Use runtcl script to test Tcl before installing -"
-	@echo "	- Use runwishx script to test Tk before installing -"
-	@echo '# Temporary TCLDEFAULT file for debugging'  >TCLDEFAULT
-	@echo "set TCLPATH `pwd`/tcllib"                  >>TCLDEFAULT
-	@echo "set TCLINIT `pwd`/tcllib/TclInit.tcl"      >>TCLDEFAULT
+# Also a script to point the TCLINIT environment variable at the local tcllib
+# directory so tcl can be run before installing.
 
 runtcl:
 	@echo ':'                                              >runtcl
 	@echo '# script for testing Tcl before installation'  >>runtcl
-	@echo "TCLDEFAULT=`pwd`/TCLDEFAULT"                   >>runtcl
-	@echo "export TCLDEFAULT"                             >>runtcl
+	@echo "TCLINIT=`pwd`/tcllib/TclInit.tcl"              >>runtcl
+	@echo "export TCLINIT"                                >>runtcl
 	@echo "if [ \$$# = 0 ]"                               >>runtcl
 	@echo "then"                                          >>runtcl
 	@echo "    exec `pwd`/tcl"                            >>runtcl
@@ -108,8 +99,8 @@ runtcl:
 runwishx:
 	@echo ':'                                               >runwishx
 	@echo '# script for testing wishx before installation' >>runwishx
-	@echo "TCLDEFAULT=`pwd`/TCLDEFAULT"                    >>runwishx
-	@echo "export TCLDEFAULT"                              >>runwishx
+	@echo "TCLINIT=`pwd`/tcllib/TclInit.tcl"               >>runwishx
+	@echo "export TCLINIT"                                 >>runwishx
 	@echo "TK_LIBRARY=`pwd`/$(TCL_TK_DIR)/library"         >>runwishx
 	@echo "export TK_LIBRARY"                              >>runwishx
 	@echo "if [ \$$# = 0 ]"                                >>runwishx
@@ -121,14 +112,12 @@ runwishx:
 	chmod a+rx runwishx
 
 #------------------------------------------------------------------------------
-#
-#  just test to see if the C++ include file compiles and links
+# Test to see if the C++ include file compiles and links.
 
 tcl++:
 	cd src;$(MAKE) -$(MAKEFLAGS) TCL++
 
 #------------------------------------------------------------------------------
-#
 # Run the UCB and Extended Tcl tests.
 
 test: ucbtests extdtests
@@ -143,6 +132,12 @@ ucbtests: all
 
 extdtests: all
 	./runtcl -c "cd tests;source all"	
+
+#------------------------------------------------------------------------------
+# Build help for Tk.
+
+buildtkhelp:
+	./runtcl tclsrc/bldtkhelp.tcl  $(TCL_TK_DIR)
 
 #------------------------------------------------------------------------------
 # Install Tcl.
@@ -161,4 +156,4 @@ clean:
 	cd tclsrc;    $(MAKE) -$(MAKEFLAGS) clean
 	cd tkucbsrc;  $(MAKE) -$(MAKEFLAGS) clean
 	cd tksrc;     $(MAKE) -$(MAKEFLAGS) clean
-	-rm -f libtcl.a TCLDEFAULT libtk.a runtcl runwishx
+	-rm -f libtcl.a libtk.a runtcl runwishx tkhelp.tmp

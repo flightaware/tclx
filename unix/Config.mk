@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.9 1993/02/11 04:52:18 markd Exp markd $
+# $Id: Config.mk,v 2.10 1993/02/18 05:16:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -134,11 +134,13 @@ MEM_DEBUG_FLAGS=
 TCL_OWNER=bin
 TCL_GROUP=bin
 
-# o TCL_DEFAULT - Base name of Tcl default file.  This name will have a
-#   version number appended.  The MUST be a full path name!
+
 #
-TCL_DEFAULT=/etc/default/tcl
-#TCL_DEFAULT=/usr/local/lib/tcldefault
+# The master Tcl directory that the Tcl runtime files are installed into.
+# The Tcl initiaization file (TclInit.tcl) is found in this directory.  The
+# directory name will have the TclX version number appended to it.
+#
+TCL_MASTERDIR=/usr/local/tclX
 
 #
 # The directory to install Tcl binary into.
@@ -154,11 +156,6 @@ TCL_LIBDIR=/usr/local/lib
 # The directory the Tcl .h files go into.
 #
 TCL_INCLUDEDIR=/usr/local/include
-
-#
-# The directory .tcl files and the .tlib library goes into.
-#
-TCL_TCLDIR=/usr/local/tcl
 
 #==============================================================================
 # These defines specify where and how the manual pages are to be installed.
