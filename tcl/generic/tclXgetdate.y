@@ -1,8 +1,8 @@
 /* 
  * tclXgetdate.y --
  *
- * Contains yacc grammer for parsing date and time strings..
- *---------------------------------------------------------------------------
+ * Contains yacc grammer for parsing date and time strings based on getdate.y.
+ *-----------------------------------------------------------------------------
  * Copyright 1992 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -11,567 +11,821 @@
  * Mark Diekhans make no representations about the suitability of this
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
- *---------------------------------------------------------------------------
- * This code is a slightly modified version of getdate.y by:
- *     Steven M. Bellovin (unc!smb)
- *     Dept. of Computer Science
- *     University of North Carolina at Chapel Hill
- *     getdate.y    2.13    9/16/86
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.1 1992/11/20 04:37:02 markd Exp markd $
+ * $Id: tclXgetdate.y,v 2.2 1992/12/30 06:49:39 markd Exp markd $
+ *-----------------------------------------------------------------------------
+ * This code is a modified version of getdate.y.  It was changed to be able
+ * to convert a larger range of years along with other tweaks to make it more
+ * portable.  The following header is for the version of getdate.y that this
+ * code is based on, theys guys are the real heros here.
+ *-----------------------------------------------------------------------------
+ * $Revision: 2.1 $
+ *
+ *  Originally written by Steven M. Bellovin <smb@research.att.com> while
+ *  at the University of North Carolina at Chapel Hill.  Later tweaked by
+ *  a couple of people on Usenet.  Completely overhauled by Rich $alz
+ *  <rsalz@osf.org> and Jim Berets <jberets@bbn.com> in August, 1990;
+ *  send any email to Rich.
+ *
+ *  This grammar has eight shift/reduce conflicts.
+ *
+ *  This code is in the public domain and has no copyright.
  *-----------------------------------------------------------------------------
  */
-
-%token ID MONTH DAY MERIDIAN NUMBER UNIT MUNIT SUNIT ZONE DAYZONE AGO
 %{
+#include <stdio.h>
 #include <sys/types.h>
 #include <ctype.h>
 #include <time.h>
 
-#ifndef NULL
-#    define NULL    0
-#endif
+#define yyparse         date_parse
+#define yylex           date_lex
+#define yyerror         date_error
 
-#define daysec (24L*60L*60L)
+#define EPOCH           1970
+#define START_OF_TIME   1902
+#define END_OF_TIME     2037
 
-        static int timeflag, zoneflag, dateflag, dayflag, relflag;
-        static time_t relsec, relmonth;
-        static int hh, mm, ss, merid, dayLight;
-        static int dayord, dayreq;
-        static int month, day, year;
-        static int ourzone;
+#define HOUR(x)         (x * 60)
+#define SECSPERDAY      (24L * 60L * 60L)
 
-#define AM 1
-#define PM 2
-#define DAYLIGHT 1
-#define STANDARD 2
-#define MAYBE    3
+
+/*
+**  An entry in the lexical lookup table.
+*/
+typedef struct _TABLE {
+    char        *name;
+    int         type;
+    time_t      value;
+} TABLE;
+
+
+/*
+**  Daylight-savings mode:  on, off, or not yet known.
+*/
+typedef enum _DSTMODE {
+    DSTon, DSToff, DSTmaybe
+} DSTMODE;
+
+/*
+**  Meridian:  am, pm, or 24-hour style.
+*/
+typedef enum _MERIDIAN {
+    MERam, MERpm, MER24
+} MERIDIAN;
+
+
+/*
+**  Global variables.  We could get rid of most of these by using a good
+**  union as the yacc stack.  (This routine was originally written before
+**  yacc had the %union construct.)  Maybe someday; right now we only use
+**  the %union very rarely.
+*/
+static char     *yyInput;
+static DSTMODE  yyDSTmode;
+static time_t   yyDayOrdinal;
+static time_t   yyDayNumber;
+static int      yyHaveDate;
+static int      yyHaveDay;
+static int      yyHaveRel;
+static int      yyHaveTime;
+static int      yyHaveZone;
+static time_t   yyTimezone;
+static time_t   yyDay;
+static time_t   yyHour;
+static time_t   yyMinutes;
+static time_t   yyMonth;
+static time_t   yySeconds;
+static time_t   yyYear;
+static MERIDIAN yyMeridian;
+static time_t   yyRelMonth;
+static time_t   yyRelSeconds;
+
+
+extern struct tm  *localtime();
 %}
 
-%%
-timedate:               /* empty */
-        | timedate item;
+%union {
+    time_t              Number;
+    enum _MERIDIAN      Meridian;
+}
 
-item:   tspec =
-                {timeflag++;}
-        | zone =
-                {zoneflag++;}
-        | dtspec =
-                {dateflag++;}
-        | dyspec =
-                {dayflag++;}
-        | rspec =
-                {relflag++;}
-        | nspec;
+%token  tAGO tDAY tDAYZONE tID tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
+%token  tSEC_UNIT tSNUMBER tUNUMBER tZONE
 
-nspec:  NUMBER =
-                {if (timeflag && dateflag && !relflag) year = $1;
-                else {timeflag++;hh = $1/100;mm = $1%100;ss = 0;merid = 24;}};
+%type   <Number>        tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
+%type   <Number>        tSEC_UNIT tSNUMBER tUNUMBER tZONE
+%type   <Meridian>      tMERIDIAN o_merid
 
-tspec:  NUMBER MERIDIAN =
-                {hh = $1; mm = 0; ss = 0; merid = $2;}
-        | NUMBER ':' NUMBER =
-                {hh = $1; mm = $3; merid = 24;}
-        | NUMBER ':' NUMBER MERIDIAN =
-                {hh = $1; mm = $3; merid = $4;}
-        | NUMBER ':' NUMBER NUMBER =
-                {hh = $1; mm = $3; merid = 24;
-                dayLight = STANDARD; ourzone = -($4%100 + 60*$4/100);}
-        | NUMBER ':' NUMBER ':' NUMBER =
-                {hh = $1; mm = $3; ss = $5; merid = 24;}
-        | NUMBER ':' NUMBER ':' NUMBER MERIDIAN =
-                {hh = $1; mm = $3; ss = $5; merid = $6;}
-        | NUMBER ':' NUMBER ':' NUMBER NUMBER =
-                {hh = $1; mm = $3; ss = $5; merid = 24;
-                dayLight = STANDARD; ourzone = -($6%100 + 60*$6/100);};
-
-zone:   ZONE =
-                {ourzone = $1; dayLight = STANDARD;}
-        | DAYZONE =
-                {ourzone = $1; dayLight = DAYLIGHT;};
-
-dyspec: DAY =
-                {dayord = 1; dayreq = $1;}
-        | DAY ',' =
-                {dayord = 1; dayreq = $1;}
-        | NUMBER DAY =
-                {dayord = $1; dayreq = $2;};
-
-dtspec: NUMBER '/' NUMBER =
-                {month = $1; day = $3;}
-        | NUMBER '/' NUMBER '/' NUMBER =
-                {month = $1; day = $3; year = $5;}
-        | MONTH NUMBER =
-                {month = $1; day = $2;}
-        | MONTH NUMBER ',' NUMBER =
-                {month = $1; day = $2; year = $4;}
-        | NUMBER MONTH =
-                {month = $2; day = $1;}
-        | NUMBER MONTH NUMBER =
-                {month = $2; day = $1; year = $3;};
-
-
-rspec:  NUMBER UNIT =
-                {relsec +=  60L * $1 * $2;}
-        | NUMBER MUNIT =
-                {relmonth += $1 * $2;}
-        | NUMBER SUNIT =
-                {relsec += $1;}
-        | UNIT =
-                {relsec +=  60L * $1;}
-        | MUNIT =
-                {relmonth += $1;}
-        | SUNIT =
-                {relsec++;}
-        | rspec AGO =
-                {relsec = -relsec; relmonth = -relmonth;};
 %%
 
-static int mdays[12] =
-        {31, 0, 31,  30, 31, 30,  31, 31, 30,  31, 30, 31};
-#define epoch 1970
+spec    : /* NULL */
+        | spec item
+        ;
 
-extern struct tm *localtime();
-
-static
-time_t dateconv(mm, dd, yy, h, m, s, mer, zone, dayflag)
-int mm, dd, yy, h, m, s, mer, zone, dayflag;
-{
-        time_t tod, jdate;
-        register int i;
-        time_t timeconv();
-
-        if (yy < 0) yy = -yy;
-        if (yy < 100) yy += 1900;
-        mdays[1] = 28 + (yy%4 == 0 && (yy%100 != 0 || yy%400 == 0));
-        if (yy < epoch || yy > 1999 || mm < 1 || mm > 12 ||
-                dd < 1 || dd > mdays[--mm]) return (-1);
-        jdate = dd-1;
-        for (i=0; i<mm; i++) jdate += mdays[i];
-        for (i = epoch; i < yy; i++) jdate += 365 + (i%4 == 0);
-        jdate *= daysec;
-        jdate += zone * 60L;
-        if ((tod = timeconv(h, m, s, mer)) < 0) return (-1);
-        jdate += tod;
-        if (dayflag==DAYLIGHT || (dayflag==MAYBE&&localtime(&jdate)->tm_isdst))
-                jdate += -1*60*60;
-        return (jdate);
-}
-
-static
-time_t dayconv(ord, day, now) int ord, day; time_t now;
-{
-        register struct tm *loctime;
-        time_t tod;
-        time_t daylcorr();
-
-        tod = now;
-        loctime = localtime(&tod);
-        tod += daysec * ((day - loctime->tm_wday + 7) % 7);
-        tod += 7*daysec*(ord<=0?ord:ord-1);
-        return daylcorr(tod, now);
-}
-
-static
-time_t timeconv(hh, mm, ss, mer) register int hh, mm, ss, mer;
-{
-        if (mm < 0 || mm > 59 || ss < 0 || ss > 59) return (-1);
-        switch (mer) {
-                case AM: if (hh < 1 || hh > 12) return(-1);
-                         return (60L * ((hh%12)*60L + mm)+ss);
-                case PM: if (hh < 1 || hh > 12) return(-1);
-                         return (60L * ((hh%12 +12)*60L + mm)+ss);
-                case 24: if (hh < 0 || hh > 23) return (-1);
-                         return (60L * (hh*60L + mm)+ss);
-                default: return (-1);
+item    : time {
+            yyHaveTime++;
         }
-}
-
-static
-time_t monthadd(sdate, relmonth) time_t sdate, relmonth;
-{
-        struct tm *ltime;
-        time_t dateconv();
-        time_t daylcorr();
-        int mm, yy;
-
-        if (relmonth == 0) return 0;
-        ltime = localtime(&sdate);
-        mm = 12*ltime->tm_year + ltime->tm_mon + relmonth;
-        yy = mm/12;
-        mm = mm%12 + 1;
-        return daylcorr(dateconv(mm, ltime->tm_mday, yy, ltime->tm_hour,
-                ltime->tm_min, ltime->tm_sec, 24, ourzone, MAYBE), sdate);
-}
-
-static
-time_t daylcorr(future, now) time_t future, now;
-{
-        int fdayl, nowdayl;
-
-        nowdayl = (localtime(&now)->tm_hour+1) % 24;
-        fdayl = (localtime(&future)->tm_hour+1) % 24;
-        return (future-now) + 60L*60L*(nowdayl-fdayl);
-}
-
-static char *lptr;
-
-static
-yylex()
-{
-        extern int yylval;
-        int sign;
-        register char c;
-        register char *p;
-        char idbuf[20];
-        int pcnt;
-
-        for (;;) {
-                while (isspace(*lptr)) lptr++;
-
-                if (isdigit(c = *lptr) || c == '-' || c == '+') {
-                        if (c== '-' || c == '+') {
-                                if (c=='-') sign = -1;
-                                else sign = 1;
-                                if (!isdigit(*++lptr)) {
-                                        /* yylval = sign; return (NUMBER); */
-                                        return yylex(); /* skip the '-' sign */
-                                }
-                        } else sign = 1;
-                        yylval = 0;
-                        while (isdigit(c = *lptr++)) yylval = 10*yylval + c - '0';
-                        yylval *= sign;
-                        lptr--;
-                        return (NUMBER);
-
-                } else if (isalpha(c)) {
-                        p = idbuf;
-                        while (isalpha(c = *lptr++) || c=='.')
-                                if (p < &idbuf[sizeof(idbuf)-1])
-                                        *p++ = c;
-                        *p = '\0';
-                        lptr--;
-                        return (lookup(idbuf));
-                }
-
-                else if (c == '(') {
-                        pcnt = 0;
-                        do {
-                                c = *lptr++;
-                                if (c == '\0') return(c);
-                                else if (c == '(') pcnt++;
-                                else if (c == ')') pcnt--;
-                        } while (pcnt > 0);
-                }
-
-                else return (*lptr++);
+        | zone {
+            yyHaveZone++;
         }
-}
+        | date {
+            yyHaveDate++;
+        }
+        | day {
+            yyHaveDay++;
+        }
+        | rel {
+            yyHaveRel++;
+        }
+        | number
+        ;
 
-static
-struct table {
-        char *name;
-        int type, value;
+time    : tUNUMBER tMERIDIAN {
+            yyHour = $1;
+            yyMinutes = 0;
+            yySeconds = 0;
+            yyMeridian = $2;
+        }
+        | tUNUMBER ':' tUNUMBER o_merid {
+            yyHour = $1;
+            yyMinutes = $3;
+            yySeconds = 0;
+            yyMeridian = $4;
+        }
+        | tUNUMBER ':' tUNUMBER tSNUMBER {
+            yyHour = $1;
+            yyMinutes = $3;
+            yyMeridian = MER24;
+            yyDSTmode = DSToff;
+            yyTimezone = - ($4 % 100 + ($4 / 100) * 60);
+        }
+        | tUNUMBER ':' tUNUMBER ':' tUNUMBER o_merid {
+            yyHour = $1;
+            yyMinutes = $3;
+            yySeconds = $5;
+            yyMeridian = $6;
+        }
+        | tUNUMBER ':' tUNUMBER ':' tUNUMBER tSNUMBER {
+            yyHour = $1;
+            yyMinutes = $3;
+            yySeconds = $5;
+            yyMeridian = MER24;
+            yyDSTmode = DSToff;
+            yyTimezone = - ($6 % 100 + ($6 / 100) * 60);
+        }
+        ;
+
+zone    : tZONE {
+            yyTimezone = $1;
+            yyDSTmode = DSToff;
+        }
+        | tDAYZONE {
+            yyTimezone = $1;
+            yyDSTmode = DSTon;
+        }
+        ;
+
+day     : tDAY {
+            yyDayOrdinal = 1;
+            yyDayNumber = $1;
+        }
+        | tDAY ',' {
+            yyDayOrdinal = 1;
+            yyDayNumber = $1;
+        }
+        | tUNUMBER tDAY {
+            yyDayOrdinal = $1;
+            yyDayNumber = $2;
+        }
+        ;
+
+date    : tUNUMBER '/' tUNUMBER {
+            yyMonth = $1;
+            yyDay = $3;
+        }
+        | tUNUMBER '/' tUNUMBER '/' tUNUMBER {
+            yyMonth = $1;
+            yyDay = $3;
+            yyYear = $5;
+        }
+        | tMONTH tUNUMBER {
+            yyMonth = $1;
+            yyDay = $2;
+        }
+        | tMONTH tUNUMBER ',' tUNUMBER {
+            yyMonth = $1;
+            yyDay = $2;
+            yyYear = $4;
+        }
+        | tUNUMBER tMONTH {
+            yyMonth = $2;
+            yyDay = $1;
+        }
+        | tUNUMBER tMONTH tUNUMBER {
+            yyMonth = $2;
+            yyDay = $1;
+            yyYear = $3;
+        }
+        ;
+
+rel     : relunit tAGO {
+            yyRelSeconds = -yyRelSeconds;
+            yyRelMonth = -yyRelMonth;
+        }
+        | relunit
+        ;
+
+relunit : tUNUMBER tMINUTE_UNIT {
+            yyRelSeconds += $1 * $2 * 60L;
+        }
+        | tSNUMBER tMINUTE_UNIT {
+            yyRelSeconds += $1 * $2 * 60L;
+        }
+        | tMINUTE_UNIT {
+            yyRelSeconds += $1 * 60L;
+        }
+        | tSNUMBER tSEC_UNIT {
+            yyRelSeconds += $1;
+        }
+        | tUNUMBER tSEC_UNIT {
+            yyRelSeconds += $1;
+        }
+        | tSEC_UNIT {
+            yyRelSeconds++;
+        }
+        | tSNUMBER tMONTH_UNIT {
+            yyRelMonth += $1 * $2;
+        }
+        | tUNUMBER tMONTH_UNIT {
+            yyRelMonth += $1 * $2;
+        }
+        | tMONTH_UNIT {
+            yyRelMonth += $1;
+        }
+        ;
+
+number  : tUNUMBER {
+            if (yyHaveTime && yyHaveDate && !yyHaveRel)
+                yyYear = $1;
+            else {
+                yyHaveTime++;
+                if ($1 < 100) {
+                    yyHour = $1;
+                    yyMinutes = 0;
+                }
+                else {
+                    yyHour = $1 / 100;
+                    yyMinutes = $1 % 100;
+                }
+                yySeconds = 0;
+                yyMeridian = MER24;
+            }
+        }
+        ;
+
+o_merid : /* NULL */ {
+            $$ = MER24;
+        }
+        | tMERIDIAN {
+            $$ = $1;
+        }
+        ;
+
+%%
+
+/* Month and day table. */
+static TABLE    MonthDayTable[] = {
+    { "january",        tMONTH,  1 },
+    { "february",       tMONTH,  2 },
+    { "march",          tMONTH,  3 },
+    { "april",          tMONTH,  4 },
+    { "may",            tMONTH,  5 },
+    { "june",           tMONTH,  6 },
+    { "july",           tMONTH,  7 },
+    { "august",         tMONTH,  8 },
+    { "september",      tMONTH,  9 },
+    { "sept",           tMONTH,  9 },
+    { "october",        tMONTH, 10 },
+    { "november",       tMONTH, 11 },
+    { "december",       tMONTH, 12 },
+    { "sunday",         tDAY, 0 },
+    { "monday",         tDAY, 1 },
+    { "tuesday",        tDAY, 2 },
+    { "tues",           tDAY, 2 },
+    { "wednesday",      tDAY, 3 },
+    { "wednes",         tDAY, 3 },
+    { "thursday",       tDAY, 4 },
+    { "thur",           tDAY, 4 },
+    { "thurs",          tDAY, 4 },
+    { "friday",         tDAY, 5 },
+    { "saturday",       tDAY, 6 },
+    { NULL }
+};
+
+/* Time units table. */
+static TABLE    UnitsTable[] = {
+    { "year",           tMONTH_UNIT,    12 },
+    { "month",          tMONTH_UNIT,    1 },
+    { "fortnight",      tMINUTE_UNIT,   14 * 24 * 60 },
+    { "week",           tMINUTE_UNIT,   7 * 24 * 60 },
+    { "day",            tMINUTE_UNIT,   1 * 24 * 60 },
+    { "hour",           tMINUTE_UNIT,   60 },
+    { "minute",         tMINUTE_UNIT,   1 },
+    { "min",            tMINUTE_UNIT,   1 },
+    { "second",         tSEC_UNIT,      1 },
+    { "sec",            tSEC_UNIT,      1 },
+    { NULL }
+};
+
+/* Assorted relative-time words. */
+static TABLE    OtherTable[] = {
+    { "tomorrow",       tMINUTE_UNIT,   1 * 24 * 60 },
+    { "yesterday",      tMINUTE_UNIT,   -1 * 24 * 60 },
+    { "today",          tMINUTE_UNIT,   0 },
+    { "now",            tMINUTE_UNIT,   0 },
+    { "last",           tUNUMBER,       -1 },
+    { "this",           tMINUTE_UNIT,   0 },
+    { "next",           tUNUMBER,       2 },
+#if 0
+    { "first",          tUNUMBER,       1 },
+/*  { "second",         tUNUMBER,       2 }, */
+    { "third",          tUNUMBER,       3 },
+    { "fourth",         tUNUMBER,       4 },
+    { "fifth",          tUNUMBER,       5 },
+    { "sixth",          tUNUMBER,       6 },
+    { "seventh",        tUNUMBER,       7 },
+    { "eighth",         tUNUMBER,       8 },
+    { "ninth",          tUNUMBER,       9 },
+    { "tenth",          tUNUMBER,       10 },
+    { "eleventh",       tUNUMBER,       11 },
+    { "twelfth",        tUNUMBER,       12 },
+#endif
+    { "ago",            tAGO,   1 },
+    { NULL }
+};
+
+/* The timezone table. */
+static TABLE    TimezoneTable[] = {
+    { "gmt",    tZONE,     HOUR( 0) },  /* Greenwich Mean */
+    { "ut",     tZONE,     HOUR( 0) },  /* Universal (Coordinated) */
+    { "utc",    tZONE,     HOUR( 0) },
+    { "wet",    tZONE,     HOUR( 0) },  /* Western European */
+    { "bst",    tDAYZONE,  HOUR( 0) },  /* British Summer */
+    { "wat",    tZONE,     HOUR( 1) },  /* West Africa */
+    { "at",     tZONE,     HOUR( 2) },  /* Azores */
+#if     0
+    /* For completeness.  BST is also British Summer, and GST is
+     * also Guam Standard. */
+    { "bst",    tZONE,     HOUR( 3) },  /* Brazil Standard */
+    { "gst",    tZONE,     HOUR( 3) },  /* Greenland Standard */
+#endif
+    { "nft",    tZONE,     HOUR(3.5) }, /* Newfoundland */
+    { "nst",    tZONE,     HOUR(3.5) }, /* Newfoundland Standard */
+    { "ndt",    tDAYZONE,  HOUR(3.5) }, /* Newfoundland Daylight */
+    { "ast",    tZONE,     HOUR( 4) },  /* Atlantic Standard */
+    { "adt",    tDAYZONE,  HOUR( 4) },  /* Atlantic Daylight */
+    { "est",    tZONE,     HOUR( 5) },  /* Eastern Standard */
+    { "edt",    tDAYZONE,  HOUR( 5) },  /* Eastern Daylight */
+    { "cst",    tZONE,     HOUR( 6) },  /* Central Standard */
+    { "cdt",    tDAYZONE,  HOUR( 6) },  /* Central Daylight */
+    { "mst",    tZONE,     HOUR( 7) },  /* Mountain Standard */
+    { "mdt",    tDAYZONE,  HOUR( 7) },  /* Mountain Daylight */
+    { "pst",    tZONE,     HOUR( 8) },  /* Pacific Standard */
+    { "pdt",    tDAYZONE,  HOUR( 8) },  /* Pacific Daylight */
+    { "yst",    tZONE,     HOUR( 9) },  /* Yukon Standard */
+    { "ydt",    tDAYZONE,  HOUR( 9) },  /* Yukon Daylight */
+    { "hst",    tZONE,     HOUR(10) },  /* Hawaii Standard */
+    { "hdt",    tDAYZONE,  HOUR(10) },  /* Hawaii Daylight */
+    { "cat",    tZONE,     HOUR(10) },  /* Central Alaska */
+    { "ahst",   tZONE,     HOUR(10) },  /* Alaska-Hawaii Standard */
+    { "nt",     tZONE,     HOUR(11) },  /* Nome */
+    { "idlw",   tZONE,     HOUR(12) },  /* International Date Line West */
+    { "cet",    tZONE,     -HOUR(1) },  /* Central European */
+    { "met",    tZONE,     -HOUR(1) },  /* Middle European */
+    { "mewt",   tZONE,     -HOUR(1) },  /* Middle European Winter */
+    { "mest",   tDAYZONE,  -HOUR(1) },  /* Middle European Summer */
+    { "swt",    tZONE,     -HOUR(1) },  /* Swedish Winter */
+    { "sst",    tDAYZONE,  -HOUR(1) },  /* Swedish Summer */
+    { "fwt",    tZONE,     -HOUR(1) },  /* French Winter */
+    { "fst",    tDAYZONE,  -HOUR(1) },  /* French Summer */
+    { "eet",    tZONE,     -HOUR(2) },  /* Eastern Europe, USSR Zone 1 */
+    { "bt",     tZONE,     -HOUR(3) },  /* Baghdad, USSR Zone 2 */
+    { "it",     tZONE,     -HOUR(3.5) },/* Iran */
+    { "zp4",    tZONE,     -HOUR(4) },  /* USSR Zone 3 */
+    { "zp5",    tZONE,     -HOUR(5) },  /* USSR Zone 4 */
+    { "ist",    tZONE,     -HOUR(5.5) },/* Indian Standard */
+    { "zp6",    tZONE,     -HOUR(6) },  /* USSR Zone 5 */
+#if     0
+    /* For completeness.  NST is also Newfoundland Stanard, nad SST is
+     * also Swedish Summer. */
+    { "nst",    tZONE,     -HOUR(6.5) },/* North Sumatra */
+    { "sst",    tZONE,     -HOUR(7) },  /* South Sumatra, USSR Zone 6 */
+#endif  /* 0 */
+    { "wast",   tZONE,     -HOUR(7) },  /* West Australian Standard */
+    { "wadt",   tDAYZONE,  -HOUR(7) },  /* West Australian Daylight */
+    { "jt",     tZONE,     -HOUR(7.5) },/* Java (3pm in Cronusland!) */
+    { "cct",    tZONE,     -HOUR(8) },  /* China Coast, USSR Zone 7 */
+    { "jst",    tZONE,     -HOUR(9) },  /* Japan Standard, USSR Zone 8 */
+    { "cast",   tZONE,     -HOUR(9.5) },/* Central Australian Standard */
+    { "cadt",   tDAYZONE,  -HOUR(9.5) },/* Central Australian Daylight */
+    { "east",   tZONE,     -HOUR(10) }, /* Eastern Australian Standard */
+    { "eadt",   tDAYZONE,  -HOUR(10) }, /* Eastern Australian Daylight */
+    { "gst",    tZONE,     -HOUR(10) }, /* Guam Standard, USSR Zone 9 */
+    { "nzt",    tZONE,     -HOUR(12) }, /* New Zealand */
+    { "nzst",   tZONE,     -HOUR(12) }, /* New Zealand Standard */
+    { "nzdt",   tDAYZONE,  -HOUR(12) }, /* New Zealand Daylight */
+    { "idle",   tZONE,     -HOUR(12) }, /* International Date Line East */
+    {  NULL  }
+};
+
+/* Military timezone table. */
+static TABLE    MilitaryTable[] = {
+    { "a",      tZONE,  HOUR(  1) },
+    { "b",      tZONE,  HOUR(  2) },
+    { "c",      tZONE,  HOUR(  3) },
+    { "d",      tZONE,  HOUR(  4) },
+    { "e",      tZONE,  HOUR(  5) },
+    { "f",      tZONE,  HOUR(  6) },
+    { "g",      tZONE,  HOUR(  7) },
+    { "h",      tZONE,  HOUR(  8) },
+    { "i",      tZONE,  HOUR(  9) },
+    { "k",      tZONE,  HOUR( 10) },
+    { "l",      tZONE,  HOUR( 11) },
+    { "m",      tZONE,  HOUR( 12) },
+    { "n",      tZONE,  HOUR(- 1) },
+    { "o",      tZONE,  HOUR(- 2) },
+    { "p",      tZONE,  HOUR(- 3) },
+    { "q",      tZONE,  HOUR(- 4) },
+    { "r",      tZONE,  HOUR(- 5) },
+    { "s",      tZONE,  HOUR(- 6) },
+    { "t",      tZONE,  HOUR(- 7) },
+    { "u",      tZONE,  HOUR(- 8) },
+    { "v",      tZONE,  HOUR(- 9) },
+    { "w",      tZONE,  HOUR(-10) },
+    { "x",      tZONE,  HOUR(-11) },
+    { "y",      tZONE,  HOUR(-12) },
+    { "z",      tZONE,  HOUR(  0) },
+    { NULL }
 };
 
 static
-struct table mdtab[] = {
-        {"January", MONTH, 1},
-        {"February", MONTH, 2},
-        {"March", MONTH, 3},
-        {"April", MONTH, 4},
-        {"May", MONTH, 5},
-        {"June", MONTH, 6},
-        {"July", MONTH, 7},
-        {"August", MONTH, 8},
-        {"September", MONTH, 9},
-        {"Sept", MONTH, 9},
-        {"October", MONTH, 10},
-        {"November", MONTH, 11},
-        {"December", MONTH, 12},
-
-        {"Sunday", DAY, 0},
-        {"Monday", DAY, 1},
-        {"Tuesday", DAY, 2},
-        {"Tues", DAY, 2},
-        {"Wednesday", DAY, 3},
-        {"Wednes", DAY, 3},
-        {"Thursday", DAY, 4},
-        {"Thur", DAY, 4},
-        {"Thurs", DAY, 4},
-        {"Friday", DAY, 5},
-        {"Saturday", DAY, 6},
-        {0, 0, 0}};
-
-#define HRS *60
-#define HALFHR 30
-static
-struct table mztab[] = {
-        {"a.m.", MERIDIAN, AM},
-        {"am", MERIDIAN, AM},
-        {"p.m.", MERIDIAN, PM},
-        {"pm", MERIDIAN, PM},
-        {"nst", ZONE, 3 HRS + HALFHR},          /* Newfoundland */
-        {"n.s.t.", ZONE, 3 HRS + HALFHR},
-        {"ast", ZONE, 4 HRS},           /* Atlantic */
-        {"a.s.t.", ZONE, 4 HRS},
-        {"adt", DAYZONE, 4 HRS},
-        {"a.d.t.", DAYZONE, 4 HRS},
-        {"est", ZONE, 5 HRS},           /* Eastern */
-        {"e.s.t.", ZONE, 5 HRS},
-        {"edt", DAYZONE, 5 HRS},
-        {"e.d.t.", DAYZONE, 5 HRS},
-        {"cst", ZONE, 6 HRS},           /* Central */
-        {"c.s.t.", ZONE, 6 HRS},
-        {"cdt", DAYZONE, 6 HRS},
-        {"c.d.t.", DAYZONE, 6 HRS},
-        {"mst", ZONE, 7 HRS},           /* Mountain */
-        {"m.s.t.", ZONE, 7 HRS},
-        {"mdt", DAYZONE, 7 HRS},
-        {"m.d.t.", DAYZONE, 7 HRS},
-        {"pst", ZONE, 8 HRS},           /* Pacific */
-        {"p.s.t.", ZONE, 8 HRS},
-        {"pdt", DAYZONE, 8 HRS},
-        {"p.d.t.", DAYZONE, 8 HRS},
-        {"yst", ZONE, 9 HRS},           /* Yukon */
-        {"y.s.t.", ZONE, 9 HRS},
-        {"ydt", DAYZONE, 9 HRS},
-        {"y.d.t.", DAYZONE, 9 HRS},
-        {"hst", ZONE, 10 HRS},          /* Hawaii */
-        {"h.s.t.", ZONE, 10 HRS},
-        {"hdt", DAYZONE, 10 HRS},
-        {"h.d.t.", DAYZONE, 10 HRS},
-
-        {"gmt", ZONE, 0 HRS},
-        {"g.m.t.", ZONE, 0 HRS},
-        {"bst", DAYZONE, 0 HRS},                /* British Summer Time */
-        {"b.s.t.", DAYZONE, 0 HRS},
-        {"eet", ZONE, 0 HRS},           /* European Eastern Time */
-        {"e.e.t.", ZONE, 0 HRS},
-        {"eest", DAYZONE, 0 HRS},       /* European Eastern Summer Time */
-        {"e.e.s.t.", DAYZONE, 0 HRS},
-        {"met", ZONE, -1 HRS},          /* Middle European Time */
-        {"m.e.t.", ZONE, -1 HRS},
-        {"mest", DAYZONE, -1 HRS},      /* Middle European Summer Time */
-        {"m.e.s.t.", DAYZONE, -1 HRS},
-        {"wet", ZONE, -2 HRS },         /* Western European Time */
-        {"w.e.t.", ZONE, -2 HRS },
-        {"west", DAYZONE, -2 HRS},      /* Western European Summer Time */
-        {"w.e.s.t.", DAYZONE, -2 HRS},
-
-        {"jst", ZONE, -9 HRS},          /* Japan Standard Time */
-        {"j.s.t.", ZONE, -9 HRS},       /* Japan Standard Time */
-                                        /* No daylight savings time */
-
-        {"aest", ZONE, -10 HRS},        /* Australian Eastern Time */
-        {"a.e.s.t.", ZONE, -10 HRS},
-        {"aesst", DAYZONE, -10 HRS},    /* Australian Eastern Summer Time */
-        {"a.e.s.s.t.", DAYZONE, -10 HRS},
-        {"acst", ZONE, -(9 HRS + HALFHR)},      /* Australian Central Time */
-        {"a.c.s.t.", ZONE, -(9 HRS + HALFHR)},
-        {"acsst", DAYZONE, -(9 HRS + HALFHR)},  /* Australian Central Summer */
-        {"a.c.s.s.t.", DAYZONE, -(9 HRS + HALFHR)},
-        {"awst", ZONE, -8 HRS},         /* Australian Western Time */
-        {"a.w.s.t.", ZONE, -8 HRS},     /* (no daylight time there, I'm told */
-        {0, 0, 0}};
-
-static
-struct table unittb[] = {
-        {"year", MUNIT, 12},
-        {"month", MUNIT, 1},
-        {"fortnight", UNIT, 14*24*60},
-        {"week", UNIT, 7*24*60},
-        {"day", UNIT, 1*24*60},
-        {"hour", UNIT, 60},
-        {"minute", UNIT, 1},
-        {"min", UNIT, 1},
-        {"second", SUNIT, 1},
-        {"sec", SUNIT, 1},
-        {0, 0, 0}};
-
-static
-struct table othertb[] = {
-        {"tomorrow", UNIT, 1*24*60},
-        {"yesterday", UNIT, -1*24*60},
-        {"today", UNIT, 0},
-        {"now", UNIT, 0},
-        {"last", NUMBER, -1},
-        {"this", UNIT, 0},
-        {"next", NUMBER, 2},
-        {"first", NUMBER, 1},
-        /* {"second", NUMBER, 2}, */
-        {"third", NUMBER, 3},
-        {"fourth", NUMBER, 4},
-        {"fifth", NUMBER, 5},
-        {"sixth", NUMBER, 6},
-        {"seventh", NUMBER, 7},
-        {"eigth", NUMBER, 8},
-        {"ninth", NUMBER, 9},
-        {"tenth", NUMBER, 10},
-        {"eleventh", NUMBER, 11},
-        {"twelfth", NUMBER, 12},
-        {"ago", AGO, 1},
-        {0, 0, 0}};
-
-static
-struct table milzone[] = {
-        {"a", ZONE, 1 HRS},
-        {"b", ZONE, 2 HRS},
-        {"c", ZONE, 3 HRS},
-        {"d", ZONE, 4 HRS},
-        {"e", ZONE, 5 HRS},
-        {"f", ZONE, 6 HRS},
-        {"g", ZONE, 7 HRS},
-        {"h", ZONE, 8 HRS},
-        {"i", ZONE, 9 HRS},
-        {"k", ZONE, 10 HRS},
-        {"l", ZONE, 11 HRS},
-        {"m", ZONE, 12 HRS},
-        {"n", ZONE, -1 HRS},
-        {"o", ZONE, -2 HRS},
-        {"p", ZONE, -3 HRS},
-        {"q", ZONE, -4 HRS},
-        {"r", ZONE, -5 HRS},
-        {"s", ZONE, -6 HRS},
-        {"t", ZONE, -7 HRS},
-        {"u", ZONE, -8 HRS},
-        {"v", ZONE, -9 HRS},
-        {"w", ZONE, -10 HRS},
-        {"x", ZONE, -11 HRS},
-        {"y", ZONE, -12 HRS},
-        {"z", ZONE, 0 HRS},
-        {0, 0, 0}};
-
-static
-lookup(id) char *id;
+yyerror(s)
+    char        *s;
 {
-#define gotit (yylval=i->value,  i->type)
-#define getid for(j=idvar, k=id; *j++ = *k++; )
-
-        char idvar[20];
-        register char *j, *k;
-        register struct table *i;
-        int abbrev;
-
-        getid;
-        if (strlen(idvar) == 3) abbrev = 1;
-        else if (strlen(idvar) == 4 && idvar[3] == '.') {
-                abbrev = 1;
-                idvar[3] = '\0';
-        }
-        else abbrev = 0;
-
-        if (islower(*idvar)) *idvar = toupper(*idvar);
-
-        for (i = mdtab; i->name; i++) {
-                k = idvar;
-                for (j = i->name; *j++ == *k++;) {
-                        if (abbrev && j==i->name+3) return gotit;
-                        if (j[-1] == 0) return gotit;
-                }
-        }
-
-        getid;
-        for (i = mztab; i->name; i++)
-                if (strcmp(i->name, idvar) == 0) return gotit;
-
-        for (j = idvar; *j; j++)
-                if (isupper(*j)) *j = tolower(*j);
-        for (i=mztab; i->name; i++)
-                if (strcmp(i->name, idvar) == 0) return gotit;
-
-        getid;
-        for (i=unittb; i->name; i++)
-                if (strcmp(i->name, idvar) == 0) return gotit;
-
-        if (idvar[strlen(idvar)-1] == 's')
-                idvar[strlen(idvar)-1] = '\0';
-        for (i=unittb; i->name; i++)
-                if (strcmp(i->name, idvar) == 0) return gotit;
-
-        getid;
-        for (i = othertb; i->name; i++)
-                if (strcmp(i->name, idvar) == 0) return gotit;
-
-        getid;
-        if (strlen(idvar) == 1 && isalpha(*idvar)) {
-                if (isupper(*idvar)) *idvar = tolower(*idvar);
-                for (i = milzone; i->name; i++)
-                        if (strcmp(i->name, idvar) == 0) return gotit;
-        }
-
-        return(ID);
 }
 
-time_t
-Tcl_GetDate (p, now, zone)
-    char   *p;
-    time_t  now;
-    long    zone;
+
+static time_t
+ToSeconds(Hours, Minutes, Seconds, Meridian)
+    time_t      Hours;
+    time_t      Minutes;
+    time_t      Seconds;
+    MERIDIAN    Meridian;
 {
-#define mcheck(f)       if (f>1) err++
-        time_t monthadd();
-        int err;
-        struct tm *lt;
-        time_t sdate, tod;
-
-        lptr = p;
-        if (now <= 0)
-                (void) time(&now);
-        lt = localtime(&now);
-        year = lt->tm_year;
-        month = lt->tm_mon+1;
-        day = lt->tm_mday;
-        relsec = 0; relmonth = 0;
-        timeflag=zoneflag=dateflag=dayflag=relflag=0;
-        dayLight = MAYBE;
-        hh = mm = ss = 0;
-        merid = 24;
-
-        if (err = yyparse()) return (-1);
-
-        mcheck(timeflag);
-        mcheck(zoneflag);
-        mcheck(dateflag);
-        mcheck(dayflag);
-        if (err) return (-1);
-
-        /*
-         * If timezone was not in strings, set it here.  yyparse nukes ourzone
-         * if not specified, but not sure why.
-         */
-        if (!zoneflag)
-            ourzone = zone;
-
-        if (dateflag || timeflag || dayflag) {
-                sdate = dateconv(month,day,year,hh,mm,ss,merid,ourzone,
-                                 dayLight);
-                if (sdate < 0) return -1;
-        }
-        else {
-                sdate = now;
-                if (relflag == 0)
-                        sdate -= (lt->tm_sec + lt->tm_min*60 +
-                                lt->tm_hour*(60L*60L));
-        }
-
-        sdate += relsec;
-        sdate += monthadd(sdate, relmonth);
-
-        if (dayflag && !dateflag) {
-                tod = dayconv(dayord, dayreq, sdate);
-                sdate += tod;
-        }
-
-        return sdate;
+    if (Minutes < 0 || Minutes > 59 || Seconds < 0 || Seconds > 59)
+        return -1;
+    switch (Meridian) {
+    case MER24:
+        if (Hours < 0 || Hours > 23)
+            return -1;
+        return (Hours * 60L + Minutes) * 60L + Seconds;
+    case MERam:
+        if (Hours < 1 || Hours > 12)
+            return -1;
+        return ((Hours % 12) * 60L + Minutes) * 60L + Seconds;
+    case MERpm:
+        if (Hours < 1 || Hours > 12)
+            return -1;
+        return (((Hours % 12) + 12) * 60L + Minutes) * 60L + Seconds;
+    }
+    /* NOTREACHED */
 }
 
-/*
- * Error message are not used, so discard with dummy function.
- */
 
-static void
-yyerror(msg)
-    char *msg;
+static int
+Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode, TimePtr)
+    time_t      Month;
+    time_t      Day;
+    time_t      Year;
+    time_t      Hours;
+    time_t      Minutes;
+    time_t      Seconds;
+    MERIDIAN    Meridian;
+    DSTMODE     DSTmode;
+    time_t     *TimePtr;
 {
+    static int  DaysInMonth[12] = {
+        31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    };
+    time_t      tod;
+    time_t      Julian;
+    int         i;
+
+    if (Year < 0)
+        Year = -Year;
+    if (Year < 100)
+        Year += 1900;
+    DaysInMonth[1] = Year % 4 == 0 && (Year % 100 != 0 || Year % 400 == 0)
+                    ? 29 : 28;
+    if (Month < 1 || Month > 12
+     || Year < START_OF_TIME || Year > END_OF_TIME
+     || Day < 1 || Day > DaysInMonth[(int)--Month])
+        return -1;
+
+    for (Julian = Day - 1, i = 0; i < Month; i++)
+        Julian += DaysInMonth[i];
+    if (Year >= EPOCH) {
+        for (i = EPOCH; i < Year; i++)
+            Julian += 365 + (i % 4 == 0);
+    } else {
+        for (i = Year; i < EPOCH; i++)
+            Julian -= 365 + (i % 4 == 0);
+    }
+    Julian *= SECSPERDAY;
+    Julian += yyTimezone * 60L;
+    if ((tod = ToSeconds(Hours, Minutes, Seconds, Meridian)) < 0)
+        return -1;
+    Julian += tod;
+    if (DSTmode == DSTon
+     || (DSTmode == DSTmaybe && localtime(&Julian)->tm_isdst))
+        Julian -= 60 * 60;
+    *TimePtr = Julian;
+    return 0;
+}
+
+
+static time_t
+DSTcorrect(Start, Future)
+    time_t      Start;
+    time_t      Future;
+{
+    time_t      StartDay;
+    time_t      FutureDay;
+
+    StartDay = (localtime(&Start)->tm_hour + 1) % 24;
+    FutureDay = (localtime(&Future)->tm_hour + 1) % 24;
+    return (Future - Start) + (StartDay - FutureDay) * 60L * 60L;
+}
+
+
+static time_t
+RelativeDate(Start, DayOrdinal, DayNumber)
+    time_t      Start;
+    time_t      DayOrdinal;
+    time_t      DayNumber;
+{
+    struct tm   *tm;
+    time_t      now;
+
+    now = Start;
+    tm = localtime(&now);
+    now += SECSPERDAY * ((DayNumber - tm->tm_wday + 7) % 7);
+    now += 7 * SECSPERDAY * (DayOrdinal <= 0 ? DayOrdinal : DayOrdinal - 1);
+    return DSTcorrect(Start, now);
+}
+
+
+static int
+RelativeMonth(Start, RelMonth, TimePtr)
+    time_t      Start;
+    time_t      RelMonth;
+    time_t     *TimePtr;
+{
+    struct tm   *tm;
+    time_t      Month;
+    time_t      Year;
+    time_t      Julian;
+
+    if (RelMonth == 0) {
+        *TimePtr = 0;
+        return 0;
+    }
+    tm = localtime(&Start);
+    Month = 12 * tm->tm_year + tm->tm_mon + RelMonth;
+    Year = Month / 12;
+    Month = Month % 12 + 1;
+    if (Convert(Month, (time_t)tm->tm_mday, Year,
+                (time_t)tm->tm_hour, (time_t)tm->tm_min, (time_t)tm->tm_sec,
+                MER24, DSTmaybe, &Julian) < 0)
+        return -1;
+    *TimePtr = DSTcorrect(Start, Julian);
+    return 0;
+}
+
+
+static int
+LookupWord(buff)
+    char                *buff;
+{
+    register char       *p;
+    register char       *q;
+    register TABLE      *tp;
+    int                 i;
+    int                 abbrev;
+
+    /* Make it lowercase. */
+    for (p = buff; *p; p++)
+        if (isupper(*p))
+            *p = tolower(*p);
+
+    if (strcmp(buff, "am") == 0 || strcmp(buff, "a.m.") == 0) {
+        yylval.Meridian = MERam;
+        return tMERIDIAN;
+    }
+    if (strcmp(buff, "pm") == 0 || strcmp(buff, "p.m.") == 0) {
+        yylval.Meridian = MERpm;
+        return tMERIDIAN;
+    }
+
+    /* See if we have an abbreviation for a month. */
+    if (strlen(buff) == 3)
+        abbrev = 1;
+    else if (strlen(buff) == 4 && buff[3] == '.') {
+        abbrev = 1;
+        buff[3] = '\0';
+    }
+    else
+        abbrev = 0;
+
+    for (tp = MonthDayTable; tp->name; tp++) {
+        if (abbrev) {
+            if (strncmp(buff, tp->name, 3) == 0) {
+                yylval.Number = tp->value;
+                return tp->type;
+            }
+        }
+        else if (strcmp(buff, tp->name) == 0) {
+            yylval.Number = tp->value;
+            return tp->type;
+        }
+    }
+
+    for (tp = TimezoneTable; tp->name; tp++)
+        if (strcmp(buff, tp->name) == 0) {
+            yylval.Number = tp->value;
+            return tp->type;
+        }
+
+    for (tp = UnitsTable; tp->name; tp++)
+        if (strcmp(buff, tp->name) == 0) {
+            yylval.Number = tp->value;
+            return tp->type;
+        }
+
+    /* Strip off any plural and try the units table again. */
+    i = strlen(buff) - 1;
+    if (buff[i] == 's') {
+        buff[i] = '\0';
+        for (tp = UnitsTable; tp->name; tp++)
+            if (strcmp(buff, tp->name) == 0) {
+                yylval.Number = tp->value;
+                return tp->type;
+            }
+    }
+
+    for (tp = OtherTable; tp->name; tp++)
+        if (strcmp(buff, tp->name) == 0) {
+            yylval.Number = tp->value;
+            return tp->type;
+        }
+
+    /* Military timezones. */
+    if (buff[1] == '\0' && isalpha(*buff)) {
+        for (tp = MilitaryTable; tp->name; tp++)
+            if (strcmp(buff, tp->name) == 0) {
+                yylval.Number = tp->value;
+                return tp->type;
+            }
+    }
+
+    /* Drop out any periods and try the timezone table again. */
+    for (i = 0, p = q = buff; *q; q++)
+        if (*q != '.')
+            *p++ = *q;
+        else
+            i++;
+    *p = '\0';
+    if (i)
+        for (tp = TimezoneTable; tp->name; tp++)
+            if (strcmp(buff, tp->name) == 0) {
+                yylval.Number = tp->value;
+                return tp->type;
+            }
+
+    return tID;
+}
+
+
+static int
+yylex()
+{
+    register char       c;
+    register char       *p;
+    char                buff[20];
+    int                 Count;
+    int                 sign;
+
+    for ( ; ; ) {
+        while (isspace(*yyInput))
+            yyInput++;
+
+        if (isdigit(c = *yyInput) || c == '-' || c == '+') {
+            if (c == '-' || c == '+') {
+                sign = c == '-' ? -1 : 1;
+                if (!isdigit(*++yyInput))
+                    /* skip the '-' sign */
+                    continue;
+            }
+            else
+                sign = 0;
+            for (yylval.Number = 0; isdigit(c = *yyInput++); )
+                yylval.Number = 10 * yylval.Number + c - '0';
+            yyInput--;
+            if (sign < 0)
+                yylval.Number = -yylval.Number;
+            return sign ? tSNUMBER : tUNUMBER;
+        }
+        if (isalpha(c)) {
+            for (p = buff; isalpha(c = *yyInput++) || c == '.'; )
+                if (p < &buff[sizeof buff - 1])
+                    *p++ = c;
+            *p = '\0';
+            yyInput--;
+            return LookupWord(buff);
+        }
+        if (c != '(')
+            return *yyInput++;
+        Count = 0;
+        do {
+            c = *yyInput++;
+            if (c == '\0')
+                return c;
+            if (c == '(')
+                Count++;
+            else if (c == ')')
+                Count--;
+        } while (Count > 0);
+    }
+}
+
+
+int
+Tcl_GetDate(p, now, zone, timePtr)
+    char          *p;
+    time_t         now;
+    int            zone;
+    time_t        *timePtr;
+{
+    struct tm           *tm;
+    time_t              Start;
+    time_t              Time;
+    time_t              tod;
+
+    yyInput = p;
+    tm = localtime(&now);
+    yyYear = tm->tm_year;
+    yyMonth = tm->tm_mon + 1;
+    yyDay = tm->tm_mday;
+    yyTimezone = zone;
+    yyDSTmode = DSTmaybe;
+    yyHour = 0;
+    yyMinutes = 0;
+    yySeconds = 0;
+    yyMeridian = MER24;
+    yyRelSeconds = 0;
+    yyRelMonth = 0;
+    yyHaveDate = 0;
+    yyHaveDay = 0;
+    yyHaveRel = 0;
+    yyHaveTime = 0;
+    yyHaveZone = 0;
+
+    if (yyparse()
+     || yyHaveTime > 1 || yyHaveZone > 1 || yyHaveDate > 1 || yyHaveDay > 1)
+        return -1;
+
+    if (yyHaveDate || yyHaveTime || yyHaveDay) {
+        if (Convert(yyMonth, yyDay, yyYear, yyHour, yyMinutes, yySeconds,
+                    yyMeridian, yyDSTmode, &Start) < 0)
+            return -1;
+    }
+    else {
+        Start = now;
+        if (!yyHaveRel)
+            Start -= ((tm->tm_hour * 60L) + tm->tm_min * 60L) + tm->tm_sec;
+    }
+
+    Start += yyRelSeconds;
+    if (RelativeMonth(Start, yyRelMonth, &Time) < 0)
+        return -1;
+    Start += Time;
+
+    if (yyHaveDay && !yyHaveDate) {
+        tod = RelativeDate(Start, yyDayOrdinal, yyDayNumber);
+        Start += tod;
+    }
+
+    *timePtr = Start;
+    return 0;
 }

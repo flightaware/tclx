@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.1 1992/11/17 06:26:44 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.2 1993/01/26 04:01:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -180,10 +180,11 @@ int
 Tcl_ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
                                   char       *handle));
 
-time_t
+int
 Tcl_GetDate _ANSI_ARGS_((char   *p,
                          time_t  now,
-                         long    zone));
+                         int     zone,
+                         time_t *timePtr));
 
 int
 Tcl_ProcessSignal _ANSI_ARGS_((Tcl_Interp *interp,

@@ -14,12 +14,55 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 2.1 1992/11/07 22:23:03 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 2.2 1993/01/26 04:01:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+static int
+GetTimeZone _ANSI_ARGS_((time_t  currentTime));
+
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * GetTimeZone --
+ *   Determines the current timezone.  The method varies wildly between
+ * different Unix implementations, so its hidden in this function.
+ *
+ * Parameters:
+ *   o currentTime (I) - The clock value that is to be used for the current
+ *     time.
+ * 
+ * Returns:
+ *    Minutes east of GMT.
+ *-----------------------------------------------------------------------------
+ */
+static int
+GetTimeZone (currentTime)
+    time_t  currentTime;
+{
+#ifdef TCL_USEGETTOD
+    struct timeval tv;
+    struct timezone tz;
+
+    gettimeofday( &tv, &tz );
+    return tz.tz_minuteswest;
+#else
+    struct tm  *timeDataPtr = localtime (&currentTime);
+
+#ifdef TCL_TM_GMTOFF
+    return -(timeDataPtr->tm_gmtoff / 60);
+#endif
+#ifdef TCL_TIMEZONE_VAR 
+    return timezone / 60;
+#endif
+#if !defined(TCL_TM_GMTOFF) && !defined(TCL_TIMEZONE_VAR)
+    return timeDataPtr->tm_tzadj  / 60;
+#endif
+#endif
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -42,12 +85,7 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
 {
     long        clockVal;
     time_t      baseClock;
-    struct tm  *timeDataPtr;
-    long        zone;
-#ifdef TCL_USEGETTOD
-    struct timeval tv;
-    struct timezone tz;
-#endif
+    int         zone;
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -68,27 +106,10 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
         }
         zone = 0; /* Zero minutes from GMT */
     } else {
-        timeDataPtr = localtime (&baseClock);
-        /*
-         * Get the minutes east of GMT.
-         */
-#ifdef TCL_USEGETTOD
-      gettimeofday( &tv, &tz );
-      zone = tz.tz_minuteswest;
-#endif
-#ifdef TCL_TM_GMTOFF
-        zone = -(timeDataPtr->tm_gmtoff / 60);
-#endif
-#ifdef TCL_TIMEZONE_VAR 
-        zone = timezone / 60;
-#endif
-#if  !defined(TCL_TM_GMTOFF) && !defined(TCL_TIMEZONE_VAR) && !defined(TCL_USEGETTOD)
-        zone = timeDataPtr->tm_tzadj  / 60;
-#endif
+        zone = GetTimeZone (baseClock);
     }
 
-    clockVal = Tcl_GetDate (argv [1], baseClock, zone);
-    if (clockVal == -1) {
+    if (Tcl_GetDate (argv [1], baseClock, zone, &clockVal) < 0) {
         Tcl_AppendResult (interp, "Unable to convert date-time string \"",
                           argv [1], "\"", (char *) NULL);
 	return TCL_ERROR;

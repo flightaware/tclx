@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.2 1992/11/15 06:59:52 markd Exp markd $
+.\" $Id: TclX.man,v 2.3 1992/11/17 06:26:44 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -332,13 +332,89 @@ argument is specified, in which case the clock value is calculated assuming
 that the specified time is relative to Greenwich Mean Time.
 If \fIbaseClock\fR is specified,
 it is taken as the current clock value.  This is useful for determining the
-time on a specific day.  Some examples are:
+time on a specific day.
+.sp
+The character string consists of zero or more specifications of the following
+form:
+.sp
+.I time
+- A time of day, which is of the form
+.IR hh [ :mm [ :ss ]]
+.RI [ meridian ]
+.RI [ zone ]
+or
+.IR hhmm
+.RI [ meridian ]
+.RI [ zone ].
+If no meridian is specified,
+.I hh
+is interpreted on a 24-hour clock.
+.sp
+.I date
+- A specific month and day with optional year.
+The acceptable formats are
+.IR mm/dd [ /yy ],
+.IR yyyy/mm/dd ,
+.IR "monthname dd" "[, " yy ],
+.IR "dd monthname" " [" yy "],
+and
+.IR "day, dd monthname yy" .
+The default year is the current year.
+If the year is less then 100, then 1900 is added to it.
+.sp
+.I "relative time"
+- A specification relative to the current time.
+The format is
+.IR "number unit" ;
+acceptable units are
+.IR year ,
+.IR fortnight ,
+.IR month ,
+.IR week ,
+.IR day ,
+.IR hour ,
+.I minute
+(or
+.IR min ),
+and
+.I second
+(or
+.IR sec ).
+The unit can be specified as a singular or plural, as in
+.IR "3 weeks" .
+These modifiers may also be specified:
+.IR  tomorrow ,
+.IR  yesterday ,
+.IR  today ,
+.IR  now ,
+.IR  last ,
+.IR  this ,
+.IR  next ,
+.IR  ago.
+.sp
+The actual date is calculated according to the following steps.
+First, any absolute date and/or time is processed and converted.
+Using that time as the base, day-of-week specifications are added.
+Next, relative specifications are used.
+If a date or day is specified, and no absolute or relative time is given,
+midnight is used.
+Finally, a correction is applied so that the correct hour of the day is
+produced after allowing for daylight savings time differences.
+.sp
+.I convertclock
+ignores case when parsing all words.
+The names of the months and days of the week can be abbreviated to their
+first three letters, with optional trailing period.
+Periods are ignored in any timezone or meridian values.
+The only dates in the range 1902 and 2037 may be
+converted. 
+Some examples are:
 .sp
 .nf
 .ft CW
     convertclock "14 Feb 92"
     convertclock "Feb 14, 1992 12:20 PM PST"
-    convertclock "12:20 PM, Feb 14, 1992"
+    convertclock "12:20 PM Feb 14, 1992"
 .ft R
 .fi
 '@endhelp
@@ -2338,4 +2414,5 @@ are removed.
 .br
 Writes the specified strings to the named file.
 '@endhelp
+
 
