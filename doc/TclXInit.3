@@ -12,13 +12,13 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+.\" $Id: TclXInit.3,v 4.0 1994/07/16 05:24:15 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
 .ad b
 .SH NAME
-TclX_Init, TclXCmd_Init, TclXLib_Init, TclX_Shell - Extended Tcl initialization.
+TclX_Init, TclXCmd_Init, TclXLib_Init, Tcl_Main - Extended Tcl initialization.
 '
 .SH SYNOPSIS
 .nf
@@ -46,8 +46,8 @@ int
 TclXLib_Init (Tcl_Interp *interp);
 
 void
-TclX_Shell (int    argc,
-            char **argv);
+Tcl_Main (int    argc,
+          char **argv);
 .ft R
 .fi
 .SH DESCRIPTION
@@ -154,15 +154,12 @@ Returns:
 \fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS TclX_Shell
+.SS Tcl_Main
 .PP
-The function is used when a \fBmain\fR other that the default one in
-\fBlibtclx.a\fR is required.
 This function parses the command line according to the TclX shell
 specification.  It creates an interpreter and calls the function
 \fBTcl_AppInit\fR to initialize any application specific commands.
 It then either evaluates the command of script specified on the
-command line or enters an interactive command loop.  No other TclX
-initialization function should be called directly when this function is
-used.
+command line or enters an interactive command loop.  This procedure never
+returns, it exits the process when it's done.
 
