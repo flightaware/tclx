@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.18 1996/04/25 14:32:30 markd Exp $
+.\" $Id: TclX.n,v 5.19 1996/04/27 01:38:10 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -95,20 +95,23 @@ configuration.  The command loop terminates on EOF.
 .sp
 The following options are available:
 .RS 5
-.TP \fB-async\fR
+.TP
+\fB-async\fR
 A command handler will be associated with stdin.  When input is available
 on stdin, it will be read and accumulated until a full command is available.
 That command will then be evaluated.  An event loop must be entered to make
 for input to be processed.
 '
-.TP \fB-interactive on|off|tty\fR
+.TP
+\fB-interactive on|off|tty\fR
 Enable or disable interactive command mode.  In interactive mode, commands
 are prompted for and the results of comments are printed.  The value maybe
 any boolean value or \fBtty\fR.  If \fBtty\fR is used, interactive mode
 is enabled if stdin is associated with a terminal or terminal emulator.
 The default is \fBtty\fR.
 '
-.TP \fB-prompt1 \fIcmd\fR
+.TP
+\fB-prompt1 \fIcmd\fR
 If specified, \fIcmd\fR  is used is evaluate and its result used for the
 main command prompt.  If not specified, the command in \fBtcl_prompt1\fR
 is evaluated to output the prompt.  Note the difference in behavior,
@@ -116,12 +119,14 @@ is evaluated to output the prompt.  Note the difference in behavior,
 allow for future expansion to command loops that write to other than
 stdout.
 '
-.TP \fB-prompt2 \fIcmd\fR
+.TP
+\fB-prompt2 \fIcmd\fR
 If specified, \fIcmd\fR is used is evaluate and its result used for the
 secondary (continuation) command prompt.  If not specified, the command in
 \fBtcl_prompt2\fR is evaluated to output the prompt.
 '
-.TP \fB-endcommand \fIcmd\fR
+.TP
+\fB-endcommand \fIcmd\fR
 If specified, \fIcmd\fR is evaluated when the command loop terminates.
 .RE
 .sp
