@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 1.3 1992/09/21 00:17:57 markd Exp markd $
+# $Id: Makefile,v 1.4 1992/09/21 07:13:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -42,7 +42,9 @@ all: tcl TCLDEFAULT $(TCL_TK_SHELL)
 # Compile the Extended Tcl library and link the Tcl shell.
 #
 
-tcl: libtcl.a
+tcl: TCLX_MAKES
+
+TCLX_MAKES: libtcl.a
 	cd ucbsrc;    $(MAKE) -$(MAKEFLAGS) all
 	cd osSupport; $(MAKE) -$(MAKEFLAGS) all
 	cd tclsrc;    $(MAKE) -$(MAKEFLAGS) all
@@ -61,7 +63,9 @@ libtcl.a: $(TCL_UCB_DIR)/libtcl.a
 # commands.
 #
 
-wish: libtk.a
+wish: TKX_MAKES
+
+TKX_MAKES: libtk.a
 	cd tkucbsrc; $(MAKE) -$(MAKEFLAGS) all
 	cd tksrc;    $(MAKE) -$(MAKEFLAGS) all
 
