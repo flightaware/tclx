@@ -18,7 +18,7 @@
  *     University of North Carolina at Chapel Hill
  *     getdate.y    2.13    9/16/86
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.0 1992/10/16 04:51:34 markd Rel markd $
+ * $Id: tclXgetdate.y,v 2.1 1992/11/20 04:37:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -527,7 +527,6 @@ Tcl_GetDate (p, now, zone)
         dayLight = MAYBE;
         hh = mm = ss = 0;
         merid = 24;
-        ourzone = zone;
 
         if (err = yyparse()) return (-1);
 
@@ -535,8 +534,15 @@ Tcl_GetDate (p, now, zone)
         mcheck(zoneflag);
         mcheck(dateflag);
         mcheck(dayflag);
-
         if (err) return (-1);
+
+        /*
+         * If timezone was not in strings, set it here.  yyparse nukes ourzone
+         * if not specified, but not sure why.
+         */
+        if (!zoneflag)
+            ourzone = zone;
+
         if (dateflag || timeflag || dayflag) {
                 sdate = dateconv(month,day,year,hh,mm,ss,merid,ourzone,
                                  dayLight);
