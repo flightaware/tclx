@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.8 1993/07/18 15:19:48 markd Exp markd $
+# $Id: Makefile,v 2.9 1993/07/18 21:14:28 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -55,8 +55,8 @@ ${TCL}: main.o ${LIBTCLX.A} made.tmp
 	    ${MCS_CMD} ${TCL}; fi
 
 made.tmp: ${OBJS} ${CPLUSOBJS}
-	${RANLIB_CMD} ${LIBTCLX.A}
 	${AR} cr ${LIBTCLX.A} ${OBJS} ${CPLUSOBJS}
+	${RANLIB_CMD} ${LIBTCLX.A}
 	touch made.tmp
 
 tclXstartup.o: patchlevel.h tclXstartup.c

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.5 1993/07/18 21:14:28 markd Exp markd $
+# $Id: Makefile,v 2.6 1993/07/18 22:15:05 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -48,8 +48,8 @@ ${WISHX}: tkMain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
 	    ${MCS_CMD} ${WISHX}; fi
 
 made.tmp: ${OBJS}
-	${RANLIB_CMD} ${LIBTKX.A}
 	${AR} cr ${LIBTKX.A} ${OBJS}
+	${RANLIB_CMD} ${LIBTKX.A}
 	touch made.tmp
 
 tkXstartup.o: tkXstartup.c
