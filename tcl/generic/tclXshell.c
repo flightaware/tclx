@@ -1,8 +1,7 @@
 /*
- * tclXstartup.c --
+ * tclXshell.c --
  *
- * Startup code for the Tcl shell and other interactive applications.  Also
- * create special commands used just by Tcl shell features.
+ * Support code for the Extended Tcl shell.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
@@ -13,101 +12,67 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.17 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.18 1993/09/05 02:01:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-#include "patchlevel.h"
 
 extern char *optarg;
 extern int   optind, opterr;
 
-typedef struct tclParms_t {
-    int       execFile;      /* Run the specified file. (no searching)       */
-    int       execCommand;   /* Execute the specified command.               */
-    unsigned  options;       /* Startup options.                             */
-    char     *execStr;       /* Command file or command to execute.          */
-    } tclParms_t;
+static char *TCLXENV = "TCLXENV";
 
-/*
- * Prototypes of internal functions.
- */
-static void
-ParseCmdArgs _ANSI_ARGS_((Tcl_Interp  *interp,
-                          int          argc,
-                          char       **argv,
-                          tclParms_t  *tclParmsPtr));
-
-static void
-MergeMasterDirPath _ANSI_ARGS_((char        *dir,
-                                char        *version1,
-                                char        *version2,
-                                Tcl_DString *dirPathPtr));
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ErrorAbort --
+ * TclX_ParseCmdLine --
  *
- * Display error information and abort when an error is returned in the
- * interp->result.
+ *   Parse the command line for the TclX shell ("tcl") and similar programs.
+ * This sets Tcl variables and returns, no other action is taken at this
+ * time.  The following Tcl variables are initialized by this routine:
+ *
+ *   o argv0 -  The name of the Tcl program specified on the command line or
+ *     the name that the Tcl shell was invoked under if no program was
+ *     specified.
+ *   o argc - Contains a count of the number of argv arguments (0 if none).
+ *   o argv- A list containing the arguments passed in from the command line,
+ *     excluding arguments used by the Tcl shell.  The first element is the
+ *     first passed argument, not the program name.
+ *   o tcl_interactive - Set to 1 if Tcl shell is invoked interactively, or
+ *     0 if the Tcl shell is directly executing a script.
+ *   o TCLXENV(evalCmd) - Command to eval, as specified by the -c flag.
+ *   o TCLXENV(evalFile) - File specified on the command to evaluate rather
+ *     than go interactive.
+ *   o TCLXENV(quick) - If defined, the -q for quick startup flag was
+ *     specified.
+ *   o TCLXENV(noDump) - If defined, the -n for no stack dump on error flag
+ *     was specified.
+ *
+ * This function should be called before any application or package specific
+ * initialization.  It aborts if an error occurs processing the command line.
  *
  * Parameters:
- *   o interp - A pointer to the interpreter, should contain the
- *     error message in `result'.
- *   o noStackDump - If TRUE, then the procedure call stack will not be
- *     displayed.
- *   o exitCode - The code to pass to exit.
+ *   o interp - A pointer to the interpreter.
+ *   o argc, argv - Arguments passed to main for the command line.
+ * Notes:
+ *   The variables tclAppName, tclAppLongName, tclAppVersion must be set
+ * before calling thus routine if special values are desired.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_ErrorAbort (interp, noStackDump, exitCode)
-    Tcl_Interp  *interp;
-    int          noStackDump;
-    int          exitCode;
+TclX_ParseCmdLine (interp, argc, argv)
+    Tcl_Interp   *interp;
+    int           argc;
+    char        **argv;
 {
-    char *errorStack;
-
-    fflush (stdout);
-    fprintf (stderr, "Error: %s\n", interp->result);
-
-    if (noStackDump == 0) {
-        errorStack = Tcl_GetVar (interp, "errorInfo", 1);
-        if (errorStack != NULL)
-            fprintf (stderr, "%s\n", errorStack);
-    }
-    exit (exitCode);
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * ParseCmdArgs --
- *
- * Parse the arguments passed to the Tcl shell.  Set the Tcl variables
- * argv0, argv & argc from the remaining parameters.
- *
- * Parameters:
- *   o interp  (I) - A pointer to the interpreter.
- *   o argc, argv - Arguments passed to main.
- *   o tclParmsPtr - Results of the parsed Tcl shell command line.
- *-----------------------------------------------------------------------------
- */
-static void
-ParseCmdArgs (interp, argc, argv, tclParmsPtr)
-    Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
-    tclParms_t  *tclParmsPtr;
-{
-    char   *scanPtr, *tclArgv, numBuf [32];
-    int     option;
-
-    tclParmsPtr->execFile = FALSE;
-    tclParmsPtr->execCommand = FALSE;
-    tclParmsPtr->options = 0;
-    tclParmsPtr->execStr = NULL;
+    char  *scanPtr, *tclArgv, *errorStack, numBuf [32];
+    int    option;
+    char  *evalFile = NULL;
+    char  *evalCmd  = NULL;
+    int    quick    = FALSE;
+    int    noDump   = FALSE;
 
     /*
      * Scan arguments looking for flags to process here rather than to pass
@@ -116,30 +81,28 @@ ParseCmdArgs (interp, argc, argv, tclParmsPtr)
      */
     while ((option = getopt (argc, argv, "qc:f:un")) != -1) {
         switch (option) {
-            case 'q':
-                if (tclParmsPtr->options & TCLSH_QUICK_STARTUP)
-                    goto usageError;
-                tclParmsPtr->options |= TCLSH_QUICK_STARTUP;
-                break;
-            case 'n':
-                if (tclParmsPtr->options & TCLSH_NO_STACK_DUMP)
-                    goto usageError;
-                tclParmsPtr->options |= TCLSH_NO_STACK_DUMP;
-                break;
-            case 'c':
-                tclParmsPtr->execCommand = TRUE;
-                tclParmsPtr->execStr = optarg;
-                goto exitParse;
-            case 'f':
-                tclParmsPtr->execFile = TRUE;
-                tclParmsPtr->execStr = optarg;
-                goto exitParse;
-            case 'u':
-            default:
+          case 'q':
+            if (quick)
                 goto usageError;
+            quick = TRUE;
+            break;
+          case 'n':
+            if (noDump)
+                goto usageError;
+            noDump = TRUE;
+            break;
+          case 'c':
+            evalCmd = optarg;
+            goto exitParse;
+          case 'f':
+            evalFile = optarg;
+            goto exitParse;
+          case 'u':
+          default:
+            goto usageError;
         }
     }
-    exitParse:
+  exitParse:
   
     /*
      * If neither `-c' nor `-f' were specified and at least one parameter
@@ -147,338 +110,117 @@ ParseCmdArgs (interp, argc, argv, tclParmsPtr)
      * are passed to the script.  Check for '--' as the last option, this also
      * is a terminator for the file to execute.
      */
-    if ((!tclParmsPtr->execCommand) && (!tclParmsPtr->execFile) &&
-        (optind != argc) && !STREQU (argv [optind-1], "--")) {
-        tclParmsPtr->execFile = TRUE;
-        tclParmsPtr->execStr = argv [optind];
+    if ((evalCmd == NULL) && (evalFile == NULL) && (optind != argc) &&
+        !STREQU (argv [optind-1], "--")) {
+        evalFile = argv [optind];
         optind++;
     }
 
     /*
      * Set the Tcl argv0, argv & argc variables.
      */
-    Tcl_SetVar (interp, "argv0",
-                (tclParmsPtr->execFile) ? tclParmsPtr->execStr : argv[0],
-                TCL_GLOBAL_ONLY);
+    if (Tcl_SetVar (interp, "argv0",
+                    (evalFile != NULL) ? evalFile : argv [0],
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        goto tclError;
 
     tclArgv = Tcl_Merge (argc - optind,  &argv [optind]);
-    Tcl_SetVar (interp, "argv", tclArgv, TCL_GLOBAL_ONLY);
+    if (Tcl_SetVar (interp, "argv", tclArgv,
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        goto tclError;
     ckfree (tclArgv);
-    sprintf (numBuf, "%d", argc - optind);
-    Tcl_SetVar (interp, "argc", numBuf, TCL_GLOBAL_ONLY);
 
+    sprintf (numBuf, "%d", argc - optind);
+    if (Tcl_SetVar (interp, "argc", numBuf, 
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        goto tclError;
+
+    /*
+     * Set the interactive flag, based on what we have parsed.
+     */
+    if (Tcl_SetVar (interp, "tcl_interactive", 
+                    ((evalCmd == NULL) && (evalFile == NULL)) ? "1" : "0",
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        goto tclError;
+
+    /*
+     * Set elements in the TCLXENV array.
+     */
+    if (evalCmd != NULL) {
+        if (Tcl_SetVar2 (interp, TCLXENV, "evalCmd", evalCmd,
+                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+            goto tclError;
+    }
+    if (evalFile != NULL) {
+        if (Tcl_SetVar2 (interp, TCLXENV, "evalFile", evalFile,
+                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+            goto tclError;
+    }
+    if (quick) {
+        if (Tcl_SetVar2 (interp, TCLXENV, "quick", "1",
+                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+            goto tclError;
+    }
+    if (noDump) {
+        if (Tcl_SetVar2 (interp, TCLXENV, "noDump", "1",
+                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+            goto tclError;
+    }
     return;
 
-usageError:
+  usageError:
     fprintf (stderr, "usage: %s %s\n", argv [0],
              "?-qun? ?-f? ?script?|?-c command? ?args?");
     exit (1);
+
+  tclError:
+    TclX_ErrorExit (interp, 255);
 }
 
 
 /*
  *-----------------------------------------------------------------------------
- * MergeMasterDirPath --
  *
- *   Merge mastter directory components and into a path name.  
+ * TclX_RunShell --
  *
- * Parameters:
- *   o dir (I) - The directory name.
- *   o version1, version2 - Two part version number forming a directory under
- *     dir.  Either maybe NULL.
- *   o dirPathPtr (O) - Dynamic string containing the directory path.  Will
- *     be initialized.
- *-----------------------------------------------------------------------------
- */
-static void
-MergeMasterDirPath (dir, version1, version2, dirPathPtr)
-    char        *dir;
-    char        *version1;
-    char        *version2;
-    Tcl_DString *dirPathPtr;
-{
-    Tcl_DStringInit (dirPathPtr);
-
-    Tcl_DStringAppend (dirPathPtr, dir, -1);
-    Tcl_DStringAppend (dirPathPtr, "/", -1);
-    if (version1 != NULL)
-        Tcl_DStringAppend (dirPathPtr, version1, -1);
-    if (version2 != NULL)
-        Tcl_DStringAppend (dirPathPtr, version2, -1);
-}
-
-/*
- *-----------------------------------------------------------------------------
- * Tcl_SetLibrayDirEnvVar --
- *
- *   Set an library (master) directory environment variable to override
- * default that Tcl or TK were compiled with.  Only overrides if the variable
- * does not exist.
- *
- * Parameters:
- *   o interp - A pointer to the interpreter.
- *   o envVar (I) - Environement variable to set if it does not exist.
- *   o dir (I) - The directory name.
- *   o version1, version2 - Two part version number forming a directory under
- *     dir.  Either maybe NULL.
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_SetLibraryDirEnvVar (interp, envVar, dir, version1, version2)
-    Tcl_Interp  *interp;
-    char        *envVar;
-    char        *dir;
-    char        *version1;
-    char        *version2;
-{
-    Tcl_DString   masterDir;
-
-    if (Tcl_GetVar2 (interp, "env", envVar, TCL_GLOBAL_ONLY) != NULL)
-        return;
-
-    MergeMasterDirPath (dir, version1, version2, &masterDir);
-    Tcl_SetVar2 (interp, "env", envVar, masterDir.string, TCL_GLOBAL_ONLY);
-
-    Tcl_DStringFree (&masterDir);
-
-}
-
-/*
- *-----------------------------------------------------------------------------
- * Tcl_ProcessInitFile --
- *
- *   Find and evaluate a Tcl init file.  This assumes that the init file
- * lives in a master directory and appends the directory name to the 
- * "auto_path" variable.
+ *   This function runs the TclX shell once all apllication and package
+ * initialization has taken place.  It either enters interactive command mode
+ * or evaulates a script or command from the command line.
+ * TclX_ParseCmdLine must have been called.
  *
  * Parameters:
  *   o interp  (I) - A pointer to the interpreter.
- *   o dirEnvVar (I) - Environment variable used to override the directory
- *     path.
- *   o dir (I) - The directory name.
- *   o version1, version2 - Two part version number forming a directory under
- *     dir.  Either maybe NULL.
- *   o initFile (I) - The name of the init file, which is found either in the
- *     directory pointed to by envVar or by the directory formed from dir1,
- *     dir2 & dir3.
  * Returns:
- *   TCL_OK if all is ok, TCL_ERROR if an error occured.
+ *   The result of the command being evaulated.  Check for TCL_ERROR and call
+ * TclX_ErrorExit if an error occured after any cleanup you want to do.
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ProcessInitFile (interp, dirEnvVar, dir, version1, version2, initFile)
-    Tcl_Interp *interp;
-    char       *dirEnvVar;
-    char       *dir;
-    char       *version1;
-    char       *version2;
-    char       *initFile;
-{
-    char         *dirEnvValue;
-    Tcl_DString   filePath;
-    struct stat   statBuf;
-
-    /*
-     * Determine the master (library) directory name.
-     */
-    dirEnvValue = getenv (dirEnvVar);
-    if (dirEnvValue != NULL) {
-        Tcl_DStringInit (&filePath);
-        Tcl_DStringAppend (&filePath, dirEnvValue, -1);
-    } else {
-        MergeMasterDirPath (dir, version1, version2, &filePath);
-    }
-
-    /*
-     * Include this in the auto_path variable.
-     */
-
-    if (Tcl_SetVar (interp, "auto_path", filePath.string,
-                    TCL_GLOBAL_ONLY  | TCL_APPEND_VALUE |
-                    TCL_LIST_ELEMENT | TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-
-    /*
-     * Eval the init file in that directory.
-     */
-    Tcl_DStringAppend (&filePath, "/", -1);
-    Tcl_DStringAppend (&filePath, initFile, -1);
-    
-    if (stat (filePath.string, &statBuf) < 0) {
-        Tcl_AppendResult (interp,
-                          "Can't access initialization file \"",
-                          filePath.string, "\".\n", 
-                          "  Override directory containing this file with ",
-                          "the environment variable: \"",
-                          dirEnvVar, "\"",
-                          (char *) NULL);
-        return TCL_ERROR;
-
-    }
-    if (Tcl_EvalFile (interp, filePath.string) != TCL_OK)
-        goto errorExit;
-    Tcl_ResetResult (interp);
-
-    Tcl_DStringFree (&filePath);
-    return TCL_OK;
-
-  errorExit:
-    Tcl_DStringFree (&filePath);
-    return TCL_ERROR;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_ShellEnvInit --
- *
- *   Initialize the Tcl shell environment.  Including evaluating the standard
- * TclX init file and setting various variable and values for infox to access.
- * If this is an interactive Tcl session, SIGINT is set to generate a Tcl
- * error.  This routine is provided for the wishx shell or similar
- * environments where the Tcl_Startup command line parsing is not desired.
- *
- * Parameters:
- *   o interp - A pointer to the interpreter.
- *   o options - Flags to control the behavior of this routine, the following
- *     options are supported:
- *       o TCLSH_INTERACTIVE - Set tcl_interactive to 1.
- *       o TCLSH_QUICK_STARTUP - Don't source the Tcl initialization file.
- *       o TCLSH_ABORT_STARTUP_ERR - If set, abort the process if an error
- *         occurs.
- *       o TCLSH_NO_STACK_DUMP - If an error occurs, don't dump out the
- *         procedure call stack, just print an error message.
- * Notes:
- *   The variables tclAppName, tclAppLongName, tclAppVersion 
- * must be set before calling thus routine if special values are desired.
- *
- * Returns:
- *   TCL_OK if all is ok, TCL_ERROR if an error occured.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_ShellEnvInit (interp, options)
+TclX_RunShell (interp)
     Tcl_Interp  *interp;
-    unsigned     options;
 {
-    if (Tcl_SetVar (interp, "tcl_interactive", 
-                    (options & TCLSH_INTERACTIVE) ? "1" : "0",
-                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    tclxVersion = ckalloc (strlen (TCL_VERSION) + 
-                           strlen (TCL_EXTD_VERSION_SUFFIX) + 1);
-    strcpy (tclxVersion, TCL_VERSION);
-    strcat (tclxVersion, TCL_EXTD_VERSION_SUFFIX);
-
-#ifdef PATCHLEVEL
-    tclxPatchlevel = PATCHLEVEL;
-#else
-    tclxPatchlevel = 0;
-#endif
+    char  *evalStr;
 
     /*
-     * Set application specific values to return from the infox if they
-     * have not been set.
+     * Evaluate either a command or file if it was specified on the command
+     * line.
      */
-    if (tclAppName == NULL)
-        tclAppName = "TclX";
-    if (tclAppLongname == NULL)
-        tclAppLongname = "Extended Tcl";
-    if (tclAppVersion == NULL)
-        tclAppVersion = tclxVersion;
-
-    Tcl_SetLibraryDirEnvVar (interp,
-                             "TCL_LIBRARY",
-                             TCL_MASTERDIR,
-                             TCL_VERSION,
-                             TCL_EXTD_VERSION_SUFFIX);
-
-    if ((options & TCLSH_QUICK_STARTUP) == 0) {
-        if (Tcl_ProcessInitFile (interp,
-                                 "TCL_LIBRARY",
-                                 TCL_MASTERDIR,
-                                 TCL_VERSION,
-                                 TCL_EXTD_VERSION_SUFFIX,
-                                 "TclInit.tcl") == TCL_ERROR)
-            goto errorExit;
+    evalStr = Tcl_GetVar2 (interp, TCLXENV, "evalCmd", TCL_GLOBAL_ONLY);
+    if (evalStr != NULL) {
+        return Tcl_Eval (interp, evalStr);
     }
-    if (options & TCLSH_INTERACTIVE)
-        Tcl_SetupSigInt ();
+
+    evalStr = Tcl_GetVar2 (interp, TCLXENV, "evalFile", TCL_GLOBAL_ONLY);
+    if (evalStr != NULL) {
+        return Tcl_EvalFile (interp, evalStr);
+    }
+    
+    /*
+     * Otherwise, enter an interactive command loop.  Setup SIGINT handling
+     * so user may interrupt with out killing program.
+     */
+    Tcl_SetupSigInt ();
+    Tcl_CommandLoop (interp, isatty (0));
 
     return TCL_OK;
-
-errorExit:
-    if (options & TCLSH_ABORT_STARTUP_ERR)
-        Tcl_ErrorAbort (interp, options & TCLSH_NO_STACK_DUMP, 255);
-    return TCL_ERROR;
 }
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_Startup --
- *
- *   Initializes the Tcl extended environment.  This function processes the
- * standard command line arguments and locates the Tcl initialization file.
- * It then sources the initialization file.  Either an interactive command
- * loop is created or a Tcl script file is executed depending on the command
- * line.  This functions calls Tcl_ShellEnvInit, so it should not be called
- * separately.
- *
- * Parameters:
- *   o interp - A pointer to the interpreter.
- *   o options (I) - Options that control startup behavior.  None are
- *     currently defined.
- *   o argc, argv - Arguments passed to main for the command line.
- * Notes:
- *   The variables tclAppName, tclAppLongName, tclAppVersion must be set
- * before calling thus routine if special values are desired.
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_Startup (interp, options, argc, argv)
-    Tcl_Interp      *interp;
-    unsigned         options;
-    int              argc;
-    CONST char     **argv;
-{
-    char       *cmdBuf;
-    tclParms_t  tclParms;
-    int         result;
-
-    /*
-     * Process the arguments.
-     */
-    ParseCmdArgs (interp, argc, (char **) argv, &tclParms);
-
-    if (tclParms.execStr == NULL)
-        tclParms.options |= TCLSH_INTERACTIVE;
-
-    if (Tcl_ShellEnvInit (interp, tclParms.options) != TCL_OK)
-        goto errorAbort;
-
-    /*
-     * If the invoked tcl interactively, give the user an interactive session,
-     * otherwise, source the command file or execute the specified command.
-     */
-    if (tclParms.execFile) {
-        result = Tcl_EvalFile (interp, tclParms.execStr);
-        if (result != TCL_OK)
-            goto errorAbort;
-    } else if (tclParms.execCommand) {
-        result = Tcl_Eval (interp, tclParms.execStr);
-        if (result != TCL_OK)
-            goto errorAbort;
-    } else {
-        Tcl_CommandLoop (interp, isatty (0));
-    }
-
-    Tcl_ResetResult (interp);
-    return;
-
-errorAbort:
-    Tcl_ErrorAbort (interp, tclParms.options & TCLSH_NO_STACK_DUMP, 255);
-}
-

@@ -1,9 +1,9 @@
 /*
- * tclXcreate.c
+ * tclXcmdInit.c
  *
- * Contains a routine to create an interpreter and initialize all the Extended
- * Tcl commands.  It is is a seperate file so that an application may create
- * the interpreter and add in only a subset of the Extended Tcl commands.
+ * Function to add the Extented Tcl command into an interpreter.  The TclX
+ * library commands are not added here, to make it easier to build applications
+ * that don't use the extended libraries.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
@@ -14,26 +14,40 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcreate.c,v 2.6 1993/07/31 03:45:25 markd Exp markd $
+ * $Id: tclXcreate.c,v 2.7 1993/09/07 14:44:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+#include "patchlevel.h"
 
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_AddExtendedCmds --
+ * TclXCmd_Init --
  *
  *   Add the Extended Tcl commands to the specified interpreter (except for
- * the library commands that override that standard Tcl procedures).
+ * the library commands that override that standard Tcl procedures).  This
+ * does no other startup.
  *-----------------------------------------------------------------------------
  */
-void
-Tcl_AddExtendedCmds (interp)
+int
+TclXCmd_Init (interp)
     Tcl_Interp *interp;
 {
+    /*
+     * Initialized the variables used by infox, these can be overriden later.
+     */
+    tclxVersion = ckalloc (strlen (TCL_VERSION) + 
+                           strlen (TCL_EXTD_VERSION_SUFFIX) + 1);
+    strcpy (tclxVersion, TCL_VERSION);
+    strcat (tclxVersion, TCL_EXTD_VERSION_SUFFIX);
+
+    tclxPatchlevel = PATCHLEVEL;
+    tclAppName     = "TclX";
+    tclAppLongname = "Extended Tcl";
+    tclAppVersion  = tclxVersion;
 
     /*
      * from tclCkalloc.c (now part of the UCB Tcl).
@@ -254,48 +268,5 @@ Tcl_AddExtendedCmds (interp)
      */
     Tcl_CreateCommand (interp, "server_open", Tcl_ServerOpenCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_AddExtendedLibCmds --
- *
- *   Add the Extended Tcl library management commands.  These override the
- * standard Tcl procedures.
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_AddExtendedLibCmds (interp)
-    Tcl_Interp *interp;
-{
-    /*
-     * from tclXlib.c
-     */
-    Tcl_InitLibrary (interp);
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_CreateExtendedInterp --
- *
- *      Create a new TCL command interpreter and initialize all of the
- *      extended Tcl commands..
- *
- * Returns:
- *      The return value is a token for the interpreter.
- *-----------------------------------------------------------------------------
- */
-Tcl_Interp *
-Tcl_CreateExtendedInterp ()
-{
-    Tcl_Interp *interp;
-
-    interp = Tcl_CreateInterp ();
-
-    Tcl_AddExtendedCmds (interp);
-    Tcl_AddExtendedLibCmds (interp);
-
-    return interp;
+    return TCL_OK;
 }

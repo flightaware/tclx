@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 2.4 1993/06/01 05:52:14 markd Exp markd $
+# $Id: help.tcl,v 2.5 1993/06/24 07:30:29 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -76,13 +76,13 @@ proc help:FlattenPath pathName {
 # one of the root directories.
 
 proc help:ConvertPath pathName {
-    global TCLENV
+    global TCLXENV
 
     if {![string match "/*" $pathName]} {
-        if {"$TCLENV(help:curSubject)" == "/"} {
+        if {"$TCLXENV(help:curSubject)" == "/"} {
             set pathName "/$pathName"
         } else {
-            set pathName "$TCLENV(help:curSubject)/$pathName"
+            set pathName "$TCLXENV(help:curSubject)/$pathName"
         }
     }
     set pathName [help:FlattenPath $pathName]
@@ -163,9 +163,9 @@ proc help:ListSubject {pathName pathList subjectsVar pagesVar} {
 #
 
 proc help:Display line {
-    global TCLENV
-    if {$TCLENV(help:lineCnt) >= 23} {
-        set TCLENV(help:lineCnt) 0
+    global TCLXENV
+    if {$TCLXENV(help:lineCnt) >= 23} {
+        set TCLXENV(help:lineCnt) 0
         puts stdout ":" nonewline
         flush stdout
         gets stdin response
@@ -173,7 +173,7 @@ proc help:Display line {
             return 0}
     }
     puts stdout $line
-    incr TCLENV(help:lineCnt)
+    incr TCLXENV(help:lineCnt)
 }
 
 #------------------------------------------------------------------------------
@@ -233,9 +233,9 @@ proc help:HelpOnHelp {} {
 # Help command.
 
 proc help {{what {}}} {
-    global TCLENV
+    global TCLXENV
 
-    set TCLENV(help:lineCnt) 0
+    set TCLXENV(help:lineCnt) 0
 
     # Special case "help help", so we can get it at any level.
 
@@ -269,14 +269,14 @@ proc help {{what {}}} {
 # current directory and the argument.
 
 proc helpcd {{dir /}} {
-    global TCLENV
+    global TCLXENV
 
     set pathName [lindex [help:ConvertPath $dir] 0]
 
     if {![file isdirectory $pathName]} {
         error "Helpcd: \"$dir\" is not a subject"}
 
-    set TCLENV(help:curSubject) [help:RelativePath $pathName]
+    set TCLXENV(help:curSubject) [help:RelativePath $pathName]
     return
 }
 
@@ -284,17 +284,17 @@ proc helpcd {{dir /}} {
 # Helpcd main.
 
 proc helppwd {} {
-        global TCLENV
-        echo "Current help subject: $TCLENV(help:curSubject)"
+        global TCLXENV
+        echo "Current help subject: $TCLXENV(help:curSubject)"
 }
 
 #------------------------------------------------------------------------------
 # apropos command.  This search the 
 
 proc apropos {regexp} {
-    global TCLENV
+    global TCLXENV
 
-    set TCLENV(help:lineCnt) 0
+    set TCLXENV(help:lineCnt) 0
 
     set ch [scancontext create]
     scanmatch -nocase $ch $regexp {
@@ -320,6 +320,6 @@ proc apropos {regexp} {
 #------------------------------------------------------------------------------
 # One time initialization done when the file is sourced.
 #
-global TCLENV
+global TCLXENV
 
-set TCLENV(help:curSubject) "/"
+set TCLXENV(help:curSubject) "/"

@@ -111,9 +111,6 @@
 #undef mode_t
 #undef time_t
 
-/* Define to empty if the keyword does not work.  */
-#undef const
-
 /* Define if the `getloadavg' function needs to be run setuid or setgid.  */
 #undef GETLOADAVG_PRIVILEGED
 
@@ -162,3 +159,12 @@
 
 /* Define if "times" returns the elasped real time */
 #undef TIMES_RETS_REAL_TIME
+
+/* Define if gettimeofday is not available */
+#undef NO_GETTOD
+
+/* Define if errno.h is not available */
+#undef NO_ERRNO_H
+
+/* Define if fd_set is not defined. */
+#undef NO_FD_SET

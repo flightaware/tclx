@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.13 1993/08/05 06:41:55 markd Exp markd $
+ * $Id: tclExtend.h,v 2.14 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,15 +32,8 @@
 typedef void *void_pt;
 
 /*
- * Flags for Tcl shell startup.
- */
-#define TCLSH_QUICK_STARTUP       1   /* Don't process Tcl init file.        */
-#define TCLSH_ABORT_STARTUP_ERR   2   /* Abort on an error.                  */
-#define TCLSH_NO_STACK_DUMP       8   /* Don't dump the proc stack on error. */
-#define TCLSH_INTERACTIVE        16   /* Set interactiveSession to 1.        */
-
-/*
- * These globals are used by the infox command.  Should be set by main.
+ * These globals are used by the infox command.  Should be set before
+ * initializing the TclX shell.
  */
 
 extern char *tclxVersion;        /* Extended Tcl version number.            */
@@ -68,46 +61,46 @@ extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
 
 
 /*
- * Exported Extended Tcl functions.
+ * Exported Tcl initialization functions.
  */
+int
+TclX_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
-EXTERN Tcl_Interp * 
-Tcl_CreateExtendedInterp ();
+int
+TclXCmd_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
+int
+TclXLib_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN void
-Tcl_AddExtendedCmds _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_ErrorExit _ANSI_ARGS_((Tcl_Interp  *interp,
+                            int          exitCode));
+
+void
+TclX_InitLibDirPath _ANSI_ARGS_((Tcl_Interp  *interp,
+                                 Tcl_DString *libDirPtr,
+                                 char        *envVar,
+                                 char        *dir,
+                                 char        *version1,
+                                 char        *version2));
+
+EXTERN void 
+TclX_ParseCmdLine _ANSI_ARGS_((Tcl_Interp   *interp,
+                               int           argc,
+                               char        **argv));
+
+EXTERN int
+TclX_RunShell _ANSI_ARGS_((Tcl_Interp  *interp));
 
 EXTERN void
-Tcl_AddExtendedLibCmds _ANSI_ARGS_((Tcl_Interp *interp));
+Tcl_SetupSigInt _ANSI_ARGS_((void));
 
-EXTERN char *
-Tcl_DeleteKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
-                                      CONST char  *fieldName,
-                                      CONST char  *keyedList));
+/*
+ * Exported utility functions.
+ */
 EXTERN char * 
 Tcl_DownShift _ANSI_ARGS_((char       *targetStr,
                            CONST char *sourceStr));
-EXTERN char * 
-Tcl_UpShift _ANSI_ARGS_((char       *targetStr,
-                         CONST char *sourceStr));
-
-EXTERN void
-Tcl_ErrorAbort _ANSI_ARGS_((Tcl_Interp  *interp,
-                            int          noStackDump,
-                            int          exitCode));
-
-EXTERN int
-Tcl_GetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
-                                   CONST char  *fieldName,
-                                   CONST char  *keyedList,
-                                   char       **fieldValuePtr));
-
-int
-Tcl_GetKeyedListKeys _ANSI_ARGS_((Tcl_Interp  *interp,
-                                  CONST char  *subFieldName,
-                                  CONST char  *keyedList,
-                                  int         *keyesArgcPtr,
-                                  char      ***keyesArgvPtr));
 
 EXTERN int 
 Tcl_GetLong _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -118,20 +111,6 @@ EXTERN int
 Tcl_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
                              CONST char *string,
                              unsigned   *unsignedPtr));
-
-EXTERN char *
-Tcl_SetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
-                                   CONST char  *fieldName,
-                                   CONST char  *fieldvalue,
-                                   CONST char  *keyedList));
-
-EXTERN int
-Tcl_ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
-                                 char       *dirEnvVar,
-                                 char       *dir,
-                                 char       *version1,
-                                 char       *version2,
-                                 char       *initFile));
 
 EXTERN int
 Tcl_ProcessSignals _ANSI_ARGS_((ClientData  clientData,
@@ -157,6 +136,39 @@ EXTERN int
 Tcl_StrToDouble _ANSI_ARGS_((CONST char  *string,
                              double      *doublePtr));
 
+EXTERN char * 
+Tcl_UpShift _ANSI_ARGS_((char       *targetStr,
+                         CONST char *sourceStr));
+
+/*
+ * Exported keyed list manipulation functions.
+ */
+EXTERN char *
+Tcl_DeleteKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
+                                      CONST char  *fieldName,
+                                      CONST char  *keyedList));
+EXTERN int
+Tcl_GetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
+                                   CONST char  *fieldName,
+                                   CONST char  *keyedList,
+                                   char       **fieldValuePtr));
+
+EXTERN int
+Tcl_GetKeyedListKeys _ANSI_ARGS_((Tcl_Interp  *interp,
+                                  CONST char  *subFieldName,
+                                  CONST char  *keyedList,
+                                  int         *keyesArgcPtr,
+                                  char      ***keyesArgvPtr));
+
+EXTERN char *
+Tcl_SetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
+                                   CONST char  *fieldName,
+                                   CONST char  *fieldvalue,
+                                   CONST char  *keyedList));
+
+/*
+ * Exported handle table manipulation functions.
+ */
 EXTERN void_pt  
 Tcl_HandleAlloc _ANSI_ARGS_((void_pt   headerPtr,
                              char     *handlePtr));
@@ -191,13 +203,5 @@ Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              void_pt      headerPtr,
                              CONST  char *handle));
 
-EXTERN void 
-Tcl_Startup _ANSI_ARGS_((Tcl_Interp     *interp,
-                         unsigned        options,
-                         int             argc,
-                         CONST char    **argv));
 
-EXTERN int
-Tcl_ShellEnvInit _ANSI_ARGS_((Tcl_Interp  *interp,
-                              unsigned     options));
 #endif

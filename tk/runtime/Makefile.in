@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.10 1993/08/18 06:39:38 markd Exp markd $
+# $Id: Makefile.in,v 1.11 1993/08/26 04:55:13 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -47,7 +47,7 @@ BLDMANHELP  = ${srcbasedir}/tools/bldmanhelp.tcl
 TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
 
 #------------------------------------------------------------------------------
-# Copy all files.  Note, tk.tcl must be edited to not nuke the auto_path.
+# Copy all files.
 #
 
 all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} ${MAN}
@@ -55,7 +55,7 @@ all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} ${MAN}
 
 ${TK.TCL}: ${TK_UCB_SRC}/library/tk.tcl
 	rm -f ${TK.TCL}
-	fgrep -v "set auto_path" ${TK_UCB_SRC}/library/tk.tcl > ${TK.TCL}
+	cp ${TK_UCB_SRC}/library/tk.tcl ${TK.TCL}
 
 ${TK.TLIB} ${TK.TNDX}: ${TK_UCB_SRC}/library/tclIndex tkdemo.tcl
 	../runtcl "-c convert_lib ${TK_UCB_SRC}/library/tclIndex ${TK.TLIB}"

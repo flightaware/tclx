@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.20 1993/08/31 23:03:20 markd Exp markd $
+# $Id: Makefile.in,v 2.21 1993/09/08 06:32:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -21,6 +21,7 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
+CC         = @CC@
 RANLIB     = @RANLIB@
 MCS        = @MCS_CMD@
 srcdir     = @srcdir@
@@ -53,21 +54,23 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
 #------------------------------------------------------------------------------
 
 OBJS= \
-    tclXbsearch.o    tclXchmod.o      tclXclock.o      tclXcmdloop.o \
-    tclXcnvclock.o   tclXcreate.o     tclXdebug.o      tclXdup.o     \
+    tclXbsearch.o    tclXchmod.o      tclXclock.o      tclXcmdInit.o \
+    tclXcmdloop.o    tclXcnvclock.o   tclXdebug.o      tclXdup.o     \
     tclXfcntl.o      tclXfilecmds.o   tclXfilescan.o   tclXflock.o   \
     tclXfstat.o      tclXgeneral.o    tclXgetdate.o    tclXhandles.o \
-    tclXid.o         tclXkeylist.o    tclXlib.o        tclXlist.o    \
-    tclXmath.o       tclXmsgcat.o     tclXprocess.o    tclXprofile.o \
-    tclXregexp.o     tclXselect.o     tclXserver.o     tclXsignal.o  \
-    tclXstartup.o    tclXstring.o     tclXunixcmds.o   tclXutil.o
+    tclXid.o         tclXinit.o       tclXkeylist.o    tclXlib.o     \
+    tclXlist.o       tclXmain.o       tclXmath.o       tclXmsgcat.o  \
+    tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
+    tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
+    tclXunixcmds.o   tclXutil.o
  
 #------------------------------------------------------------------------------
 
 all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${TCL_PLUS_BUILD}
 
-${TCL}: tclXmain.o ${LIBTCLX.A} ${LIBTCL.A} made.tmp 
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXmain.o ${LDLIBS} ${XLDLIBS} -o ${TCL}
+${TCL}: tclXAppInit.o ${LIBTCLX.A} ${LIBTCL.A} made.tmp 
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
+	      -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
 	    ${MCS} ${TCL}; \
@@ -80,10 +83,10 @@ made.tmp ${LIBTCLX.A}: ${OBJS}
 	${RANLIB} ${LIBTCLX.A}
 	touch made.tmp
 
-tclXstartup.o: patchlevel.h tclXstartup.c
-	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" tclXstartup.c
+tclXinit.o: tclXinit.c
+	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" tclXinit.c
 
-tclXmain.o: patchlevel.h tclXmain.c
+tclXcmdInit.o: tclXcmdInit.c patchlevel.h
 
 tclXgetdate.c: tclXgetdate.y
 	${YACC} $(srcdir)/tclXgetdate.y

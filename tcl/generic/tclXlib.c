@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.8 1993/07/23 03:19:29 markd Exp markd $
+ * $Id: tclXlib.c,v 2.9 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -1283,13 +1283,13 @@ TclLibCleanUp (clientData, interp)
 
 /*
  *-----------------------------------------------------------------------------
- * Tcl_InitLibrary --
+ * TclXLib_Init --
  *
- *   Initialize the Tcl library facility command.
+ *   Initialize the Extended Tcl library facility commands.
  *-----------------------------------------------------------------------------
  */
-void
-Tcl_InitLibrary (interp)
+int
+TclXLib_Init (interp)
     Tcl_Interp *interp;
 {
     libInfo_t *infoPtr;
@@ -1308,5 +1308,6 @@ Tcl_InitLibrary (interp)
                       (ClientData) infoPtr, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "loadlibindex", Tcl_LoadlibindexCmd,
                       (ClientData) infoPtr, (void (*)()) NULL);
+    return TCL_OK;
 }
 

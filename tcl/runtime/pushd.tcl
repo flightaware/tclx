@@ -13,23 +13,23 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.tcl,v 2.0 1992/10/16 04:52:06 markd Rel markd $
+# $Id: pushd.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-directory_stack pushd popd dirs
 
-global TCLENV(dirPushList)
+global TCLXENV(dirPushList)
 
-set TCLENV(dirPushList) ""
+set TCLXENV(dirPushList) ""
 
 proc pushd {args} {
-    global TCLENV
+    global TCLXENV
 
     if {[llength $args] > 1} {
         error "bad # args: pushd [dir_to_cd_to]"
     }
-    set TCLENV(dirPushList) [linsert $TCLENV(dirPushList) 0 [pwd]]
+    set TCLXENV(dirPushList) [linsert $TCLXENV(dirPushList) 0 [pwd]]
 
     if {[llength $args] != 0} {
         cd [glob $args]
@@ -37,10 +37,10 @@ proc pushd {args} {
 }
 
 proc popd {} {
-    global TCLENV
+    global TCLXENV
 
-    if [llength $TCLENV(dirPushList)] {
-        cd [lvarpop TCLENV(dirPushList)]
+    if [llength $TCLXENV(dirPushList)] {
+        cd [lvarpop TCLXENV(dirPushList)]
         pwd
     } else {
         error "directory stack empty"
@@ -48,6 +48,6 @@ proc popd {} {
 }
 
 proc dirs {} { 
-    global TCLENV
-    echo [pwd] $TCLENV(dirPushList)
+    global TCLXENV
+    echo [pwd] $TCLXENV(dirPushList)
 }

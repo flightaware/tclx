@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 1.1 1993/07/18 15:51:55 markd Exp markd $
+# $Id: tclhelp.tcl,v 1.2 1993/07/18 21:14:28 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -153,8 +153,6 @@ proc AproposPanel {} {
 # Tk base help command for Tcl/Tk/TclX.
 
 proc tkhelp {} {
-    global TCLENV
-
     if ![auto_load help] {
         puts stderr "couldn't auto_load TclX 'help' command"
         exit 255

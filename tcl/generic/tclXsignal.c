@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.13 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.14 1993/09/09 06:07:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -360,9 +360,9 @@ Tcl_KillCmd (clientData, interp, argc, argv)
     if (((argc - nextArg) < 1) || ((argc - nextArg) > 2))
         goto usage;
 
-    if ((argc - nextArg) == 1)
+    if ((argc - nextArg) == 1) {
         signalNum = SIGTERM;
-    else {
+    } else {
         if (!Tcl_StrToInt (argv[nextArg], 0, &signalNum)) {
             signalNum = SigNameToNum (argv[nextArg]);
         }
@@ -370,9 +370,10 @@ Tcl_KillCmd (clientData, interp, argc, argv)
             Tcl_AppendResult (interp, "invalid signal", (char *) NULL);
             return TCL_ERROR;
         }
+        nextArg++;
     }
 
-    if (Tcl_SplitList (interp, argv [nextArg + 1], &procArgc, 
+    if (Tcl_SplitList (interp, argv [nextArg], &procArgc, 
                        &procArgv) != TCL_OK)
         return TCL_ERROR;
 

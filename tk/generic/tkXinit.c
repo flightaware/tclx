@@ -1,7 +1,8 @@
 /*
- * tkXstartup.c --
+ * tkXinit.c --
  *
- * Startup code for the wishx and other Tk & Extended Tcl based applications.
+ * Initialization code for the wishx and other Tk & Extended Tcl based
+ * applications.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
@@ -12,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXstartup.c,v 1.4 1993/07/27 05:17:30 markd Exp markd $
+ * $Id: tkXstartup.c,v 1.5 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,74 +25,48 @@
 /*
  *-----------------------------------------------------------------------------
  *
- * TkX_Startup --
+ * TkX_Init --
  *
- *   Do basic startup for wishx.  This is called before Tk_CreateMainWindow.
- * It does the basic TclX shell environment intialization and then doctors
- * the TK_LIBRARY environment variable to point to our library.  This does
- * not source the Tk init file, that must be done after the main window is
- * created.
+ *   Do Tk initialization for wishx.  This includes overriding the value
+ * of the variable "tk_library" so it points to our library instead of 
+ * the standard one.
  *
  * Parameters:
  *   o interp - A pointer to the interpreter.
- *   o interactive (I) - TRUE if this is interactive, FALSE otherwise.
- *   o errorSignalProc (I) - Function to call when an error signal occurs.
- *     This can handle flushing of interactive input buffers if necessary.
- *     Ignored if interactive is FALSE.
+ * Returns:
+ *   TCL_OK.
  *-----------------------------------------------------------------------------
  */
-void
-TkX_Startup (interp, interactive, errorSignalProc)
+int
+TkX_Init (interp, interactive, errorSignalProc)
     Tcl_Interp          *interp;
     int                  interactive;
     TkX_ShellSignalProc *errorSignalProc;
 {
+    char        *value;
+    Tcl_DString  libDir;
 
     tclAppName     = "Wishx";
     tclAppLongname = "Extended Tk Shell - Wishx";
     tclAppVersion  = TK_VERSION;
-    Tcl_ShellEnvInit (interp, 
-                      TCLSH_ABORT_STARTUP_ERR |
-                          (interactive ? TCLSH_INTERACTIVE : 0));
 
-    tclSignalBackgroundError = Tk_BackgroundError;
-    if (interactive)
-        tclErrorSignalProc = errorSignalProc;
+    TclX_InitLibDirPath (interp,
+                         &libDir,
+                         "TK_LIBRARY",
+                         TK_MASTERDIR,
+                         TK_VERSION,
+                         TCL_EXTD_VERSION_SUFFIX);
+    Tcl_SetVar (interp, "tk_library", libDir.string, TCL_GLOBAL_ONLY);
 
-    Tcl_SetLibraryDirEnvVar (interp,
-                             "TK_LIBRARY",
-                             TK_MASTERDIR,
-                             TK_VERSION,
-                             TCL_EXTD_VERSION_SUFFIX);
-}
+    /*
+     * If we are going to be interactive, Setup SIGINT handling.
+     */
+    value = Tcl_GetVar (interp, "tcl_interactive", TCL_GLOBAL_ONLY);
+    if ((value != NULL) && (value [0] != '0'))
+        Tcl_SetupSigInt ();
 
-
-/*
- *-----------------------------------------------------------------------------
- *
- * TkX_WishInit --
- *
- *   Do the rest of the wish initalization.  This sources the tk.tcl file and
- * sets up auto_path.
- *
- * Parameters:
- *   o interp - A pointer to the interpreter.
- *-----------------------------------------------------------------------------
- */
-void
-TkX_WishInit (interp)
-    Tcl_Interp *interp;
-{
-    if (Tcl_ProcessInitFile (interp,
-                             "TK_LIBRARY",
-                             TK_MASTERDIR,
-                             TK_VERSION,
-                             TCL_EXTD_VERSION_SUFFIX,
-                             "tk.tcl")  == TCL_ERROR)
-        goto errorExit;
-
-    return;
-
-  errorExit:
-        Tcl_ErrorAbort (interp, 0, 255);
+    /*
+     * Run the initialization that comes with standard Tk.
+     */
+    return Tk_Init (interp);
 }

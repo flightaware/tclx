@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.16 1993/08/31 23:03:20 markd Exp markd $
+# $Id: Makefile.in,v 2.17 1993/09/08 06:32:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -21,6 +21,7 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
+CC         = @CC@
 RANLIB     = @RANLIB@
 MCS        = @MCS_CMD@
 srcdir     = @srcdir@
@@ -60,14 +61,14 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS = tkXstartup.o
+OBJS= tkXAppInit.o   tkXinit.o      tkXmain.o
 
 #------------------------------------------------------------------------------
 
 all: made.tmp ${WISHX}
 
-${WISHX}: tkXmain.o ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} made.tmp
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXmain.o ${LDLIBS} ${XLDLIBS} \
+${WISHX}: tkXAppInit.o ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} made.tmp
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	    -o ${WISHX}
 	if ${DO_STRIPPING} ; then \
 	    strip ${WISHX}  ;\
@@ -81,8 +82,8 @@ made.tmp ${LIBTKX.A}: ${OBJS}
 	${RANLIB} ${LIBTKX.A}
 	touch made.tmp
 
-tkXstartup.o: tkXstartup.c
-	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXstartup.c
+tkXinit.o: tkXinit.c
+	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXinit.c
 
 #------------------------------------------------------------------------------
 

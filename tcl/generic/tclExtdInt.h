@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.23 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.24 1993/09/07 14:44:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -241,13 +241,6 @@ Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
 extern void
 Tcl_ResetSignals ();
 
-void
-Tcl_SetLibraryDirEnvVar _ANSI_ARGS_((Tcl_Interp  *interp,
-                                     char        *envVar,
-                                     char        *dir,
-                                     char        *version1,
-                                     char        *version2));
-
 extern FILE *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
@@ -256,9 +249,6 @@ Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
 extern void
 Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
                                int         fileNum));
-
-extern void
-Tcl_SetupSigInt _ANSI_ARGS_(());
 
 /*
  * Definitions required to initialize all extended commands.  These are either

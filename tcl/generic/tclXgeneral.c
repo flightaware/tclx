@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 2.5 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXgeneral.c,v 2.6 1993/08/04 15:20:50 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,7 +22,7 @@
  * These globals must be set by main for the information to be defined.
  */
 
-char *tclxVersion       = "?";   /* Extended Tcl version number.            */
+char *tclxVersion       = NULL;  /* Extended Tcl version number.            */
 int   tclxPatchlevel    = 0;     /* Extended Tcl patch level.               */
 
 char *tclAppName        = NULL;  /* Application name                        */
