@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.8 1996/08/09 04:12:31 markd Exp $
+ * $Id: tclXunixOS.c,v 7.9 1996/08/19 07:43:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1463,4 +1463,104 @@ TclXOSGetSelectFnum (interp, channel, readFnumPtr, writeFnumPtr)
     else
         *writeFnumPtr = -1;
     return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFlock --
+ *   Portability interface to locking a file.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o lockInfoPtr - Lock specification, gotLock will be initialized.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFlock (interp, lockInfoPtr)
+    Tcl_Interp     *interp;
+    TclX_FlockInfo *lockInfoPtr;
+{
+#ifdef F_SETLKW
+    int fnum, stat;
+    struct flock flockInfo;
+    
+    flockInfo.l_start = lockInfoPtr->start;
+    flockInfo.l_len = lockInfoPtr->len;
+    flockInfo.l_type =
+        (lockInfoPtr->access == TCL_WRITABLE) ? F_WRLCK : F_RDLCK;
+    flockInfo.l_whence = lockInfoPtr->whence;
+
+    fnum = ChannelToFnum (lockInfoPtr->channel, lockInfoPtr->access);
+
+    stat = fcntl (fnum, lockInfoPtr->block ?  F_SETLKW : F_SETLK, 
+                  &flockInfo);
+
+    /*
+     * Handle status from non-blocking lock.
+     */
+    if ((stat < 0) && (!lockInfoPtr->block) &&
+        ((errno == EACCES) || (errno == EAGAIN))) {
+        lockInfoPtr->gotLock = FALSE;
+        return TCL_OK;
+    }
+    
+    if (stat < 0) {
+        lockInfoPtr->gotLock = FALSE;
+        Tcl_AppendResult (interp, "lock of \"",
+                          Tcl_GetChannelName (lockInfoPtr->channel),
+                          "\" failed: ", Tcl_PosixError (interp));
+        return TCL_ERROR;
+    }
+
+    lockInfoPtr->gotLock = TRUE;
+    return TCL_OK;
+#else
+    return TclXNotAvailableError (interp,
+                                  "file locking");
+#endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFunlock --
+ *   Portability interface to unlocking a file.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o lockInfoPtr - Lock specification.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFunlock (interp, lockInfoPtr)
+    Tcl_Interp     *interp;
+    TclX_FlockInfo *lockInfoPtr;
+{
+#ifdef F_SETLKW
+    int fnum, stat;
+    struct flock flockInfo;
+    
+    flockInfo.l_start = lockInfoPtr->start;
+    flockInfo.l_len = lockInfoPtr->len;
+    flockInfo.l_type = F_UNLCK;
+    flockInfo.l_whence = lockInfoPtr->whence;
+
+    fnum = ChannelToFnum (lockInfoPtr->channel, lockInfoPtr->access);
+
+    stat = fcntl (fnum, F_SETLK, &flockInfo);
+    if (stat < 0) {
+        Tcl_AppendResult (interp, "lock of \"",
+                          Tcl_GetChannelName (lockInfoPtr->channel),
+                          "\" failed: ", Tcl_PosixError (interp));
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+#else
+    return TclXNotAvailableError (interp,
+                                  "file locking");
+#endif
 }

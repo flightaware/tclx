@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.8 1996/08/09 04:12:25 markd Exp $
+ * $Id: tclExtdInt.h,v 7.9 1996/08/19 07:43:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -139,6 +139,22 @@ typedef struct {
  */
 #define TCLX_CHOWN  0x1
 #define TCLX_CHGRP  0x2
+
+/*
+ * Structure use to pass file locking information.  Parallels the Posix
+ * struct flock, but use to pass info from the generic code to the system
+ * dependent code.
+ */
+typedef struct {
+    Tcl_Channel channel;      /* Channel to lock */
+    int         access;       /* TCL_READABLE and/or TCL_WRITABLE */
+    int         block;        /* Block if lock is not available */
+    off_t       start;        /* Starting offset */
+    off_t       len;          /* len = 0 means until end of file */
+    pid_t       pid;          /* Lock owner */
+    short       whence;       /* Type of start */
+    int         gotLock;      /* Succeeded? */
+} TclX_FlockInfo;
 
 /*
  * Used to return argument messages by most commands.
@@ -762,4 +778,12 @@ TclXOSGetSelectFnum _ANSI_ARGS_((Tcl_Interp *interp,
                                  Tcl_Channel channel,
                                  int        *readFnumPtr,
                                  int        *writeFnumPtr));
+
+int
+TclXOSFlock _ANSI_ARGS_((Tcl_Interp     *interp,
+                         TclX_FlockInfo *lockInfoPtr));
+
+int
+TclXOSFunlock _ANSI_ARGS_((Tcl_Interp     *interp,
+                           TclX_FlockInfo *lockInfoPtr));
 #endif
