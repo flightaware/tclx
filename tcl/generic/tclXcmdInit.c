@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 3.1 1994/01/23 17:00:28 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -287,6 +287,8 @@ TclXCmd_Init (interp)
      * from tclXserver.c
      */
     Tcl_CreateCommand (interp, "server_open", Tcl_ServerOpenCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "server_info", Tcl_ServerInfoCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     return TCL_OK;
 }
