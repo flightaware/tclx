@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.3 1997/06/30 03:56:03 markd Exp $
+ * $Id: tclXselect.c,v 8.4 1997/06/30 06:07:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -392,7 +392,8 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
 
   exitPoint:
     for (idx = 0; idx < 3; idx++) {
-        ckfree ((char *) descLists [idx]);
+        if (descLists [idx] != NULL)
+            ckfree ((char *) descLists [idx]);
     }
     return result;
 }
