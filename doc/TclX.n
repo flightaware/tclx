@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.48 1993/11/09 06:35:19 markd Exp markd $
+.\" $Id: TclX.n,v 2.49 1993/11/09 07:50:37 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -969,7 +969,7 @@ the command is returned.
 '\"@help: tcl/files/sync
 '\"@brief: Force a file or all files to be written to disk.
 .TP
-.B sync \fIcommand\fR ?\fIfileId\fR?
+.B sync ?\fIfileId\fR?
 .br
 If \fIfileId\fR is not specified, or if it is and this system does
 not support the \fIfsync\fR system call, issues a \fIsync\fR system
@@ -978,14 +978,11 @@ and the system does support the \fIfsync\fR system call, issues an
 \fIfsync\fR on the file corresponding to the specified Tcl \fIfileId\fR
 to force all pending output to that file out to the disk.
 .sp
-This command does not do a Tcl \fBflush\fR command. You might need to issue a 
-\fBflush\fR command to force process file buffers to be written before
-calling \fBsync\fR.
+If \fIfileId\fR is specified, the file must be writable.  A \fBflush\fR
+will be issued against the \fIfileId\fR before the sync.
 .sp
-Since Tcl programs may want to know whether \fBsync\fR \fIfileId\fR will
-do a \fIsync\fR or a \fIfsync\fR, the \fIinfox\fR command has a
-suboption of \fIhave_fsync\fR that will return \fB1\fR if \fIfsync\fR
-is available and \fB0\fR if not.
+The \fIinfox have_fsync\fR command can be used to determine if
+"\fBsync\fR \fIfileId\fR" will do a \fIsync\fR or a \fIfsync\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

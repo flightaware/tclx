@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.7 1993/09/27 05:03:47 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.8 1993/11/09 07:50:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -242,10 +242,12 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
     }
 
     if (Tcl_GetOpenFile (interp, argv[1], 
-			 FALSE,   /* no write check */
-			 FALSE,   /* no access check */
+			 TCL_FILE_WRITABLE,
+			 TRUE,   /* check access */
 			 &filePtr) != TCL_OK)
 	return TCL_ERROR;
+
+    fflush (filePtr);
 
 #ifdef HAVE_FSYNC
     if (fsync (fileno (filePtr)) < 0) {
