@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.0 1996/11/21 00:24:04 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.1 1997/01/11 04:44:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -587,11 +587,11 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     if ((argc != 2) && (argc != 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " fileId ?varName?", (char *) NULL);
-        goto erorrExit;
+        goto errorExit;
     }
     channel = TclX_GetOpenChannel (interp, argv [1], TCL_READABLE);
     if (channel == NULL)
-        goto erorrExit;
+        goto errorExit;
 
     /*
      * If the channel is non-blocking, temporarily set blocking mode, since
@@ -604,7 +604,7 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     if (mode == TCLX_MODE_NONBLOCKING) {
         if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
                                    TCLX_MODE_BLOCKING) == TCL_ERROR)
-            goto erorrExit;
+            goto errorExit;
     }
 
     /*
@@ -631,7 +631,7 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     if (mode == TCLX_MODE_NONBLOCKING) {
         if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
                                    TCLX_MODE_NONBLOCKING) == TCL_ERROR)
-            goto erorrExit;
+            goto errorExit;
     }
     if (argc >= 2) {
         if (Tcl_SetVar (interp, argv[2], buffer.string,
