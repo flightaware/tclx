@@ -364,6 +364,7 @@
 ./tksrc/tkXshell.c
 ./tktclsrc/Makefile.in
 ./tktclsrc/tclhelp.tcl
+./tktclsrc/tk.tcl.sed
 ./tktclsrc/tkdemo.tcl
 ./tktests/Makefile.in
 ./tktests/signal.test
