@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.1 1993/01/26 04:01:28 markd Exp markd $
+ * $Id: tclXutil.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -69,7 +69,7 @@ Tcl_StrToLong (string, base, longPtr)
     *longPtr = num;
     return TRUE;
 
-} /* Tcl_StrToLong */
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -107,7 +107,7 @@ Tcl_StrToInt (string, base, intPtr)
     *intPtr = num;
     return TRUE;
 
-} /* Tcl_StrToInt */
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -145,7 +145,7 @@ Tcl_StrToUnsigned (string, base, unsignedPtr)
     *unsignedPtr = num;
     return TRUE;
 
-} /* Tcl_StrToUnsigned */
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -178,7 +178,7 @@ Tcl_StrToDouble (string, doublePtr)
     *doublePtr = num;
     return TRUE;
 
-} /* Tcl_StrToDouble */
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -562,10 +562,11 @@ Tcl_ConvertFileHandle (interp, handle)
  *   o readable (I) - TRUE if read access to the file.
  *   o writable (I) - TRUE if  write access to the file.
  * Returns:
- *   TCL_OK or TCL_ERROR;
+ *   A pointer to the OpenFile structure for the file, or NULL if an error
+ * occured.
  *-----------------------------------------------------------------------------
  */
-int
+OpenFile *
 Tcl_SetupFileEntry (interp, fileNum, readable, writable)
     Tcl_Interp *interp;
     int         fileNum;
@@ -590,7 +591,7 @@ Tcl_SetupFileEntry (interp, fileNum, readable, writable)
     fileCBPtr = fdopen (fileNum, mode);
     if (fileCBPtr == NULL) {
         iPtr->result = Tcl_UnixError (interp);
-        return TCL_ERROR;
+        return NULL;
     }
 
     /*
@@ -610,18 +611,51 @@ Tcl_SetupFileEntry (interp, fileNum, readable, writable)
     filePtr->pidPtr   = NULL;
     filePtr->errorId  = -1;
 
-    return TCL_OK;
+    return filePtr;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_CloseForError --
+ *
+ *   Close a file number on error.  If the file is in the Tcl file table, clean
+ * it up too. The variable errno will be saved and not lost.
+ *
+ * Parameters:
+ *   o interp (I) - Current interpreter.
+ *   o fileNum (I) - File number to close.
+ * Returns:
+ *   A pointer to the OpenFile structure for the file, or NULL if an error
+ * occured.
+ *-----------------------------------------------------------------------------
+ */
+void
+Tcl_CloseForError (interp, fileNum)
+    Tcl_Interp *interp;
+    int         fileNum;
+{
+    Interp   *iPtr = (Interp *) interp;
+    int       saveErrNo = errno;
+
+    if ((fileNum < iPtr->numFiles) && (iPtr->filePtrArray [fileNum] != NULL)) {
+        fclose (iPtr->filePtrArray [fileNum]->f);
+        ckfree (iPtr->filePtrArray [fileNum]);
+        iPtr->filePtrArray [fileNum] = NULL;
+    } else {
+        close (fileNum);
+    }
+    errno = saveErrNo;
 }
 
 /*
  *-----------------------------------------------------------------------------
  *
  * Tcl_System --
- *     does the equivalent of the Unix "system" library call, but
- *     uses waitpid to wait on the correct process, rather than
- *     waiting on all processes and throwing the exit statii away
- *     for the processes it isn't interested in, plus does it with
- *     a Tcl flavor
+ *     Does the equivalent of the Unix "system" library call, but uses waitpid
+ * to wait on the correct process, rather than waiting on all processes and
+ * throwing the exit statii away for the processes it isn't interested in,
+ * plus does it with a Tcl flavor.
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
