@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 7.0 1996/06/16 05:30:52 markd Exp $
+ * $Id: tclXshell.c,v 7.1 1996/07/18 19:36:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -301,7 +301,7 @@ TclX_Main (argc, argv, appInitProc)
     Tcl_DeleteInterp (interp);
     fprintf (stderr, " >>> Dumping active memory list to mem.lst <<<\n");
     if (Tcl_DumpActiveMemory ("mem.lst") != TCL_OK)
-        panic ("error accessing `mem.lst': %s", strerror (errno));
+        panic ("error accessing `mem.lst': %s", Tcl_ErrnoMsg (errno));
     Tcl_Exit (0);
 #endif
 
