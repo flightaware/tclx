@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.8 1996/02/09 18:44:08 markd Exp $
+dnl $Id: configure.in,v 5.9 1996/02/12 07:22:01 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.8 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.9 $),)dnl
 
 AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
 
@@ -72,19 +72,6 @@ AC_SUBST(TCLX_ARCH)
 
 AC_PROG_CC
 AC_PROG_RANLIB
-
-#------------------------------------------------------------------------------
-# Check for C++ compiler.  Autoconf defaults C++ to gcc if its not found, so
-# make sure we have gcc.
-#------------------------------------------------------------------------------
-
-AC_PROG_CXX
-if test "$CXX" = "gcc"; then
-   AC_CHECK_PROG(TCLXX, gcc, "YES", "NO")
-else
-   TCLXX="YES"
-fi
-AC_SUBST(TCLXX)
 
 #------------------------------------------------------------------------------
 # Determine if we have symbolic links on the filesystem we are building

@@ -185,8 +185,6 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 
          CC - The C compiler to use.
          CFLAGS - The optimization flags to pass to the C compiler.
-         CXX - The C++ compiler to use to compile support for tcl++.h classes.
-         CXXFLAGS - The optimization flags to pass to the C++ compiler.
 
      These variables are passed using a command line in the form:
 
@@ -306,9 +304,6 @@ General Porting Notes:
      tests/flock.bad to prevent them from being run.  If anyone can give
      any clues into what is going on, we would love to detect this.
 
-   o glob failures:  Don't add tcl7.5/compat/opendir.o to your libtcl.a unless
-     you really don't have opendir on your system.  This will cause the glob
-     command and TclX package libraries to fail.
 
 SVR3 systems (14 character file name limit):
    o All critical files in TclX are 14 characters or less.  A few help
@@ -317,8 +312,8 @@ SVR3 systems (14 character file name limit):
      truncated name.  If they can't be extracted, then they can be regenerated
      with truncated names by doing a "make buildhelp".
 
-DEC Ultrix:
 
+DEC Ultrix:
    o Setting O_APPEND via the fcntl FSETFL system call returns an EOPNOTSUPP
      (Operation not supported) error.  This causes failures of fcntl tests
      2.4 and 2.5. This is an Ultrix bug as far as we can tell.
@@ -329,6 +324,7 @@ DEC Ultrix:
    o Several tests fail when Tcl is run on an NFS mounted file system.
 
    o Problems with flock tests have been reported on some Ultrix systems.  See
+
      `General Porting Notes' section above.
 
 DEC Alpha:
@@ -339,8 +335,10 @@ DEC Alpha:
      when the first character of a string has the high order bit set. This
      breaks string expressions and eight bit characters.
 
-SUN:
+
+SUNOS:
    o See note on flock tests hanging under the "general" section.
+
 
 SOLARIS:
    o glob & library test failures observed on SunOS 5.3. Doing a "glob *"
@@ -356,12 +354,14 @@ SOLARIS:
    o message-cat-1.3 test fails due to broken catopen.  This is should not
      affect actual use of this command.
 
+
 SCO:
    o SCO Unix systems have a "ranlib" command that is used for Xenix cross-
      development.  Pre-ODT 3.0 development systems, the command returns
      an error if used on COFF files.  Many developers rename the command
      to "xranlib" if they are not doing cross development.  Later versions
      of the command return a warning if used on COFF binaries.
+
 
 SGI:
    o There appears to be a compiler bug with some SGI compilers.
@@ -382,6 +382,7 @@ SGI:
 
    o The fstat system call does does not return updated modification times on
      an open file.  This causes fstat test 3.1 to fail. This is an IRIX bug.
+
   
 BSDI:
    o The BSDI 1.0  make is broken.  It does not correctly handle the setting of
@@ -414,6 +415,7 @@ BSDI:
      checked for in configure but still causes the message-cat-2.4 test
      to fail.
 
+
 386BSD/BSDI
    o There is some problem in the configure parsing of the --with-arch option.
      The syntax "./configure --arch=XXX" will not work, use
@@ -424,14 +426,14 @@ CONVEX:
    o Set both NOBUF and NONBLOCK on a pipe will result in read returning the
      the error "Errno is zero".
 
+
 LINUX:
-   o Linux 1.1.59 has a bad strftime function, which causes clock tests to
-     fail.
    o If shell scripts run in make file exit with exit code 127, a new
      version of Bash is needed.
-   o Receive error:  ld: Output file requires shared library `libc.so.4'
+   o Received error:  ld: Output file requires shared library `libc.so.4'
      gcc: Internal compiler error: program ld got fatal signal 6:
      Recompile without -g.
+
 
 CRAY:
    o catgets does not return the default string, causing failure of 

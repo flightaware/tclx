@@ -1063,3 +1063,8 @@
     independent, the Tcl and Tk init routines must be called first.
   o Added initialization of preliminary set of safe commands.
 -------------------------------------------------------------------------------
+17 Feb 96:
+  o Dropped support for the C++ interfaces in tcl++.h.   This file
+    was outdated, not documented and of limited usefulness.  It was often
+    a source of portability problems.
+-------------------------------------------------------------------------------

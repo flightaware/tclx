@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.3 1996/02/09 18:44:02 markd Exp $
+# $Id: Common.mk.in,v 5.4 1996/02/12 07:21:50 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -23,9 +23,6 @@ SHELL = /bin/sh
 #
 CC          = @CC@
 CFLAGS      = @CFLAGS@
-CXX         = @CXX@
-CXXFLAGS    = @CXXFLAGS@
-TCLXX       = @TCLXX@
 RANLIB      = @RANLIB@
 srcbasedir  = @srcbasedir@
 bldbasedir  = @bldbasedir@

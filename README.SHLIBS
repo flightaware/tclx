@@ -176,10 +176,8 @@ TclX
 
     (1) Run configure.
 
-    (2) make CFLAGS="-O -PIC"  CXXFLAGS="-O -PIC"         <--- SUN cc
-        make CFLAGS="-O -fPIC" CXXFLAGS="-O -fPIC"        <--- GNU gcc
-
-        CXXFLAGS is passed to the C++ compiler.
+    (2) make CFLAGS="-O -PIC"         <--- SUN cc
+        make CFLAGS="-O -fPIC"        <--- GNU gcc
 
     (3) Create the TclX shared library.
 
@@ -302,10 +300,8 @@ TclX
 
     (1) Run configure.
 
-    (2) make CFLAGS="-O -KPIC" CXXFLAGS="-O -KPIC"       <--- SPARCcompiler C
-        make CFLAGS="-O -fPIC"  CXXFLAGS="-O -fPIC"      <--- GNU gcc
-
-        CXXFLAGS is passed to the C++ compiler.
+    (2) make CFLAGS="-O -KPIC"       <--- SPARCcompiler C
+        make CFLAGS="-O -fPIC""      <--- GNU gcc
 
     (3) Create the TclX shared library.
 
@@ -427,9 +423,7 @@ TclX
 
     (1) Run configure.
 
-    (2) make CFLAGS="-O -fPIC" CXXFLAGS="-O -fPIC"
-
-        CXXFLAGS is passed to the C++ compiler.
+    (2) make CFLAGS="-O -fPIC"
 
     (3) Create the TclX shared library.
 
@@ -545,8 +539,6 @@ TclX
     (1) Run configure.
 
     (2) make CFLAGS="-O -KPIC -belf"
-
-        CXXFLAGS is passed to the C++ compiler.
 
     (3) Create the TclX shared library.
 

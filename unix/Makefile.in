@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.4 1996/02/09 18:44:05 markd Exp $
+# $Id: Makefile.in,v 5.5 1996/02/16 08:10:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,17 +27,16 @@ srcdir = @srcdir@
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
-# second level makes.  C++ flags are only passed to the tcl build.
+# second level makes.
 
 PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}" "LDFLAGS=${LDFLAGS}"
-PASSXX_FLAGS = ${PASS_FLAGS} "CXX=${CXX}" "CXXFLAGS=${CXXFLAGS}"
 
 #------------------------------------------------------------------------------
 
 all: COMP_TCLX COMP_${TK_BUILD}
 
 COMP_TCLX: COMP_TOOLS runtcl
-	cd ../tcl/unix; ${MAKE} ${PASSXX_FLAGS} all
+	cd ../tcl/unix; ${MAKE} all
 
 COMP_WISHX: COMP_TOOLS runwishx
 	cd ../tk/unix; ${MAKE} ${PASS_FLAGS} all
@@ -88,10 +87,10 @@ runwishx: Makefile
 shlink: TCL_SHLINK SHLINK_${TK_BUILD}
 
 TCL_SHLINK:
-	cd src;  ${MAKE} ${PASSXX_FLAGS} shlink
+	cd src; ${MAKE} shlink
 
 SHLINK_WISHX:
-	cd tksrc;  ${MAKE} ${PASSXX_FLAGS} shlink
+	cd tksrc; ${MAKE} shlink
 
 SHLINK_:
 

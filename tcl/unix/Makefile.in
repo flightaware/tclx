@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.8 1996/02/16 07:51:34 markd Exp $
+# $Id: Makefile.in,v 5.9 1996/02/16 08:10:07 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -37,12 +37,6 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
 
 LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
-
-CXX_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CXXFLAGS} ${TCL_SHLIB_CFLAGS} \
-	       -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
-	       -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
-
-LDXX_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CXXFLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -88,18 +82,14 @@ TEST_OBJS = tclTest.o tclXtest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtclx.a tcl TCLXX_${TCLXX} checkup RUNTIME tclXtest runtest \
-     ${bldbasedir}/tcl/tests
+all: libtclx.a tcl checkup RUNTIME tclXtest runtest ${bldbasedir}/tcl/tests
 
 tcl: tclXAppInit.o libtclx.a ${TCL_LIB}
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
 	    (rm -f tcl; exit 1)
 
-libtclx.a: ${OBJS} TCLXX_O_${TCLXX}
+libtclx.a: ${OBJS}
 	${AR} cr libtclx.a ${OBJS}
-	if [ "${TCLXX}" = "YES" ] ; then \
-	    ${AR} cr libtclx.a tcl++.o ;\
-	else exit 0 ; fi
 	${RANLIB} libtclx.a
 
 #------------------------------------------------------------------------------
@@ -203,9 +193,6 @@ tclXunixcmds.o: ${TCLX_GENERIC_DIR}/tclXunixcmds.c
 tclXutil.o: ${TCLX_GENERIC_DIR}/tclXutil.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXutil.c
 
-tcl++.o: ${TCLX_GENERIC_DIR}/tcl++.C ${TCLX_GENERIC_DIR}/tcl++.h
-	${CXX} -c ${CXX_SWITCHES} ${TCLX_GENERIC_DIR}/tcl++.C
-
 random.o: ${COMPAT_DIR}/random.c
 	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/random.c
 
@@ -223,28 +210,6 @@ checkup: checkup.done
 checkup.done: tcl
 	./tcl -q ${srcbasedir}/unix/tools/checkup.tcl
 	touch checkup.done
-
-#------------------------------------------------------------------------------
-# Make sure we can link a C++ program (the result is not install).  Target
-# also forces tcl++.o to be compiled.
-
-TCLXX_O_YES:  tcl++.o
-	touch TCLXX_O_YES
-TCLXX_O_NO:
-	touch TCLXX_O_NO
-
-TCLXX_YES:  tcl++
-TCLXX_NO:
-
-tcl++: tclXAppInit++.o tcl++.o libtclx.a
-	${CXX} ${LDXX_SWITCHES} tclXAppInit++.o ${LDLIBS} -o tcl++
-
-tclXAppInit++.o: ${TCLX_GENERIC_DIR}/tcl++.h tclXAppInit++.C
-	${CXX} -c ${CXX_SWITCHES} tclXAppInit++.C
-
-tclXAppInit++.C: ${TCLX_GENERIC_DIR}/tclXAppInit.c
-	rm -f tclXAppInit++.C
-	cp ${TCLX_GENERIC_DIR}/tclXAppInit.c tclXAppInit++.C
 
 #------------------------------------------------------------------------------
 # Generate the runtime .tlib library in the current directory.  Copy other
@@ -361,7 +326,7 @@ shlink:
 
 install: install-runtime install-exec
 	${INSTCOPY} ${TCLX_GENERIC_DIR}/tclExtend.h \
-	${TCLX_GENERIC_DIR}/tcl++.h ${INSTALL_ROOT}${TCL_INCLUDEDIR}
+	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 	${CPMANPAGES} -rmcat @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
 	    ${srcbasedir}/man ${INSTALL_ROOT}${TCL_MAN_BASEDIR}
@@ -381,8 +346,7 @@ install-exec:
 
 install-master: install-runtime install-master-exec
 	${INSTCOPY} ${TCL_SRC}/generic/tcl.h ${TCLX_GENERIC_DIR}/tclExtend.h \
-	    ${TCLX_GENERIC_DIR}/tcl++.h \
-	    ${INSTALL_ROOT}${TCLX_INST_MASTER}/include
+	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 	${SYMLINKEXT} ${TCLX_INST_MASTER}/include/* \
 	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
@@ -408,8 +372,7 @@ install-master-exec:
 
 clean:
 	-rm -f tclXAppInit.o tclTest.c
-	-rm -f ${OBJS} libtclx.a tcl tcl++ checkup.done
-	-rm -f tclXAppInit++.C TCLXX_O_YES TCLXX_O_NO tclXAppInit++.o tcl++.o
+	-rm -f ${OBJS} libtclx.a tcl checkup.done
 	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl
 	-rm -f help help.tmp ${TEST_OBJS} tclXtest runtest
 

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.5 1996/02/09 18:44:03 markd Exp $
+# $Id: Config.mk,v 5.6 1996/02/16 08:10:15 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -106,23 +106,6 @@ XLDLIBS=
 #
 TCLX_SHLIBS=-L${TCL_LIBDIR} -ltclx -ltcl
 TKX_SHLIBS=-L${TCL_LIBDIR} -ltkx -ltk
-
-#------------------------------------------------------------------------------
-# If C++ is to be used to compile support for the class in tcl++.h, then
-# the variable TCLXX should be set to "YES", if support is not compiled in,
-# it should be set to "NO".   Normally this is set by configure based on
-# if a C++ compiler is found.  It can be overridden here.
-#
-# CXX is the C++ compiler to use and CXXFLAGS are the debug option flags.
-# These are set by configure, and are normally overridden on the make command
-# line, but can also be changed here.
-#
-
-#TCLXX=YES
-#TCLXX=NO
-#CXX=CC
-#CXXFLAGS=-O
-
 
 #------------------------------------------------------------------------------
 # The following definition can be set to non-null for special systems

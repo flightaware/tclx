@@ -1,15 +1,5 @@
                            Extended Tcl (TclX) 7.5a
                            ========================
-IMPORTANT:
-==========
-   o Please read and comment on the POTENTIAL CHANGES section.
-
-   o This release contains a patch to Tcl 7.5 beta 1.  The patch,
-     tcl.patch, must be applied and Tcl 7.5 recompiled before
-     compiling TclX.  This is to add functionality to the new Tcl
-     I/O system.  We are working with the Tcl team on resolving this
-     (they are very helpful and the new I/O system is excellent).
-
 
 TclX 7.5 Beta 1 Release
 ========================
@@ -28,28 +18,6 @@ working with us on these port, we would like to do it in the same manner
 as Tcl and Tk.  Please contact us if you would like to help.   We will
 handle merge changes into the source tree and making changes available.
 Please contact us at tcl-project@neosoft.com if you think you can help.
-
-POTENTIAL CHANGES:
-==================
-  We are looking at making some changes to TclX that we want input on.  While
-none of these changes will break TclX scripts, they will affect either C code
-or the way TclX is installed.  The following changes have been proposed:
-
-  o Currently, the TclX runtime is independent of the Tcl/Tk runtimes.  To use
-    TclX you don't need to have the matching version of Tcl installed.  This
-    approach dates from the time with standard Tcl didn't have either a runtime
-    or an install rule.  We are contemplating changes that will make TclX more
-    like other extensions, building on Tcl/Tk runtimes.  Would such a change
-    negatively impact anyone?
-
-  o Dropping support for the tcl++.h include files and the class associated
-    with it.  This file is of limited usefulness to the C++ programmer,
-    is missing a lot of new Tcl functions and has never been documented.
-    Compiling a small amount of C++ code to go with this file causes a
-    lot of portability problems.  Is anyone dependent on tcl++.h?
-
-  o If people use the master installation mode, please let us know.  While
-    we will continue to support it, we will may change the implementation.
 
 INTRODUCTION
 ============
@@ -87,6 +55,13 @@ CHANGES IN TCLX 7.5a
     TK_LIBRARY environment variables set) before building or running
     TclX.  Tcl_Init must now be called before TclX_Init and Tk_Init
     before TkX_Init.
+
+  o Dropped support for the C++ interfaces in tcl++.h.   This file was
+    outdated, not documented and of limited usefulness.  It was often
+    a source of portability problems.  If you need this support,
+    tcl++.h and tcl++.C from a previous release should work.  Contact
+    us if this causes you problems.
+
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
