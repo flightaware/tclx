@@ -19,7 +19,6 @@
 ./osSupport/random.c
 ./osSupport/rename.c
 ./osSupport/strftime.c
-./osSupport/system.c
 ./src/Makefile.in
 ./src/tcl++.C
 ./src/tcl++.h
