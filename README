@@ -23,10 +23,13 @@ with the Extended Tcl command set and signal handling.
    Extended Tcl runs on most Unix-like systems and Windows 95/NT.  However
 the Windows 95/NT work is not complete and should be considered alpha quality.
 
-   While this TclX distribution is tested with Tcl 8.0 and Tk 8.0, it will
+   While this TclX distribution is tested with Tcl 8.0.3 and Tk 8.0.3, it will
 probably work with newer versions of 8.x-series Tcl & Tk with little or no 
-changes.  Please check the Extended Tcl homepage at www.neosoft.com/tclx
-for the latest release and information.
+changes.  It is also compatible with Tcl 8.0p2 and Tk 8.0p2; but not
+earlier versions of Tcl 8.0.
+
+   Please check the Extended Tcl homepage at www.neosoft.com/TclX for the
+latest release and information.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
 (karl@NeoSoft.com) and Mark Diekhans (markd@Grizzly.com), with help
@@ -48,7 +51,10 @@ the Tcl8.1a series.
 
 CHANGES IN TCLX 8.0.3
 =====================
-  o This is a bug fix release.
+  o Bug fixes.
+  o Addition of the -restart option to the signal command.  This provides
+    the ability to safely use signals to indicate that an event has occured
+    rather than generating an error.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
