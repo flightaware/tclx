@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.3 1996/07/25 04:42:06 markd Exp $
+# $Id: makefile.vc,v 7.4 1996/07/26 05:56:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -158,7 +158,11 @@ CP=copy
 all:  $(DUMPEXTS) $(TCLXDLL) $(TCL) RUNTIME
 
 release: $(DUMPEXTS) $(TCLXDLL) $(TCLX16DLL) $(TCL)
-test:  $(DUMPEXTS) $(TCLXDLL) $(TCLXTEST)
+
+test:  all
+        set TCL_PROGRAM=..\win\tcl
+        cd ..\tests
+        ..\win\tcl all
 
 tclXvc.def: dumpexts.exe $(TCLXOBJS)
         dumpexts.exe -o $@ $(TCLXDLL) @<<
@@ -202,12 +206,6 @@ $(TCL): $(TCLOBJS) $(TCLXLIB) $(TMPDIR)\tcl.res
         $(link) $(linkdebug) $(conlflags) \
                 $(TCLOBJS) $(TMPDIR)\tcl.res $(TCLXLIB) $(TCLLIB) $(conlibsdll) \
                 -out:$(TCL)
-
-$(TCLXTEST): $(TCLXTESTOBJS) $(TCLXLIB)
-        set LIB=$(LIB)
-        $(link) $(linkdebug) $(conlflags) \
-                $(TCLXTESTOBJS) $(TCLXLIB) $(conlibsdll) \
-                -out:$(TCLXTEST)
 
 $(ROOT)\tcl\generic\patchlvl.h: $(ROOT)\tcl\generic\patchlevel.h
         $(CP) $(ROOT)\tcl\generic\patchlevel.h $(ROOT)\tcl\generic\patchlvl.h
