@@ -180,3 +180,9 @@
 
 /* Define if catclose is type void instead of int */
 #undef BAD_CATCLOSE
+
+/* Define struct msghdr contains the msg_accrights field */
+#undef HAVE_MSG_ACCRIGHTS
+
+/* Define if inet_aton function is available. */
+#undef HAVE_INET_ATON
