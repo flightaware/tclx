@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.8 1993/07/12 05:26:12 markd Exp markd $
+ * $Id: tcl++.h,v 2.9 1993/07/13 03:04:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -164,6 +164,13 @@ public:
                int         writable)
     {
         Tcl_EnterFile (interp, file, readable, writable);
+    }
+
+    inline void
+    ErrorAbort (int  noStackDump,
+                int  exitCode)
+    {
+        Tcl_ErrorAbort (interp, noStackDump, exitCode);
     }
 
     inline int 

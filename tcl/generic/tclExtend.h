@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.6 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclExtend.h,v 2.7 1993/07/12 05:26:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -79,6 +79,11 @@ Tcl_DownShift _ANSI_ARGS_((char       *targetStr,
 EXTERN char * 
 Tcl_UpShift _ANSI_ARGS_((char       *targetStr,
                          CONST char *sourceStr));
+
+EXTERN void
+Tcl_ErrorAbort _ANSI_ARGS_((Tcl_Interp  *interp,
+                            int          noStackDump,
+                            int          exitCode));
 
 EXTERN int
 Tcl_GetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 2.4 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXprocess.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -217,6 +217,13 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
+
+    /*
+     * If no process was available, return an empty status.  Otherwise return
+     * a list contain the PID and why it stopped.
+     */
+    if (returnedPid == 0)
+        return TCL_OK;
     
     if (WIFEXITED (status))
         sprintf (interp->result, "%d %s %d", returnedPid, "EXIT", 

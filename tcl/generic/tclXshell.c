@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.9 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.10 1993/07/12 05:26:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -36,11 +36,6 @@ typedef struct tclParms_t {
  * Prototypes of internal functions.
  */
 static void
-ErrorAbort _ANSI_ARGS_((Tcl_Interp  *interp,
-                        int          noStackDump,
-                        int          exitCode));
-
-static void
 ParseCmdArgs _ANSI_ARGS_((Tcl_Interp  *interp,
                           int          argc,
                           char       **argv,
@@ -50,7 +45,7 @@ ParseCmdArgs _ANSI_ARGS_((Tcl_Interp  *interp,
 /*
  *-----------------------------------------------------------------------------
  *
- * ErrorAbort --
+ * Tcl_ErrorAbort --
  *
  * Display error information and abort when an error is returned in the
  * interp->result.
@@ -63,8 +58,8 @@ ParseCmdArgs _ANSI_ARGS_((Tcl_Interp  *interp,
  *   o exitCode - The code to pass to exit.
  *-----------------------------------------------------------------------------
  */
-static void
-ErrorAbort (interp, noStackDump, exitCode)
+void
+Tcl_ErrorAbort (interp, noStackDump, exitCode)
     Tcl_Interp  *interp;
     int          noStackDump;
     int          exitCode;
@@ -343,7 +338,7 @@ Tcl_ShellEnvInit (interp, options)
                                  TCL_MASTERDIR,
                                  TCL_VERSION,
                                  TCL_EXTD_VERSION_SUFFIX,
-                                 "TclInit.tcl") != TCL_OK)
+                                 "TclInit.tcl") == TCL_ERROR)
             goto errorExit;
     }
     if (options & TCLSH_INTERACTIVE)
@@ -353,7 +348,7 @@ Tcl_ShellEnvInit (interp, options)
 
 errorExit:
     if (options & TCLSH_ABORT_STARTUP_ERR)
-        ErrorAbort (interp, options & TCLSH_NO_STACK_DUMP, 255);
+        Tcl_ErrorAbort (interp, options & TCLSH_NO_STACK_DUMP, 255);
     return TCL_ERROR;
 }
 
@@ -421,6 +416,6 @@ Tcl_Startup (interp, options, argc, argv)
     return;
 
 errorAbort:
-    ErrorAbort (interp, tclParms.options & TCLSH_NO_STACK_DUMP, 255);
+    Tcl_ErrorAbort (interp, tclParms.options & TCLSH_NO_STACK_DUMP, 255);
 }
 

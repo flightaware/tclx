@@ -15,22 +15,23 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.6 1993/06/21 06:09:09 markd Exp markd $
+# $Id: Makefile,v 2.7 1993/06/24 07:31:52 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 include ../Config.mk
-include ../config/$(TCL_CONFIG_FILE)
+include ../config/${TCL_CONFIG_FILE}
 SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
 
-LIBTCLX = ../tclmaster/lib/libtclx.a
-TCL     = ../tclmaster/bin/tcl
-LIBTCL  = ../tclmaster/lib/libtcl.a
+LIBTCLX.A = ../tclmaster/lib/libtclx.a
+TCL       = ../tclmaster/bin/tcl
+LIBTCL.A  = ../tclmaster/lib/libtcl.a
 
-CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I../$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) \
-        $(SYS_DEP_FLAGS)
+CFLAGS= ${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} \
+        ${SYS_DEP_FLAGS}
+LDLIBS= ${LIBTCLX.A} ${LIBTCL.A} ${LIBS}
 
 #------------------------------------------------------------------------------
 
@@ -46,46 +47,45 @@ OBJS= \
  
 #------------------------------------------------------------------------------
 
-all: made.tmp $(TCL)
+all: made.tmp ${TCL}
 
-$(TCL): $(LIBTCLX) $(LIBTCL) made.tmp 
-	$(CC) $(CFLAGS) main.o $(LIBTCLX) $(LIBTCL) $(LIBS) $(XLDFLAGS) \
-              -o $(TCL)
-	if $(DO_STRIPPING) ; then \
-	    strip $(TCL); \
-	    $(MCS_CMD) $(TCL); fi
+${TCL}: ${LIBTCLX.A} ${LIBTCL.A} made.tmp 
+	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${LDLIBS} -o ${TCL}
+	if ${DO_STRIPPING} ; then \
+	    strip ${TCL}; \
+	    ${MCS_CMD} ${TCL}; fi
 
-made.tmp: $(OBJS) main.o $(CPLUSOBJS)
-	$(RANLIB_CMD) $(LIBTCLX)
-	$(AR) cr $(LIBTCLX) $(OBJS) $(CPLUSOBJS)
+made.tmp: ${OBJS} main.o ${CPLUSOBJS}
+	${RANLIB_CMD} ${LIBTCLX.A}
+	${AR} cr ${LIBTCLX.A} ${OBJS} ${CPLUSOBJS}
 	touch made.tmp
 
 tclXstartup.o: patchlevel.h tclXstartup.c
-	$(CC) -c $(CFLAGS) -DTCL_MASTERDIR=\"$(TCL_MASTERDIR)\" tclXstartup.c
+	${CC} -c ${CFLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" tclXstartup.c
 
 main.o: patchlevel.h main.c
 
 tclXgetdate.c: tclXgetdate.y
-	$(YACC) tclXgetdate.y
+	${YACC} tclXgetdate.y
 	mv y.tab.c tclXgetdate.c
 
 tcl++.o: tcl++.C tcl++.h
-	$(CCPLUS) -c $(CFLAGS) tcl++.C
+	${CCPLUS} -c ${CFLAGS} tcl++.C
 
 #------------------------------------------------------------------------------
 # This is just to test if it compiles.
 
 tcl++: main++.o
-	$(CCPLUS) $(CFLAGS) main++.o $(LIBTCLX) $(LIBTCL) $(LIBS) \
-	          $(XLDFLAGS) -o ../tcl++
+	${CCPLUS} ${CFLAGS} main++.o ${LIBTCLX.A} ${LIBTCL.A} ${LIBS} \
+	          ${XLDFLAGS} -o ../tcl++
 
 main++.o: tcl++.h main++.C
-	$(CCPLUS) -c -I$(CPLUSINCL) $(CFLAGS) main++.C
+	${CCPLUS} -c -I${CPLUSINCL} ${CFLAGS} main++.C
 
 
 #------------------------------------------------------------------------------
 
 clean:
 	-rm -f made.tmp tclXgetdate.c
-	-rm -f *.o $(TCL) tcl++
+	-rm -f *.o ${TCL} tcl++
 
