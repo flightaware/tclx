@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXsignal.c,v 1.2 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -52,7 +52,7 @@
  * Value returned by Tcl_SignalId when an invalid signal is passed in.
  * Pointer is used as a quick check of a valid signal number.
  */
-static char *unknownSignalIdMsg;
+static CONST char *unknownSignalIdMsg;
 
 /*
  * Signal name table maps name to number.  Note, it is possible to have
@@ -1090,12 +1090,12 @@ FormatSignalListEntry (interp, signalNum, sigStatesObjPtr)
 {
     Tcl_Obj *stateObjv [4], *stateObjPtr;
     signalProcPtr_t  actionFunc;
-    char *actionStr;
+    char *actionStr, *idStr;
     int restart;
 
     if (GetSignalState (signalNum, &actionFunc, &restart) == TCL_ERROR)
         goto unixSigError;
-    
+
     if (actionFunc == SIG_DFL) {
         actionStr = SIGACT_DEFAULT;
     } else if (actionFunc == SIG_IGN) {
@@ -1124,12 +1124,17 @@ FormatSignalListEntry (interp, signalNum, sigStatesObjPtr)
     stateObjPtr = Tcl_NewListObj (4, stateObjv);
     Tcl_IncrRefCount (stateObjPtr);
 
-    if (TclX_KeyedListSet (interp, sigStatesObjPtr, 
-                           Tcl_SignalId (signalNum),
-                           stateObjPtr) != TCL_OK) {
+    /*
+     * Dup the string so we don't pass a const char to KLSet.
+     */
+    idStr = ckstrdup(Tcl_SignalId(signalNum));
+    if (TclX_KeyedListSet (interp, sigStatesObjPtr, idStr,
+		stateObjPtr) != TCL_OK) {
+	ckfree(idStr);
         Tcl_DecrRefCount (stateObjPtr);
         return TCL_ERROR;
     }
+    ckfree(idStr);
     Tcl_DecrRefCount (stateObjPtr);
 
     return TCL_OK;
