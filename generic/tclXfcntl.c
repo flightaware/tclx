@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 8.7 1999/03/31 06:37:43 markd Exp $
+ * $Id: tclXfcntl.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,11 +43,11 @@
 /*
  * Table of attribute names and values.
  */
-struct {
+static struct {
     char *name;
     int   id;
     int   modifiable;
-} attrNames [] = {
+} TclXfcntlAttrNames [] = {
     {"RDONLY",    ATTR_RDONLY,    FALSE},
     {"WRONLY",    ATTR_WRONLY,    FALSE},
     {"RDWR",      ATTR_RDWR,      FALSE},
@@ -115,15 +115,15 @@ XlateFcntlAttr (interp, attrName, modify)
     
     TclX_UpShift (attrNameUp, attrName);
     
-    for (idx = 0; attrNames [idx].name != NULL; idx++) {
-        if (STREQU (attrNameUp, attrNames [idx].name)) {
-            if (modify && !attrNames [idx].modifiable) {
+    for (idx = 0; TclXfcntlAttrNames [idx].name != NULL; idx++) {
+        if (STREQU (attrNameUp, TclXfcntlAttrNames [idx].name)) {
+            if (modify && !TclXfcntlAttrNames [idx].modifiable) {
                 TclX_AppendObjResult (interp, "Attribute \"", attrName,
                                       "\" may not be altered after open",
                                       (char *) NULL);
                 return ATTR_ERROR;
             }
-            return attrNames [idx].id;
+            return TclXfcntlAttrNames [idx].id;
         }
     }
 
@@ -134,11 +134,11 @@ XlateFcntlAttr (interp, attrName, modify)
     TclX_AppendObjResult (interp, "unknown attribute name \"", attrName,
                           "\", expected one of ", (char *) NULL);
 
-    for (idx = 0; attrNames [idx + 1].name != NULL; idx++) {
-        TclX_AppendObjResult (interp, attrNames [idx].name, ", ",
+    for (idx = 0; TclXfcntlAttrNames [idx + 1].name != NULL; idx++) {
+        TclX_AppendObjResult (interp, TclXfcntlAttrNames [idx].name, ", ",
                               (char *) NULL);
     }
-    TclX_AppendObjResult (interp, "or ", attrNames [idx].name, (char *) NULL);
+    TclX_AppendObjResult (interp, "or ", TclXfcntlAttrNames [idx].name, (char *) NULL);
     return ATTR_ERROR;
 }
 
