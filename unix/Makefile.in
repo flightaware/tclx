@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.1 1997/04/17 05:00:18 markd Exp $
+# $Id: Makefile.in,v 8.2 1997/06/27 09:11:56 karl Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -154,10 +154,11 @@ PATCH=patch
 patch-tcl-core:
 	@echo "Patching Tcl core in '${TCLSRC}' with required patches."
 	@cd ${TCL_SRC}; \
-	    for i in ${srcbasedir}/TCL-REQUIRED_PATCHES/*.patch ; \
+	    for i in ${srcbasedir}/TCL-REQUIRED-PATCHES/*.patch ; \
 	    do \
 		echo patching $$i; \
-		${PATCH} --strip=0 --forward <$$i || echo PATCH FAILED, $i to ${TCL_SRC}; \
+		${PATCH} --strip=0 --forward <$$i || \
+		    echo PATCH FAILED, $i to ${TCL_SRC}; \
 	    done;
 
 #------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 ./CHANGES
 ./MANIFEST
 ./README
+./TCL-REQUIRED-PATCHES/format.patch
 ./doc/CONVERSION-NOTES
 ./doc/CmdWrite.3
 ./doc/Handles.3

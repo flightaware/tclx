@@ -1,0 +1,25 @@
+Patch to Tcl 8.0 final generic/tclCmdAH.c.  This fixes a off-by-one error
+in the format command that can lead to memory corruption on some systems,
+most notable little endian systems, such as Intel.
+
+
+
+*** generic/tclCmdAH.c.ORG	Sun Aug 17 13:45:41 1997
+--- generic/tclCmdAH.c	Sun Aug 17 14:18:31 1997
+***************
+*** 1670,1676 ****
+  #   define MAX_FLOAT_SIZE 320
+      
+      Tcl_Obj *resultPtr;  	/* Where result is stored finally. */
+!     char staticBuf[MAX_FLOAT_SIZE];
+                                  /* A static buffer to copy the format results 
+  				 * into */
+      char *dst = staticBuf;      /* The buffer that sprintf writes into each
+--- 1670,1676 ----
+  #   define MAX_FLOAT_SIZE 320
+      
+      Tcl_Obj *resultPtr;  	/* Where result is stored finally. */
+!     char staticBuf[MAX_FLOAT_SIZE+1];
+                                  /* A static buffer to copy the format results 
+  				 * into */
+      char *dst = staticBuf;      /* The buffer that sprintf writes into each
