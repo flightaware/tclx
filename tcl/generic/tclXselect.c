@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.4 1993/04/07 05:55:07 markd Exp markd $
+ * $Id: tclXselect.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,9 +32,11 @@ double floor ();
 
 #ifdef linux
 #   define READ_DATA_PENDING(fp) (fp->_egptr != fp->_gptr)
-#elif defined __SLBF
+#endif
+#if (!defined (READ_DATA_PENDING)) && defined __SLBF
 #   define READ_DATA_PENDING(fp) (fp->_r > 0)
-#else
+#endif
+#if !defined (READ_DATA_PENDING)
 #   define READ_DATA_PENDING(fp) (fp->_cnt != 0)
 #endif
 
