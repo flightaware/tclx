@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.7 1995/04/17 01:24:02 markd Exp markd $
+ * $Id: tclXutil.c,v 4.8 1995/04/29 22:54:13 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -787,15 +787,18 @@ Tcl_GetOpenFileStruct (interp, handle)
  *
  * Parameters:
  *   o interp (I) - Current interpreter.  The file handle is NOT returned
- *     in result, it is cleared.  This is done because this function is
- *     often used to setup more than one descriptor and we don't want the
- *     error message from a second failure appended to a file descriptor.
+ *     in result, it is cleared.  This is done because the file handles
+ *     are often returned in different ways.
  *   o fileNum (I) - File number to set up the entry for.
  *   o permissions (I) - Flags consisting of TCL_FILE_READABLE,
  *     TCL_FILE_WRITABLE.
  * Returns:
  *   A pointer to the FILE structure for the file, or NULL if an error
  * occured.
+ *
+ * Notes:
+ *   Use great care setting up an entry for both read and write access.
+ * For non-seakable files like sockets, this can cause strange errors.
  *-----------------------------------------------------------------------------
  */
 FILE *
@@ -835,6 +838,68 @@ Tcl_SetupFileEntry (interp, fileNum, permissions)
     Tcl_ResetResult (interp);
 
     return filePtr;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_SetupFileEntry2 --
+ *
+ * Set up an entrues in the Tcl file table for a pair of file numbers, one
+ * for read, the other for write.
+ *
+ * Parameters:
+ *   o interp (I) - Current interpreter.  The file handle is NOT returned
+ *     in result, it is cleared.  This is done because the file handles
+ *     are often returned in different ways.
+ *   o readFileNum (I) - Read file number to set up the entry for.
+ *   o writeFileNum (I) - Write file number to set up the entry for.
+ *   o writeFilePtrPtr (O) - Write FILE structure ptr is returned here.
+ * Returns:
+ *   A pointer to the FILE structure for read file, or NULL if an error
+ * occured.
+ *-----------------------------------------------------------------------------
+ */
+FILE *
+Tcl_SetupFileEntry2 (interp, readFileNum, writeFileNum, writeFilePtrPtr)
+    Tcl_Interp *interp;
+    int         readFileNum;
+    int         writeFileNum;
+    FILE      **writeFilePtrPtr;
+{
+    Interp   *iPtr = (Interp *) interp;
+    FILE     *readFilePtr, *writeFilePtr;
+    OpenFile *tclFilePtr;
+
+    /*
+     * Set up dual FILE structs.
+     */
+    readFilePtr = fdopen (readFileNum, "r");
+    if (readFilePtr == NULL) {
+        iPtr->result = Tcl_PosixError (interp);
+        return NULL;
+    }
+    
+    writeFilePtr = fdopen (writeFileNum, "w");
+    if (writeFilePtr == NULL) {
+        iPtr->result = Tcl_PosixError (interp);
+        fclose (readFilePtr);
+        return NULL;
+    }
+
+    /*
+     * Add these into the Tcl file table as a single file.
+     */
+    Tcl_EnterFile (interp, readFilePtr, TCL_FILE_READABLE);
+
+    tclFilePtr = tclOpenFiles [fileno (readFilePtr)];
+    tclFilePtr->permissions |= TCL_FILE_WRITABLE;
+    tclFilePtr->f2 = writeFilePtr;
+
+    Tcl_ResetResult (interp);
+
+    *writeFilePtrPtr = writeFilePtr;
+    return readFilePtr;
 }
 
 /*

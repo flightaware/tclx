@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.10 1995/03/30 05:26:13 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.11 1995/04/17 01:24:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -306,6 +306,12 @@ extern FILE *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
                                 int         permissions));
+
+extern FILE *
+Tcl_SetupFileEntry2  _ANSI_ARGS_((Tcl_Interp *interp,
+                                  int         readFileNum,
+                                  int         writeFileNum,
+                                  FILE      **writeFilePtrPtr));
 
 extern clock_t
 Tcl_TicksToMS _ANSI_ARGS_((clock_t numTicks));
