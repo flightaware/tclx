@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.13 1995/05/24 05:27:12 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.14 1995/06/26 22:45:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -81,32 +81,11 @@
 struct tm *gmtime ();
 struct tm *localtime ();
 
+
 /*
- * Determine how a timezone is obtained from "struct tm".  If there is no
- * time zone in this struct (very lame) then use the timezone variable.
- * This is done in a way to make the timezone variable the method of
- * second to last resort, as some systems have it in addition to a field in
- * "struct tm".  The last resort is to use gettimeofday to determine the
- * time zone (this is all a big drag).
+ * Get ranges of integers and longs.
+ *  If no MAXLONG, assume sizeof (long) == sizeof (int).
  */
-
-#if defined(HAVE_TM_TZADJ)
-#    define TCL_USE_TM_TZADJ
-#    define TCL_GOT_TIMEZONE
-#endif
-#if defined(HAVE_TM_GMTOFF) && !defined (TCL_GOT_TIMEZONE)
-#    define TCL_USE_TM_GMTOFF
-#    define TCL_GOT_TIMEZONE
-#endif
-#if defined(HAVE_GETTIMEOFDAY) && !defined (TCL_GOT_TIMEZONE)
-#    define TCL_USE_GETTIMEOFDAY
-#    define TCL_GOT_TIMEZONE
-#endif
-#if defined(HAVE_TIMEZONE_VAR) && !defined (TCL_GOT_TIMEZONE)
-#    define TCL_USE_TIMEZONE_VAR
-#    define TCL_GOT_TIMEZONE
-#endif
-
 
 #ifndef MAXINT
 #    ifdef INT_MAX	/* POSIX */
@@ -127,9 +106,6 @@ struct tm *localtime ();
 #    endif
 #endif
 
-/*
- * If no MAXLONG, assume sizeof (long) == sizeof (int).
- */
 #ifndef MAXLONG
 #    ifdef LONG_MAX /* POSIX */
 #        define MAXLONG LONG_MAX
@@ -138,6 +114,9 @@ struct tm *localtime ();
 #    endif
 #endif
 
+/*
+ * Boolean constants.
+ */
 #ifndef TRUE
 #    define TRUE   (1)
 #    define FALSE  (0)
