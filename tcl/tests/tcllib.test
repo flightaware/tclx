@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 1.3 1992/10/13 03:12:58 markd Exp markd $
+# $Id: tcllib.test,v 2.0 1992/10/16 04:50:17 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -245,6 +245,37 @@ Test tcllib-7.1 {Duplicate package handling} {
     DupPkgTest
 } 0 {Version-1}
 
+#
+# Test backslash parsing in #@package: line.
+#
+TclLibCleanUp
+mkdir {tcllib1.dir tcllib2.dir}
+set TCLPATH [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tcllib]
+
+PutFile tcllib1.dir/test1.tlib \
+    {#@package: test-pkg procAAA \\} \
+    {           procBBB \\         } \
+    {           procCCC            } \
+    {proc procAAA {} {return {AAA}}} \
+    {proc procBBB {} {return {BBB}}} \
+    {proc procCCC {} {return {CCC}}}
+
+Test tcllib-8.1 {backslash parsing in package headers} {
+    TclLibReset
+    procAAA
+} 0 {AAA}
+
+
+Test tcllib-8.2 {backslash parsing in package headers} {
+    TclLibReset
+    procBBB
+} 0 {BBB}
+
+
+Test tcllib-8.3 {backslash parsing in package headers} {
+    TclLibReset
+    procCCC
+} 0 {CCC}
 
 TclLibCleanUp
 

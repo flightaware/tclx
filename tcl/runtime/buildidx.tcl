@@ -13,15 +13,51 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 1.1 1992/09/20 23:28:10 markd Exp markd $
+# $Id: buildidx.tcl,v 2.0 1992/10/16 04:51:38 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
-proc TCHSH:PutLibLine {outfp package where endwhere autoprocs} {
-    puts $outfp [concat $package $where [expr {$endwhere - $where - 1}] \
-                        $autoprocs]
+#------------------------------------------------------------------------------
+# The following code passes around a array containing information about a
+# package.  The following fields are defined
+#
+#   o name - The name of the package.
+#   o offset - The byte offset of the package in the file.
+#   o procs - The list of entry point procedures defined for the package.
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Write a line to the index file describing the package.
+#
+proc TCLSH:PutIdxEntry {outfp pkgInfo endOffset} {
+    puts $outfp [concat [keylget pkgInfo name] \
+                        [keylget pkgInfo offset] \
+                        [expr {$endOffset - [keylget pkgInfo offset] - 1}] \
+                        [keylget pkgInfo procs]]
 }
 
+#------------------------------------------------------------------------------
+# Parse a package header found by a scan match.  Handle backslashed
+# continuation lines.
+#
+proc TCLSH:ParsePkgHeader matchInfoVar {
+    upvar $matchInfoVar matchInfo
+
+    set line [string trimright $matchInfo(line)]
+    while {[string match {*\\} $line]} {
+        set line [csubstr $line 0 [expr [clength $line]-1]]
+        append line " " [string trimright [gets $matchInfo(handle)]]
+    }
+
+    keylset pkgInfo name   [lindex $line 1]
+    keylset pkgInfo offset [tell $matchInfo(handle)]
+    keylset pkgInfo procs  [lrange $line  2 end]
+    return $pkgInfo
+}
+
+#------------------------------------------------------------------------------
+# Do the actual work of creating a package library index from a library file.
+#
 proc TCLSH:CreateLibIndex {libName} {
 
     if {[file extension $libName] != ".tlib"} {
@@ -35,44 +71,38 @@ proc TCLSH:CreateLibIndex {libName} {
     set contectHdl [scancontext create]
 
     scanmatch $contectHdl "^#@package: " {
-        set size [llength $matchInfo(line)]
-        if {$size < 2} {
+        if {[llength $matchInfo(line)] < 2} {
             error [format "invalid package header \"%s\"" $matchInfo(line)]
         }
-        if $inPackage {
-            TCHSH:PutLibLine $idxFH $pkgDefName $pkgDefWhere \
-                             $matchInfo(offset) $pkgDefProcs
+        if ![lempty $pkgInfo] {
+            TCLSH:PutIdxEntry $idxFH $pkgInfo $matchInfo(offset)
         }
-        set pkgDefName   [lindex $matchInfo(line) 1]
-        set pkgDefWhere  [tell $matchInfo(handle)]
-        set pkgDefProcs  [lrange $matchInfo(line) 2 end]
-        set inPackage 1
+        set pkgInfo [TCLSH:ParsePkgHeader matchInfo]
     }
 
     scanmatch $contectHdl "^#@packend" {
-        if !$inPackage {
+        if [lempty $pkgInfo] {
             error "#@packend without #@package in $libName
         }
-        TCHSH:PutLibLine $idxFH $pkgDefName $pkgDefWhere $matchInfo(offset) \
-                         $pkgDefProcs
-        set inPackage 0
+        TCLSH:PutIdxEntry $idxFH $pkgDefName $pkgDefWhere $matchInfo(offset) \
+                          $pkgDefProcs
+        set pkgInfo {}
     }
 
-    set inPackage 0
+    set pkgInfo {}
     if {[catch {
         scanfile $contectHdl $libFH
        } msg] != 0} {
        global errorInfo errorCode
-       close libFH
-       close idxFH
+       close $libFH
+       close $idxFH
        error $msg $errorInfo $errorCode
     }
-    if {![info exists pkgDefName]} {
+    if [lempty $pkgInfo] {
         error "No #@package definitions found in $libName"
     }
-    if $inPackage {
-        TCHSH:PutLibLine $idxFH $pkgDefName $pkgDefWhere [tell $libFH] \
-                         $pkgDefProcs
+    if ![lempty $pkgInfo] {
+        TCLSH:PutIdxEntry $idxFH $pkgInfo [tell $libFH] 
     }
     close $libFH
     close $idxFH
@@ -87,9 +117,14 @@ proc TCLSH:CreateLibIndex {libName} {
 
 }
 
+#------------------------------------------------------------------------------
+# Create a package library index from a library file.
+#
 proc buildpackageindex {libfile} {
 
-    set status [catch {TCLSH:CreateLibIndex $libfile} errmsg]
+    set status [catch {
+        TCLSH:CreateLibIndex $libfile
+    } errmsg]
     if {$status != 0} {
         global errorInfo errorCode
         error "building package index for `$libfile' failed: $errmsg" \
