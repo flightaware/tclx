@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.9 1997/07/23 03:32:59 markd Exp $
+# $Id: Makefile.in,v 8.10 1997/08/08 09:59:00 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -39,8 +39,8 @@ LIBS = ${TCLX_LD_SEARCH_FLAGS} @SHARED_LIBS@
 ALL_LIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
 	   ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
 
-STATIC_LIBS = ${TCLX_STLIB_NAME} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
-	      ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
+STATIC_LIBS = ${TCLX_STLIB_NAME} ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} \
+	     ${TCLX_LIBS} ${TCL_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -134,8 +134,6 @@ ${TCLX_SHLIB_NAME}: ${SOBJS}
 	rm -f ${TCLX_SHLIB_NAME}
 	${TCL_SHLIB_LD} -o ${TCLX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
 
-dont_build_this:
-
 #------------------------------------------------------------------------------
 # Dependencies for generating objects.
 #
@@ -206,7 +204,7 @@ tclXmsgcat.o: ${TCLX_GENERIC_DIR}/tclXmsgcat.c
 tclXprocess.o: ${TCLX_GENERIC_DIR}/tclXprocess.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXprocess.c
 
-tclXprofile.o: ${TCLX_GENERIC_DIR}/tclXprofile.c
+tclXprofile.o: ${TCLX_GENERIC_DIR}/tclXprofile.c tclxConfig.sh
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXprofile.c
 
 tclXregexp.o: ${TCLX_GENERIC_DIR}/tclXregexp.c
@@ -396,7 +394,7 @@ tclXprocess..o: ${TCLX_GENERIC_DIR}/tclXprocess.c
 	    ${TCLX_GENERIC_DIR}/tclXprocess.c
 	@OBJ_RESTORE@
 
-tclXprofile..o: ${TCLX_GENERIC_DIR}/tclXprofile.c
+tclXprofile..o: ${TCLX_GENERIC_DIR}/tclXprofile.c tclxConfig.sh
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
 	    ${TCLX_GENERIC_DIR}/tclXprofile.c
@@ -557,8 +555,12 @@ help:
 #------------------------------------------------------------------------------
 # Generate the test program.
 #
-tclXtest: ${TEST_OBJS} ${TCLX_SHLIB_BUILD} ${TCLX_STLIB_BUILD}
+tclXtest: ${TEST_OBJS} ${TCLX_LIB_NAME}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
+
+tclXtest.static: ${TEST_OBJS} ${TCLX_STLIB_NAME}
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
 tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
@@ -606,10 +608,31 @@ runtest: Makefile
 	@echo "fi"                                                 >>runtest
 	chmod a+rx runtest
 
+runtest.static: Makefile
+	@echo '#!/bin/sh'                                           >runtest.static
+	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest.static
+	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest.static
+	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tclXtest"          >>runtest.static
+	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtest.static
+	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${LD_LIBRARY_PATH}" >>runtest.static
+	@echo "SHLIB_PATH=${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${SHLIB_PATH}" >>runtest.static
+	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                  >>runtest.static
+	@echo "if [ \$$# = 0 ]"                                    >>runtest.static
+	@echo "then"                                               >>runtest.static
+	@echo "    exec \$$TCL_PROGRAM.static"                     >>runtest.static
+	@echo "else"                                               >>runtest.static
+	@echo "    exec \$$TCL_PROGRAM.static \"\$$@\""            >>runtest.static
+	@echo "fi"                                                 >>runtest.static
+	chmod a+rx runtest.static
+
 #------------------------------------------------------------------------------
 # Run the UCB and Extended Tcl tests.
 
 test: ucbtests testx
+
+test.static:	ucbtests.static testx.static
+
+test.verbose:	ucbtests.verbose testx.verbose
 
 ucbtests: all
 	@echo ""
@@ -626,8 +649,32 @@ ucbtests: all
 	@echo ""
 	./runtest -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
 
+ucbtests.static: all
+	@echo ""
+	@echo "***************************************************************"
+	@echo "* Note: Expect failures from the following standard Tcl tests.*"
+	@echo "* They do not represent problems with TclX,  but are caused   *"
+	@echo "* by Tcl tests being sensitive to the program running the     *"
+	@echo "* tests.                                                      *"
+	@echo "*     namespace-old-9.8                                       *"
+	@echo "*     namespace-old-9.10                                      *"
+	@echo "*     namespace-old-9.11                                      *"
+	@echo "*     namespace-old-9.19                                      *"
+	@echo "*     safe-6.3                                                *"
+	@echo "*     safe-6.4                                                *"
+	@echo "*     safe-6.5                                                *"
+	@echo "***************************************************************"
+	@echo ""
+	./runtest.static -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
+
 testx: all
 	./runtest -c "cd ${srcbasedir}/tcl/tests; source all"
+
+testx.static: all
+	./runtest.static -c "cd ${srcbasedir}/tcl/tests; source all"
+
+testx.verbose: all
+	./runtest -c "set VERBOSE 1;cd ${srcbasedir}/tcl/tests; source all"
 
 #------------------------------------------------------------------------------
 # Build help for Tcl & TclX.  These files are normally part of the

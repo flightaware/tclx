@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.12 1997/06/27 09:11:58 karl Exp $
+dnl $Id: configure.in,v 8.13 1997/08/08 09:59:10 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.12 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.13 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -214,15 +214,6 @@ AC_SUBST(TKX_INST_LIB)
 
 LIBS=$TCL_LIBS   # Need for tests.
 
-# 
-# Work around incorrect value being determined by Tcl for TCL_SHLIB_CFLAGS on
-# MIPS and AIX that result in reduntant ..o files being created. Supplied by
-# Jan Nijtmans <nijtmans@nici.kun.nl>). Should be removed when Tcl is fixed.
-#
-if test "x`uname -p 2>/dev/null`" = "xmips" -o "x$TCL_SHARED_LIB_SUFFIX" = 'x${VERSION}.a' ; then
-    TCL_SHLIB_CFLAGS=""
-fi
-
 AC_SUBST(TCL_VERSION)
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
@@ -337,14 +328,6 @@ eval "TKX_STLIB_NAME=libtkx${TCL_UNSHARED_LIB_SUFFIX}"
 eval "TKX_SHLIB_NAME=libtkx${TCL_SHARED_LIB_SUFFIX}"
 
 #
-# If the names ended up the same, do build twice.
-#
-if test "x$TCLX_STLIB_NAME" = "x$TCLX_SHLIB_NAME"; then
-    TCLX_STLIB_NAME=dont_build_this
-    TKX_STLIB_NAME=dont_build_this
-fi
-
-#
 # Determine suffix to use for the object files for the shared library.
 #
 if test "x${TCL_SHLIB_CFLAGS}" != "x"; then
@@ -373,6 +356,8 @@ case "$BUILD_SHARED" in
         TKX_STLIB_BUILD=$TKX_STLIB_NAME
         TCLX_SHLIB_BUILD=$TCLX_SHLIB_NAME
         TKX_SHLIB_BUILD=$TKX_SHLIB_NAME
+	TCLX_LIB_NAME=${TCLX_SHLIB_NAME}
+	TKX_LIB_NAME=${TKX_SHLIB_NAME}
         ;;
     NO|no)
         AC_MSG_RESULT(Will not build shared libraries)
@@ -381,10 +366,12 @@ case "$BUILD_SHARED" in
         TCLX_LIB_SPEC="$TCLX_INST_LIB/${TCLX_STLIB_NAME}"
         TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/${TKX_STLIB_NAME}"
         TKX_LIB_SPEC="$TCLX_INST_LIB/${TKX_STLIB_NAME}"
-        TCLX_STLIB_BUILD=$TCLX_STLIB_NAME
-        TKX_STLIB_BUILD=$TKX_STLIB_NAME
+        TCLX_STLIB_BUILD=${TCLX_STLIB_NAME}
+        TKX_STLIB_BUILD=${TKX_STLIB_NAME}
         TCLX_SHLIB_BUILD=""
         TKX_SHLIB_BUILD=""
+ 	TCLX_LIB_NAME=${TCLX_STLIB_NAME}
+ 	TKX_LIB_NAME=${TKX_STLIB_NAME}
         ;;
 esac
 
@@ -411,6 +398,8 @@ AC_SUBST(TCLX_BUILD_LIB_SPEC)
 AC_SUBST(TCLX_LIB_SPEC)
 AC_SUBST(TKX_BUILD_LIB_SPEC)
 AC_SUBST(TKX_LIB_SPEC)
+AC_SUBST(TCLX_LIB_NAME)
+AC_SUBST(TKX_LIB_NAME)
 
 #------------------------------------------------------------------------------
 # Test for UnixWare -o bug.  Macros are used in targets to build the shared
@@ -489,7 +478,17 @@ if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
     LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
 fi
 eval "TCLX_CC_SEARCH_FLAGS=\"$TCL_LD_SEARCH_FLAGS\""
-TCLX_LD_SEARCH_FLAGS=`echo ${TCLX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
+
+case $TCL_SHLIB_LD in
+    *cc*-shared*)
+	TCLX_LD_SEARCH_FLAGS="${TCLX_CC_SEARCH_FLAGS}"
+	;;
+    *)
+	TCLX_LD_SEARCH_FLAGS=`echo ${TCLX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
+
+	;;
+esac
+
 AC_SUBST(TCLX_LD_SEARCH_FLAGS)
 AC_SUBST(TCLX_CC_SEARCH_FLAGS)
 
@@ -515,7 +514,15 @@ if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
     fi
 fi
 eval "TKX_CC_SEARCH_FLAGS=\"$TCL_LD_SEARCH_FLAGS\""
-TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
+case $TCL_SHLIB_LD in
+    *cc*-shared*)
+	TKX_LD_SEARCH_FLAGS="${TKX_CC_SEARCH_FLAGS}"
+	;;
+    *)
+	TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
+	;;
+esac
+
 AC_SUBST(TKX_LD_SEARCH_FLAGS)
 AC_SUBST(TKX_CC_SEARCH_FLAGS)
 

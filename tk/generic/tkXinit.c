@@ -13,12 +13,37 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 8.0.4.1 1997/04/14 02:03:00 markd Exp $
+ * $Id: tkXinit.c,v 8.1 1997/04/17 05:00:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tk.h"
+
+
+/*-----------------------------------------------------------------------------
+ * InitSetup --
+ *
+ *   Common initialize function.
+ *
+ * Parameters:
+ *   o interp - A pointer to the interpreter.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+InitSetup (interp)
+    Tcl_Interp  *interp;
+{
+    if (Tcl_PkgRequire (interp, "Tk", TK_VERSION, 1) == NULL) {
+ 	return TCL_ERROR;
+    }
+    if (Tcl_PkgRequire (interp, "Tclx", TCLX_VERSION, 1) == NULL) {
+ 	return TCL_ERROR;
+    }
+    return Tcl_PkgProvide (interp, "Tkx", TKX_VERSION);
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -32,23 +57,12 @@
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-int
-Tkx_Init (interp)
-    Tcl_Interp  *interp;
+int Tkx_Init (interp)
+    Tcl_Interp *interp;
 {
-    if (Tcl_PkgRequire (interp, "Tcl", TCL_VERSION, 1) == NULL) {
- 	return TCL_ERROR;
+    if (InitSetup(interp) != TCL_OK) {
+	goto errorExit;
     }
-    if (Tcl_PkgRequire (interp, "Tclx", TCLX_VERSION, 1) == NULL) {
- 	return TCL_ERROR;
-    }
-    if (Tcl_PkgRequire (interp, "Tk", TK_VERSION, 1) == NULL) {
- 	return TCL_ERROR;
-    }
-    if (Tcl_PkgProvide (interp, "Tkx", TKX_VERSION) != TCL_OK) {
- 	return TCL_ERROR;
-    }
-
     if (TclXRuntimeInit (interp,
                          "tk",
                          TKX_LIBRARY,
@@ -63,4 +77,25 @@ Tkx_Init (interp)
     return TCL_ERROR;
 }
 
-
+
+/*-----------------------------------------------------------------------------
+ * Tkx_Init --
+ *
+ *   Do safe TkX initialization.
+ *
+ * Parameters:
+ *   o interp - A pointer to the interpreter.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int Tkx_SafeInit (interp)
+    Tcl_Interp *interp;
+{
+    if (InitSetup (interp) != TCL_OK) {
+	Tcl_AddErrorInfo (interp,
+		     "\n    (while initializing safe TkX)");
+	return TCL_ERROR;
+    }
+    return TCL_OK;
+}

@@ -12,9 +12,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.13 1997/07/10 10:06:41 markd Exp $
+ * $Id: tclXlib.c,v 8.14 1997/08/08 10:04:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
+/* FIX: Really should use original auto_load instead load_ouster_index,
+   but this leads to search path problems.*/
+
 
 /*-----------------------------------------------------------------------------
  * The Extended Tcl library code is a super set of the standard Tcl libaries.
@@ -49,7 +52,8 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
  * This is a global rather than a local so it will work with K&R compilers.
  * Its writable so it works with gcc.
  */
-static char loadOusterCmd [] = "source [file join $tclx_library loadouster.tcl]";
+static char loadOusterCmd [] =
+    "source [file join $tclx_library loadouster.tcl]";
 
 /*
  * Indicates the type of library index.
@@ -130,11 +134,11 @@ LoadPackageIndex _ANSI_ARGS_((Tcl_Interp       *interp,
 
 static int
 LoadOusterIndex _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *indexFilePath));
+                             char       *dirPath));
 
 static int
 LoadDirIndexCallback _ANSI_ARGS_((Tcl_Interp  *interp,
-                                  char        *path,
+                                  char        *dirPath,
                                   char        *fileName,
                                   int          caseSensitive,
                                   ClientData   clientData));
@@ -698,7 +702,8 @@ BuildPackageIndex (interp, tlibFilePath)
 
     Tcl_DStringInit (&command);
 
-    Tcl_DStringAppend (&command, "source [file join $tclx_library buildidx.tcl];", -1);
+    Tcl_DStringAppend (&command, 
+                       "source [file join $tclx_library buildidx.tcl];", -1);
     Tcl_DStringAppend (&command, "buildpackageindex ", -1);
     Tcl_DStringAppend (&command, tlibFilePath, -1);
 
@@ -782,12 +787,13 @@ LoadPackageIndex (interp, tlibFilePath, indexNameClass)
 /*-----------------------------------------------------------------------------
  * LoadOusterIndex --
  *
- * Load a standard Tcl index (tclIndex).  A special proc is used so that the
- * "dir" variable can be set.
+ * Load a standard Tcl index (tclIndex).  A proc is used to do the actual work.
+ * This way, the "dir" variable can be set.
  *
  * Parameters
  *   o interp - A pointer to the interpreter, error returned in result.
- *   o indexFilePath - Absolute path name to the tclIndex file.
+ *   o dirPath - Absolute path name to the directory containing the tclIndex
+ *     file.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  * Notes:
@@ -799,9 +805,9 @@ LoadPackageIndex (interp, tlibFilePath, indexNameClass)
  *-----------------------------------------------------------------------------
  */
 static int
-LoadOusterIndex (interp, indexFilePath)
+LoadOusterIndex (interp, dirPath)
      Tcl_Interp *interp;
-     char       *indexFilePath;
+     char       *dirPath;
 {
     Tcl_DString  command;
     Tcl_CmdInfo  loadCmdInfo;
@@ -820,10 +826,11 @@ LoadOusterIndex (interp, indexFilePath)
     }
 
     /*
-     * Now, actually do the load.
+     * Now, actually do the load.  Pass only the dir name, not the whole
+     * file path.
      */
     Tcl_DStringAppendElement (&command, "auto_load_ouster_index");
-    Tcl_DStringAppendElement (&command, indexFilePath);
+    Tcl_DStringAppendElement (&command, dirPath);
 
     if (Tcl_GlobalEval (interp, command.string) == TCL_ERROR)
         goto errorExit;
@@ -833,7 +840,9 @@ LoadOusterIndex (interp, indexFilePath)
     return TCL_OK;
 
   errorExit:
-    AddLibIndexErrorInfo (interp, indexFilePath);
+    Tcl_DStringSetLength(&command, 0);  /* Use to hold file path */
+    AddLibIndexErrorInfo (interp,
+                          TclX_JoinPath (dirPath, "tclIndex", &command));
     Tcl_DStringFree (&command);
     return TCL_ERROR;
 }
@@ -845,7 +854,7 @@ LoadOusterIndex (interp, indexFilePath)
  *
  * Parameters
  *   o interp - Interp is passed though.
- *   o path - Normalized path to directory.
+ *   o dirPath - Normalized path to directory.
  *   o fileName - Tcl normalized file name in directory.
  *   o caseSensitive - Are the file names case sensitive?  Always
  *     TRUE on Unix.
@@ -856,9 +865,9 @@ LoadOusterIndex (interp, indexFilePath)
  *-----------------------------------------------------------------------------
  */
 static int
-LoadDirIndexCallback (interp, path, fileName, caseSensitive, clientData)
+LoadDirIndexCallback (interp, dirPath, fileName, caseSensitive, clientData)
     Tcl_Interp  *interp;
-    char        *path;
+    char        *dirPath;
     char        *fileName;
     int          caseSensitive;
     ClientData   clientData;
@@ -900,7 +909,7 @@ LoadDirIndexCallback (interp, path, fileName, caseSensitive, clientData)
      * Assemble full path to library file.
      */
     Tcl_DStringInit (&filePath);
-    TclX_JoinPath (path, fileName, &filePath);
+    TclX_JoinPath (dirPath, fileName, &filePath);
 
     /*
      * Skip index it can't be accessed.
@@ -912,7 +921,7 @@ LoadDirIndexCallback (interp, path, fileName, caseSensitive, clientData)
      * Process the index according to its type.
      */
     if (indexNameClass == TCLLIB_OUSTER) {
-        if (LoadOusterIndex (interp, filePath.string) != TCL_OK)
+        if (LoadOusterIndex (interp, dirPath) != TCL_OK)
             goto errorExit;
     } else {
         if (LoadPackageIndex (interp, filePath.string,
@@ -1558,7 +1567,7 @@ TclX_Auto_loadObjCmd (clientData, interp, objc, objv)
     result = LoadCommand (interp, command);
     if (result == TCL_ERROR)
         goto errorExit;
-    if (result != TCL_OK)
+    if (result == TCL_CONTINUE)
         goto notFound;
 
   found:

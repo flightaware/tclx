@@ -12,11 +12,17 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: Common.mk.in,v 8.4 1997/04/17 05:00:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 SHELL = /bin/sh
+
+#------------------------------------------------------------------------------
+# Tcl and Tk versions
+#
+TCL_VERSION      = @TCL_VERSION@
+TK_VERSION       = @TK_VERSION@
 
 #------------------------------------------------------------------------------
 # TclX version information extracted from tclExtend.h.
@@ -57,9 +63,11 @@ TK_STLIB_NAME   = @TK_STLIB_NAME@
 
 TCLX_SHLIB_NAME = @TCLX_SHLIB_NAME@
 TCLX_STLIB_NAME = @TCLX_STLIB_NAME@
+TCLX_LIB_NAME   = @TCLX_LIB_NAME@
 
 TKX_SHLIB_NAME       = @TKX_SHLIB_NAME@
 TKX_STLIB_NAME       = @TKX_STLIB_NAME@
+TKX_LIB_NAME         = @TKX_LIB_NAME@
 
 TCLX_SHLIB_BUILD     = @TCLX_SHLIB_BUILD@
 TCLX_STLIB_BUILD     = @TCLX_STLIB_BUILD@
@@ -137,6 +145,4 @@ BLDMANHELP         = ${RUNTCL} ${bldbasedir}/unix/tools/bldmanhelp
 CONVERTLIB         = ${RUNTCL} ${srcbasedir}/unix/tools/libconvert.tcl
 INSTCOPY           = ${RUNTCL} ${bldbasedir}/unix/tools/instcopy
 CPMANPAGES         = ${RUNTCL} ${bldbasedir}/unix/tools/cpmanpages
-
-
 

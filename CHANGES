@@ -1328,3 +1328,7 @@
     ports.  Instead, a Tcl global TCLXENV(deleteInterpAtShellExit) enables
     deleting the interp when the shell exits.
 -------------------------------------------------------------------------------
+16 Aug 97:
+  o Integrated several build fixes from Jan Nijtmans' <nijtmans@nici.kun.nl>
+    TclX plus patch.
+-------------------------------------------------------------------------------

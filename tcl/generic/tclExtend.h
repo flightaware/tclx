@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.4 1997/07/03 07:14:11 markd Exp $
+ * $Id: tclExtend.h,v 8.5 1997/08/10 22:18:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,10 +42,10 @@
 #define TCLX_PATCHLEVEL      0
 
 #define TCLX_VERSION        "8.0.0"
-#define TCLX_FULL_VERSION   "8.0.0b2"
+#define TCLX_FULL_VERSION   "8.0.0b3"
 
 #define TKX_VERSION         "8.0.0"
-#define TKX_FULL_VERSION    "8.0.0b2"
+#define TKX_FULL_VERSION    "8.0.0b3"
 
 #define TCLX_DEBUG
 
@@ -246,6 +246,9 @@ TclX_AsyncCommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
 
 EXTERN int
 Tkx_Init _ANSI_ARGS_((Tcl_Interp  *interp));
+
+EXTERN int
+Tkx_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN void
 TkX_Main _ANSI_ARGS_((int               argc,

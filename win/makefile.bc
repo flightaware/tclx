@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.bc,v 1.1 1997/05/11 20:33:02 karl Exp $
+# $Id: makefile.bc,v 8.1 1997/06/12 21:09:00 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -21,6 +21,12 @@ all:
         make -f makefile.bc all
         cd ..\..\tk\win
         make -f makefile.bc all
+
+static:
+        cd ..\tcl\win
+        make -f makefile.bc static
+        cd ..\..\tk\win
+        make -f makefile.bc static
 
 test:
         cd ..\tcl\win

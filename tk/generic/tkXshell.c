@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.3 1997/08/10 22:18:36 markd Exp $
+ * $Id: tkXshell.c,v 8.4 1997/08/10 22:21:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -88,8 +88,6 @@ TkX_Main(argc, argv, appInitProc)
     Tcl_Channel inChannel, outChannel, errChannel;
     Tcl_Interp *interp;
     int tty;
-    Tcl_Obj *varValue;
-    int deleteInter;
 
     TclX_SetAppInfo (TRUE,
                      "wishx",

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.5 1997/06/30 17:21:40 markd Exp $
+ * $Id: tclXinit.c,v 8.6 1997/07/01 02:58:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,7 +43,11 @@ static char tclx_findinit [] =
     set dirs {}\n\
     set envVar [string toupper ${w}X_LIBRARY]\n\
     if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
+    if [info exists env(EXT_FOLDER)] {\n\
+	lappend dirs [file join $env(EXT_FOLDER) \"Tool Command Language\" ${w}X$version]
+    }\n\
     lappend dirs $defaultLib\n\
+    set libDir {}\n\
     set prefix [file dirname [info nameofexecutable]]\n\
     set plat [file tail $prefix]\n\
     set prefix [file dirname $prefix]\n\
@@ -57,6 +61,7 @@ static char tclx_findinit [] =
             if !$noInit {uplevel #0 source [list $init]}; return\n\
         }\n\
     }\n\
+    set libDir {}\n\
     set msg \"Can't find ${w}x.tcl in the following directories: \n\"\n\
     foreach d $dirs {append msg \"  $d\n\"}\n\
     append msg \"This probably means that TclX wasn't installed properly.\n\"\n\

@@ -1,6 +1,6 @@
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 	4,2.0,0
- PRODUCTVERSION 4,2.0,0
+ FILEVERSION 	8,0.0,0
+ PRODUCTVERSION 8,0.0,0
  FILEFLAGSMASK 	0x3fL
  FILEFLAGS 	0x0L
  FILEOS 	0x4L
@@ -14,10 +14,10 @@ BEGIN
             VALUE "FileDescription", "TkX DLL\0"
             VALUE "OriginalFilename", "tkx.dll\0"
             VALUE "CompanyName", "TclX Project\0"
-            VALUE "FileVersion", 4,2.0,0
-            VALUE "LegalCopyright", "Copyright \251 1995-1996\0"
-            VALUE "ProductName", "TkX 4.2.0 for Windows\0"
-            VALUE "ProductVersion", 4,2.0,0
+            VALUE "FileVersion", 8,0.0,0
+            VALUE "LegalCopyright", "Copyright \251 1995-1997\0"
+            VALUE "ProductName", "TkX 8.0.0 for Windows\0"
+            VALUE "ProductVersion", 8,0.0,0
         END
     END
     BLOCK "VarFileInfo"

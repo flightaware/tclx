@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loadouster.tcl,v 8.0.4.1 1997/04/14 02:02:06 markd Exp $
+# $Id: loadouster.tcl,v 8.1 1997/04/17 04:59:07 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -52,4 +52,49 @@ proc auto_load_ouster_index fn {
     }
 }
 
+#
+# Body of code taken from init.tcl auto_load proc.  Indentation maintained.
+#
 
+proc auto_load_ouster_index dir {
+    global auto_index
+
+    # Check if we are a safe interpreter. In that case, we support only
+    # newer format tclIndex files.
+
+    set issafe [interp issafe]
+
+	set f ""
+	if {$issafe} {
+	    catch {source [file join $dir tclIndex]}
+	} elseif [catch {set f [open [file join $dir tclIndex]]}] {
+	    continue
+	} else {
+	    set error [catch {
+		set id [gets $f]
+		if {$id == "# Tcl autoload index file, version 2.0"} {
+		    eval [read $f]
+		} elseif {$id == \
+		    "# Tcl autoload index file: each line identifies a Tcl"} {
+		    while {[gets $f line] >= 0} {
+			if {([string index $line 0] == "#")
+				|| ([llength $line] != 2)} {
+			    continue
+			}
+			set name [lindex $line 0]
+			set auto_index($name) \
+			    "source [file join $dir [lindex $line 1]]"
+		    }
+		} else {
+		    error \
+		      "[file join $dir tclIndex] isn't a proper Tcl index file"
+		}
+	    } msg]
+	    if {$f != ""} {
+		close $f
+	    }
+	    if $error {
+		error $msg $errorInfo $errorCode
+	    }
+	}
+}
