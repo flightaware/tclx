@@ -1,8 +1,10 @@
 #
 # server.test
 #
-# Test for server commands.
-#---------------------------------------------------------------------------
+# Test for server commands.  Some tests will be skipped if we are no on a host
+# on a known development machine, due to difficutly in certain environments.
+# Set the environment variable TCLX_FULL_TESTS to override.
+#------------------------------------------------------------------------------
 # Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
@@ -12,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.1 1995/03/30 05:20:00 markd Exp markd $
+# $Id: server.test,v 1.2 1995/03/30 19:14:04 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -149,6 +151,19 @@ Test server-5.5 {server_send argument checking} {
 
 
 #
+# Determine if we are at a development site we know is good.  If we are, we
+# do more checking.
+#
+switch -glob -- [id host] {
+    {*.neosoft.com} {set safeHost 1}
+    {*.grizzly.com} {set safeHost 1}
+    default         {set safeHost 0}
+}
+if [info exists env(TCLX_FULL_TESTS)] {
+    set safeHost 1
+}
+
+#
 # Test simple interaction with the echo server.  This proc is used to
 # do the actual interaction.  The server is connected to using various
 # different options and the same interaction done.
@@ -204,6 +219,18 @@ proc TalkToEcho {testId readFH writeFH buffered} {
     return
 }
 
+# We might have trouble converting a hostname to IP address.  If we can't,
+# just use the hostname to access.
+
+if $safeHost {
+    set maybeIP [lindex [server_info addresses [id host]] 0]
+} else {
+    set maybeIP [id host]
+    catch {
+        set maybeIP [lindex [server_info addresses [id host]] 0]
+    }
+}
+
 Test server-7.1 {simple client interaction} {
     set fh [server_connect [id host] echo]
     TalkToEcho server-7.1 $fh $fh 1
@@ -211,25 +238,22 @@ Test server-7.1 {simple client interaction} {
 
 Test server-7.2 {simple client interaction} {
     set ip [lindex [server_info addresses [id host]] 0]
-    set fh [server_connect -nobuf $ip echo]
+    set fh [server_connect -nobuf $maybeIP echo]
     TalkToEcho server-7.2 $fh $fh 0
 } 0 {}
 
 Test server-7.3 {simple client interaction} {
-    set ip [lindex [server_info addresses [id host]] 0]
-    set fh [server_connect -buf $ip echo]
+    set fh [server_connect -buf $maybeIP echo]
     TalkToEcho server-7.3 $fh $fh 1
 } 0 {}
 
 Test server-7.4 {simple client interaction} {
-    set ip [lindex [server_info addresses [id host]] 0]
-    set fhs [server_connect -twoids -buf $ip echo]
+    set fhs [server_connect -twoids -buf $maybeIP echo]
     TalkToEcho server-7.4 [lindex $fhs 0] [lindex $fhs 1] 1
 } 0 {}
 
 Test server-7.5 {simple client interaction} {
-    set ip [lindex [server_info addresses [id host]] 0]
-    set fhs [server_connect -twoids -nobuf $ip echo]
+    set fhs [server_connect -twoids -nobuf $maybeIP echo]
     TalkToEcho server-7.5 [lindex $fhs 0] [lindex $fhs 1] 0
 } 0 {}
 
