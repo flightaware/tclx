@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclExtend.h,v 8.18 1999/05/03 02:47:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,15 +48,19 @@
  *   7.5.1 patch 1   7.5.1.1   7.5.1p1
  */
 
-#define TCLX_PATCHLEVEL      0
+#define TCLX_PATCHLEVEL      2
 
-#define TCLX_VERSION        "8.1.0"
-#define TCLX_FULL_VERSION   "8.1.0"
+#define TCLX_VERSION        "8.1.2"
+#define TCLX_FULL_VERSION   "8.1.2"
 
-#define TKX_VERSION         "8.1.0"
-#define TKX_FULL_VERSION    "8.1.0"
+#define TKX_VERSION         "8.1.2"
+#define TKX_FULL_VERSION    "8.1.2"
 
 #define TCLX_DEBUG
+
+/* Removed TclX_Main, use macro instead */
+#define TclX_Main(argc, argv, proc) \
+    TclX_MainEx(argc, argv, proc, Tcl_CreateInterp())
 
 /*
  * Generic void pointer.
@@ -107,10 +111,10 @@ TclXRuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
 /*
  * Exported TclX initialization functions.
  */
-EXTERN void
-TclX_Main _ANSI_ARGS_((int              argc,
-                       char           **argv,
-                       Tcl_AppInitProc *appInitProc));
+
+EXTERN void		TclX_MainEx _ANSI_ARGS_((int argc, char ** argv, 
+				Tcl_AppInitProc * appInitProc, 
+				Tcl_Interp * interp));
 
 EXTERN int
 Tclx_Init _ANSI_ARGS_((Tcl_Interp *interp));
@@ -163,6 +167,9 @@ TclX_SplitWinCmdLine _ANSI_ARGS_((int    *argcPtr,
 /*
  * Exported utility functions.
  */
+EXTERN void
+TclX_AppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF(Tcl_Interp *, interpArg));
+
 EXTERN char * 
 TclX_DownShift _ANSI_ARGS_((char       *targetStr,
                             CONST char *sourceStr));

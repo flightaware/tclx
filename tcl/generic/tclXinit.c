@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXinit.c,v 8.16 1999/03/31 06:37:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -354,6 +354,10 @@ int
 Tclx_Init (interp)
     Tcl_Interp *interp;
 {
+    if (Tcl_InitStubs(interp, "8.0", 0) == NULL) {
+	abort();
+    }
+
     if (InitSetup (interp) == TCL_ERROR)
         goto errorExit;
 

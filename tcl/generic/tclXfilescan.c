@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXfilescan.c,v 8.20 1999/04/09 00:21:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -582,7 +582,7 @@ SetMatchInfoVar (interp, scanData)
     }
     regExpPtr = (TclRegexp *) scanData->matchPtr->regExp;
 
-    for (idx = 0; idx < regExpPtr->re.re_nsub; idx++) {
+    for (idx = 0; (unsigned int) idx < regExpPtr->re.re_nsub; idx++) {
 	start = regExpPtr->matches[idx+1].rm_so;
 	end = regExpPtr->matches[idx+1].rm_eo;
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXshell.c,v 8.6 1999/03/31 06:37:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -204,7 +204,7 @@ ParseCmdLine (interp, argc, argv)
 
 
 /*-----------------------------------------------------------------------------
- * TclX_Main --
+ * TclX_MainEx --
  *
  *   This function runs the TclX shell, including parsing the command line and
  * calling the Tcl_AppInit function at the approriate place.  It either enters
@@ -220,25 +220,33 @@ ParseCmdLine (interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_Main (argc, argv, appInitProc)
+TclX_MainEx (argc, argv, appInitProc, interp)
     int               argc;
     char            **argv;
     Tcl_AppInitProc  *appInitProc;
-{
     Tcl_Interp *interp;
+{
     char *evalStr;
 
-    Tcl_FindExecutable (argv [0]);
-
     /* 
-     * Create a basic Tcl interpreter.
+     * Initialize the stubs before making any calls to Tcl APIs.
      */
-    interp = Tcl_CreateInterp();
 
+    if (Tcl_InitStubs(interp, "8.0", 0) == NULL) {
+	abort();
+    }
+
+#ifndef BORLAND
+    TclX_SplitWinCmdLine (&argc, &argv);
+#endif
+
+    Tcl_FindExecutable(argv[0]);
+    
     /*
      * Do command line parsing.  This does not return on an error.  Information
      * for command line is saved in Tcl variables.
      */
+
     ParseCmdLine (interp, argc, argv);
 
     /*
