@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 6.0 1996/05/10 16:19:39 markd Exp $
+# $Id: Config.mk,v 7.0 1996/06/16 05:34:11 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -119,60 +119,52 @@ XLDLIBS=
 INSTALL_ROOT =
 
 #------------------------------------------------------------------------------
-# The TclX runtime directory that the Extended Tcl runtime files are installed
-# into.
+# Allow seperate prefixes for TclX and TkX, but default to standard prefix.
 
-TCLX_INST_RUNTIME=${prefix}/tclX/${TCLX_FULL_VERSION}
-
-#------------------------------------------------------------------------------
-# The TkX runtimes that the Tk runtime files are installed into.  A directory
-# whose name is the TkX version number will be built in this directory.
-
-TKX_INST_RUNTIME=${prefix}/tkX/${TKX_FULL_VERSION}
+TCLX_PREFIX="${prefix}"
+TCLX_EXEC_PREFIX="${exec_prefix}"
+TKX_PREFIX="${prefix}"
+TKX_EXEC_PREFIX="${exec_prefix}"
 
 #------------------------------------------------------------------------------
-# The directory to install the tcl, wishx and tclhelp binaries in when the
-# standard install model is used.
+# The TclX and TkX runtime directories.  This is where the shared runtime and
+# help files are installed.
 
-TCLX_INST_BIN=${exec_prefix}/bin${ARCH}
-
-#------------------------------------------------------------------------------
-# The directory to install the libtclx.a library in when the standard install
-# model is used.
-
-TCLX_INST_LIB=${exec_prefix}/lib${ARCH}
+TCLX_INST_RUNTIME=${TCLX_PREFIX}/lib/tclX/${TCLX_FULL_VERSION}
+TKX_INST_RUNTIME=${TKX_PREFIX}/lib/tkX/${TKX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
-# The directory the TclX .h files go in when the standard install model is
-# used.
+# The directories to install the executables in.
 
-TCLX_INST_INCL=${prefix}/include
-
-#==============================================================================
-# These defines specify where and how the manual pages are to be installed.
-# Since there are so many manual pages provided, they are placed together in
-# one Tcl manual page directory by default, rather than splitting into the
-# standard manual pages directories. You might want to modify these values.
-#..............................................................................
+TCLX_INST_BIN=${TCLX_EXEC_PREFIX}/bin${ARCH}
+TKX_INST_BIN=${TKX_EXEC_PREFIX}/bin${ARCH}
 
 #------------------------------------------------------------------------------
-# o TCLX_MAN - Base manual directory where all of the man* and cat*
-#   directories live.
+# The directories to install the libraries in.
 
-TCLX_INST_MAN=${prefix}/man
+TCLX_INST_LIB=${TCLX_EXEC_PREFIX}/lib${ARCH}
+TKX_INST_LIB=${TKX_EXEC_PREFIX}/lib${ARCH}
 
 #------------------------------------------------------------------------------
-# o TCLX_MAN_CMD_SECTION - Section for TclX command manual pages.
-# o TCLX_MAN_FUNC_SECTION - Section for TclX C level function manual pages.
-#
+# The directories the TclX include files are installed.
+
+TCLX_INST_INCL=${TCLX_PREFIX}/include
+
+#------------------------------------------------------------------------------
+# Base manual directory where all of the man* and cat* directories live.
+
+TCLX_INST_MAN=${TCLX_PREFIX}/man
+
+#------------------------------------------------------------------------------
+# Sections for Tcl commands and C function manual pages.
 
 TCLX_MAN_CMD_SECTION=n
 TCLX_MAN_FUNC_SECTION=3
 
 #------------------------------------------------------------------------------
-# o MAN_DIR_SEPARATOR - The separator character used in the directory name
-#   of the cat* and man* manual directories.  This is usually empty or 
-#   a period. i.e "/usr/man/man1" or "/usr/man/man.1".  Autoconf attempts to
-#   determine it but it can be overridden here.
+# The separator character used in the directory name of the cat* and man*
+# manual directories.  This is usually empty or a period. i.e "/usr/man/man1"
+# or "/usr/man/man.1".  Autoconf attempts to determine it but it can be
+# overridden here.
 
 #MAN_DIR_SEPARATOR=.

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 6.1 1996/05/19 03:37:10 markd Exp $
+# $Id: Makefile.in,v 7.0 1996/06/16 05:34:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -101,8 +101,8 @@ tkXinit.o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
 tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXshell.c
 
-tkXAppInit.o: ${TKX_GENERIC_DIR}/tkXAppInit.c
-	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXAppInit.c
+tkXAppInit.o: ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
+	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
 
 #------------------------------------------------------------------------------
 # We need the "help" directory here so that the help command will work before
@@ -116,7 +116,7 @@ tkx.tcl: ${RUNTIME_DIR}/tkx.tcl
 
 tclhelp: ${srcdir}/../runtime/tclhelp.tcl
 	rm -f tclhelp
-	echo "#!${TCLX_INST_BIN}/wishx"       >tclhelp
+	echo "#!${TKX_INST_BIN}/wishx"       >tclhelp
 	cat ${srcdir}/../runtime/tclhelp.tcl >>tclhelp
 	chmod +rx tclhelp
 
@@ -199,7 +199,7 @@ buildhelp:
 #------------------------------------------------------------------------------
 
 install: install-exec install-runtime
-	${INSTCOPY} ${TKX_GENERIC_DIR}/tkXAppInit.c \
+	${INSTCOPY} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c \
 	    ${INSTALL_ROOT}${TKX_INST_RUNTIME}
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
 
@@ -207,20 +207,20 @@ install-runtime:
 	${INSTCOPY} tkx.tcl ${INSTALL_ROOT}${TKX_INST_RUNTIME}
 
 install-exec:
-	${INSTCOPY} wishx ${INSTALL_ROOT}${TCLX_INST_BIN}
-	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/wishx
-	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TCLX_INST_LIB}
-	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/libtkx.a
+	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_BIN}
+	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
+	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TKX_INST_LIB}
+	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/libtkx.a
 	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
+	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB} ;\
 	    if test "${TKX_SHLIB_NAME}" != "${TKX_SHLIB_BASE_NAME}"; then \
-		rm -f ${INSTALL_ROOT}${TCLX_INST_LIB}/${TKX_SHLIB_BASE_NAME};\
-	        ln ${INSTALL_ROOT}${TCLX_INST_LIB}/${TKX_SHLIB_NAME} \
-		   ${INSTALL_ROOT}${TCLX_INST_LIB}/${TKX_SHLIB_BASE_NAME} ;\
+		rm -f ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME};\
+	        ln ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_NAME} \
+		   ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME} ;\
 	    fi ;\
 	fi
-	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
-	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TCLX_INST_BIN}
+	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
+	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
 
 #------------------------------------------------------------------------------
 clean:
