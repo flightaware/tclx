@@ -301,10 +301,9 @@ a multi-architecture server that has the rest of TclX already installed):
 SHARED LIBRARIES
 ================
 
-   Shared libraries are not directly supported by the TclX build process,
-since the mechanisms for building them are not portable across Unix
-platforms.  See the file README.SHLIB for help in building shared libraries.
-If you have instructions on other platforms, please contact us.
+   Shared libraries can be build for all systems that Tcl supports shared
+libraries on.  The --enable-shared flag to configure generates TclX shared
+libraries and links the TclX shells with shared libraries.
 
 INTEGRATING WITH OTHER EXTENSIONS AND APPLICATIONS
 ==================================================

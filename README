@@ -193,6 +193,8 @@ who have helped us debug problems and given us valuable suggestions.
 A special thanks to John Ousterhout and his team at Sun for Tcl, Tk and
 all the support they have given us.
 
+Thanks to Dr. Joseph E. Sacco <jsacco@ssl.com> for his initial work on
+building shared libraries.
 
 NEOSOFT TCL CONSULTING
 ======================
