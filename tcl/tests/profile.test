@@ -12,11 +12,30 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
+# $Id: profile.test,v 2.2 1993/05/13 06:07:08 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+# Make sure we that real time is not zero.  If so, suggest compiling with a
+# different parameter.
+
+proc ProcA1 {} {sleep 1}
+profile on
+ProcA1
+profile off profData
+foreach idx [array names profData] {
+   if [string match "ProcA1 *" $idx] break
+}
+
+if {[lindex $profData($idx) 1] == 0} {
+    puts stderr "*** The profile command is returning real time values of"
+    puts stderr "*** zero.  This suggests that your `times' system call does"
+    puts stderr "*** not return elapsed real time.  Try compiling with"
+    puts stderr "*** -DTCL_NO_REAL_TIMES added to SYS_DEP_FLAGS in your"
+    puts stderr "*** config file."
+}
 
 #
 # Function to build a list from the profile output data with each entry

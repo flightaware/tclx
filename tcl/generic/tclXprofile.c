@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 2.2 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXprofile.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -81,6 +81,9 @@ typedef struct profInfo_t {
  * Prototypes of internal functions.
  */
 
+static long
+GetTimes _ANSI_ARGS_((long  *cpuTimesPtr));
+
 static void
 ProcEntry _ANSI_ARGS_((profInfo_t *infoPtr,
                        char       *procName,
@@ -129,6 +132,75 @@ Tcl_ProfileCmd _ANSI_ARGS_((ClientData    clientData,
 static void
 CleanUpProfMon _ANSI_ARGS_((ClientData clientData));
 
+#ifdef TCL_NO_REAL_TIMES
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * GetTimes --
+ *   Get the current real and CPU time for the process.  This version of this
+ * function is used on systems where the times systems call does not return the
+ * elasped real time.  It uses gettimeofday to figure out the real time.
+ *
+ * Parameters:
+ *   o cpuTimePtr (O) - The CPU time in milliseconds is returned here.
+ * Returns:
+ *   The current real time of the process, in milliseconds, relative to the
+ * first time this function was called.
+ *-----------------------------------------------------------------------------
+ */
+static long
+GetTimes (cpuTimePtr)
+    long  *cpuTimePtr;
+{
+    static struct timeval startTime = {0, 0};
+    struct timeval        currentTime;
+    struct tms            cpuTimes;
+    long                  realTime;
+
+    /*
+     * If this is the first call, get base time.
+     */
+    if ((startTime.tv_sec == 0) && (startTime.tv_usec == 0))
+        gettimeofday (&startTime, NULL);
+    
+    gettimeofday (&currentTime, NULL);
+    currentTime.tv_sec  = currentTime.tv_sec  - startTime.tv_sec;
+    currentTime.tv_usec = currentTime.tv_usec - startTime.tv_usec;
+    realTime = (currentTime.tv_sec  * 1000) +
+               (currentTime.tv_usec / 1000);
+    times (&cpuTimes);
+    *cpuTimePtr = (cpuTimes.tms_utime + cpuTimes.tms_stime) * MS_PER_TICK;
+    return realTime;
+}
+#else
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * GetTimes --
+ *   Get the current real and CPU time for the process.  This version of this
+ * function is used on systems where the times systems call returns the
+ * elasped real time.
+ *
+ * Parameters:
+ *   o cpuTimePtr (O) - The CPU time in milliseconds is returned here.
+ * Returns:
+ *   The current real time of the process, in milliseconds.
+ *-----------------------------------------------------------------------------
+ */
+static long
+GetTimes (cpuTimePtr)
+    long  *cpuTimePtr;
+{
+    struct tms cpuTimes;
+    long       realTime;
+
+    realTime = times (&cpuTimes) * MS_PER_TICK;
+    *cpuTimePtr = (cpuTimes.tms_utime + cpuTimes.tms_stime) * MS_PER_TICK;
+    return realTime;
+}
+#endif /* TCL_NO_REAL_TIMES */
 
 /*
  *-----------------------------------------------------------------------------
@@ -365,18 +437,16 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     char        **argv;
 {
     Interp      *iPtr      = (Interp *) interp;
-    struct tms   cpuTimes;
     profInfo_t  *infoPtr   = (profInfo_t *) clientData;
     int          procLevel = (iPtr->varFramePtr == NULL) ? 0 : 
                              iPtr->varFramePtr->level;
+    long         cpuTime;
 
     /*
      * Calculate the time spent since the last trace.
      */
-    infoPtr->realTime += times (&cpuTimes) - infoPtr->lastRealTime;
-    infoPtr->cpuTime  += (cpuTimes.tms_utime + cpuTimes.tms_stime) -
-                         infoPtr->lastCpuTime;
-
+    infoPtr->realTime += GetTimes (&cpuTime) - infoPtr->lastRealTime;
+    infoPtr->cpuTime  += cpuTime - infoPtr->lastCpuTime;
     
     /*
      * If the procedure level has changed, then something is up.  Its not a
@@ -423,9 +493,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     /*
      * Save the exit time of the profiling trace handler.
      */
-    infoPtr->lastRealTime = times (&cpuTimes);
-    infoPtr->lastCpuTime  = cpuTimes.tms_utime + cpuTimes.tms_stime;
-
+    infoPtr->lastRealTime = GetTimes (&infoPtr->lastCpuTime);
 }
 
 /*
@@ -519,8 +587,8 @@ DumpTableData (interp, infoPtr, varName)
             (profDataEntry_t *) Tcl_GetHashValue (hashEntryPtr);
 
         sprintf (countBuf,    "%ld", dataEntryPtr->count);
-        sprintf (realTimeBuf, "%ld", dataEntryPtr->realTime * MS_PER_TICK);
-        sprintf (cpuTimeBuf,  "%ld", dataEntryPtr->cpuTime  * MS_PER_TICK);
+        sprintf (realTimeBuf, "%ld", dataEntryPtr->realTime);
+        sprintf (cpuTimeBuf,  "%ld", dataEntryPtr->cpuTime);
 
         dataListPtr = Tcl_Merge (3, dataArgv);
 
@@ -583,8 +651,7 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
      * Handle the on command.
      */
     if (STREQU (cmdArgv [0], "on")) {
-        int        allCommands = FALSE;
-        struct tms cpuTimes;
+        int  allCommands = FALSE;
 
         if ((cmdArgc != 1) || (optionsArgc > 1))
             goto wrongArgs;
@@ -612,8 +679,7 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
                              (ClientData) infoPtr);
         infoPtr->realTime = 0;
         infoPtr->cpuTime  = 0;
-        infoPtr->lastRealTime = times (&cpuTimes);
-        infoPtr->lastCpuTime  = cpuTimes.tms_utime + cpuTimes.tms_stime;
+        infoPtr->lastRealTime = GetTimes (&infoPtr->lastCpuTime);
         infoPtr->allCommands = allCommands;
         return TCL_OK;
     }
