@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.1 1992/10/25 17:07:40 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.2 1992/12/19 05:43:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -357,7 +357,7 @@ proc GenerateHelp {helpDirPath briefFile mergeTree sourceFiles} {
                  ", offset = $matchInfo(offset)"]
     }
     scanmatch $G_nroffScanCT "^'@brief" {
-        error [concat {"'@brief" without corresponding "'@help:"}
+        error [concat {"'@brief" without corresponding "'@help:"} \
                  ", offset = $matchInfo(offset)"]
     }
 
