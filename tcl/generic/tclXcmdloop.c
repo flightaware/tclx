@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 7.0 1996/06/16 05:30:09 markd Exp $
+ * $Id: tclXcmdloop.c,v 7.1 1996/07/18 19:36:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -567,7 +567,8 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
     char       *prompt2;
 {
     Tcl_DString command;
-    int result, partial = FALSE, gotSigIntError = FALSE;
+    int result, partial = FALSE, gotSigIntError = FALSE,
+      gotInterrupted = FALSE;
     Tcl_Channel stdinChan, stdoutChan;
 
     Tcl_DStringInit (&command);
@@ -593,14 +594,12 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
          * were through here, event if its already been processed.
          */
         if (gotSigIntError) {
-            gotSigIntError = FALSE;
             Tcl_DStringFree (&command);
             partial = FALSE;
             stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
             if (stdoutChan != NULL)
                 TclX_WriteNL (stdoutChan);
         }
-        gotSigIntError = FALSE;
 
         /*
          * Output a prompt and input a command.
@@ -609,15 +608,27 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
         if (stdinChan == NULL)
             goto endOfFile;
 
-        if (options & TCLX_CMDL_INTERACTIVE) {
+        /*
+         * Only ouput prompt if we didn't get interrupted or if the
+         * interruption was SIGINT
+         */
+        if ((options & TCLX_CMDL_INTERACTIVE) &&
+            (!gotInterrupted || gotSigIntError)) {
             OutputPrompt (interp, !partial, prompt1, prompt2);
         }
+
+        /*
+         * Reset these flags for the next round
+         */
+        gotSigIntError = FALSE;
+        gotInterrupted = FALSE; 
 
         result = Tcl_Gets (stdinChan, &command);
         if (result < 0) {
             if (Tcl_Eof (stdinChan) || Tcl_InputBlocked (stdinChan))
                 goto endOfFile;
             if (Tcl_GetErrno () == EINTR) {
+                gotInterrupted = TRUE; 
                 continue;  /* Process signals above */
             }
             Tcl_AppendResult (interp, "command input error on stdin: ",
