@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.24 1995/07/03 06:35:43 markd Exp markd $
+.\" $Id: TclX.n,v 4.25 1995/07/04 04:59:57 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -156,7 +156,7 @@ command will sync individual files.
 all file buffers.
 .TP
 .B have_ftruncate
-Return \fB1\fR if the \fBftruncate\fR system call is available.  If it is,
+Return \fB1\fR if the \fBftruncate\fR or \fBchsize\fR system call is available.  If it is,
 the \fBftruncate\fR command \fB-fileid\fR option maybe used.
 .TP
 .B have_msgcats
@@ -175,8 +175,8 @@ and \fBfstat\fR \fBlocalhost\fR and \fBremotehost\fR options).
 \fB0\fR is returned if sockets are not available.
 .TP
 .B have_truncate
-Return \fB1\fR if the \fBtruncate\fR of \fBchsize\fR system call is available.
-If it is, the \fBftruncate\fR command will work.
+Return \fB1\fR if the \fBtruncate\fR system call is available.
+If it is, the \fBftruncate\fR command may truncate by file path.
 .TP
 .B appname
 Return the symbolic application name of the current application linked with
@@ -1462,11 +1462,10 @@ Truncate a file to have a length of at most \fInewsize\fR bytes.
 If the option \fB-fileid\fR is specified, \fIfile\fR is an open
 file identifier, otherwise it is a file path.
 .sp
-This command is not available on all systems if the underlying operating
-system support is not available.  The command \fBinfox have_truncate\fR
-will indicate if this command is available.  On some systems,
-the \fB-fileid\fR option is not available,  check the result of
-\fBinfox have_ftruncate\fR to see if it can be used.
+This command is not available or not fully functional if the underlying
+operating system support is not available.  The command \fBinfox have_truncate\fR
+will indicate if this command may truncate by file path.  The command
+\fBinfox have_ftruncate\fR will indicate if this command may truncate by file id.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

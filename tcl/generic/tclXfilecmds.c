@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 4.4 1995/05/24 05:27:12 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 4.5 1995/07/15 05:36:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -46,7 +46,7 @@
 
 static char *FILE_ID_OPT = "-fileid";
 static char *FILE_ID_NOT_AVAIL =
-    "The -fileid option is not available on this system";
+    "the -fileid option is not available on this system";
 
 /*
  * Prototypes of internal functions.
@@ -62,6 +62,16 @@ GetsListElement _ANSI_ARGS_((Tcl_Interp    *interp,
                              FILE          *filePtr,
                              Tcl_DString   *bufferPtr,
                              int           *idxPtr));
+
+static int
+TruncateByPath  _ANSI_ARGS_((Tcl_Interp  *interp,
+                             char        *filePath,
+                             off_t        newSize));
+
+static int
+TruncateByHandle  _ANSI_ARGS_((Tcl_Interp  *interp,
+                               char        *fileHandle,
+                               off_t        newSize));
 
 /*
  *-----------------------------------------------------------------------------
@@ -619,7 +629,6 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
                           (char *) NULL);
         return TCL_ERROR;
     }
-
     
     Tcl_DStringFree (&tildeBuf1);
     Tcl_DStringFree (&tildeBuf2);
@@ -631,7 +640,98 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-#if defined(HAVE_TRUNCATE) || defined(HAVE_CHSIZE)
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TruncateByPath --
+ * 
+ *  Truncate a file via path, if this is available on this system.
+ *
+ * Parameters:
+ *   o interp (I) - Error messages are returned in the interpreter.
+ *   o filePath (I) - Path to file.
+ *   o newSize (I) - Size to truncate the file to.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+TruncateByPath (interp, filePath, newSize)
+    Tcl_Interp  *interp;
+    char        *filePath;
+    off_t        newSize;
+{
+#if defined(HAVE_TRUNCATE)
+    Tcl_DString  tildeBuf;
+
+    Tcl_DStringInit (&tildeBuf);
+
+    filePath = Tcl_TildeSubst (interp, filePath, &tildeBuf);
+    if (filePath == NULL) {
+        Tcl_DStringFree (&tildeBuf);
+        return TCL_ERROR;
+    }
+    if (truncate (filePath, newSize) != 0) {
+        Tcl_AppendResult (interp, filePath, ": ", Tcl_PosixError (interp), (char *) NULL);
+        Tcl_DStringFree (&tildeBuf);
+        return TCL_ERROR;
+    }
+
+    Tcl_DStringFree (&tildeBuf);
+    return TCL_OK;
+#else
+    Tcl_AppendResult (interp, "truncating files by path is not available on this system",
+                      (char *) NULL);
+    return TCL_ERROR;
+#endif
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TruncateByHandle --
+ * 
+ *  Truncate a file via a open file handle., if this is available on this system.
+ *
+ * Parameters:
+ *   o interp (I) - Error messages are returned in the interpreter.
+ *   o fileHandle (I) - Path to file.
+ *   o newSize (I) - Size to truncate the file to.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+TruncateByHandle (interp, fileHandle, newSize)
+    Tcl_Interp  *interp;
+    char        *fileHandle;
+    off_t        newSize;
+{
+#if defined(HAVE_FTRUNCATE) || defined(HAVE_CHSIZE)
+    int   stat;
+    FILE *filePtr;
+
+    if (Tcl_GetOpenFile (interp, fileHandle,
+                         TRUE, TRUE, /* Write access */
+                         &filePtr) != TCL_OK)
+        return TCL_ERROR;
+
+#ifdef HAVE_FTRUNCATE
+    stat = ftruncate (fileno (filePtr), newSize);
+#else
+    stat = chsize (fileno (filePtr), newSize);
+#endif
+    if (stat != 0) {
+        Tcl_AppendResult (interp, fileHandle, ": ", Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+#else
+    Tcl_AppendResult (interp, FILE_ID_NOT_AVAIL, (char *) NULL);
+    return TCL_ERROR;
+#endif
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -652,11 +752,8 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    int          argIdx, fileIds, stat;
-    off_t        newSize;
-    char        *filePath;
-    Tcl_DString  tildeBuf;
-    FILE        *filePtr;
+    int    argIdx, fileIds;
+    off_t  newSize;
 
     fileIds = FALSE;
     for (argIdx = 1; (argIdx < argc) && (argv [argIdx] [0] == '-'); argIdx++) {
@@ -683,67 +780,11 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
 
 
     if (fileIds) {
-#ifndef HAVE_FTRUNCATE
-        Tcl_AppendResult (interp, FILE_ID_NOT_AVAIL, (char *) NULL);
-        return TCL_ERROR;
-#else
-        if (Tcl_GetOpenFile (interp, argv [argIdx],
-                             TRUE, TRUE, /* Write access */
-                             &filePtr) != TCL_OK)
-            return TCL_ERROR;
-
-        if (ftruncate (fileno (filePtr), newSize) != 0) {
-            Tcl_AppendResult (interp, argv [argIdx], ": ",
-                              Tcl_PosixError (interp), (char *) NULL);
-            return TCL_ERROR;
-        }
-#endif        
+        return TruncateByHandle (interp, argv [argIdx], newSize);
     } else {
-        Tcl_DStringInit (&tildeBuf);
-
-        filePath = Tcl_TildeSubst (interp, argv [argIdx], &tildeBuf);
-        if (filePath == NULL) {
-            Tcl_DStringFree (&tildeBuf);
-            return TCL_ERROR;
-        }
-#if HAVE_TRUNCATE
-        stat = truncate (filePath, newSize);
-#else
-        stat = chsize (filePath, newSize);
-#endif
-        if (stat != 0) {
-            Tcl_AppendResult (interp, filePath, ": ",
-                              Tcl_PosixError (interp), (char *) NULL);
-            Tcl_DStringFree (&tildeBuf);
-            return TCL_ERROR;
-        }
-        Tcl_DStringFree (&tildeBuf);
+        return TruncateByPath (interp, argv [argIdx], newSize);
     }
-    return TCL_OK;
 }
-#else
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_FtruncateCmd --
- *     Dummy ftruncate command that returns an error for systems that don't
- *     have ftruncate or chsize.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_FtruncateCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
-{
-    Tcl_AppendResult (interp, 
-                      "the ftruncate command is not available on this ",
-                      "version of Unix", (char *) NULL);
-    return TCL_ERROR;
-}
-#endif
 
 /*
  *-----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 4.5 1995/05/24 05:27:12 markd Exp markd $
+ * $Id: tclXgeneral.c,v 4.6 1995/06/16 15:48:42 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -134,7 +134,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_ftruncate", argv [1])) {
-#       ifdef HAVE_FTRUNCATE
+#       if defined(HAVE_FTRUNCATE) || defined(HAVE_CHSIZE)
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -166,7 +166,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_truncate", argv [1])) {
-#       if defined(HAVE_TRUNCATE) || defined(HAVE_CHSIZE)
+#       ifdef HAVE_TRUNCATE
         interp->result = "1";
 #       else
         interp->result = "0";
