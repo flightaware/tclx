@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: list.test,v 8.6 1999/03/31 06:37:50 markd Exp $
+# $Id: list.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 Test list-1.1 {lvarpop tests} {
     set a {a b c d e f g h i j}
@@ -281,3 +283,6 @@ Test list-5.8 {lempty} {
 } 0 0
 
 
+# cleanup
+::tcltest::cleanupTests
+return

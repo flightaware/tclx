@@ -13,11 +13,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: init.test,v 8.3 1999/03/31 06:37:50 markd Exp $
+# $Id: init.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 Test init-1.0 {safe interp with TclX} {
     set si [interp create -safe]
@@ -28,4 +30,6 @@ Test init-1.0 {safe interp with TclX} {
     lsort $xcmds
 } 0 {keyldel keylget keylkeys keylset}
 
-
+# cleanup
+::tcltest::cleanupTests
+return

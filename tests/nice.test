@@ -16,7 +16,9 @@
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 if [cequal $tcl_platform(platform) windows] {
     echo "    * The nice command has not been ported to Win32" 
@@ -70,6 +72,9 @@ set pid [fork]
 #
 if {$pid > 0} {
     wait $pid
+
+    # cleanup
+    ::tcltest::cleanupTests
     return
 }
 
@@ -119,6 +124,6 @@ Test nice-1.12 {nice tests} {
     list [nice -1] [nice]
 } 0 [list [expr $niceBase+3+4-1-9-10-1] [expr $niceBase+3+4-1-9-10-1]]
 
+# cleanup
+::tcltest::cleanupTests
 exit
-
-

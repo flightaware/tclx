@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 8.4 1999/03/31 06:37:52 markd Exp $
+# $Id: unixcmds.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 #
 # Fork without exec will not work under Tk, skip this test
@@ -163,4 +165,6 @@ Test unixcmds-6.3 {sleep tests} {
 } 1 {wrong # args: sleep seconds}
 
 
-
+# cleanup
+::tcltest::cleanupTests
+return

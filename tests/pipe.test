@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pipe.test,v 8.3 1999/03/31 06:37:51 markd Exp $
+# $Id: pipe.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 #
 # Fork without exec will not work under Tk, skip this test
@@ -75,7 +77,6 @@ Test pipe-1.2 {pipe tests} {
     close $writeChan
 } 0 {} {unixOnly}
 
-
-
-
-
+# cleanup
+::tcltest::cleanupTests
+return

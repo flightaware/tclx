@@ -16,14 +16,21 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 8.4 1999/03/31 06:37:52 markd Exp $
+# $Id: testlib.tcl,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
 # Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
 # that variable.
 
-global SAVED_UNKNOWN TCL_PROGRAM env TEST_ERROR_INFO tcl_platform testXConfig
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import ::tcltest::*
+}
+
+set ::tcltest::testConstraints(have_fchown) [infox have_fchown]
+
+global TCL_PROGRAM env TEST_ERROR_INFO tcl_platform testXConfig
 global TEST_VERBOSE
 
 if [info exists env(TEST_ERROR_INFO)] {
@@ -80,17 +87,6 @@ if ![info exists TCL_PROGRAM] {
 
 set TCL_PROGRAM [eval file join [file split $TCL_PROGRAM]]
 
-if {([info command unknown] == "") && ![info exists SAVED_UNKNOWN]} {
-    error "can't find either unknown or SAVED_UNKNOWN"
-}
-if {[info command unknown] != ""} {
-    set SAVED_UNKNOWN "proc unknown "
-    append SAVED_UNKNOWN "\{[info args unknown]\} "
-    append SAVED_UNKNOWN "\{[info body unknown]\}"
-    rename unknown {}
-}
-
-
 #
 # Convert a Tcl result code to a string.
 #
@@ -141,40 +137,26 @@ proc Test {test_name test_description contents_of_test passing_int_result
                 return
         }
     }
-    if [info exists TEST_VERBOSE] {
-        puts "$test_name $test_description"
+    if {$passing_int_result == 0} {
+	uplevel 1 [list test $test_name $test_description \
+		$contents_of_test $passing_result]
+    } elseif {$passing_int_result == 1} {
+	uplevel 1 [list test $test_name $test_description \
+		"list \[catch {$contents_of_test} msg\] \$msg" \
+		[list $passing_int_result $passing_result]]
+    } else {
+	if {[info exists TEST_VERBOSE]} {
+	    puts "$test_name $test_description"
+	}
+
+	set int_result [catch {uplevel $contents_of_test} result]
+
+	if {($int_result != $passing_int_result) \
+		|| ![cequal $result $passing_result]} {
+	    OutTestError $test_name $test_description $contents_of_test \
+		    $passing_int_result $passing_result $int_result $result
+	}
     }
-
-    set int_result [catch {uplevel $contents_of_test} result]
-
-    if {($int_result != $passing_int_result) ||
-        ![cequal $result $passing_result]} {
-        OutTestError $test_name $test_description $contents_of_test \
-                     $passing_int_result $passing_result $int_result $result
-    }
-}
-
-#
-# Compare result against case-insensitive regular expression.
-#
-
-proc TestReg {test_name test_description contents_of_test passing_int_result
-              passing_result} {
-    set int_result [catch {uplevel $contents_of_test} result]
-
-    if {($int_result != $passing_int_result) ||
-        ![regexp -nocase $passing_result $result]} {
-        OutTestError $test_name $test_description $contents_of_test \
-                     $passing_int_result $passing_result $int_result $result
-    }
-}
-
-proc dotests {file args} {
-    global TESTS
-    set savedTests $TESTS
-    set TESTS $args
-    source $file
-    set TESTS $savedTests
 }
 
 # Genenerate a unique file record that can be verified.  The record

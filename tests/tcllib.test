@@ -13,13 +13,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 8.11 1999/03/31 06:37:52 markd Exp $
+# $Id: tcllib.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-
-if [cequal [info procs Test] {}] {source testlib.tcl}
-eval $SAVED_UNKNOWN
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 auto_load auto_reset  ;# Make sure we have this before changing path.
 
@@ -92,35 +92,35 @@ catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 # in C.
 #
 
-Test tcllib-1.2 {command parameter checking} {
-    loadlibindex
-} 1 {wrong # args: loadlibindex libFile}
+test tcllib-1.2 {command parameter checking} {
+    list [catch {loadlibindex} msg] $msg
+} {1 {wrong # args: loadlibindex libFile}}
 
-Test tcllib-1.3 {command parameter checking} {
-    loadlibindex a b c d
-} 1 {wrong # args: loadlibindex libFile}
+test tcllib-1.3 {command parameter checking} {
+    list [catch {loadlibindex a b c d} msg] $msg
+} {1 {wrong # args: loadlibindex libFile}}
 
 #
 # Test error recovery from bogus paths (should ignore path and not find proc)
 #
 
-Test tcllib-2.1 {bogus path test} {
+test tcllib-2.1 {bogus path test} {
     set auto_path [list /bogus/dir/path/no/work $tclx_library]
-    TclLibAAA
-} 1 {invalid command name "TclLibAAA"}
+    list [catch {TclLibAAA} msg] $msg
+} {1 {invalid command name "TclLibAAA"}}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
-Test tcllib-2.2 {bogus path test} {
+test tcllib-2.2 {bogus path test} {
     set auto_path [list ~bogususerman/tcllib $tclx_library]
-    TclLibAAA
-} 1 {invalid command name "TclLibAAA"}
+    list [catch {TclLibAAA} msg] $msg
+} {1 {invalid command name "TclLibAAA"}}
 
-Test tcllib-2.3 {bogus path test} {
+test tcllib-2.3 {bogus path test} {
     set auto_path $tclx_library
     set auto_path [list /bogus/dir/path/no/work]
-    TclLibAAA
-} 1 {invalid command name "TclLibAAA"}
+    list [catch {TclLibAAA} msg] $msg
+} {1 {invalid command name "TclLibAAA"}}
 
 
 #
@@ -143,9 +143,10 @@ data}
 TclLibReset
 set auto_path [list [pwd]/tcllib1.dir $tclx_library]
 
-TestReg tcllib-3.1 {bogus package library index} {
-    TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": format error in library index "....+test1.tndx" \(bogus\)$}
+test tcllib-3.1 {bogus package library index} {
+    set re {error while autoloading "TclLibAAB": format error in library index "....+test1.tndx" \(bogus\)$}
+    list [catch {TclLibAAB} msg] [expr {[regexp $re $msg]?1:$msg}]
+} {1 1}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
@@ -153,17 +154,19 @@ PutFile tcllib1.dir/test1.tndx \
     {test1-package 56 240 TclLibAAB TclLibAAC TclLibAAD}
 TclLibReset
 
-TestReg tcllib-3.2 {bogus package library index} {
-    TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "....+test1.tlib", index file probably corrupt$}
+test tcllib-3.2 {bogus package library index} {
+    set re {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "....+test1.tlib", index file probably corrupt$}
+    list [catch {TclLibAAB} msg] [expr {[regexp $re $msg]?1:$msg}]
+} {1 1}
 
 PutFile tcllib1.dir/test1.tndx \
     {test1-package -1 140 TclLibAAB TclLibAAC TclLibAAD}
 TclLibReset
 
-TestReg tcllib-3.3 {bogus package library index} {
-    TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": format error in library index ".*" \(test1-package -1 140 TclLibAAB TclLibAAC TclLibAAD\)$}
+test tcllib-3.3 {bogus package library index} {
+    set re {^error while autoloading "TclLibAAB": format error in library index ".*" \(test1-package -1 140 TclLibAAB TclLibAAC TclLibAAD\)$}
+    list [catch {TclLibAAB} msg] [expr {[regexp $re $msg]?1:$msg}]
+} {1 1}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
@@ -171,26 +174,21 @@ PutFile tcllib1.dir/test1.tndx \
     {test1-package 456 40 TclLibAAB TclLibAAC TclLibAAD}
 TclLibReset
 
-TestReg tcllib-3.4 {bogus package library index} {
-    TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "...+test1.tlib", index file probably corrupt}
+test tcllib-3.4 {bogus package library index} {
+    set re {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "...+test1.tlib", index file probably corrupt}
+    list [catch {TclLibAAB} msg] [expr {[regexp $re $msg]?1:$msg}]
+} {1 1}
 
 TclLibReset
 set auto_path [list [pwd]/tcllib2.dir $tclx_library]
 
 if !$rootSkip {
-    Test tcllib-4.1 {bad rebuild package library index} {
+    test tcllib-4.1 {bad rebuild package library index} {
         BuildTestLib tcllib2.dir/test1.tlib TclLibAB
         chmod -w tcllib2.dir
-        if ![catch {TclLibABB} msg] {
-            error "auto_load should have failed with permission denied"
-        }
-        set expect  {^error while autoloading "tcllibabb": building package index for.*/tcllib2.dir/test1.tlib' failed: couldn't open ".*/tcllib2.dir/test1.tndx": permission denied$}
-        if ![regexp -nocase $expect $msg] {
-            error "unexpected result \"$msg\""
-        }
-        concat OK
-    } 0 OK
+        set re {^error while autoloading "tcllibabb": building package index for.*/tcllib2.dir/test1.tlib' failed: couldn't open ".*/tcllib2.dir/test1.tndx": permission denied$}
+	list [catch {TclLibABB} msg] [expr {[regexp $re $msg]?1:$msg}]
+    } {1 1}
 }
 TclLibCleanUp
 set auto_path [list [pwd]/tcllib1.dir $tclx_library]
@@ -369,3 +367,7 @@ rename PutFile {}
 rename TclLibReset {}
 
 set auto_path $save_auto_path
+
+# cleanup
+::tcltest::cleanupTests
+return

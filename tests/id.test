@@ -12,13 +12,15 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: id.test,v 8.2 1999/03/31 06:37:50 markd Exp $
+# $Id: id.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
 # FIX: These are very basic tests.  Better are needed.
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 if [cequal $tcl_platform(platform) windows] {
     echo "    * The id command tests have not been ported to Win32" 
@@ -66,3 +68,6 @@ Test id-4.2 {id convert} {
 # FIX: Make sure this doesn't core dump./
 id groups
 
+# cleanup
+::tcltest::cleanupTests
+return

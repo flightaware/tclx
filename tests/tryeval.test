@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tryeval.test,v 8.3 1999/03/31 06:37:52 markd Exp $
+# $Id: tryeval.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 #
 # Use a proc to do some tests to see if errorInfo and errorCode are preserved
@@ -193,3 +195,6 @@ Test try_eval-3.6 {try_eval error result} {
 } 0 {{0 {Ok now 3.6} errorInfo-error-3.6 errorCode-error-3.6}}
 
 
+# cleanup
+::tcltest::cleanupTests
+return

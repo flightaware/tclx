@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: readdir.test,v 8.3 1999/03/31 06:37:51 markd Exp $
+# $Id: readdir.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 catch {eval file delete [glob -nocomplain READDIR.TMP/*]}
 catch {file delete READDIR.TMP}
@@ -50,3 +52,6 @@ catch {eval file delete [glob -nocomplain READDIR.TMP/*]}
 catch {file delete READDIR.TMP}
 
 
+# cleanup
+::tcltest::cleanupTests
+return

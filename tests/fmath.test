@@ -14,13 +14,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fmath.test,v 8.3 1999/03/31 06:37:49 markd Exp $
+# $Id: fmath.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
-eval $SAVED_UNKNOWN
-
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 set F_E	        2.71828
 set F_LN10	2.30258
@@ -127,8 +127,6 @@ Test fmath-1.21 {math error tests} {
     pow 10000 100000
 } 1 {floating-point value too large to represent}
 
-rename unknown {}
-
-
-
-
+# cleanup
+::tcltest::cleanupTests
+return

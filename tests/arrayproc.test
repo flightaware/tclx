@@ -12,35 +12,38 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayproc.test,v 8.3 1999/03/31 06:37:48 markd Exp $
+# $Id: arrayproc.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
-eval $SAVED_UNKNOWN
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import ::tcltest::*
+}
 
+package require Tclx 8.4
 
 set testArray(foo) bar
 set testArray(snap) frammistan
 set testArray(0) zero
 set testArray(william) dafoe
 
-Test for_array_keys-1.1 {for_array_keys command} {
+test for_array_keys-1.1 {for_array_keys command} {
     for_array_keys key testArray {
         lappend result $key
     }
     lsort $result
-} 0 "0 foo snap william"
+} "0 foo snap william"
 
-Test for_array_keys-1.2 {errors in for_array_keys command} {
+test for_array_keys-1.2 {errors in for_array_keys command} {
     list [catch {
         for_array_keys key testArray {
             error fakeResult fakeInfo fakeCode
         }
     } msg] $msg [crange $errorInfo 0 7] $errorCode
-} 0 {1 fakeResult fakeInfo fakeCode}
+} {1 fakeResult fakeInfo fakeCode}
 
-Test for_array_keys-1.3 {break in for_array_keys command} {
+test for_array_keys-1.3 {break in for_array_keys command} {
     set cnt 0
     list [catch {
         for_array_keys key testArray {
@@ -48,9 +51,9 @@ Test for_array_keys-1.3 {break in for_array_keys command} {
             break
         }
     } msg] $msg $cnt
-} 0 {0 {} 1}
+} {0 {} 1}
 
-Test for_array_keys-1.4 {break in for_array_keys command} {
+test for_array_keys-1.4 {break in for_array_keys command} {
     set cnt 0
     list [catch {
         for_array_keys key testArray {
@@ -59,9 +62,9 @@ Test for_array_keys-1.4 {break in for_array_keys command} {
             incr cnt 20
         }
     } msg] $msg $cnt
-} 0 {0 {} 4}
+} {0 {} 4}
 
-Test for_array_keys-1.5 {return in for_array_keys command} {
+test for_array_keys-1.5 {return in for_array_keys command} {
     proc for_array_keys_test {testArrayVar cntVar} {
         upvar $testArrayVar testArray $cntVar cnt
         for_array_keys key testArray {
@@ -71,12 +74,12 @@ Test for_array_keys-1.5 {return in for_array_keys command} {
     }
     set cnt 0
     list [catch {for_array_keys_test testArray cnt} msg] $msg $cnt
-} 0 {0 abcd 1}
+} {0 abcd 1}
 rename for_array_keys_test {}
 
 unset testArray
 unset result
-rename unknown {}
 
-
-
+# cleanup
+::tcltest::cleanupTests
+return

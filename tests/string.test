@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 8.12 1999/06/26 03:35:23 markd Exp $
+# $Id: string.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 # Test the 'cindex' command.
 
@@ -408,8 +410,6 @@ Test string-11.4 {cconcat tests} {
 } 0 "Aaa \0Bbb"
 
 
-
-
-
-
-
+# cleanup
+::tcltest::cleanupTests
+return

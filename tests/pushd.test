@@ -13,14 +13,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.test,v 8.3 1999/03/31 06:37:51 markd Exp $
+# $Id: pushd.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
-eval $SAVED_UNKNOWN
-
-
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 #
 # Get the directories we are going to be using.  Also the device for
@@ -99,8 +98,7 @@ Test popd-1.4 {popd command} {
 } 0 {}
 
 cd $CWD
-rename unknown {}
 
-
-
-
+# cleanup
+::tcltest::cleanupTests
+return

@@ -12,14 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showproc.test,v 8.4 1999/03/31 06:37:51 markd Exp $
+# $Id: showproc.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
-eval $SAVED_UNKNOWN
-
-
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 set testProcVar {proc testproc testVar {
     return 1
@@ -53,10 +52,6 @@ Test showproc-1.3 {showproc command} {
     lsort $result
 } 0 [lsort [info procs]]
 
-unset testProcVar
-rename testproc ""
-rename unknown {}
-
-
-
-
+# cleanup
+::tcltest::cleanupTests
+return

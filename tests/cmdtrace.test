@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 8.8 1999/03/31 06:37:49 markd Exp $
+# $Id: cmdtrace.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 #
 # Proc to do something to trace.
@@ -89,7 +91,7 @@ Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
     DoStuff4
     cmdtrace off
     GetTrace $cmdtraceFH
-} 0 "DoStuff4
+} 0 "    DoStuff4\\n
   DoStuff3
     DoStuff2
       DoStuff1
@@ -100,7 +102,7 @@ Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
           set wap 1
           if {\$wap} {\\n        set wap 0\\n    } else \{\\n        set wap 1...
             set wap 0
-cmdtrace off
+    cmdtrace off\\n
 "
 
 Test cmdtrace-1.3 {command trace: evaluated, not truncated} {
@@ -129,7 +131,7 @@ Test cmdtrace-1.4 {command trace: not evaluated, not truncated} {
     DoStuff4
     cmdtrace off
     GetTrace $cmdtraceFH
-} 0 {DoStuff4
+} 0 {    DoStuff4\n
   DoStuff3
     DoStuff2
       DoStuff1
@@ -140,7 +142,7 @@ Test cmdtrace-1.4 {command trace: not evaluated, not truncated} {
           set wap 1
           if {$wap} {\n        set wap 0\n    } else {\n        set wap 1\n    }
             set wap 0
-cmdtrace off
+    cmdtrace off\n
 }
 
 Test cmdtrace-2.1 {command trace argument error checking} {
@@ -185,7 +187,8 @@ Test cmdtrace-3.1 {command trace argument error checking} {
     cmdtrace off
     lappend traceout $errorInfo $errorCode
     set traceout
-} 0 [list {CD DoStuff4 DoStuff4 {}} \
+} 0 [list {CD {{    DoStuff4
+}} DoStuff4 {}} \
 {CD DoStuff3 DoStuff3 {}} \
 {CD DoStuff2 DoStuff2 {}} \
 {CD DoStuff1 DoStuff1 {}} \
@@ -204,18 +207,19 @@ Test cmdtrace-3.1 {command trace argument error checking} {
         set wap 1
     }}} {}} \
 {CD {{set wap 0}} {{set wap 0}} {}} \
-{CD {{cmdtrace off}} {{cmdtrace off}} {}}\
+{CD {{    cmdtrace off
+}} {{cmdtrace off}} {}}\
 ERRORINFO \
 ERRORCODE]
 
-Test cmdtrace-3.2 {command trace argument error checking} {
+test cmdtrace-3.2 {command trace argument error checking} {tclxShell} {
     exec $TCL_PROGRAM -qc {
         puts [list [catch {
             cmdtrace on command {foo $NOTDEFINED}
             info globals
         } msg] $msg $errorInfo]
     }
-} 0 {1 {can't read "NOTDEFINED": no such variable} {can't read "NOTDEFINED": no such variable
+} {1 {can't read "NOTDEFINED": no such variable} {can't read "NOTDEFINED": no such variable
     while executing
 "foo $NOTDEFINED {{info globals}} {{info globals}} 2 0"
     ("cmdtrace" callback command)

@@ -16,7 +16,9 @@
 #------------------------------------------------------------------------------
 #
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 TestRemove SYNC.TMP
 
@@ -38,4 +40,6 @@ Test sync-1.3 {sync tests} {
 
 TestRemove SYNC.TMP
 
-
+# cleanup
+::tcltest::cleanupTests
+return

@@ -12,10 +12,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: msgcat.test,v 8.3 1999/03/31 06:37:51 markd Exp $
+# $Id: msgcat.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
 #------------------------------------------------------------------------------
 
-if [cequal [info procs Test] {}] {source testlib.tcl}
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
 
 #
 # This only tests default strings, since its difficult to setup and rely on
@@ -114,5 +116,6 @@ Test message-cat-3.5 {catgets tests} {
 } 1 {wrong # args: catgets catHandle setnum msgnum defaultstr}
 catch {catclose $msgcat}
 
-
-
+# cleanup
+::tcltest::cleanupTests
+return
