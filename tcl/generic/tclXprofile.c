@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXprofile.c,v 2.0 1992/10/16 04:51:05 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -606,9 +606,10 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
         }
             
         CleanDataTable (infoPtr);
-        infoPtr->traceHolder = Tcl_CreateTrace (interp, MAXINT,
-                                                ProfTraceRoutine,
-                                                (ClientData) infoPtr);
+        infoPtr->traceHolder =
+            Tcl_CreateTrace (interp, MAXINT,
+                             (Tcl_CmdTraceProc *) ProfTraceRoutine,
+                             (ClientData) infoPtr);
         infoPtr->realTime = 0;
         infoPtr->cpuTime  = 0;
         infoPtr->lastRealTime = times (&cpuTimes);
