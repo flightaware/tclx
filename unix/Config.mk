@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.7 1993/01/15 02:21:14 markd Exp markd $
+# $Id: Config.mk,v 2.8 1993/01/26 04:01:28 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -36,9 +36,9 @@ TCL_CONFIG_FILE=scoodt2.0
 
 #------------------------------------------------------------------------------
 # Location of the UCB Tcl distribution relative to this directory.  TclX works
-# with Tcl 6.4 and Tcl 6.5.
+# with Tcl 6.5 and Tcl 6.6.
 #
-TCL_UCB_DIR=../tcl6.5
+TCL_UCB_DIR=../tcl6.6
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -52,7 +52,7 @@ TCL_UCB_DIR=../tcl6.5
 # to 0.
 
 #TCL_TK_SHELL=wishx
-TCL_TK_DIR=../tk3.0
+TCL_TK_DIR=../tk3.1
 TK_INSTALL_DEMO=1
 
 #------------------------------------------------------------------------------
@@ -137,8 +137,8 @@ TCL_GROUP=bin
 # o TCL_DEFAULT - Base name of Tcl default file.  This name will have a
 #   version number appended.  The MUST be a full path name!
 #
-#TCL_DEFAULT=/etc/default/tcl
-TCL_DEFAULT=/usr/local/lib/tcldefault
+TCL_DEFAULT=/etc/default/tcl
+#TCL_DEFAULT=/usr/local/lib/tcldefault
 
 #
 # The directory to install Tcl binary into.
@@ -191,10 +191,10 @@ TCL_MAN_BASEDIR=/usr/local/man
 #   In some cases it might be desirable install all manual pages in one
 #   section, in this case, the value should be the same as TCL_MAN_CMD_SECTION.
 #
-#TCL_MAN_CMD_SECTION=TCL
-#TCL_MAN_FUNC_SECTION=TCL
-TCL_MAN_CMD_SECTION=1
-TCL_MAN_FUNC_SECTION=3
+TCL_MAN_CMD_SECTION=TCL
+TCL_MAN_FUNC_SECTION=TCL
+#TCL_MAN_CMD_SECTION=1
+#TCL_MAN_FUNC_SECTION=3
 
 #
 # o TK_MAN_CMD_SECTION - Section for Tk command  manual pages. Normal `1' or
@@ -204,10 +204,10 @@ TCL_MAN_FUNC_SECTION=3
 #   In some cases it might be desirable install all manual pages in one
 #   section, in this case, the value should be the same as TK_MAN_CMD_SECTION.
 #
-#TK_MAN_CMD_SECTION=TK
-#TK_MAN_FUNC_SECTION=TK
-TK_MAN_CMD_SECTION=1
-TK_MAN_FUNC_SECTION=3
+TK_MAN_CMD_SECTION=TK
+TK_MAN_FUNC_SECTION=TK
+#TK_MAN_CMD_SECTION=1
+#TK_MAN_FUNC_SECTION=3
 
 
 #..............................................................................
