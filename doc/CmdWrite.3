@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: CmdWrite.3,v 4.0 1994/07/16 05:24:19 markd Rel markd $
+.\" $Id: CmdWrite.3,v 4.1 1995/01/01 19:46:29 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Command Writing" TCL "" "Tcl"
@@ -62,8 +62,7 @@ A simple Tcl extension in C is now presented, and described below:
 The client data pointer will be described later.
 .PP
 The interpreter pointer is the ``key'' to an interpreter.  It is returned by
-\fBTcl_CreateInterp\fR or \fBTcl_CreateExtendedInterp\fR, and is used 
-extensively
+\fBTcl_CreateInterp\fR and is used extensively
 within Tcl, and will be by your C extensions.  The data structure pointed to 
 by the interpreter pointer,
 and all of the subordinate structures that branch off of it, make up a
@@ -72,7 +71,7 @@ procedures, commands, variables, arrays and the execution state of that
 interpreter.  (For more information on creating and deleting interpreters,
 please examine the \fBCrtInterp\fR(3) manpage in the Berkeley Tcl distribution.
 For information on creating interpreters that include the commands provided
-by Extended Tcl, check out the \fBCreateExte\fR(3) manpage of Extended
+by Extended Tcl, check out the \fBTclX_Init\fR(3) manpage of Extended
 Tcl.
 For a manual page describing the user-visible fields of a Tcl interpreter,
 please look at \fBInterp\fR(3) in Berkeley Tcl.)
@@ -287,7 +286,7 @@ and a pointer to an optional callback routine.
 The client data pointer and the callback routine will be described later.
 .PP
 For example, for the max function above (which, incidentally, comes from
-TclX's math.c in the \fITclX7.1/src\fR directory):
+TclX's tclXmath.c in the \fITclX7.4/src\fR directory):
 .sp
 .nf
 .ft CW
@@ -342,7 +341,7 @@ to your C routine through the ClientData pointer calling argument.
 Commands that need to share this data with one another can do so by using the
 same ClientData pointer when the commands are added.
 .PP
-It is important to note that the Tcl extensions in the \fItclX7.1/src\fR
+It is important to note that the Tcl extensions in the \fItclX7.4/src\fR
 directory have had all of their data set up in this way.
 Since release 6.2, Extended Tcl has supported
 multiple interpreters within one invocation of Tcl.
@@ -779,7 +778,7 @@ by studying the source code of the commands added by Tcl, Tk and
 Extended Tcl.  The \fIcomp.lang.tcl\fR Usenet newsgroup is read by
 tens of thousands of Tcl people, and is a good place to ask questions.
 Finally, if you have interactive Internet access, you can ftp to
-\fIharbor.ecn.purdue.edu\fR, the site for contributed Tcl sources.
-``Harbor'' contains quite a few extensions, applications, and so forth,
+\fIftp.aud.alcatel.com\fR, the site for contributed Tcl sources.
+This site contains quite a few extensions, applications, and so forth,
 including several object-oriented extension packages.
 
