@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 8.10 1997/09/04 22:39:03 markd Exp $
+# $Id: Config.mk,v 8.11 1998/01/24 17:30:11 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -62,8 +62,8 @@ TCL_CONFIG=${TCL_BUILD}/unix/tclConfig.sh
 TCL_LIB=${TCL_BUILD_LIB_SPEC}
 
 #------------------------------------------------------------------------------
-# Unless configure is going to be run with --with-tk=NO, these defines must be
-# set.  They define the directory containing the Tk source distribution, the
+# Unless configure is going to be run with --enable-tk=NO, these defines must
+# be set.  They define the directory containing the Tk source distribution, the
 # path to tkConfig.sh, the path to the Tk library (libtk8.0.a) and the flags
 # neccessary to link with the Tk shared library (libtk8.0.so).  If you want to
 # use the installed Tk library, set TK_LIB to ${TK_LIB_SPEC}.
