@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: globrecur.tcl,v 4.0 1994/07/16 05:29:53 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -28,7 +28,8 @@ proc recursive_glob {dirlist globlist} {
         foreach pattern $globlist {
             set result [concat $result [glob -nocomplain -- $dir/$pattern]]
         }
-        foreach file [glob -nocomplain -- $dir/* $dir/.*] {
+        foreach file [readdir $dir] {
+            set file $dir/$file
             if [file isdirectory $file] {
                 set fileTail [file tail $file]
                 if {!(($fileTail == ".") || ($fileTail == ".."))} {
@@ -45,20 +46,37 @@ proc recursive_glob {dirlist globlist} {
 
 #@package: TclX-forrecur for_recursive_glob
 
-proc for_recursive_glob {var dirlist globlist code {depth 1}} {
+proc for_recursive_glob {var dirlist globlist cmd {depth 1}} {
     upvar $depth $var myVar
     set recurse {}
     foreach dir $dirlist {
         if ![file isdirectory $dir] {
             error "\"$dir\" is not a directory"
         }
+        set code 0
+        set result {}
         foreach pattern $globlist {
             foreach file [glob -nocomplain -- $dir/$pattern] {
                 set myVar $file
-                uplevel $depth $code
+                set code [catch {uplevel $depth $cmd} result]
+                if {$code != 0 && $code != 4} break
             }
+            if {$code != 0 && $code != 4} break
         }
-        foreach file [glob -nocomplain -- $dir/* $dir/.*] {
+        if {$code != 0 && $code != 4} {
+            if {$code == 3} {
+                return $result
+            }
+            if {$code == 1} {
+                global errorCode errorInfo
+                return -code $code -errorcode $errorCode \
+                        -errorinfo $errorInfo $result
+            }
+            return -code $code $result
+        }
+
+        foreach file [readdir $dir] {
+            set file $dir/$file
             if [file isdirectory $file] {
                 set fileTail [file tail $file]
                 if {!(($fileTail == ".") || ($fileTail == ".."))} {
@@ -68,7 +86,8 @@ proc for_recursive_glob {var dirlist globlist code {depth 1}} {
         }
     }
     if ![lempty $recurse] {
-        for_recursive_glob $var $recurse $globlist $code [expr {$depth + 1}]
+        return [for_recursive_glob $var $recurse $globlist $cmd \
+                    [expr {$depth + 1}]]
     }
     return {}
 }

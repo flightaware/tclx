@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.test,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+# $Id: globrecur.test,v 4.0 1994/07/16 05:25:26 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -102,11 +102,81 @@ Test recursive_glob-2.3 {for_recursive_glob command} {
     lsort $result
 } 0 $expectedResult3
 
-Test recursive_glob-2.4 {for_recursive_glob command} {
+Test recursive_glob-2.4 {errors in for_recursive_glob command} {
     for_recursive_glob file GLOBTESTDIR/file1 {*.c *3} {
         error "should not execute"
     }
 } 1 {"GLOBTESTDIR/file1" is not a directory}
+
+
+Test recursive_glob-2.5 {errors in for_recursive_glob command} {
+    list [catch {
+        for_recursive_glob file GLOBTESTDIR {*.c *3} {
+            error "should not execute" FAKE-INFO FAKE-CODE
+        }
+    } msg] $msg [crange $errorInfo 0 8] $errorCode
+} 0 {1 {should not execute} FAKE-INFO FAKE-CODE}
+
+Test recursive_glob-2.6 {break in for_recursive_glob command} {
+    set cnt 0
+    list [catch {
+        for_recursive_glob file GLOBTESTDIR {*.c *3} {
+            incr cnt
+            break
+        }
+    } msg] $msg $cnt
+} 0 {0 {} 1}
+
+Test recursive_glob-2.7 {break in for_recursive_glob command} {
+    set cnt 0
+    list [catch {
+        for_recursive_glob file GLOBTESTDIR {*.c *1} {
+            incr cnt
+            if [string match GLOBTESTDIR/dir2/* $file] {
+                break
+            }
+        }
+    } msg] $msg $cnt
+} 0 {0 {} 5}
+
+Test recursive_glob-2.8 {continue in for_recursive_glob command} {
+    set cnt 0
+    list [catch {
+        for_recursive_glob file GLOBTESTDIR {*.c *3} {
+            incr cnt
+            continue
+            incr cnt
+        }
+    } msg] $msg $cnt
+} 0 {0 {} 7}
+
+Test recursive_glob-2.9 {return in for_recursive_glob command} {
+    proc for_recursive_glob_test cntVar {
+        upvar $cntVar cnt
+        for_recursive_glob file GLOBTESTDIR {*.c *3} {
+            incr cnt
+            return ABCDE
+        }
+    }
+    set cnt 0
+    list [catch {for_recursive_glob_test cnt} msg] $msg $cnt
+} 0 {0 ABCDE 1}
+rename for_recursive_glob_test {}
+
+Test recursive_glob-2.10 {return in for_recursive_glob command} {
+    proc for_recursive_glob_test cntVar {
+        upvar $cntVar cnt
+        for_recursive_glob file GLOBTESTDIR {*.c *1} {
+            incr cnt
+            if [string match GLOBTESTDIR/dir2/* $file] {
+                return ABCDE
+            }
+        }
+    }
+    set cnt 0
+    list [catch {for_recursive_glob_test cnt} msg] $msg $cnt
+} 0 {0 ABCDE 5}
+rename for_recursive_glob_test {}
 
 exec rm -rf GLOBTESTDIR
 
