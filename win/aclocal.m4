@@ -645,8 +645,6 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    LD_SEARCH_FLAGS=""
 	    ;;
 	*win32*|*WIN32*|CYGWIN_NT*|cygwin_nt*|*CYGWIN_98*|*CYGWIN_95*)
-	    CFLAGS_DEBUG="-nologo -Z7 -Od -WX"
-	    CFLAGS_OPTIMIZE="-nologo -Oti -Gs -GD"
 	    LDFLAGS_CONSOLE="-subsystem:console"
 	    LDFLAGS_WINDOW="-subsystem:windows"
 	    LDFLAGS_DEBUG="-debug:full -debugtype:cv"
@@ -678,6 +676,8 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 		EXESUFFIX="\${DBGX}.exe"
 		LIBRARIES="\${SHARED_LIBRARIES}"
 	    fi
+	    CFLAGS_DEBUG="-nologo -Z7 -Od -WX ${runtime}d"
+	    CFLAGS_OPTIMIZE="-nologo -Oti -Gs -GD ${runtime}"
 	    ;;
 	dgux*)
 	    SHLIB_CFLAGS="-K PIC"
