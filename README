@@ -24,6 +24,8 @@ early stages from Peter da Silva (peter@NeoSoft.com).
    As with Berkeley Tcl, all of Extended Tcl is freely redistributable,
 including for commercial use and resale.
 
+   Please read this file carefully before building and installing Extended Tcl.
+
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -100,7 +102,7 @@ Here is an overview of the directory hierarchy:
                           tcl6.5    tclX6.5c   tk3.0
 
 The tcl6.5 directory contains Berkeley Tcl, unmodified and tk3.0 contains
-unmodified tk3.0, if you plan to use Tk  These locations are only suggested,
+unmodified tk3.0, if you plan to use Tk.  These locations are only suggested,
 they maybe changed by editing tclX6.5c/Config.mk.
 
 The following directories are included under the tclX6.5c directory:
@@ -156,6 +158,9 @@ your system.  If not, you will have to develop one based on the documentation
 in "Config.mk".  If you develop or fix problems in a configuration file,
 please send it to us at the address below.
 
+   It is important to set the value for TCL_MASTERDIR in Config.mk before
+compiling TclX.
+
     Now do a "make".  If all goes well, this will augment the tcl.a library
 will all of the functions defined by both Berkeley and Extended Tcl, and
 create an executable version of tcl in the "tclX6.5c" directory called, simply
@@ -168,6 +173,12 @@ be run directly.  To run them before installation, use "runtcl" or "runwishx".
 greeted by a tcl prompt:
 
 tcl>
+
+    If you are using Tk and desired to have the information from the Tk
+command manual pages available in the Tcl help system, build them with the
+command:
+
+    make buildtkhelp
 
 
 RUN TESTS TO INSURE THAT TCL IS WORKING PROPERLY
@@ -212,14 +223,17 @@ INSTALLING EXTENDED TCL
 =======================
 
     To install Extended Tcl, edit the tclX6.5c/Config.mk installation
-configuration section to match your preferences. Read the information in the
-Makefile carefully before configuring it. Cd to the tclX6.5c directory and do
-a "make install" (normally as root).  This will install include files and
-manual pages for Berkeley Tcl and TclX, as well as the TclX binary and
-library.
+configuration section to match your preferences. Read the information in 
+Config.mk carefully before configuring it.  TCL_MASTERDIR must have been
+set before compiling TclX.
 
-    The Tcl default file may be used to install more than one version of
-TclX on a system.
+    The master directory name will have the Tcl version number appended to
+it, which allows multiple versions of Tcl to be installed.
+
+
+    Cd to the tclX6.5c directory and do a "make install" (normally as root).
+This will install include files and manual pages for Berkeley Tcl and TclX, as
+well as the TclX binary and library.
 
 PACKAGE LIBRARIES
 =================

@@ -442,3 +442,16 @@
   o Converted error messages containing optional arguments from the form [xxx]
     to ?xxx? for consistency with Tcl.
 -------------------------------------------------------------------------------
+10 Mar 93:
+  o Added the program and make target to optional build Tk help files from
+    the command manual pages.
+-------------------------------------------------------------------------------
+14 Mar 93:
+  o Deleted merge tree option of buildhelp.tcl.  This was for internal use and
+    is no longer needed.
+  o Made read_file argument compatible with the read command.
+  o Close file in read_file & write_file if an I/O error occurs.
+  o Eliminated the Tcl default file.  The file TclInit.tcl is now sourced
+    directly and it sets the Tcl path.  The directory Tcl is installed in
+    now contains the TclX version number.
+-------------------------------------------------------------------------------
