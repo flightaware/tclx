@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.5 1995/01/01 19:51:02 markd Exp markd $
+# $Id: Makefile.in,v 4.6 1995/01/01 19:56:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -356,5 +356,5 @@ distclean: clean
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	rm -f Makefile config.status config.cache
+	rm -f Makefile config.status config.cache config.log
 
