@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 7.2 1996/11/07 02:28:38 markd Exp $
+# $Id: instcopy.tcl,v 7.3 1996/11/16 20:38:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:

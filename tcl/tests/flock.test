@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 7.5 1996/11/04 22:30:52 markd Exp $
+# $Id: flock.test,v 7.6 1996/11/07 01:09:45 markd Exp $
 #------------------------------------------------------------------------------
 #
 

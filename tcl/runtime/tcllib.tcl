@@ -32,7 +32,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tcllib.tcl,v 6.0 1996/05/10 16:16:49 markd Exp $
+# $Id: tcllib.tcl,v 7.0 1996/06/16 05:31:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 

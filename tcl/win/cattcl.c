@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: cattcl.c,v 7.1 1996/07/25 04:42:06 markd Exp $
+ * $Id: cattcl.c,v 7.2 1996/07/26 05:56:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 7.0 1996/06/16 05:33:42 markd Exp $
+ * $Id: tkXAppInit.c,v 7.1 1996/08/17 02:10:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

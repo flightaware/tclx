@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Memory.n,v 6.0 1996/05/10 16:14:55 markd Exp $
+.\" $Id: Memory.n,v 7.0 1996/06/16 05:29:43 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Memory" TCL "" "Tcl"

@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 1.3 1996/08/04 18:21:24 markd Exp $
+ * $Id: tclXsocket.c,v 1.4 1996/08/17 02:10:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

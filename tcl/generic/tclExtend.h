@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 7.8 1996/11/16 15:27:42 markd Exp $
+ * $Id: tclExtend.h,v 7.9 1996/11/17 08:52:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

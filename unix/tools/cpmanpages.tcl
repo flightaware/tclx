@@ -37,7 +37,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 7.0 1996/06/16 05:34:35 markd Exp $
+# $Id: cpmanpages.tcl,v 7.1 1996/10/04 15:30:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 7.3 1996/08/06 07:15:27 markd Exp $
+ * $Id: tclXdup.c,v 7.4 1996/08/19 07:43:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"

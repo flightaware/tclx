@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 7.3 1996/07/30 02:29:39 markd Exp $
+ * $Id: tclXsignal.c,v 7.4 1996/09/17 22:28:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

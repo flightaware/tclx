@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXwinTest.c,v 7.1 1996/10/25 04:55:39 markd Exp $
+ * $Id: tkXwinTest.c,v 7.2 1996/10/27 00:34:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
