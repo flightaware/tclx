@@ -1,9 +1,8 @@
 /*
  * tkXshell.c
  *
- * Version of Tk main that is modified to build a wish shell with the Extended
- * Tcl command set and libraries.  This makes it easier to use a different
- * main.
+ * Version of Tk main modified for TclX to support SIGINT and use some of
+ * the TclX utility procedures.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -14,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.7 1996/02/20 01:13:13 markd Exp $
+ * $Id: tkXshell.c,v 5.8 1996/02/20 09:10:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -27,13 +26,13 @@
  *	for Tk applications.
  *
  * Copyright (c) 1990-1994 The Regents of the University of California.
- * Copyright (c) 1994-1996 Sun Microsystems, Inc.
+ * Copyright (c) 1994-1995 Sun Microsystems, Inc.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+ *
+ * SCCS: @(#) tkMain.c 1.145 96/03/08 17:13:44
  */
-
-static char sccsid[] = "@(#) tkMain.c 1.136 96/01/17 09:32:28";
 
 #include <ctype.h>
 #include <stdio.h>
@@ -63,26 +62,17 @@ static Tcl_DString line;	/* Used to read the next line from the
 static int tty;			/* Non-zero means standard input is a
 				 * terminal-like device.  Zero means it's
 				 * a file. */
-static char *argv0;		/* Holds the name of the script file we're
-				 * processing, if there was one.  Otherwise
-				 * holds argv[0] from the command line.  This
-				 * value is used as a default for the
-				 * application name. */
 static int gotPartial = 0;
+
 
 /*
  * Forward declarations for procedures defined later in this file.
- * Note: TkDefaultAppName is declared here even though it's also
- * in tkInt.h.  This is because we don't include tkInt.h here:
- * people should be able to make a local copy of this file outside
- * the Tk source area to build personal main programs.
  */
 
-static void		Prompt _ANSI_ARGS_((Tcl_Interp *interp, int partial));
 static void		StdinProc _ANSI_ARGS_((ClientData clientData,
 			    int mask));
 static void		SignalProc _ANSI_ARGS_((int  signalNum));
-EXTERN char *		TkDefaultAppName _ANSI_ARGS_((void));
+
 
 /*
  *----------------------------------------------------------------------
@@ -130,10 +120,6 @@ TkX_Main(argc, argv, appInitProc)
     Tcl_InitMemory(interp);
 #endif
 
-    inChannel = Tcl_GetChannel(interp, "stdin", NULL);
-    outChannel = Tcl_GetChannel(interp, "stdout", NULL);
-    errChannel = Tcl_GetChannel(interp, "stderr", NULL);
-
     /*
      * Parse command-line arguments.  A leading "-file" argument is
      * ignored (a historical relic from the distant past).  If the
@@ -141,7 +127,6 @@ TkX_Main(argc, argv, appInitProc)
      * use it as the name of a script file to process.
      */
 
-    argv0 = argv[0];
     fileName = NULL;
     if (argc > 1) {
 	length = strlen(argv[1]);
@@ -155,9 +140,6 @@ TkX_Main(argc, argv, appInitProc)
 	argc--;
 	argv++;
     }
-    if (fileName != NULL) {
-	argv0 = fileName;
-    }
 
     /*
      * Make command-line arguments available in the Tcl variables "argc"
@@ -169,7 +151,12 @@ TkX_Main(argc, argv, appInitProc)
     ckfree(args);
     sprintf(buf, "%d", argc-1);
     Tcl_SetVar(interp, "argc", buf, TCL_GLOBAL_ONLY);
-    Tcl_SetVar(interp, "argv0", argv0, TCL_GLOBAL_ONLY);
+    Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv[0],
+	    TCL_GLOBAL_ONLY);
+
+    /*
+     * Set the "tcl_interactive" variable.
+     */
 
     /*
      * For now, under Windows, we assume we are not running as a console mode
@@ -185,6 +172,7 @@ TkX_Main(argc, argv, appInitProc)
 #endif
     Tcl_SetVar(interp, "tcl_interactive",
 	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+
     if ((fileName == NULL) && tty)
         Tcl_SetupSigInt ();
 
@@ -219,22 +207,27 @@ TkX_Main(argc, argv, appInitProc)
 	 */
 
         TclX_EvalRCFile (interp);
-            
 
 	/*
 	 * Establish a channel handler for stdin.
 	 */
 
         tclErrorSignalProc = SignalProc;
-        Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
-                (ClientData) inChannel);
+	inChannel = Tcl_GetStdChannel(TCL_STDIN);
+	if (inChannel) {
+	    Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
+		    (ClientData) inChannel);
+	}
 	if (tty) {
 	    TclX_OutputPrompt (interp, 1);
 	}
     }
 
     tclSignalBackgroundError = Tk_BackgroundError;
-    Tcl_Flush(outChannel);
+    outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+    if (outChannel) {
+	Tcl_Flush(outChannel);
+    }
     Tcl_DStringInit(&command);
     Tcl_DStringInit(&line);
     Tcl_ResetResult(interp);
@@ -252,8 +245,11 @@ error:
     if (msg == NULL) {
 	msg = interp->result;
     }
-    Tcl_Write(errChannel, msg, -1);
-    Tcl_Write(errChannel, "\n", 1);
+    errChannel = Tcl_GetStdChannel(TCL_STDERR);
+    if (errChannel) {
+        Tcl_Write(errChannel, msg, -1);
+        Tcl_Write(errChannel, "\n", 1);
+    }
     if (!tclDeleteInterpAtEnd) {
         Tcl_Exit(1);
     } else {
@@ -334,11 +330,9 @@ StdinProc(clientData, mask)
     cmd = Tcl_DStringAppend(&command, "\n", -1);
     Tcl_DStringFree(&line);
     
-    if (count != 0) {
-	if (!Tcl_CommandComplete(cmd)) {
-	    gotPartial = 1;
-	    goto prompt;
-	}
+    if (!Tcl_CommandComplete(cmd)) {
+        gotPartial = 1;
+        goto prompt;
     }
     gotPartial = 0;
 
@@ -370,42 +364,4 @@ StdinProc(clientData, mask)
         TclX_OutputPrompt (interp, !gotPartial);
     }
     Tcl_ResetResult(interp);
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * TkDefaultAppName --
- *
- *	This procedure provides a default application name to use
- *	if one isn't specified explicitly for a Tk application.
- *
- * Results:
- *	Returns a string that can be used as the default application
- *	name.  This is either the last component of the file name
- *	from which the application was invoked, or "tk" if we don't
- *	know the name of the application's file (e.g. because Tk was
- *	loaded as a shared library).
- *
- * Side effects:
- *	None.
- *
- *----------------------------------------------------------------------
- */
-
-char *
-TkDefaultAppName()
-{
-    char *p;
-
-    if (argv0 == NULL) {
-	return "tk";
-    }
-    p = strrchr(argv0, '/');
-    if (p != NULL) {
-	p++;
-    } else {
-	p = argv0;
-    }
-    return p;
 }

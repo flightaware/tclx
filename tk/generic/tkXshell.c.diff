@@ -1,223 +1,445 @@
-0a1,19
-> /*
->  * tkXshell.c
->  *
->  * Version of Tk main that is modified to build a wish shell with the Extended
->  * Tcl command set and libraries.  This makes it easier to use a different
->  * main.
->  *-----------------------------------------------------------------------------
->  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
->  *
->  * Permission to use, copy, modify, and distribute this software and its
->  * documentation for any purpose and without fee is hereby granted, provided
->  * that the above copyright notice appear in all copies.  Karl Lehenbauer and
->  * Mark Diekhans make no representations about the suitability of this
->  * software for any purpose.  It is provided "as is" without express or
->  * implied warranty.
->  *-----------------------------------------------------------------------------
->  * $Id: tkXshell.c,v 5.7 1996/02/20 01:13:13 markd Exp $
->  *-----------------------------------------------------------------------------
->  */
-11c30
-<  * Copyright (c) 1994-1995 Sun Microsystems, Inc.
----
->  * Copyright (c) 1994-1996 Sun Microsystems, Inc.
-17c36
-< static char sccsid[] = "@(#) tkMain.c 1.136 96/01/31 13:08:42";
----
-> static char sccsid[] = "@(#) tkMain.c 1.136 96/01/17 09:32:28";
-21,22c40
-< #include <string.h>
-< #include <tcl.h>
----
-> #include <tclExtdInt.h>
-24,28d41
-< #ifdef NO_STDLIB_H
-< #   include "../compat/stdlib.h"
-< #else
-< #   include <stdlib.h>
-< #endif
-39,40d51
-< extern int		isatty _ANSI_ARGS_((int fd));
-< extern int		read _ANSI_ARGS_((int fd, char *buf, size_t size));
-59a71
-> static int gotPartial = 0;
-71a84
-> static void		SignalProc _ANSI_ARGS_((int  signalNum));
-77c90
-<  * Tk_Main --
----
->  * TkX_Main --
-94c107
-< Tk_Main(argc, argv, appInitProc)
----
-> TkX_Main(argc, argv, appInitProc)
-107a121,126
->     TclX_SetAppInfo (TRUE,
->                      "wishx",
->                      "Extended Wish",
->                      TKX_VERSION,
->                      TCLX_PATCHLEVEL);
-> 
-156,159d174
-<      * Set the "tcl_interactive" variable.
-<      */
-< 
-<     /*
-172a188,189
->     if ((fileName == NULL) && tty)
->         Tcl_SetupSigInt ();
-179,181c196
-< 	    Tcl_Write(errChannel, "initialization failed: ", -1);
-< 	    Tcl_Write(errChannel, interp->result, -1);
-< 	    Tcl_Write(errChannel, "\n", 1);
----
->         TclX_ErrorExit (interp, 255);
-189c204,207
-< 	code = Tcl_EvalFile(interp, fileName);
----
-> 	code = TclX_Eval (interp,
->                           TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
->                           TCLX_EVAL_ERR_HANDLER,
->                           fileName);
-203,227c221
-< 	fileName = Tcl_GetVar(interp, "tcl_rcFileName", TCL_GLOBAL_ONLY);
-< 
-< 	if (fileName != NULL) {
-< 	    Tcl_DString buffer;
-< 	    char *fullName;
-<     
-< 	    fullName = Tcl_TranslateFileName(interp, fileName, &buffer);
-< 	    if (fullName == NULL) {
-< 		Tcl_Write(errChannel, interp->result, -1);
-< 		Tcl_Write(errChannel, "\n", 1);
-< 	    } else {
-< 
-<                 /*
-<                  * NOTE: The following relies on O_RDONLY==0.
-<                  */
-<                 
-<                 chan = Tcl_OpenFileChannel(interp, fullName, "r", 0);
-<                 if (chan != (Tcl_Channel) NULL) {
-<                     Tcl_Close(chan);
-<                     if (Tcl_EvalFile(interp, fullName) != TCL_OK) {
-<                         Tcl_Write(errChannel, interp->result, -1);
-<                         Tcl_Write(errChannel, "\n", 1);
-<                     }
-<                 }
-<             }
----
->         TclX_EvalRCFile (interp);
-229,230d222
-< 	    Tcl_DStringFree(&buffer);
-< 	}
-235a228
->         tclErrorSignalProc = SignalProc;
-239c232
-< 	    Prompt(interp, 0);
----
-> 	    TclX_OutputPrompt (interp, 1);
-242a236
->     tclSignalBackgroundError = Tk_BackgroundError;
-263c257,285
-<     Tcl_Exit(1);
----
->     if (!tclDeleteInterpAtEnd) {
->         Tcl_Exit(1);
->     } else {
->         Tcl_DeleteInterp (interp);
->         Tcl_Exit(1);
->     }
-> }
-> 
-> /*
->  *----------------------------------------------------------------------
->  *
->  * SignalProc --
->  *
->  *	Function called on a signal generating an error to clear the stdin
->  *   	buffer.
->  *----------------------------------------------------------------------
->  */
-> 
-> static void
-> SignalProc (signalNum)
->     int  signalNum;
-> {
->     tclGotErrorSignal = 0;
->     Tcl_DStringFree (&command);
->     gotPartial = 0;
->     if (tty) {
->         Tcl_Write (TclX_Stdout (interp), "\n", 1);
->         TclX_OutputPrompt (interp, !gotPartial);
->     }
-292d313
-<     static int gotPartial = 0;
-339,346c360
-< 	    /*
-< 	     * The statement below used to call "printf", but that resulted
-< 	     * in core dumps under Solaris 2.3 if the result was very long.
-<              *
-<              * NOTE: This probably will not work under Windows either.
-< 	     */
-< 
-< 	    puts(interp->result);
----
->             TclX_PrintResult (interp, code, cmd);
-356c370
-< 	Prompt(interp, gotPartial);
----
->         TclX_OutputPrompt (interp, !gotPartial);
-359,410d372
-< }
-< 
-< /*
-<  *----------------------------------------------------------------------
-<  *
-<  * Prompt --
-<  *
-<  *	Issue a prompt on standard output, or invoke a script
-<  *	to issue the prompt.
-<  *
-<  * Results:
-<  *	None.
-<  *
-<  * Side effects:
-<  *	A prompt gets output, and a Tcl script may be evaluated
-<  *	in interp.
-<  *
-<  *----------------------------------------------------------------------
-<  */
-< 
-< static void
-< Prompt(interp, partial)
-<     Tcl_Interp *interp;			/* Interpreter to use for prompting. */
-<     int partial;			/* Non-zero means there already
-< 					 * exists a partial command, so use
-< 					 * the secondary prompt. */
-< {
-<     char *promptCmd;
-<     int code;
-<     Tcl_Channel outChannel, errChannel;
-< 
-<     outChannel = Tcl_GetChannel(interp, "stdout", NULL);
-<     errChannel = Tcl_GetChannel(interp, "stderr", NULL);
-< 
-<     promptCmd = Tcl_GetVar(interp,
-< 	partial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
-<     if (promptCmd == NULL) {
-< defaultPrompt:
-< 	if (!partial) {
-< 	    Tcl_Write(outChannel, "% ", 2);
-< 	}
-<     } else {
-< 	code = Tcl_Eval(interp, promptCmd);
-< 	if (code != TCL_OK) {
-< 	    Tcl_AddErrorInfo(interp,
-< 		    "\n    (script that generates prompt)");
-< 		    Tcl_Write(errChannel, interp->result, -1);
-< 		    Tcl_Write(errChannel, "\n", 1);
-< 	    goto defaultPrompt;
-< 	}
-<     }
-<     Tcl_Flush(outChannel);
+*** ../../../tk4.1b3/generic/tkMain.c	Fri Mar  8 17:16:22 1996
+--- tkXshell.c	Sun Mar 10 21:40:14 1996
+***************
+*** 1,3 ****
+--- 1,21 ----
++ /*
++  * tkXshell.c
++  *
++  * Version of Tk main modified for TclX to support SIGINT and use some of
++  * the TclX utility procedures.
++  *-----------------------------------------------------------------------------
++  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
++  *
++  * Permission to use, copy, modify, and distribute this software and its
++  * documentation for any purpose and without fee is hereby granted, provided
++  * that the above copyright notice appear in all copies.  Karl Lehenbauer and
++  * Mark Diekhans make no representations about the suitability of this
++  * software for any purpose.  It is provided "as is" without express or
++  * implied warranty.
++  *-----------------------------------------------------------------------------
++  * $Id: tkXshell.c,v 5.8 1996/02/20 09:10:42 markd Exp $
++  *-----------------------------------------------------------------------------
++  */
+  /* 
+   * tkMain.c --
+   *
+***************
+*** 18,31 ****
+  
+  #include <ctype.h>
+  #include <stdio.h>
+! #include <string.h>
+! #include <tcl.h>
+  #include <tk.h>
+- #ifdef NO_STDLIB_H
+- #   include "../compat/stdlib.h"
+- #else
+- #   include <stdlib.h>
+- #endif
+  
+  /*
+   * Declarations for various library procedures and variables (don't want
+--- 36,43 ----
+  
+  #include <ctype.h>
+  #include <stdio.h>
+! #include <tclExtdInt.h>
+  #include <tk.h>
+  
+  /*
+   * Declarations for various library procedures and variables (don't want
+***************
+*** 36,43 ****
+   * some systems.
+   */
+  
+- extern int		isatty _ANSI_ARGS_((int fd));
+- extern int		read _ANSI_ARGS_((int fd, char *buf, size_t size));
+  extern char *		strrchr _ANSI_ARGS_((CONST char *string, int c));
+  
+  /*
+--- 48,53 ----
+***************
+*** 52,70 ****
+  static int tty;			/* Non-zero means standard input is a
+  				 * terminal-like device.  Zero means it's
+  				 * a file. */
+  
+  /*
+   * Forward declarations for procedures defined later in this file.
+   */
+  
+- static void		Prompt _ANSI_ARGS_((Tcl_Interp *interp, int partial));
+  static void		StdinProc _ANSI_ARGS_((ClientData clientData,
+  			    int mask));
+  
+  /*
+   *----------------------------------------------------------------------
+   *
+!  * Tk_Main --
+   *
+   *	Main program for Wish and most other Tk-based applications.
+   *
+--- 62,83 ----
+  static int tty;			/* Non-zero means standard input is a
+  				 * terminal-like device.  Zero means it's
+  				 * a file. */
++ static int gotPartial = 0;
++ 
+  
+  /*
+   * Forward declarations for procedures defined later in this file.
+   */
+  
+  static void		StdinProc _ANSI_ARGS_((ClientData clientData,
+  			    int mask));
++ static void		SignalProc _ANSI_ARGS_((int  signalNum));
++ 
+  
+  /*
+   *----------------------------------------------------------------------
+   *
+!  * TkX_Main --
+   *
+   *	Main program for Wish and most other Tk-based applications.
+   *
+***************
+*** 81,87 ****
+   */
+  
+  void
+! Tk_Main(argc, argv, appInitProc)
+      int argc;				/* Number of arguments. */
+      char **argv;			/* Array of argument strings. */
+      Tcl_AppInitProc *appInitProc;	/* Application-specific initialization
+--- 94,100 ----
+   */
+  
+  void
+! TkX_Main(argc, argv, appInitProc)
+      int argc;				/* Number of arguments. */
+      char **argv;			/* Array of argument strings. */
+      Tcl_AppInitProc *appInitProc;	/* Application-specific initialization
+***************
+*** 95,100 ****
+--- 108,119 ----
+      size_t length;
+      Tcl_Channel inChannel, outChannel, errChannel, chan;
+  
++     TclX_SetAppInfo (TRUE,
++                      "wishx",
++                      "Extended Wish",
++                      TKX_VERSION,
++                      TCLX_PATCHLEVEL);
++ 
+      Tcl_FindExecutable(argv[0]);
+      interp = Tcl_CreateInterp();
+  #ifdef TCL_MEM_DEBUG
+***************
+*** 154,171 ****
+      Tcl_SetVar(interp, "tcl_interactive",
+  	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+  
+      /*
+       * Invoke application-specific initialization.
+       */
+  
+      if ((*appInitProc)(interp) != TCL_OK) {
+! 	errChannel = Tcl_GetStdChannel(TCL_STDERR);
+! 	if (errChannel) {
+!             Tcl_Write(errChannel,
+! 		    "application-specific initialization failed: ", -1);
+!             Tcl_Write(errChannel, interp->result, -1);
+!             Tcl_Write(errChannel, "\n", 1);
+!         }
+      }
+  
+      /*
+--- 173,187 ----
+      Tcl_SetVar(interp, "tcl_interactive",
+  	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+  
++     if ((fileName == NULL) && tty)
++         Tcl_SetupSigInt ();
++ 
+      /*
+       * Invoke application-specific initialization.
+       */
+  
+      if ((*appInitProc)(interp) != TCL_OK) {
+!         TclX_ErrorExit (interp, 255);
+      }
+  
+      /*
+***************
+*** 173,179 ****
+       */
+  
+      if (fileName != NULL) {
+! 	code = Tcl_EvalFile(interp, fileName);
+  	if (code != TCL_OK) {
+  	    goto error;
+  	}
+--- 189,198 ----
+       */
+  
+      if (fileName != NULL) {
+! 	code = TclX_Eval (interp,
+!                           TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
+!                           TCLX_EVAL_ERR_HANDLER,
+!                           fileName);
+  	if (code != TCL_OK) {
+  	    goto error;
+  	}
+***************
+*** 187,241 ****
+  	 * input, and print a prompt if the input device is a terminal.
+  	 */
+  
+! 	fileName = Tcl_GetVar(interp, "tcl_rcFileName", TCL_GLOBAL_ONLY);
+! 
+! 	if (fileName != NULL) {
+! 	    Tcl_DString buffer;
+! 	    char *fullName;
+!     
+! 	    fullName = Tcl_TranslateFileName(interp, fileName, &buffer);
+! 	    if (fullName == NULL) {
+! 		errChannel = Tcl_GetStdChannel(TCL_STDERR);
+! 		if (errChannel) {
+!                     Tcl_Write(errChannel, interp->result, -1);
+!                     Tcl_Write(errChannel, "\n", 1);
+!                 }
+! 	    } else {
+! 
+!                 /*
+!                  * NOTE: The following relies on O_RDONLY==0.
+!                  */
+!                 
+!                 chan = Tcl_OpenFileChannel(interp, fullName, "r", 0);
+!                 if (chan != (Tcl_Channel) NULL) {
+!                     Tcl_Close(NULL, chan);
+!                     if (Tcl_EvalFile(interp, fullName) != TCL_OK) {
+! 			errChannel = Tcl_GetStdChannel(TCL_STDERR);
+! 			if (errChannel) {
+!                             Tcl_Write(errChannel, interp->result, -1);
+!                             Tcl_Write(errChannel, "\n", 1);
+!                         }
+!                     }
+!                 }
+!             }
+!             
+! 	    Tcl_DStringFree(&buffer);
+! 	}
+  
+  	/*
+  	 * Establish a channel handler for stdin.
+  	 */
+  
+  	inChannel = Tcl_GetStdChannel(TCL_STDIN);
+  	if (inChannel) {
+  	    Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
+  		    (ClientData) inChannel);
+  	}
+  	if (tty) {
+! 	    Prompt(interp, 0);
+  	}
+      }
+  
+      outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+      if (outChannel) {
+  	Tcl_Flush(outChannel);
+--- 206,229 ----
+  	 * input, and print a prompt if the input device is a terminal.
+  	 */
+  
+!         TclX_EvalRCFile (interp);
+  
+  	/*
+  	 * Establish a channel handler for stdin.
+  	 */
+  
++         tclErrorSignalProc = SignalProc;
+  	inChannel = Tcl_GetStdChannel(TCL_STDIN);
+  	if (inChannel) {
+  	    Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
+  		    (ClientData) inChannel);
+  	}
+  	if (tty) {
+! 	    TclX_OutputPrompt (interp, 1);
+  	}
+      }
+  
++     tclSignalBackgroundError = Tk_BackgroundError;
+      outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+      if (outChannel) {
+  	Tcl_Flush(outChannel);
+***************
+*** 262,268 ****
+          Tcl_Write(errChannel, msg, -1);
+          Tcl_Write(errChannel, "\n", 1);
+      }
+!     Tcl_Exit(1);
+  }
+  
+  /*
+--- 250,284 ----
+          Tcl_Write(errChannel, msg, -1);
+          Tcl_Write(errChannel, "\n", 1);
+      }
+!     if (!tclDeleteInterpAtEnd) {
+!         Tcl_Exit(1);
+!     } else {
+!         Tcl_DeleteInterp (interp);
+!         Tcl_Exit(1);
+!     }
+! }
+! 
+! /*
+!  *----------------------------------------------------------------------
+!  *
+!  * SignalProc --
+!  *
+!  *	Function called on a signal generating an error to clear the stdin
+!  *   	buffer.
+!  *----------------------------------------------------------------------
+!  */
+! 
+! static void
+! SignalProc (signalNum)
+!     int  signalNum;
+! {
+!     tclGotErrorSignal = 0;
+!     Tcl_DStringFree (&command);
+!     gotPartial = 0;
+!     if (tty) {
+!         Tcl_Write (TclX_Stdout (interp), "\n", 1);
+!         TclX_OutputPrompt (interp, !gotPartial);
+!     }
+  }
+  
+  /*
+***************
+*** 291,297 ****
+      ClientData clientData;		/* Not used. */
+      int mask;				/* Not used. */
+  {
+-     static int gotPartial = 0;
+      char *cmd;
+      int code, count;
+      Tcl_Channel chan = (Tcl_Channel) clientData;
+--- 307,312 ----
+***************
+*** 336,349 ****
+      Tcl_DStringFree(&command);
+      if (*interp->result != 0) {
+  	if ((code != TCL_OK) || (tty)) {
+! 	    /*
+! 	     * The statement below used to call "printf", but that resulted
+! 	     * in core dumps under Solaris 2.3 if the result was very long.
+!              *
+!              * NOTE: This probably will not work under Windows either.
+! 	     */
+! 
+! 	    puts(interp->result);
+  	}
+      }
+  
+--- 351,357 ----
+      Tcl_DStringFree(&command);
+      if (*interp->result != 0) {
+  	if ((code != TCL_OK) || (tty)) {
+!             TclX_PrintResult (interp, code, cmd);
+  	}
+      }
+  
+***************
+*** 353,432 ****
+  
+      prompt:
+      if (tty) {
+! 	Prompt(interp, gotPartial);
+      }
+      Tcl_ResetResult(interp);
+- }
+- 
+- /*
+-  *----------------------------------------------------------------------
+-  *
+-  * Prompt --
+-  *
+-  *	Issue a prompt on standard output, or invoke a script
+-  *	to issue the prompt.
+-  *
+-  * Results:
+-  *	None.
+-  *
+-  * Side effects:
+-  *	A prompt gets output, and a Tcl script may be evaluated
+-  *	in interp.
+-  *
+-  *----------------------------------------------------------------------
+-  */
+- 
+- static void
+- Prompt(interp, partial)
+-     Tcl_Interp *interp;			/* Interpreter to use for prompting. */
+-     int partial;			/* Non-zero means there already
+- 					 * exists a partial command, so use
+- 					 * the secondary prompt. */
+- {
+-     char *promptCmd;
+-     int code;
+-     Tcl_Channel outChannel, errChannel;
+- 
+-     errChannel = Tcl_GetChannel(interp, "stderr", NULL);
+- 
+-     promptCmd = Tcl_GetVar(interp,
+- 	partial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
+-     if (promptCmd == NULL) {
+- defaultPrompt:
+- 	if (!partial) {
+- 
+-             /*
+-              * We must check that outChannel is a real channel - it
+-              * is possible that someone has transferred stdout out of
+-              * this interpreter with "interp transfer".
+-              */
+- 
+- 	    outChannel = Tcl_GetChannel(interp, "stdout", NULL);
+-             if (outChannel != (Tcl_Channel) NULL) {
+-                 Tcl_Write(outChannel, "% ", 2);
+-             }
+- 	}
+-     } else {
+- 	code = Tcl_Eval(interp, promptCmd);
+- 	if (code != TCL_OK) {
+- 	    Tcl_AddErrorInfo(interp,
+- 		    "\n    (script that generates prompt)");
+-             /*
+-              * We must check that errChannel is a real channel - it
+-              * is possible that someone has transferred stderr out of
+-              * this interpreter with "interp transfer".
+-              */
+-             
+- 	    errChannel = Tcl_GetChannel(interp, "stderr", NULL);
+-             if (errChannel != (Tcl_Channel) NULL) {
+-                 Tcl_Write(errChannel, interp->result, -1);
+-                 Tcl_Write(errChannel, "\n", 1);
+-             }
+- 	    goto defaultPrompt;
+- 	}
+-     }
+-     outChannel = Tcl_GetChannel(interp, "stdout", NULL);
+-     if (outChannel != (Tcl_Channel) NULL) {
+-         Tcl_Flush(outChannel);
+-     }
+  }
+--- 361,367 ----
+  
+      prompt:
+      if (tty) {
+!         TclX_OutputPrompt (interp, !gotPartial);
+      }
+      Tcl_ResetResult(interp);
+  }
