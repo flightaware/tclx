@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: help.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -133,32 +133,35 @@ EatServerPrompt
 # Now run the tests.
 
 
-test help-1.1 {help tests} {
+Test help-1.1 {help tests} {
     HelpSend "help" promptCnt
-} {
+} 0 {
 Subjects available in /:
-   commands/        extended/        intro/           misc/
-   tcl.tlib/        tclshell/        
+   RCS/             control/         debug/           files/
+   filescan/        internation/     intro/           keyedlists/
+   libraries/       lists/           math/            processes/
+   signals/         status/          strings/         tclshell/
+   time/            variables/       
 
 Help files available in /:
    brief            help             
 }
 
-test help-1.2 {help tests} {
+Test help-1.2 {help tests} {
     HelpSend "helppwd" promptCnt
-} {Current help subject directory: /
+} 0 {Current help subject directory: /
 }
 
-test help-1.3 {help tests} {
+Test help-1.3 {help tests} {
     HelpSend "helpcd intro" promptCnt
-} {}
+} 0 {}
 
-test help-1.4 {help tests} {
+Test help-1.4 {help tests} {
     HelpSend "helppwd" promptCnt
-} {Current help subject directory: /intro
+} 0 {Current help subject directory: /intro
 }
 
-test help-1.5 {help tests} {
+Test help-1.5 {help tests} {
     set result [HelpSend "help comments" promptCnt]
     set fh [open "../tcllib/help/intro/comments"]
     set expect [read $fh]
@@ -175,9 +178,9 @@ test help-1.5 {help tests} {
        append summary " : TOO MANY PROMPTS"
     }
     set summary
-} {CORRECT : PROMPT OK}
+} 0 {CORRECT : PROMPT OK}
 
-test help-1.6 {help tests} {
+Test help-1.6 {help tests} {
     set result [HelpSend "help expressions" promptCnt]
     set fh [open "../tcllib/help/intro/expressions"]
     set expect [read $fh]
@@ -194,28 +197,28 @@ test help-1.6 {help tests} {
        append summary " : NOT ENOUGH PROMPTS"
     }
     set summary
-} {CORRECT : PROMPT OK}
+} 0 {CORRECT : PROMPT OK}
 
-test help-1.7 {help tests} {
+Test help-1.7 {help tests} {
     HelpSend "apropos upvar" promptCnt
-} {commands/upvar - Bind a variable to another variable up the procedure call stack.
+} 0 {variables/upvar - Bind a variable to another variable up the procedure call stack.
 }
 
-test help-1.8 {help tests} {
+Test help-1.8 {help tests} {
     HelpSend "apropos clock" promptCnt
-} {extended/alarm - Set a process alarm clock.
-extended/convertclock - Parse and convert a date and time string to integer clock value.
-extended/fmtclock - Convert an integer time value to human-readable format.
-extended/getclock - Return current date and time as an integer value.
+} 0 {time/alarm - Set a process alarm clock.
+time/convertclock - Parse and convert a date and time string to integer clock value.
+time/fmtclock - Convert an integer time value to human-readable format.
+time/getclock - Return current date and time as an integer value.
 }
 
-test help-1.9 {help tests} {
+Test help-1.9 {help tests} {
     HelpSend "helpcd" promptCnt
-} {}
+} 0 {}
 
-test help-1.10 {help tests} {
+Test help-1.10 {help tests} {
     HelpSend "helppwd" promptCnt
-} {Current help subject directory: /
+} 0 {Current help subject directory: /
 }
 
 
