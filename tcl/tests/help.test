@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 1.4 1992/10/05 22:01:14 markd Exp markd $
+# $Id: help.test,v 2.0 1992/10/16 04:49:52 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -144,7 +144,7 @@ Subjects available in /:
    variables/       
 
 Help files available in /:
-   Tcl.brf          TclX.brf         help             
+   help             
 }
 
 Test help-1.2 {help tests} {
