@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 2.10 1993/11/08 05:06:40 markd Exp markd $
+ * $Id: tclXprocess.c,v 3.0 1993/11/19 06:59:07 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -154,7 +154,7 @@ Tcl_ForkCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    pid = fork ();
+    pid = vfork ();
     if (pid < 0) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
