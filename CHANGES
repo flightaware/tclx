@@ -970,11 +970,31 @@
 ===============================================================================
  1 Jul 95: Released TclX 7.4a-beta4.
 ===============================================================================
- 2 Jun 95:
+ 2 Jul 95:
   o Fixed fcntl RDWR not returning the correct value.
   o Modified dup test of binding to a file number to work around the fact that
     Solaris has pipes open RDWR.
   o Fix problems with convertclock on Solaris.
 ===============================================================================
  2 Jul 95: Released TclX 7.4a-beta5.
+===============================================================================
+ 3 Jul 95:
+  o Added -reuseaddr option to server_create command.
+  o Added server_cntl command.
+  o Added cmdtrace command option.  This is a callback that is called on
+    every traced command executed.
+  o Added ability to call TclX_Init after Tcl_Init has been called and TkX_Init
+    after Tk_Init.  This gives the option of using the TclX runtime in
+    conjunction with the standard Tcl/Tk runtime.  It is still recommended
+    to only use the TclX runtime, but this change adds flexibility.
+  o Renamed the SYSLIBS files to be tclxlibs.mk and tkxlibs.mk.  These are
+    now install in the lib directories, as they are architecturally
+    dependent.
+-------------------------------------------------------------------------------
+16 Jul 95:
+  o Fixed several protability issues.
+  o Updated document on building shared libraries.
+  o Added INSTALL_ROOT to support installation on AFS systems.
+===============================================================================
+16 Jul 95: Released TclX 7.4a-beta5.
 ===============================================================================
