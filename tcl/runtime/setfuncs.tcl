@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 2.3 1993/04/07 06:47:25 markd Exp markd $
+# $Id: setfuncs.tcl,v 2.4 1993/09/26 16:26:59 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -37,7 +37,10 @@ proc union {lista listb} {
 #
 # sort a list, returning the sorted version minus any duplicates
 #
-proc lrmdups {list} {
+proc lrmdups list {
+    if [lempty $list] {
+        return {}
+    }
     set list [lsort $list]
     set last [lvarpop list]
     lappend result $last
