@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.9 1993/11/18 06:14:51 markd Exp markd $
+ * $Id: tclXselect.c,v 3.0 1993/11/19 06:59:13 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,11 +45,15 @@ double floor ();
 
 /*
  * Macro to probe the stdio buffer to see if any data is pending in the
- * buffer.  Different versions are provided for System V and BSD stdio.
+ * buffer.  Different versions are provided for System V, BSD and GNU stdio.
  */
 
-#ifdef linux
-#   define READ_DATA_PENDING(fp) (fp->_egptr != fp->_gptr)
+#ifdef _STDIO_USES_IOSTREAM  /* GNU libc */
+#   ifdef _IO_STDIO_H
+#       define READ_DATA_PENDING(fp) (fp->_IO_read_ptr != fp->_IO_read_end)
+#else
+#       define READ_DATA_PENDING(fp) ((fp)->_gptr < (fp)->_egptr)
+#   endif
 #endif
 #if (!defined (READ_DATA_PENDING)) && defined __SLBF
 #   define READ_DATA_PENDING(fp) (fp->_r > 0)
