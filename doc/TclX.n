@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.53 1993/11/19 06:16:14 markd Exp markd $
+.\" $Id: TclX.n,v 3.0 1993/11/19 06:56:37 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1778,7 +1778,7 @@ sorted.
 Assign successive elements of a list to specified variables.
 If there are more variable
 names than fields, the remaining variables are set to the
-empty string.  If there are more elements than variables, as list of the
+empty string.  If there are more elements than variables, a list of the
 unassigned elements is returned.
 .sp
 For example,
