@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 2.1 1993/05/04 02:57:06 markd Exp markd $
+# $Id: buildidx.tcl,v 2.2 1993/05/16 06:36:04 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -61,7 +61,8 @@ proc TCLSH:ParsePkgHeader matchInfoVar {
 proc TCLSH:CreateLibIndex {libName} {
 
     if {[file extension $libName] != ".tlib"} {
-        error "Package library `$libName' does not have the extension `.tlib'"}
+        error "Package library `$libName' does not have the extension `.tlib'"
+    }
     set idxName "[file root $libName].tndx"
 
     unlink -nocomplain $idxName
@@ -72,7 +73,7 @@ proc TCLSH:CreateLibIndex {libName} {
 
     scanmatch $contectHdl "^#@package: " {
         if {[llength $matchInfo(line)] < 2} {
-            error [format "invalid package header \"%s\"" $matchInfo(line)]
+            error "invalid package header \"$matchInfo(line)\""
         }
         if ![lempty $pkgInfo] {
             TCLSH:PutIdxEntry $idxFH $pkgInfo $matchInfo(offset)
@@ -82,7 +83,7 @@ proc TCLSH:CreateLibIndex {libName} {
 
     scanmatch $contectHdl "^#@packend" {
         if [lempty $pkgInfo] {
-            error "#@packend without #@package in $libName
+            error "#@packend without #@package in $libName"
         }
         TCLSH:PutIdxEntry $idxFH $pkgDefName $pkgDefWhere $matchInfo(offset) \
                           $pkgDefProcs
