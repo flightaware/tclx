@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.6 1995/01/01 19:56:09 markd Exp markd $
+# $Id: Makefile.in,v 4.7 1995/01/01 20:31:05 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -207,7 +207,6 @@ TCLXINSTALL:
 	@echo ""
 	@echo "   Install Extended Tcl using standard model"
 	@echo ""
-	rm -rf ${TCL_INST_MASTER}
 	${INSTCOPY} tclmaster/*.tcl tclmaster/*.tlib tclmaster/*.tndx \
 	   tclmaster/help tclmaster/src ${TCL_INST_MASTER}
 	${INSTCOPY} tclmaster/include/tclExtend.h tclmaster/include/tcl++.h \
@@ -224,7 +223,6 @@ TCLXINSTALL-EXEC:
 	${RANLIB} ${TCL_LIBDIR}/libtclx.a
 
 TKXINSTALL:
-	rm -rf ${TK_INST_MASTER}
 	${INSTCOPY} tkmaster/*.tcl tkmaster/*.tlib tkmaster/*.tndx \
 	   tkmaster/help tkmaster/src tkmaster/*.ps tkmaster/demos \
 	   ${TK_INST_MASTER}
@@ -265,7 +263,6 @@ TCLXMINSTALL:
 	@echo ""
 	@echo "   Install TclX master directory"
 	@echo ""
-	rm -rf ${TCL_INST_MASTER}
 	${INSTCOPY} -dirname tclmaster ${TCL_INST_MASTER}
 	strip ${TCL_INST_MASTER}/bin${ARCH}/tcl
 	${MCS}  ${TCL_INST_MASTER}/bin${ARCH}/tcl
@@ -296,7 +293,6 @@ TKXMINSTALL:
 	@echo ""
 	@echo "   Install TkX master directory"
 	@echo ""
-	rm -rf ${TK_INST_MASTER}
 	${INSTCOPY} -dirname tkmaster ${TK_INST_MASTER}
 	strip ${TK_INST_MASTER}/bin${ARCH}/wishx
 	${MCS}  ${TK_INST_MASTER}/bin${ARCH}/wishx
