@@ -1,3 +1,11 @@
+2001-10-24  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	**** POTENTIAL INCOMPATABILITY ****
+	* MASSIVE restructuring underway.  Reorganizing into a simple TclX
+	only extension - no more tkx or shell builds.  You can retrieve
+	the latest of the old style TclX from the tclx-8-3-0-branch.
+	**** POTENTIAL INCOMPATABILITY ****
+
 2001-09-11  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* tcl/generic/tclXlib.c (MakeAbsFile): Replaced a call to the
