@@ -657,6 +657,8 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    SHLIB_LD="link -dll -nologo"
 	    SHLIB_LD_LIBS="user32.lib advapi32.lib"
 	    RC="rc"
+	    CC_EXENAME="-o \[$]@"
+	    CC_OBJNAME="-Fo\[$]@"
 	    if test "${SHARED_BUILD}" = "0" ; then
 		# static
 		AC_MSG_RESULT([using static flags])
