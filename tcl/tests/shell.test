@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: shell.test,v 5.3 1996/03/14 05:04:52 markd Exp $
+# $Id: shell.test,v 5.4 1996/03/17 08:48:45 markd Exp $
 #------------------------------------------------------------------------------
 
 if {[info procs test] != "test"} then {source testlib.tcl}
@@ -21,6 +21,20 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 # Test tclx_errorHandler traping of errors.
 
 Test shell-1.0 {TclX shell error handling} {
+    exec $TCL_PROGRAM -c {
+        proc tclx_errorHandler msg {
+            echo "@@@Error handler got: $msg"
+        }
+        proc bad {} badcommand
+        bad
+        puts stderr "Should not make it here"
+        exit 1
+    }
+} 0 {@@@Error handler got: invalid command name "badcommand"}
+
+# Tested the deprecated functionallity where a variable contains the
+# name of the error function.
+Test shell-1.1 {deprected TclX shell error handling} {
     exec $TCL_PROGRAM -c {
         proc err msg {
             echo "@@@Error handler got: $msg"

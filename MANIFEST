@@ -65,6 +65,7 @@
 ./tcl/help/tcl/control/return
 ./tcl/help/tcl/control/source
 ./tcl/help/tcl/control/switch
+./tcl/help/tcl/control/tclx_errorHandler
 ./tcl/help/tcl/control/uplevel
 ./tcl/help/tcl/control/while
 ./tcl/help/tcl/debug/cmdtrace

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.10 1996/03/13 08:30:21 markd Exp $
+ * $Id: tclXutil.c,v 5.11 1996/03/15 07:35:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -833,7 +833,8 @@ Tcl_TicksToMS (numTicks)
 /*-----------------------------------------------------------------------------
  * CallEvalErrorHandler --
  *
- *   Call the error handler specified in tclx_errorHandler.
+ *   Call the error handler function tclx_errorHandler, if it exists.  Passing
+ * it the result of the failed command.
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter.
@@ -846,28 +847,32 @@ static int
 CallEvalErrorHandler (interp)
     Tcl_Interp  *interp;
 {
-    char         *errorHandler, *msgArg;
-    char         *msgArgv [2];
-    Tcl_DString   command;
-    int           result;
-
-    errorHandler = Tcl_GetVar (interp, "tclx_errorHandler", TCL_GLOBAL_ONLY);
-    if (errorHandler == NULL)
-        return TCL_ERROR;
-    
-    Tcl_DStringInit (&command);
-    Tcl_DStringAppend (&command, errorHandler, -1);
+    static char *ERROR_HANDLER = "tclx_errorHandler";
+    Tcl_CmdInfo cmdInfo;
+    Tcl_DString command;
+    int result;
 
     /*
-     * Use list merge to quote the argument, as it probably contains spaces.
+     * Check if the tclx_errorHandler function exists.  For backwards
+     * compatibility with TclX 7.4 we check to see if there is a variable
+     * by the same name holding the name of a procedrure.  Build up the command
+     * based on what we found.  The variable functionality is deprectated and
+     * should be removed eventually. ????
      */
-    msgArgv [0] = interp->result;
-    msgArgv [1] = NULL;
-    msgArg = Tcl_Merge (1, msgArgv);
+    if (!Tcl_GetCommandInfo (interp, ERROR_HANDLER, &cmdInfo)) {
+        char *errorHandler;
 
-    Tcl_DStringAppend (&command, " ", -1);
-    Tcl_DStringAppend (&command, msgArg, -1);
-    ckfree (msgArg);
+        errorHandler = Tcl_GetVar (interp, ERROR_HANDLER, TCL_GLOBAL_ONLY);
+        if (errorHandler == NULL)
+            return TCL_ERROR;  /* No handler specified */
+        Tcl_DStringInit (&command);
+        Tcl_DStringAppendElement (&command, errorHandler);
+    } else {
+        Tcl_DStringInit (&command);
+        Tcl_DStringAppendElement (&command, ERROR_HANDLER);
+    }
+
+    Tcl_DStringAppendElement (&command, interp->result);
 
     result = Tcl_GlobalEval (interp, Tcl_DStringValue (&command));
     if (result == TCL_ERROR) {

@@ -1126,6 +1126,12 @@
    (* potential incompatibility *)
   o Removed the implicit event loop feature of the TclX added in the previous
     beta.  It could lead to some hard to find problems.
-  o Added mainloop procedure to implement top level evant loops in TclX that
-    are similar to wish's.
+  o Added mainloop procedure to implement top level evant loops in the TclX
+    shell that are similar to wish's.
+  o Changed the tclx_errorHandler functionality to be consistent with bgerror.
+    Uncaught synchronous errors now look for a procedure named
+    tclx_errorHandler, rather than a variable which contains a procedure name.
+    For backwards compatibility, a check is still made for a variable
+    named tclx_errorHandler.  This functionality is deprecated and scripts
+    should be change to use the new form.
 -------------------------------------------------------------------------------
