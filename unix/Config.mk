@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.3 1992/11/09 07:33:02 markd Exp markd $
+# $Id: Config.mk,v 2.4 1992/12/18 05:16:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -42,17 +42,15 @@ TCL_UCB_DIR=../tcl6.5
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
-# that includes the TclX command set, define TCL_TK_SHELL=wish and the
+# that includes the TclX command set, define TCL_TK_SHELL=wishx and the
 # location of your Tk directory in TCL_TK_DIR relative to this directory. If
-# you do not want a "wish" compiled, don't define TCL_TK_SHELL. The libraries
+# you do not want a "wishx" compiled, don't define TCL_TK_SHELL. The libraries
 # required to link Tk are defined in the system specific sections below.
-# TK_LIBRARY must be set to the same value specified in the compile of the Tk
-# source.  If TCL_TK_SHELL is define, Tk manual pages will be installed by the
-# install script.
+# If TCL_TK_SHELL is define, Tk manual pages will be installed by the install
+# script.
 #
-#TCL_TK_SHELL=wish
+#TCL_TK_SHELL=wishx
 TCL_TK_DIR=../tk3.0
-TK_LIBRARY=/usr/local/lib/tk
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Not that if debugging or
