@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 8.8 1997/08/30 22:30:14 markd Exp $
+# $Id: Config.mk,v 8.9 1997/08/31 05:48:24 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ TCL2C = ${TCL_BUILD}/unix/tcl2c
 #   o XLDLIBS - Extra libraries to use at link time.
 
 XCFLAGS=
-XLDFLAGS=-g
+XLDFLAGS=
 XLDLIBS=
 
 #------------------------------------------------------------------------------
