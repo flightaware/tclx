@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.34 1993/11/19 06:16:14 markd Exp markd $
+ * $Id: tclExtdInt.h,v 3.0 1993/11/19 06:59:03 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -64,7 +64,26 @@
 #    endif
 #endif
 
-#define MS_PER_TICK ((1000 + CLK_TCK/2) / CLK_TCK)
+/*
+ * We will need to convert OS ticks, as returned by times() for example,
+ * into milliseconds. The macro TICKS_TO_MS() will return milliseconds as
+ * an integer value.
+ */
+#if 1000 > CLK_TCK
+        /*
+         * On low resolution systems we can get away with the constant
+         * expression MS_PER_TICK. Note that the addition of half the
+         * clock hertz results in appoximate rounding instead of truncation.
+         *
+         */
+#  define TICKS_TO_MS(_ticks_)  ((_ticks_) * (1000 + CLK_TCK/2) / CLK_TCK)
+#else
+        /*
+         * On systems where the question is ticks per millisecond, not
+         * milliseconds per tick, we need to use floating point arithmetic.
+         */
+#  define TICKS_TO_MS(_ticks_)  (long)((_ticks_) * 1000.0 / CLK_TCK)
+#endif
 
 #include <math.h>
 

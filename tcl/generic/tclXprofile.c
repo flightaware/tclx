@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 2.7 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXprofile.c,v 3.0 1993/11/19 06:59:09 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -157,8 +157,8 @@ GetTimes (cpuTimePtr)
     struct tms cpuTimes;
     long       realTime;
 
-    realTime = times (&cpuTimes) * MS_PER_TICK;
-    *cpuTimePtr = (cpuTimes.tms_utime + cpuTimes.tms_stime) * MS_PER_TICK;
+    realTime = TICKS_TO_MS (times (&cpuTimes));
+    *cpuTimePtr = TICKS_TO_MS (cpuTimes.tms_utime + cpuTimes.tms_stime);
     return realTime;
 }
 #else
@@ -199,7 +199,7 @@ GetTimes (cpuTimePtr)
     realTime = (currentTime.tv_sec  * 1000) +
                (currentTime.tv_usec / 1000);
     times (&cpuTimes);
-    *cpuTimePtr = (cpuTimes.tms_utime + cpuTimes.tms_stime) * MS_PER_TICK;
+    *cpuTimePtr = TICKS_TO_MS (cpuTimes.tms_utime + cpuTimes.tms_stime);
     return realTime;
 }
 #endif /* TIMES_RETS_REAL_TIME */
