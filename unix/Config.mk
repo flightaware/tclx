@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.10 1993/02/18 05:16:35 markd Exp markd $
+# $Id: Config.mk,v 2.11 1993/03/15 06:39:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -287,10 +287,12 @@ TK_MAN_FUNC_SECTION=TK
 #        the warning (its not safe to just unset it).
 #
 #      o TCL_NOVALUES_H - Some systems do not support the <values.h>
-#      include file.  Define this to account for this fact.
+#        include file.  Define this to account for this fact.
 #
 #      o TCL_USEGETTOD - Use gettimeofday for handling timezone shifts
-#      from GMT.
+#        from GMT.
+#
+#      o TCL_NO_SOCKETS - Define if sockets are not available.
 #
 #    o LIBS - The flags to specify when linking the tclshell.
 #
