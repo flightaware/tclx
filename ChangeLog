@@ -1,4 +1,8 @@
 2000-07-12 Brent Welch <welch@ajubasolutions.com>
+	* Changed the HELP_DIR to be configurable so I could have parallel
+		builds not all trying to create the same help files.
+
+2000-07-12 Brent Welch <welch@ajubasolutions.com>
 	* tcl/win/configure.in, common.bc, common.vc
 	    Fixed version number to 8.3
 	* {tcl,tk}/unix/Makefile.in, tweaks to get references to LIB_RUNTIME_DIR
