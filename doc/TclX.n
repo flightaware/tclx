@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id$
+.\" $Id: TclX.n,v 8.17 1999/03/31 06:37:42 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -20,6 +20,9 @@
 .SH NAME
 TclX \- Extended Tcl: Extended command set for Tcl
 '
+.SH SYNOPSIS
+\fBpackage require Tclx\fR
+.PP
 .SH "INTRODUCTION"
 .PP
 This man page contains the documentation for all of the extensions that are
