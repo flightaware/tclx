@@ -4,7 +4,7 @@
 INTRODUCTION
 ============
 
-Extended Tcl (TclX), is an extension to Tcl 8.4, the Tool Command Language
+Extended Tcl (TclX), is an extension to Tcl, the Tool Command Language
 invented by Dr. John Ousterhout.  Tcl is a powerful, yet simple embeddable
 programming language.  Extended Tcl is oriented towards system programming
 tasks and large application development.  TclX provides additional
@@ -13,7 +13,7 @@ constructs, text manipulation tools, and debugging tools.
 
 TclX is upwardly compatible with Tcl.  You take the Extended Tcl package,
 add it to Tcl, and from that you get Extended Tcl.  Tcl can be obtained at
-    http://tcl.sourceforge.net/ or http://www.tcl-tk.net/
+    http://tcl.sourceforge.net/ or http://www.tcl.tk/
 
 Extended Tcl runs on most Unix-like systems and Windows.
 
@@ -25,7 +25,12 @@ for the latest release and information.
 
 Extended Tcl was designed and implemented by Karl Lehenbauer
 (karl@procplace.com) and Mark Diekhans (markd@Kermodei.com), with help in
-the earliest stages from Peter da Silva (peter@NeoSoft.com).
+the earliest stages from Peter da Silva (peter@NeoSoft.com).  TclX 8.4
+work was done by Jeff Hobbs.
+
+TclX 8.4 differs from its predecessors in that it is based more on the
+idea of TclX as an extension to Tcl, and not an alternate environment.
+There is no TkX and no stand-alone shells are built.
 
 As with Tcl, all of Extended Tcl is freely redistributable, including for
 commercial use and resale (BSD-style license).
@@ -66,8 +71,6 @@ Tcl, see the manual page man/TclX.man.
     o Extended string and character manipulation commands.
 
     o X/PG based internationalization commands.
-
-    o Support for event-oriented programming in non-Tk applications.
 
     o Advanced Tcl code library facility that is oriented towards building
       large applications.  It is compatible with standard Tcl auto-loading.
