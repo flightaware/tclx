@@ -1,12 +1,6 @@
                          TclX bug, idea and task list
 *** Serious Bugs ***
 
-o Remove check for whitespace in keyedlist field names.
-
-o waitpid status not checked in tclXunixOS.c
-
-o for_file can exit with file still open, maybe others.
-
 *** Minor bugs and enhancements ***
 
 o Need to either document how namspaces are used in #@package or normalize
