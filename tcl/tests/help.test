@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 2.0 1992/10/16 04:49:52 markd Rel markd $
+# $Id: help.test,v 2.1 1993/03/14 17:59:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -104,7 +104,6 @@ flush stderr
 set G_helpPid [fork]
 
 if {$G_helpPid == 0} {
-    # Set up stdin/stdout.  Cann't use them nobuf, since we havn't execvp-ed.
     close stdin
     dup $fromClientPipeFH stdin
     close stdout
