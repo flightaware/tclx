@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 5.5 1996/02/16 08:08:54 markd Exp $
+.\" $Id: TclXInit.3,v 5.6 1996/02/20 01:13:05 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -60,31 +60,6 @@ TclX_SetAppInfo (int   defaultValues,
 These functions are used to initialize Extended Tcl and applications based
 on Extended Tcl.  This manual page also discusses various issues and approaches
 of integrating TclX into other applications.
-'
-.SS tclX_library
-The path to the TclX runtime library.
-This directory contains the initialization file evaluated by TclX_Init and is
-also appended to auto_path.
-This variable is initialized to the compile-time specified install location.
-The value maybe modified before TclX_Init or TclXLib_Init are called to
-use another library in a particular application.
-If its set to NULL, no library will be used unless override by tclX_libraryEnv.
-Setting tclX_libraryEnv and this variable to NULL causes no library directory
-or initialization file to be used.
-'
-.SS tclX_libraryEnv
-Environment variable used to override the path stored in tclX_library.
-The value maybe modified before TclX_Init or TclXLib_Init are called to
-use another environment variable for a particular application.
-If its set to NULL, no environment variable will allow to override.
-Defaults to "TCL_LIBRARY".
-'
-.SS tclX_initFile
-The initialization file for TclX_Init to source.
-By default the file "TclInit.tcl" in the TclX library directory is sourced.
-If set to an absolute path, it is not assumed to be in the TclX library
-directory and is independent of a library path being specified.
-If set to NULL, not initialization file is evaluated.
 '
 .SS "Tclx_Init"
 .PP

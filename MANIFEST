@@ -217,7 +217,6 @@
 ./tcl/help/tcl/strings/string
 ./tcl/help/tcl/strings/subst
 ./tcl/help/tcl/strings/translit
-./tcl/help/tcl/tclshell/initialize
 ./tcl/help/tcl/tclshell/intro
 ./tcl/help/tcl/tclshell/variables
 ./tcl/help/tcl/time/alarm
@@ -233,7 +232,7 @@
 ./tcl/help/tcl/variables/trace
 ./tcl/help/tcl/variables/unset
 ./tcl/help/tcl/variables/upvar
-./tcl/runtime/TclInit.tcl
+./tcl/runtime/tclx.tcl
 ./tcl/runtime/arrayprocs.tcl
 ./tcl/runtime/buildhelp.tcl
 ./tcl/runtime/buildidx.tcl
@@ -313,6 +312,7 @@
 ./tk/help/tk/control/fileevent
 ./tk/help/tk/control/focus
 ./tk/help/tk/control/grab
+./tk/help/tk/control/grid
 ./tk/help/tk/control/lower
 ./tk/help/tk/control/option
 ./tk/help/tk/control/pack

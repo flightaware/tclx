@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.18 1996/03/02 19:50:20 markd Exp $
+# $Id: Makefile.in,v 5.19 1996/03/04 01:27:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -54,6 +54,8 @@ GENERIC_OBJS = tkXinit.o tkXshell.o
 
 OBJS = ${GENERIC_OBJS}
 
+RUNTIME_DIR = ${srcbasedir}/tk/runtime
+
 LIBTCLX = ../../tcl/unix/libtclx.a
 
 HELP_DIR = ${srcbasedir}/tk/help
@@ -65,7 +67,7 @@ TEST_OBJS = tkTest.o tkSquare.o tkXtest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtkx.a SHLIB_@BUILD_SHARED@ wishx tclhelp help.tmp tktest runtest \
+all: libtkx.a SHLIB_@BUILD_SHARED@ wishx RUNTIME tktest runtest \
      ${bldbasedir}/tk/tests
 
 wishx: tkXAppInit.o libtkx.a ${LIBTK}
@@ -92,6 +94,7 @@ ${TKX_SHLIB_NAME}: ${OBJS}
 	fi
 
 SHLIB_NO:
+	touch SHLIB_NO
 
 #------------------------------------------------------------------------------
 # Dependencies for generating objects.
@@ -110,7 +113,11 @@ tkXAppInit.o: ${TKX_GENERIC_DIR}/tkXAppInit.c
 # We need the "help" directory here so that the help command will work before
 # installation. Normally just symlink, unless we don't have them.
 #
-RUNTIME: tclhelp help.tmp
+RUNTIME: tkx.tcl tclhelp help.tmp
+
+tkx.tcl: ${RUNTIME_DIR}/tkx.tcl
+	rm -f tkx.tcl
+	cp ${RUNTIME_DIR}/tkx.tcl tkx.tcl
 
 tclhelp: ${srcdir}/../runtime/tclhelp.tcl
 	rm -f tclhelp
@@ -200,6 +207,7 @@ buildhelp:
 install: install-exec install-runtime
 
 install-runtime:
+	${INSTCOPY} tkx.tcl ${INSTALL_ROOT}${TKX_INST_RUNTIME}
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
 
 install-exec:
@@ -218,8 +226,8 @@ install-exec:
 
 #------------------------------------------------------------------------------
 clean:
-	-rm -f tkXAppInit.o ${OBJS} ${TEST_OBJS} wishx libtkx.a
-	-rm -rf tclhelp help help.tmp SHLIB_YES
+	-rm -f tkXAppInit.o ${OBJS} ${TEST_OBJS} wishx libtkx.a tkx.tcl
+	-rm -rf tclhelp help help.tmp SHLIB_YES SHLIB_NO
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

@@ -13,20 +13,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 5.4 1996/02/12 18:17:17 markd Exp $
+ * $Id: tkXinit.c,v 5.5 1996/02/16 07:51:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tk.h"
-
-/*
- * Used to override the library and library environment variable used to
- * find the TkX startup file and runtime library.  The values of these
- * fields must be changed before TkX_Init is called.
- */
-char *tkX_library    = TKX_LIBRARY;
-char *tkX_libraryEnv = "TKX_LIBRARY";
 
 
 /*-----------------------------------------------------------------------------
@@ -44,6 +36,19 @@ int
 Tkx_Init (interp)
     Tcl_Interp  *interp;
 {
-    return TclX_SetRuntimeLocation (interp, "tkx_library", tkX_libraryEnv,
-                                    tkX_library);
+    if (TclX_RuntimeInit (interp,
+                          "tkx_library",
+                          "tkx_library_env",
+                          "TKX_LIBRARY",
+                          TKX_LIBRARY,
+                          "tkx_init",
+                          "tkx.tcl") == TCL_ERROR)
+        goto errorExit;
+
+    return TCL_OK;
+
+  errorExit:
+    Tcl_AddErrorInfo (interp,
+                     "\n    (while initializing TkX)");
+    return TCL_ERROR;
 }

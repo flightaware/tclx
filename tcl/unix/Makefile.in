@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.16 1996/03/01 05:09:00 markd Exp $
+# $Id: Makefile.in,v 5.17 1996/03/01 17:59:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -112,13 +112,13 @@ ${TCLX_SHLIB_NAME}: ${OBJS}
 	fi
 
 SHLIB_NO:
+	touch SHLIB_NO
 
 #------------------------------------------------------------------------------
 # Dependencies for generating objects.
 #
-tclXlibInit.o: ${TCLX_GENERIC_DIR}/tclXlibInit.c Makefile
-	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
-	    ${TCLX_GENERIC_DIR}/tclXlibInit.c
+tclXlibInit.o: ${TCLX_GENERIC_DIR}/tclXlibInit.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXlibInit.c
 
 tclXcmdInit.o: ${TCLX_GENERIC_DIR}/tclXcmdInit.c
 	${CC} -c ${CC_SWITCHES}  ${TCLX_GENERIC_DIR}/tclXcmdInit.c
@@ -165,8 +165,9 @@ tclXhandles.o: ${TCLX_GENERIC_DIR}/tclXhandles.c
 tclXid.o: ${TCLX_GENERIC_DIR}/tclXid.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXid.c
 
-tclXinit.o: ${TCLX_GENERIC_DIR}/tclXinit.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXinit.c
+tclXinit.o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
+	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
+	    ${TCLX_GENERIC_DIR}/tclXinit.c
 
 tclXkeylist.o: ${TCLX_GENERIC_DIR}/tclXkeylist.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXkeylist.c
@@ -235,19 +236,19 @@ checkup.done: tcl
 # the help command will work before installation.  Normally just symlink,
 # unless we don't have them.
 #
-RUNTIME: tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help.tmp \
+RUNTIME: tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl help.tmp \
          dltest.tmp
 
 tcl.tlib: ${TLIB_SRCS}
 	-rm -f tcl.tlib tcl.tndx
 	cat ${TLIB_SRCS} | grep -v '^#[^@].*' | grep -v '#$$' > $@
 
-tcl.tndx: tcl.tlib TclInit.tcl buildidx.tcl
+tcl.tndx: tcl.tlib tclx.tcl buildidx.tcl
 	${GENTNDX} tcl.tlib
 
-TclInit.tcl: ${RUNTIME_DIR}/TclInit.tcl
-	rm -f TclInit.tcl
-	cp ${RUNTIME_DIR}/TclInit.tcl TclInit.tcl
+tclx.tcl: ${RUNTIME_DIR}/tclx.tcl
+	rm -f tclx.tcl
+	cp ${RUNTIME_DIR}/tclx.tcl tclx.tcl
 
 buildidx.tcl: ${RUNTIME_DIR}/buildidx.tcl
 	rm -f buildidx.tcl
@@ -356,7 +357,7 @@ install: install-runtime install-exec
 	    ${srcbasedir}/man ${INSTALL_ROOT}${TCLX_INST_MAN}
 
 install-runtime:
-	${INSTCOPY} ${srcdir}/TclInit.tcl tcl.tlib tcl.tndx \
+	${INSTCOPY} tclx.tcl tcl.tlib tcl.tndx \
 	    ${srcdir}/buildidx.tcl ${srcdir}/loadouster.tcl \
 	    ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_RUNTIME}/help
@@ -377,8 +378,9 @@ install-exec:
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclXAppInit.o ${OBJS} libtclx.a tcl checkup.done SHLIB_YES
-	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl
+	-rm -f tclXAppInit.o ${OBJS} libtclx.a tcl checkup.done
+	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
+	-rm -f SHLIB_YES SHLIB_NO
 	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
 
 #------------------------------------------------------------------------------

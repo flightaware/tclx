@@ -13,27 +13,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlibInit.c,v 5.1 1996/02/12 18:16:01 markd Exp $
+ * $Id: tclXlibInit.c,v 5.2 1996/02/16 07:51:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * Used to override the library and library environment variable used to
- * find the TclX startup file and runtime library.  The values of these
- * fields must be changed before Tclxlib_Init is called.
- */
-char *tclX_library    = TCLX_LIBRARY;
-char *tclX_libraryEnv = "TCLX_LIBRARY";
 
 
 /*
  *-----------------------------------------------------------------------------
  * Tclxlib_Init --
  *
- *   Initialize the Extended Tcl library facility commands.  Add the TclX
- * library directory to auto_path and set the tclx_library variable.
+ *   Initialize the Extended Tcl library facility commands.
  *-----------------------------------------------------------------------------
  */
 int
@@ -42,7 +33,6 @@ Tclxlib_Init (interp)
 {
     TclX_LibraryInit (interp);
 
-    return TclX_SetRuntimeLocation (interp, "tclx_library",
-                                    tclX_libraryEnv, tclX_library);
+    return TCL_OK;
 }
 

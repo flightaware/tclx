@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.5 1996/02/16 08:08:49 markd Exp $
+.\" $Id: TclX.n,v 5.6 1996/02/18 22:10:15 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2564,8 +2564,41 @@ The path is a Tcl list of directory names.
 .TP
 .B tclx_library
 Path to the TclX runtime library.  If your running the TclX shell or
-an appilcation based on it (like wishx), this is the same value returned by
-"info library".
+an appilcation based on it (like wishx).  The TclX initilization file normally
+adds this to the \fBauto_path\fR.
+.TP
+.B tclx_library_env
+Name of the environment variable the is used to override the default value for
+\fBtclx_library\fR.  This value is normally not set and the default
+environment variable, \fBTCLX_LIBRARY\fR, is used.  If the variable is set to
+an empty string, no environment override will be allowed.  This value must be
+set before \fBTclx_Init\fR is called.
+.TP
+.B tclx_init
+Path to the initalization file that \fBTclx_Init\fR will evaluate.  This value
+is normally not set, resulting in the standard init file being evaluated.
+If the path starts with a "\fB/\fR", its is taken as an absolute path.  If
+it does not start with a "\fB/\fR", its is taken as a path relative to 
+\fBtclx_library\fR.
+.TP
+.B tkx_library
+Path to the TkX runtime library.  This is set only if your application has
+called \fBTkx_InitfR.  The TkX initilization file normally adds this to the
+auto_path.
+.TP
+.B tkx_library_env
+Name of the environment variable the is used to override the default value for
+\fBtkx_library\fR.  This value is normally not set and the default environment
+variable, \fBTKX_LIBRARY\fR, is used.  If the variable is set to an empty
+string, no environment override will be allowed.  This value must be set
+before \fBTkx_Init\fR is called.
+.TP
+.B tkx_init
+Path to the initalization file that \fBTkx_Init\fR will evaluate.  This value
+is normally not set, resulting in the standard init file being evaluated.
+If the path starts with a "\fB/\fR", its is taken as an absolute path.  If
+it does not start with a "\fB/\fR", its is taken as a path relative to 
+\fBtkx_library\fR.
 .TP
 .B tcl_prompt1
 Contains code to run to output the prompt used when interactively prompting
@@ -2593,45 +2626,6 @@ This is useful for logging \fBerrorInfo\fR or e-mailing it to the maintainer.
 Array that contains information used internally by various Tcl procedures that
 are part of the TclX shell.  Don't change this array unless you know what
 your doing.
-'\"@endhelp
-'
-'\"@help: tcl/tclshell/initialize
-'\"@brief: Tcl shell initialization.
-.PP
-When Extended Tcl is installed, the standard runtime files are places in the
-Tcl master directory, which is configured when Tcl is built.  This master
-directory normally contains the Tcl initialization file (TclInit.tcl), the
-standard Tcl library file (tcl.tlib) and the help files.
-The Tcl master directory is named after the version of Tcl it is associated
-with, e.g. \fB/usr/local/tclX/7.4a\fR.  The path to the Tcl master directory
-is available from the \fBinfo library\fR command.  The location of the
-Tcl master directory can be overridden with the \fBTCL_LIBRARY\fR environment
-variable.
-.PP
-The first step in initializing the Tcl shell is to locate the Tcl
-initialization file, normally \fBTclInit.tcl\fR.  If an environment variable
-\fBTCLINIT\fR exists, it contains the path to the Tcl initialization file.
-If the \fBTCLINIT\fR environment variable is not set, the file
-\fBTclInit.tcl\fR is used from the default Tcl master directory.
-.PP
-\fBTcl\fR then evaulates the Tcl initialization file.  The \fBauto_path\fR
-variable is initialized to the Tcl master directory and may be augmented by
-the intialization file or the application.
-Other procedures and variables used by the Extended Tcl shell are also defined
-by this file.
-.PP
-If the Tcl is invoked interactively, it will source a file
-named \fI.tclrc\fR in the
-user's home directory, if it exists.  Tcl is viewed primarily as a programming
-language, not an interactive shell, so the \fI.tclrc\fR is intended for use for
-loading development utilities, not to support applications,
-which should not have to rely on the user's environment in such a manner.
-.PP
-The Extended Tcl Tk shell, \fBwishx\fR, has an additional master directory
-and initialization file.  It use the environment variable \fBTK_LIBRARY\fR
-to override the default location of the Tk master directory.
-'\"@:
-'\"@:This functionallity is provided by Extended Tcl.
 '\"@endhelp
 '
 .SH "HELP FACILITY"

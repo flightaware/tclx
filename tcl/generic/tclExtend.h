@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.12 1996/02/20 09:10:02 markd Exp $
+ * $Id: tclExtend.h,v 5.13 1996/02/29 07:02:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,15 +47,6 @@
  * Generic void pointer.
  */
 typedef void *void_pt;
-
-/*
- * Used to override the init file name, which is either library relative or
- * absolute.  The value fields must be changed before Tclx_Init or
- * Tclxlib_Init is called. 
- */
-extern char *tclX_library;     /* Library directory to use.        */
-extern char *tclX_libraryEnv;  /* Override environment variable.   */
-extern char *tclX_initFile;    /* Init file name or absolute path. */
 
 /*
  * Flag user to indicate that a signal that was setup to return an error
