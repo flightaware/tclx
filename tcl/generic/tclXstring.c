@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 6.0 1996/05/10 16:16:08 markd Exp $
+ * $Id: tclXstring.c,v 7.0 1996/06/16 05:30:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,17 +26,14 @@ ExpandString _ANSI_ARGS_((unsigned char *s,
                           unsigned char  buf[]));
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_CindexCmd --
- *     Implements the cindex TCL command:
+ *     Implements the cindex Tcl command:
  *         cindex string indexExpr
  *
  * Results:
  *      Returns the character indexed by  index  (zero  based)  from
  *      string. 
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -47,6 +44,7 @@ Tcl_CindexCmd (clientData, interp, argc, argv)
     char       **argv;
 {
     long index, len;
+    char result [2];
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
@@ -60,22 +58,20 @@ Tcl_CindexCmd (clientData, interp, argc, argv)
     if ((index < 0) || (index >= len))
         return TCL_OK;
 
-    interp->result [0] = argv[1][index];
-    interp->result [1] = '\0';
+    result [0] = argv[1][index];
+    result [1] = '\0';
+    Tcl_SetResult (interp, result, TCL_VOLATILE);
     return TCL_OK;
 
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ClengthCmd --
- *     Implements the clength TCL command:
+ *     Implements the clength Tcl command:
  *         clength string
  *
  * Results:
  *      Returns the length of string in characters. 
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -85,6 +81,7 @@ Tcl_ClengthCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
+    char numBuf [32];
 
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " string", 
@@ -92,16 +89,39 @@ Tcl_ClengthCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    sprintf (interp->result, "%d", strlen (argv[1]));
+    sprintf (numBuf, "%d", strlen (argv[1]));
+    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
     return TCL_OK;
 
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * Tcl_CconcatCmd --
+ *     Implements the cconcat Tcl command:
+ *         cconcat ?string? ?string? ?...?
  *
+ * Results:
+ *      The arguments concatenated.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_CconcatCmd (clientData, interp, argc, argv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          argc;
+    char       **argv;
+{
+    int idx;
+
+    for (idx = 1; idx < argc; idx++) {
+        Tcl_AppendResult (interp, argv [idx], (char *) NULL);
+    }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
  * Tcl_CrangeCmd --
- *     Implements the crange and csubstr TCL commands:
+ *     Implements the crange and csubstr Tcl commands:
  *         crange string firstExpr lastExpr
  *         csubstr string firstExpr lengthExpr
  *
@@ -165,11 +185,9 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_Ccollate Cmd --
- *     Implements the crange and csubstr TCL commands:
+ *     Implements the crange and csubstr Tcl commands:
  *         ccollate [-local] string1 string2
  *
  * Results:
@@ -212,27 +230,19 @@ Tcl_CcollateCmd (clientData, interp, argc, argv)
     } else {
         result = strcmp (argv [argIndex], argv [argIndex + 1]);
     }
-
-    if (result < 0) {
-        interp->result = "-1";
-    } else if (result == 0) {
-        interp->result = "0";
-    } else {
-        interp->result = "1";
-    }
+    Tcl_SetResult (interp,
+                   ((result == 0) ? "0" : ((result < 0) ? "-1" : "1")),
+                   TCL_STATIC);
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ReplicateCmd --
- *     Implements the replicate TCL command:
+ *     Implements the replicate Tcl command:
  *         replicate string countExpr
  *
  * Results:
  *      Returns string replicated count times.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -242,9 +252,8 @@ Tcl_ReplicateCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    long           repCount;
-    register char *srcPtr, *scanPtr, *newPtr;
-    register long  newLen, cnt;
+    long repCount, cnt;
+    Tcl_DString newStr;
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -252,35 +261,26 @@ Tcl_ReplicateCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (Tcl_ExprLong (interp, argv[2], &repCount) != TCL_OK)
+    if (Tcl_ExprLong (interp, argv [2], &repCount) != TCL_OK)
         return TCL_ERROR;
 
-    srcPtr = argv [1];
-    newLen = strlen (srcPtr) * repCount;
-    if (newLen >= TCL_RESULT_SIZE)
-        Tcl_SetResult (interp, ckalloc ((unsigned) newLen + 1), TCL_DYNAMIC);
-
-    newPtr = interp->result;
+    Tcl_DStringInit (&newStr);
     for (cnt = 0; cnt < repCount; cnt++) {
-        for (scanPtr = srcPtr; *scanPtr != 0; scanPtr++)
-            *newPtr++ = *scanPtr;
+        Tcl_DStringAppend (&newStr, argv [1], -1);
     }
-    *newPtr = 0;
-
+    Tcl_DStringResult (interp, &newStr);
+    Tcl_DStringFree (&newStr);
     return TCL_OK;
 
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_CtokenCmd --
- *     Implements the clength TCL command:
+ *     Implements the clength Tcl command:
  *         ctoken strvar separators
  *
  * Results:
  *      Returns the first token and removes it from the string variable.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -322,11 +322,9 @@ Tcl_CtokenCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_CequalCmd --
- *     Implements the cexpand TCL command:
+ *     Implements the cexpand Tcl command:
  *         cequal string1 string2
  *
  * Results:
@@ -345,19 +343,19 @@ Tcl_CequalCmd (clientData, interp, argc, argv)
                           " string1 string2", (char *) NULL);
         return TCL_ERROR;
     }
-    interp->result = (strcmp (argv [1], argv [2]) == 0) ? "1" : "0";
+    ;
+    Tcl_SetResult (interp,
+                   ((strcmp (argv [1], argv [2]) == 0) ? "1" : "0"),
+                   TCL_STATIC);
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ExpandString --
  *  Build an expand version of a translit range specification.
  *
  * Results:
  *  TRUE it the expansion is ok, FALSE it its too long.
- *
  *-----------------------------------------------------------------------------
  */
 #define MAX_EXPANSION 255
@@ -382,16 +380,13 @@ ExpandString (s, buf)
     return (i < MAX_EXPANSION);
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_TranslitCmd --
- *     Implements the TCL translit command:
+ *     Implements the Tcl translit command:
  *     translit inrange outrange string
  *
  * Results:
- *  Standard TCL results.
- *
+ *  Standard Tcl results.
  *-----------------------------------------------------------------------------
  */
 int
@@ -451,9 +446,7 @@ Tcl_TranslitCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_CtypeCmd --
  *
  *      This function implements the 'ctype' command:
@@ -467,7 +460,6 @@ Tcl_TranslitCmd (clientData, interp, argc, argv)
  *       One or zero: Depending if all the characters in the string are of
  *       the desired class.  Char and ord provide conversions and return the
  *       converted value.
- *
  *-----------------------------------------------------------------------------
  */
 int
