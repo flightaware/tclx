@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.7 1992/10/06 16:46:14 markd Exp markd $
+# $Id: Config.mk,v 1.8 1992/10/13 03:06:56 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -100,7 +100,8 @@ HISTORY_FLAG=
 
 #------------------------------------------------------------------------------
 # Memory debugging defines.  These are only of interest if you are adding C
-# code to Tcl or debugging Tcl C code.  They help find memory overwrites and
+# code to Tcl or debugging Tcl C code. You probably don't need this unless it
+# seems like you have memory problems. They help find memory overwrites and
 # leaks.  One or more of the following flags may be specified (in the form
 # -DFLAGNAME).
 #
@@ -109,10 +110,15 @@ HISTORY_FLAG=
 #      shell exits an eof (requires TCL_MEM_DEBUG).
 #
 # NOTE: If TCL_MEM_DEBUG is enabled, the Berkeley Tcl distribution must be 
-# recompiled with this option as well, or it will not link.  In addition a flag
-# MEM_VALIDATE may be specified in the Berkeley Tcl compilation to do
-# validation of all memory blocks on each allocation or deallocation (very
-# slow).
+# recompiled with this option as well, or it will not link or may fail
+# with some mysterious memory problems.  Same goes for Tk if you are using
+# Tk.  If this option is to be used, all code being tested MUST be compiled
+# with TCL_MEM_DEBUG and use ckalloc and ckfree for all memory passed between
+# the application and Tcl.
+#
+# An addition a flag MEM_VALIDATE may be specified in the Berkeley Tcl
+# compilation to do validation of all memory blocks on each allocation or
+# deallocation (very slow).
 #
 MEM_DEBUG_FLAGS=
 
