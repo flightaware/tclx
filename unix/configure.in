@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 3.11 1994/03/15 05:12:52 markd Exp markd $
+dnl $Id: configure.in,v 3.12 1994/03/18 15:42:26 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 3.11 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 3.12 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -80,6 +80,9 @@ LIBS="$LIBS $socket_libs"
 AC_HAVE_LIBRARY(sun, [LIBS="$LIBS -lsun"])
 AC_HAVE_LIBRARY(c_s, [LIBS="$LIBS -lc_s"])
 AC_HAVE_LIBRARY(ieee, [LIBS="$LIBS -lieee"])
+
+# This is needed for DEC Alphas
+AC_HAVE_LIBRARY(dnet_stub, [LIBS="$LIBS -ldnet_stub"])
 
 #------------------------------------------------------------------------------
 #       Some make programs require includes to be 

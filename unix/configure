@@ -129,7 +129,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 3.11 
+# From configure.in Revision: 3.13 
 
 
 
@@ -424,6 +424,31 @@ rm -f conftest*
 LIBS="${LIBS_save}"
 if test -n "${have_lib}"; then
    :; LIBS="$LIBS -lieee"
+else
+   :; 
+fi
+
+
+# This is needed for DEC Alphas
+LIBS_save="${LIBS}"
+LIBS="${LIBS} -ldnet_stub"
+have_lib=""
+echo checking for -ldnet_stub
+cat > conftest.c <<EOF
+#include "confdefs.h"
+
+int main() { exit(0); }
+int t() { main(); }
+EOF
+if eval $compile; then
+  rm -rf conftest*
+  have_lib="1"
+
+fi
+rm -f conftest*
+LIBS="${LIBS_save}"
+if test -n "${have_lib}"; then
+   :; LIBS="$LIBS -ldnet_stub"
 else
    :; 
 fi
