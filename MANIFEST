@@ -358,7 +358,6 @@
 ./tkhelp/tk/widgets/toplevel
 ./tksrc/Makefile.in
 ./tksrc/SYSLIBS.in
-./tksrc/tkX.h
 ./tksrc/tkXAppInit.c
 ./tksrc/tkXinit.c
 ./tksrc/tkXshell.c
