@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.12 1993/10/24 18:56:27 markd Exp markd $
+dnl $Id: configure.in,v 1.13 1993/10/29 14:36:38 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.12 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.13 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -328,19 +328,20 @@ WIFEXITED(x);           /* Generates compiler error if WIFEXITED
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 #--------------------------------------------------------------------
-#       Include sys/select.h if it exists and if it supplies things
-#       that appear to be useful.  This appears to be true only on
-#       the RS/6000 under AIX.  Some systems like OSF/1 have a
-#       sys/select.h that's of no use, and other systems like SCO
-#       UNIX have a sys/select.h that's pernicious.  If there isn't
-#       a sys/select.h, then make sure that "fd_set" is defined in
-#       sys/types.h.
+#	Include sys/select.h if it exists and if it supplies things
+#	that appear to be useful and aren't already in sys/types.h.
+#	This appears to be true only on the RS/6000 under AIX.  Some
+#	systems like OSF/1 have a sys/select.h that's of no use, and
+#	other systems like SCO UNIX have a sys/select.h that's
+#	pernicious.  If "fd_set" isn't defined anywhere then set a
+#	special flag.
 #--------------------------------------------------------------------
 
 echo checking for sys/select.h
-AC_HEADER_EGREP(fd_mask, sys/select.h, AC_DEFINE(HAVE_SYS_SELECT_H),
-        AC_COMPILE_CHECK(fd_set, [#include <sys/types.h>],
-                [fd_set readMask, writeMask;], , AC_DEFINE(NO_FD_SET)))
+AC_COMPILE_CHECK(fd_set, [#include <sys/types.h>],
+	[fd_set readMask, writeMask;], ,
+	AC_HEADER_EGREP(fd_mask, sys/select.h, AC_DEFINE(HAVE_SYS_SELECT_H),
+		AC_DEFINE(NO_FD_SET)))
 
 #--------------------------------------------------------------------
 #	Locate the X11 header files and the X11 library archive.  Try
@@ -353,6 +354,9 @@ AC_PROGRAM_CHECK(tk_ok, xmkmf, 1, 0)
 if test $tk_ok = 1; then
     AC_FIND_X
 fi
+if test "$XINCLUDE_DIR" != ""; then
+     x_includes="$XINCLUDE_DIR"
+fi
 if test "$x_includes" = /usr/include; then
     XINCLUDES="# no special path needed"
 elif test "$x_includes" != ""; then
@@ -362,7 +366,7 @@ else
     XINCLUDES="# no special path needed"
     AC_TEST_CPP([#include <X11/Intrinsic.h>], , XINCLUDES="nope")
     if test "$XINCLUDES" = nope; then
-        dirs=${XINCLUDE_DIR-"/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include"}
+        dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include"
         for i in $dirs ; do
 	    if test -r $i/X11/Intrinsic.h; then
 	        XINCLUDES=" -I$i"
@@ -376,6 +380,9 @@ if test "$XINCLUDES" = nope; then
 fi
 AC_SUBST(XINCLUDES)
 
+if test "$XLIBRARY_DIR" != ""; then
+    x_libraries="$XLIBRARY_DIR"
+fi
 if test "$x_libraries" = /usr/lib; then
     XLIBSW=-lX11
 elif test "$x_libraries" != ""; then
@@ -387,8 +394,7 @@ else
         AC_HAVE_LIBRARY(X11, XLIBSW="-lX11", XLIBSW=nope)
     fi
     if test "$XLIBSW" = nope; then
-	dirs=${XLIBRARY_DIR-"/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"}
-	for i in $dirs ; do
+	dirs=${XLIBRARY_DIR-"/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"}	for i in $dirs ; do
 	    if test -r $i/libX11.a; then
 		XLIBSW="-L$i -lX11"
 	    fi

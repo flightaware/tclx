@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.16 1993/10/29 14:36:38 markd Exp markd $
+# $Id: Makefile.in,v 1.17 1993/11/04 16:07:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -91,6 +91,10 @@ buildtkhelp:
 	mkdir ${HELPSRC}
 	${BLDMANHELP} ${TK_UCB_SRC}/doc ${TKMANPAGES} ${HELPSRC} Tk.brf
 	rm -rf ${HELP}	
+
+#------------------------------------------------------------------------------
+# Nothing to clean here, tkmaster is cleaned at the top level.
+clean:
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

@@ -655,3 +655,26 @@
 30 Sep 93:
   o Integrated with Tcl 7.0 and Tk 3.3.
 -------------------------------------------------------------------------------
+ 6 Oct 93:
+  o Add ability to specify "end" as the index for lvarpop and lvarpush. Thanks
+    to Tom Tromey <tromey@busco.lanl.gov>.
+  o Fixed many long != int protability problems. Thanks to Steve Clift
+    <clift@ml.csiro.au>.
+-------------------------------------------------------------------------------
+21 Oct 93:
+  o Recompile the needed Tcl & Tk files to set the Tcl & Tk library paths
+    rather than attempting to override it by setting environment variables,
+    as this can have side affects with exec-ed programs.
+-------------------------------------------------------------------------------
+24 Oct 93:
+  o Added "frename" command.
+-------------------------------------------------------------------------------
+30 Oct 93:
+  o Added --arch flag to configure program.
+  o Added -argv0 option to execl command. Thanks to R Lindsay Todd
+    <toddr@rpi.edu>.
+-------------------------------------------------------------------------------
+ 3 Nov 93:
+  o Change help marker for nroff manual pages from '@ to '\"@, since this
+    is a true comment. (*POTENTIAL INCOMPATIBILITY*) 
+-------------------------------------------------------------------------------

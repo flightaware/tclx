@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.20 1993/10/29 14:36:38 markd Exp markd $
+# $Id: Makefile.in,v 2.21 1993/11/04 16:07:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -95,6 +95,10 @@ buildtclhelp: ${TCLINIT.TCL} ${TCL.TLIB}
 	${BLDMANHELP} ${TCL_UCB_SRC}/doc ${TCLMANPAGES} ${HELPSRC} Tcl.brf
 	../runtcl -c "buildhelp ${HELPSRC} TclX.brf ${srcbasedir}/man/TclX.n"
 	rm -rf ${HELP}	
+
+#------------------------------------------------------------------------------
+# Nothing to clean here, tclmaster is cleaned at the top level.
+clean:
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.29 1993/11/01 01:38:38 markd Exp markd $
+# $Id: Makefile.in,v 2.30 1993/11/04 16:07:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -348,7 +348,9 @@ clean:
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	-rm -f runtcl runwishx
 	-rm -rf tclmaster tkmaster
 
