@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.28 1993/10/31 17:17:02 markd Exp markd $
+# $Id: Makefile.in,v 2.29 1993/11/01 01:38:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -281,7 +281,7 @@ TCLXMINSTALL:
 	@echo "   Install TclX master directory"
 	@echo ""
 	rm -rf ${TCL_INST_MASTER}
-	${INSTCOPY} tclmaster/* ${TCL_INST_MASTER}
+	${INSTCOPY} -dirname tclmaster ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} "${MAN_DIR_SEPARATOR}" \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} "" \
@@ -309,7 +309,7 @@ TKXMINSTALL:
 	@echo "   Install TkX master directory"
 	@echo ""
 	rm -rf ${TK_INST_MASTER}
-	${INSTCOPY} tkmaster/* ${TK_INST_MASTER}
+	${INSTCOPY} -dirname tkmaster ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} "${MAN_DIR_SEPARATOR}" \
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} "" \
@@ -348,12 +348,9 @@ clean:
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	-rm -f runtcl runwishx
-	-rm -rf tclmaster/bin* tclmaster/lib* tclmaster/include tclmaster/src
-	-rm -rf tkmaster/bin* tkmaster/lib* tkmaster/include tkmaster/src
+	-rm -rf tclmaster tkmaster
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

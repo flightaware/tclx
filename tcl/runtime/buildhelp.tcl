@@ -1,3 +1,4 @@
+cmdtrace on [open cmd.log w]
 #
 # buildhelp.tcl --
 #
@@ -15,13 +16,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.9 1993/08/31 23:03:20 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.10 1993/08/31 23:44:51 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
 #
-#     '@help: subjectdir/helpfile
-#     '@endhelp
+#     '\"@help: subjectdir/helpfile
+#     '\"@endhelp
 #
 # start in column one. The text between these markers is extracted and stored
 # in help/subjectdir/help.  The file must not exists, this is done to enforced 
@@ -33,11 +34,11 @@
 # If there is other text to include in the helpfile, but not in the manual 
 # page, the text, along with nroff formatting commands, may be included using:
 #
-#     '@:Other text to include in the help page.
+#     '\"@:Other text to include in the help page.
 #
 # A entry in the brief file, used by apropos my be included by:
 #
-#     '@brief: Short, one line description
+#     '\"@brief: Short, one line description
 #
 # These brief request must occur with in the bounds of a help section.
 #
@@ -45,8 +46,8 @@
 # text streem before it is run through nroff, then that text can be bracketed
 # with:
 #
-#     '@header
-#     '@endheader
+#     '\"@header
+#     '\"@endheader
 #
 # If multiple header blocks are encountered, they will all be preappended.
 #
@@ -90,9 +91,9 @@
 # If the name is then over 14 characters, it is truncated to 14 charactes
 #  
 proc TruncFileName {pathName} {
-    global G_truncFileNames
+    global truncFileNames
 
-    if {!$G_truncFileNames} {
+    if {!$truncFileNames} {
         return $pathName}
     set fileName [file tail $pathName]
     if {"[crange $fileName 0 3]" == "Tcl_"} {
@@ -119,161 +120,296 @@ proc EnsureDirs {filePath} {
     }
 }
 
+#-----------------------------------------------------------------------------
+# Proc to set up scan context for use by FilterNroffManPage.
+# This keeps the a two line cache of the previous two lines encountered
+# and the blank lines that followed them.
+#
+
+proc CreateFilterNroffManPageContext {} {
+    global filterNroffManPageContext
+
+    set filterNroffManPageContext [scancontext create]
+
+    # On finding a page header, drop the previous line (which is
+    # the page footer). Also deleting the blank lines followin
+    # the last line on the previous page.
+
+    scanmatch $filterNroffManPageContext {@@@BUILDHELP@@@} {
+        catch {unset prev2Blanks}
+        catch {unset prev1Line}
+        catch {unset prev1Blanks}
+        set nukeBlanks {}
+    }
+
+    # Save blank lines
+
+    scanmatch $filterNroffManPageContext {$^} {
+        if ![info exists nukeBlanks] {
+            append prev1Blanks \n
+        }
+    }
+
+    # Non-blank line, save it.  Output the 2nd previous line if necessary.
+
+    scanmatch $filterNroffManPageContext {
+        catch {unset nukeBlanks}
+        if [info exists prev2Line] {
+            puts $outFH $prev2Line
+            unset prev2Line
+        }
+        if [info exists prev2Blanks] {
+            puts $outFH $prev2Blanks nonewline
+            unset prev2Blanks
+        }
+        if [info exists prev1Line] {
+            set prev2Line $prev1Line
+        }
+        set prev1Line $matchInfo(line)
+        if [info exists prev1Blanks] {
+            set prev2Blanks $prev1Blanks
+            unset prev1Blanks
+        }
+    }
+}
 
 #-----------------------------------------------------------------------------
+# Proc to filter a formatted manual page, removing the page headers and
+# footers.  This relies on each manual page having a .TH macro in the form:
+#   .TH @@@BUILDHELP@@@ n
+
+proc FilterNroffManPage {inFH outFH} {
+    global filterNroffManPageContext
+
+    if ![info exists filterNroffManPageContext] {
+        CreateFilterNroffManPageContext
+    }
+
+    scanfile $filterNroffManPageContext $inFH
+
+    if [info exists prev2Line] {
+        puts $outFH $prev2Line
+    }
+}
+
+#-----------------------------------------------------------------------------
+# Proc to set up scan context for use by ExtractNroffHeader
 #
+
+proc CreateExtractNroffHeaderContext {} {
+    global extractNroffHeaderContext
+
+    set extractNroffHeaderContext [scancontext create]
+
+    scanmatch $extractNroffHeaderContext {'\\"@endheader[ 	]*$} {
+        break
+    }
+    scanmatch $extractNroffHeaderContext {'\\"@:} {
+        append nroffHeader "[crange $matchInfo(line) 5 end]\n"
+    }
+    scanmatch $extractNroffHeaderContext {
+        append nroffHeader "$matchInfo(line)\n"
+    }
+}
+
+#-----------------------------------------------------------------------------
 # Proc to extract nroff text to use as a header to all pass to nroff when
 # processing a help file.
 #    manPageFH - The file handle of the manual page.
 #
 
 proc ExtractNroffHeader {manPageFH} {
-    global nroffHeader
-    while {[gets $manPageFH manLine] >= 0} {
-        if {[string first "'@endheader" $manLine] == 0} {
-            break;
-            }
-        if {[string first "'@:" $manLine] == 0} {
-            set manLine [csubstr manLine 3 end]
-            }
-        append nroffHeader "$manLine\n"
+    global extractNroffHeaderContext nroffHeader
+
+    if ![info exists extractNroffHeaderContext] {
+        CreateExtractNroffHeaderContext
+    }
+    scanfile $extractNroffHeaderContext $manPageFH
+}
+
+
+#-----------------------------------------------------------------------------
+# Proc to set up scan context for use by ExtractNroffHelp
+#
+
+proc CreateExtractNroffHelpContext {} {
+    global extractNroffHelpContext
+
+    set extractNroffHelpContext [scancontext create]
+
+    scanmatch $extractNroffHelpContext {^'\\"@endhelp[ 	]*$} {
+        break
+    }
+
+    scanmatch $extractNroffHelpContext {^'\\"@brief:} {
+        if $foundBrief {
+            error {Duplicate "@brief:" entry}
         }
+        set foundBrief 1
+        puts $briefHelpFH "$helpName\t[csubstr $matchInfo(line) 11 end]"
+        continue
+    }
+
+    scanmatch $extractNroffHelpContext {^'\\"@:} {
+        puts $nroffFH  [csubstr $matchInfo(line) 5 end]
+        continue
+    }
+    scanmatch $extractNroffHelpContext {^'\\"@help:} {
+        error {"@help" found within another help section"}
+    }
+    scanmatch $extractNroffHelpContext {
+        puts $nroffFH $matchInfo(line)
+    }
 }
 
 #-----------------------------------------------------------------------------
-#
 # Proc to extract a nroff help file when it is located in the text.
 #    manPageFH - The file handle of the manual page.
-#    manLine - The '@help: line starting the data to extract.
+#    manLine - The '\"@help: line starting the data to extract.
 #
 
 proc ExtractNroffHelp {manPageFH manLine} {
-    global G_helpDir nroffHeader G_briefHelpFH G_colArgs
+    global helpDir nroffHeader briefHelpFH colArgs
+    global extractNroffHelpContext
 
-    set helpName [string trim [csubstr $manLine 7 end]]
-    set helpFile [TruncFileName "$G_helpDir/$helpName"]
-    if {[file exists $helpFile]} {
-        error "Help file already exists: $helpFile"}
+    if ![info exists extractNroffHelpContext] {
+        CreateExtractNroffHelpContext
+    }
+
+    set helpName [string trim [csubstr $manLine 9 end]]
+    set helpFile [TruncFileName "$helpDir/$helpName"]
+    if [file exists $helpFile] {
+        error "Help file already exists: $helpFile"
+    }
     EnsureDirs $helpFile
-    set helpFH [open "| nroff -man | col $G_colArgs > $helpFile" w]
+
+    set tmpFile "[file dirname $helpFile]/tmp.[id process]"
+
     echo "    creating help file $helpName"
 
-    # Nroff commands from .TH macro to get the formatting right.  
-    # The `\\n' become `\n' in the text.
-        
-    puts $helpFH ".ad b"
-    puts $helpFH ".PD"
-    puts $helpFH ".nrIN \\n()Mu"
-    puts $helpFH ".nr)R 0"
-    puts $helpFH ".nr)I \\n()Mu"
-    puts $helpFH ".nr)R 0"
-    puts $helpFH ".\}E"
-    puts $helpFH ".DT"
-    puts $helpFH ".hy14"
-    puts $helpFH $nroffHeader
+    set nroffFH [open "| nroff -man | col $colArgs > $tmpFile" w]
+
+    puts $nroffFH {.TH @@@BUILDHELP@@@ 1}
+
     set foundBrief 0
-    while {[gets $manPageFH manLine] >= 0} {
-        if {[string first "'@endhelp" $manLine] == 0} {
-            break;
-        }
-        if {[string first "'@brief:" $manLine] == 0} {
-            if $foundBrief {
-                error {Duplicate "'@brief" entry"}
-            }
-            set foundBrief 1
-	    puts $G_briefHelpFH "$helpName\t[csubstr $manLine 8 end]"
-            continue;
-        }
-        if {[string first "'@:" $manLine] == 0} {
-            set manLine [csubstr $manLine 3 end]
-        }
-        if {[string first "'@help" $manLine] == 0} {
-            error {"'@help" found within another help section"}
-        }
-        puts $helpFH $manLine
-        }
+    scanfile $extractNroffHelpContext $manPageFH
+    close $nroffFH
+
+    set tmpFH [open $tmpFile r]
+    set helpFH [open $helpFile w]
+
+    FilterNroffManPage $tmpFH $helpFH
+
+    close $tmpFH
     close $helpFH
+
+    unlink $tmpFile
     chmod a-w,a+r $helpFile
 }
 
 #-----------------------------------------------------------------------------
+# Proc to set up scan context for use by ExtractScriptHelp
 #
+
+proc CreateExtractScriptHelpContext {} {
+    global extractScriptHelpContext
+
+    set extractScriptHelpContext [scancontext create]
+
+    scanmatch $extractScriptHelpContext {^#@endhelp[ 	]*$} {
+        break
+    }
+
+    scanmatch $extractScriptHelpContext {^#@brief:} {
+        if $foundBrief {
+            error {Duplicate "@brief" entry}
+        }
+        set foundBrief 1
+        puts $briefHelpFH "$helpName\t[csubstr $matchInfo(line) 9 end]"
+        continue
+    }
+
+    scanmatch $extractScriptHelpContext {^#@help:} {
+        error {"@help" found within another help section"}
+    }
+    scanmatch $extractScriptHelpContext {
+        if {[clength $matchInfo(line)] > 1} {
+            puts $helpFH " [csubstr $matchInfo(line) 1 end]"
+        } else {
+            puts $helpFH $matchInfo(line)
+        }
+    }
+}
+
+#-----------------------------------------------------------------------------
 # Proc to extract a tcl script help file when it is located in the text.
 #    ScriptPageFH - The file handle of the .tcl file.
 #    ScriptLine - The #@help: line starting the data to extract.
 #
 
 proc ExtractScriptHelp {ScriptPageFH ScriptLine} {
-    global G_helpDir G_briefHelpFH
+    global helpDir briefHelpFH
+    global extractScriptHelpContext
+
+    if ![info exists extractScriptHelpContext] {
+        CreateExtractScriptHelpContext
+    }
+
     set helpName [string trim [csubstr $ScriptLine 7 end]]
-    set helpFile "$G_helpDir/$helpName"
+    set helpFile "$helpDir/$helpName"
     if {[file exists $helpFile]} {
-        error "Help file already exists: $helpFile"}
+        error "Help file already exists: $helpFile"
+    }
     EnsureDirs $helpFile
-    set helpFH [open $helpFile w]
+
     echo "    creating help file $helpName"
+
+    set helpFH [open $helpFile w]
+
     set foundBrief 0
-    while {[gets $ScriptPageFH ScriptLine] >= 0} {
-        if {[string first "#@endhelp" $ScriptLine] == 0} {
-            break;
-        }
-        if {[string first "#@brief:" $ScriptLine] == 0} {
-            if $foundBrief {
-                error {Duplicate "#@brief" entry"}
-            }
-            set foundBrief 1
-	    puts $G_briefHelpFH "$helpName\t[csubstr $ScriptLine 8 end]"
-            continue;
-        }
-        if {[string first "#@help" $ScriptLine] == 0} {
-            error {"#@help" found within another help section"}
-        }
-        if {[clength $ScriptLine] > 1} {
-            set ScriptLine " [csubstr $ScriptLine 1 end]"
-        } else {
-            set ScriptLine ""
-        }
-        puts $helpFH $ScriptLine
-        }
+    scanfile $extractScriptHelpContext $manPageFH
+
     close $helpFH
     chmod a-w,a+r $helpFile
 }
 
 #-----------------------------------------------------------------------------
-#
 # Proc to scan a nroff manual file looking for the start of a help text
 # sections and extracting those sections.
 #    pathName - Full path name of file to extract documentation from.
 #
 
 proc ProcessNroffFile {pathName} {
-   global G_nroffScanCT G_scriptScanCT nroffHeader
+   global nroffScanCT scriptScanCT nroffHeader
 
    set fileName [file tail $pathName]
 
    set nroffHeader {}
    set manPageFH [open $pathName r]
-   echo "    scanning $pathName"
    set matchInfo(fileName) [file tail $pathName]
-   scanfile $G_nroffScanCT $manPageFH
+
+   echo "    scanning $pathName"
+
+   scanfile $nroffScanCT $manPageFH
+
    close $manPageFH
 }
 
 #-----------------------------------------------------------------------------
-#
 # Proc to scan a Tcl script file looking for the start of a
 # help text sections and extracting those sections.
 #    pathName - Full path name of file to extract documentation from.
 #
 
 proc ProcessTclScript {pathName} {
-   global G_scriptScanCT nroffHeader
+   global scriptScanCT nroffHeader
 
    set scriptFH [open "$pathName" r]
+   set matchInfo(fileName) [file tail $pathName]
 
    echo "    scanning $pathName"
-   set matchInfo(fileName) [file tail $pathName]
-   scanfile $G_scriptScanCT $scriptFH
+   scanfile $scriptScanCT $scriptFH
+
    close $scriptFH
 }
 
@@ -284,59 +420,59 @@ proc ProcessTclScript {pathName} {
 #    sourceFiles - List of files to extract help files from.
 
 proc buildhelp {helpDirPath briefFile sourceFiles} {
-    global G_helpDir G_truncFileNames G_nroffScanCT
-    global G_scriptScanCT G_briefHelpFH G_colArgs
+    global helpDir truncFileNames nroffScanCT
+    global scriptScanCT briefHelpFH colArgs
 
     echo ""
     echo "Begin building help tree"
 
     # Determine version of col command to use (no -x on BSD)
     if {[system {col -bx </dev/null >/dev/null 2>&1}] != 0} {
-        set G_colArgs {-b}
+        set colArgs {-b}
     } else {
-        set G_colArgs {-bx}
+        set colArgs {-bx}
     }
-    set G_helpDir $helpDirPath
-    if {![file exists $G_helpDir]} {
-        mkdir $G_helpDir
+    set helpDir $helpDirPath
+    if {![file exists $helpDir]} {
+        mkdir $helpDir
     }
 
-    if {![file isdirectory $G_helpDir]} {
-        error [concat "$G_helpDir is not a directory or does not exist. "  
+    if {![file isdirectory $helpDir]} {
+        error [concat "$helpDir is not a directory or does not exist. "  
                       "This should be the help root directory"]
     }
         
-    set status [catch {set tmpFH [open $G_helpDir/AVeryVeryBigFileName w]}]
+    set status [catch {set tmpFH [open $helpDir/AVeryVeryBigFileName w]}]
     if {$status != 0} {
-        set G_truncFileNames 1
+        set truncFileNames 1
     } else {
         close $tmpFH
-        unlink $G_helpDir/AVeryVeryBigFileName
-        set G_truncFileNames 0
+        unlink $helpDir/AVeryVeryBigFileName
+        set truncFileNames 0
     }
 
-    set G_nroffScanCT [scancontext create]
+    set nroffScanCT [scancontext create]
 
-    scanmatch $G_nroffScanCT "^'@help:" {
+    scanmatch $nroffScanCT {'\\"@help:} {
         ExtractNroffHelp $matchInfo(handle) $matchInfo(line)
         continue
     }
 
-    scanmatch $G_nroffScanCT "^'@header" {
+    scanmatch $nroffScanCT {^'\\"@header} {
         ExtractNroffHeader $matchInfo(handle)
         continue
     }
-    scanmatch $G_nroffScanCT "^'@endhelp" {
-        error [concat {"'@endhelp" without corresponding "'@help:"} \
+    scanmatch $nroffScanCT {^'\\"@endhelp} {
+        error [concat {@endhelp" without corresponding "@help:"} \
                  ", offset = $matchInfo(offset)"]
     }
-    scanmatch $G_nroffScanCT "^'@brief" {
-        error [concat {"'@brief" without corresponding "'@help:"} \
+    scanmatch $nroffScanCT {^'\\"@brief} {
+        error [concat {"@brief" without corresponding "@help:"} \
                  ", offset = $matchInfo(offset)"]
     }
 
-    set G_scriptScanCT [scancontext create]
-    scanmatch $G_scriptScanCT "^#@help:" {
+    set scriptScanCT [scancontext create]
+    scanmatch $scriptScanCT {^#@help:} {
         ExtractScriptHelp $matchInfo(handle) $matchInfo(line)
     }
 
@@ -344,11 +480,11 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
         puts stderr "Brief file \"$briefFile\" must have an extension \".brf\""
         exit 1
     }
-    if [file exists $G_helpDir/$briefFile] {
-        puts stderr "Brief file \"$G_helpDir/$briefFile\" already exists"
+    if [file exists $helpDir/$briefFile] {
+        puts stderr "Brief file \"$helpDir/$briefFile\" already exists"
         exit 1
     }
-    set G_briefHelpFH [open "|sort > $G_helpDir/$briefFile" w]
+    set briefHelpFH [open "|sort > $helpDir/$briefFile" w]
 
     foreach manFile $sourceFiles {
         set manFile [glob $manFile]
@@ -369,8 +505,8 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
         }
     }
 
-    close $G_briefHelpFH
-    chmod a-w,a+r $G_helpDir/$briefFile
+    close $briefHelpFH
+    chmod a-w,a+r $helpDir/$briefFile
     echo "Completed extraction of help files"
 }
 

@@ -11,7 +11,7 @@
 #
 # The command line is:
 #
-#   bldmanhelp.tcl docdir maninfo helpdir
+#   bldmanhelp docdir maninfo helpdir
 #
 # Where:
 #    o docdir is the directory containing the manual pages.
@@ -30,12 +30,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 1.1 1993/06/24 15:02:49 markd Exp markd $
+# $Id: bldmanhelp.tcl,v 1.2 1993/08/13 15:01:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #-----------------------------------------------------------------------------
-# Process the name section.  This is used to generate a '@brief: entry.
+# Process the name section.  This is used to generate a @brief: entry.
 
 proc ProcessNameSection {manFH outFH} {
     set line [gets $manFH]
@@ -45,7 +45,7 @@ proc ProcessNameSection {manFH outFH} {
         }
     }
     set brief [string trim [crange $line [string first - $line]+1 end]]
-    puts $outFH "'@brief: $brief"
+    puts $outFH "'\\\"@brief: $brief"
 }
 
 #-----------------------------------------------------------------------------
@@ -68,16 +68,10 @@ proc CopyManPage {manPage outFH} {
                 CopyManPage [lindex $line 1] $outFH
             }
             {.SH} {
-                set skipSection 0
-                case [lindex $line 1] {
-                    {NAME} {
-                        ProcessNameSection $fh $outFH
-                    }
-                    {SYNOPSIS} {}
-                    default {
-                        puts $outFH $line
-                    }
+                if {[lindex $line 1] == "NAME"} {
+                    ProcessNameSection $fh $outFH
                 }
+                puts $outFH $line
             }
             {.HS .BS .BE .VS .VE} {
             }
@@ -98,9 +92,9 @@ proc CopyManPage {manPage outFH} {
 proc ProcessManFile {ent tmpFH} {
     global skipSection
     set skipSection 0
-    puts $tmpFH "'@help: [lindex $ent 1]"
+    puts $tmpFH "'\\\"@help: [lindex $ent 1]"
     CopyManPage [lindex $ent 0] $tmpFH
-    puts $tmpFH "'@endhelp"
+    puts $tmpFH "'\\\"@endhelp"
 }
 
 #-----------------------------------------------------------------------------

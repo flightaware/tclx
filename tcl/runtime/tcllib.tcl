@@ -33,7 +33,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tcllib.tcl,v 1.2 1993/06/24 07:32:30 markd Exp markd $
+# $Id: tcllib.tcl,v 1.3 1993/06/25 02:15:10 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -127,18 +127,7 @@ proc auto_commands {{option {}}} {
     return $loadList
 }
 
-#@package: TclX-ucblib auto_load_ouster_index auto_reset auto_mkindex
-
-#------------------------------------------------------------------------------
-# auto_load_ouster_index:
-# Loads a Ousterhout-style index.  This sets up the local variables that
-# are expected by the index (which is really a script).
-#
-proc auto_load_ouster_index tclIndex {
-    global auto_index auto_path
-    set dir [file dirname $tclIndex]
-    source $tclIndex
-}
+#@package: TclX-ucblib auto_reset auto_mkindex
 
 #------------------------------------------------------------------------------
 # auto_reset:

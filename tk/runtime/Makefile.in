@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.15 1993/10/23 23:33:18 markd Exp markd $
+# $Id: Makefile.in,v 1.16 1993/10/29 14:36:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -42,6 +42,7 @@ PROLOG.PS   = ${bldbasedir}/tkmaster/prolog.ps
 TCLHELP     = ${bldbasedir}/tkmaster/bin${ARCH}/tclhelp
 DEMOS       = ${bldbasedir}/tkmaster/demos
 HELP        = ${bldbasedir}/tkmaster/help
+HELPSRC    =  ${srcbasedir}/tkhelp
 TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
 INSTCOPY    = ../runtcl ../tools/instcopy
 BLDMANHELP  = ../runtcl ${srcbasedir}/tools/bldmanhelp
@@ -74,36 +75,22 @@ ${DEMOS}:
 	${INSTCOPY} ${TK_UCB_SRC}/library/demos/* ${DEMOS}
 
 #------------------------------------------------------------------------------
-# Copy help files if they don't appear to exist and we are in a different
-# directory from the srcdir.
+# Copy help files to the master directory.
 #
 
 HELPCP: ${HELP}/Tk.brf
 
 ${HELP}/Tk.brf:
-	${srcbasedir}/tools/cphelpdir` ${srcbasedir}/tkmaster/help \
-           ${bldbasedir}/tkmaster/help
+	${srcbasedir}/tools/cphelpdir ${HELPSRC} ${HELP}
 
 #------------------------------------------------------------------------------
 # Build help for Tk.
 
 buildtkhelp:
-	rm -rf ${HELP}
-	mkdir ${HELP}
-	${BLDMANHELP} ${TK_UCB_SRC}/doc ${TKMANPAGES} ${HELP} Tk.brf
-
-#------------------------------------------------------------------------------
-# Clean up everything but the manual pages that we copied to the master
-# directories and the demos.
-
-partclean:
-	rm -f ${TK.TCL} ${TK.TLIB} ${TK.TNDX}
-
-#------------------------------------------------------------------------------
-# Clean up all files that were built by make.
-
-clean: partclean
-	rm -rf ${PROLOG.PS} ${DEMOS} ${MAN}
+	rm -rf ${HELPSRC}
+	mkdir ${HELPSRC}
+	${BLDMANHELP} ${TK_UCB_SRC}/doc ${TKMANPAGES} ${HELPSRC} Tk.brf
+	rm -rf ${HELP}	
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

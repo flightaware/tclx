@@ -19,32 +19,37 @@ The following directories are included under the tclX7.0a directory:
       on all Unix versions.
 
     o tclsrc - Tcl source that is built into the standard Tcl package library.
-      The makefile also handles generation of help files and copying man files
-      into the master directory
-
-    o tclmaster - Tcl master directory.  All files required to run TclX
-      are built or copied into this directory.  The entire contents of
-      this directory are installed.
+      The makefile also handles generation of help files.
 
     o tests - Tests for TclX.
+
+    o tclhelp - The Tcl and TclX help files.  These can be rebuilt from the
+      manual pages if necessary.
 
     o tksrc - A makefile that builds a version of the Tk wish shell containing
       Extended Tcl.
 
     o tktclsrc - Tcl source that is built into the standard Tk package library.
-      The makefile also handles generation of help files and copying man files
-      into the master directory
-
-    o tkmaster - Tk master directory.  All files required to run Tk
-      are built or copied into this directory.  The entire contents of
-      this directory are installed.
+      The makefile also handles generation of help files.
 
     o tktests - Files used to test wishx.
+
+    o tkhelp - The Tk help files.  These can be rebuilt from the manual pages
+      if necessary.
 
     o experimental - A directory of experimental and contributed Tcl source.
       The code is not normally built as part of TclX.
 
     o tools - Tools used for building and installing TclX.
+
+    o tclmaster - Tcl master directory.  All files required to run TclX are
+      built or copied into this directory.  The entire contents of this
+      directory are installed.  This directory is created by the build.
+
+    o tkmaster - Tk master directory.  All files required to run Tk
+      are built or copied into this directory.  The entire contents of
+      this directory are installed.  This directory is created by the build.
+
 
 THE EXTENDED TCL INSTALLATION MODELS
 ====================================
@@ -194,7 +199,8 @@ HOW TO BUILD EXTENDED TCL
       You must have nroff and the man macro package installed on your system
       to build the manual pages.  Enter "make buildtclhelp" to build the
       Tcl and TclX help pages and "make buildtkhelp" to build the Tk manual
-      pages or "make buildhelp" to build both.
+      pages or "make buildhelp" to build both.  If the help files are rebuilt,
+      another make should be done to copy them into the master directories.
 
     o Note that if you modify any files in the Tcl or Tk library directories
       you need to do a "make clean" and a "make" to rebuild Extended Tcl,

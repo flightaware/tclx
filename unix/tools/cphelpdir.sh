@@ -18,22 +18,30 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cphelpdir.sh,v 1.3 1993/11/04 06:36:38 markd Exp markd $
+# $Id: cphelpdir.sh,v 1.4 1993/11/04 06:38:03 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 SRC=$1
 BUILD=$2
-SRCBRF=`(cd $SRC;echo *.brf)`
+FOUND=notok
+if [ -d $SRC ]
+then
+    SRCBRF=`(cd $SRC; echo *.brf)`
+    if [  "$SRCBRF" != "*.brf" ]
+    then
+        FOUND=ok
+    fi
+fi
 
-if [ "$SRC" = "$BUILD" -o "$SRCBRF" = "*.brf" ]
+if [ "$FOUND" = "notok" ]
 then
     echo "***"
-    echo "*** Tcl help files not found. Run \"make buildhelp\" to generate"
+    echo "*** help files not found. Run \"make buildhelp\" to generate"
     echo "***"
     exit 1
 else
-    $TOOLS/instcopy $SRC $BUILD
+    ../runtcl ../tools/instcopy -dirname $SRC $BUILD
     exit $?
 fi
 

@@ -15,13 +15,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: installTcl.tcl,v 2.9 1993/07/18 15:20:24 markd Exp $
+# $Id: instcopy.tcl,v 1.1 1993/11/02 07:25:05 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
 #
 #  instcopy file1 file2 ... targetdir
+#  instcopy -dirname file1 targetdir
 #
+#  o -dirname - If specified, then a directory is copies as the target
+#     directory rather than to it.
 #  o files - List of files to copy. If one of directories are specified, they
 #    are copied.
 #  o targetdir - Target directory to copy the files to.  If the directory does
@@ -37,7 +40,7 @@ proc Usage {{msg {}}} {
     if {"$msg" != ""} {
         puts stderr "Error: $msg"
     }
-    puts stderr {usage: instcopy ?-makeflags? file1 file2 ... targetdir}
+    puts stderr {usage: instcopy ?-dir? file1 file2 ... targetdir}
     exit 1
 }
 
@@ -48,15 +51,25 @@ proc Usage {{msg {}}} {
 #------------------------------------------------------------------------------
 
 proc DoACopy {file targetDir} {
+    global dirNameMode
+
     if [file isdirectory $file] {
-        set target $targetDir/[file tail $file]
+        if $dirNameMode {
+            set target $targetDir
+        } else {
+            set target $targetDir/[file tail $file]
+        }
+        puts stdout ""
         puts stdout "Copying directory hierarchy $file to $target"
+        puts stdout ""
         if ![file exists $target] {
             mkdir -path  $target
         }
         CopyDir $file $target
     } else {
+        puts stdout ""
         puts stdout "Copying $file to $targetDir"
+        puts stdout ""
         CopyFile $file $targetDir
     }
 }
@@ -71,6 +84,13 @@ proc DoACopy {file targetDir} {
 #
 if {$argc < 2} {
     Usage "Not enough arguments"
+}
+
+set dirNameMode 0
+if {[lindex $argv 0] == "-dirname"} {
+    lvarpop argv
+    incr argc -1
+    set dirNameMode 1
 }
 
 set files [lrange $argv 0 [expr $argc-2]]
