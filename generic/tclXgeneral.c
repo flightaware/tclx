@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXgeneral.c,v 1.2 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -119,31 +119,37 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
  */
 static int
 TclX_EchoObjCmd (dummy, interp, objc, objv)
-    ClientData  dummy;
+    ClientData	dummy;
     Tcl_Interp *interp;
-    int         objc;
+    int		objc;
     Tcl_Obj    *CONST objv[];
 {
-    int   idx;
+    int	  idx;
     Tcl_Channel channel;
+#ifndef TCL_UTF_MAX
     char *stringPtr;
     int stringPtrLen;
+#endif
 
     channel = TclX_GetOpenChannel (interp, "stdout", TCL_WRITABLE);
     if (channel == NULL)
-        return TCL_ERROR;
+	return TCL_ERROR;
 
     for (idx = 1; idx < objc; idx++) {
-        stringPtr = Tcl_GetStringFromObj (objv [idx], &stringPtrLen);
-        if (Tcl_Write (channel, stringPtr, stringPtrLen) < 0)
-            goto posixError;
-        if (idx < (objc - 1)) {
-            if (Tcl_Write (channel, " ", 1) < 0)
-                goto posixError;
-        }
+#ifndef TCL_UTF_MAX
+	stringPtr = Tcl_GetStringFromObj (objv [idx], &stringPtrLen);
+	if (Tcl_Write (channel, stringPtr, stringPtrLen) < 0)
+#else
+	if (Tcl_WriteObj(channel, objv[idx]) < 0)
+#endif
+	    goto posixError;
+	if (idx < (objc - 1)) {
+	    if (Tcl_Write (channel, " ", 1) < 0)
+		goto posixError;
+	}
     }
     if (TclX_WriteNL (channel) < 0)
-        goto posixError;
+	goto posixError;
     return TCL_OK;
 
   posixError:
@@ -324,22 +330,21 @@ SetLoopCounter (interp, varName, idx)
 
     iObj = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
-        iObj = newVarObj = Tcl_NewLongObj (idx);
+	iObj = newVarObj = Tcl_NewLongObj (idx);
     } else {
-        newVarObj = NULL;
+	newVarObj = NULL;
     }
 
     Tcl_SetLongObj (iObj, idx);
     if (Tcl_SetVar2Ex(interp, varName, NULL, iObj,
-                      TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
-        if (newVarObj != NULL) {
-            Tcl_DecrRefCount (newVarObj);
-        }
-        return TCL_ERROR;
+	    TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+	if (newVarObj != NULL) {
+	    Tcl_DecrRefCount (newVarObj);
+	}
+	return TCL_ERROR;
     }
     return TCL_OK;
 }
-
 
 
 /*-----------------------------------------------------------------------------
@@ -364,54 +369,54 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
     Tcl_Obj  *command;
 
     if ((objc < 5) || (objc > 6)) {
-        return TclX_WrongArgs (interp, objv [0], 
-                               "var first limit ?incr? command");
+	return TclX_WrongArgs (interp, objv [0], 
+		"var first limit ?incr? command");
     }
 
     if (Tcl_ExprLongObj (interp, objv [2], &first) != TCL_OK)
-        return TCL_ERROR;
+	return TCL_ERROR;
 
     if (Tcl_ExprLongObj (interp, objv [3], &limit) != TCL_OK)
-        return TCL_ERROR;
+	return TCL_ERROR;
 
     if (objc == 5) {
-        command = objv [4];
+	command = objv [4];
     } else {
-        if (Tcl_ExprLongObj (interp, objv [4], &incr) != TCL_OK)
-            return TCL_ERROR;
-        command = objv [5];
+	if (Tcl_ExprLongObj (interp, objv [4], &incr) != TCL_OK)
+	    return TCL_ERROR;
+	command = objv [5];
     }
 
     varName = Tcl_GetStringFromObj (objv[1], NULL);
     for (idx = first;
-         (((idx < limit) && (incr >= 0)) || ((idx > limit) && (incr < 0)));
-         idx += incr) {
-        
-        if (SetLoopCounter(interp, varName, idx) == TCL_ERROR)
-            return TCL_ERROR;
+	 (((idx < limit) && (incr >= 0)) || ((idx > limit) && (incr < 0)));
+	 idx += incr) {
+	
+	if (SetLoopCounter(interp, varName, idx) == TCL_ERROR)
+	    return TCL_ERROR;
 
-        result = Tcl_EvalObj (interp, command);
-        if (result == TCL_CONTINUE) {
-            result = TCL_OK;
-        } else if (result != TCL_OK) {
-            if (result == TCL_BREAK) {
-                result = TCL_OK;
-            } else if (result == TCL_ERROR) {
-                char buf [64];
-                
-                sprintf (buf, "\n    (\"loop\" body line %d)", 
-                         interp->errorLine);
+	result = Tcl_EvalObj (interp, command);
+	if (result == TCL_CONTINUE) {
+	    result = TCL_OK;
+	} else if (result != TCL_OK) {
+	    if (result == TCL_BREAK) {
+		result = TCL_OK;
+	    } else if (result == TCL_ERROR) {
+		char buf [64];
+		
+		sprintf (buf, "\n    (\"loop\" body line %d)", 
+			interp->errorLine);
 		Tcl_AddErrorInfo (interp, buf);
-            }
-            break;
-        }
+	    }
+	    break;
+	}
     }
 
     /*
      * Set loop counter to its final value.
      */
     if (SetLoopCounter(interp, varName, idx) == TCL_ERROR)
-        return TCL_ERROR;
+	return TCL_ERROR;
     return result;
 }
 
