@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkmanpages,v 5.0 1995/07/25 05:59:30 markd Rel $
+# $Id: tkmanpages,v 5.1 1996/02/16 08:10:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 return {
@@ -35,6 +35,7 @@ return {
     {focusNext.n    tk/control/tk_focusNext}
     {frame.n        tk/widgets/frame}
     {grab.n         tk/control/grab}
+    {grid.n         tk/control/grid}
     {image.n        tk/images/image}
     {label.n        tk/widgets/label}
     {listbox.n      tk/widgets/listbox}
