@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXutil.c,v 1.2 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -768,7 +768,7 @@ TclX_JoinPath (path1, path2, joinedPath)
     char        *path2;
     Tcl_DString *joinedPath;
 {
-    char *joinArgv [2];
+    CONST84 char *joinArgv [2];
 
     joinArgv [0] = path1;
     joinArgv [1] = path2;
@@ -978,7 +978,7 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
     Tcl_DecrRefCount (saveObjPtr);
 }
 
-/*-----------------------------------------------------------------------------
+/*--------------------------------------------------------------------------
  * TclX_CreateObjCommand --
  *
  * Handles the creation of TclX commands. Used for commands who come
@@ -987,32 +987,96 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
  * Parameters:
  *   o Like Tcl_CreateObjCommand
  *   o flags - Additional flags to control the behaviour of the procedure.
- *----------------------------------------------------------------------------- */
+ *--------------------------------------------------------------------------
+ */
 
 int
 TclX_CreateObjCommand (interp, cmdName, proc, clientData, deleteProc, flags)
-     Tcl_Interp*        interp;
-     char*              cmdName;
-     Tcl_ObjCmdProc*    proc;
-     ClientData         clientData;
-     Tcl_CmdDeleteProc* deleteProc;
-     int                flags;
+    Tcl_Interp*        interp;
+    char*              cmdName;
+    Tcl_ObjCmdProc*    proc;
+    ClientData         clientData;
+    Tcl_CmdDeleteProc* deleteProc;
+    int                flags;
 {
-  Namespace *globalNsPtr = (Namespace *) Tcl_GetGlobalNamespace(interp);
-  Namespace *currNsPtr   = (Namespace *) Tcl_GetCurrentNamespace(interp);
-  char cmdnamebuf[80];
+    Namespace *globalNsPtr = (Namespace *) Tcl_GetGlobalNamespace(interp);
+    Namespace *currNsPtr   = (Namespace *) Tcl_GetCurrentNamespace(interp);
+    Tcl_HashTable *gTblPtr, *cTblPtr;
+    static size_t offset = TclX_Offset(Namespace, cmdTable);
 
-  if ((flags & TCLX_CMD_REDEFINE) ||
-	  !(Tcl_FindHashEntry(&globalNsPtr->cmdTable, cmdName) ||
-		  Tcl_FindHashEntry(&currNsPtr->cmdTable, cmdName))) {
-      Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc);
-  }
+    gTblPtr = (Tcl_HashTable *) TclX_StructOffset(globalNsPtr, offset, 0);
+    cTblPtr = (Tcl_HashTable *) TclX_StructOffset(currNsPtr, offset, 0);
+    if ((flags & TCLX_CMD_REDEFINE) ||
+	    !(Tcl_FindHashEntry(gTblPtr, cmdName) ||
+		    Tcl_FindHashEntry(cTblPtr, cmdName))) {
+	Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc);
+    }
+    if (!(cmdName[0] == 't' && cmdName[1] == 'c' && cmdName[2] == 'l' &&
+	    cmdName[3] == 'x') && !(flags & TCLX_CMD_NOPREFIX)) {
+	char cmdnamebuf[80];
+	sprintf(cmdnamebuf, "tclx_%s", cmdName);
+	Tcl_CreateObjCommand(interp, cmdnamebuf, proc, clientData, deleteProc);
+    }
 
-  if (!(cmdName[0] == 't' && cmdName[1] == 'c' && cmdName[2] == 'l' &&
-	  cmdName[3] == 'x') && !(flags & TCLX_CMD_NOPREFIX)) {
-      sprintf(cmdnamebuf, "tclx_%s", cmdName);
-      Tcl_CreateObjCommand(interp, cmdnamebuf, proc, clientData, deleteProc);
-  }
+    return TCL_OK;
+}
+
+/*--------------------------------------------------------------------------
+ * TclX_NSOffset --
+ *
+ * Handles offsets into a private structure, which has changed in size from
+ * 8.3 to 8.4.  Currently only for Namespace, but others could be added.
+ *--------------------------------------------------------------------------
+ */
 
-  return TCL_OK;
+void *
+TclX_StructOffset(nsPtr, offset, offType)
+    void *nsPtr;
+    size_t offset;
+    unsigned int offType;
+{
+    int major, minor, i;
+    /*
+     * These size_t pairs indicate the element at which we will have a
+     * shift in size and the size by which it will shift.
+     */
+    static size_t nsOffs[] = {
+	TclX_Offset(Namespace, varTable), sizeof(void *),
+	TclX_Offset(Namespace, cmdTable), sizeof(void *),
+	TclX_Offset(Namespace, childTable), sizeof(void *),
+	0, 0
+    };
+
+    /*
+     * Get the version so we can runtime switch on available functionality.
+     * 8.0 is the lowest we compile with, so use that assumption.
+     */
+    Tcl_GetVersion(&major, &minor, NULL, NULL);
+
+#if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 4
+    /*
+     * Headers are <= 8.3 for offset calculations, so we only need to
+     * adjust for 8.4+ interpreters.
+     */
+    if ((major > 8) || (minor > 3)) {
+	for (i = 0; nsOffs[i] != 0; i += 2) {
+	    if (offset > nsOffs[i]) {
+		offset += nsOffs[i+1];
+	    }
+	}
+    }
+#else
+    /*
+     * Headers are >= 8.4 for offset calculations, so we only need to
+     * adjust for 8.3- interpreters.
+     */
+    if ((major == 8) && (minor < 4)) {
+	for (i = 0; nsOffs[i] != 0; i += 2) {
+	    if (offset > nsOffs[i]) {
+		offset -= nsOffs[i+1];
+	    }
+	}
+    }
+#endif
+    return (void *)((size_t) nsPtr + offset);
 }

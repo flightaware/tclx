@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 1.1 2001/10/24 23:31:47 hobbs Exp $
+ * $Id: tclExtdInt.h,v 1.2 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -194,6 +194,21 @@ extern int
 TclX_CreateObjCommand _ANSI_ARGS_((Tcl_Interp* interp, char* cmdName,
 				   Tcl_ObjCmdProc *proc, ClientData clientData,
 				   Tcl_CmdDeleteProc *deleteProc, int flags));
+extern void *
+TclX_StructOffset _ANSI_ARGS_((void *nsPtr, size_t offset,
+	unsigned int offType));
+
+/*
+ * Macro to use to fill in "offset" fields of a structure.
+ * Computes number of bytes from beginning of structure to a given field.
+ * Based off Tk_Offset
+ */
+
+#ifdef offsetof
+#define TclX_Offset(type, field) ((size_t) offsetof(type, field))
+#else
+#define TclX_Offset(type, field) ((size_t) ((char *) &((type *) 0)->field))
+#endif
 
 /* Special flags for "TclX_CreateObjCommand".
  */

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.25 1999/04/23 10:00:07 markd Exp $
+ * $Id: tclXstring.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -211,7 +211,8 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
 {
     int strLen, utfLen, first, subLen;
     int isRange = (int) clientData;
-    char *str, *start, *end;
+    char *str;
+    CONST84 char *start, *end;
 
     if (objc != 4) {
         if (isRange)

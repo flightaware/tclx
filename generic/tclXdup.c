@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 8.10 1999/03/31 06:37:43 markd Exp $
+ * $Id: tclXdup.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -57,7 +57,7 @@ DupChannelOptions (interp, srcChannel, targetChannel)
     Tcl_Channel  targetChannel;
 {
     Tcl_DString strValues;
-    char *option, *value, **optArgv = NULL;
+    CONST84 char *option, *value, **optArgv = NULL;
     int optArgc, idx;
 
     Tcl_DStringInit (&strValues);

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 1.2 2002/04/02 03:01:00 hobbs Exp $
+ * $Id: tclExtend.h,v 1.3 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,6 +29,10 @@
 #if defined(BUILD_tclx) || defined(BUILD_TCLX)
 # undef TCL_STORAGE_CLASS
 # define TCL_STORAGE_CLASS DLLEXPORT
+#endif
+
+#ifndef CONST84
+#  define CONST84
 #endif
 
 /*

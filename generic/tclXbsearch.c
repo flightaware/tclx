@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 8.12 1999/03/31 06:37:43 markd Exp $
+ * $Id: tclXbsearch.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -106,7 +106,8 @@ static int
 TclProcKeyCompare (searchCBPtr)
     binSearchCB_t *searchCBPtr;
 {
-    char *cmdArgv [3], *command, *oldResult;
+    CONST84 char *cmdArgv [3];
+    char *command, *oldResult;
     int   result;
 
     cmdArgv [0] = searchCBPtr->tclProc;

@@ -1,3 +1,24 @@
+2002-09-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* generic/tclExtdInt.h: added TclX_(Struct)Offet header
+	* generic/tclXutil.c: added TclX_StructOffset to handle the
+	changes in the size of Tcl_HashTable when embedded in a structure.
+
+	* generic/tclExtend.h: added support for 8.4 CONSTification (TIP 27)
+	* generic/tclXbsearch.c:
+	* generic/tclXcmdloop.c:
+	* generic/tclXdebug.c:
+	* generic/tclXdup.c:
+	* generic/tclXfilecmds.c:
+	* generic/tclXlib.c:
+	* generic/tclXprofile.c:
+	* generic/tclXsignal.c:
+	* generic/tclXstring.c:
+
+	* tests/profile.test: support changed error msgs between 8.3 and 8.4
+	* tests/string.test:
+	* tests/tcllib.test:
+
 2002-04-11  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* configure:

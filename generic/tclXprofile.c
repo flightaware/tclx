@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.15 1999/03/31 06:37:46 markd Exp $
+ * $Id: tclXprofile.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -284,7 +284,7 @@ RecordData (infoPtr, entryPtr)
             stackArgv [idx++] = scanPtr->cmdName;
         }
     }
-    stackListPtr = Tcl_Merge (idx, stackArgv);
+    stackListPtr = Tcl_Merge (idx, (CONST84 char **) stackArgv);
     ckfree ((char *) stackArgv);
 
     /*
@@ -795,8 +795,8 @@ TurnOffProfiling (interp, infoPtr, varName)
     Tcl_HashEntry *hashEntryPtr;
     Tcl_HashSearch searchCookie;
     profDataEntry_t *dataEntryPtr;
-    char *dataArgv [3], *dataListPtr;
-    char countBuf [32], realTimeBuf [32], cpuTimeBuf [32];
+    CONST84 char *dataArgv [3];
+    char countBuf [32], realTimeBuf [32], cpuTimeBuf [32], *dataListPtr;
 
     DeleteProfTrace (infoPtr);
 

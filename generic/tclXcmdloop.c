@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXcmdloop.c,v 1.2 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -191,7 +191,8 @@ OutputPrompt (interp, topLevel, prompt1, prompt2)
     char       *prompt1;
     char       *prompt2;
 {
-    char *promptHook, *resultStr;
+    char *promptHook;
+    char *resultStr;
     int result, useResult, promptDone = FALSE;
     Tcl_Channel stdoutChan, stderrChan;
 
@@ -217,7 +218,8 @@ OutputPrompt (interp, topLevel, prompt1, prompt2)
             promptHook = prompt1;
             useResult = TRUE;
         } else {
-            promptHook = Tcl_GetVar (interp, "tcl_prompt1", TCL_GLOBAL_ONLY);
+            promptHook = (char *) Tcl_GetVar (interp, "tcl_prompt1",
+		    TCL_GLOBAL_ONLY);
             useResult = FALSE;
         }
     } else {
@@ -225,7 +227,8 @@ OutputPrompt (interp, topLevel, prompt1, prompt2)
             promptHook = prompt2;
             useResult = TRUE;
         } else {
-            promptHook = Tcl_GetVar (interp, "tcl_prompt2", TCL_GLOBAL_ONLY);
+            promptHook = (char *) Tcl_GetVar (interp, "tcl_prompt2",
+		    TCL_GLOBAL_ONLY);
             useResult = FALSE;
         }
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXdebug.c,v 1.2 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,13 +47,13 @@ TraceDelete _ANSI_ARGS_((Tcl_Interp   *interp,
 
 static void
 PrintStr _ANSI_ARGS_((Tcl_Channel  channel,
-                      char        *string,
+                      CONST84 char *string,
                       int          numChars,
                       int          quoted));
 
 static void
 PrintArg _ANSI_ARGS_((Tcl_Channel  channel,
-                      char        *argStr,
+                      CONST84 char *argStr,
                       int          noTruncate));
 
 static void
@@ -61,7 +61,7 @@ TraceCode  _ANSI_ARGS_((traceInfo_pt infoPtr,
                         int          level,
                         char        *command,
                         int          argc,
-                        char       **argv));
+                        CONST84 char **argv));
 
 static int
 TraceCallbackErrorHandler _ANSI_ARGS_((ClientData  clientData,
@@ -74,7 +74,7 @@ TraceCallBack _ANSI_ARGS_((Tcl_Interp   *interp,
                            int           level,
                            char         *command,
                            int           argc,
-                           char        **argv));
+                           CONST84 char **argv));
 
 static void
 CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
@@ -84,7 +84,7 @@ CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              Tcl_CmdProc  *cmdProc,
                              ClientData    cmdClientData,
                              int           argc,
-                             char        **argv));
+                             CONST84 char **argv));
 
 static int
 TclX_CmdtraceObjCmd _ANSI_ARGS_((ClientData clientData, 
@@ -133,7 +133,7 @@ TraceDelete (interp, infoPtr)
 static void
 PrintStr (channel, string, numChars, quoted)
     Tcl_Channel  channel;
-    char        *string;
+    CONST84 char *string;
     int          numChars;
     int          quoted;
 {
@@ -165,7 +165,7 @@ PrintStr (channel, string, numChars, quoted)
 static void
 PrintArg (channel, argStr, noTruncate)
     Tcl_Channel  channel;
-    char        *argStr;
+    CONST84 char *argStr;
     int          noTruncate;
 {
     int idx, argLen, printLen;
@@ -200,7 +200,7 @@ TraceCode (infoPtr, level, command, argc, argv)
     int          level;
     char        *command;
     int          argc;
-    char       **argv;
+    CONST84 char **argv;
 {
     int idx, cmdLen, printLen;
     char buf [32];
@@ -218,7 +218,7 @@ TraceCode (infoPtr, level, command, argc, argv)
         if ((!infoPtr->noTruncate) && (printLen > CMD_TRUNCATE_SIZE))
             printLen = CMD_TRUNCATE_SIZE;
 
-        PrintStr (infoPtr->channel, command, printLen, FALSE);
+        PrintStr (infoPtr->channel, (CONST84 char *) command, printLen, FALSE);
       } else {
           for (idx = 0; idx < argc; idx++) {
               if (idx > 0)
@@ -290,7 +290,7 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
     int           level;
     char         *command;
     int           argc;
-    char        **argv;
+    CONST84 char **argv;
 {
     Interp       *iPtr = (Interp *) interp;
     Tcl_DString   callback;
@@ -356,7 +356,7 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
     Tcl_CmdProc  *cmdProc;
     ClientData    cmdClientData;
     int           argc;
-    char        **argv;
+    CONST84 char **argv;
 {
     Interp       *iPtr = (Interp *) interp;
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;

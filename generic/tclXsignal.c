@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.16 1999/03/31 06:37:46 markd Exp $
+ * $Id: tclXsignal.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -236,7 +236,7 @@ static char *signalTrapCmds[MAXSIG];
 /*
  * Prototypes of internal functions.
  */
-static char *
+static CONST84 char *
 GetSignalName _ANSI_ARGS_((int signalNum));
 
 static int
@@ -345,7 +345,7 @@ TclX_KillObjCmd _ANSI_ARGS_((ClientData   clientData,
  *   Static signal name.
  *-----------------------------------------------------------------------------
  */
-static char *
+static CONST84 char *
 GetSignalName (signalNum)
     int signalNum;
 {
@@ -805,7 +805,7 @@ ProcessASignal (interp, background, signalNum)
      * If evaluating code, call it for each time the signal occured.
      */
     if (signalTrapCmds [signalNum] == NULL) {
-        char *signalName = GetSignalName (signalNum);
+        CONST84 char *signalName = GetSignalName (signalNum);
 
         signalsReceived [signalNum] = 0;
         Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);

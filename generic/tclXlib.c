@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXlib.c,v 1.2 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -77,8 +77,8 @@ MakeAbsFile _ANSI_ARGS_((Tcl_Interp  *interp,
 
 static int
 SetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                  char       *packageName,
-                                  char       *fileName,
+                                  CONST84 char *packageName,
+                                  CONST84 char *fileName,
                                   off_t       offset,
                                   unsigned    length));
 
@@ -91,8 +91,8 @@ GetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 SetProcIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                               char       *procName,
-                               char       *package));
+                               CONST84 char *procName,
+                               CONST84 char *package));
 
 static void
 AddLibIndexErrorInfo _ANSI_ARGS_((Tcl_Interp *interp,
@@ -162,10 +162,10 @@ EvalFilePart (interp, fileName, offset, length)
     off_t        length;
 {
     Interp *iPtr = (Interp *) interp;
-    int result;
+    int result, major, minor;
     off_t fileSize;
     Tcl_DString pathBuf, cmdBuf;
-    char *oldScriptFile, *buf;
+    char *buf;
     Tcl_Channel channel = NULL;
 
     Tcl_ResetResult (interp);
@@ -207,10 +207,24 @@ EvalFilePart (interp, fileName, offset, length)
         goto posixError;
     channel = NULL;
 
-    oldScriptFile = iPtr->scriptFile;
-    iPtr->scriptFile = fileName;
-    result = Tcl_GlobalEval (interp, cmdBuf.string);
-    iPtr->scriptFile = oldScriptFile;
+    /*
+     * The internal scriptFile element changed from char* to Tcl_Obj* in 8.4.
+     */
+    Tcl_GetVersion(&major, &minor, NULL, NULL);
+    if ((major > 8) || (minor > 3)) {
+	Tcl_Obj *oldScriptFile = (Tcl_Obj *) iPtr->scriptFile;
+	Tcl_Obj *newobj = Tcl_NewStringObj(fileName, -1);
+	Tcl_IncrRefCount(newobj);
+	iPtr->scriptFile = (void *) newobj;
+	result = Tcl_GlobalEval (interp, cmdBuf.string);
+	iPtr->scriptFile = (void *) oldScriptFile;
+	Tcl_DecrRefCount(newobj);
+    } else {
+	char *oldScriptFile = (char *) iPtr->scriptFile;
+	iPtr->scriptFile = (void *) fileName;
+	result = Tcl_GlobalEval (interp, cmdBuf.string);
+	iPtr->scriptFile = (void *) oldScriptFile;
+    }
     
     Tcl_DStringFree (&pathBuf);
     Tcl_DStringFree (&cmdBuf);
@@ -338,8 +352,8 @@ MakeAbsFile (interp, fileName, absNamePtr)
 static int
 SetPackageIndexEntry (interp, packageName, fileName, offset, length)
      Tcl_Interp *interp;
-     char       *packageName;
-     char       *fileName;
+     CONST84 char *packageName;
+     CONST84 char *fileName;
      off_t       offset;
      unsigned    length;
 {
@@ -449,11 +463,11 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
 static int
 SetProcIndexEntry (interp, procName, package)
     Tcl_Interp *interp;
-    char       *procName;
-    char       *package;
+    CONST84 char *procName;
+    CONST84 char *package;
 {
     Tcl_DString  command;
-    char        *result;
+    CONST84 char *result;
 
     Tcl_DStringInit (&command);
     Tcl_DStringAppendElement (&command, "auto_load_pkg");
@@ -518,7 +532,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
     Tcl_Channel  indexChannel = NULL;
     Tcl_DString  lineBuffer;
     int          lineArgc, idx, result, tmpNum;
-    char       **lineArgv = NULL;
+    CONST84 char **lineArgv = NULL;
     off_t        offset;
     unsigned     length;
 

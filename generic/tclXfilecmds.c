@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.16 1999/03/31 06:37:43 markd Exp $
+ * $Id: tclXfilecmds.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -70,8 +70,8 @@ TclX_PipeObjCmd (clientData, interp, objc, objv)
      int         objc;
      Tcl_Obj    *CONST objv[];
 {
-    Tcl_Channel  channels [2];
-    char        *channelNames [2];
+    Tcl_Channel   channels [2];
+    CONST84 char *channelNames [2];
 
     if (!((objc == 1) || (objc == 3)))
 	return TclX_WrongArgs (interp, objv [0], "?fileId_var_r fileId_var_w?");
