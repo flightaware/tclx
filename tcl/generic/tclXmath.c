@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 2.7 1993/11/18 06:14:51 markd Exp markd $
+ * $Id: tclXmath.c,v 3.0 1993/11/19 06:59:01 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,7 +24,6 @@
  */
 
 #ifndef __GNU_LIBRARY__
-void srandom ();
 long random ();
 #endif
 
