@@ -1,13 +1,6 @@
                            Extended Tcl (TclX) 8.0.0
                            =========================
 
-*** WARNING: REQUIRED PATCH ***
-===============================
-
-    You should install the patch TCL-REQUIRED-PATCHES/format.patch to Tcl 8.0
-and rebuild.  See unix/INSTALL for details.  If you get a core dump in
-bsearch.test, you probably need this patch.
-
 INTRODUCTION
 ============
 
