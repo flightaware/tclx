@@ -1240,5 +1240,9 @@
 ===============================================================================
 20 Nov 96: Released TclX 7.6.0, including Win 95/NT binary distribution.
 ===============================================================================
+30 Nov 96:
+  o Fixed crash with profile when run with ITcl.  Patch supplied by Christopher
+    Hylands <cxh@EECS.Berkeley.EDU>.
+-------------------------------------------------------------------------------
 
  

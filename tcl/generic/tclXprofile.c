@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 7.9 1996/10/21 03:14:27 markd Exp $
+ * $Id: tclXprofile.c,v 8.0 1996/11/21 00:24:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -525,14 +525,24 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
 {
     Interp *iPtr = (Interp *) interp;
     profInfo_t *infoPtr = (profInfo_t *) clientData;
-    Tcl_HashEntry *hPtr;
     Command *cmdPtr;
-    
+#ifdef ITCL_NAMESPACES      
+    Tcl_Command cmd;
+#else
+    Tcl_HashEntry *hPtr;
+#endif    
+
     if (infoPtr->currentCmdPtr != NULL)
         panic (PROF_PANIC, 5);
 
+#ifdef ITCL_NAMESPACES      
+    if (Itcl_FindCommand((Tcl_Interp*)iPtr, argv [0], 0, &cmd) != TCL_OK)
+        panic (PROF_PANIC, 56);
+    cmdPtr = (Command*)cmd;
+#else
     hPtr = Tcl_FindHashEntry (&iPtr->commandTable, argv [0]);
     cmdPtr = (Command *) Tcl_GetHashValue (hPtr);
+#endif
 
     if ((cmdPtr->proc != cmdProc) || (cmdPtr->clientData != cmdClientData))
         panic (PROF_PANIC, 6);
