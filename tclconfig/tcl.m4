@@ -1112,11 +1112,11 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 
+	    CFLAGS_OPTIMIZE=-O2
 	    # egcs-2.91.66 on Redhat Linux 6.0 generates lots of warnings 
 	    # when you inline the string and math operations.  Turn this off to
 	    # get rid of the warnings.
-
-	    CFLAGS_OPTIMIZE="${CFLAGS_OPTIMIZE} -D__NO_STRING_INLINES -D__NO_MATH_INLINES"
+	    #CFLAGS_OPTIMIZE="${CFLAGS_OPTIMIZE} -D__NO_STRING_INLINES -D__NO_MATH_INLINES"
 
 	    if test "$have_dl" = yes; then
 		SHLIB_LD="${CC} -shared"
