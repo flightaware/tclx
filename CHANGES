@@ -1420,3 +1420,9 @@
   o Fixed tests to build when threads are enabled.
   o Pickup TK_LD_SEARCH_FLAGS in configure.
 -------------------------------------------------------------------------------
+22 June 99:
+  o Moved TclX_AppendObjResult to be an external API for testing
+  o Upgraded the patch levels to be "8.1.2"
+  o Defined TclX_MainEx to take an interp as an argument.  TclX_Main is
+    now a macro that calls TclX_MainEx.  When passing the interp argument,
+    Tcl_CreateInterp() is called.  This is done so TclX can use stubs.
