@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.7 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tcl++.h,v 2.8 1993/07/12 05:26:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -97,15 +97,6 @@ public:
                      ClientData            clientData)
     {
         Tcl_CallWhenDeleted (interp, proc, clientData);
-    }
-
-    inline Tcl_CmdProc *
-    CommandInfo (const char         *cmdName,
-                 ClientData         *clientDataPtr,
-                 Tcl_CmdDeleteProc **deleteProcPtr)
-    {
-        return Tcl_CommandInfo (interp, (char *) cmdName, clientDataPtr,
-                                deleteProcPtr);
     }
 
     inline void 
@@ -222,6 +213,13 @@ public:
     }
 
     inline int
+    GetCommandInfo (const char  *cmdName,
+                    Tcl_CmdInfo *infoPtr)
+    {
+        return Tcl_GetCommandInfo (interp, (char *) cmdName, infoPtr);
+    }
+
+    inline int
     GetDouble (const char *string,
                double     *doublePtr)
     { 
@@ -297,9 +295,22 @@ public:
         Tcl_ResetResult (interp);
     }
 
+    inline int
+    SetCommandInfo (const char  *cmdName,
+                    Tcl_CmdInfo *infoPtr)
+    {
+        return Tcl_SetCommandInfo (interp, (char *) cmdName, infoPtr);
+    }
+
     void
     SetErrorCode (char *p, 
                   ...);
+
+    inline int
+    SetRecursionLimit (int depth)
+    {
+        return Tcl_SetRecursionLimit (interp, depth);
+    }
 
     inline void 
     SetResult (const char *string)

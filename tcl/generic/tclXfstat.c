@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 1.1 1993/04/07 06:02:59 markd Exp markd $
+ * $Id: tclXfstat.c,v 1.2 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -83,13 +83,13 @@ GetRemoteHost (interp, filePtr)
 
     if (getpeername (socketFD, &remote, &nameLen) < 0)
         goto unixError;
-    Tcl_AppendElement (interp, inet_ntoa (remote.sin_addr), 0);
+    Tcl_AppendElement (interp, inet_ntoa (remote.sin_addr));
 
     hostEntry = gethostbyaddr ((char *) &(remote.sin_addr.s_addr),
                                sizeof (remote.sin_addr.s_addr),
                                AF_INET);
     if (hostEntry != NULL)
-        Tcl_AppendElement (interp, hostEntry->h_name, 0);
+        Tcl_AppendElement (interp, hostEntry->h_name);
        
     return TCL_OK;
 

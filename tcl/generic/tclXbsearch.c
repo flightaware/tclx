@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXbsearch.c,v 2.3 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -112,7 +112,7 @@ TclProcKeyCompare (searchCBPtr)
     cmdArgv [2] = searchCBPtr->dynBuf.string;
     command = Tcl_Merge (3, cmdArgv);
 
-    result = Tcl_Eval (searchCBPtr->interp, command, 0, (char **) NULL);
+    result = Tcl_Eval (searchCBPtr->interp, command);
 
     ckfree (command);
     if (result == TCL_ERROR)

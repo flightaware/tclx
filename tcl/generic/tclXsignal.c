@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.7 1993/05/19 04:19:21 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.8 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -452,7 +452,7 @@ EvalTrapCode (interp, signalNum, command)
     else
         result = TCL_OK;
     if (result == TCL_OK);
-        result = Tcl_Eval (interp, signalTrapCmds [signalNum], 0, NULL);
+        result = Tcl_Eval (interp, signalTrapCmds [signalNum]);
 
     /*
      * Restore the frame pointer and return the result (only OK or ERROR).
