@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.31 1993/09/09 06:07:15 markd Exp markd $
+.\" $Id: TclX.man,v 2.32 1993/09/16 05:37:54 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -87,7 +87,7 @@ and a looping command.
 .B dirs
 This procedure lists the directories in the directory stack.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/control/commandloop
@@ -117,7 +117,7 @@ value.  Prompt hooks are TCL code that return as their result the prompt to
 output.  The result of the last command executed in the command string (which
 may be a \fBreturn\fR) will be used as the prompt.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/echo
@@ -127,7 +127,7 @@ may be a \fBreturn\fR) will be used as the prompt.
 .br
 Writes zero or more strings to standard output, followed by a newline.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/status/infox
@@ -169,7 +169,7 @@ Return the version number for the current application.  The C variable
 application-specific value for this variable.
 .RE
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/variables/for_array_keys
@@ -181,7 +181,7 @@ This procedure performs a foreach-style loop for each key in the named
 array.  The \fBbreak\fR and \fBcontinue\fR statements work as with
 \fBforeach\fR.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/for_recursive_glob
@@ -196,7 +196,7 @@ directory, and calling \fIcode\fR.  The \fBbreak\fR and \fBcontinue\fR
 statements work as expected.  This procedure does not follow symbolic
 links.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/control/loop
@@ -235,7 +235,7 @@ then the \fBloop\fR command will
 return immediately.
 \fBLoop\fR returns an empty string.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/status/popd
@@ -246,7 +246,7 @@ return immediately.
 This procedure pops the top directory entry from the directory stack and
 make it the current directory.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/status/pushd
@@ -258,7 +258,7 @@ This procedure pushs the current directory onto the directory stack and
 \fBcd\fR to the specified directory.  If the directory is not specified,
 then the current directory is pushed, but remains unchanged.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/recursive_glob
@@ -271,7 +271,7 @@ descends all the matched subdirectories, returning a list of all the
 files that matched all pattern in the list \fIgloblist\fR.  This
 procedure does not follow symbolic links.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/status/showproc
@@ -283,7 +283,7 @@ This procedure lists the definition of the named procedures.  Loading
 them if it is not already loaded.  If no procedure names are supplied,
 the definitions of all currently loaded procedures are returned.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 .TP
@@ -339,7 +339,7 @@ Turn off all tracing.
 .br
 Returns the current maximum trace level, or zero if trace is disabled.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/debug/edprocs
@@ -352,7 +352,7 @@ procedures, to a temporary file, then calls an editor on it (as
 specified by the \fBEDITOR\fR environment variable, or \fBvi\fR if none
 is specified), then sources the file back in if it was changed.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/debug/profile
@@ -383,7 +383,7 @@ real cpu\fR}.
 A Tcl procedure \fBprofrep\fR is supplied for reducing the data and
 producing a report
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/debug/profrep
@@ -401,7 +401,7 @@ etc. \fBOutFile\fR is the name of file to write the report to.  If omitted,
 stdout is assumed.  \fBUserTitle\fR is an optional title line to add to
 output.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/debug/saveprocs
@@ -412,7 +412,7 @@ output.
 This prodcure saves the definition of the named procedure, or all
 currently defined procedures if none is specified, to the named file.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 .SH "UNIX ACCESS COMMANDS
@@ -436,7 +436,7 @@ Only one alarm at a time may be active; the command returns the number of
 seconds left in the previous alarm.  On systems without the \fBsetitimer\fR
 system call, \fIseconds\fR is rounded up to an even number of seconds.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/chgrp
@@ -449,7 +449,7 @@ group id of each file in the list \fIfilelist\fR to \fIgroup\fR, which can
 be either a
 group name or a numeric group id.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/chmod
@@ -462,7 +462,7 @@ where \fImode\fR is an absolute numeric mode or symbolic permissions as in the
 UNIX \fBchmod(1)\fR command.  To specify a mode as octal, it should be
 prefixed with a "0" (e.g. 0622).
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/chown
@@ -478,7 +478,7 @@ second element.  \fIGroup\fR can be a group name or numeric group id.
 If \fIgroup\fR is {}, then the file group will be set to the login
 group of the specified user.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/time/convertclock
@@ -581,7 +581,7 @@ Some examples are:
 .ft R
 .fi
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/processes/execl
@@ -605,7 +605,7 @@ command to abort Tk applications after an \fBexecl\fR failure:
 .ft R
 .fi
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/time/fmtclock
@@ -663,7 +663,7 @@ is specified, the time will be formated as Greenwich Mean Time. If the
 argument is not specified or is empty, then the local timezone will be used as
 defined by the TIMEZONE environment variable.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/processes/fork
@@ -688,7 +688,7 @@ Note: If you are \fBfork\fRing in a Tk based apllication you must \fBexecl\fR
 before doing any window operations in the child or you will receive a
 \fBBadWindow\fR error from the X server.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/time/getclock
@@ -700,7 +700,7 @@ Return the current date and time as a system-dependent integer value.  The
 unit of the value is seconds, allowing it to be used for relative time
 calculations.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/status/id
@@ -764,7 +764,7 @@ Return the process group ID of the current process.
 Set the process group ID of the current process to its process ID.
 .RE
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/processes/kill
@@ -784,7 +784,7 @@ as process group ids and the signal is sent to all of the process in that
 process group.  A process group id of \fB0\fR specifies the current process
 group.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/link
@@ -797,7 +797,7 @@ Create a directory entry, \fIdestpath\fR, linking it to the existing file,
 a hard link, is created.  (The \fB-sym\fR option is only available
 on systems that support symbolic links.)
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/mkdir
@@ -810,7 +810,7 @@ new directories is 777, modified by the umask.  If \fB-path\fR is specified,
 then any non-existent parent directories in the specified path(s) are also
 created.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/rmdir
@@ -821,7 +821,7 @@ created.
 Remove each of the directories in the list \fIdirList\fR.
 If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/signals/signal
@@ -887,7 +887,7 @@ Tcl sessions leave \fBSIGINT\fR unchanged from when the process started
 (normally \fBdefault\fR for foreground processes and \fBignore\fR for
 processes in the background).
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/time/sleep
@@ -897,7 +897,7 @@ processes in the background).
 .br
 Sleep the Extended Tcl process for \fIseconds\fR seconds.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/processes/system
@@ -914,7 +914,7 @@ expansion, redirection, etc,
 as is normal from an \fBsh\fR command line.  The exit code of
 the command is returned.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/time/times
@@ -929,7 +929,7 @@ Return a list containing the process and child execution times in the form:
 Also see the \fItimes\fR(2) system call manual page.
 The values are in milliseconds.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/status/umask
@@ -940,7 +940,7 @@ The values are in milliseconds.
 Sets file-creation mode mask to the octal value of \fIoctalmask\fR.
 If \fIoctalmask\fR is omitted, the current mask is returned.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/unlink
@@ -951,7 +951,7 @@ If \fIoctalmask\fR is omitted, the current mask is returned.
 Delete (unlink) the files whose names are in the list \fIfilelist\fR.
 If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/processes/wait
@@ -990,7 +990,7 @@ in the background with the \fBexec\fR command.  However, if any other
 process status will be reaped by the \fBexec\fR command and will not be
 available to the \fBwait\fR command.  
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .SH "FILE I/O COMMANDS"
@@ -1035,7 +1035,7 @@ The file must be sorted in ascending order according to the same criteria
 \fIcompare_proc\fR uses to compare the key with the line, or errouenous
 results will occur.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/copyfile
@@ -1058,7 +1058,7 @@ The command returns the number of bytes that were copied.
 The \fB-bytes\fR option is particularly useful for mixing binary data
 in with ASCII commands or data in a data stream.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/dup
@@ -1102,7 +1102,7 @@ our pair of pipes.
 .ft R
 .fi
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/fcntl
@@ -1153,7 +1153,7 @@ Once set, it may not be
 changed.  These options should be set before any I/O operations have been done
 on the file or data may be lost.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/flock
@@ -1189,7 +1189,7 @@ See your system's \fBfcntl\fR system call documentation for full details of
 the behavior of file locking.  If locking is being done on ranges of a
 file, it is best to use unbuffered file access (see the \fBfcntl\fR command).
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/for_file
@@ -1211,7 +1211,7 @@ For example, the command
 .sp
 would echo all the lines in the password file.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/funlock
@@ -1223,7 +1223,7 @@ Remove a locked from a file that was previously placed with the \fIflock\fR
 command.  The arguments are the same as for the \fIflock\fR command, see
 that command for more details.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/fstat
@@ -1282,7 +1282,7 @@ list is returned with the first element being the remote host IP address.  If
 the remote host name can be found, it is returned as the second element of
 the list.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/lgets
@@ -1310,7 +1310,7 @@ An empty string will also be returned if a line contains no characters
 except the newline, so \fBeof\fR may have to be used to determine
 what really happened.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/pipe
@@ -1329,7 +1329,7 @@ If the fileId variables are not specified, then a
 list containing the read and write fileIdw is returned as the
 result of the command.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/read_file
@@ -1346,7 +1346,7 @@ exactly how many bytes will be read and returned, unless there are fewer
 than \fInumBytes\fR bytes left in the file; in this case, all the
 remaining bytes are returned.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/select
@@ -1400,7 +1400,7 @@ or perhaps
 .fi
 .sp
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/files/write_file
@@ -1410,7 +1410,7 @@ or perhaps
 .br
 This procedure writes the specified strings to the named file.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 .SH "TCP/IP SERVER ACCESS"
@@ -1444,7 +1444,7 @@ command may be used to make one of these files unbuffered.
 if \fB-nobuf\fR is specified, then the file is unbuffered and a single file id,
 open for both reading and writing, is returned.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .SH "FILE SCANNING COMMANDS"
@@ -1489,7 +1489,7 @@ of the
 match statements and compiled regular expressions associated with the
 specified context.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/filescan/scanfile
@@ -1502,7 +1502,7 @@ current file position.  Check all patterns in the scan context specified by
 \fIcontexthandle\fR against
 it, executing the match commands corresponding to patterns matched.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '@help: tcl/filescan/scanmatch
 '@brief: Specify tcl code to execute when scanfile pattern is matched.
@@ -1573,7 +1573,7 @@ currently in
 progress returns, with the value passed to \fBreturn\fR as its
 return value.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .SH "MATH COMMANDS"
@@ -1601,7 +1601,7 @@ may take expressions as arguments.
 .fi
 .RE
 '@:
-'@: These procedures are provided by Extended Tcl.
+'@:These procedures are provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/math/max
@@ -1612,7 +1612,7 @@ may take expressions as arguments.
 Returns the argument that has the highest numeric value. The arguments,
 \fInumN\fR may be any interger or floating point values.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/math/min
@@ -1623,7 +1623,7 @@ Returns the argument that has the highest numeric value. The arguments,
 Returns the argument that has the lowest numeric value. The arguments,
 \fInumN\fR may be any interger or floating point values.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/math/random
@@ -1641,7 +1641,7 @@ If \fIseedval\fR is omitted, then the seed is set to a value based on current
 system state and the current time, providing a reasonably interesting and
 ever-changing seed.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .SH "LIST MANINIPULATION COMMANDS"
@@ -1658,7 +1658,7 @@ sorted.
 .sp
 (Note: This command is implemented as a procedure)
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/intersect3
@@ -1673,7 +1673,7 @@ of the two lists, and the third list contains all the elements that
 were in \fIlistb\fR but weren't in \fIlista\fR.  The returned lists will be
 sorted.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/lassign
@@ -1695,7 +1695,7 @@ For example,
 Assigns \fIname\fR to ``dave'', \fIuid\fR to ``100'', \fIgid\fR to ``200'',
 and \fIlongName\fR to ``Dave Foo''.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/lempty
@@ -1707,7 +1707,7 @@ Determine if the specified list is empty.
 If empty, 1 is returned, otherwise, 0 is returned.  This command is an
 alternative to comparing a list to an empty string.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/lmatch
@@ -1735,7 +1735,7 @@ each list element using the same rules as the \fBregexp\fR command.
 .sp
 If \fImode\fR is omitted then it defaults to \fB\-glob\fR.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/lrmdups
@@ -1746,7 +1746,7 @@ If \fImode\fR is omitted then it defaults to \fB\-glob\fR.
 This procedure remove duplicate elements from a list.  The returned list
 will be sorted.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/lvarcat
@@ -1759,7 +1759,7 @@ to the end of the contents of \fIvar\fR, forming a a single list.  The list is
 stored back into \fIvar\fR and also returned as the result.  if \fIvar\fR does
 not exist, it is created.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/lvarpop
@@ -1775,7 +1775,7 @@ If \fIstring\fR, is specified, then the deleted element is replaced by
 Thus ``lvarpop argv 0'' returns the first element of argv, setting
 argv to contain the remainder of the string.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/lvarpush
@@ -1788,7 +1788,7 @@ list contained in the variable \fIvar\fR.  The element is inserted before
 position \fIindex\fR in the list. If \fIindex\fR is omitted, then 0 is
 assumed.  If \fIvar\fR does not exists, it is created.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/lists/union
@@ -1798,7 +1798,7 @@ assumed.  If \fIvar\fR does not exists, it is created.
 This procedure returns the logical union of the two specified lists.
 Any duplicate elements are removed.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/intro/keyedlists
@@ -1845,7 +1845,7 @@ the keyed list
 as an argument (i.e. passed by reference), rather than passing the
 list directly.
 '@:
-'@: This functionallity is provided by Extended Tcl.
+'@:This functionallity is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/keyedlists/keyldel
@@ -1857,7 +1857,7 @@ Delete the field specified by \fIkey\fR from the keyed list in the
 variable \fIlistvar\fR.  This removes both the key and the value from
 the keyed list.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/keyedlists/keylget
@@ -1883,7 +1883,7 @@ variable as a side-effect.
 If \fIkey\fR is omitted, then a list of all the keys in
 the keyed list is returned.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/keyedlists/keylkeys
@@ -1895,7 +1895,7 @@ Return the a list of the keyes in the keyed list in the
 variable \fIlistvar\fR.  If \fIkeys\fR is specified, then it is the
 name of a key field  who's subfield keys are to be retrieve.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/keyedlists/keylset
@@ -1910,7 +1910,7 @@ is not currently in the list, it will be added.  If it already exists,
 \fIvalue\fR replaces the existing value.  Multiple keywords and values may
 be specified, if desired.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .SH "STRING AND CHARACTER MANIPULATION COMMANDS"
@@ -1934,7 +1934,7 @@ If the expression \fIindexExpr\fR starts with the string \fBend\fR, then
 the expression starts with \fBlen\fR, then \fBlen\fR is replaced with the
 length of the string.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '@help: tcl/strings/clength
 '@brief: Return length of specified string.
@@ -1950,7 +1950,7 @@ This command is a shortcut for:
 .ft R
 .fi
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/strings/crange
@@ -1967,7 +1967,7 @@ If the expression \fIfirstExpr\fR or \fBlastExpr\fR starts with the string
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/strings/csubstr
@@ -1984,7 +1984,7 @@ If the expression \fIfirstExpr\fR or \fBlengthExpr\fR starts with the string
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/strings/ctoken
@@ -2000,7 +2000,7 @@ All leading separators are skipped and the first token is returned.
 The variable \fIstrvar\fR will be modified to contain the remainder of
 the string following the token.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/strings/ctype
@@ -2076,7 +2076,7 @@ Tests that all characters are valid hexadecimal digits, that is \fI0\fR
 through \fI9\fR, a through \fIf\fR or \fIA\fR through \fIF\fR.
 .RE
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/strings/replicate
@@ -2087,7 +2087,7 @@ through \fI9\fR, a through \fIf\fR or \fIA\fR through \fIF\fR.
 Returns \fIstring\fR, replicated the number of times indicated by the
 expression \fIcountExpr\fR.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/strings/translit
@@ -2108,7 +2108,7 @@ For example:
 .if
 returns "FOOBAR".
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .SH "XPG/3 MESSAGE CATALOG COMMANDS"
@@ -2170,7 +2170,7 @@ of not returning an error when \fBcatopen\fR fails to open a specified
 message catalog.  If the handle from a failed \fBcatopen\fR is passed to
 \fBcatgets\fR, the default string is returned.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/internation/catgets
@@ -2185,7 +2185,7 @@ and \fImsgnum\fR is the message number. If the message catalog was not opened,
 or the message set or message number cannot be found, then the default
 string, \fIdefaultstr\fR, is returned.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/internation/catclose
@@ -2201,7 +2201,7 @@ specifies the default behavior of not returning an error.  The use of
 \fB-fail\fR only makes sense if it was also
 specified in the call to \fBcatopen\fR.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .SH "TCL SHELL AND DEVELOPMENT ENVIRONMENT"
@@ -2294,7 +2294,7 @@ or in procedures, to reduce confusion and mistakes while programming
 in Tcl.  Scripts should use the Tcl \fBexec\fR or \fBsystem\fR 
 commands to run Unix commands.
 '@:
-'@: This functionallity is provided by Extended Tcl.
+'@:This functionallity is provided by Extended Tcl.
 '@endhelp
 '
 .SH "HELP FACILITY"
@@ -2345,7 +2345,7 @@ description of a command, and want to search through the one-line summaries
 for matching lines.  Full regular expressions may be specified (see 
 the \fBregexp\fR command).
 '@:
-'@: These procedures are provided by Extended Tcl.
+'@:These procedures are provided by Extended Tcl.
 '@endhelp
 '
 .SH "TCL SHELL INITIALIZATION SEQUENCE"
@@ -2387,7 +2387,7 @@ of thise initialization files.
 Tcl global variable \fBauto_path\fR will contain the directories contain those
 initialization files.
 '@:
-'@: This functionallity is provided by Extended Tcl.
+'@:This functionallity is provided by Extended Tcl.
 '@endhelp
 '
 .SH "TCL SHELL VARIABLES"
@@ -2447,7 +2447,7 @@ generally useful:
 Source a file, as with the \fBsource\fR command, except search
 \fBauto_path\fR for the file.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 .TP
@@ -2459,7 +2459,7 @@ Search all directories in the specified path, which is a Tcl list, for the
 specified file.  Returns the full path name of the file, or an empty string
 if the requested file could not be found.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/libraries/packagelib
@@ -2520,7 +2520,7 @@ to the next \fIpackage\fR line or the end of the file is a package named
 \fIpopd\fR or \fIdirs\fR when the routine is not already defined will cause 
 the \fBdirectory_stack\fR portion of the package file to be loaded.
 '@:
-'@: This functionallity is provided by Extended Tcl.
+'@:This functionallity is provided by Extended Tcl.
 '@endhelp
 '
 .SS "PACKAGE LIBRARY MANAGEMENT COMMANDS"
@@ -2538,7 +2538,7 @@ Lists the names of all known loadable procedures and commands
 procedures.  If \fB-loaders\fR is specified, the command that will be
 executed to load the command will also be returned.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 .TP
@@ -2549,7 +2549,7 @@ executed to load the command will also be returned.
 Build an index for a package library.  The the \fIlibfile\fR name must end with
 the suffix \fB.tlib\fR.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 .TP
@@ -2563,7 +2563,7 @@ have a \fB.tlib\fR extension, one will be added.  Any files specified in
 \fItclIndex\fR that are in the list \fIignore\fR will be skipped.  Files
 listed in \fIignore\fR should just be the base file names, not full paths.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
 .TP
@@ -2589,7 +2589,7 @@ changed, but no command will be loaded.
 .PP
 This command overrides the standard Tcl procedure of the same name.
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .TP
@@ -2612,7 +2612,7 @@ been used from the previously defined package, the procedures from
 This command will also load an index built by \fBmkindex.tcl\fR program
 supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 '@:
-'@: This command is provided by Extended Tcl.
+'@:This command is provided by Extended Tcl.
 '@endhelp
 '
 .TP
@@ -2624,6 +2624,6 @@ Returns a list of the names of all defined packages. If \fI-location\fR
 is specified, a list of pairs of package name and the \fB.tlib\fR path
 name, offset and length of the package within the library.
 '@:
-'@: This procedure is provided by Extended Tcl.
+'@:This procedure is provided by Extended Tcl.
 '@endhelp
 '
