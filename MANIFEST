@@ -189,6 +189,7 @@
 ./tclhelp/tcl/processes/system
 ./tclhelp/tcl/processes/wait
 ./tclhelp/tcl/server/server_accept
+./tclhelp/tcl/server/server_cntl
 ./tclhelp/tcl/server/server_connect
 ./tclhelp/tcl/server/server_create
 ./tclhelp/tcl/server/server_info
