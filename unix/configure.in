@@ -13,19 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.25 1999/06/16 02:41:01 wart Exp $
+dnl $Id: configure.in,v 8.26 1999/06/17 00:59:22 wart Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.25 $),)dnl
-
-# If `configure' is invoked (in)directly via `make', ensure that it
-# encounters no `make' conflicts.  Ignore error if shell does not have
-# unset, but at least set these to empty values.
-#
-MFLAGS=
-MAKEFLAGS=
-MAKELEVEL=
-unset MFLAGS MAKEFLAGS MAKELEVEL 2>/dev/null
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.26 $),)dnl
 
 #------------------------------------------------------------------------------
 # Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
@@ -105,7 +96,6 @@ AC_SUBST(TKX_BUILD)
 #------------------------------------------------------------------------------
 
 SC_ENABLE_SHARED
-
 AC_SUBST(SHARED_BUILD)
 
 #------------------------------------------------------------------------------
@@ -120,8 +110,7 @@ AC_SUBST(prefix)
 AC_SUBST(exec_prefix)
 
 #------------------------------------------------------------------------------
-# Extract the version information out of tclExtend.h so it can be assigned
-# to macros.
+# Extract the version information out of tclExtend.h.
 #------------------------------------------------------------------------------
 
 AC_MSG_CHECKING(TclX versions)
@@ -137,58 +126,16 @@ AC_SUBST(TKX_VERSION)
 AC_SUBST(TKX_FULL_VERSION)
 
 #------------------------------------------------------------------------------
-# If Config.mk is not in the build directory, copy it local.
-#------------------------------------------------------------------------------
-
-if test ! -r Config.mk ; then
-    echo "Copying $srcdir/Config.mk to build directory"
-    cp $srcdir/Config.mk  Config.mk || exit 1
-fi
-
-#------------------------------------------------------------------------------
-# Generate tmp makefile that outputs macro values in Config.mk as shell
-# variables.  Validate that we can find Tcl and Tk files.  Note, we have to
-# deal with 3 parsings by the shell plus a parsing by make, use care in
-# changing this.
+# Get location of Tcl source directory and configuration information from
+# tclConfig.sh.
 #------------------------------------------------------------------------------
 
 SC_PATH_TCLCONFIG
 SC_LOAD_TCLCONFIG
 
-if test "$TKX_BUILD" = "YES"; then
-    SC_PATH_TKCONFIG
-    SC_LOAD_TKCONFIG
-fi
-
-cat Config.mk >confmakefile
-echo "srcbasedir=$srcbasedir" >>confmakefile
-echo "bldbasedir=$bldbasedir" >>confmakefile
-echo "prefix=$prefix" >>confmakefile
-echo "exec_prefix=$exec_prefix" >>confmakefile
-echo "all:" >>confmakefile
-echo '	@echo TCL_CONFIG=\"${TCL_CONFIG}\"' >>confmakefile
-echo '	@echo TCL_BUILD=\"${TCL_BUILD}\"' >>confmakefile
-echo '	@echo TK_CONFIG=\"${TK_CONFIG}\"' >>confmakefile
-echo '	@echo TK_SRC=\"${TK_SRC}\"' >>confmakefile
-echo '	@echo TK_BUILD=\"${TK_BUILD}\"' >>confmakefile
-echo '	@echo TCLX_INST_LIB=\"${TCLX_INST_LIB}\"' >>confmakefile
-echo '	@echo TKX_INST_LIB=\"${TKX_INST_LIB}\"' >>confmakefile
-echo ".NO_PARALLEL: all" >>confmakefile
-
-eval `${MAKE-make} -f confmakefile`
-rm confmakefile
-
-AC_SUBST(TCLX_INST_LIB)
-AC_SUBST(TKX_INST_LIB)
-
-LIBS=$TCL_LIBS   # Need for tests.
+LIBS=$TCL_LIBS   # Need for configure tests.
 
 AC_SUBST(TCL_VERSION)
-AC_SUBST(TCL_SRC_DIR)
-AC_SUBST(TCL_BUILD)
-#AC_SUBST(TCL_BUILD_DIR)
-AC_SUBST(TK_SRC_DIR)
-AC_SUBST(TK_BUILD)
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
 AC_SUBST(TCL_EXEC_PREFIX)
@@ -199,10 +146,25 @@ AC_SUBST(TCL_SHLIB_LD_LIBS)
 AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(TCL_LD_FLAGS)
 AC_SUBST(TCL_LD_SEARCH_FLAGS)
-AC_SUBST(TCLX_DBGX)
 AC_SUBST(TCL_EXTRA_CFLAGS)
 AC_SUBST(TCL_BUILD_LIB_SPEC)
 AC_SUBST(TCL_LIB_SPEC)
+
+# These are substituted into the run scripts
+TCL_LIB_DIR="${TCL_BIN_DIR}"
+TCL_LIBRARY_DIR="${TCL_SRC_DIR}/library"
+AC_SUBST(TCL_LIB_DIR)
+AC_SUBST(TCL_LIBRARY_DIR)
+
+#------------------------------------------------------------------------------
+# Get location of Tk source directory and configuration information from
+# tkConfig.sh.
+#------------------------------------------------------------------------------
+
+if test "$TKX_BUILD" = "YES"; then
+    SC_PATH_TKCONFIG
+    SC_LOAD_TKCONFIG
+fi
 
 AC_SUBST(TK_VERSION)
 AC_SUBST(TK_DEFS)
@@ -211,9 +173,21 @@ AC_SUBST(TK_EXEC_PREFIX)
 AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TK_XLIBSW)
 AC_SUBST(TK_LD_SEARCH_FLAGS)
-AC_SUBST(TKX_DBGX)
 AC_SUBST(TK_BUILD_LIB_SPEC)
 AC_SUBST(TK_LIB_SPEC)
+
+# These are substituted into the run scripts
+TK_LIB_DIR="${TK_BIN_DIR}"
+TK_LIBRARY_DIR="${TK_SRC_DIR}/library"
+AC_SUBST(TK_LIB_DIR)
+AC_SUBST(TK_LIBRARY_DIR)
+
+#------------------------------------------------------------------------------
+# The TclX and TkX runtime directories.  This is where the shared runtime and
+# help files are installed.
+#------------------------------------------------------------------------------
+AC_SUBST(TCLX_INST_LIB)
+AC_SUBST(TKX_INST_LIB)
 
 #------------------------------------------------------------------------------
 # Check for various programs used during the build.  If the CC environment
@@ -263,12 +237,15 @@ AC_PROG_RANLIB
 #------------------------------------------------------------------------------
 
 SC_CONFIG_CFLAGS
-
 SC_ENABLE_SYMBOLS
 
 CFLAGS="${CFLAGS_DEFAULT}"
 TCLX_DBGX=${DBGX}
 TKX_DBGX=${DBGX}
+
+AC_SUBST(TCLX_DBGX)
+AC_SUBST(TKX_DBGX)
+
 
 #------------------------------------------------------------------------------
 # Set this back to ${TCL_DBGX} because the UNSHARED_LIB_SUFFIX references
@@ -284,14 +261,6 @@ DBGX=${TCL_DBGX}
 
 AC_SUBST(TCL_DBGX)
 AC_SUBST(TK_DBGX)
-
-#------------------------------------------------------------------------------
-# If we can find "patch", set up to use it.
-#------------------------------------------------------------------------------
-
-AC_PATH_PROG(PATCH, patch, false)
-AC_SUBST(PATCH)
-
 
 #------------------------------------------------------------------------------
 # Determine the names of the TclX libraries and the link specifications and
@@ -409,6 +378,21 @@ AC_SUBST(TKX_LIB_SPEC)
 AC_SUBST(TCLX_LIB_NAME)
 AC_SUBST(TKX_LIB_NAME)
 
+# These are substituted into the run scripts
+TCLX_BIN_DIR="${bldbasedir}/tcl/unix"
+TCLX_LIB_DIR="${bldbasedir}/tcl/unix"
+TCLX_RUNTIME_DIR="${bldbasedir}/tcl/unix"
+AC_SUBST(TCLX_BIN_DIR)
+AC_SUBST(TCLX_LIB_DIR)
+AC_SUBST(TCLX_RUNTIME_DIR)
+
+TKX_BIN_DIR="${bldbasedir}/tk/unix"
+TKX_LIB_DIR="${bldbasedir}/tk/unix"
+TKX_RUNTIME_DIR="${bldbasedir}/tk/unix"
+AC_SUBST(TKX_BIN_DIR)
+AC_SUBST(TKX_LIB_DIR)
+AC_SUBST(TKX_RUNTIME_DIR)
+
 #------------------------------------------------------------------------------
 # Test for UnixWare -o bug.  Macros are used in targets to build the shared
 # objects.
@@ -517,80 +501,10 @@ AC_SUBST(TKX_BUILD_STANDALONE)
 AC_SUBST(TKX_BUILD_DUMMY_STANDALONE)
 
 #------------------------------------------------------------------------------
-# Determine the search path argument for the installed TclX libraries. 
-#-----------------------------------------------------------------------------
-
-if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
-    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib"
-    if test "X$TCLX_INST_LIB" != "X$TCL_EXEC_PREFIX/lib"; then
-      LIB_RUNTIME_DIR="$LIB_RUNTIME_DIR:$TCLX_INST_LIB"
-    fi
-fi
-if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
-    LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
-fi
-eval "TCLX_CC_SEARCH_FLAGS=\"$TCL_LD_SEARCH_FLAGS\""
-
-case $TCL_SHLIB_LD in
-    *cc*-shared*)
-	TCLX_LD_SEARCH_FLAGS="${TCLX_CC_SEARCH_FLAGS}"
-	;;
-    *)
-	TCLX_LD_SEARCH_FLAGS=`echo ${TCLX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
-
-	;;
-esac
-
-AC_SUBST(TCLX_LD_SEARCH_FLAGS)
-AC_SUBST(TCLX_CC_SEARCH_FLAGS)
-
-#------------------------------------------------------------------------------
-# Determine the search path argument for the installed TkX libraries. 
-#-----------------------------------------------------------------------------
-
-if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
-    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib"
-    if test "X$TCLX_INST_LIB" != "X$TCL_EXEC_PREFIX/lib"; then
-      LIB_RUNTIME_DIR="$LIB_RUNTIME_DIR:$TCLX_INST_LIB"
-    fi
-    if test "X$TKX_INST_LIB" != "X$TCL_EXEC_PREFIX/lib" -a \
-       "X$TKX_INST_LIB" != "X$TCLX_INST_LIB"; then
-      LIB_RUNTIME_DIR="$LIB_RUNTIME_DIR:$TKX_INST_LIB"
-    fi
-    X11_LIB_DIR=`echo ${TK_XLIBSW} |sed -e "s|-L||" -e "s/ .*$//g" -e "s/-l.*$//g" -e "s|/libX11.*$||" -e "s|/libXhp11.*$||"`
-    if test "x${X11_LIB_DIR}" != "x"; then
-	LIB_RUNTIME_DIR="${LIB_RUNTIME_DIR}:${X11_LIB_DIR}"
-    fi
-    if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
-	LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
-    fi
-fi
-eval "TKX_CC_SEARCH_FLAGS=\"$TK_CC_SEARCH_FLAGS\""
-case $TCL_SHLIB_LD in
-    *ld*)
-	TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
-	;;
-    *)
-	TKX_LD_SEARCH_FLAGS="${TKX_CC_SEARCH_FLAGS}"
-	;;
-esac
-
-AC_SUBST(TKX_LD_SEARCH_FLAGS)
-AC_SUBST(TKX_CC_SEARCH_FLAGS)
-
-#------------------------------------------------------------------------------
 # Determine if Tcl was built with threading support. We look in
 # the TCL_DEFS variable from tclConfig.sh for DTCL_THREADS=1. Would
 # be nice if we could query tcl.
 #------------------------------------------------------------------------------
-#AC_MSG_CHECKING("if tcl was built with thread support")
-#if echo ${TCL_DEFS} | grep 'DTCL_THREADS=1' >/dev/null 2>/dev/null; then
-#    TCL_THREAD_TEST="tclThreadTest.o"
-#    AC_MSG_RESULT(yes)
-#else
-#    AC_MSG_RESULT(no)
-#fi
-
 SC_ENABLE_THREADS
 
 if test "x${TCL_THREADS}" = x ; then
@@ -836,26 +750,26 @@ fi
 
 AC_SUBST(TCLX_LIBS)
 
-AC_OUTPUT(Makefile
-          Common.mk
-          runtcl
-          runtcl.static
-          runtcl.standalone
-          runwishx
-          runwishx.static
-          runwishx.standalone
-          tools/Makefile
-          ../tcl/unix/Makefile
-          ../tcl/unix/tclxConfig.sh
-          ../tcl/unix/pkgIndex.tcl
-          ../tcl/unix/runtest
-          ../tcl/unix/runtest.static
-          ../tcl/unix/runtest.standalone
-          ../tk/unix/Makefile
-          ../tk/unix/tkxConfig.sh
-          ../tk/unix/pkgIndex.tcl
-          ../tk/unix/runtest
-          ../tk/unix/runtest.static
+AC_OUTPUT(Makefile \
+          Common.mk \
+          runtcl \
+          runtcl.static \
+          runtcl.standalone \
+          runwishx \
+          runwishx.static \
+          runwishx.standalone \
+          tools/Makefile \
+          ../tcl/unix/Makefile \
+          ../tcl/unix/tclxConfig.sh \
+          ../tcl/unix/pkgIndex.tcl \
+          ../tcl/unix/runtest \
+          ../tcl/unix/runtest.static \
+          ../tcl/unix/runtest.standalone \
+          ../tk/unix/Makefile \
+          ../tk/unix/tkxConfig.sh \
+          ../tk/unix/pkgIndex.tcl \
+          ../tk/unix/runtest \
+          ../tk/unix/runtest.static \
           ../tk/unix/runtest.standalone)
 
 chmod a+xr,a-w runtcl

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.6 1999/03/31 06:37:58 markd Exp $
+# $Id: Makefile.in,v 8.7 1999/06/16 02:41:01 wart Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -23,7 +23,6 @@
 srcdir = @srcdir@
 
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
-@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
@@ -147,20 +146,6 @@ TCLX_INSTALL_MAN:
 	${CPMANPAGES} -rmcat @${MAN_DIR_SEPARATOR}@ \
 	    ${TCLX_MAN_CMD_SECTION} ${TCLX_MAN_FUNC_SECTION} @@ \
 	    ${srcbasedir}/doc ${INSTALL_ROOT}${TCLX_INST_MAN}
-
-#------------------------------------------------------------------------------
-# Perform required patches to the Tcl core
-
-PATCH=patch
-patch-tcl-core:
-	@echo "Patching Tcl core in '${TCLSRC}' with required patches."
-	@cd ${TCL_SRC}; \
-	    for i in ${srcbasedir}/TCL-REQUIRED-PATCHES/*.patch ; \
-	    do \
-		echo patching $$i; \
-		${PATCH} --strip=0 --forward <$$i || \
-		    echo PATCH FAILED, $i to ${TCL_SRC}; \
-	    done;
 
 #------------------------------------------------------------------------------
 # Clean up all files that were built by make.

@@ -2,7 +2,7 @@
 INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
 ------------------------------------------------------------------------
 
-$Id$
+$Id: INSTALL,v 8.13 1999/06/26 04:22:10 markd Exp $
 
 COMPATIBILITY
 =============
@@ -44,8 +44,7 @@ EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 
 To successfully build and install Extended Tcl, you must have already
 built Tcl and Tk, and make their built source trees available to
-Extended Tcl during the build process.  Their location relative to the 
-tclX8.1.1 directory is configured by editing tclX8.1.1/unix/Config.mk.
+Extended Tcl during the build process. 
 
 The following directories are included under the TclX directory:
 
@@ -68,25 +67,6 @@ The following directories are included under the TclX directory:
 
   o doc - Unformatted manual pages for TclX.
 
-REQUIRED PATCHES
-================
-
-In some releases of Extended Tcl, particularly beta releases, it is sometimes
-necessary for us to ship patches to the Tcl core to fix or work around a
-problem, etc.  These patches usually come from postings to the
-comp.lang.tcl newsgroup made by the Sunscript team.
-
-If any patches are included in this package's TCL-REQUIRED-PATCHES directory,
-they must be installed into the corresponding version of Tcl you're
-building with.
-
-You may either install the patches by hand, or, go ahead and cd to "unix" and
-configure TclX.  This will put a rule in your tclX8.1/unix/Makefile
-where you can then say "make patch-tcl-core" to make the patches on the
-Tcl core.  If any patch is reversed or has already been applied, it
-is ignored.
-
-
 HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 ==========================================
 
@@ -104,21 +84,16 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 
     o After building and installing Tcl and Tk, cd to tclX8.1.1/unix
 
-    o Edit Config.mk in the build directory following the instructions in the
-      file.  You normally won't need to change anything, unless you require
-      any special configuration options.  
-
-      If the --srcdir option to configure is used, Config.mk is copied from the 
-      source directory to the build directory.  This file is
-      used to specify values that can't be figured out by the configure script.
-      This includes the location of the Tcl and Tk distributions.  It's also
-      used to specify the sections that the Tcl manual pages are to be
-      installed in.  This must be done before running configure, as 
-      configure uses this file to fine tclConfig.sh and tkConfig.sh.
-
     o Enter ./configure to run the configure script.  If you are going to
       be compiling with gcc, set the environment variable CC to "gcc".
       The following options are recognized by the TclX configure script:
+        o -- with-tcl=dir
+          Specifies the full path to the built Tcl source directory.
+          By default, configure searchs for the Tcl distribution.
+
+        o -- with-tk=dir
+          Specifies the full path to the built Tk source directory.
+          By default, configure searchs for the Tk distribution.
 
         o --enable-shared=YES|NO
           If "YES", build and link with shared libraries if "NO", no shared
@@ -153,8 +128,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       correct files to be built.
  
     o Now do a "make" to compile TclX.  The following variables maybe passed
-      to on the make command line to override values set by configure or in
-      Config.mk:
+      to on the make command line to override values set by configure:
 
          CC - The C compiler to use.
          CFLAGS - The optimization flags to pass to the C compiler.

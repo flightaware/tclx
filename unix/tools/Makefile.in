@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: Makefile.in,v 8.3 1999/03/31 06:37:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,25 +22,24 @@
 #
 srcdir = @srcdir@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
-@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
 all: instcopy bldmanhelp cpmanpages cphelpdir
 
-instcopy: instcopy.tcl buildutil.tcl
+instcopy: ${srcdir}/instcopy.tcl ${srcdir}/buildutil.tcl
 	rm -f instcopy
 	cat ${srcdir}/buildutil.tcl ${srcdir}/instcopy.tcl >instcopy
 
-bldmanhelp: bldmanhelp.tcl
+bldmanhelp: ${srcdir}/bldmanhelp.tcl
 	rm -f bldmanhelp
 	cp ${srcdir}/bldmanhelp.tcl bldmanhelp
 
-cpmanpages: cpmanpages.tcl buildutil.tcl
+cpmanpages: ${srcdir}/cpmanpages.tcl ${srcdir}/buildutil.tcl
 	rm -f cpmanpages
 	cat ${srcdir}/buildutil.tcl ${srcdir}/cpmanpages.tcl >cpmanpages
 
-cphelpdir: cphelpdir.sh
+cphelpdir: ${srcdir}/cphelpdir.sh
 	rm -f cphelpdir
 	echo ":"                           >cphelpdir
 	echo "TOOLS=${bldbasedir}/tools"  >>cphelpdir

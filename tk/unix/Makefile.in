@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.29 1999/05/10 15:25:53 markd Exp $
+# $Id: Makefile.in,v 8.30 1999/06/16 02:41:00 wart Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,7 +22,6 @@
 #
 srcdir = @srcdir@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
-@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Local macros.
@@ -41,16 +40,19 @@ LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LIBS = ${TKX_LD_SEARCH_FLAGS} ${TK_LIB} ${TK_XLIBSW} @SHARED_LIBS@
+LIBS = ${TK_LIBS} @SHARED_LIBS@
 
-ALL_LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
-	   ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS} \
-	   ${XLDLIBS} ${TKX_CC_SEARCH_FLAGS}
+# Don't include TCL_LIBS.  Those libraries should already be listed
+# in TK_LIBS, and including them twice produces errors on Linux Redhat 6.0
+# when building the shared version of wishx
 
-STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_UNIX_DIR}/${TK_STLIB_NAME} ${TK_XLIBSW} \
-              ${TCLX_UNIX_SRC_DIR}/${TCLX_STLIB_NAME} \
-	      ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} \
-              ${TK_LIBS} ${TCLX_LIBS} ${XLDLIBS} ${TKX_CC_SEARCH_FLAGS}
+ALL_LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_BUILD_LIB_SPEC} \
+	   ${TCLX_BUILD_LIB_SPEC} ${TCL_BUILD_LIB_SPEC} \
+	   ${XLDLIBS} ${TK_LIBS} ${TCLX_LIBS}
+
+STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_UNIX_DIR}/${TK_STLIB_NAME} \
+	      ${TCLX_STLIB_NAME} ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} \
+	      ${XLDLIBS} ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -171,11 +173,11 @@ tktest.standalone: ${TEST_SAOBJS} @TKX_STLIB_BUILD_REF@ ${TCL}
 	${CC} ${LD_SWITCHES} ${TEST_SAOBJS} ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
-tkTest.o: ${TK_SRC}/generic/tkTest.c
-	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkTest.c
+tkTest.o: ${TK_SRC_DIR}/generic/tkTest.c
+	${CC} -c ${CC_SWITCHES} ${TK_SRC_DIR}/generic/tkTest.c
 
-tkSquare.o: ${TK_SRC}/generic/tkSquare.c
-	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkSquare.c
+tkSquare.o: ${TK_SRC_DIR}/generic/tkSquare.c
+	${CC} -c ${CC_SWITCHES} ${TK_SRC_DIR}/generic/tkSquare.c
 
 tkXtest.o: ${TKX_GENERIC_DIR}/tkXtest.c
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXtest.c
@@ -194,15 +196,15 @@ ${bldbasedir}/tk/tests:
 # Run the UCB tests with wishx.
 
 test: all
-	echo "cd ${TK_SRC}/tests; source all.tcl; exit" | \
+	echo "cd ${TK_SRC_DIR}/tests; source all.tcl; exit" | \
 	    ./runtest -geometry +0+0
 
 test.static: all
-	echo "cd ${TK_SRC}/tests; source all.tcl; exit" | \
+	echo "cd ${TK_SRC_DIR}/tests; source all.tcl; exit" | \
 	    ./runtest.static -geometry +0+0
 
 test.verbose: all
-	echo "cd ${TK_SRC}/tests; set VERBOSE 1; source all.tcl; exit" | \
+	echo "cd ${TK_SRC_DIR}/tests; set VERBOSE 1; source all.tcl; exit" | \
 	    ./runtest -geometry +0+0
 
 #------------------------------------------------------------------------------
@@ -212,7 +214,7 @@ test.verbose: all
 buildhelp:
 	rm -rf ${HELP_DIR} help help.tmp
 	mkdir ${HELP_DIR}
-	${BLDMANHELP} ${TK_SRC}/doc ${srcbasedir}/unix/tools/tkmanpages \
+	${BLDMANHELP} ${TK_SRC_DIR}/doc ${TCLX_TOOLS_SRC_DIR}/tkmanpages \
 	    ${HELP_DIR} Tk.brf
 
 #------------------------------------------------------------------------------

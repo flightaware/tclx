@@ -419,7 +419,6 @@
 ./tk/win/tkx.rc
 ./tk/win/wishx.rc
 ./unix/Common.mk.in
-./unix/Config.mk
 ./unix/INSTALL
 ./unix/INSTALL.generic
 ./unix/Makefile.in
