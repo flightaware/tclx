@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 4.1 1995/01/01 19:49:13 markd Exp markd $
+# $Id: testlib.tcl,v 4.2 1995/04/30 05:46:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -77,6 +77,7 @@ proc OutTestError {test_name test_description contents_of_test
     puts stderr "$passing_result"
     puts stderr "---- $test_name FAILED" 
     if {[info exists TEST_ERROR_INFO] && [info exists errorInfo]} {
+        puts stderr $errorCode
         puts stderr $errorInfo
         puts stderr "---------------------------------------------------"
     }
