@@ -4,6 +4,9 @@
 # Test support routines.  Some of these are based on routines provided with
 # standard Tcl.
 #------------------------------------------------------------------------------
+# Set the global variable TEST_ERROR_INFO to display errorInfo when a test
+# fails.
+#------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
@@ -13,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.1 1993/06/21 05:45:20 markd Exp markd $
+# $Id: testlib.tcl,v 2.2 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -37,6 +40,7 @@ if {[info command unknown] != ""} {
 #
 proc OutTestError {test_name test_description contents_of_test
                    passing_int_result passing_result int_result result} {
+    global TEST_ERROR_INFO errorInfo
     set int(0) TCL_OK
     set int(1) TCL_ERROR
     set int(2) TCL_RETURN
@@ -51,6 +55,10 @@ proc OutTestError {test_name test_description contents_of_test
     puts stdout "---- Result should have been: $int($passing_int_result)"
     puts stdout "$passing_result"
     puts stdout "---- $test_name FAILED" 
+    if {[info exists TEST_ERROR_INFO] && [info exists errorInfo]} {
+        puts stdout $errorInfo
+        puts stdout "---------------------------------------------------"
+    }
 }
 
 #
