@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 2.0 1992/10/16 04:50:31 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -69,10 +69,10 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
          * Get the minutes east of GMT.
          */
 #ifdef TCL_TM_GMTOFF
-        zone = timeDataPtr->tm_gmtoff / 60;
+        zone = -(timeDataPtr->tm_gmtoff / 60);
 #endif
 #ifdef TCL_TIMEZONE_VAR 
-        zone = -(timezone / 60);
+        zone = timezone / 60;
 #endif
 #if  !defined(TCL_TM_GMTOFF) && !defined(TCL_TIMEZONE_VAR)
         zone = timeDataPtr->tm_tzadj  / 60;
