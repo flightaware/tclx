@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.8 1996/03/10 22:16:34 markd Exp $
+.\" $Id: TclX.n,v 5.9 1996/03/11 04:12:18 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -991,17 +991,21 @@ results will occur.
 '\"@help: tcl/files/copyfile
 '\"@brief: Copy the remainder of one open file into another.
 .TP
-.B copyfile \fR?\fB-bytes \fInum\fR|\fB-maxbytes \fInum\fR? \fIfromFileId toFileId\fR
+.B copyfile \fR?\fB-bytes \fInum\fR|\fB-maxbytes \fInum\fR? ?\fI-translate\fR? \fIfromFileId toFileId\fR
 .br
 Copies the rest of the file specified by \fIfromFileId\fR, starting
 from its current position,
 to the file specified by \fItoFileId\fR, starting from its current
-position.
+position.  By default, newline translation is disabled for the duration
+of the copy.
 .sp
 If \fB-bytes\fR is specified, then \fInum\fR bytes are copied.  If less than
 \fInum\fR bytes are available, an error is returned.  If \fB-maxbytes\fR is
 specified, then \fInum\fR bytes are copied but no error is returned if less
 are available.
+.sp
+If \fB-translate\fR is specified, then newline translation will not be
+disabled for the copy.
 .sp
 The command returns the number of bytes that were copied.
 .sp

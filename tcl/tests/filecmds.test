@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 5.2 1996/02/09 18:43:36 markd Exp $
+# $Id: filecmds.test,v 5.3 1996/02/16 08:09:14 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -82,7 +82,7 @@ Test filecmds-3.4 {copyfile tests} {
 
 Test filecmds-3.5 {copyfile tests} {
     copyfile
-} 1 {wrong # args: copyfile ?-bytes num|-maxbytes num? fromFileId toFileId}
+} 1 {wrong # args: copyfile ?-bytes num|-maxbytes num? ?-translate? fromFileId toFileId}
 
 foreach flag {-bytes -maxbytes} {
     Test filecmds-3.6.$flag {copyfile tests} {

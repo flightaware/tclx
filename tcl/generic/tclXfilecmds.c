@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.7 1996/02/24 23:08:59 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.8 1996/03/10 04:42:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -156,7 +156,8 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
  *   o inChan (I) - Input channel.
  *   o outChan (I) - Output channel.
  * Returns:
- *    The number of bytes transfered or -1 on an error.
+ *    The number of bytes transfered or -1 on an error with the error in
+ * errno.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -182,29 +183,25 @@ CopyOpenFile (interp, maxBytes, inChan, outChan)
             if (Tcl_Eof (inChan) || Tcl_InputBlocked (inChan)) {
                 break;
             }
-            goto unixError;
+            return -1;
         }
         if (Tcl_Write (outChan, buffer, bytesRead) != bytesRead)
-            goto unixError;
+            return -1;
 
         bytesLeft -= bytesRead;
         totalBytesRead += bytesRead;
     }
 
     if (Tcl_Flush (outChan) == TCL_ERROR)
-        goto unixError;
+        return -1;
 
     return totalBytesRead;
-
-  unixError:
-    interp->result = Tcl_PosixError (interp);
-    return -1;
 }
 
 /*-----------------------------------------------------------------------------
  * Tcl_CopyfileCmd --
  *     Implements the copyfile TCL command:
- *         copyfile ?-bytes num|-maxbytes num? fromFileId toFileId
+ *         copyfile ?-bytes num|-maxbytes num? -translate fromFileId toFileId
  *
  * Results:
  *      The number of bytes transfered or an error.
@@ -222,40 +219,109 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
 #define TCLX_COPY_MAX_BYTES  2
 
     Tcl_Channel inChan, outChan;
+    int inTrans, outTrans;
     long totalBytesToRead, totalBytesRead;
-    int copyMode;
+    int argIdx, copyMode, translate, saveErrno;
 
-    if (!(argc == 3 || argc == 5))
-        goto wrongArgs;
+    /*
+     * Parse arguments.
+     */
+    copyMode = TCLX_COPY_ALL;
+    totalBytesToRead = MAXLONG;
+    translate = FALSE;
 
-    if (argc == 5) {
-        if (STREQU (argv [1], "-bytes")) 
+    for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
+        if (STREQU (argv [argIdx], "-bytes")) {
             copyMode = TCLX_COPY_BYTES;
-        else if (STREQU (argv [1], "-maxbytes"))
+            argIdx++;
+            if (argIdx >= argc) {
+                Tcl_AppendResult (interp,
+                                  "argument required for -bytes option",
+                                  (char *) NULL);
+                return TCL_ERROR;
+            }
+            if (Tcl_GetLong (interp, argv [argIdx],
+                             &totalBytesToRead) != TCL_OK)
+                return TCL_ERROR;
+        } else if (STREQU (argv [1], "-maxbytes")) {
             copyMode = TCLX_COPY_MAX_BYTES;
-        else
-            goto invalidOption;
-
-        if (Tcl_GetLong (interp, argv [2], &totalBytesToRead) != TCL_OK)
+            argIdx++;
+            if (argIdx >= argc) {
+                Tcl_AppendResult (interp,
+                                  "argument required for -maxbytes option",
+                                  (char *) NULL);
+                return TCL_ERROR;
+            }
+            if (Tcl_GetLong (interp, argv [argIdx],
+                             &totalBytesToRead) != TCL_OK)
+                return TCL_ERROR;
+        } else if (STREQU (argv [1], "-translate")) {
+            translate = TRUE;
+        } else {
+            Tcl_AppendResult (interp, "invalid argument \"", argv [argIdx],
+                              "\", expected \"-bytes\", \"-maxbytes\", or ",
+                              "\"-translate\"", (char *) NULL);
             return TCL_ERROR;
-    } else {
-        copyMode = TCLX_COPY_ALL;
-        totalBytesToRead = MAXLONG;
+        }
+    }
+    
+    if (argIdx != argc - 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " ?-bytes num|-maxbytes num? ?-translate? ",
+                          "fromFileId toFileId", (char *) NULL);
+        return TCL_ERROR;
     }
 
-    inChan = TclX_GetOpenChannel (interp, argv [argc - 2], TCL_READABLE);
+
+    /*
+     * Get the channels.  Unless translation is enabled, save the current
+     * translation mode and put the files in binary mode.
+     */
+    inChan = TclX_GetOpenChannel (interp, argv [argIdx], TCL_READABLE);
     if (inChan == NULL)
         return TCL_ERROR;
-
-    outChan = TclX_GetOpenChannel (interp, argv [argc - 1], TCL_WRITABLE);
+    outChan = TclX_GetOpenChannel (interp, argv [argIdx + 1], TCL_WRITABLE);
     if (outChan == NULL)
         return TCL_ERROR;
 
+    if (!translate) {
+        inTrans = TclX_GetChannelOption (inChan, TCLX_COPT_TRANSLATION);
+        if (TclX_SetChannelOption (interp, inChan, TCLX_COPT_TRANSLATION,
+                                   TCLX_TRANSLATE_BINARY) != TCL_OK)
+            return TCL_ERROR;
+
+        outTrans = TclX_GetChannelOption (outChan, TCLX_COPT_TRANSLATION);
+        if (TclX_SetChannelOption (interp, outChan, TCLX_COPT_TRANSLATION,
+                                   TCLX_TRANSLATE_BINARY) != TCL_OK)
+            return TCL_ERROR;
+    }
+
+    /*
+     * Copy the file, it an error occurs, save it until translation is
+     * restored.
+     */
     totalBytesRead = CopyOpenFile (interp,
                                    totalBytesToRead,
                                    inChan, outChan);
     if (totalBytesRead < 0)
+        saveErrno = Tcl_GetErrno ();
+
+    if (!translate) {
+        if (TclX_SetChannelOption (interp, inChan, TCLX_COPT_TRANSLATION,
+                                   inTrans) != TCL_OK)
+            return TCL_ERROR;
+
+        if (TclX_SetChannelOption (interp, outChan, TCLX_COPT_TRANSLATION,
+                                   outTrans) != TCL_OK)
+            return TCL_ERROR;
+    }
+
+    if (totalBytesRead < 0) {
+        Tcl_SetErrno (saveErrno);
+        Tcl_AppendResult (interp, "copyfile failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
         return TCL_ERROR;
+    }
 
     /*
      * Return an error if -bytes were specified and not that many were
@@ -272,17 +338,6 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
 
     sprintf (interp->result, "%ld", totalBytesRead);
     return TCL_OK;
-
-  wrongArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " ?-bytes num|-maxbytes num? fromFileId toFileId",
-                      (char *) NULL);
-    return TCL_ERROR;
-
-  invalidOption:
-    Tcl_AppendResult (interp, "expect \"-bytes\" or \"-maxbytes\", got \"",
-                      argv [1], "\"", (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -508,9 +563,8 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
 {
     Tcl_Channel channel;
     Tcl_DString buffer;
-    int blocking;
+    int mode;
     int stat, bufIdx = 0;
-    Tcl_DString optValue;
 
     if ((argc != 2) && (argc != 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
@@ -527,15 +581,11 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      * buffer (yet).
      */
     
-    Tcl_DStringInit (&optValue);
-    if (Tcl_GetChannelOption (channel, "-blocking", &optValue) != TCL_OK)
-        panic ("can't get channel opt");
-    blocking = (optValue.string [0] == '1');
-    Tcl_DStringFree (&optValue);
+    mode = TclX_GetChannelOption (channel, TCLX_COPT_BLOCKING);
 
-    if (!blocking) {
-        if (Tcl_SetChannelOption (interp, channel, "-blocking",
-                                  "1") == TCL_ERROR)
+    if (mode == TCLX_MODE_NONBLOCKING) {
+        if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                                   TCLX_MODE_BLOCKING) == TCL_ERROR)
             return TCL_ERROR;
     }
 
@@ -562,9 +612,9 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      * Return the string as a result or in a variable.
      */
   done:
-    if (!blocking) {
-        if (Tcl_SetChannelOption (interp, channel, "-blocking",
-                                  "0") == TCL_ERROR)
+    if (mode == TCLX_MODE_NONBLOCKING) {
+        if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                                   TCLX_MODE_NONBLOCKING) == TCL_ERROR)
             return TCL_ERROR;
     }
     if (argc == 2) {
@@ -595,9 +645,9 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
         Tcl_SetVar (interp, argv[2], buffer.string, TCL_LEAVE_ERR_MSG);
     }
     Tcl_DStringFree (&buffer);
-    if (!blocking) {
-        if (Tcl_SetChannelOption (interp, channel, "-blocking",
-                                  "0") == TCL_ERROR)
+    if (mode == TCLX_MODE_NONBLOCKING) {
+        if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                                   TCLX_MODE_NONBLOCKING) == TCL_ERROR)
             return TCL_ERROR;
     }
     return TCL_ERROR;
