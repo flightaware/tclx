@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.1 1995/08/08 15:46:01 markd Exp markd $
+dnl $Id: configure.in,v 5.2 1995/08/10 03:31:38 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.1 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.2 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -249,7 +249,7 @@ AC_TRY_COMPILE([#include <stdio.h>],
          AC_MSG_RESULT(readCount)])
 
 AC_TRY_COMPILE([#include <stdio.h>],
-	[FILE *f = stdin; f->_gptr = f->egptr;],
+	[FILE *f = stdin; f->_gptr = f->_egptr;],
 	[AC_DEFINE(HAVE_STDIO_GPTR)
          AC_MSG_RESULT([_gptr/_egptr])])
 

@@ -403,7 +403,7 @@ else
 fi
 
 
-# From configure.in Revision: 5.1 dnl
+# From configure.in Revision: 5.2 dnl
 
 
 
@@ -1582,7 +1582,7 @@ cat > conftest.$ac_ext <<EOF
 #include <stdio.h>
 int main() { return 0; }
 int t() {
-FILE *f = stdin; f->_gptr = f->egptr;
+FILE *f = stdin; f->_gptr = f->_egptr;
 ; return 0; }
 EOF
 if eval $ac_compile; then
