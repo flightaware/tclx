@@ -13,12 +13,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXAppInit.c,v 8.4 1999/03/31 06:37:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtend.h"
-
 
 
 /*-----------------------------------------------------------------------------
@@ -31,11 +30,6 @@ int
 main (int    argc,
       char **argv)
 {
-
-#ifndef BORLAND
-    TclX_SplitWinCmdLine (&argc, &argv);
-#endif
-
     TclX_Main (argc, argv, Tcl_AppInit);
 
     return 0;                   /* Needed only to prevent compiler warning. */

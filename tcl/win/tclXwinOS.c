@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXwinOS.c,v 8.10 1999/04/05 16:16:36 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -572,7 +572,6 @@ TclXOSElapsedTime (clock_t *realTime,
                    clock_t *cpuTime)
 {
     static DWORD startTime = 0;
-    DWORD currentTime;
   
     /*
      * If this is the first call, get base time.
