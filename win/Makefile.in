@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.14 2000/07/31 04:18:03 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.15 2001/07/17 21:37:12 hobbs Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -213,13 +213,13 @@ ${AC_FLAGS}
 
 STUB_CC_SWITCHES = ${CC_SWITCHES}
 
-RUN_TCLX_SETUP	= PATH="$(bindir)"; export PATH; \
+RUN_TCLX_SETUP	= PATH="$(TCL_BIN_DIR)"; export PATH; \
 		  TCL_LIBRARY="$(TCL_LIBRARY_DIR_NATIVE)"; export TCL_LIBRARY; \
 		  TCLX_LIBRARY="$(TCLX_BIN_DIR_NATIVE)"; export TCLX_LIBRARY; \
 		  TCL_PROGRAM="$(TCLX_BIN_DIR_NATIVE)/$(TCLXTEST)"; \
 		  export TCL_PROGRAM;
 
-RUN_TKX_SETUP	= PATH="$(bindir)"; export PATH; \
+RUN_TKX_SETUP	= PATH="$(TCL_BIN_DIR)"; export PATH; \
 		  TCL_LIBRARY="$(TCL_LIBRARY_DIR_NATIVE)"; export TCL_LIBRARY; \
 		  TK_LIBRARY="$(TK_LIBRARY_DIR_NATIVE)"; export TK_LIBRARY; \
 		  TCLX_LIBRARY="$(TCLX_BIN_DIR_NATIVE)"; export TCLX_LIBRARY; \
