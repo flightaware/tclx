@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.35 1996/05/10 06:37:01 markd Exp $
+# $Id: Makefile.in,v 6.0 1996/05/10 16:19:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -184,7 +184,7 @@ ${bldbasedir}/tk/tests:
 
 test: all
 	echo "cd ${TK_SRC}/tests; source all; exit" | \
-	    ./runtest -n tktest -geometry +0+0
+	    ./runtest -geometry +0+0
 
 #------------------------------------------------------------------------------
 # Build help for Tk.  These files are normally part of the distribution and
