@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 1.2 2002/04/04 06:12:48 hobbs Exp $
+ * $Id: tclXwinOS.c,v 1.3 2002/09/26 00:23:30 hobbs Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -612,6 +612,7 @@ TclXOSkill (Tcl_Interp *interp,
     }
 
     TerminateProcess(processHandle, 7);
+    CloseHandle(processHandle);
     return TCL_OK;
 }
 

@@ -1,3 +1,7 @@
+2004-02-12  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* win/tclXwinOS.c (TclXOSkill): close process handle
+
 2003-04-04  Andreas Kupries  <andreask@activestate.com>
 
 	* configure.in:
