@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.16 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.17 1993/08/02 05:12:34 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -121,17 +121,22 @@ struct tm *localtime ();
 
 /*
  * Structure to hold a regular expression, plus a Boyer-Moore compiled
- * pattern.
+ * pattern.  Also structure to return submatch info.
  */
 
-typedef struct regexp_t {
+typedef struct {
     regexp *progPtr;
     char   *boyerMoorePtr;
     int     noCase;
-    } regexp_t;
-typedef regexp_t *regexp_pt;
+} Tcl_regexp;
+
+typedef struct {
+    int start;
+    int end;
+} Tcl_SubMatchInfo [NSUBEXP];
+
 /*
- * Flags used by RegExpCompile:
+ * Flags used by Tcl_RegExpCompile:
  */
 #define REXP_NO_CASE         1   /* Do matching regardless of case    */
 #define REXP_BOTH_ALGORITHMS 2   /* Use boyer-moore along with regexp */
@@ -193,19 +198,20 @@ Tcl_ProcessSignal _ANSI_ARGS_((Tcl_Interp *interp,
                                int         cmdResultCode));
 
 extern void
-Tcl_RegExpClean _ANSI_ARGS_((regexp_pt regExpPtr));
+Tcl_RegExpClean _ANSI_ARGS_((Tcl_regexp *regExpPtr));
 
 extern int
 Tcl_RegExpCompile _ANSI_ARGS_((Tcl_Interp  *interp,
-                               regexp_pt    regExpPtr,
+                               Tcl_regexp  *regExpPtr,
                                char        *expression,
                                int          flags));
 
 extern int
-Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp  *interp,
-                               regexp_pt    regExpPtr,
-                               char        *matchStrIn,
-                               char        *matchStrLower));
+Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
+                               Tcl_regexp       *regExpPtr,
+                               char             *matchStrIn,
+                               char             *matchStrLower,
+                               Tcl_SubMatchInfo  subMatchInfo));
 
 extern int
 Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,

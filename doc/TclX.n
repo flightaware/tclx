@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.21 1993/07/20 08:35:45 markd Exp markd $
+.\" $Id: TclX.man,v 2.22 1993/07/25 00:56:25 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1403,6 +1403,15 @@ file.  The first line is line number one.
 .TP
 .B matchInfo(handle)
 The file id (handle) of the file currently being scanned.
+.TP
+.B matchInfo(submatch0)
+Will contain the characters matching the first parenthesized subexpression.
+The second will be contained in \fBsubmatch1\fR, etc.
+.TP
+.B matchInfo(subindex0)
+Will contain the a list of the starting and ending indices of the string
+matching the first parenthesized subexpression.
+The second will be contained in \fBsubindex1\fR, etc.
 .RE
 .PP
 All \fBscanmatch\fR patterns that match a line will be processed in the order

@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 2.4 1993/07/18 05:59:41 markd Exp markd $
+ * $Id: tclXregexp.c,v 2.5 1993/07/23 02:19:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -266,7 +266,7 @@ BoyerMooreExecute (text, textlen, compPtr, patLenP)
  */
 void
 Tcl_RegExpClean (regExpPtr)
-    regexp_pt regExpPtr;
+    Tcl_regexp *regExpPtr;
 {
     if (regExpPtr->progPtr != NULL)
     	ckfree ((char *) regExpPtr->progPtr);
@@ -349,7 +349,7 @@ FindNonRegExpSubStr (expression, subStrPtrPtr)
 int
 Tcl_RegExpCompile (interp, regExpPtr, expression, flags)
     Tcl_Interp  *interp;
-    regexp_pt    regExpPtr;
+    Tcl_regexp  *regExpPtr;
     char        *expression;
     int          flags;
 {
@@ -433,21 +433,24 @@ okExitPoint:
  *       multiple no case matches are being done, time can be saved by
  *       down shifting the string in advance.  NULL if not a no-case 
  *       match or this procedure is to do the down shifting.
- *
+ *     o subMatchInfo - A array of entries containing the indexs and
+ *       lengths of each submatch.  Teminated by an entry of -1, -1.
  * Results:
  *     TRUE if a match, FALSE if it does not match.
  *
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower)
-    Tcl_Interp  *interp;
-    regexp_pt    regExpPtr;
-    char        *matchStrIn;
-    char        *matchStrLower;
+Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
+    Tcl_Interp       *interp;
+    Tcl_regexp       *regExpPtr;
+    char             *matchStrIn;
+    char             *matchStrLower;
+    Tcl_SubMatchInfo  subMatchInfo;
 {
-    char *matchStr;
-    int   result;
+    char   *matchStr;
+    int     result, idx;
+    regexp *progPtr;
 
     if (regExpPtr->noCase) {
         if (matchStrLower == NULL) {
@@ -455,8 +458,9 @@ Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower)
             Tcl_DownShift (matchStr, matchStrIn);
         } else
             matchStr = matchStrLower;
-    } else
+    } else {
         matchStr = matchStrIn;
+    }
 
     /*
      * If a Boyer-Moore pattern has been compiled, use that algorithm to test
@@ -473,8 +477,13 @@ Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower)
             result = FALSE;
             goto exitPoint;
         }
+        /* 
+         * If no regexp, its a match!
+         */
         if (regExpPtr->progPtr == NULL) {
-            result = TRUE;  /* No regexp, its a match! */
+            subMatchInfo [0].start = -1;
+            subMatchInfo [0].end = -1;
+            result = TRUE; 
             goto exitPoint;
         }
     }
@@ -482,7 +491,22 @@ Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower)
     /*
      * Give it a go with full regular expressions
      */
-    result = regexec (regExpPtr->progPtr, matchStr, matchStr);
+    progPtr = regExpPtr->progPtr;
+    result = regexec (progPtr, matchStr, matchStr);
+
+    /*
+     * Return submatches if we found it.
+     */
+    if (result) {
+        for (idx = 1; idx < NSUBEXP; idx++) {
+            if (progPtr->startp [idx] == NULL)
+                break;
+            subMatchInfo [idx - 1].start = progPtr->startp [idx] - matchStr;
+            subMatchInfo [idx - 1].end = progPtr->endp [idx] - matchStr - 1;
+        }
+        subMatchInfo [idx - 1].start = -1;
+        subMatchInfo [idx - 1].end = -1;
+    }
 
     /*
      * Clean up and return status here.

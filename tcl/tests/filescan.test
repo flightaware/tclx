@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 2.2 1993/06/21 05:43:53 markd Exp markd $
+# $Id: filescan.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -203,7 +203,6 @@ Test filescan-2.2 {filescan tests} {
 
 scancontext delete $testCH
 
-
 # Test argument checking and error handling.
 
 Test filescan-3.1 {filescan tests} {
@@ -229,10 +228,66 @@ Test filescan-3.5 {filescan tests} {
 catch {scancontext delete $testCH}
 
 close $testFH
+
+# 
+# Test subMatch handling.
+#
+
+set testFH [open TEST.TMP w]
+loop idx 0 10 {
+    puts $testFH "AAx[replicate xx $idx]xBBc[replicate cc $idx]cDD"
+}
+close $testFH
+
+# Procedure to verify submatches.  Works for upper or lower case.
+
+proc ChkSubMatch {id matchInfoVar} {
+    upvar $matchInfoVar matchInfo
+
+    set idx [expr $matchInfo(linenum) - 1]
+
+    set end0 [expr 3+($idx * 2)]
+    Test filescan-$id.0.$idx {filescan tests} {
+        set matchInfo(submatch0)
+    } 0 "x[replicate xx $idx]x"
+    Test filescan-$id.1.$idx {filescan tests} {
+        set matchInfo(subindex0)
+    } 0 "2 $end0"
+
+    set start1 [expr $end0+3]
+    set end1 [expr $start1+($idx*2)+1]
+    Test filescan-$id.2.$idx {filescan tests} {
+        set matchInfo(submatch1)
+    } 0 "c[replicate cc $idx]c"
+    Test filescan-$id.3.$idx {filescan tests} {
+        set matchInfo(subindex1)
+    } 0 "$start1 $end1"
+
+    Test filescan-$id.4.$idx {filescan tests} {
+        list [info exists matchInfo(submatch2)] \
+             [info exists matchInfo(subindex2)]
+    } 0 {0 0}
+}
+
+set testFH [open TEST.TMP r]
+
+set testCH [scancontext create]
+scanmatch $testCH {\A*(x*)B*(c*)DD} {
+    ChkSubMatch 4 matchInfo
+}
+
+scanmatch -nocase $testCH {\Aa(x*)B(C*)Dd} {
+    ChkSubMatch 5 matchInfo
+}
+
+scanfile $testCH $testFH
+
+close $testFH
 unlink TEST.TMP
 
 rename GenScanRec {}
 rename ValMatch {}
+rename ChkSubMatch {}
 
 unset matchCnt matchInfo
 unset matchCnt.0    matchCnt.1    matchCnt.2    matchCnt.3    defaultCnt 
