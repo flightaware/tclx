@@ -12,11 +12,16 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.1 1997/04/17 04:58:45 markd Exp $
+ * $Id: tclXlist.c,v 8.2 1997/06/12 21:08:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * Only do look up of type once, its static.
+ */
+static Tcl_ObjType *listType;
 
 static int
 TclX_LvarcatObjCmd _ANSI_ARGS_((ClientData   clientData,
@@ -78,6 +83,7 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
     int strArgc, idx, argIdx, strLen;
     char **strArgv, *staticArgv [32], *newStr;
 
+/*FIX: Not binary clean */
     if (objc < 3) {
         return TclX_WrongArgs (interp, objv [0], "var string ?string...?");
     }
@@ -92,7 +98,8 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
 
     /*
      * FIX: Figure out how to do this without converting to strings, or if
-     * that would even be compatible.
+     * that would even be compatible.  Maybe if all lists, then build a big
+     * list, otherwise, this way.
      */
     if (strVarPtr != NULL) {
         strArgc = objc - 1;
@@ -300,28 +307,28 @@ TclX_LemptyObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    int isEmpty, length;
-    char *scanPtr;
-
+    int isEmpty, length, idx;
+    char *data;
+    
     if (objc != 2) {
         return TclX_WrongArgs (interp, objv [0], "list");
     }
 
     /*
-     * This is a little tricky, because the pre-object lempty never check
+     * This is a little tricky, because the pre-object lempty never checked
      * for a valid list, it just checked for a string of all white spaces.
      * If the object is already a list, go off of the length, otherwise scan
      * the string for while space.
      */
-    if (objv [1]->typePtr == Tcl_GetObjType ("list")) {
+    if (objv [1]->typePtr == listType) {
         if (Tcl_ListObjLength (interp, objv [1], &length) != TCL_OK)
             return TCL_ERROR;
         isEmpty = (length == 0);
     } else {
-        scanPtr = Tcl_GetStringFromObj (objv [1], &length);
-        while ((*scanPtr != '\0') && (ISSPACE (*scanPtr)))
-            scanPtr++;
-        isEmpty = (*scanPtr == '\0');
+        data = Tcl_GetStringFromObj (objv [1], &length);
+        for (idx = 0; (idx < length) && ISSPACE (data [idx]); idx++)
+            continue;
+        isEmpty = (idx == length);
     }
     Tcl_SetBooleanObj (Tcl_GetObjResult (interp), isEmpty);
     return TCL_OK;
@@ -410,6 +417,7 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
     char *modeStr, *patternStr, *valueStr;
     Tcl_Obj **listObjv, *matchedListPtr = NULL;
 
+/*FIX: Not binary clean (at least on -exact)*/
     mode = GLOB;
     if (objc == 4) {
         modeStr = Tcl_GetStringFromObj (objv [1], &strLen);
@@ -494,6 +502,8 @@ TclX_LcontainObjCmd (clientData, interp, objc, objv)
                                "list element");
     }
 
+/*FIX: Not binary clean */
+/*FIX: Could optimize to not convert to string. */
     if (Tcl_ListObjGetElements (interp, objv [1],
                                 &listObjc, &listObjv) != TCL_OK)
         return TCL_ERROR;
@@ -521,6 +531,8 @@ void
 TclX_ListInit (interp)
     Tcl_Interp *interp;
 {
+    listType = Tcl_GetObjType ("list");
+
     Tcl_CreateObjCommand(interp, 
 			 "lvarcat", 
 			 TclX_LvarcatObjCmd, 
