@@ -1,0 +1,335 @@
+#
+# server.test
+#
+# Test for server commands.
+#---------------------------------------------------------------------------
+# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: process.test,v 4.1 1995/01/01 19:49:06 markd Exp $
+#------------------------------------------------------------------------------
+#
+
+if {[info procs test] != "test"} then {source testlib.tcl}
+
+if ![infox have_sockets] return
+
+#
+# Do all argument and error checking.  We can at least test this, even
+# if we can't run full tests on this particular system.
+#
+
+Test server-1.1 {server_connect argument checking} {
+    server_connect
+} 1 {wrong # args: server_connect ?options? host service|port}
+
+Test server-1.2 {server_connect argument checking} {
+    server_connect -nobuf
+} 1 {wrong # args: server_connect ?options? host service|port}
+
+Test server-1.3 {server_connect argument checking} {
+    server_connect -buf
+} 1 {wrong # args: server_connect ?options? host service|port}
+
+Test server-1.4 {server_connect argument checking} {
+    server_connect localhost
+} 1 {wrong # args: server_connect ?options? host service|port}
+
+Test server-1.5 {server_connect argument checking} {
+    server_connect localhost echo gecko
+} 1 {wrong # args: server_connect ?options? host service|port}
+
+Test server-1.6 {server_connect argument checking} {
+    server_connect -badbuf localhost echo
+} 1 {expected one of "-buf", "-nobuf", "-twoids", "-myip" or "-myport", got "-badbuf"}
+
+Test server-1.7 {server_connect argument checking} {
+    server_connect -buf -badbuf localhost echo
+} 1 {expected one of "-buf", "-nobuf", "-twoids", "-myip" or "-myport", got "-badbuf"}
+
+
+Test server-2.0 {server_create argument checking} {
+    server_create localhost
+} 1 {wrong # args: server_create ?options?}
+
+Test server-2.1 {server_create argument checking} {
+    server_create localhost bad
+} 1 {wrong # args: server_create ?options?}
+
+Test server-2.2 {server_create argument checking} {
+    server_create -myport 3 -buf
+} 1 {expected   "-myip", "-myport" or "-backlog", got "-buf"}
+
+Test server-2.3 {server_create argument checking} {
+    server_create -myip 
+} 1 {missing argument for -myip}
+
+Test server-2.4 {server_create argument checking} {
+    server_create -myip xxx
+} 1 {malformed address: "xxx"}
+
+Test server-2.5 {server_create argument checking} {
+    server_create -myport 
+} 1 {missing argument for -myport}
+
+Test server-2.7 {server_create argument checking} {
+    server_create -myport xxx
+} 1 {expected integer but got "xxx"}
+
+
+Test server-3.1 {server_accept argument checking} {
+    server_accept
+} 1 {wrong # args: server_accept ?options? fileid}
+
+Test server-3.2 {server_accept argument checking} {
+    server_accept -nobuf
+} 1 {wrong # args: server_accept ?options? fileid}
+
+Test server-3.3 {server_accept argument checking} {
+    server_accept -buf
+} 1 {wrong # args: server_accept ?options? fileid}
+
+Test server-3.4 {server_accept argument checking} {
+    server_accept bad
+} 1 {bad file identifier "bad"}
+
+Test server-3.5 {server_accept argument checking} {
+    server_accept bad good ugly
+} 1 {wrong # args: server_accept ?options? fileid}
+
+Test server-3.6 {server_accept argument checking} {
+    server_accept -badbuf stdin
+} 1 {expected "-buf", "-nobuf" or "-twoids", got "-badbuf"}
+
+Test server-3.7 {server_accept argument checking} {
+    server_accept -buf -badbuf stdin
+} 1 {expected "-buf", "-nobuf" or "-twoids", got "-badbuf"}
+
+Test server-4.0 {server_info argument checking} {
+    server_info
+} 1 {wrong # args: server_info option ...}
+
+Test server-4.1 {server_info argument checking} {
+    server_info addresses
+} 1 {wrong # args: server_info addresses host}
+
+Test server-4.2 {server_info argument checking} {
+    server_info addresses xxx yyy
+} 1 {wrong # args: server_info addresses host}
+
+Test server-4.3 {server_info argument checking} {
+    server_info bad localhost
+} 1 {invalid option "bad", expected one of "addresses", "official_name" or "aliases"}
+
+Test server-5.1 {server_send argument checking} {
+    server_send
+} 1 {wrong # args: server_send [options] fileid message}
+
+Test server-5.2 {server_send argument checking} {
+    server_send x y z
+} 1 {wrong # args: server_send [options] fileid message}
+
+Test server-5.3 {server_send argument checking} {
+    server_send x y
+} 1 {bad file identifier "x"}
+
+Test server-5.4 {server_send argument checking} {
+    server_send -bad x y
+} 1 {expected one of "-nonewline", "-outofband", or "-dontroute" got "-bad"}
+
+Test server-5.5 {server_send argument checking} {
+    server_send -nonewline -bad x y
+} 1 {expected one of "-nonewline", "-outofband", or "-dontroute" got "-bad"}
+
+
+Test server-6.1 {server_receive argument checking} {
+    server_receive
+} 1 {wrong # args: server_receive [options] fileid length}
+
+Test server-6.2 {server_receive argument checking} {
+    server_receive x y z
+} 1 {wrong # args: server_receive [options] fileid length}
+
+Test server-6.3 {server_receive argument checking} {
+    server_receive x y
+} 1 {bad file identifier "x"}
+
+Test server-6.4 {server_receive argument checking} {
+    server_receive -bad x y
+} 1 {expected one of "-outofband", "-peek", or "-waitall", got "-bad"}
+
+Test server-6.5 {server_receive argument checking} {
+    server_receive -keepnewline -bad x y
+} 1 {expected one of "-outofband", "-peek", or "-waitall", got "-bad"} 
+
+
+#
+# Test simple interaction with the echo server.  This proc is used to
+# do the actual interaction.  The server is connected to using various
+# different options and the same interaction done.
+#
+
+proc TalkToEcho {testId readFH writeFH buffered} {
+    # Try gets/puts first.
+
+    Test $testId.1 {simple client interaction} {
+        puts $writeFH "Test #1"
+        if $buffered {
+            flush $writeFH
+        }
+        gets $readFH
+    } 0 {Test #1}
+
+    # Queue serveral messages on buffered access
+
+    if $buffered {
+        Test $testId.2 {simple client interaction} {
+            puts $writeFH "Test #2"
+            puts $writeFH "Test #3"
+            puts $writeFH "Test #4"
+            puts $writeFH "Test #5"
+            puts $writeFH "Test #6"
+            puts $writeFH "Test #7"
+            flush $writeFH
+            list [gets $readFH] [gets $readFH] [gets $readFH] \
+                    [gets $readFH] [gets $readFH] [gets $readFH]
+        } 0 [list {Test #2} {Test #3} {Test #4} \
+                {Test #5} {Test #6} {Test #7}]
+    }
+
+    Test $testId.3 {simple client interaction} {
+        server_send $writeFH "Test #8"
+        server_receive $readFH 100
+    } 0 {Test #8}
+
+    Test $testId.4 {simple client interaction} {
+        server_send $writeFH "Test #9"
+        server_receive -keepnewline $readFH 100
+    } 0 "Test #9\n"
+
+    Test $testId.5 {simple client interaction} {
+        server_send -nonewline $writeFH "Test #10"
+        server_receive -keepnewline $readFH 100
+    } 0 {Test #10}
+
+    Test $testId.6 {simple client interaction} {
+        server_send  $writeFH "Test #11"
+        list [server_receive -peek $readFH 100] [server_receive $readFH 100]
+    } 0 {{Test #11} {Test #11}}
+
+    close $readFH
+    if ![cequal $readFH $writeFH] {
+        close $writeFH
+    }
+    return
+}
+
+Test server-7.1 {simple client interaction} {
+    set fh [server_connect [id host] echo]
+    TalkToEcho server-7.1 $fh $fh 1
+} 0 {}
+
+Test server-7.2 {simple client interaction} {
+    set ip [lindex [server_info addresses [id host]] 0]
+    set fh [server_connect -nobuf $ip echo]
+    TalkToEcho server-7.2 $fh $fh 0
+} 0 {}
+
+Test server-7.3 {simple client interaction} {
+    set ip [lindex [server_info addresses [id host]] 0]
+    set fh [server_connect -buf $ip echo]
+    TalkToEcho server-7.3 $fh $fh 1
+} 0 {}
+
+Test server-7.4 {simple client interaction} {
+    set ip [lindex [server_info addresses [id host]] 0]
+    set fhs [server_connect -twoids -buf $ip echo]
+    TalkToEcho server-7.4 [lindex $fhs 0] [lindex $fhs 1] 1
+} 0 {}
+
+Test server-7.5 {simple client interaction} {
+    set ip [lindex [server_info addresses [id host]] 0]
+    set fhs [server_connect -twoids -nobuf $ip echo]
+    TalkToEcho server-7.5 [lindex $fhs 0] [lindex $fhs 1] 0
+} 0 {}
+
+
+#
+# Fork a server to echo slightly modified versions of the messages.
+#
+
+proc TestServer {toClient} {
+    set reqFH [server_create]
+    puts $toClient [lindex [fstat $reqFH localhost] 2]
+    flush $toClient
+    set readIds $reqFH
+
+    while 1 {
+        set ready [lindex [select $readIds] 0]
+        foreach id $ready {
+            if [cequal $id $reqFH] {
+                lappend readIds [server_accept -nobuf $reqFH]
+                continue
+            }
+            if {[gets $id data] < 0} {
+                set idx [lsearch -exact $readIds $id]
+                set readIds [lreplace $readIds $idx $idx]
+                continue
+            }
+            if [cequal $data EXIT] {
+                exit
+            }
+            puts $id "Got \"$data\""
+        }
+    }
+}
+
+pipe fromServer toClient
+flush stdout
+flush stderr
+
+if {[set serverPID [fork]] == 0} {
+    catch {
+        close $fromServer
+        TestServer $toClient
+        exit 0
+    }
+    global errorInfo
+    puts stderr "Error in test server: $errorInfo"
+    exit 1
+}
+close $toClient
+if {[gets $fromServer serverPort] < 0} {
+    error "Unexpected EOF from test server"
+}
+close $fromServer
+
+Test server-8.1 {Tcl server} {
+    set fh [server_connect -nobuf localhost $serverPort]
+    puts $fh "Hello"
+    set data [gets $fh]
+    close $fh
+    set data
+} 0 {Got "Hello"}
+
+Test server-8.2 {Tcl server} {
+    set fh [server_connect -nobuf localhost $serverPort]
+    puts $fh "Are you still there?"
+    set data [list [gets $fh]]
+    puts $fh "Are you really still there?"
+    lappend data [gets $fh]
+    close $fh
+    set data
+} 0 {{Got "Are you still there?"} {Got "Are you really still there?"}}
+
+Test server-8.2 {Tcl server} {
+    set fh [server_connect -nobuf localhost $serverPort]
+    puts $fh "EXIT"
+    lrange [wait $serverPID] 1 2
+} 0 {EXIT 0}
