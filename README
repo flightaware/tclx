@@ -129,14 +129,11 @@ C++ programmers can include the file "tcl++.h" to define C++ classes
 that can be used to access a Tcl interpreter.  This is based on Tcl
 C++ classes originally developed by Parag Patel.  The files
 
-        src/tclXmain.c
+        src/tclXAppInit.c
 and
-        tksrc/tkXmain.c
+        tksrc/tkXAppInit.c
 
-will compile under both C and C++.  If your have a C++ compiler that
-requires the main to be compiled with C++ (g++ does not have this
-restriction), use these files renamed to have the correct suffix for
-C++ (usually .C).
+will compile under both C and C++.
 
 PACKAGE LIBRARIES
 =================
@@ -162,11 +159,9 @@ either:
 or
         tkmaster/src/tkXAppInit.c for TclX & Tk
 
-and add your application initialization.  There are comments in the
-code to guide you. The "main" object file is already in the
-libraries, all you have to do is link a customized tclXAppInit.o or
-tkXAppInit.o file with your application and the Tcl libraries.  For
-example:
+and add your application initialization.  These files contain an application
+specific initialization function as well as "main".  There are comments in the
+code to guide you.  For example:
 
   cc tclXAppInit.o mystuff.a libtclx.a libtcl.a ${SYSLIBS} -o myapp
 
