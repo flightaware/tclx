@@ -328,7 +328,6 @@
 ./tk/help/tk/control/tkerror
 ./tk/help/tk/control/tkvars
 ./tk/help/tk/control/tkwait
-./tk/help/tk/control/update
 ./tk/help/tk/control/winfo
 ./tk/help/tk/control/wm
 ./tk/help/tk/images/bitmap
