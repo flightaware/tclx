@@ -1,0 +1,239 @@
+               Building Shared Libraries for Tcl, Tk and TclX.
+                             Dr. Joseph E. Sacco
+                                jsacco@ssl.com
+
+
+The following is a discussion of the construction and use of shared libraries
+for building TCL applications. The principal source of information for this 
+discussion is the set of SUN Reference Manuals.
+
+Shared Libraries
+-----------------
+
+Some operating systems allow a single physical copy of a program's text (code) 
+to be shared in memory by all the processes executing it. Such sharing results 
+in a more efficient use of memory since the code is not duplicated for each 
+process executing it. This is particularly true for applications that use
+libraries. If the contents of a library can be shared among several processes
+the savings can be significant.
+
+Libraries of shared objects offer the additional benefit of a space/time trade
+off though run-time binding. An executable that uses shared objects does not
+have copies of these shared objects bound into it when linked but rather 
+maintains references to these objects which are satisfied at run-time. This 
+can result in a significant reduction in storage space for an program at a 
+cost of a small delay in startup time. For example, on a SPARC10 under OS4.1.3 
+using gcc-2.5.3, the storage requirements for "wishx", which uses functions 
+from several libraries, ranges from 57.3KB to 991.2KB depending upon the 
+degree to which shared libraries are used in its construction. For "wishx"
+on a SPARC10 there is no user preceptible difference in the startup time
+between any of these versions.
+
+The paradigm for constructing libraries of shared objects varies from one
+operating system to another. Central to all of these is the notion of 
+position independent code [pic] which is code that requires link editing only 
+to relocate objects that are external to the given module. [Each reference to
+a global datum is generated as a dereference of a pointer in a global offset
+table. Each function call is generated in pc-relative addressing mode through
+a procedure linkage table.] Such code is readily shared. The basic approach to 
+creating a shared library is to use the compiler [and assembler] to generate 
+position independent code objects and then use the link editor to "join" these 
+objects together. 
+
+It must be noted that not all source code can be converted into a position 
+independent object. Modules that "export" "initialized" data items cannot be 
+expressed as position independent code. A data item is "exported" from a 
+module if a program that uses that module refers to that data item by name.
+User transparent mechanisms are provided to handle the non-position-independent
+code that is used by shared libraries. One such scheme that is used by SUN is 
+to [manually] collect the non-position-independent code into an [static] 
+archive format library from which objects are extracted and copied into the 
+executable by the link editor during the link stage.
+
+Building Shared Libraries
+-------------------------
+
+What follows are instructions for *manually* constructing shared libraries for 
+Tcl, Tk and TclX on a SUN system with *minimal* changes to the existing
+code. Other systems may follow different procedures so consult your local 
+system manuals for specifics.
+
+The basic approach that will be used in each case is to set a compiler flag 
+to create position independent code and run the makefile. The contents of a 
+resulting archive library will then be extracted and relinked into a shared 
+library. This approach is not very elegant but it works. It is not difficult
+to modify the makefiles to automatically construct shared libraries for a
+SUN system. Xiaokun Zhu [xiaokun@stats.gla.ac.uk] has done an excellent job
+of this for Tcl and Tk. However, such modifications are SUN-specific and are 
+of limited value for non-SUN platforms.
+
+
+TCL
+---
+Do the following:
+
+    (1) run configure
+
+    (2) edit the makefile. add the appropriate position-independent-code 
+        flag for your compiler to CFLAGS:
+
+	CFLAGS = -O -PIC         <--- SUN cc
+	CFLAGS = -O -fPIC        <--- GNU gcc
+
+        Note that "PIC" rather than "pic" is used. Libtcl does not need
+        the larger global offset table created when using PIC but libtk does.
+
+    (3) Patch tclAppInit.c [explanation will follow]
+
+        Note that this file is used to build tclsh and is not 
+        included in the tcl library.
+       
+
+    *** tclAppInit.c.dist   Mon Nov  8 21:54:21 1993
+    --- tclAppInit.c        Mon Nov  8 22:02:09 1993
+    ***************
+    *** 39,44 ****
+    --- 39,53 ----
+      
+      extern int main();
+      int *tclDummyMainPtr = (int *) main;
+    + 
+    + /*
+    +  * The following variable is a special hack that insures the tcl
+    +  * version of matherr() is used when linking against shared libraries
+    +  */
+    + 
+    + extern int matherr();
+    + int *tclDummyMathPtr = (int *) matherr;
+    + 
+      
+     
+      /*
+       *----------------------------------------------------------------------
+
+    (4) % make
+
+    (5) create a directory named ./shared and move to it.
+
+        % mkdir ./shared
+        % cd ./shared
+
+    (6) extract the objects from libtcl.a into ./shared
+
+        % ar xv ../libtcl.a
+
+    (7) remove tclMtherr.o 
+
+    (8) create the .so part of the shared library
+
+	% ld -o libtcl.so.7.1 *.o -assert pure-text   <--- there should be
+							   no complaints from
+							   the assertion
+        % cp libtcl.so.7.1 ../
+
+    (9) create the .sa part of the shared library
+
+	% cd ../
+	% ar rcv libtcl.sa.7.1 tclMtherr.o
+	% ranlib libtcl.sa.7.1
+
+   (10) build a version of tclsh using shared libraries
+
+	    % gcc -O tclsh.shared tclAppInit.o -L./ -ltcl -lm
+
+        check out dynamic dependencies
+
+            % ldd tclsh.shared
+
+		-ltcl.7 => .//libtcl.so.7.1
+		-lc.1 => /usr/lib/libc.so.1.8
+		-ldl.1 => /usr/lib/libdl.so.1.0
+
+        check out its size
+
+            % ls -l tclsh.shared
+
+	    -rwxr-xr-x   1 root     daemon      57344 Nov 14 10:39 tclsh.shared
+
+            [compare to the statically linked version and smile]
+
+   (11) Copy the .so and .sa pieces of the library to their destination.
+        Run "ranlib -t" on the .sa piece once it has been installed.
+
+
+The reason for the patch to tclAppInit.c is to guarantee the tcl-version of
+matherr() is used rather than the system version contained in the math library,
+libm.a. The dummy reference to matherr() creates a demand that is resolved 
+at link time by the tcl-version of matherr() contained in the [static] 
+archive libtcl.sa.7.1. Note that this is a hack since tclMtherr.c contains
+no exported, initialized data items. To see see the consequences of these
+actions try :
+
+          % tclsh.shared
+          % catch {acos(-2)}
+            1
+
+Without this hack, the system version of matherr() would be used and catch
+would fail to "catch" the acos domain error.
+
+TK
+---
+Do the following:
+
+    (1) run configure
+    (2) Edit the makfile: add the PIC flag to CFLAGS
+    (3) patch tkAppInit.c
+
+    *** tkAppInit.c.dist    Tue Nov  9 00:10:15 1993
+    --- tkAppInit.c Tue Nov  9 00:11:04 1993
+    ***************
+    *** 40,45 ****
+    --- 40,53 ----
+      
+      extern int main();
+      int *tclDummyMainPtr = (int *) main;
+    + 
+    + /*
+    +  * The following variable is a special hack to insure that the tcl
+    +  * version of matther() is used when linking against shared libraries
+    +  */
+    + extern int matherr();
+    + int *tclDummyMathPtr = (int *) matherr;
+    + 
+      
+     
+      /*
+       *----------------------------------------------------------------------
+
+    (4) run make
+    (5) % mkdir ./shared
+        % cd ./shared
+
+    (6) % ar xv ../libtk.a
+        % ld -o libtk.so.3.4 *.o -assert pure-text
+        % cp libtk.so.3.4 ../
+
+    (7) build a version of wish using shared libaries
+
+        % gcc -O -o wish.shared -L./ -ltk -L../tcl7.1 -ltcl -lX11 -lm
+
+TCLX
+----
+
+    (1) run configure
+    (2) edit Config.mk: add PIC flag to CFLAGS
+    (3) run make
+    (4) % cd tclmaster/lib
+        % mkdir shared
+        % cd shared
+        % ar xv ../libtclx.a
+        % ld -o libtclx.so.7.1 *.o -assert pure-text
+        % cp libtclx.so.7.1 ../
+    (5) % cd ./tkmaster/lib
+        % mkdir shared
+        % cd shared
+        % ar xv ../libtkx.a
+        % ld -o libtkx.so.3.4 *.o -assert pure-text
+        % cp libtkx.so.3.4 ../
+
+    (6) copy the two shared libaries to their final destination
