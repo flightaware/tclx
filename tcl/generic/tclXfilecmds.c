@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 4.1 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 4.2 1995/01/01 19:49:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -122,7 +122,9 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
  *
  * CopyOpenFile --
  * 
- *  Utility function to copy an open file to another open file.
+ *  Utility function to copy an open file to another open file.  Handles
+ * non-blocking I/O in the same manner as gets.  It doesn't return an
+ * error when EWOULDBLOCK or EAGAIN is returned if some data has been read.
  *
  * Parameters:
  *   o interp (I) - Error messages are returned in the interpreter.
@@ -131,7 +133,6 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
  *   o outFilePtr (I) - Output file.
  * Returns:
  *    The number of bytes transfered or -1 on an error.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -154,10 +155,14 @@ CopyOpenFile (interp, maxBytes, inFilePtr, outFilePtr)
 
         bytesRead = fread (buffer, sizeof (char), bytesToRead, inFilePtr);
         if (bytesRead <= 0) {
-            if (feof (inFilePtr))
+            if (feof (inFilePtr)) {
                 break;
-            else
-                goto unixError;
+            }
+            if (((errno == EWOULDBLOCK) || (errno == EAGAIN)) &&
+                (totalBytesRead > 0)) {
+                break;  /* Would blocking, but got some data. */
+            }
+            goto unixError;
         }
         if (fwrite (buffer, sizeof (char), bytesRead, outFilePtr) != bytesRead)
             goto unixError;
