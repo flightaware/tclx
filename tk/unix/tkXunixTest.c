@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXunixTest.c,v 8.0.4.1 1997/04/14 02:03:06 markd Exp $
+ * $Id: tkXunixTest.c,v 8.1 1997/04/17 05:00:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,18 +76,18 @@ Tcl_AppInit (interp)
     if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tclx", Tclx_Init, Tclx_SafeInit);
+    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
     if (Tk_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
 
-    Tcl_StaticPackage (interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
-    if (Tkx_Init(interp) == TCL_ERROR) {
+    Tcl_StaticPackage (interp, "Tk", Tk_Init, Tk_SafeInit);
+    if (Tkx_Init (interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
 
-    Tcl_StaticPackage(interp, "Tkx", Tkx_Init, (Tcl_PackageInitProc *) NULL);
-    if (Tktest_Init(interp) == TCL_ERROR) {
+    Tcl_StaticPackage (interp, "Tkx", Tkx_Init, Tkx_SafeInit);
+    if (Tktest_Init (interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
     Tcl_StaticPackage (interp, "Tktest", Tktest_Init,

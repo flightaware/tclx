@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 8.1 1997/04/17 05:00:10 markd Exp $
+ * $Id: tkXAppInit.c,v 8.2 1997/07/09 01:57:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,18 +76,18 @@ Tcl_AppInit (interp)
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    if (Tclx_Init(interp) == TCL_ERROR) {
+    if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tclx", Tclx_Init, Tclx_SafeInit);
-    if (Tk_Init(interp) == TCL_ERROR) {
+    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
+    if (Tk_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
-    if (Tkx_Init(interp) == TCL_ERROR) {
+    Tcl_StaticPackage (interp, "Tk", Tk_Init, Tk_SafeInit);
+    if (Tkx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tkx", Tkx_Init, (Tcl_PackageInitProc *) NULL);
+    Tcl_StaticPackage (interp, "Tkx", Tkx_Init, Tkx_SafeInit);
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -100,7 +100,7 @@ Tcl_AppInit (interp)
      * where "app" is the name of the application.  If this line is deleted
      * then no user-specific startup file will be run under any conditions.
      */
-    Tcl_SetVar(interp, "tcl_rcFileName", "~/.wishxrc", TCL_GLOBAL_ONLY);
+    Tcl_SetVar (interp, "tcl_rcFileName", "~/.wishxrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
 
