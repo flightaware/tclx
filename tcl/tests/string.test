@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 8.3 1997/06/25 08:46:56 markd Exp $
+# $Id: string.test,v 8.4 1997/06/25 16:59:09 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -119,7 +119,6 @@ Test string-3.8 {crange tests} {
 } 1 {syntax error in expression "4x-3"}
 
 Test string-3.9 {crange tests} {
-    puts "*****>>>>> FAILS DUE TO BUG IN TCL 8.0b1 <<<<<*****"
     set text .tex
     set l 4
     crange $text $l+1 end

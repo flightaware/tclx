@@ -12,16 +12,17 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 8.1 1997/04/17 04:59:17 markd Exp $
+# $Id: cmdtrace.test,v 8.2 1997/06/12 21:08:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
 set doNoeval 0
-if {!$doNoeval} {
+set docallbackerr 0
+if {(!$doNoeval) ||(!$docallbackerr)} {
     # FIX
-    echo "**** Some command trace test disabled due to Tcl 8.0b1 behavioral differences"
+    echo "**** Some command trace test disabled due to Tcl 8.0b2 bugs"
 }
 
 #
@@ -218,6 +219,7 @@ Test cmdtrace-3.1 {command trace argument error checking} {
 ERRORINFO \
 ERRORCODE]
 
+if $docallbackerr {
 Test cmdtrace-3.2 {command trace argument error checking} {
     exec $TCL_PROGRAM -qc {cmdtrace on command {foo $NOTDEFINED};info globals}
 } 1 {cmdtrace callback command error: errorCode = NONE
@@ -225,7 +227,7 @@ can't read "NOTDEFINED": no such variable
     while executing
 "foo $NOTDEFINED {{info globals}} {{info globals}} 1 0"
     ("cmdtrace" callback command)} {tempNotPc}
-
+}
 TestRemove CMDTRACE.OUT
 
 
