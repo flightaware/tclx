@@ -257,6 +257,7 @@
 ./tclsrc/stringfile.tcl
 ./tclsrc/tcllib.tcl
 ./tclsrc/tclshell.tcl
+./tests/Makefile.in
 ./tests/all
 ./tests/arrayproc.test
 ./tests/bsearch.test
@@ -358,8 +359,8 @@
 ./tktclsrc/Makefile.in
 ./tktclsrc/tclhelp.tcl
 ./tktclsrc/tkdemo.tcl
+./tktests/Makefile.in
 ./tktests/signal.test
-./tktests/tktests.tcl
 ./tools/Makefile.in
 ./tools/bldmanhelp.tcl
 ./tools/buildutil.tcl

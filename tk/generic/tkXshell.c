@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.0 1994/07/16 05:31:03 markd Rel markd $
+ * $Id: tkXshell.c,v 4.1 1994/11/25 19:00:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,6 +27,7 @@
  *	applications.
  *
  * Copyright (c) 1990-1994 The Regents of the University of California.
+ * Copyright (c) 1994 Sun Microsystems, Inc.
  * All rights reserved.
  *
  * Permission is hereby granted, without written agreement and without
@@ -78,8 +79,6 @@ static char *display = NULL;
 static char *geometry = NULL;
 
 static Tk_ArgvInfo argTable[] = {
-    {"-file", TK_ARGV_STRING, (char *) NULL, (char *) &fileName,
-	"File from which to read commands"},
     {"-geometry", TK_ARGV_STRING, (char *) NULL, (char *) &geometry,
 	"Initial geometry for window"},
     {"-display", TK_ARGV_STRING, (char *) NULL, (char *) &display,
@@ -124,9 +123,9 @@ Tk_Main (argc, argv)
     int argc;				/* Number of arguments. */
     char **argv;			/* Array of argument strings. */
 {
-    char *args, *p, *msg;
+    char *args, *p, *msg, *argv0, *class;
     char buf[20];
-    int code;
+    int code, length;
     FILE *stderrPtr;
 
     stderrPtr = TCL_STDERR;
@@ -137,12 +136,30 @@ Tk_Main (argc, argv)
 #endif
 
     /*
-     * Parse command-line arguments.
+     * Parse command-line arguments.  A leading "-file" argument is
+     * ignored (a historical relic from the distant past).  If the
+     * next argument doesn't start with a "-" then strip it off and
+     * use it as the name of a script file to process.  Also check
+     * for other standard arguments, such as "-geometry", anywhere
+     * in the argument list.
      */
 
+    argv0 = argv[0];
+    if (argc > 1) {
+	length = strlen(argv[1]);
+	if ((length >= 2) && (strncmp(argv[1], "-file", length) == 0)) {
+	    argc--;
+	    argv++;
+	}
+    }
+    if ((argc > 1) && (argv[1][0] != '-')) {
+	fileName = argv[1];
+	argc--;
+	argv++;
+    }
     if (Tk_ParseArgv(interp, (Tk_Window) NULL, &argc, argv, argTable, 0)
 	    != TCL_OK) {
-	fprintf(stderrPtr, "%s\n", interp->result);
+	fprintf(stderr, "%s\n", interp->result);
 	exit(1);
     }
     if (name == NULL) {
@@ -159,6 +176,24 @@ Tk_Main (argc, argv)
 	}
     }
 
+
+    /*
+     * Make command-line arguments available in the Tcl variables "argc"
+     * and "argv".    Also set the "geometry" variable from the geometry
+     * specified on the command line.
+     */
+
+    args = Tcl_Merge(argc-1, argv+1);
+    Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
+    ckfree(args);
+    sprintf(buf, "%d", argc-1);
+    Tcl_SetVar(interp, "argc", buf, TCL_GLOBAL_ONLY);
+    Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv0,
+	    TCL_GLOBAL_ONLY);
+    if (geometry != NULL) {
+	Tcl_SetVar(interp, "geometry", geometry, TCL_GLOBAL_ONLY);
+    }
+
     /*
      * If a display was specified, put it into the DISPLAY
      * environment variable so that it will be available for
@@ -170,63 +205,48 @@ Tk_Main (argc, argv)
     }
 
     /*
+     * Initialize the Tk application.  If a -name option was provided,
+     * use it;  otherwise, if a file name was provided, use the last
+     * element of its path as the name of the application; otherwise
+     * use the last element of the program name.  For the application's
+     * class, capitalize the first letter of the name.
+     */
+
+    if (name == NULL) {
+	p = (fileName != NULL) ? fileName : argv0;
+	name = strrchr(p, '/');
+	if (name != NULL) {
+	    name++;
+	} else {
+	    name = p;
+	}
+    }
+    class = ckalloc((unsigned) (strlen(name) + 1));
+    strcpy(class, name);
+    class[0] = toupper((unsigned char) class[0]);
+    mainWindow = Tk_CreateMainWindow(interp, display, name, class);
+    ckfree(class);
+    if (mainWindow == NULL) {
+	fprintf(stderr, "%s\n", interp->result);
+	exit(1);
+    }
+    if (synchronize) {
+	XSynchronize(Tk_Display(mainWindow), True);
+    }
+
+    /*
      * Set the "tcl_interactive" variable.
      */
     tty = isatty(0);
     Tcl_SetVar(interp, "tcl_interactive",
  	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
  
-    tty = isatty(0);
-
-    /*
-     * Initialize the Tk application.
-     */
-
-    mainWindow = Tk_CreateMainWindow(interp, display, name, "Tk");
-    if (mainWindow == NULL) {
-	fprintf(stderrPtr, "%s\n", interp->result);
-	exit(1);
-    }
-    Tk_SetClass(mainWindow, "Tk");
-    if (synchronize) {
-	XSynchronize(Tk_Display(mainWindow), True);
-    }
-    Tk_GeometryRequest(mainWindow, 200, 200);
-
-    /*
-     * Make command-line arguments available in the Tcl variables "argc"
-     * and "argv".  Also set the "geometry" variable from the geometry
-     * specified on the command line.
-     */
-
-    args = Tcl_Merge(argc-1, argv+1);
-    Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
-    ckfree(args);
-    sprintf(buf, "%d", argc-1);
-    Tcl_SetVar(interp, "argc", buf, TCL_GLOBAL_ONLY);
-    Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv[0],
-	    TCL_GLOBAL_ONLY);
-    if (geometry != NULL) {
-	Tcl_SetVar(interp, "geometry", geometry, TCL_GLOBAL_ONLY);
-    }
-
     /*
      * Invoke application-specific initialization.
      */
 
     if (Tcl_AppInit(interp) != TCL_OK) {
 	TclX_ErrorExit (interp, 255);
-    }
-
-    /*
-     * Set the geometry of the main window, if requested.
-     */
-
-    if (geometry != NULL) {
-	code = Tcl_VarEval(interp, "wm geometry . ", geometry, (char *) NULL);
-	if (code != TCL_OK) {
-	    fprintf(stderrPtr, "%s\n", interp->result);
-	}
     }
 
     /*
@@ -257,6 +277,22 @@ Tk_Main (argc, argv)
 
     fflush(TCL_STDOUT);
     Tcl_DStringInit(&command);
+
+    /*
+     * Set the geometry of the main window, if requested.  If the "geometry"
+     * variable has gone away, this means that the application doesn't want
+     * us to set the geometry after all.
+     */
+
+    if (geometry != NULL) {
+	p = Tcl_GetVar(interp, "geometry", TCL_GLOBAL_ONLY);
+	if (p != NULL) {
+	    code = Tcl_VarEval(interp, "wm geometry . ", p, (char *) NULL);
+	    if (code != TCL_OK) {
+		fprintf(stderr, "%s\n", interp->result);
+	    }
+	}
+    }
 
     /*
      * Loop infinitely, waiting for commands to execute.  When there

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.2 1994/11/25 19:00:41 markd Exp markd $
+# $Id: Makefile.in,v 4.3 1994/12/29 06:21:39 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -78,6 +78,7 @@ TCLX: TCLCOPY runtcl
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
 # Copy include and library files from the UCB Tcl distribution to the
@@ -137,17 +138,17 @@ ${TK_H}: ${TK_UCB_SRC}/tk.h
 # the local master directories so tcl & wishx can be run before installing.
 
 runtcl:
-	@echo ':'                                                  >runtcl
-	@echo '# script for testing Tcl before installation'      >>runtcl
-	@echo "TCL_LIBRARY=`pwd`/tclmaster"                       >>runtcl
-	@echo "TCL_PROGRAM=`pwd`/tclmaster/bin${ARCH}/tcl"        >>runtcl
-	@echo "export TCL_LIBRARY TCL_PROGRAM"                    >>runtcl
-	@echo "if [ \$$# = 0 ]"                                   >>runtcl
-	@echo "then"                                              >>runtcl
-	@echo "    exec \$$TCL_PROGRAM"                           >>runtcl
-	@echo "else"                                              >>runtcl
-	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                  >>runtcl
-	@echo "fi"                                                >>runtcl
+	@echo ':'                                                   >runtcl
+	@echo '# script for testing Tcl before installation'       >>runtcl
+	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"                >>runtcl
+	@echo "TCL_PROGRAM=${bldbasedir}/tclmaster/bin${ARCH}/tcl" >>runtcl
+	@echo "export TCL_LIBRARY TCL_PROGRAM"                     >>runtcl
+	@echo "if [ \$$# = 0 ]"                                    >>runtcl
+	@echo "then"                                               >>runtcl
+	@echo "    exec \$$TCL_PROGRAM"                            >>runtcl
+	@echo "else"                                               >>runtcl
+	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                   >>runtcl
+	@echo "fi"                                                 >>runtcl
 	chmod a+rx runtcl
 
 runwishx:
@@ -173,38 +174,13 @@ tcl++:
 	cd src;${MAKE} -${MAKEFLAGS} tcl++
 
 #------------------------------------------------------------------------------
-# Run the UCB and Extended Tcl tests.
+# Run the tests.
 
-test: ucbtests extdtests
-
-ucbtests: all
-	@echo "***************************************************************"
-	@echo "*** Expect warnings about not having the following commands:"
-	@echo "***     testasync"
-	@echo "***     testcmdinfo"
-	@echo "***     testdcall"
-	@echo "***     testdstring"
-	@echo "***     testlink"
-	@echo "***     testupvar"
-	@echo "***"
-	@echo "*** Expect warnings about not having the following math functions:"
-	@echo "***     T1"
-	@echo "***     T2"
-	@echo "***************************************************************"
-	@echo ""
-	./runtcl -c "cd ${TCL_UCB_SRC}/tests;source ${srcbasedir}/tests/all"
-
-extdtests: all
-	./runtcl -c "cd tests;source all"
+test: all
+	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} test
 
 tktest: all
-	@echo "***************************************************************"
-	@echo "*** Expect warnings about not having the following commands:"
-	@echo "***     testmakexists"
-	@echo "***************************************************************"
-	@echo ""
-	cd ${srcdir}/tktests ;\
-	    ${bldbasedir}/runwishx -f tktests.tcl -n wish ${TK_UCB_SRC}
+	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} test
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or

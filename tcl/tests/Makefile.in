@@ -1,7 +1,7 @@
 #
 # tests/Makefile.in  --
 #
-# Makefile for Extended Tcl C tests.
+# Makefile for Extended Tcl tests.
 # 
 #------------------------------------------------------------------------------
 # Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.3 1994/12/29 06:21:39 markd Exp $
+# $Id: Makefile.in,v 1.1 1994/12/31 21:39:25 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -54,8 +54,8 @@ OBJS= tclXtest.o
 
 #------------------------------------------------------------------------------
 # Compile the test proram.  It is generated from the Tcl test program with 
-# a simple sed script.
-# the executable, as some systems leave invalid executables around.
+# a sed script.
+#
 
 all: tclxtest runtest
 
@@ -67,9 +67,9 @@ tclXtest.o: tclXtest.c
 
 tclXtest.c: ${TCL_UCB_SRC}/tclTest.c
 	rm -f tclXtest.c	
-	sed -e 's@#include "tclInt.h"@#include "../src/tclExtdInt.h"@' \
-	    -e 's/Tcl_Init(/TclX_Init(/' \
-	    -e '/tcl_RcFileName =/d' ${TCL_UCB_SRC}/tclTest.c >tclXtest.c
+	echo '#include "../src/tclXconfig.h"' >tclXtest.c
+	sed -e 's/Tcl_Init(/TclX_Init(/' \
+	    -e '/tcl_RcFileName =/d' ${TCL_UCB_SRC}/tclTest.c >>tclXtest.c
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCL_LIBRARY environment variable at
