@@ -265,6 +265,7 @@
 ./tcl/tests/fstat.test
 ./tcl/tests/globrecur.test
 ./tcl/tests/help.test
+./tcl/tests/init.test
 ./tcl/tests/keylist.test
 ./tcl/tests/lassign.test
 ./tcl/tests/lgets.test

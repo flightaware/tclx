@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 5.6 1996/03/04 23:12:16 markd Exp $
+ * $Id: tkXinit.c,v 5.7 1996/03/10 04:42:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,6 +48,7 @@ Tkx_Init (interp)
     if (Tcl_PkgProvide (interp, "Tkx", TKX_VERSION) != TCL_OK) {
  	return TCL_ERROR;
     }
+    Tcl_StaticPackage (interp, "Tkx", Tkx_Init, NULL);
 
     if (TclX_RuntimeInit (interp,
                           "tkx_library",

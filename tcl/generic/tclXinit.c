@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.11 1996/03/10 04:42:36 markd Exp $
+ * $Id: tclXinit.c,v 5.12 1996/03/11 06:15:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -354,6 +354,14 @@ static int
 InitSetup (interp)
     Tcl_Interp *interp;
 {
+    if (Tcl_PkgRequire (interp, "Tcl", TCL_VERSION, 1) == NULL) {
+	return TCL_ERROR;
+    }
+    if (Tcl_PkgProvide (interp, "Tclx", TCLX_VERSION) != TCL_OK) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
+
     /*
      * Make sure a certain set of variable exists.  If not, default them.
      * Tcl code often assumes that these exists.
@@ -379,12 +387,6 @@ int
 Tclx_Init (interp)
     Tcl_Interp *interp;
 {
-    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 1) == NULL) {
-	return TCL_ERROR;
-    }
-    if (Tcl_PkgProvide(interp, "Tclx", TCLX_VERSION) != TCL_OK) {
-	return TCL_ERROR;
-    }
     if (InitSetup (interp) == TCL_ERROR)
         goto errorExit;
 
