@@ -763,3 +763,11 @@
 ===============================================================================
 23 Jan 94: Released TclX7.2a-p1 (patch and full release).
 ===============================================================================
+ 5 Feb 93:
+   o Fixed SVR4 portability problems.
+   o Fixed problem with convertclock on DEC Alpha.
+-------------------------------------------------------------------------------
+ 8 Feb 93:
+   o Used setvbuf if its available instead of setlinebuf, as setlinebuf appears
+     broken on Ultrix.
+-------------------------------------------------------------------------------

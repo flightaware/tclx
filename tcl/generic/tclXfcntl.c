@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 2.8 1993/11/18 05:53:40 markd Exp markd $
+ * $Id: tclXfcntl.c,v 3.0 1993/11/19 06:58:36 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,12 +21,13 @@
 /*
  * Macro to enable line buffering mode on a file.  The macros assure that the
  * resulting expression returns zero if the function call does not return
- * a value.
+ * a value.  Try for setvbuf first, as setlinebuf seems to be a no-op on 
+ * DEC Ultrix.
  */
-#ifdef HAVE_SETLINEBUF
-#   define SET_LINE_BUF(fp)  (setlinebuf (fp),0)
-#else
+#if defined(HAVE_SETVBUF) && defined(_IOLBF)
 #   define SET_LINE_BUF(fp)  setvbuf (fp, NULL, _IOLBF, BUFSIZ)
+#else
+#   define SET_LINE_BUF(fp)  (setlinebuf (fp),0)
 #endif
 
 /*

@@ -129,7 +129,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 3.3 
+# From configure.in Revision: 3.4 
 
 
 
@@ -1856,7 +1856,7 @@ fi
 #       These must be after the library checks.
 #------------------------------------------------------------------------------
 
-for func in catgets getcwd select setitimer setlinebuf sigaction setpgid
+for func in catgets getcwd select setitimer setvbuf sigaction setpgid
 do
 trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
 echo checking for ${func}

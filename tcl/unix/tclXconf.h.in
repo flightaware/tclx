@@ -14,9 +14,6 @@
    tzname.  */
 #undef HAVE_TZNAME
 
-/* Define if you have unistd.h.  */
-#undef HAVE_UNISTD_H
-
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef mode_t
 
@@ -62,9 +59,6 @@
 /* Define if you don't have tm_zone but do have the external array
    tzname.  */
 #undef HAVE_TZNAME
-
-/* Define if you have unistd.h.  */
-#undef HAVE_UNISTD_H
 
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
@@ -155,14 +149,17 @@
 /* Define if you have setitimer.  */
 #undef HAVE_SETITIMER
 
-/* Define if you have setlinebuf.  */
-#undef HAVE_SETLINEBUF
-
 /* Define if you have setpgid.  */
 #undef HAVE_SETPGID
 
+/* Define if you have setvbuf.  */
+#undef HAVE_SETVBUF
+
 /* Define if you have sigaction.  */
 #undef HAVE_SIGACTION
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
 
 /* Define if you have the X11 library (-lX11).  */
 #undef HAVE_LIBX11
