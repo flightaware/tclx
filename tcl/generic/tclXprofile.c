@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 7.6 1996/10/03 19:38:16 markd Exp $
+ * $Id: tclXprofile.c,v 7.7 1996/10/08 07:18:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -121,7 +121,7 @@ ProfTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                               Tcl_Interp   *interp,
                               int           evalLevel,
                               char         *command,
-                              int           (*cmdProc)(),
+                              Tcl_CmdProc  *cmdProc,
                               ClientData    cmdClientData,
                               int           argc,
                               char        **argv));
@@ -145,6 +145,12 @@ static int
 TurnOffProfiling _ANSI_ARGS_((Tcl_Interp *interp,
                               profInfo_t *infoPtr,
                               char       *varName));
+
+static int
+Tcl_ProfileCmd _ANSI_ARGS_((ClientData    clientData,
+                            Tcl_Interp   *interp,
+                            int           argc,
+                            char        **argv));
 
 static void
 ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -512,7 +518,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     Tcl_Interp   *interp;
     int           evalLevel;
     char         *command;
-    int           (*cmdProc)();
+    Tcl_CmdProc  *cmdProc;
     ClientData    cmdClientData;
     int           argc;
     char        **argv;

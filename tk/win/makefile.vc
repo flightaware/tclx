@@ -12,21 +12,21 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.0 1996/06/16 05:34:07 markd Exp $
+# $Id: makefile.vc,v 7.1 1996/10/20 06:14:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 !include "..\..\win\common.vc"
 
 TKX_INCLUDES = \
-	-I$(TOOLS32)\include \
+	-I$(TOOLS32)\include -I$(TK_XLIB_DIR)\
 	-I$(TKX_WIN_DIR) -I$(TKX_GENERIC_DIR) \
         -I$(TCLX_WIN_DIR) -I$(TCLX_GENERIC_DIR) \
         -I$(TK_GENERIC_DIR) -I$(TCL_WIN_DIR) \
 	-I$(TCL_GENERIC_DIR) -I$(TCL_WIN_DIR)
 
 TKX_DEFINES = \
-    -nologo $(DEBUGDEFINES)
+    -nologo $(DEBUGDEFINES) $(TKX_LIBRARY)
 
 WISHXOBJS = \
         $(TMP_DIR)\tkXAppInit.obj
@@ -36,18 +36,18 @@ TKXTESTOBJS = \
         $(TMP_DIR)\tkSquare.obj \
         $(TMP_DIR)\tkXtest.obj
 
-TCLXOBJS = \
+TKXOBJS = \
         $(TMP_DIR)\tkXinit.obj \
         $(TMP_DIR)\tkXshell.obj \
 
 WISHX = wishx.exe
 TCLXTEST = tclxtest.exe
-DUMPEXTS = $(TCLX_WIN_DIR)/dumpexts.exe
+DUMPEXTS = $(TCLX_WIN_DIR)\dumpexts.exe
 
 #
 # Targets
 #
-all: $(DUMPEXTS) $(TKX_DLL) $(WISHX) RUNTIME
+all: $(TKX_DLL) $(WISHX) RUNTIME
 
 test:  all
         set TCL_PROGRAM=..\win\tcl
@@ -59,15 +59,15 @@ tkXvc.def: $(TKXOBJS)
         $(TKXOBJS)
 <<
 
-$(TKX_DLL): $(TKXOBJS) tkXvc.def $(TMP_DIR)\tcl.res
+$(TKX_DLL): $(TKXOBJS) tkXvc.def $(TMP_DIR)\tkx.res
         set LIB=$(LIB)
         $(link) $(linkdebug) $(dlllflags) -def:tkXvc.def \
-                $(TMP_DIR)\tcl.res $(guilibsdll) -out:$(TKX_DLL) @<<
+                $(TMP_DIR)\tkx.res $(guilibsdll) -out:$(TKX_DLL) @<<
                 $(TKXOBJS) $(TK_LIB) $(TCLX_LIB) $(TCL_LIB) Wsock32.lib
 <<
 
 
-$(WISHX): $(WISHXOBJS) $(TKX_LIB) $(TCLX_LIB) $(TMP_DIR)\tcl.res
+$(WISHX): $(WISHXOBJS) $(TKX_LIB) $(TCLX_LIB) $(TMP_DIR)\wishx.res
         set LIB=$(LIB)
         $(link) $(linkdebug) $(conlflags) \
                 $(WISHXOBJS) $(TMP_DIR)\wishx.res $(TKX_LIB) $(TK_LIB) \

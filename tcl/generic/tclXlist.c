@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 7.0 1996/06/16 05:30:37 markd Exp $
+ * $Id: tclXlist.c,v 7.1 1996/09/28 16:14:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -423,7 +423,7 @@ Tcl_LcontainCmd (notUsed, interp, argc, argv)
     char **argv;
 {
     int listArgc, idx;
-    char **listArgv, *element;
+    char **listArgv;
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 

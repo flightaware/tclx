@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.4 1996/08/01 15:50:00 markd Exp $
+ * $Id: tclXinit.c,v 7.5 1996/08/21 06:54:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,7 +45,7 @@ static char tclx_fileinit [] =
     if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
     lappend dirs $defaultLib\n\
     set prefix [file dirname [file dirname [info nameofexecutable]]]\n\
-    lappend dirs [file join $prefix lib ${w}X $version]\n\
+    lappend dirs [file join $prefix lib ${w}X$version]\n\
     if [cequal $tcl_platform(platform) windows] {\n\
         set plat win} else {set plat unix}\n\
     lappend dirs [file join [file dirname [file dirname $prefix]] ${w}X${version} $w $plat]\n\

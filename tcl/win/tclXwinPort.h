@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 7.5 1996/09/03 23:39:12 markd Exp $
+ * $Id: tclXwinPort.h,v 7.6 1996/09/09 22:13:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,9 +29,6 @@
  */
 #define S_IFIFO  _S_IFIFO               /* pipe */
 #define S_IFSOCK 0140000                /* socket */
-
-/*FIX: Don't use this, do it the way Tcl does. */
-#define TCLX_LIBRARY "C:/markd/tcl/tclX7.6.0-a1/tcl/win"
 
 /*
  * OS feature definitons.

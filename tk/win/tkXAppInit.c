@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 7.0 1996/06/16 05:33:42 markd Exp $
+ * $Id: tkXAppInit.c,v 1.1 1996/08/17 02:10:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -50,8 +50,6 @@ main (int    argc,
  */
 int
 Tcl_AppInit (Tcl_Interp *interp)
-#else
-int
 {
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;

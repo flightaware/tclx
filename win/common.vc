@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.0 1996/06/16 05:34:07 markd Exp $
+# $Id: common.vc,v 1.1 1996/10/20 06:14:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -20,6 +20,12 @@
 # IMPORTANT:  All paths in the file are relative to the TclX directories
 # tcl/win and tk/win, not the directory containing this file.
 #
+
+#
+# Installation directory root.
+#
+PREFIX=C:/markd
+
 #
 # Project directories
 #
@@ -59,8 +65,9 @@ TCL_DLL          = $(TCL_WIN_DIR)\tcl76.dll
 TK_DIR           = ..\..\..\tk4.2
 TK_GENERIC_DIR   = $(TK_DIR)\generic
 TK_WIN_DIR       = $(TK_DIR)\win
-TK_LIB           = $(TCL_WIN_DIR)\tk42.lib
-TK_DLL           = $(TCL_WIN_DIR)\tk42.dll
+TK_XLIB_DIR      = $(TK_DIR)\xlib
+TK_LIB           = $(TK_WIN_DIR)\tk42.lib
+TK_DLL           = $(TK_WIN_DIR)\tk42.dll
 
 #
 # TclX directories.
@@ -70,6 +77,7 @@ TCLX_GENERIC_DIR = $(ROOT)\tcl\generic
 TCLX_RUNTIME_DIR = $(ROOT)\tcl\runtime
 TCLX_LIB         = $(TCLX_WIN_DIR)\tclx760.lib
 TCLX_DLL         = $(TCLX_WIN_DIR)\tclx760.dll
+TCLX_LIBRARY     = -DTCLX_LIBRARY=\"$(PREFIX)/lib/tclX7.6.0b2\"
 
 #
 # TkX directories.
@@ -79,6 +87,8 @@ TKX_GENERIC_DIR  = $(ROOT)\tk\generic
 TKX_RUNTIME_DIR  = $(ROOT)\tk\runtime
 TKX_LIB          = $(TKX_WIN_DIR)\tkx420.lib
 TKX_DLL          = $(TKX_WIN_DIR)\tkx420.dll
+TKX_LIBRARY      = -DTKX_LIBRARY=\"$(PREFIX)/lib/tkX4.2.0b2\"
+
 
 # Make sure the VC++ tools are at the head of the path
 PATH=$(TOOLS32)\bin;$(PATH)
