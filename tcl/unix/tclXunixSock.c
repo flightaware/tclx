@@ -295,7 +295,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
     int                 socketFD = -1, nextArg;
     struct hostent     *hostEntry;
     struct sockaddr_in  server, local;
-    int                 idx, specifiedLocalIp = 0;
+    int                 idx, needBind = 0;
     int                 myPort;
 
     /*
@@ -325,7 +325,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
                           &local.sin_addr) == TCL_ERROR)
                 return TCL_ERROR;
             local.sin_family = AF_INET;
-            specifiedLocalIp = 1;
+            needBind = 1;
         } else if (STREQU ("-myport", argv [nextArg])) {
             if (nextArg >= argc - 1)
                 goto missingArg;
@@ -333,6 +333,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
             if (Tcl_GetInt (interp, argv [nextArg], &myPort) != TCL_OK)
                 return TCL_ERROR;
             local.sin_port = htons (myPort);
+            needBind = 1;
         } else {
             Tcl_AppendResult (interp, "expected one of \"-buf\", \"-nobuf\", ",
                               "\"-twoids\", \"-myip\" or \"-myport\", got \"",
@@ -395,7 +396,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
     if (socketFD < 0)
         goto unixError;
 
-    if (specifiedLocalIp) {
+    if (needBind) {
         if (bind (socketFD, (struct sockaddr *) &local, sizeof (local)) < 0) {
             goto unixError;
         }
