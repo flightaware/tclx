@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.9 1996/03/11 06:16:01 markd Exp $
+ * $Id: tclXutil.c,v 5.10 1996/03/13 08:30:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -694,8 +694,7 @@ TclX_GetOpenFnum (interp, handle, accessMode)
  *    Convert a channel to a file number.
  *
  * Parameters:
- *   o interp (I) - Current interpreter.
- *   o handle (I) - The file handle to convert.
+ *   o channel (I) - Channel to get file number for.
  *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
  *     return the first of the read and write numbers.
  * Returns:

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.21 1996/03/11 09:10:15 markd Exp $
+# $Id: Makefile.in,v 5.22 1996/03/14 06:11:55 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -54,7 +54,8 @@ GENERIC_OBJS = \
     tclXlib.o        tclXlist.o       tclXmath.o       tclXmsgcat.o   \
     tclXlibInit.o    tclXprocess.o    tclXprofile.o    tclXregexp.o   \
     tclXselect.o     tclXserver.o     tclXsignal.o     tclXshell.o    \
-    tclXstring.o     tclXunixcmds.o   tclXutil.o
+    tclXstring.o     tclXunixcmds.o   tclXutil.o       tclXunixOS.o   \
+    tclXoscmds.o
 
 COMPAT_OBJS = @LIBOBJS@
 
@@ -131,9 +132,6 @@ tclXAppInit.o: ${TCLX_GENERIC_DIR}/tclXAppInit.c
 tclXbsearch.o: ${TCLX_GENERIC_DIR}/tclXbsearch.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXbsearch.c
 
-tclXchmod.o: ${TCLX_GENERIC_DIR}/tclXchmod.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXchmod.c
-
 tclXcmdloop.o: ${TCLX_GENERIC_DIR}/tclXcmdloop.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXcmdloop.c
 
@@ -163,9 +161,6 @@ tclXgeneral.o: ${TCLX_GENERIC_DIR}/tclXgeneral.c
 
 tclXhandles.o: ${TCLX_GENERIC_DIR}/tclXhandles.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXhandles.c
-
-tclXid.o: ${TCLX_GENERIC_DIR}/tclXid.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXid.c
 
 tclXinit.o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
 	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
@@ -210,11 +205,23 @@ tclXsignal.o: ${TCLX_GENERIC_DIR}/tclXsignal.c
 tclXstring.o: ${TCLX_GENERIC_DIR}/tclXstring.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXstring.c
 
-tclXunixcmds.o: ${TCLX_GENERIC_DIR}/tclXunixcmds.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXunixcmds.c
+tclXoscmds.o: ${TCLX_GENERIC_DIR}/tclXoscmds.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXoscmds.c
 
 tclXutil.o: ${TCLX_GENERIC_DIR}/tclXutil.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXutil.c
+
+tclXchmod.o: ${TCLX_UNIX_SRC_DIR}/tclXchmod.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXchmod.c
+
+tclXid.o: ${TCLX_UNIX_SRC_DIR}/tclXid.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXid.c
+
+tclXunixOS.o: ${TCLX_UNIX_SRC_DIR}/tclXunixOS.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXunixOS.c
+
+tclXunixcmds.o: ${TCLX_UNIX_SRC_DIR}/tclXunixcmds.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXunixcmds.c
 
 random.o: ${COMPAT_DIR}/random.c
 	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/random.c

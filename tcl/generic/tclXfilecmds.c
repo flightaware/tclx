@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.8 1996/03/10 04:42:34 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.9 1996/03/13 08:29:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -101,11 +101,8 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (pipe (fileNums) < 0) {
-        Tcl_AppendResult (interp, "pipe creation failed: ",
-                          Tcl_PosixError (interp));
+    if (TclX_OSpipe (interp, fileNums) != TCL_OK)
         return TCL_ERROR;
-    }
 
     chans [0] = TclX_SetupFileEntry (interp,  fileNums [0], TCL_READABLE,
                                      FALSE);

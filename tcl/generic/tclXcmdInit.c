@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.7 1996/02/20 09:10:06 markd Exp $
+ * $Id: tclXcmdInit.c,v 5.8 1996/03/11 08:14:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -113,6 +113,24 @@ Tclxcmd_Init (interp)
     Tcl_InitSignalHandling (interp);
 
     /*
+     * from tclXoscmds.c
+     */
+    Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
+                       (ClientData) NULL,(void (*)()) NULL);
+    Tcl_CreateCommand (interp, "sync", Tcl_SyncCmd,
+                       (ClientData) NULL,(void (*)()) NULL);
+    Tcl_CreateCommand (interp, "system", Tcl_SystemCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "umask", Tcl_UmaskCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "unlink", Tcl_UnlinkCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "mkdir", Tcl_MkdirCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+
+    /*
      * from tclXunixcmds.c
      */
     Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
@@ -121,23 +139,9 @@ Tclxcmd_Init (interp)
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "nice", Tcl_NiceCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
-                       (ClientData) NULL,(void (*)()) NULL);
-    Tcl_CreateCommand (interp, "sync", Tcl_SyncCmd,
-                       (ClientData) NULL,(void (*)()) NULL);
-    Tcl_CreateCommand (interp, "system", Tcl_SystemCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "times", Tcl_TimesCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "umask", Tcl_UmaskCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "link", Tcl_LinkCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "unlink", Tcl_UnlinkCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "mkdir", Tcl_MkdirCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 
     /*

@@ -33,6 +33,7 @@
 ./tcl/generic/tclXlist.c
 ./tcl/generic/tclXmath.c
 ./tcl/generic/tclXmsgcat.c
+./tcl/generic/tclXoscmds.c
 ./tcl/generic/tclXprocess.c
 ./tcl/generic/tclXprofile.c
 ./tcl/generic/tclXregexp.c
@@ -42,7 +43,6 @@
 ./tcl/generic/tclXsignal.c
 ./tcl/generic/tclXstring.c
 ./tcl/generic/tclXtest.c
-./tcl/generic/tclXunixcmds.c
 ./tcl/generic/tclXutil.c
 ./tcl/help/Tcl.brf
 ./tcl/help/TclX.brf
@@ -290,6 +290,8 @@
 ./tcl/tests/testlib.tcl
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
+./tcl/unix/tclXunixOS.c
+./tcl/unix/tclXunixcmds.c
 ./tcl/unix/tclxConfig.sh.in
 ./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c

@@ -83,15 +83,17 @@ if {[id user] != "root"} {
                      {no permission match} {invalid argument}}
         set stat [catch {nice -1} msg]
         set msg [string tolower $msg]
-        if {[lsearch $errList $msg] < 0} {
+        if {![regexp {^failed to increment priority: (.*)$} $msg {} \
+                      errmsg] ||
+            ([lsearch $errList $errmsg] < 0)} {
             set stat [list $stat $msg]
         }
         set stat
     } 0 1
 
     puts "*************************************************************"
-    puts "You are not running as `root', certain nice tests will be"
-    puts "skipped"
+    puts "Notice: You are not running as `root', certain nice tests"
+    puts "will be skipped"
     puts "*************************************************************"
     exit
 }

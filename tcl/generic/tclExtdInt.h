@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.11 1996/03/11 06:15:53 markd Exp $
+ * $Id: tclExtdInt.h,v 5.12 1996/03/13 08:30:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -560,6 +560,30 @@ extern void
 Tcl_InitLibrary _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
+ * from tclXoscmds.c
+ */
+extern int 
+Tcl_SleepCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_SyncCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_SystemCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_UmaskCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_UnlinkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_MkdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_RmdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+/*
  * from tclXunixcmds.c
  */
 extern int 
@@ -572,31 +596,10 @@ extern int
 Tcl_NiceCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
-Tcl_SleepCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_SyncCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_SystemCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
 Tcl_TimesCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
-Tcl_UmaskCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
 Tcl_LinkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_UnlinkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_MkdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_RmdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
  * from tclXserver.c
@@ -619,4 +622,53 @@ TclXSetKeepAlive _ANSI_ARGS_((Tcl_Interp  *interp,
                               Tcl_Channel  channel,
                               int          value));
 
+/*
+ * from tclXxxxOS.c
+ */
+extern int
+TclX_OSgetpriority _ANSI_ARGS_((Tcl_Interp *interp,
+                                int        *priority,
+                                char       *funcName));
+
+extern int
+TclX_OSincrpriority _ANSI_ARGS_((Tcl_Interp *interp,
+                                 int         priorityIncr,
+                                 int        *priority,
+                                 char       *funcName));
+
+extern int
+TclX_OSpipe _ANSI_ARGS_((Tcl_Interp *interp,
+                         int        *fildes));
+
+extern int
+TclX_OSsetitimer _ANSI_ARGS_((Tcl_Interp *interp,
+                              double     *seconds,
+                              char       *funcName));
+
+extern void
+TclX_OSsleep _ANSI_ARGS_((unsigned seconds));
+
+extern void
+TclX_OSsync _ANSI_ARGS_((void));
+
+extern int
+TclX_OSfsync _ANSI_ARGS_((Tcl_Interp *interp,
+                          char       *channelName));
+extern int
+TclX_OSsystem _ANSI_ARGS_((Tcl_Interp *interp,
+                           char       *command,
+                           int        *exitCode));
+extern int
+TclX_OSmkdir _ANSI_ARGS_((Tcl_Interp *interp,
+                          char       *path));
+
+extern int
+TclX_OSsymlink _ANSI_ARGS_((Tcl_Interp *interp,
+                            char       *srcPath,
+                            char       *destPath,
+                            char       *funcName));
+
+extern void
+TclX_OSElapsedTime _ANSI_ARGS_((clock_t *realTime,
+                                clock_t *cpuTime));
 #endif
