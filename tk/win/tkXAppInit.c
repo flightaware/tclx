@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 8.5 1999/03/31 06:37:57 markd Exp $
+ * $Id: tkXAppInit.c,v 8.6 1999/06/26 00:25:53 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -57,7 +57,10 @@ WinMain(hInstance, hPrevInstance, lpszCmdLine, nCmdShow)
      * This is only needed for Windows 3.x, since NT dynamically expands
      * the queue.
      */
+
+#ifndef __WIN32__
     SetMessageQueue(64);
+#endif /* __WIN32__ */
 
     TkX_Main(argc, argv, Tcl_AppInit);
 
