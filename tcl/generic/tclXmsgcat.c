@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 2.6 1993/11/02 07:48:44 markd Exp markd $
+ * $Id: tclXmsgcat.c,v 3.0 1993/11/19 06:59:05 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -297,7 +297,7 @@ MsgCatCleanUp (clientData, interp)
     walkKey = -1;
     while (TRUE) {
         catDescPtr = (nl_catd *) Tcl_HandleWalk (msgCatTblPtr, &walkKey);
-        if (catDescPtr != NULL)
+        if (catDescPtr == NULL)
             break;
         catclose (*catDescPtr);
     }
