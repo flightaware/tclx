@@ -223,7 +223,7 @@ PORTING NOTES
 
 
 General:
-   o Flock tests hanging: Many problems have been encountered on some Sun
+   o Flock tests hanging:  Problems have been encountered on some Sun
      systems with the flock tests.  This might occur on other systems as
      well.  These are probably due to an incorrectly configured NFS lockd.
      The tests have been modified to try and report problems rather than
@@ -243,3 +243,20 @@ SCO:
      an error if used on COFF files.  Many developers rename the command
      to "xranlib" if they are not doing cross development.  Later versions
      of the command return a warning if used on COFF binaries.
+
+SGI:
+   o The strftime function appears to not work correctly on SGI (tested on
+     IRIX 4.0.5). The fmtclock command specifying the GMT argument (perhaps
+     only during daylight) returns a formated time that is one hour off.  This
+     causes the following clock tests to fail:
+
+        clock-3.2
+        clock-4.0
+        clock-4.1
+     
+     If this is a problem, add the following macro to your Config.mk:
+ 
+         LIBOBJS=strftime.o
+
+     This will cause a functioning (but not internationalized) strftime
+     to be built and added to 
