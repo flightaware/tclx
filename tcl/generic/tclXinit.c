@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.7 1997/08/17 04:08:21 markd Exp $
+ * $Id: tclXinit.c,v 8.8 1997/08/17 08:44:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,6 +48,12 @@ static char tclx_findinit [] =
     }\n\
     lappend dirs $defaultLib\n\
     set libDir {}\n\
+#ifdef HAVE_STANDALONE
+    if ![catch {uplevel #0 source -rsrc ${w}x}] {\n\
+	uplevel #0 source -rsrc ${w}x:tclIndex
+	return\n\
+    }\n\
+#endif
     set prefix [file dirname [info nameofexecutable]]\n\
     set plat [file tail $prefix]\n\
     set prefix [file dirname $prefix]\n\
@@ -252,7 +258,7 @@ TclX_ErrorExit TCL_VARARGS_DEF(Tcl_Interp *, interpArg)
          * Don't output the result if its the first thing on the error stack.
          */
         if ((errorStack == NULL) || 
-            (strncmp (strResult, errorStack, strlen (strResult) != 0))) {
+            (strncmp (strResult, errorStack, strlen (strResult)) != 0)) {
             TclX_WriteStr (stderrChan, strResult);
             TclX_WriteNL (stderrChan);
         }

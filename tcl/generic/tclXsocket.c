@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 8.6 1997/07/04 20:24:02 markd Exp $
+ * $Id: tclXsocket.c,v 8.7 1997/07/08 06:35:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -111,7 +111,7 @@ TclXGetHostInfo (interp, channel, remoteHost)
 {
     struct sockaddr_in sockaddr;
     struct hostent *hostEntry;
-    char *hostName;
+    CONST char *hostName;
     Tcl_Obj *listObjv [3];
 
     if (remoteHost) {
@@ -133,7 +133,7 @@ TclXGetHostInfo (interp, channel, remoteHost)
         hostName = "";
 
     listObjv [0] = Tcl_NewStringObj (inet_ntoa (sockaddr.sin_addr), -1);
-    listObjv [1] = Tcl_NewStringObj (hostName, -1);
+    listObjv [1] = Tcl_NewStringObj ((char *) hostName, -1);
     listObjv [2] = Tcl_NewIntObj (ntohs (sockaddr.sin_port));
     
     return Tcl_NewListObj (3, listObjv);
@@ -244,7 +244,7 @@ TclX_HostInfoObjCmd (clientData, interp, objc, objv)
             bcopy ((VOID *) hostEntry->h_addr_list [idx],
                    (VOID *) &inAddr,
                    hostEntry->h_length);
-	    listObj = Tcl_NewStringObj (hostEntry->h_name, -1);
+	    listObj = Tcl_NewStringObj ((char *) hostEntry->h_name, -1);
 	    Tcl_ListObjAppendElement (interp, resultPtr, listObj);
         }
         return TCL_OK;
@@ -255,7 +255,7 @@ TclX_HostInfoObjCmd (clientData, interp, objc, objv)
         if (hostEntry == NULL)
             return TCL_ERROR;
 
-        Tcl_SetStringObj (resultPtr, hostEntry->h_name, -1);
+        Tcl_SetStringObj (resultPtr, (char *) hostEntry->h_name, -1);
         return TCL_OK;
     }
 

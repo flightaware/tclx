@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.11 1997/08/08 09:59:05 markd Exp $
+# $Id: Makefile.in,v 8.12 1997/08/17 04:08:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -55,15 +55,21 @@ STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_UNIX_DIR}/${TK_STLIB_NAME} ${TK_XLIBSW} \
 #------------------------------------------------------------------------------
 # Source and target macros.
 #
-GENERIC_OBJS = tkXinit.o tkXshell.o
+GENERIC_OBJS = @TKX_BUILD_STANDALONE@ tkXinit.o tkXshell.o
 
-GENERIC_SOBJS = tkXinit@SHOBJ_SUFFIX@ tkXshell@SHOBJ_SUFFIX@
+GENERIC_SOBJS = @TKX_BUILD_DUMMY_STANDALONE@ tkXinit@SHOBJ_SUFFIX@ \
+		tkXshell@SHOBJ_SUFFIX@
 
 OBJS = ${GENERIC_OBJS}
 
 SOBJS = ${GENERIC_SOBJS}
 
 RUNTIME_DIR = ${srcbasedir}/tk/runtime
+
+# C source optionally built by tcl2c
+STANDALONE_SRCS = tkx.c
+
+STANDALONE_OBJS = tkx.o
 
 LIBTCLX = ../../tcl/unix/${TCLX_STLIB_NAME}
 TCL = ../../tcl/unix/tcl
@@ -72,22 +78,29 @@ HELP_DIR = ${srcbasedir}/tk/help
 
 TEST_OBJS = tkTest.o tkSquare.o tkXunixTest.o
 
+TEST_SAOBJS = tkTest.o tkSquare.o tkXunixTestSA.o
+
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: wishx RUNTIME tktest runtest \
-     ${bldbasedir}/tk/tests
+all: wishx RUNTIME tktest
 
-static: wishx.static
+static: wishx.static tktest.static
 
-wishx: tkXAppInit.o ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
+standalone: wishx.standalone tktest.standalone
+
+wishx: tkXAppInit.o ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL} Makefile
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
-wishx.static: tkXAppInit.o ${TKX_STLIB_NAME} ${LIBTCLX}
+wishx.static: tkXAppInit.o ${TKX_STLIB_NAME} ${LIBTCLX} Makefile
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${STATIC_LIBS} -o $@ || \
+	    (rm -f $@; exit 1)
+
+wishx.standalone: tkXAppInitSA.o ${TKX_STLIB_NAME} ${LIBTCLX} Makefile
+	${CC} ${LD_SWITCHES} tkXAppInitSA.o ${STATIC_LIBS} -o $@ || \
 	    (rm -f $@; exit 1)
 
 ${TKX_STLIB_NAME}: ${OBJS}
@@ -97,39 +110,6 @@ ${TKX_STLIB_NAME}: ${OBJS}
 ${TKX_SHLIB_NAME}: ${SOBJS}
 	rm -f ${TKX_SHLIB_NAME}
 	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
-
-#------------------------------------------------------------------------------
-# Dependencies for generating objects.
-#
-tkXinit.o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
-	${CC} -c ${CC_SWITCHES} -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" \
-	  ${TKX_GENERIC_DIR}/tkXinit.c
-
-tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
-	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXshell.c
-
-tkXAppInit.o: ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
-	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
-
-tkXunixTest.o: ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
-	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
-
-
-#------------------------------------------------------------------------------
-# Dependencies for generating objects (position independant versions).
-#
-tkXinit..o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
-	@OBJ_SAVE@
-	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
-	    -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" ${TKX_GENERIC_DIR}/tkXinit.c
-	@OBJ_RESTORE@
-
-tkXshell..o: ${TKX_GENERIC_DIR}/tkXshell.c
-	@OBJ_SAVE@
-	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
-	    ${TKX_GENERIC_DIR}/tkXshell.c
-	@OBJ_RESTORE@
-
 
 #------------------------------------------------------------------------------
 # We need the "help" directory here so that the help command will work before
@@ -174,6 +154,14 @@ tktest: ${TEST_OBJS} ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
+tktest.static: ${TEST_OBJS} ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${STATIC_LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
+
+tktest.standalone: ${TEST_SAOBJS} ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
+	${CC} ${LD_SWITCHES} ${TEST_SAOBJS} ${STATIC_LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
+
 tkTest.o: ${TK_SRC}/generic/tkTest.c
 	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkTest.c
 
@@ -182,50 +170,6 @@ tkSquare.o: ${TK_SRC}/generic/tkSquare.c
 
 tkXtest.o: ${TKX_GENERIC_DIR}/tkXtest.c
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXtest.c
-
-#------------------------------------------------------------------------------
-
-runtest: Makefile
-	@echo '#!/bin/sh'                                           >runtest
-	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest
-	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest
-	@echo "TK_LIBRARY=${TK_SRC}/library"                       >>runtest
-	@echo "TKX_LIBRARY=${TKX_TMP_RUNTIME}"                     >>runtest
-	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtest
-	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tktest"                >>runtest
-	@echo "export TCL_LIBRARY TCLX_LIBRARY"                    >>runtest
-	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"          >>runtest
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_BUILD}/unix:${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${LD_LIBRARY_PATH}" >>runtest
-	@echo "SHLIB_PATH=${bldbasedir}/tk/unix:${TK_BUILD}/unix:${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${SHLIB_PATH}" >>runtest
-	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                  >>runtest
-	@echo "if [ \$$# = 0 ]"                                    >>runtest
-	@echo "then"                                               >>runtest
-	@echo "    exec \$$TESTWISH"                               >>runtest
-	@echo "else"                                               >>runtest
-	@echo "    exec \$$TESTWISH \"\$$@\""                      >>runtest
-	@echo "fi"                                                 >>runtest
-	chmod a+rx runtest
-
-runtest.static: Makefile
-	@echo '#!/bin/sh'                                           >runtest.static
-	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest.static
-	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest.static
-	@echo "TK_LIBRARY=${TK_SRC}/library"                       >>runtest.static
-	@echo "TKX_LIBRARY=${TKX_TMP_RUNTIME}"                     >>runtest.static
-	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtest.static
-	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tktest"                >>runtest.static
-	@echo "export TCL_LIBRARY TCLX_LIBRARY"                    >>runtest.static
-	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"          >>runtest.static
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_BUILD}/unix:${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${LD_LIBRARY_PATH}" >>runtest.static
-	@echo "SHLIB_PATH=${bldbasedir}/tk/unix:${TK_BUILD}/unix:${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${SHLIB_PATH}" >>runtest.static
-	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                  >>runtest.static
-	@echo "if [ \$$# = 0 ]"                                    >>runtest.static
-	@echo "then"                                               >>runtest.static
-	@echo "    exec \$$TESTWISH"                               >>runtest.static
-	@echo "else"                                               >>runtest.static
-	@echo "    exec \$$TESTWISH \"\$$@\""                      >>runtest.static
-	@echo "fi"                                                 >>runtest.static
-	chmod a+rx runtest.static
 
 #------------------------------------------------------------------------------
 # If test directory in not in build tree, copy it from the source tree.
@@ -284,19 +228,97 @@ install-exec:
 	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
 
 #------------------------------------------------------------------------------
+config:
+	(cd ../../unix && configure)
+
+#------------------------------------------------------------------------------
 clean:
-	-rm -f tkXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} wishx wishx.static
-	-rm -rf libtkx* tkx.tcl tclhelp help help.tmp tktest
-	-rm -f SHLIB_YES SHLIB_NO
+	-rm -f tkXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} ${TEST_SAOBJS}
+	-rm -f wishx wishx.static wishx.standalone
+	-rm -f tktest tktest.static tktest.standalone
+	-rm -f ${TKX_STLIB_NAME} ${TKX_SHLIB_NAME}
+	-rm -f ${STANDALONE_SRCS} ${STANDALONE_OBJS} tkXAppInitSA.c
+	-rm -rf tkx.tcl tclhelp help help.tmp
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
 
 distclean: clean
-	rm -f Makefile tkxConfig.sh runtest tktest pkgIndex.tcl
-	rm -f runtest.static tktest.static
+	-rm -f Makefile tkxConfig.sh pkgIndex.tcl
+	-rm -f runtest runtest.static runtest.standalone
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:
 
 
+#==============================================================================
+# Repetitive rules below:
+
+#------------------------------------------------------------------------------
+# Dependencies for generating objects.
+#
+tkXinit.o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
+	${CC} -c ${CC_SWITCHES} -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" \
+	  ${TKX_GENERIC_DIR}/tkXinit.c
+
+tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
+	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXshell.c
+
+tkXAppInit.o: ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
+	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
+
+tkXinitSA.o: ${TKX_GENERIC_DIR}/tkXinitSA.c ${STANDALONE_SRCS}
+	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXinitSA.c
+
+tkXAppInitSA.c: tkXAppInitSA.c Makefile
+	rm -f tkXinitSA.c
+	sed -e s/Tclx_Init/Tclx_InitStandAlone/ \
+	    -e s/Tcl_Init/Tcl_InitStandAlone/ \
+	    -e s/Tkx_Init/Tkx_InitStandAlone/ \
+	    -e s/Tk_Init/Tk_InitStandAlone/ \
+	    ${TKX_UNIX_SRC_DIR}/tkXAppInit.c >tkXAppInitSA.c
+
+tkXunixTest.o: ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
+	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
+
+tkXunixTestDA.o: ${TKX_UNIX_SRC_DIR}/tkXunixTestSA.c
+	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXunixTestSA.c
+
+tkXunixTestSA.c: tkXunixTest.c Makefile
+	rm -f tkXinitSA.c
+	sed -e s/Tclx_Init/Tclx_InitStandAlone/ \
+	    -e s/Tcl_Init/Tcl_InitStandAlone/ \
+	    -e s/Tkx_Init/Tkx_InitStandAlone/ \
+	    -e s/Tk_Init/Tk_InitStandAlone/ \
+	    ${TKX_UNIX_SRC_DIR}/tkXunixTest.c >tkXunixTestSA.c
+
+
+#------------------------------------------------------------------------------
+# Dependencies for generating objects (position independant versions).
+#
+tkXinit..o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" ${TKX_GENERIC_DIR}/tkXinit.c
+	@OBJ_RESTORE@
+
+tkXinitDSA..o: ${TKX_GENERIC_DIR}/tkXinitDSA.c Makefile
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	   "${TKX_INST_RUNTIME}\" ${TKX_GENERIC_DIR}/tkXinitDSA.c
+	@OBJ_RESTORE@
+
+tkXshell..o: ${TKX_GENERIC_DIR}/tkXshell.c
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TKX_GENERIC_DIR}/tkXshell.c
+	@OBJ_RESTORE@
+
+#------------------------------------------------------------------------------
+# Rules to build standalone .c files using tcl2c.  Explicit rules are required,
+# as not all makes can handle cross-directory rules.
+
+tkx.c: ${RUNTIME_DIR}/tkx.tcl
+	${TCL2C} -o $@ -a -n $@ $<
+.c.o:
+	${CC} -c ${CC_SWITCHES} $<

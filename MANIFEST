@@ -29,6 +29,8 @@
 ./tcl/generic/tclXgeneral.c
 ./tcl/generic/tclXhandles.c
 ./tcl/generic/tclXinit.c
+./tcl/generic/tclXinitDSA.c
+./tcl/generic/tclXinitSA.c
 ./tcl/generic/tclXkeylist.c
 ./tcl/generic/tclXlgets.c
 ./tcl/generic/tclXlib.c
@@ -310,6 +312,9 @@
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
 ./tcl/unix/pkgIndex.tcl.in
+./tcl/unix/runtest.in
+./tcl/unix/runtest.standalone.in
+./tcl/unix/runtest.static.in
 ./tcl/unix/tclXAppInit.c
 ./tcl/unix/tclXunixCmds.c
 ./tcl/unix/tclXunixDup.c
@@ -332,6 +337,8 @@
 ./tcl/win/tclXwinTest.c
 ./tcl/win/tclx.rc
 ./tk/generic/tkXinit.c
+./tk/generic/tkXinitDSA.c
+./tk/generic/tkXinitSA.c
 ./tk/generic/tkXshell.c
 ./tk/generic/tkXshell.c.diff
 ./tk/help/Tk.brf
@@ -394,6 +401,9 @@
 ./tk/tests/signal.test
 ./tk/unix/Makefile.in
 ./tk/unix/pkgIndex.tcl.in
+./tk/unix/runtest.in
+./tk/unix/runtest.standalone.in
+./tk/unix/runtest.static.in
 ./tk/unix/tkXAppInit.c
 ./tk/unix/tkXunixTest.c
 ./tk/unix/tkxConfig.sh.in
@@ -410,6 +420,12 @@
 ./unix/Makefile.in
 ./unix/configure
 ./unix/configure.in
+./unix/runtcl.in
+./unix/runtcl.standalone.in
+./unix/runtcl.static.in
+./unix/runwishx.in
+./unix/runwishx.standalone.in
+./unix/runwishx.static.in
 ./unix/tools/Makefile.in
 ./unix/tools/bldmanhelp.tcl
 ./unix/tools/buildutil.tcl

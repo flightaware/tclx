@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.16 1997/08/17 05:31:38 markd Exp $
+ * $Id: tclXlib.c,v 8.17 1997/08/17 06:27:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Really should use original auto_load instead load_ouster_index,
@@ -52,8 +52,24 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
  * This is a global rather than a local so it will work with K&R compilers.
  * Its writable so it works with gcc.
  */
+#ifdef HAVE_STANDALONE
+static char loadOusterCmd [] =
+"if [catch {source -rsrc loadouster}] {\n\
+    source [file join $tclx_library loadouster.tcl]\n\
+}";
+#else
 static char loadOusterCmd [] =
     "source [file join $tclx_library loadouster.tcl]";
+#endif
+
+/*
+ * Command to pass to Tcl_GlobalEval to load all built-in index files
+ * (for standalone executables).
+ */
+static char searchBuiltIn [] =
+"foreach pkg \"[info loaded {}] {{} Tcl}\" {\n\
+    catch {source -rsrc [string tolower [lindex $pkg 1]]:tclIndex}\n\
+}";
 
 /*
  * Indicates the type of library index.
@@ -687,7 +703,7 @@ BuildPackageIndex (interp, tlibFilePath)
     Tcl_DStringInit (&command);
 
     Tcl_DStringAppend (&command, 
-                       "source [file join $tclx_library buildidx.tcl];", -1);
+		       "if [catch {source -rsrc buildidx}] {source [file join $tclx_library buildidx.tcl]};", -1);
     Tcl_DStringAppend (&command, "buildpackageindex ", -1);
     Tcl_DStringAppend (&command, tlibFilePath, -1);
 
@@ -1481,6 +1497,21 @@ TclX_Auto_loadObjCmd (clientData, interp, objc, objv)
      * Slow path, load the libraries indices on auto_path.
      */
     if (LoadAutoPath (interp, infoPtr) != TCL_OK)
+        goto errorExit;
+
+    /*
+     * Try to load the command again.
+     */
+    result = LoadCommand (interp, command);
+    if (result == TCL_ERROR)
+        goto errorExit;
+    if (result == TCL_OK)
+        goto found;
+
+    /*
+     * Not in auto_path. The last chance is that it is built-in.
+     */
+    if (Tcl_GlobalEval(interp, searchBuiltIn) != TCL_OK)
         goto errorExit;
 
     /*

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 8.1 1997/04/17 05:00:33 markd Exp $
+# $Id: makefile.vc,v 8.2 1997/08/17 04:08:51 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,6 +27,18 @@ static:
         nmake /f makefile.vc static
         cd ..\..\tk\win
         nmake /f makefile.vc static
+
+static:
+        cd ..\tcl\win
+        nmake /f makefile.vc static
+        cd ..\..\tk\win
+        nmake /f makefile.vc static
+
+standalone:
+        cd ..\tcl\win
+        nmake /f makefile.vc standalone
+        cd ..\..\tk\win
+        nmake /f makefile.vc standalone
 
 test:
         cd ..\tcl\win

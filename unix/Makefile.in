@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.2 1997/06/27 09:11:56 karl Exp $
+# $Id: Makefile.in,v 8.3 1997/08/17 21:46:46 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -47,50 +47,6 @@ TOOLS:
 	cd tools; ${MAKE} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
-# Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
-# at the local runtime directories so tcl & wishx can be run before installing.
-
-runtcl: Makefile
-	@echo '#!/bin/sh'                                           >runtcl
-	@echo '# script for testing Tcl before installation'       >>runtcl
-	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtcl
-	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtcl
-	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtcl
-	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtcl
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${LD_LIBRARY_PATH}" >>runtcl
-	@echo "SHLIB_PATH=${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${SHLIB_PATH}" >>runtcl
-	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                  >>runtcl
-	@echo "if [ \$$# = 0 ]"                                    >>runtcl
-	@echo "then"                                               >>runtcl
-	@echo "    exec \$$TCL_PROGRAM"                            >>runtcl
-	@echo "else"                                               >>runtcl
-	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                   >>runtcl
-	@echo "fi"                                                 >>runtcl
-	chmod a+rx runtcl
-
-runwishx: Makefile
-	@echo '#!/bin/sh'                                          >runwishx
-	@echo '# script for testing wishx before installation'    >>runwishx
-	@echo "TCL_LIBRARY=${TCL_SRC}/library"                    >>runwishx
-	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                  >>runwishx
-	@echo "TK_LIBRARY=${TK_SRC}/library"                      >>runwishx
-	@echo "TKX_LIBRARY=${TKX_TMP_RUNTIME}"                    >>runwishx
-	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"              >>runwishx
-	@echo "WISHX=${TKX_UNIX_BLD_DIR}/wishx"                   >>runwishx
-	@echo "export TCL_LIBRARY TCLX_LIBRARY"                   >>runwishx
-	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"         >>runwishx
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_BUILD}/unix:${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${LD_LIBRARY_PATH}" >>runwishx
-	@echo "SHLIB_PATH=${bldbasedir}/tk/unix:${TK_BUILD}/unix:${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${SHLIB_PATH}" >>runwishx
-	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                 >>runwishx
-	@echo "if [ \$$# = 0 ]"                                   >>runwishx
-	@echo "then"                                              >>runwishx
-	@echo "    exec \$$WISHX"                                 >>runwishx
-	@echo "else"                                              >>runwishx
-	@echo "    exec \$$WISHX \"\$$@\""                        >>runwishx
-	@echo "fi"                                                >>runwishx
-	chmod a+rx runwishx
-
-#------------------------------------------------------------------------------
 # Static executables.
 
 static: all
@@ -98,19 +54,50 @@ static: all
 	cd ../tk/unix; ${MAKE} static
 
 #------------------------------------------------------------------------------
+# Standalone executables.
+
+standalone: all
+	cd ../tcl/unix; ${MAKE} standalone
+	cd ../tk/unix; ${MAKE} standalone
+
+#------------------------------------------------------------------------------
 # Run the tests.
 
 test: all
-	cd ../tcl/unix; ${MAKE} test
+	(cd ../tcl/unix &&  ${MAKE} test)
 
 ucbtests: all
-	cd ../tcl/unix; ${MAKE} ucbtests
+	(cd ../tcl/unix &&  ${MAKE} ucbtests)
 
 testx: all
-	cd ../tcl/unix; ${MAKE} testx
+	(cd ../tcl/unix &&  ${MAKE} testx)
 
 tktest: all
-	cd ../tk/unix;  ${MAKE} test
+	(cd ../tk/unix &&   ${MAKE} test)
+
+test.static: static
+	(cd ../tcl/unix &&  ${MAKE} test.static)
+
+ucbtests.static: static
+	(cd ../tcl/unix &&  ${MAKE} ucbtests.static)
+
+testx.static: static
+	(cd ../tcl/unix &&  ${MAKE} testx.static)
+
+tktest.static: static
+	(cd ../tk/unix &&   ${MAKE} test.static)
+
+test.standalone: standalone
+	(cd ../tcl/unix &&  ${MAKE} test.standalone)
+
+ucbtests.standalone: standalone
+	(cd ../tcl/unix &&  ${MAKE} ucbtests.standalone)
+
+testx.standalone: standalone
+	(cd ../tcl/unix &&  ${MAKE} testx.standalone)
+
+tktest.standalone: standalone
+	(cd ../tk/unix &&   ${MAKE} test.standalone)
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or

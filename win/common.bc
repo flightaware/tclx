@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.bc,v 8.1 1997/06/12 21:08:56 markd Exp $
+# $Id: common.bc,v 8.2 1997/08/17 04:08:50 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -99,13 +99,16 @@ LNFLAGS16_dll = -Twd -c -C -A=16 $(DEBUGLDFLAGS16) $(BORLAND)\lib\c0dl
 .AUTODEPEND
 .CACHEAUTODEPEND
  
-.suffixes: .c .dll .lib .obj .exe
+.suffixes: .c .tcl .dll .lib .obj .exe
  
 .path.c=$(ROOT)\win;$(ROOT)\generic;$(ROOT)\compat
 .path.obj=$(TMPDIR)
 .path.dll=$(ROOT)\win
 
 # Implicit Targets
+
+.tcl.c:
+	$(TCL_WIN_DIR)\$(TCL2C) -a -n $@ -o $< $@
 
 .c.obj:
 	@$(BCC32) {$< }
@@ -141,6 +144,7 @@ TCL_RUNTIME_DIR  = $(TCL_DIR)\library
 TCL_TESTS_DIR    = $(TCL_DIR)\tests
 TCL_LIB          = $(TCL_WIN_DIR)\tcl80.lib
 TCL_DLL          = $(TCL_WIN_DIR)\tcl80.dll
+TCL_SALIB        = $(TCL_WIN_DIR)\tcl80sa.lib
 
 #
 # TK build directories and files.
@@ -153,6 +157,7 @@ TK_RUNTIME_DIR   = $(TK_DIR)\library
 TK_TESTS_DIR     = $(TK_DIR)\tests
 TK_LIB           = $(TK_WIN_DIR)\tk80.lib
 TK_DLL           = $(TK_WIN_DIR)\tk80.dll
+TK_SALIB         = $(TK_WIN_DIR)\tk80sa.lib
 
 #
 # TclX directories.
@@ -163,6 +168,7 @@ TCLX_RUNTIME_DIR  = $(ROOT)\tcl\runtime
 TCLX_LIB          = $(TCLX_WIN_DIR)\tclx800.lib
 TCLX_SHORT_DLL    = tclx800.dll
 TCLX_DLL          = $(TCLX_WIN_DIR)\$(TCLX_SHORT_DLL)
+TCLX_SALIB        = $(TCLX_WIN_DIR)\tclx800s.lib
 TCLX_INST_BIN     = $(PREFIX)\bin
 TCLX_INST_INCL    = $(PREFIX)\include
 TCLX_INST_LIB     = $(PREFIX)\lib
@@ -178,6 +184,7 @@ TKX_GENERIC_DIR  = $(ROOT)\tk\generic
 TKX_RUNTIME_DIR  = $(ROOT)\tk\runtime
 TKX_LIB          = $(TKX_WIN_DIR)\tkx800.lib
 TKX_DLL          = $(TKX_WIN_DIR)\tkx800.dll
+TKX_SALIB        = $(TKX_WIN_DIR)\tkx800sa.lib
 TKX_INST_BIN     = $(PREFIX)\bin
 TKX_INST_INCL    = $(PREFIX)\include
 TKX_INST_LIB     = $(PREFIX)\lib

@@ -1336,3 +1336,8 @@
   o Added patch to tcl8.0/generic/tclCmdAH.c to fix memory corruption caused
     by the format command.
 -------------------------------------------------------------------------------
+24 Aug 97:
+  o Added support for generating standalone executables, with Tcl runtime in
+    the executable as strings.  Requires Jan Nijtmans'
+    <nijtmans@worldaccess.nl> Tcl/Tk Plus patch.
+-------------------------------------------------------------------------------

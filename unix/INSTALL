@@ -2,7 +2,7 @@
 INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
 ------------------------------------------------------------------------
 
-$Id: INSTALL,v 8.3 1997/08/17 21:46:45 markd Exp $
+$Id: INSTALL,v 8.4 1997/08/18 00:10:00 markd Exp $
 
 QUICK START
 ===========
@@ -250,6 +250,20 @@ SHARED LIBRARIES
    Shared libraries can be built for all systems that Tcl supports shared
 libraries on.  The --enable-shared flag to configure generates TclX shared
 libraries.  
+
+PLUS-PATCHES
+============
+
+If Jan Nijtmans' Plus patch is applied to Tcl, TclX will automatically
+generate standalone object in the static (.a) library.  This allows
+building applications with no external dependencies.  The following
+additional make targets are also available:
+
+    o standalone - Generate standalone executables, tcl.standalone and
+      wishx.standalone.
+    o test.standalone - Run the tests using the standalone executables.
+
+See http://www.worldaccess.nl/~nijtmans/plus.html for the Plus patches.
 
 INTEGRATING WITH OTHER EXTENSIONS AND APPLICATIONS
 ==================================================

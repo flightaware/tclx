@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.tcl,v 8.2 1997/07/10 10:50:31 markd Exp $
+# $Id: convlib.tcl,v 8.3 1997/08/23 18:55:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -74,9 +74,6 @@ namespace eval TclX {
 # list
 
 proc convert_lib {tclIndex packageLib {ignore {}}} {
-    global tclx_library
-    source $tclx_library/buildidx.tcl
-
     if {[file tail $tclIndex] != "tclIndex"} {
         error "Tail file name must be `tclIndex': $tclIndex"}
     if ![file readable $tclIndex] {

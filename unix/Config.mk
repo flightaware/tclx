@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 8.6 1997/07/03 07:27:34 markd Exp $
+# $Id: Config.mk,v 8.7 1997/08/17 04:08:46 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -90,6 +90,13 @@ TK_LIB=${TK_BUILD_LIB_SPEC}
 
 AR=ar
 STRIP=strip
+
+#------------------------------------------------------------------------------
+# Location of optional tcl2c program.  Used if compiling with a Tcl that has
+# the PlusPatch applied.
+
+TCL2C = ${TCL_UNIX_DIR}/tcl2c
+
 
 #------------------------------------------------------------------------------
 # X is often in strange places, override what configure figured out if

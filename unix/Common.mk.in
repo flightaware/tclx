@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 8.5 1997/08/17 04:08:45 markd Exp $
+# $Id: Common.mk.in,v 8.6 1997/08/23 18:56:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -146,3 +146,12 @@ CONVERTLIB         = ${RUNTCL} ${srcbasedir}/unix/tools/libconvert.tcl
 INSTCOPY           = ${RUNTCL} ${bldbasedir}/unix/tools/instcopy
 CPMANPAGES         = ${RUNTCL} ${bldbasedir}/unix/tools/cpmanpages
 
+  
+#------------------------------------------------------------------------------
+# For conversion of a tcl-script into C-strings.  Used in standalone binaries.
+# Requires Tcl PlusPatch.
+#
+.SUFFIXES: .tcl $(SUFFIXES)
+
+.tcl.c:
+	${TCL2C} -o $@ -a -n $@ $<
