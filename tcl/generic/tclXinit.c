@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 4.3 1995/01/01 19:49:38 markd Exp markd $
+ * $Id: tclXinit.c,v 4.4 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -118,7 +118,7 @@ ProcessInitFile (interp)
         value = Tcl_GetVar (interp, "tclx_library",  
                             TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
         if (value == NULL) {
-            Tcl_AppendResult (interp, "can't find variable \"tclx_library\", "
+            Tcl_AppendResult (interp, "can't find variable \"tclx_library\", ",
                               "should have been set by TclXLib_Init",
                               (char *) NULL);
             goto errorExit;
