@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.16 1995/04/30 05:46:07 markd Exp markd $
+.\" $Id: TclX.n,v 4.17 1995/05/15 00:04:20 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -43,7 +43,7 @@ o Debugging and Development Commands
 .TP
 o Unix Access Commands
 .TP
-o File I/O Commands
+o File Commands
 .TP
 o TCP/IP Server Access
 .TP
@@ -155,6 +155,10 @@ command will sync individual files.
 \fB0\fR if it is not available and the \fBsync\fR command will always sync
 all file buffers.
 .TP
+.B have_ftruncate
+Return \fB1\fR if the \fBftruncate\fR system call is available.  If it is,
+the \fBftruncate\fR command \fB-fileid\fR option maybe used.
+.TP
 .B have_msgcats
 Return \fB1\fR if XPG message catalogs are available, \fB0\fR if they are
 not.  The \fBcatgets\fR is designed to continue to function without message
@@ -169,6 +173,10 @@ signals are not available.
 Return \fB1\fR if sockets are available (\fBserver_*\fR suite
 and \fBfstat\fR \fBlocalhost\fR and \fBremotehost\fR options).
 \fB0\fR is returned if sockets are not available.
+.TP
+.B have_truncate
+Return \fB1\fR if the \fBtruncate\fR of \fBchsize\fR system call is available.
+If it is, the \fBftruncate\fR command will work.
 .TP
 .B appname
 Return the symbolic application name of the current application linked with
@@ -445,10 +453,8 @@ currently defined procedures if none is specified, to the named file.
 .SH "UNIX ACCESS COMMANDS
 .PP
 These commands provide access to many basic Unix facilities, including process
-handling, date and time processing, signal handling,
-linking and unlinking files,
-setting file, process, and user attributes, and the executing
-commands via the shell.
+handling, date and time processing, signal handling
+and the executing commands via the shell.
 '
 '\"@help: tcl/time/alarm
 '\"@brief: Set a process alarm clock.
@@ -461,64 +467,7 @@ specified.
 If \fIseconds\fR is 0.0, any previous alarm request is canceled.
 Only one alarm at a time may be active; the command returns the number of
 seconds left in the previous alarm.  On systems without the \fBsetitimer\fR
-system call, \fIseconds\fR is rounded up to an even number of seconds.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/files/chgrp
-'\"@brief: Change file group.
-.TP
-.B chgrp \fR[\fB-fileid\fR] \fIgroup\fR \fIfilelist\fR
-.br
-Set the
-group id of each file in the list \fIfilelist\fR to \fIgroup\fR, which can
-be either a
-group name or a numeric group id.
-.sp
-If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
-file identifiers rather than a list of file names.  This option is not
-available on all Unix systems.  Use the \fBinfox have_fchown\fR command
-to determine if this functionallity is available.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/files/chmod
-'\"@brief: Set file permissions.
-.TP
-.B chmod \fR[\fB-fileid\fR] \fImode\fR \fIfilelist\fR
-.br
-Set permissions of each of the files in the list \fIfilelist\fR to \fImode\fR,
-where \fImode\fR is an absolute numeric mode or symbolic permissions as in the
-UNIX \fBchmod(1)\fR command.  To specify a mode as octal, it should be
-prefixed with a "0" (e.g. 0622).
-.sp
-If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
-file identifiers rather than a list of file names.  This option is not
-available on all Unix systems.  Use the \fBinfox have_fchmod\fR command
-to determine if this functionallity is available.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/files/chown
-'\"@brief: Change file owner and/or group.
-.TP
-.B chown \fR[\fB-fileid\fR] \fIowner\fR|{\fIowner group\fR} \fIfilelist\fR
-.br
-Set owner of each file in the list \fIfilelist\fR to \fIowner\fR, which can
-be a user
-name or numeric user id.  If the first parameter is a list, then the
-owner is set to the first element of the list and the group is set to the
-second element.  \fIGroup\fR can be a group name or numeric group id.
-If \fIgroup\fR is {}, then the file group will be set to the login
-group of the specified user.
-.sp
-If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
-file identifiers rather than a list of file names.  This option is not
-available on all Unix systems.  Use the \fBinfox have_fchown\fR command
-to determine if this functionallity is available.
+system call, \fIseconds\fR is rounded up to an integer number of seconds.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1132,14 +1081,16 @@ available to the \fBwait\fR command.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-.SH "FILE I/O COMMANDS"
-.PP      
-These commands extend the stdio-style file I/O capabilities present in Tcl
-and above.
-These extensions include searching ASCII-sorted data files, copying files,
+.SH "FILE COMMANDS"
+.PP
+These commands provide extended file access and manipulation.
+This includes searching ASCII-sorted data files, copying files,
 duplicating file descriptors, control of file access options, retrieving open
-file status, and creating pipes with the \fBpipe\fR system call.  An interface
-to the \fBselect\fR system call is available on Unix systems that support
+file status, and creating pipes with the \fBpipe\fR system call.  Also linking
+and unlinking files, setting file, process, and user attributes
+and truncating files.
+An interface to the \fBselect\fR system call is available on Unix systems that
+support
 it.
 .PP
 It should be noted that Tcl file I/O is implemented on top of the stdio 
@@ -1196,6 +1147,63 @@ The command returns the number of bytes that were copied.
 .sp
 The \fB-bytes\fR option is particularly useful for mixing binary data
 in with ASCII commands or data in a data stream.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/files/chmod
+'\"@brief: Set file permissions.
+.TP
+.B chmod \fR[\fB-fileid\fR] \fImode\fR \fIfilelist\fR
+.br
+Set permissions of each of the files in the list \fIfilelist\fR to \fImode\fR,
+where \fImode\fR is an absolute numeric mode or symbolic permissions as in the
+UNIX \fBchmod(1)\fR command.  To specify a mode as octal, it should be
+prefixed with a "0" (e.g. 0622).
+.sp
+If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+file identifiers rather than a list of file names.  This option is not
+available on all Unix systems.  Use the \fBinfox have_fchmod\fR command
+to determine if this functionallity is available.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/files/chown
+'\"@brief: Change file owner and/or group.
+.TP
+.B chown \fR[\fB-fileid\fR] \fIowner\fR|{\fIowner group\fR} \fIfilelist\fR
+.br
+Set owner of each file in the list \fIfilelist\fR to \fIowner\fR, which can
+be a user
+name or numeric user id.  If the first parameter is a list, then the
+owner is set to the first element of the list and the group is set to the
+second element.  \fIGroup\fR can be a group name or numeric group id.
+If \fIgroup\fR is {}, then the file group will be set to the login
+group of the specified user.
+.sp
+If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+file identifiers rather than a list of file names.  This option is not
+available on all Unix systems.  Use the \fBinfox have_fchown\fR command
+to determine if this functionallity is available.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/files/chgrp
+'\"@brief: Change file group.
+.TP
+.B chgrp \fR[\fB-fileid\fR] \fIgroup\fR \fIfilelist\fR
+.br
+Set the
+group id of each file in the list \fIfilelist\fR to \fIgroup\fR, which can
+be either a
+group name or a numeric group id.
+.sp
+If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+file identifiers rather than a list of file names.  This option is not
+available on all Unix systems.  Use the \fBinfox have_fchown\fR command
+to determine if this functionallity is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1398,6 +1406,25 @@ o\ \fBlocalhost\fR - If \fIfileId\fR is a TCP/IP socket connection, then a
 list is returned with the first element being the local host IP address.  If
 the local host name can be found, it is returned as the second element of
 the list.  The local host IP port number is returned as the this element.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/files/ftruncate
+'\"@brief: Truncate a file to a specified size.
+.TP
+.B ftruncate \fR[\fB-fileid\fR] \fIfile newsize\fR
+.br
+Truncate a file to have a length of at most \fInewsize\fR bytes.
+.sp
+If the option \fB-fileid\fR is specified, \fIfile\fR is an open
+file identifier, otherwise it is a file path.
+.sp
+This command is not available on all systems if the underlying operating
+system support is not available.  The command \fBinfox have_truncate\fR
+will indicate if this command is available.  On some systems,
+the \fB-fileid\fR option is not available,  check the result of
+\fBinfox have_ftruncate\fR to see if it can be used.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

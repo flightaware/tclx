@@ -108,6 +108,7 @@
 ./tclhelp/tcl/files/for_recursive_glob
 ./tclhelp/tcl/files/frename
 ./tclhelp/tcl/files/fstat
+./tclhelp/tcl/files/ftruncate
 ./tclhelp/tcl/files/funlock
 ./tclhelp/tcl/files/gets
 ./tclhelp/tcl/files/glob

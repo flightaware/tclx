@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 4.3 1995/04/15 19:49:30 markd Exp markd $
+ * $Id: tclXgeneral.c,v 4.4 1995/05/15 00:04:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -133,6 +133,14 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
 #       endif        
         return TCL_OK;
     }
+    if (STREQU ("have_ftruncate", argv [1])) {
+#       ifdef HAVE_FTRUNCATE
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
     if (STREQU ("have_msgcats", argv [1])) {
 #       ifdef HAVE_CATGETS
         interp->result = "1";
@@ -151,6 +159,14 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     }
     if (STREQU ("have_sockets", argv [1])) {
 #       ifdef HAVE_SOCKET
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
+    if (STREQU ("have_truncate", argv [1])) {
+#       if defined(HAVE_TRUNCATE) || defined(HAVE_CHSIZE)
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -181,8 +197,8 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     Tcl_AppendResult (interp, "illegal option \"", argv [1], 
                       "\" expect one of: version, patchlevel, ",
                       "have_fchown, have_fchmod, have_flock, ",
-                      "have_fsync, have_msgcats, have_posix_signals, ",
-                      "have_sockets, ",
+                      "have_fsync, have_ftruncate, have_msgcats, ",
+                      "have_sockets, have_truncate, have_posix_signals, ",
                       "appname, applongname, appversion, or apppatchlevel",
                       (char *) NULL);
     return TCL_ERROR;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 4.2 1995/01/01 19:49:27 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 4.3 1995/04/25 04:01:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -43,6 +43,10 @@
  */
 
 #include "tclExtdInt.h"
+
+static char *FILE_ID_OPT = "-fileid";
+static char *FILE_ID_NOT_AVAIL =
+    "The -fileid option is not available on this system";
 
 /*
  * Prototypes of internal functions.
@@ -627,6 +631,120 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
+#if defined(HAVE_TRUNCATE) || defined(HAVE_CHSIZE)
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_FtruncateCmd --
+ *     Implements the Tcl ftruncate command:
+ *     ftruncate [-fileid] file newsize
+ *
+ * Results:
+ *  Standard TCL results, may return the UNIX system error message.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_FtruncateCmd (clientData, interp, argc, argv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          argc;
+    char       **argv;
+{
+    int          argIdx, fileIds, stat;
+    off_t        newSize;
+    char        *filePath;
+    Tcl_DString  tildeBuf;
+    FILE        *filePtr;
+
+    fileIds = FALSE;
+    for (argIdx = 1; (argIdx < argc) && (argv [argIdx] [0] == '-'); argIdx++) {
+        if (STREQU (argv [argIdx], FILE_ID_OPT)) {
+            fileIds = TRUE;
+        } else {
+            Tcl_AppendResult (interp, "Invalid option \"", argv [argIdx],
+                              "\", expected \"", FILE_ID_OPT, "\"",
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+
+    if (argIdx != argc - 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " [-fileid] file newsize", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetOffset (interp,
+                       argv [argIdx + 1],
+                       &newSize) != TCL_OK)
+        return TCL_ERROR;
+
+
+    if (fileIds) {
+#ifndef HAVE_FTRUNCATE
+        Tcl_AppendResult (interp, FILE_ID_NOT_AVAIL, (char *) NULL);
+        return TCL_ERROR;
+#else
+        if (Tcl_GetOpenFile (interp, argv [argIdx],
+                             TRUE, TRUE, /* Write access */
+                             &filePtr) != TCL_OK)
+            return TCL_ERROR;
+
+        if (ftruncate (fileno (filePtr), newSize) != 0) {
+            Tcl_AppendResult (interp, argv [argIdx], ": ",
+                              Tcl_PosixError (interp), (char *) NULL);
+            return TCL_ERROR;
+        }
+#endif        
+    } else {
+        Tcl_DStringInit (&tildeBuf);
+
+        filePath = Tcl_TildeSubst (interp, argv [argIdx], &tildeBuf);
+        if (filePath == NULL) {
+            Tcl_DStringFree (&tildeBuf);
+            return TCL_ERROR;
+        }
+#if HAVE_TRUNCATE
+        stat = truncate (filePath, newSize);
+#else
+        stat = chsize (filePath, newSize);
+#endif
+        if (stat != 0) {
+            Tcl_AppendResult (interp, filePath, ": ",
+                              Tcl_PosixError (interp), (char *) NULL);
+            Tcl_DStringFree (&tildeBuf);
+            return TCL_ERROR;
+        }
+        Tcl_DStringFree (&tildeBuf);
+    }
+    return TCL_OK;
+}
+#else
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_FtruncateCmd --
+ *     Dummy ftruncate command that returns an error for systems that don't
+ *     have ftruncate or chsize.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_FtruncateCmd (clientData, interp, argc, argv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          argc;
+    char       **argv;
+{
+{
+    Tcl_AppendResult (interp, 
+                      "the ftruncate command is not available on this ",
+                      "version of Unix", (char *) NULL);
+    return TCL_ERROR;
+}
+#endif
 
 /*
  *-----------------------------------------------------------------------------

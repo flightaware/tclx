@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.11 1995/04/17 01:24:02 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.12 1995/04/30 00:48:00 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -399,6 +399,12 @@ Tcl_LgetsCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 extern int 
 Tcl_FrenameCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
+extern int
+Tcl_FtruncateCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int
+Tcl_ReaddirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
 /*
  * from tclXfstat.c
  */
@@ -413,9 +419,6 @@ Tcl_FlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int
 Tcl_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int
-Tcl_ReaddirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
  * from tclXfilescan.c
