@@ -1248,5 +1248,10 @@
   o Fixed bug that caused some scanmatch regular expression to fail to match
     due to problems with the BoyerMoore pre-parse.
 -------------------------------------------------------------------------------
+02 Jan 97:
+  o Changed to compile shared libraries with -fpic and +z.
+  o Added Win32 support for ftruncate, close-on-exec and partial support for
+    dup-ing and open file.  Supplied by Alan Dewar <alan@calgary.hp.com>.
+-------------------------------------------------------------------------------
 
  
