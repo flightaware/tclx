@@ -333,113 +333,6 @@ rm -f conftest*
 
 
 #------------------------------------------------------------------------------
-#       Check for missing functions that we need.  They will be
-#       compiled in the osSupport directory. Must check for SCO
-#       -lintl, which is were strftime is hidden.
-#------------------------------------------------------------------------------
-
-LIBS_save="${LIBS}"
-LIBS="${LIBS} -lintl"
-have_lib=""
-echo checking for -lintl
-cat > conftest.c <<EOF
-#include "confdefs.h"
-
-int main() { exit(0); }
-int t() { main(); }
-EOF
-if eval $compile; then
-  rm -rf conftest*
-  have_lib="1"
-
-fi
-rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
-   :; LIBS="$LIBS -lintl"
-else
-   :; 
-fi
-
-
-echo checking for strftime
-cat > conftest.c <<EOF
-#include "confdefs.h"
-#include <ctype.h>
-int main() { exit(0); }
-int t() { 
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_strftime) || defined (__stub___strftime)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char strftime(); strftime();
-#endif
- }
-EOF
-if eval $compile; then
-  :
-else
-  rm -rf conftest*
-  LIBOBJS="$LIBOBJS strftime.o"
-fi
-rm -f conftest*
-
-echo checking for random
-cat > conftest.c <<EOF
-#include "confdefs.h"
-#include <ctype.h>
-int main() { exit(0); }
-int t() { 
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_random) || defined (__stub___random)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char random(); random();
-#endif
- }
-EOF
-if eval $compile; then
-  :
-else
-  rm -rf conftest*
-  LIBOBJS="$LIBOBJS random.o"
-fi
-rm -f conftest*
-
-echo checking for rename
-cat > conftest.c <<EOF
-#include "confdefs.h"
-#include <ctype.h>
-int main() { exit(0); }
-int t() { 
-/* The GNU C library defines this for functions which it implements
-    to always fail with ENOSYS.  Some functions are actually named
-    something starting with __ and the normal name is an alias.  */
-#if defined (__stub_rename) || defined (__stub___rename)
-choke me
-#else
-/* Override any gcc2 internal prototype to avoid an error.  */
-extern char rename(); rename();
-#endif
- }
-EOF
-if eval $compile; then
-  :
-else
-  rm -rf conftest*
-  LIBOBJS="$LIBOBJS rename.o"
-fi
-rm -f conftest*
-
-
-
-#------------------------------------------------------------------------------
 #       Check for missing typedefs.
 #------------------------------------------------------------------------------
 
@@ -914,10 +807,13 @@ rm -f conftest*
 #             as strstr
 #--------------------------------------------------------------------
 
-echo checking for unistd.h
+for hdr in unistd.h
+do
+trhdr=HAVE_`echo $hdr | tr '[a-z]./' '[A-Z]__'`
+echo checking for ${hdr}
 cat > conftest.c <<EOF
 #include "confdefs.h"
-#include <unistd.h>
+#include <${hdr}>
 EOF
 err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
 if test -z "$err"; then
@@ -925,18 +821,19 @@ if test -z "$err"; then
   
 {
 test -n "$verbose" && \
-echo "	defining HAVE_UNISTD_H"
-echo "#define" HAVE_UNISTD_H 1 >> confdefs.h
-DEFS="$DEFS -DHAVE_UNISTD_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_UNISTD_H\${SEDdB}HAVE_UNISTD_H\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_UNISTD_H\${SEDuB}HAVE_UNISTD_H\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_UNISTD_H\${SEDeB}HAVE_UNISTD_H\${SEDeC}1\${SEDeD}
+echo "	defining ${trhdr}"
+echo "#define" ${trhdr} 1 >> confdefs.h
+DEFS="$DEFS -D${trhdr}=1"
+SEDDEFS="${SEDDEFS}\${SEDdA}${trhdr}\${SEDdB}${trhdr}\${SEDdC}1\${SEDdD}
+\${SEDuA}${trhdr}\${SEDuB}${trhdr}\${SEDuC}1\${SEDuD}
+\${SEDeA}${trhdr}\${SEDeB}${trhdr}\${SEDeC}1\${SEDeD}
 "
 }
 
 
 fi
 rm -f conftest*
+done
 
 echo checking for dirent.h
 cat > conftest.c <<EOF
@@ -2003,6 +1900,114 @@ done
 
 
 #------------------------------------------------------------------------------
+#       Check for missing functions that we need.  They will be
+#       compiled in the osSupport directory. Must check for SCO
+#       -lintl, which is were strftime is hidden.  Also done after library
+#       checks.
+#------------------------------------------------------------------------------
+
+LIBS_save="${LIBS}"
+LIBS="${LIBS} -lintl"
+have_lib=""
+echo checking for -lintl
+cat > conftest.c <<EOF
+#include "confdefs.h"
+
+int main() { exit(0); }
+int t() { main(); }
+EOF
+if eval $compile; then
+  rm -rf conftest*
+  have_lib="1"
+
+fi
+rm -f conftest*
+LIBS="${LIBS_save}"
+if test -n "${have_lib}"; then
+   :; LIBS="$LIBS -lintl"
+else
+   :; 
+fi
+
+
+echo checking for strftime
+cat > conftest.c <<EOF
+#include "confdefs.h"
+#include <ctype.h>
+int main() { exit(0); }
+int t() { 
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_strftime) || defined (__stub___strftime)
+choke me
+#else
+/* Override any gcc2 internal prototype to avoid an error.  */
+extern char strftime(); strftime();
+#endif
+ }
+EOF
+if eval $compile; then
+  :
+else
+  rm -rf conftest*
+  LIBOBJS="$LIBOBJS strftime.o"
+fi
+rm -f conftest*
+
+echo checking for random
+cat > conftest.c <<EOF
+#include "confdefs.h"
+#include <ctype.h>
+int main() { exit(0); }
+int t() { 
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_random) || defined (__stub___random)
+choke me
+#else
+/* Override any gcc2 internal prototype to avoid an error.  */
+extern char random(); random();
+#endif
+ }
+EOF
+if eval $compile; then
+  :
+else
+  rm -rf conftest*
+  LIBOBJS="$LIBOBJS random.o"
+fi
+rm -f conftest*
+
+echo checking for rename
+cat > conftest.c <<EOF
+#include "confdefs.h"
+#include <ctype.h>
+int main() { exit(0); }
+int t() { 
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_rename) || defined (__stub___rename)
+choke me
+#else
+/* Override any gcc2 internal prototype to avoid an error.  */
+extern char rename(); rename();
+#endif
+ }
+EOF
+if eval $compile; then
+  :
+else
+  rm -rf conftest*
+  LIBOBJS="$LIBOBJS rename.o"
+fi
+rm -f conftest*
+
+
+
+#------------------------------------------------------------------------------
 #       If Config.mk is not in the build directory, copy it local.
 #------------------------------------------------------------------------------
 
@@ -2084,13 +2089,13 @@ MCS_CMD='$MCS_CMD'
 MAKEINCLUDE='$MAKEINCLUDE'
 MAKEQUOTE='$MAKEQUOTE'
 CPP='$CPP'
-LIBOBJS='$LIBOBJS'
 MAN_DIR_SEPARATOR='$MAN_DIR_SEPARATOR'
 srcbasedir='$srcbasedir'
 bldbasedir='$bldbasedir'
 tk_ok='$tk_ok'
 XINCLUDES='$XINCLUDES'
 XLIBSW='$XLIBSW'
+LIBOBJS='$LIBOBJS'
 prefix='$prefix'
 execprefix='$execprefix'
 LIBS='$LIBS'
@@ -2127,13 +2132,13 @@ s%@MCS_CMD@%$MCS_CMD%g
 s%@MAKEINCLUDE@%$MAKEINCLUDE%g
 s%@MAKEQUOTE@%$MAKEQUOTE%g
 s%@CPP@%$CPP%g
-s%@LIBOBJS@%$LIBOBJS%g
 s%@MAN_DIR_SEPARATOR@%$MAN_DIR_SEPARATOR%g
 s%@srcbasedir@%$srcbasedir%g
 s%@bldbasedir@%$bldbasedir%g
 s%@tk_ok@%$tk_ok%g
 s%@XINCLUDES@%$XINCLUDES%g
 s%@XLIBSW@%$XLIBSW%g
+s%@LIBOBJS@%$LIBOBJS%g
 s%@prefix@%$prefix%g
 s%@execprefix@%$execprefix%g
 s%@LIBS@%$LIBS%g

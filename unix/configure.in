@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 3.1 1993/12/26 21:21:48 markd Exp markd $
+dnl $Id: configure.in,v 3.2 1994/01/11 06:30:50 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 3.1 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 3.2 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -96,18 +96,6 @@ AC_SUBST(MAKEQUOTE)
 
 AC_HEADER_CHECK(values.h, , AC_DEFINE(NO_VALUES_H))
 AC_HEADER_CHECK(sys/socket.h, , AC_DEFINE(NO_SYS_SOCKET_H))
-
-#------------------------------------------------------------------------------
-#       Check for missing functions that we need.  They will be
-#       compiled in the osSupport directory. Must check for SCO
-#       -lintl, which is were strftime is hidden.
-#------------------------------------------------------------------------------
-
-AC_SCO_INTL
-AC_FUNC_CHECK(strftime, ,[LIBOBJS="$LIBOBJS strftime.o"])
-AC_FUNC_CHECK(random, ,[LIBOBJS="$LIBOBJS random.o"])
-AC_FUNC_CHECK(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
-AC_SUBST(LIBOBJS)
 
 #------------------------------------------------------------------------------
 #       Check for missing typedefs.
@@ -233,7 +221,7 @@ AC_FUNC_CHECK(gettimeofday, , AC_DEFINE(NO_GETTOD))
 #             as strstr
 #--------------------------------------------------------------------
 
-AC_UNISTD_H
+AC_HAVE_HEADERS(unistd.h)
 AC_COMPILE_CHECK(dirent.h, [#include <sys/types.h>
 #include <dirent.h>], [
 DIR *d;
@@ -425,6 +413,19 @@ AC_HAVE_LIBRARY(ieee, [LIBS="$LIBS -lieee"])
 
 AC_HAVE_FUNCS(catgets getcwd select setitimer setlinebuf sigaction setpgid)
 AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync getpriority)
+
+#------------------------------------------------------------------------------
+#       Check for missing functions that we need.  They will be
+#       compiled in the osSupport directory. Must check for SCO
+#       -lintl, which is were strftime is hidden.  Also done after library
+#       checks.
+#------------------------------------------------------------------------------
+
+AC_SCO_INTL
+AC_FUNC_CHECK(strftime, ,[LIBOBJS="$LIBOBJS strftime.o"])
+AC_FUNC_CHECK(random, ,[LIBOBJS="$LIBOBJS random.o"])
+AC_FUNC_CHECK(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
+AC_SUBST(LIBOBJS)
 
 #------------------------------------------------------------------------------
 #       If Config.mk is not in the build directory, copy it local.
