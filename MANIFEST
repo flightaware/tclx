@@ -33,7 +33,6 @@
 ./src/tclXcmdloop.c
 ./src/tclXcnvclock.c
 ./src/tclXconf.h.in
-./src/tclXdata.c
 ./src/tclXdebug.c
 ./src/tclXdup.c
 ./src/tclXfcntl.c
@@ -354,7 +353,6 @@
 ./tksrc/SYSLIBS.in
 ./tksrc/tkX.h
 ./tksrc/tkXAppInit.c
-./tksrc/tkXdata.c
 ./tksrc/tkXinit.c
 ./tksrc/tkXshell.c
 ./tktclsrc/Makefile.in
