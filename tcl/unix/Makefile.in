@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.7 1994/05/28 03:38:22 markd Exp markd $
+# $Id: Makefile.in,v 3.8 1994/06/29 04:18:26 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -23,7 +23,6 @@ SHELL = /bin/sh
 
 CC          = @CC@
 RANLIB      = @RANLIB@
-MCS         = @MCS_CMD@
 srcdir      = @srcdir@
 srcbasedir  = @srcbasedir@
 bldbasedir  = @bldbasedir@
@@ -82,12 +81,6 @@ all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${APPINIT} ${SYSLIBS} \
 ${TCL}: tclXAppInit.o ${LIBTCLX_A} ${LIBTCL_A} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	      -o ${TCL} || (rm -f ${TCL}; exit 1)
-	if ${DO_STRIPPING} ; then \
-	    strip ${TCL}; \
-	    ${MCS} ${TCL}; \
-	else \
-	    exit 0 ;\
-	fi
 
 made.tmp ${LIBTCLX_A}: ${OBJS} ${UCBOBJS} ${CPLUSOBJS}
 	${AR} cr ${LIBTCLX_A} ${OBJS} ${UCBOBJS} ${CPLUSOBJS}

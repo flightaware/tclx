@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.8 1994/05/28 03:38:22 markd Exp markd $
+# $Id: Makefile.in,v 3.9 1994/06/30 02:14:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -23,7 +23,6 @@ SHELL = /bin/sh
 
 CC          = @CC@
 RANLIB      = @RANLIB@
-MCS         = @MCS_CMD@
 srcdir      = @srcdir@
 srcbasedir  = @srcbasedir@
 bldbasedir  = @bldbasedir@
@@ -80,12 +79,6 @@ all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TCL_PLUS_BUILD}
 ${WISHX}: tkXAppInit.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	    -o ${WISHX} || (rm -f ${WISHX}; exit 1)
-	if ${DO_STRIPPING} ; then \
-	    strip ${WISHX}  ;\
-	    ${MCS} ${WISHX} ;\
-	else \
-	    exit 0 ;\
-	fi
 
 made.tmp ${LIBTKX_A}: ${OBJS} ${UCBOBJS}
 	${AR} cr ${LIBTKX_A} ${OBJS} ${UCBOBJS}

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 3.1 1993/11/25 03:21:14 markd Exp markd $
+# $Id: Config.mk,v 3.2 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -62,15 +62,10 @@ TK_UCB_LIB=${bldbasedir}/../tk3.6
 TK_UCB_SRC=${srcbasedir}/../tk3.6
 
 #------------------------------------------------------------------------------
-# Compiler debug/optimization/profiling flag to use.  Also a macro that
-# controls if the binaries will be stripped.  Specify `true' if the binary is
-# to be stripped (optimized case) or specify `false' if the binary is not to be
-# stripped (debugging case).  Note that if debugging or profiling is enabled,
-# the DO_STRIPPING option must be disabled.
+# Compiler debug/optimization/profiling flag to use.  Nromally specified on
+# the make command line (make CFLAGS=-g).
 
 #CFLAGS=
-DO_STRIPPING=false
-#DO_STRIPPING=true
 
 #------------------------------------------------------------------------------
 # Definition of the compiler, ar and yacc program you wish to use.
@@ -80,6 +75,9 @@ DO_STRIPPING=false
 AR=ar
 YACC=yacc
 #YACC=bison -b y
+
+STRIP_CMD=strip
+#MCS_CMD= Normally set by configure, define this to override.
 
 #------------------------------------------------------------------------------
 # X is often in strange places, override what configure figured out if
