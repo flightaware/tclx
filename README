@@ -1,10 +1,13 @@
                            Extended Tcl (TclX) 8.0.0
                            =========================
 
-BETA 1 Release
-==============
+BETA 1 Release (second try)
+===========================
 This release is compatible with the Tcl/Tk 8.0b1 releases.  A Win32 release
 is not yet available.
+
+Due to a mangling of TCL-REQUIRED_PATCHES/result.patch, this is a re-release
+of TclX 8.0.0 beta 1.
 
                               **** WARNING *****
 You must install the patches to Tcl 8.0b1 that are in TCL-REQUIRED_PATCHES.
