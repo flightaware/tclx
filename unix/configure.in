@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.17 1996/02/29 07:03:00 markd Exp $
+dnl $Id: configure.in,v 5.18 1996/03/01 05:12:09 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.17 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.18 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -480,7 +480,7 @@ AC_CHECK_FUNC(catgets,
         if (catclose ((nl_catd) 0) == 0) exit (0);],
         AC_MSG_RESULT(ok), [
         AC_MSG_RESULT([broken catclose return type])
-        AC_DEFINE(BAD_CATCLOSE)])]
+        AC_DEFINE(BAD_CATCLOSE)])],
     [AC_DEFINE(NO_CATGETS)])
 
 #------------------------------------------------------------------------------

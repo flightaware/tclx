@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.10 1996/02/24 02:42:47 markd Exp $
+# $Id: Config.mk,v 5.11 1996/02/29 07:02:45 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ TCL_SRC=${srcbasedir}/../tcl7.5b2
 TCL_CONFIG=${srcbasedir}/../tcl7.5b2/unix/tclConfig.sh
 TCL_LIB=${bldbasedir}/../tcl7.5b2/unix/libtcl7.5.a
 TCL_SHLIB_DIR=${bldbasedir}/../tcl7.5b2/unix
-TCL_SHLIB=-L ${TCL_SHLIB_DIR} -ltcl7.5
+TCL_SHLIB=-L${TCL_SHLIB_DIR} -ltcl7.5
 
 #------------------------------------------------------------------------------
 # Unless configure is going to be run with --with-tk=NO, these defines must be
@@ -70,7 +70,7 @@ TK_SRC=${srcbasedir}/../tk4.1b2
 TK_CONFIG=${srcbasedir}/../tk4.1b2/unix/tkConfig.sh
 TK_LIB=${bldbasedir}/../tk4.1b2/unix/libtk4.1.a
 TK_SHLIB_DIR=${bldbasedir}/../tk4.1b2/unix
-TK_SHLIB=-L ${TK_SHLIB_DIR} -ltk4.1
+TK_SHLIB=-L${TK_SHLIB_DIR} -ltk4.1
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,

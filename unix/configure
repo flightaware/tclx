@@ -524,7 +524,7 @@ else
 fi
 
 
-# From configure.in Revision: 5.17 dnl
+# From configure.in Revision: 5.18 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -2452,12 +2452,12 @@ EOF
 fi
 rm -f conftest*
 
-    cat >> confdefs.h <<\EOF
+else
+  echo "$ac_t""no" 1>&6
+cat >> confdefs.h <<\EOF
 #define NO_CATGETS 1
 EOF
 
-else
-  echo "$ac_t""no" 1>&6
 fi
 
 
