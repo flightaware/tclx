@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.3 1999/06/26 17:55:28 redman Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.4 1999/06/29 00:30:47 surles Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -49,8 +49,8 @@ INSTALL_ROOT	=
 # Directory from which applications will reference the library of Tclx
 # scripts (note: you can set the TCLX_LIBRARY environment variable at
 # run-time to override this value):
-TCLX_LIBRARY	= $(prefix)/lib/tclx$(VERSION)
-TKX_LIBRARY	= $(prefix)/lib/tkx$(VERSION)
+TCLX_LIBRARY	= $(prefix)/lib/tclX$(VERSION)
+TKX_LIBRARY	= $(prefix)/lib/tkX$(VERSION)
 
 # Directory in which to install the program tclxsh:
 BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin

@@ -2,14 +2,15 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.4 1999/06/26 21:11:01 redman Exp $
+# RCS: @(#) $Id: configure.in,v 1.5 1999/07/09 22:50:00 hershey Exp $
 
 AC_INIT(../tcl/generic/tclExtend.h)
 
-TCLX_VERSION=8.2
 TCLX_MAJOR_VERSION=8
 TCLX_MINOR_VERSION=2
 TCLX_PATCH_LEVEL=
+TCLX_VERSION=$TCLX_MAJOR_VERSION.$TCLX_MINOR_VERSION
+TCLX_FULL_VERSION=$TCLX_MAJOR_VERSION.$TCLX_MINOR_VERSION.$TCLX_PATCH_LEVEL
 VER=$TCLX_MAJOR_VERSION$TCLX_MINOR_VERSION
 
 #--------------------------------------------------------------------
@@ -97,6 +98,7 @@ eval "TKX_STUB_LIB_FILE="
 
 
 AC_SUBST(TCLX_VERSION)
+AC_SUBST(TCLX_FULL_VERSION)
 AC_SUBST(TCLX_MAJOR_VERSION)
 AC_SUBST(TCLX_MINOR_VERSION)
 AC_SUBST(TCLX_PATCH_LEVEL)
