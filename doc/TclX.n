@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 1.3 1992/10/02 15:25:02 markd Exp markd $
+.\" $Id: TclX.man,v 1.4 1992/10/03 04:45:40 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -566,16 +566,25 @@ then follow the standard Tcl error mechanism.  Often \fIcommand\fR will just
 do an \fBexit\fR.
 .IP
 \fBget\fR - Retrieve the current settings of the specified signals.  A keyed
-list will be returned were the keys are one of the specified signals and
-the values  are one of one of `\fBdefault\fR',`\fBignore\fR', `\fBerror\fR' or
-`\fBtrap \fIcommand\fR'.
+list will be returned were the keys are one of the specified signals and the
+values are a list cosisting of the action associated with the signal, a
+\fB0\fR if the signal may be delivered (not block) and a \fB1\fR if it is
+blocked. The actions maybe one of `\fBdefault\fR',`\fBignore\fR',
+`\fBerror\fR' or `\fBtrap\fR.  If the action is trap, the third element is the
+command associated with the action.
+.IP
+\fBblock\fR - Block the specified signals from being received. (Posix systems only).
+.IP
+\fBunblock\fR - Allow the specified signal to be received. Pending signals
+will not occur. (Posix systems only).
 .sp
-For all signals except \fBSIGCHLD\fR, the signal action will remain enabled
-after the specified signal has occured.  For \fBSIGCHLD\fR (also known as
-\fBSIGCLD\fR), the signal is not be automatically reenabled.  After a
+The signal action will remain enabled after the specified signal has occurred.
+The exception to this is \fBSIGCHLD\fR on systems without Posix signals.
+For these systems, \fBSIGCHLD\fR is not be automatically reenabled.  After a
 \fBSIGCHLD\fR signal is received, a call to \fBwait\fR must be
 performed to retrieve the exit status of the child process before issuing
-another \fBsignal CHLD \fI...\fR command.
+another \fBsignal SIGCHLD \fI...\fR command.  For code that is to be portable
+between both types of systems, use this approach.
 .sp
 Signals are not
 processed until after the completion of the Tcl command that is executing when
