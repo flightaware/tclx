@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.8 1993/08/05 16:33:49 markd Exp markd $
+ * $Id: tclXgetdate.y,v 2.9 1993/08/19 16:02:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -47,7 +47,7 @@
 #define START_OF_TIME   1902
 #define END_OF_TIME     2037
 
-#define HOUR(x)         (x * 60)
+#define HOUR(x)         ((int) (x * 60))
 #define SECSPERDAY      (24L * 60L * 60L)
 
 
