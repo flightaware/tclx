@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.18 1993/09/16 05:37:54 markd Exp markd $
+# $Id: Makefile.in,v 2.19 1993/09/20 02:39:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -39,11 +39,12 @@ XLIBSW     = @XLIBSW@
 
 #------------------------------------------------------------------------------
 
-LIBTK.A   = ../tkmaster/lib/libtk.a
-LIBTKX.A  = ../tkmaster/lib/libtkx.a
-WISHX     = ../tkmaster/bin/wishx
-APPINIT   = ../tkmaster/src/tkXAppInit.c
-SYSLIBS   = ../tkmaster/src/SYSLIBS
+LIBTK.A      = ../tkmaster/lib/libtk.a
+LIBTKX.A     = ../tkmaster/lib/libtkx.a
+WISHX        = ../tkmaster/bin/wishx
+APPINIT      = ../tkmaster/src/tkXAppInit.c
+SYSLIBS      = ../tkmaster/src/SYSLIBS
+TKXMAINPP.O  = ../tkmaster/lib/tkXmain++.o
 
 LIBTCL.A  = ../tclmaster/lib/libtcl.a
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
@@ -69,7 +70,7 @@ OBJS= tkXAppInit.o   tkXinit.o      tkXmain.o
 # Compile the TkX library and link wishx.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS}
+all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TCL_PLUS_BUILD}
 
 ${WISHX}: tkXAppInit.o ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
@@ -90,10 +91,33 @@ tkXinit.o: tkXinit.c
 	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXinit.c
 
 ${APPINIT}: tkXAppInit.c
+	rm -f ${APPINIT}
 	cp tkXAppInit.c ${APPINIT}
 
 ${SYSLIBS}: SYSLIBS
+	rm -f ${SYSLIBS}
 	cp SYSLIBS ${SYSLIBS}
+
+#------------------------------------------------------------------------------
+# Make sure tkXmain.c compiles and links with C++.
+
+TCL_PLUS: wishx++ ${TKXMAINPP.O}
+
+wishx++: tkXmain++.o made.tmp
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
+	    -o ${WISHX} || (rm -f ${WISHX}; exit 1)
+	if ${DO_STRIPPING} ; then \
+
+tkXmain++.o: tkXmain++.C
+	${CCPLUS} -c -I${CPLUSINCL} ${CC_FLAGS} tkXmain++.C
+
+tkXmain++.C: tkXmain.c
+	rm -f tkXmain++.C
+	cp tkXmain.c tkXmain++.C
+
+${TKXMAINPP.O}: tkXmain++.o
+	rm -f ${TKXMAINPP.O}
+	cp tkXmain++.o ${TKXMAINPP.O}
 
 #------------------------------------------------------------------------------
 

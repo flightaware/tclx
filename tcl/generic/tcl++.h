@@ -4,6 +4,12 @@
  * This file defines a C++ classes that can be used to access a Tcl
  * interpreter. If tcl.h is not already included, it includes it. Tcl.h has
  * macros that allow it to work with K&R C, ANSI C and C++.
+ *
+ * This class maybe instantiated in one of two ways.  In one method, an
+ * interpreter is created and owned by the object.  When the object is deleted,
+ * the interpreter is deleted.  In the other method, the interpreter is passed
+ * to the constructor and is referenced by the object, but not owned by it.
+ * When the object is deleted, the interpreter will not be deleted.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
@@ -16,7 +22,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.10 1993/07/18 15:19:48 markd Exp markd $
+ * $Id: tcl++.h,v 2.11 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,25 +39,39 @@
 
 class TclInterp_cl
 {
-    Tcl_Interp *interp;
-
     friend class TclTrace_cl;
 
-private:
+  private:
+    Tcl_Interp *interp;
+    int         ownInterp;
+
     char *
     CatVarArgs (va_list  argPtr);
 
-public:
+  public:
+    /*
+     * Constructors, destructors and basic access members.
+     */
     inline 
     TclInterp_cl () 
     {
-        interp = Tcl_CreateExtendedInterp ();
+        interp = Tcl_CreateInterp ();
+        XInit ();
+        ownInterp = 1;
+    }
+
+    inline 
+    TclInterp_cl (Tcl_Interp *passedInterp)
+    {
+        interp = passedInterp;
+        ownInterp = 0;
     }
 
     inline 
     ~TclInterp_cl () 
     { 
-        Tcl_DeleteInterp (interp);
+        if (ownInterp)
+            Tcl_DeleteInterp (interp);
     }
 
     inline char *
@@ -73,8 +93,14 @@ public:
     }
 
    /*
-    * Exported Tcl procedures (from standard baseline):
+    * Exported Tcl procedures:
     */
+
+    inline int
+    AsyncInvoke (int  code)
+    {
+        return Tcl_AsyncInvoke (interp, code);
+    }
 
     inline void
     AppendElement (const char *string)
@@ -86,10 +112,16 @@ public:
     AppendResult (const char *p,
                   ...);
 
+    inline int
+    AppInit ()
+    {
+        return Tcl_AppInit (interp);
+    }
+
     inline void
     AddErrorInfo (const char *message)
     {
-        Tcl_AddErrorInfo (interp, (char *)message);
+        Tcl_AddErrorInfo (interp, (char *) message);
     }
 
     inline void
@@ -116,7 +148,7 @@ public:
                     ClientData     clientData)
     {
         Tcl_CreateMathFunc (interp, (char *) name, numArgs, argTypes,
-			    proc,  clientData);
+                            proc,  clientData);
     }
 
     inline int
@@ -137,6 +169,12 @@ public:
                  ClientData        data)
     {
         return Tcl_CreateTrace (interp, level, proc, data);
+    }
+
+    inline void
+    DStringResult (Tcl_DString *dsPtr)
+    {
+        Tcl_DStringResult (interp, dsPtr);
     }
 
     inline void 
@@ -163,13 +201,6 @@ public:
                int    permissions)
     {
         Tcl_EnterFile (interp, file, permissions);
-    }
-
-    inline void
-    ErrorAbort (int  noStackDump,
-                int  exitCode)
-    {
-        Tcl_ErrorAbort (interp, noStackDump, exitCode);
     }
 
     inline int 
@@ -265,6 +296,24 @@ public:
     }
 
     inline int
+    GlobalEval (const char *command)
+    {
+        return Tcl_GlobalEval (interp, (char *) command);
+    }
+
+    inline int
+    Init ()
+    {
+        return Tcl_Init (interp);
+    }
+
+    inline void
+    InitMemory ()
+    {
+        Tcl_InitMemory (interp);
+    }
+
+    inline int
     LinkVar (const char *varName,
              char       *addr,
              int         type)
@@ -275,7 +324,9 @@ public:
     inline char *
     ParseVar (const char  *string, 
               char       **termPtr)
-       { return Tcl_ParseVar (interp, (char *) string, termPtr); }
+    {
+        return Tcl_ParseVar (interp, (char *) string, termPtr);
+    }
 
     inline const char *
     PosixError ()
@@ -283,10 +334,26 @@ public:
         return Tcl_PosixError (interp);
     }
 
+    inline void
+    PrintDouble (double  value,
+                 char   *dst)
+    {
+        Tcl_PrintDouble (interp, value, dst);
+    }
+
     inline int 
     RecordAndEval (const char *cmd, 
                    char        flags)
-        { return Tcl_RecordAndEval (interp, (char *) cmd, flags); }
+    {
+        return Tcl_RecordAndEval (interp, (char *) cmd, flags);
+    }
+
+    inline int
+    RegExpMatch (char *string,
+                 char *pattern)
+    {
+        return Tcl_RegExpMatch (interp, string, pattern);
+    }
 
     inline void
     ResetResult ()
@@ -447,10 +514,96 @@ public:
     }
 
     /*
-     * Exported Tcl functions added to baseline Tcl by the Extended Tcl 
-     * implementation.
+     * Exported Extended Tcl initialization functions.
      */
 
+    inline int
+    XAppInit ()
+    {
+        return TclX_AppInit (interp);
+    }
+
+    inline int
+    XInit ()
+    {
+        return TclX_Init (interp);
+    }
+
+    inline int
+    XCmdInit ()
+    {
+        return TclXCmd_Init (interp);
+    }
+
+    inline int
+    XLibInit ()
+    {
+        return TclXLib_Init (interp);
+    }
+
+    inline void
+    XErrorExit (int  exitCode)
+    {
+        TclX_ErrorExit (interp, exitCode);
+    }
+
+    inline void
+    XInitLibDirPath (Tcl_DString *libDirPtr,
+                     char        *envVar,
+                     char        *dir,
+                     char        *version1,
+                     char        *version2)
+    {
+        TclX_InitLibDirPath (interp,
+                             libDirPtr,
+                             envVar,
+                             dir,
+                             version1,
+                             version2);
+    }
+
+    inline void 
+    XParseCmdLine (int     argc,
+                   char  **argv)
+    {
+        TclX_ParseCmdLine (interp, argc, argv);
+    }
+
+    inline int
+    XRunShell ()
+    {
+        return TclX_RunShell (interp);
+    }
+
+    /*
+     * Exported Extended Tcl utility functions.
+     */
+    inline int
+    GetLong (const char *string,
+             long       *longPtr)
+    {
+        return Tcl_GetLong (interp, string, longPtr);
+    }
+
+    inline int
+    GetUnsigned (const char *string,
+                 unsigned   *unsignedPtr)
+    {
+         return Tcl_GetUnsigned (interp, string, unsignedPtr);
+    }
+
+    inline int
+    ProcessSignals (ClientData  clientData,
+                    int         cmdResultCode)
+    {
+        return Tcl_ProcessSignals (clientData,
+                                   interp,
+                                   cmdResultCode);
+    }
+
+    /*
+     * Exported keyed list manipulation functions.
+     */
     inline char *
     DeleteKeyedListField (const char  *fieldName,
                           const char  *keyedList)
@@ -478,35 +631,6 @@ public:
                                      keyesArgcPtr, keyesArgvPtr);
     }
 
-    inline int
-    GetLong (const char *string,
-             long       *longPtr)
-    {
-        return Tcl_GetLong (interp, string, longPtr);
-    }
-
-    inline int
-    GetUnsigned (const char *string,
-                 unsigned   *unsignedPtr)
-    {
-         return Tcl_GetUnsigned (interp, string, unsignedPtr);
-    }
-
-    inline int
-    ProcessInitFile (const char  *dirEnvVar,
-                     const char  *dir1,
-                     const char  *dir2,
-                     const char  *dir3,
-                     const char  *initFile)
-    {
-        return Tcl_ProcessInitFile (interp,
-                                    (char *) dirEnvVar,
-                                    (char *) dir1,
-                                    (char *) dir2,
-                                    (char *) dir3,
-                                    (char *) initFile);
-    }
-
     inline char *
     SetKeyedListField (const char  *fieldName,
                        const char  *fieldvalue,
@@ -516,19 +640,6 @@ public:
                                       keyedList);
     }
 
-    inline int
-    ShellEnvInit (unsigned  options)
-    {
-         return Tcl_ShellEnvInit (interp, options);
-    }
-
-    inline void 
-    Startup (unsigned        options,
-             int             argc,
-             const char    **argv)
-    {
-        Tcl_Startup (interp, options, argc, argv);
-    }
 };
 
 class TclTrace_cl
@@ -536,7 +647,7 @@ class TclTrace_cl
     Tcl_Trace   trace;
     Tcl_Interp *interp;
 
-public:
+  public:
     inline 
     TclTrace_cl (TclInterp_cl     &interpCl, 
                  int               level, 
@@ -547,7 +658,9 @@ public:
     }
 
     inline ~TclTrace_cl () 
-        { Tcl_DeleteTrace (interp, trace); }
+    {
+        Tcl_DeleteTrace (interp, trace);
+    }
 };
 
 class TclHandleTbl_cl

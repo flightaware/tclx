@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.25 1993/09/16 05:37:54 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.26 1993/09/17 04:21:00 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -209,15 +209,6 @@ Tcl_GetDate _ANSI_ARGS_((char   *p,
 extern OpenFile *
 Tcl_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
                                    char       *handle));
-
-extern void
-Tcl_OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
-                              int         topLevel));
-
-extern void
-Tcl_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
-                             int         intResult,
-                             char       *checkCmd));
 
 extern int
 Tcl_ProcessSignal _ANSI_ARGS_((ClientData  clientData,

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.22 1993/09/16 05:37:54 markd Exp markd $
+# $Id: Makefile.in,v 2.23 1993/09/20 02:45:17 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -37,13 +37,14 @@ LIBS       = @LIBS@ -lm
 
 #------------------------------------------------------------------------------
 
-LIBTCL.A    = ../tclmaster/lib/libtcl.a
-LIBTCLX.A   = ../tclmaster/lib/libtclx.a
-TCL         = ../tclmaster/bin/tcl
-TCLEXTEND.H = ../tclmaster/include/tclExtend.h
-TCLPP_H     = ../tclmaster/include/tcl++.h
-APPINIT     = ../tclmaster/src/tclXAppInit.c
-SYSLIBS     = ../tclmaster/src/SYSLIBS
+LIBTCL.A      = ../tclmaster/lib/libtcl.a
+LIBTCLX.A     = ../tclmaster/lib/libtclx.a
+TCL           = ../tclmaster/bin/tcl
+TCLEXTEND.H   = ../tclmaster/include/tclExtend.h
+TCLPP_H       = ../tclmaster/include/tcl++.h
+APPINIT       = ../tclmaster/src/tclXAppInit.c
+SYSLIBS       = ../tclmaster/src/SYSLIBS
+TCLXMAINPP.O  = ../tclmaster/lib/tclXmain++.o
 
 LDLIBS = ${LIBTCLX.A} ${LIBTCL.A} ${LIBS}
 
@@ -117,22 +118,32 @@ ${TCLPP_H}: tcl++.h
 	cp tcl++.h ${TCLPP_H}
 
 ${APPINIT}: tclXAppInit.c
+	rm -f ${APPINIT}
 	cp tclXAppInit.c ${APPINIT}
 
 ${SYSLIBS}: SYSLIBS
+	rm -f ${SYSLIBS}
 	cp SYSLIBS ${SYSLIBS}
 
 #------------------------------------------------------------------------------
 # Make sure tcl++.h compiles, plus force tcl++.o into the library.
 
-TCL_PLUS: tcl++ tcl++.o
+TCL_PLUS: tcl++ tcl++.o ${TCLXMAINPP.O}
 
 tcl++: tclXmain++.o tcl++.o made.tmp
-	${CCPLUS} ${CC_FLAGS} ${XLDFLAGS} tclXmain++.o ${LDLIBS} ${XLDLIBS} \
-        -o tcl++
+	${CCPLUS} ${CC_FLAGS} ${XLDFLAGS} tclXmain++.o tclXAppInit.o \
+           ${LDLIBS} ${XLDLIBS} -o tcl++
 
 tclXmain++.o: tcl++.h tclXmain++.C
-	${CCPLUS} -c -I${CPLUSINCL} ${CC_FLAGS} $(srcdir)/tclXmain++.C
+	${CCPLUS} -c -I${CPLUSINCL} ${CC_FLAGS} tclXmain++.C
+
+tclXmain++.C: tclXmain.c
+	rm -f tclXmain++.C
+	cp tclXmain.c tclXmain++.C
+
+${TCLXMAINPP.O}: tclXmain++.o
+	rm -f ${TCLXMAINPP.O}
+	cp tclXmain++.o ${TCLXMAINPP.O}
 
 #------------------------------------------------------------------------------
 

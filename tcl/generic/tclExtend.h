@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.15 1993/09/16 05:37:54 markd Exp markd $
+ * $Id: tclExtend.h,v 2.16 1993/09/20 02:38:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -63,20 +63,23 @@ extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
 /*
  * Exported Tcl initialization functions.
  */
-int
+EXTERN int
+TclX_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
+
+EXTERN int
 TclX_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
-int
+EXTERN int
 TclXCmd_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
-int
+EXTERN int
 TclXLib_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN void
 TclX_ErrorExit _ANSI_ARGS_((Tcl_Interp  *interp,
                             int          exitCode));
 
-void
+EXTERN void
 TclX_InitLibDirPath _ANSI_ARGS_((Tcl_Interp  *interp,
                                  Tcl_DString *libDirPtr,
                                  char        *envVar,
@@ -84,10 +87,19 @@ TclX_InitLibDirPath _ANSI_ARGS_((Tcl_Interp  *interp,
                                  char        *version1,
                                  char        *version2));
 
+extern void
+TclX_OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
+                               int         topLevel));
+
 EXTERN void 
 TclX_ParseCmdLine _ANSI_ARGS_((Tcl_Interp   *interp,
                                int           argc,
                                char        **argv));
+
+extern void
+TclX_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
+                              int         intResult,
+                              char       *checkCmd));
 
 EXTERN int
 TclX_RunShell _ANSI_ARGS_((Tcl_Interp  *interp));

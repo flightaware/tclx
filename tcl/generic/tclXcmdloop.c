@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.8 1993/08/05 06:41:55 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.9 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -96,7 +96,7 @@ OutFlush (filePtr)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_PrintResult --
+ * TclX_PrintResult --
  *
  *   Print the result of a Tcl.  It can optionally not echo "set" commands
  * that successfully set a variable.
@@ -111,7 +111,7 @@ OutFlush (filePtr)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_PrintResult (interp, intResult, checkCmd)
+TclX_PrintResult (interp, intResult, checkCmd)
     Tcl_Interp *interp;
     int         intResult;
     char       *checkCmd;
@@ -143,14 +143,14 @@ Tcl_PrintResult (interp, intResult, checkCmd)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_OutputPrompt --
+ * TclX_OutputPrompt --
  *     Outputs a prompt by executing either the command string in
  *     tcl_prompt1 or tcl_prompt2.
  *
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_OutputPrompt (interp, topLevel)
+TclX_OutputPrompt (interp, topLevel)
     Tcl_Interp *interp;
     int         topLevel;
 {
@@ -176,7 +176,7 @@ Tcl_OutputPrompt (interp, topLevel)
             fputs ("Error in prompt hook: ", stderr);
             fputs (interp->result, stderr);
             fputs ("\n", stderr);
-            Tcl_PrintResult (interp, result, NULL);
+            TclX_PrintResult (interp, result, NULL);
         } else {
             fputs (interp->result, stdout);
             promptDone = TRUE;
@@ -242,7 +242,7 @@ Tcl_CommandLoop (interp, interactive)
         clearerr (stdin);
         clearerr (stdout);
         if (interactive)
-            Tcl_OutputPrompt (interp, topLevel);
+            TclX_OutputPrompt (interp, topLevel);
         errno = 0;
         if (fgets (inputBuf, sizeof (inputBuf), stdin) == NULL) {
             if (!feof(stdin) && (errno == EINTR)) {
@@ -268,7 +268,7 @@ Tcl_CommandLoop (interp, interactive)
         result = Tcl_RecordAndEval (interp, cmdBuf.string, 0);
 
         if (interactive || result != TCL_OK)
-            Tcl_PrintResult (interp, result, cmdBuf.string);
+            TclX_PrintResult (interp, result, cmdBuf.string);
 
         topLevel = TRUE;
         Tcl_DStringFree (&cmdBuf);
