@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 3.0 1993/11/19 06:59:01 markd Rel markd $
+ * $Id: tclXmath.c,v 3.1 1994/01/12 02:41:29 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -158,7 +158,7 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    unsigned long range;
+    long range;
 
     if ((argc < 2) || (argc > 3))
         goto invalidArgs;
@@ -179,7 +179,7 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
             goto invalidArgs;
         if (Tcl_GetLong (interp, argv[1], &range) != TCL_OK)
             return TCL_ERROR;
-        if ((range == 0) || (range > RANDOM_RANGE))
+        if ((range <= 0) || (range > RANDOM_RANGE))
             goto outOfRange;
 
         sprintf (interp->result, "%ld", ReallyRandom (range));

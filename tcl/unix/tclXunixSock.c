@@ -156,7 +156,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     if (socketFD < 0)
         goto unixError;
 
-    if (connect (socketFD, &server, sizeof (server)) < 0)
+    if (connect (socketFD, (struct sockaddr *) &server, sizeof (server)) < 0)
         goto unixError;
 
     /*

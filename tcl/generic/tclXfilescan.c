@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 3.0 1993/11/19 06:58:41 markd Rel markd $
+ * $Id: tclXfilescan.c,v 3.1 1993/12/18 05:49:49 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -119,7 +119,7 @@ CleanUpContext (scanTablePtr, contextPtr)
 static int
 CreateScanContext (interp, scanTablePtr)
     Tcl_Interp  *interp;
-    void_pt     *scanTablePtr;
+    void_pt      scanTablePtr;
 {
     scanContext_t *contextPtr, **tableEntryPtr;
     char           curName [16];

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 3.2 1994/01/11 06:31:35 markd Exp markd $
+ * $Id: tclExtdInt.h,v 3.3 1994/01/23 17:00:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,7 +22,6 @@
 #include "tclExtend.h"
 #include "tclXconfig.h"
 #include "tclInt.h"
-#include "tclUnix.h"
 
 #include <sys/param.h>
 
@@ -92,6 +91,11 @@
 
 #include <grp.h>
 
+/*
+ * Included the tcl file tclUnix.h after other system files, as it checks
+ * if certain things are defined.
+ */
+#include "tclUnix.h"
 
 /*
  * These should be take from an include file, but it got to be such a mess
