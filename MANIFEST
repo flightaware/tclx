@@ -316,6 +316,7 @@
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h
 ./tcl/win/tclXwinTest.c
+./tcl/win/tclXwinUtil.c
 ./tcl/win/tclx.rc
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
