@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.6 1996/10/21 03:07:09 markd Exp $
+ * $Id: tclXinit.c,v 8.0 1996/11/21 00:24:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,15 +44,17 @@ static char tclx_fileinit [] =
     set envVar [string toupper ${w}X_LIBRARY]\n\
     if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
     lappend dirs $defaultLib\n\
-    set prefix [file dirname [file dirname [info nameofexecutable]]]\n\
+    set prefix [file dirname [info nameofexecutable]]\n\
+    set plat [file tail $prefix]\n\
+    set prefix [file dirname $prefix]\n\
     lappend dirs [file join $prefix lib ${w}X$version]\n\
-    if [cequal $tcl_platform(platform) windows] {\n\
-        set plat win} else {set plat unix}\n\
-    lappend dirs [file join [file dirname [file dirname $prefix]] ${w}X${version} $w $plat]\n\
+    set prefix [file dirname $prefix]\n\
+    lappend dirs [file join $prefix ${w}X${version} $w $plat]\n\
+    lappend dirs [file join [file dirname $prefix] ${w}X${version} $w $plat]\n\
     foreach libDir $dirs {\n\
         set init [file join $libDir ${w}x.tcl]\n\
         if [file exists $init] {\n\
-            if !$noInit {uplevel #0 source $init}; return\n\
+            if !$noInit {uplevel #0 source [list $init]}; return\n\
         }\n\
     }\n\
     set msg \"Can't find ${w}x.tcl in the following directories: \n\"\n\
