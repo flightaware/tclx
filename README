@@ -221,27 +221,6 @@ library.
     The Tcl default file may be used to install more than one version of
 TclX on a system.
 
-MAKING EXECUTABLE TCL SCRIPTS
-=============================
-
-    It is common to want to write Tcl scripts, put them in a directory along
-your search path, and execute them just like you do with shell scripts.
-
-On systems that support the "#!" convention, you can put a
-
-#!/usr/local/bin/tcl
-
-as the first line of your script, and executing the script will
-automatically invoke tcl to process it.  Of course if you install
-Tcl somewhere else, you'll use a different path.
-
-    For systems that don't support this convention (most System V
-systems, for example), it is probably best to create a shell
-script that does something like:
-
-        exec tcl commandfile.tcl
-
-
 PACKAGE LIBRARIES
 =================
 
@@ -253,6 +232,22 @@ demand-loading a package on the first attempt to execute one of the procedures
 defined within it.  As such, package libraries provide a mechanism to
 accommodate the creation of Tcl applications and libraries of a substantial
 size.
+
+   Note that the package library mechanism takes the place of the "tclIndex"
+mechanism that comes with UCB Tcl.  These type of libraries can be loaded by
+Extended Tcl, but the commands and variables described in the Tcl manual are
+not available.
+
+LINKING TCL APPLICATIONS
+========================
+
+   The libraries (libtcl.a, libtk.a) built by Extended Tcl are super sets
+of the libraries produced by standard Tcl and Tk.  If you call the 
+Tcl_CreateInterp routine, you get the standard Tcl command set, if you
+call Tcl_CreatedExtendedInterp, you get the extended command set.  Calling
+Tcl_Startup or Tcl_SehllEnvInit, you get the Extended Tcl startup mechanism
+and package libraries, otherwise you get the standard Tcl libraries.
+
 
 SUPPORT FOR EXTENDED TCL
 ========================

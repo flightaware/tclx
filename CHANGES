@@ -397,3 +397,48 @@
 19 Dec 92: Extended Tcl 6.5c patch 2 released. Makes TclX6.4c-P1 compatible
            with Tcl 6.5 and Tk 3.0.  Plus adds above fixes and features.
 ===============================================================================
+29 Dec 92:
+  o Fixed bug in convertclock command were a date string without an explict
+    timezone returns invalid results.
+===============================================================================
+29 Dec 92: Extended Tcl 6.4c/6.5c patch3 released.
+===============================================================================
+ 4 Jan 93: 
+  o Fixed typo in src/Makefile of C++ include path macro.
+-------------------------------------------------------------------------------
+25 Jan 93:
+  o Removed use of non-ansi strftime form specs (%D %r) from the tests.
+  o Fixed incorrect check for strftime error.
+  o Added config file for Convex C-series, ConvexOS V10.0 or greater.
+  o Merged Convex diffs suppliex by Larry Streepy <streepy@pixel.convex.com>
+-------------------------------------------------------------------------------
+07 Feb 93:
+  o Incorporated newer version of getdate.y, reorganized the convertclock
+    command code and improved the tests.
+-------------------------------------------------------------------------------
+10 Feb 93:
+  o Convert name1 & name2 to part1 & part2 in tcl++.h because of conflict with
+    generic.h macro.
+-------------------------------------------------------------------------------
+13 Feb 93:
+  o Change the cmd parameter of from const char * to char *, since Tcl_Eval
+    requires the string to be writable. (*POTENTIAL INCOMPATIBILITY*)
+  o Removed cmdtrace flush option, output lines are now always flushed.
+   (*POTENTIAL INCOMPATIBILITY*)
+-------------------------------------------------------------------------------
+16 Feb 93:
+  o Fix install script to handle new macro .so file in Tcl & Tk.  Will fold it
+    into the man page, as some man commands don't do well with .so.
+  o Added lassign command, a C implementation of the assign_fields proc.  This
+    proc was moved to the compatibility package and modified to call lassign.
+  o Do ranlib after copying UCB libraries.
+-------------------------------------------------------------------------------
+21 Feb 93:
+  o Added posix_signals options to the infox command.
+  o Eliminated the use of SIG_ERR with Posix signals (its not part of the
+    standard).
+-------------------------------------------------------------------------------
+ 6 Mar 93:
+  o Converted error messages containing optional arguments from the form [xxx]
+    to ?xxx? for consistency with Tcl.
+-------------------------------------------------------------------------------
