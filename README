@@ -64,6 +64,14 @@ CHANGES IN TCLX 7.5a
   o Added support for building shared libraries on systems where shared
     library support is implemented by Tcl.
 
+  o Added support for doing event driven programming in the TclX shell.
+
+  o Deprecated server_* commands in favor of new Tcl socket command.
+    The server_info command has been renamed to host_info and the
+    server_cntl functionallity has been incorporated in the fcntl
+    command.  All old scripts using the server_* commands will continue
+    to work.
+
 FEATURES ADDED BY EXTENDED TCL
 ==============================
 
@@ -72,7 +80,8 @@ more details on the commands and functionality provided by Extended
 Tcl, see the manual page man/TclX.man.
 
     o A shell, which provides an environment for developing and
-      executing Tcl programs.
+      executing Tcl programs.  It also supports event driven programming
+      outside of Tk.
 
     o Advanced Tcl code library facility that is oriented towards building
       large applications.  It is compatible with standard Tcl auto-loading.
