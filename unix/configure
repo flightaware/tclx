@@ -125,7 +125,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.10 
+# From configure.in Revision: 1.12 
 
 
 
@@ -491,6 +491,29 @@ if eval $compile; then
   :
 else
   LIBOBJS="$LIBOBJS random.o"
+fi
+rm -f conftest*
+
+echo checking for rename
+cat > conftest.c <<EOF
+#include <ctype.h>
+int main() { exit(0); }
+int t() { 
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_rename) || defined (__stub___rename)
+choke me
+#else
+/* Override any gcc2 internal prototype to avoid an error.  */
+extern char rename(); rename();
+#endif
+ }
+EOF
+if eval $compile; then
+  :
+else
+  LIBOBJS="$LIBOBJS rename.o"
 fi
 rm -f conftest*
 
