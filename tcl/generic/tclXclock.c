@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXclock.c,v 2.4 1993/05/27 15:00:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -70,6 +70,10 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     char            *format;
     struct tm       *timeDataPtr;
     int              stat;
+#ifdef TCL_TIMEZONE_VAR
+    int              savedTimeZone;
+    char            *savedTZEnv;
+#endif
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -93,12 +97,47 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     else
         format = "%a %b %d %X %Z %Y";
 
+#ifdef TCL_TIMEZONE_VAR
+    /*
+     * This is a horrible kludge for systems not having the timezone in
+     * struct tm.  No matter what was specified, they use the global time
+     * zone.
+     */
+    if (useGMT) {
+        char *varValue;
+
+        varValue = Tcl_GetVar2 (interp, "env", "TZ", TCL_GLOBAL_ONLY);
+        if (varValue != NULL)
+            savedTZEnv = ckstrdup (varValue);
+        else
+            savedTZEnv = NULL;
+        Tcl_SetVar2 (interp, "env", "TZ", "GMT", TCL_GLOBAL_ONLY);
+        savedTimeZone = timezone;
+        timezone = 0;
+        tzset ();
+    }
+#endif
+
     if (useGMT)
         timeDataPtr = gmtime (&clockVal);
     else    
         timeDataPtr = localtime (&clockVal);
 
     stat = strftime (interp->result, TCL_RESULT_SIZE, format, timeDataPtr);
+
+#ifdef TCL_TIMEZONE_VAR
+    if (useGMT) {
+        if (savedTZEnv != NULL) {
+            Tcl_SetVar2 (interp, "env", "TZ", savedTZEnv, TCL_GLOBAL_ONLY);
+            ckfree (savedTZEnv);
+        } else {
+            Tcl_UnsetVar2 (interp, "env", "TZ", TCL_GLOBAL_ONLY);
+        }
+        timezone = savedTimeZone;
+        tzset ();
+    }
+#endif
+
     if (stat <= 0) {
         Tcl_AppendResult (interp, "error formatting time", (char *) NULL);
         return TCL_ERROR;
