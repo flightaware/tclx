@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 5.1 1995/10/11 03:32:48 markd Exp $
+ * $Id: tclXmath.c,v 5.2 1996/02/12 18:16:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,29 +29,55 @@ long random ();
 /*
  * Prototypes of internal functions.
  */
+static int
+ConvertIntOrDouble _ANSI_ARGS_((Tcl_Interp *interp,
+                                char       *numStr,
+                                double     *valuePtr));
+
 static long 
 ReallyRandom _ANSI_ARGS_((long my_range));
 
-static int 
-Tcl_MaxCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-static int 
-Tcl_MinCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-static int 
-Tcl_RandomCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * ConvertIntOrDouble --
  *
+ *   Convert a number that can be in any legal integer or floating point
+ * format (including integer hex and octal specifications) to a double.
+ *
+ * Parameters:
+ *   o interp (I) - Interpreters, errors are returns in result.
+ *   o numStr (I) - Number to convert.
+ *   o valuePtr (O) - Double value is returned here.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+ConvertIntOrDouble (interp, numStr, valuePtr)
+    Tcl_Interp *interp;
+    char       *numStr;
+    double     *valuePtr;
+{
+    long lvalue;
+
+    if (strpbrk (numStr, ".eE") != NULL) {
+        return Tcl_GetDouble (interp, numStr, valuePtr);
+    } else {
+        if (Tcl_GetLong (interp, numStr, &lvalue) != TCL_OK)
+            return TCL_ERROR;
+        *valuePtr = (double) lvalue;
+        return TCL_OK;
+    }
+}
+
+/*-----------------------------------------------------------------------------
  * Tcl_MaxCmd --
  *      Implements the Tcl max command:
  *        max num1 ?..numN?
  *
  * Results:
  *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -62,8 +88,7 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     double value, maxValue = -MAXDOUBLE;
-    int    idx,   maxIdx   =  1;
-
+    int idx, maxIdx   =  1;
 
     if (argc < 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -72,7 +97,7 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
     }
 
     for (idx = 1; idx < argc; idx++) {
-        if (Tcl_GetDouble (interp, argv [idx], &value) != TCL_OK)
+        if (ConvertIntOrDouble (interp, argv [idx], &value) != TCL_OK)
             return TCL_ERROR;
         if (value > maxValue) {
             maxValue = value;
@@ -83,16 +108,13 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_MinCmd --
  *     Implements the TCL min command:
  *         min num1 ?..numN?
  *
  * Results:
  *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -103,7 +125,7 @@ Tcl_MinCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     double value, minValue = MAXDOUBLE;
-    int    idx,   minIdx   = 1;
+    int idx, minIdx   = 1;
 
     if (argc < 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -112,7 +134,7 @@ Tcl_MinCmd (clientData, interp, argc, argv)
     }
 
     for (idx = 1; idx < argc; idx++) {
-        if (Tcl_GetDouble (interp, argv [idx], &value) != TCL_OK)
+        if (ConvertIntOrDouble (interp, argv [idx], &value) != TCL_OK)
             return TCL_ERROR;
         if (value < minValue) {
             minValue = value;
@@ -123,8 +145,7 @@ Tcl_MinCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * Tcl_MaxFunc --
  *      Implements the Tcl max math function
@@ -169,8 +190,7 @@ Tcl_MaxFunc (clientData, interp, args, resultPtr)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * Tcl_MinFunc --
  *      Implements the Tcl min math function
@@ -215,13 +235,10 @@ Tcl_MinFunc (clientData, interp, args, resultPtr)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ReallyRandom --
  *     Insure a good random return for a range, unlike an arbitrary
  *     random() % n, thanks to Ken Arnold, Unix Review, October 1987.
- *
  *-----------------------------------------------------------------------------
  */
 #define RANDOM_RANGE 0x7fffffffL
@@ -239,16 +256,13 @@ ReallyRandom (myRange)
     return (rnum % myRange);
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_RandomCmd  --
  *     Implements the TCL random command:
  *     random limit | seed ?seedval?
  *
  * Results:
  *  Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -286,11 +300,12 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
     }
     return TCL_OK;
 
-invalidArgs:
+  invalidArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " limit | seed ?seedval?", (char *) NULL);
     return TCL_ERROR;
-outOfRange:
+
+  outOfRange:
     {
         char buf [18];
 
@@ -301,8 +316,7 @@ outOfRange:
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *  Tcl_InitMath --
  *
  *    Initialize the TclX math commands and functions.
