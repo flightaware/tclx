@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: help.tcl,v 1.1 1992/09/20 23:30:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -241,12 +241,12 @@ proc apropos {name} {
         if {![help:Display [format "%s - %s" $path $desc]]} {
             return}
     }
-    set briefFH [open $TCLENV(help:root)/brief]
-
-    scanfile $aproposCT $briefFH
-
+    foreach brief [glob -nocomplain $TCLENV(help:root)/*.brf] {
+        set briefFH [open $brief]
+        scanfile $aproposCT $briefFH
+        close $briefFH
+    }
     scancontext delete $aproposCT
-    close $briefFH
 }
 
 #------------------------------------------------------------------------------

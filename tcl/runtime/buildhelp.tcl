@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 1.1 1992/09/20 23:28:10 markd Exp markd $
+# $Id: buildhelp.tcl,v 1.2 1992/10/03 22:50:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -68,11 +68,13 @@
 # 
 # To run this program:
 #
-#   tcl buildhelp.tcl [-m mergeTree] helpDir file-1 file-2 ...
+#   tcl buildhelp.tcl [-m mergeTree] -b brief.brf helpDir file-1 file-2 ...
 #
 # o -m mergeTree is a tree of help code, plus a brief file to merge with the
 #   help files that are to be extracted.  This will become part of the new
 #   help tree.  Used to merge in the documentation from UCB Tcl.
+# o -b specified the name of the brief file to create form the @brief entries.
+#   It must have an extension of ".brf".
 # o helpDir is the help tree root directory.  helpDir should  exists, but any
 #   subdirectories that don't exists will be created.  helpDir should be
 #   cleaned up before the start of manual page generation, as this program
@@ -101,12 +103,20 @@ proc TruncFileName {pathName} {
 
 #-----------------------------------------------------------------------------
 # Proc to ensure that all directories for the specified file path exists,
-# and if they don't create them.
+# and if they don't create them.  Don't use -path so we can set the
+# permissions.
 
 proc EnsureDirs {filePath} {
     set dirPath [file dirname $filePath]
-    if {![file exists $dirPath]} {
-        mkdir -path $dirPath}
+    if [file exists $dirPath] return
+    foreach dir [split $dirPath /] {
+        lappend dirList $dir
+        set partPath [join $dirList /]
+        if [file exists $partPath] continue
+
+        mkdir $partPath
+        chmod u=rwx,go=rx $partPath
+    }
 }
 
 
@@ -274,26 +284,20 @@ proc CopyMergeTree {helpDirPath mergeTree} {
     set curHelpDir "."
 
     for_recursive_glob mergeFile {.} {
-        if {"$mergeFile" == "./brief"} {
-            continue}
-        if {[file tail $mergeFile] == "RCS"} {
-            continue}
+        if [string match "*/RCS/*" $mergeFile] continue
+
         set helpFile "$helpDirPath/$mergeFile"
-        if {[file isdirectory $mergeFile]} {
-            if ![file exists $helpFile] {
-                mkdir $helpFile
-                chmod go-w,a+rx $helpFile
-            }
-        } else {
-            if {[file exists $helpFile]} {
-                error "Help file already exists: $helpFile"}
-            set inFH [open $mergeFile r]
-            set outFH [open $helpFile w]
-            copyfile $inFH $outFH
-            close $outFH
-            close $inFH
-            chmod a-w,a+r $helpFile
-        }
+        if [file isdirectory $mergeFile] continue
+
+        if {[file exists $helpFile]} {
+            error "Help file already exists: $helpFile"}
+        EnsureDirs $helpFile
+        set inFH [open $mergeFile r]
+        set outFH [open $helpFile w]
+        copyfile $inFH $outFH
+        close $outFH
+        close $inFH
+        chmod a-w,a+r $helpFile
     }
     cd $oldDir
 }
@@ -302,9 +306,10 @@ proc CopyMergeTree {helpDirPath mergeTree} {
 # GenerateHelp: main procedure.  Generates help from specified files.
 #    helpDirPath - Directory were the help files go.
 #    mergeTree - Help file tree to merge with the extracted help files.
+#    briefFile - The name of the brief file to create.
 #    sourceFiles - List of files to extract help files from.
 
-proc GenerateHelp {helpDirPath mergeTree sourceFiles} {
+proc GenerateHelp {helpDirPath briefFile mergeTree sourceFiles} {
     global G_helpDir G_truncFileNames G_nroffScanCT
     global G_scriptScanCT G_briefHelpFH G_colArgs
 
@@ -363,14 +368,17 @@ proc GenerateHelp {helpDirPath mergeTree sourceFiles} {
         CopyMergeTree $helpDirPath $mergeTree
     }
 
-    set G_briefHelpFH [open "|sort > $G_helpDir/brief" w]
 
-    if {(![lempty $mergeTree]) && [file exists $mergeTree/brief]} {
-        echo "    Merging file: $mergeTree/brief"
-        set mergeBriefFH [open $mergeTree/brief r]
-        puts $G_briefHelpFH [read $mergeBriefFH]
-        close $mergeBriefFH
+    if {[file extension $briefFile] != ".brf"} {
+        puts stderr "Brief file \"$briefFile\" must have an extension \".brf\""
+        exit 1
     }
+    if [file exists $G_helpDir/$briefFile] {
+        puts stderr "Brief file \"$G_helpDir/$briefFile\" already exists"
+        exit 1
+    }
+    set G_briefHelpFH [open "|sort > $G_helpDir/$briefFile" w]
+
     foreach manFile $sourceFiles {
         set manFile [glob $manFile]
         set ext [file extension $manFile]
@@ -391,14 +399,14 @@ proc GenerateHelp {helpDirPath mergeTree sourceFiles} {
     }
 
     close $G_briefHelpFH
-    chmod a-w,a+r $G_helpDir/brief
+    chmod a-w,a+r $G_helpDir/$briefFile
     echo "*** completed extraction of all help files"
 }
 
 #-----------------------------------------------------------------------------
 # Print a usage message and exit the program
 proc Usage {} {
-    echo {Wrong args: [-m mergetree] helpdir manfile1 [manfile2..]}
+    puts stderr {Wrong args: [-m mergetree] -b briefFile helpdir manfile1 [manfile2..]}
     exit 1
 }
 
@@ -410,16 +418,22 @@ if {$interactiveSession} {
     echo {GenerateHelp helpdir -m mergetree file-1 file-2 ...}
 } else {
     set mergeTree {}
+    set briefFile {}
     while {[string match "-*" [lindex $argv 0]]} {
         set flag [lvarpop argv 0]
         case $flag in {
-            "-m" {set mergeTree [lvarpop argv 0]}
+            "-m" {set mergeTree [lvarpop argv]}
+            "-b" {set briefFile [lvarpop argv]}
             default Usage
         }
     }
     if {[llength $argv] < 2} {
         Usage
     }
-    GenerateHelp [lindex $argv 0] $mergeTree [lrange $argv 1 end]
+    if [lempty $briefFile] {
+       puts stderr {must specify -b argument}
+       Usage 
+    }
+    GenerateHelp [lindex $argv 0] $briefFile $mergeTree [lrange $argv 1 end]
    
 }
