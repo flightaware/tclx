@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXgeneral.c,v 8.15 1999/03/31 06:37:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -401,8 +401,7 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
                 
                 sprintf (buf, "\n    (\"loop\" body line %d)", 
                          interp->errorLine);
-                Tcl_AppendStringsToObj (Tcl_GetObjResult (interp), buf, 
-                                        (char *) NULL);
+		Tcl_AddErrorInfo (interp, buf);
             }
             break;
         }
