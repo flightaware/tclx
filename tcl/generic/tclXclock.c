@@ -1,7 +1,7 @@
 /* 
  * tclXclock.c --
  *
- *      Contains the TCL time and date related commands.
+ *      Contains the TclX time and date related commands.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 4.0 1994/07/16 05:26:31 markd Rel markd $
+ * $Id: tclXclock.c,v 4.1 1995/01/01 19:49:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -69,7 +69,8 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     time_t           clockVal;
     char            *format;
     struct tm       *timeDataPtr;
-    int              stat;
+    Tcl_DString      buffer;
+    int              bufSize;
 #ifdef TCL_USE_TIMEZONE_VAR
     int              savedTimeZone;
     char            *savedTZEnv;
@@ -123,7 +124,17 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     else    
         timeDataPtr = localtime (&clockVal);
 
-    stat = strftime (interp->result, TCL_RESULT_SIZE, format, timeDataPtr);
+    /*
+     * Format the time, increasing the buffer size until strftime succeeds.
+     */
+    bufSize = TCL_DSTRING_STATIC_SIZE - 1;
+    Tcl_DStringInit (&buffer);
+    Tcl_DStringSetLength (&buffer, bufSize);
+
+    while (strftime (buffer.string, bufSize, format, timeDataPtr) == 0) {
+        bufSize *= 2;
+        Tcl_DStringSetLength (&buffer, bufSize);
+    }
 
 #ifdef TCL_USE_TIMEZONE_VAR
     if (useGMT) {
@@ -138,14 +149,6 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     }
 #endif
 
-    if (stat < 0) {
-        char numStr [32];
-
-        sprintf (numStr, "%d", TCL_RESULT_SIZE - 1);
-        Tcl_AppendResult (interp, "invalid format string or formatted time ",
-                          "buffer overflow (max = ", numStr, " characters)",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    Tcl_DStringResult (interp, &buffer);
     return TCL_OK;
 }

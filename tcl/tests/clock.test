@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 4.0 1994/07/16 05:24:34 markd Rel markd $
+# $Id: clock.test,v 4.1 1995/01/01 19:47:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -39,6 +39,13 @@ Test clock-2.1 {fmtclock tests} {
 Test clock-2.2 {fmtclock tests} {
     fmtclock
 } 1 {wrong # args: fmtclock clockval ?format? ?GMT|{}?}
+
+set large [replicate XYZabc 500]
+Test clock-2.2 {fmtclock tests} {
+    set clockval 657687766
+    fmtclock $clockval "%a %b %d %I:%M:%S %p %Y $large" GMT
+} 0 "Sun Nov 04 03:02:46 AM 1990 $large"
+unset large
 
 # Test convertclock
 
