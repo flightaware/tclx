@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXbsearch.c,v 4.0 1994/07/16 05:26:23 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,7 +28,7 @@ typedef struct binSearchCB_t {
 
     FILE         *fileCBPtr;      /* Open file structure.                    */
     Tcl_DString   dynBuf;         /* Dynamic buffer to hold a line of file.  */
-    long          lastRecOffset;  /* Offset of last record read.             */
+    off_t         lastRecOffset;  /* Offset of last record read.             */
     int           cmpResult;      /* -1, 0 or 1 result of string compare.    */
     char         *tclProc;        /* Name of Tcl comparsion proc, or NULL.   */
     } binSearchCB_t;
@@ -44,7 +44,7 @@ static int
 TclProcKeyCompare _ANSI_ARGS_((binSearchCB_t *searchCBPtr));
 
 static int
-ReadAndCompare _ANSI_ARGS_((long           fileOffset,
+ReadAndCompare _ANSI_ARGS_((off_t          fileOffset,
                             binSearchCB_t *searchCBPtr));
 
 static int
@@ -159,7 +159,7 @@ TclProcKeyCompare (searchCBPtr)
  */
 static int
 ReadAndCompare (fileOffset, searchCBPtr)
-    long           fileOffset;
+    off_t          fileOffset;
     binSearchCB_t *searchCBPtr;
 {
     int  recChar, status;
@@ -242,7 +242,7 @@ BinSearch (searchCBPtr)
     binSearchCB_t *searchCBPtr;
 {
     FILE       *filePtr;
-    long        middle, high, low;
+    off_t       middle, high, low;
     struct stat statBuf;
 
     if (Tcl_GetOpenFile (searchCBPtr->interp, searchCBPtr->fileHandle,

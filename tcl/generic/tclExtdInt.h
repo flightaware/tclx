@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.3 1994/11/29 04:35:37 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.4 1994/12/28 05:17:24 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -224,6 +224,11 @@ Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
                              int         interactive));
 
 extern int
+Tcl_StrToOffset _ANSI_ARGS_((CONST char *string,
+                             int         base,
+                             off_t      *offsetPtr));
+
+extern int
 Tcl_DStringGets _ANSI_ARGS_((FILE         *filePtr,
                              Tcl_DString  *dynStrPtr));
 
@@ -263,6 +268,11 @@ extern int
 Tcl_GetTime _ANSI_ARGS_((Tcl_Interp *interp,
                          CONST char *string,
                          time_t     *timePtr));
+
+extern int
+Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
+                           CONST char *string,
+                           off_t      *offsetPtr));
 
 extern int
 Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 4.0 1994/07/16 05:26:47 markd Rel markd $
+ * $Id: tclXdup.c,v 4.1 1994/11/29 07:15:11 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -223,7 +223,7 @@ Tcl_DupCmd (clientData, interp, argc, argv)
 {
     OpenFile *oldFilePtr;
     FILE     *newFilePtr;
-    long      seekOffset = -1;
+    off_t     seekOffset = -1;
 
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 

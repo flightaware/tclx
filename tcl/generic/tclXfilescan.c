@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 4.4 1994/11/29 04:35:37 markd Exp markd $
+ * $Id: tclXfilescan.c,v 4.5 1994/11/29 06:53:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -429,7 +429,7 @@ SetMatchInfoVar (interp, storedLinePtr, contextPtr, filePtr, fileLine,
 {
     static char *MATCHINFO = "matchInfo";
     static char *FILEFMT   = "file%d";
-    int          matchOffset;
+    off_t        matchOffset;
     int          idx, start, end;
     char         key [32], buf [32], *varPtr, holdChar;
 

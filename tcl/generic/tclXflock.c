@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXflock.c,v 4.0 1994/07/16 05:28:26 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,14 +76,15 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, filePtrPtr, lockInfoPtr)
     argIdx++;
 
     if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
-        if (Tcl_GetLong (interp, argv [argIdx],
-                         &lockInfoPtr->l_start) != TCL_OK)
+        if (Tcl_GetOffset (interp, argv [argIdx],
+                           &lockInfoPtr->l_start) != TCL_OK)
             return TCL_ERROR;
     }
     argIdx++;
 
     if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
-        if (Tcl_GetLong (interp, argv [argIdx], &lockInfoPtr->l_len) != TCL_OK)
+        if (Tcl_GetOffset (interp, argv [argIdx],
+                           &lockInfoPtr->l_len) != TCL_OK)
             return TCL_ERROR;
     }
     argIdx++;

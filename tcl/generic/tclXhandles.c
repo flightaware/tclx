@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXhandles.c,v 4.0 1994/07/16 05:27:04 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -263,6 +263,8 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
             entryAlignment = sizeof (long);
         if (sizeof (double) > entryAlignment)
             entryAlignment = sizeof (double);
+        if (sizeof (off_t) > entryAlignment)
+            entryAlignment = sizeof (off_t);
     }
 
     /*

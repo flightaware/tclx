@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 4.0 1994/07/16 05:27:17 markd Rel markd $
+ * $Id: tclXlib.c,v 4.1 1994/10/04 00:56:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -70,7 +70,7 @@ GlobalEvalFile _ANSI_ARGS_((Tcl_Interp *interp,
 static int
 EvalFilePart _ANSI_ARGS_((Tcl_Interp  *interp,
                           char        *fileName,
-                          long         offset,
+                          off_t        offset,
                           unsigned     length));
 
 static char *
@@ -89,7 +89,7 @@ static int
 GetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                   char       *packageName,
                                   char      **fileNamePtr,
-                                  long       *offsetPtr,
+                                  off_t      *offsetPtr,
                                   unsigned   *lengthPtr));
 
 static int
@@ -189,7 +189,7 @@ static int
 EvalFilePart (interp, fileName, offset, length)
     Tcl_Interp  *interp;
     char        *fileName;
-    long         offset;
+    off_t        offset;
     unsigned     length;
 {
     Interp       *iPtr = (Interp *) interp;
@@ -198,6 +198,7 @@ EvalFilePart (interp, fileName, offset, length)
     char         *oldScriptFile, *cmdBuffer, *buf;
     Tcl_DString   tildeBuf;
 
+    Tcl_ResetResult (interp);
     Tcl_DStringInit (&tildeBuf);
     
     if (fileName [0] == '~') {
@@ -404,7 +405,7 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
      Tcl_Interp *interp;
      char       *packageName;
      char      **fileNamePtr;
-     long       *offsetPtr;
+     off_t       *offsetPtr;
      unsigned   *lengthPtr;
 {
     int   pkgDataArgc, idx;
@@ -432,7 +433,7 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
     if (pkgDataArgc != 3)
         goto invalidEntry;
 
-    if (!Tcl_StrToLong (pkgDataArgv [1], 0, offsetPtr))
+    if (!Tcl_StrToOffset (pkgDataArgv [1], 0, offsetPtr))
         goto invalidEntry;
     if (!Tcl_StrToUnsigned (pkgDataArgv [2], 0, lengthPtr))
         goto invalidEntry;
@@ -947,7 +948,7 @@ Tcl_Auto_load_pkgCmd (dummy, interp, argc, argv)
     char       **argv;
 {
     char     *fileName;
-    long      offset;
+    off_t     offset;
     unsigned  length;
     int       result;
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.1 1994/10/02 05:06:13 markd Exp markd $
+ * $Id: tclXutil.c,v 4.2 1994/12/28 05:17:24 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -172,6 +172,50 @@ Tcl_StrToDouble (string, doublePtr)
         return FALSE;
 
     *doublePtr = num;
+    return TRUE;
+
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_StrToOffset --
+ *      Convert an Ascii string to an off_t number of the specified base.
+ *
+ * Parameters:
+ *   o string (I) - String containing a number.
+ *   o base (I) - The base to use for the number 8, 10 or 16 or zero to decide
+ *     based on the leading characters of the number.  Zero to let the number
+ *     determine the base.
+ *   o offsetPtr (O) - Place to return the converted number.  Will be 
+ *     unchanged if there is an error.
+ *
+ * Returns:
+ *      Returns 1 if the string was a valid number, 0 invalid.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_StrToOffset (string, base, offsetPtr)
+    CONST char *string;
+    int         base;
+    off_t      *offsetPtr;
+{
+    char *end;
+    long  num;
+    off_t offset;
+
+    num = strtol(string, &end, base);
+    while ((*end != '\0') && ISSPACE(*end)) {
+        end++;
+    }
+    if ((end == string) || (*end != 0))
+        return FALSE;
+
+    offset = (off_t) num;
+    if (offset != num)
+        return FALSE;
+
+    *offsetPtr = offset;
     return TRUE;
 
 }
@@ -429,7 +473,7 @@ Tcl_GetTime(interp, string, timePtr)
     long   i;
     time_t time;
 
-    i = strtol(string, &end, 0);
+    i = strtoul(string, &end, 0);
     while ((*end != '\0') && ISSPACE(*end)) {
         end++;
     }
@@ -444,8 +488,56 @@ Tcl_GetTime(interp, string, timePtr)
     return TCL_OK;
 
   badTime:
-    Tcl_AppendResult (interp, "integer time \"", string, "\" to large\"",
-                      (char *) NULL);
+    Tcl_AppendResult (interp, "expected unsigned time but got \"", 
+                      string, "\"", (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_GetOffset --
+ *
+ *      Given a string, produce the corresponding off_t value.
+ *
+ * Results:
+ *      The return value is normally TCL_OK;  in this case *timepPtr
+ *      will be set to the integer value equivalent to string.  If
+ *      string is improperly formed then TCL_ERROR is returned and
+ *      an error message will be left in interp->result.
+ *
+ * Side effects:
+ *      None.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_GetOffset(interp, string, offsetPtr)
+    Tcl_Interp *interp;
+    CONST char *string;
+    off_t      *offsetPtr;
+{
+    char   *end;
+    long   i;
+    off_t offset;
+
+    i = strtol(string, &end, 0);
+    while ((*end != '\0') && ISSPACE(*end)) {
+        end++;
+    }
+    if ((end == string) || (*end != 0))
+        goto badOffset;
+
+    offset = (off_t) i;
+    if (offset != i)
+        goto badOffset;
+
+    *offsetPtr = offset;
+    return TCL_OK;
+
+  badOffset:
+    Tcl_AppendResult (interp, "expected integer offset but got \"", 
+                      string, "\"", (char *) NULL);
     return TCL_ERROR;
 }
 
