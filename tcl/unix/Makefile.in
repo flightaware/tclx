@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.14 1995/04/21 21:07:47 markd Exp markd $
+# $Id: Makefile.in,v 4.15 1995/05/08 02:26:25 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -79,11 +79,15 @@ UCBOBJS=tclCmdIL.o
 # Compile the TclX library and link the shell.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp tcl TCLXX_${TCLXX}
+all: made.tmp made2.tmp tcl TCLXX_${TCLXX}
 
 tcl: tclXAppInit.o libtclx.a ${LIBTCL} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	      -o tcl || (rm -f tcl; exit 1)
+
+made2.tmp: tcl
+	../runtcl ${srcbasedir}/tools/checkup.tcl
+	touch made2.tmp
 
 made.tmp libtclx.a: ${OBJS} ${UCBOBJS} TCLXX_O_${TCLXX}
 	${AR} cr libtclx.a ${OBJS} ${UCBOBJS}
@@ -167,7 +171,7 @@ install-master-exec:
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp tclXgetdate.c tclXAppInit.o tclCmdIL.c
+	-rm -f made*.tmp tclXgetdate.c tclXAppInit.o tclCmdIL.c
 	-rm -f ${OBJS} ${UCBOBJS} libtclx.a tcl tcl++
 	-rm -f tclXAppInit++.C TCLXX_O_YES TCLXX_O_NO tclXAppInit++.o tcl++.o
 
