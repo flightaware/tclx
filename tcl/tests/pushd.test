@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.test,v 4.2 1995/06/26 17:56:49 markd Exp markd $
+# $Id: pushd.test,v 5.0 1995/07/25 05:41:48 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -63,7 +63,7 @@ Test popd-1.2 {popd command} {
 
 Test popd-1.3 {popd command} {
     list [popd] [popd] [dirs]
-} 0 {/tmp /tmp /tmp}
+} 0 [list $TMP $TMP $TMP]
 
 Test popd-1.4 {popd command} {
     popd
