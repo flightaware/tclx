@@ -16,7 +16,7 @@
  *---------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.C,v 1.1 1992/09/20 23:24:26 markd Exp markd $
+ * $Id: tcl++.C,v 2.0 1992/10/16 04:51:32 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -82,7 +82,7 @@ TclInterp_cl::AppendResult (const char *p,
     va_start (argPtr, p);
     strPtr = CatVarArgs (argPtr);
     Tcl_AppendResult (interp, p, strPtr, (char *) NULL);
-    ckfree (strPtr)
+    ckfree (strPtr);
     va_end (argPtr);
 }
 
@@ -106,7 +106,7 @@ TclInterp_cl::SetErrorCode (char *p,
     va_start (argPtr, p);
     strPtr = CatVarArgs (argPtr);
     Tcl_SetErrorCode (interp, p, strPtr, (char *) NULL);
-    ckfree (strPtr)
+    ckfree (strPtr);
     va_end (argPtr);
 }
 
