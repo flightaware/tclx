@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 2.4 1993/09/02 04:10:46 markd Exp markd $
+# $Id: flock.test,v 2.5 1993/09/16 03:30:19 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -128,6 +128,7 @@ Test flock-2.8 {funlock argument checking} {
 # than hang on a confused system.
 #
 puts $writeFH "This is some silly text to help prevent hangs"
+flush $writeFH
 if {[catch {flock $writeFH 0 8} msg] != 0} {
     puts stderr "*************************************************************"
     puts stderr "Error acquiring file lock.  This is probably caused by an"
