@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.5 1997/07/04 09:24:46 markd Exp $
+ * $Id: tclXdebug.c,v 8.6 1997/07/04 20:23:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -62,6 +62,10 @@ TraceCode  _ANSI_ARGS_((traceInfo_pt infoPtr,
                         char       **argv));
 
 static void
+TraceCallbackError _ANSI_ARGS_((Tcl_Interp   *interp,
+                                traceInfo_pt infoPtr));
+
+static void
 TraceCallBack _ANSI_ARGS_((Tcl_Interp   *interp,
                            traceInfo_pt  infoPtr,
                            int           level,
@@ -90,8 +94,7 @@ DebugCleanUp _ANSI_ARGS_((ClientData  clientData,
                           Tcl_Interp *interp));
 
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TraceDelete --
  *
  *   Delete the trace if active, reseting the structure.
@@ -113,8 +116,7 @@ TraceDelete (interp, infoPtr)
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * PrintStr --
  *
  *     Print an string, truncating it to the specified number of characters.
@@ -145,8 +147,7 @@ PrintStr (channel, string, numChars, quoted)
         Tcl_Write (channel, "}", 1);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * PrintArg --
  *
  *   Print an argument string, truncating and adding "..." if its longer
@@ -179,8 +180,7 @@ PrintArg (channel, argStr, noTruncate)
     PrintStr (channel, argStr, printLen, quoted);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TraceCode --
  *
  *   Print out a trace of a code line.  Level is used for indenting
@@ -225,9 +225,45 @@ TraceCode (infoPtr, level, command, argc, argv)
     TclX_WriteNL (infoPtr->channel);
     Tcl_Flush (infoPtr->channel);
 }
+
 
-/*
+/*-----------------------------------------------------------------------------
+ * TraceCallbackError --
+ *
+ *   Print out an error message about a trace callback failure if possible and
+ * disable tracing.
  *-----------------------------------------------------------------------------
+ */
+static void
+TraceCallbackError (interp, infoPtr)
+    Tcl_Interp   *interp;
+    traceInfo_pt infoPtr;
+{
+    char *value;
+    Tcl_Channel stderrChan;
+
+    Tcl_AddErrorInfo (interp, "\n    (\"cmdtrace\" callback command)");
+    
+    stderrChan = Tcl_GetStdChannel (TCL_STDERR);
+    if (stderrChan != NULL) {
+        TclX_WriteStr (stderrChan, 
+                       "cmdtrace callback command error: errorCode = ");
+        value = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
+        if (value == NULL)
+            value = "";
+        TclX_WriteStr (stderrChan, value);
+        TclX_WriteNL (stderrChan);
+        value = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
+        if (value == NULL)
+            value = "";
+        TclX_WriteStr (stderrChan, value);
+        TclX_WriteNL (stderrChan);
+        Tcl_Flush (stderrChan);
+    }
+    TraceDelete (interp, infoPtr);
+}
+
+/*-----------------------------------------------------------------------------
  * TraceCallBack --
  *
  *   Build and call a callback for the command that was just executed. The
@@ -292,23 +328,7 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
      * point.
      */
     if (Tcl_Eval (interp, Tcl_DStringValue (&callback)) == TCL_ERROR) {
-        Tcl_Channel stderrChan;
-
-        Tcl_AddErrorInfo (interp, "\n    (\"cmdtrace\" callback command)");
-        
-        stderrChan = Tcl_GetStdChannel (TCL_STDERR);
-        if (stderrChan != NULL) {
-            TclX_WriteStr (stderrChan, 
-                           "cmdtrace callback command error: errorCode = ");
-            TclX_WriteStr (stderrChan,
-                           Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY));
-            TclX_WriteNL (stderrChan);
-            TclX_WriteStr (stderrChan,
-                           Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY));
-            TclX_WriteNL (stderrChan);
-            Tcl_Flush (stderrChan);
-        }
-        TraceDelete (interp, infoPtr);
+        TraceCallbackError (interp, infoPtr);
     }
 
     TclX_RestoreResultErrorInfo (interp, saveObjPtr);
@@ -316,8 +336,7 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
     Tcl_DStringFree (&callback);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * CmdTraceRoutine --
  *
  *  Routine called by Tcl_Eval to trace a command.
@@ -363,8 +382,7 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
     infoPtr->inTrace = FALSE;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_CmdtraceObjCmd --
  *
  * Implements the TCL trace command:
@@ -515,8 +533,7 @@ TclX_CmdtraceObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * DebugCleanUp --
  *
  *  Release the debug data area when the interpreter is deleted.
@@ -533,8 +550,7 @@ DebugCleanUp (clientData, interp)
     ckfree ((char *) infoPtr);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TclX_DebugInit --
  *
  *  Initialize the TCL debugging commands.

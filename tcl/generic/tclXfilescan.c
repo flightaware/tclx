@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.6 1997/07/04 08:41:00 markd Exp $
+ * $Id: tclXfilescan.c,v 8.7 1997/07/04 20:23:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -191,8 +191,8 @@ ScanContextCreate (interp, scanTablePtr)
                           contextPtr->contextHandle);
     *tableEntryPtr = contextPtr;
 
-    Tcl_SetStringObj (Tcl_GetObjResult (interp), contextPtr->contextHandle,
-	-1);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                      contextPtr->contextHandle, -1);
     return TCL_OK;
 }
 
@@ -526,7 +526,8 @@ SetMatchInfoVar (interp, scanData)
 {
     static char *MATCHINFO = "matchInfo";
     int idx, start, end;
-    char key [32], buf [32], *varPtr, holdChar;
+    char key [32];
+    Tcl_Obj *valueObjPtr, *indexObjv [2];
 
     /*
      * Save information about the current line, if it hasn't been saved.
@@ -540,10 +541,12 @@ SetMatchInfoVar (interp, scanData)
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
-        sprintf (buf, "%ld", (long) scanData->offset);
-        if (Tcl_SetVar2 (interp, MATCHINFO, "offset", buf,
-                         TCL_LEAVE_ERR_MSG) == NULL)
+        valueObjPtr = Tcl_NewLongObj ((long) scanData->offset);
+        if (TclX_ObjSetVar2S (interp, MATCHINFO, "offset", valueObjPtr,
+                              TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
+        }
 
 #if 0
         /*
@@ -551,16 +554,19 @@ SetMatchInfoVar (interp, scanData)
          * current line?  All the pieces are here, include doc and tests, just
          * disabled.
          */
-        sprintf (buf, "%ld", scanData->bytesRead);
-        if (Tcl_SetVar2 (interp, MATCHINFO, "bytesread", buf,
-                         TCL_LEAVE_ERR_MSG) == NULL)
+        valueObjPtr = Tcl_NewLongObj ((long) scanData->bytesRead);
+        if (TclX_SetVar2S (interp, MATCHINFO, "bytesread", valueObjPtr,
+                           TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
+        }
 #endif
-
-        sprintf (buf, "%ld", scanData->lineNum);
-        if (Tcl_SetVar2 (interp, MATCHINFO, "linenum", buf,
-                         TCL_LEAVE_ERR_MSG) == NULL)
+        valueObjPtr = Tcl_NewIntObj ((long) scanData->lineNum);
+        if (TclX_ObjSetVar2S (interp, MATCHINFO, "linenum", valueObjPtr,
+                              TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
+        }
 
         if (Tcl_SetVar2 (interp, MATCHINFO, "context",
                          scanData->contextPtr->contextHandle,
@@ -589,27 +595,27 @@ SetMatchInfoVar (interp, scanData)
         end = scanData->subMatchInfo [idx].end;
 
         sprintf (key, "subindex%d", idx);
-        sprintf (buf, "%d %d", start, end);
-        varPtr = Tcl_SetVar2 (interp, "matchInfo", key, buf,
-                              TCL_LEAVE_ERR_MSG);
-        if (varPtr == NULL)
+        indexObjv [0] = Tcl_NewIntObj (start);
+        indexObjv [1] = Tcl_NewIntObj (end);
+        valueObjPtr = Tcl_NewListObj (2, indexObjv);
+        if (TclX_ObjSetVar2S (interp, "matchInfo", key, valueObjPtr,
+                              TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
+        }
 
         sprintf (key, "submatch%d", idx);
         if (start < 0) {
-            varPtr = Tcl_SetVar2 (interp, "matchInfo", key,
-                                  "",
-                                  TCL_LEAVE_ERR_MSG);
+            valueObjPtr = Tcl_NewStringObj ("", 0);
         } else {
-            holdChar = scanData->line [end + 1];
-            scanData->line [end + 1] = '\0';
-            varPtr = Tcl_SetVar2 (interp, "matchInfo", key,
-                                  scanData->line + start,
-                                  TCL_LEAVE_ERR_MSG);
-            scanData->line [end + 1] = holdChar;
+            valueObjPtr = Tcl_NewStringObj (scanData->line + start,
+                                            (end - start) + 1);
         }
-        if (varPtr == NULL)
+        if (TclX_ObjSetVar2S (interp, "matchInfo", key, valueObjPtr,
+                              TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
+        }
     }
     return TCL_OK;
 }
