@@ -1,0 +1,67 @@
+*** tclWinSock.c.ORG	Sun Jun 30 05:28:57 1996
+--- tclWinSock.c	Thu Jul 18 04:03:03 1996
+***************
+*** 702,708 ****
+  
+      chan = Tcl_CreateChannel(&tcpChannelType, channelName, infoPtr->file,
+  	    infoPtr->file, (ClientData) infoPtr);
+!     if (Tcl_SetChannelOption(interp, chan, "-translation", "auto crlf") ==
+              TCL_ERROR) {
+          Tcl_Close((Tcl_Interp *) NULL, chan);
+          return (Tcl_Channel) NULL;
+--- 702,756 ----
+  
+      chan = Tcl_CreateChannel(&tcpChannelType, channelName, infoPtr->file,
+  	    infoPtr->file, (ClientData) infoPtr);
+!     if (Tcl_SetChannelOption(NULL, chan, "-translation", "auto crlf") ==
+!             TCL_ERROR) { 
+!         Tcl_Close((Tcl_Interp *) NULL, chan);
+!         return (Tcl_Channel) NULL;
+!     }
+!     if (Tcl_SetChannelOption(NULL, chan, "-eofchar", "") == TCL_ERROR) {
+!         Tcl_Close((Tcl_Interp *) NULL, chan);
+!         return (Tcl_Channel) NULL;
+!     }
+!     return chan;
+! }
+! 
+! /*
+!  *----------------------------------------------------------------------
+!  *
+!  * Tcl_MakeTcpClientChannel --
+!  *
+!  *	Creates a Tcl_Channel from an existing client TCP socket.
+!  *
+!  * Results:
+!  *	The Tcl_Channel wrapped around the preexisting TCP socket.
+!  *
+!  * Side effects:
+!  *	None.
+!  *
+!  *----------------------------------------------------------------------
+!  */
+! 
+! Tcl_Channel
+! Tcl_MakeTcpClientChannel(sock)
+!     ClientData sock;		/* The socket to wrap up into a channel. */
+! {
+!     SocketInfo *infoPtr;
+!     char channelName[20];
+!     Tcl_Channel chan;
+! 
+!     if (TclHasSockets(NULL) != TCL_OK) {
+! 	return NULL;
+!     }
+! 
+!     infoPtr = NewSocketInfo (Tcl_GetFile((ClientData) sock,
+!                                          TCL_WIN_SOCKET));
+! 
+!     sprintf(channelName, "sock%d", infoPtr->socket);
+! 
+!     chan = Tcl_CreateChannel(&tcpChannelType, channelName, infoPtr->file,
+! 	    infoPtr->file, (ClientData) infoPtr);
+!     if (Tcl_SetChannelOption((Tcl_Interp *) NULL, chan,
+!                              "-translation", "auto crlf") ==
+              TCL_ERROR) {
+          Tcl_Close((Tcl_Interp *) NULL, chan);
+          return (Tcl_Channel) NULL;
