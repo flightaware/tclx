@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 7.2 1996/07/19 04:05:08 markd Exp $
+# $Id: dup.test,v 7.3 1996/07/26 05:56:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,6 +22,8 @@ if [cequal $tcl_platform(platform) windows] {
     echo "    * The dup command has not been ported to Win32" 
     return
 }
+
+# FIX: Need tests on sockets.
 
 # Create a test file
 
@@ -33,7 +35,23 @@ for {set cnt 0} {$cnt < 100} {incr cnt} {
 }
 close $testFH
 
-Test dup-1.1 {dup tests} {
+Test dup-1.1 {dup argument checking} {
+    dup
+} 1 {wrong # args: dup channelId ?targetChannelId?}
+
+Test dup-1.2 {dup argument checking} {
+    dup a b c
+} 1 {wrong # args: dup channelId ?targetChannelId?}
+
+Test dup-1.3 {dup argument checking} {
+    dup a
+} 1 {can not find channel named "a"}
+
+Test dup-1.4 {dup argument checking} {
+    dup stdin a
+} 1 {invalid channel id: a}
+
+Test dup-2.1 {dup tests} {
     set testFH [open DUP.TMP]
     set testFH2 [dup $testFH]
     gets $testFH2 testRec
@@ -42,7 +60,7 @@ Test dup-1.1 {dup tests} {
     set testRec
 } 0 [GenRec 0]
 
-Test dup-1.2 {dup tests} {
+Test dup-2.2 {dup tests} {
     set testFH [open DUP.TMP]
     set testFH2 [open DUP2.TMP w]
     set testFH2 [dup $testFH $testFH2]
@@ -83,13 +101,13 @@ if {[set childPid [fork]] == 0} {
     exit 1
 }
 
-Test dup-1.3 {dup tests} {
+Test dup-2.3 {dup tests} {
     wait $childPid
 } 0 "$childPid EXIT 0"
 
 set outFH [open OUTPUT.TMP r]
 foreach line $data {
-    Test dup-1.4 {dup tests} {
+    Test dup-2.4 {dup tests} {
         gets $outFH
     } 0 $line
 }
@@ -98,17 +116,12 @@ close $outFH
 # Test binding of open files to ids.  Solaris opens pipes RDWR (I don't know
 # why), so skip some tests if this is the case.
 
-set doDupIdTests 1
 switch $tcl_platform(platform) {
     unix {
-        #
-        # FreeBSD 2.2-960612-SNAP implments pipes as sockets, but socket
-        # operations on them fail.  
-        #
-        if [cequal "FreeBSD 2.2-960612-SNAP" \
-                   "$tcl_platform(os) $tcl_platform(osVersion)"] {
-            set doDupIdTests 0
-        }
+        set doDupIdTests 1
+    }
+    windows {
+        set doDupIdTests 0
     }
 }
 
@@ -151,7 +164,7 @@ if $doDupIdTests {
     close $toParent
     close $fromParent
 
-    Test dup-2.1 {dup tests} {
+    Test dup-3.1 {dup tests} {
         set line [gets $fromChild]
         switch $line {
             {DOING ACCESS CHECK} {
@@ -171,17 +184,17 @@ if $doDupIdTests {
 
 
     if ![fcntl $toChild RDWR] {
-        Test dup-2.2 {dup tests} {
+        Test dup-3.2 {dup tests} {
             gets $toChild
         } 1 "channel \"$toChild\" wasn't opened for reading"
 
-        Test dup-2.3 {dup tests} {
+        Test dup-3.3 {dup tests} {
             puts $fromChild arf
         } 1 "channel \"$fromChild\" wasn't opened for writing"
     }
 
     if $doingAccess {
-        Test dup-2.4 {dup tests} {
+        Test dup-3.4 {dup tests} {
             gets $fromChild line
             if [string match {msg1: channel "*" wasn't opened for writing} $line] {
                 list OK
@@ -189,7 +202,7 @@ if $doDupIdTests {
                 list $line
             }
         } 0 OK
-        Test dup-2.5 {dup tests} {
+        Test dup-3.5 {dup tests} {
             gets $fromChild line
             if [string match {msg2: channel "*" wasn't opened for reading} $line] {
                 list OK
@@ -199,26 +212,26 @@ if $doDupIdTests {
         } 0 OK
     }
 
-    Test dup-2.6 {dup tests} {
-        puts $toChild "test 2.2"
+    Test dup-3.6 {dup tests} {
+        puts $toChild "test 3.2"
         flush $toChild
         gets $fromChild
-    } 0 {got: test 2.2}
+    } 0 {got: test 3.2}
 
-    Test dup-2.7 {dup tests} {
-        puts $toChild "test 2.3"
+    Test dup-3.7 {dup tests} {
+        puts $toChild "test 3.3"
         flush $toChild
         gets $fromChild
-    } 0 {got: test 2.3}
+    } 0 {got: test 3.3}
 
-    Test dup-2.8 {dup tests} {
+    Test dup-3.8 {dup tests} {
         close $toChild
         close $fromChild
         wait $childPid
     } 0 [list $childPid EXIT 0]
 }
 
-Test dup-2.9 {dup tests} {
+Test dup-3.9 {dup tests} {
    set stat [catch {dup 100}]
    list $stat [lrange $errorCode 0 1]
 } 0 {1 {POSIX EBADF}}

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.7 1996/08/08 01:52:24 markd Exp $
+ * $Id: tclXunixOS.c,v 7.8 1996/08/09 04:12:31 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -725,6 +725,45 @@ TclXOSFstat (interp, channel, direction, statBuf, ttyDev)
     }
     if (ttyDev != NULL)
         *ttyDev = isatty (fileNum);
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSSeakable --
+ *   Portability interface to determine if a channel is seekable.
+ *
+ * Parameters:
+ *   o interp - Errors are returned in result.
+ *   o channel - Channel to get the status of.
+ *   o seekable - TRUE is return if seekable, FALSE if not.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSSeekable (interp, channel, seekablePtr)
+    Tcl_Interp  *interp;
+    Tcl_Channel  channel;
+    int         *seekablePtr;
+{
+    struct stat statBuf;
+    int fileNum = ChannelToFnum (channel, TCL_READABLE);
+
+    if (fileNum < 0) {
+        *seekablePtr = FALSE;
+        return TCL_OK;
+    }
+
+    if (fstat (fileNum, &statBuf) < 0) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (S_ISREG (statBuf.st_mode)) {
+        *seekablePtr = TRUE;
+    } else {
+        *seekablePtr = FALSE;
+    }
     return TCL_OK;
 }
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.5 1996/08/17 02:10:16 markd Exp $
+# $Id: Makefile.in,v 7.6 1996/08/17 05:42:04 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -51,7 +51,7 @@ GENERIC_OBJS = \
     tclXlibInit.o    tclXprocess.o    tclXprofile.o    tclXregexp.o   \
     tclXselect.o     tclXunixSock.o   tclXsignal.o     tclXshell.o    \
     tclXstring.o     tclXsocket.o     tclXunixCmds.o   tclXutil.o     \
-    tclXunixOS.o     tclXoscmds.o
+    tclXunixOS.o     tclXoscmds.o     tclXunixDup.o
 
 COMPAT_OBJS = @LIBOBJS@
 
@@ -204,6 +204,9 @@ tclXutil.o: ${TCLX_GENERIC_DIR}/tclXutil.c
 
 tclXchmod.o: ${TCLX_GENERIC_DIR}/tclXchmod.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXchmod.c
+
+tclXunixDup.o: ${TCLX_UNIX_SRC_DIR}/tclXunixDup.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXunixDup.c
 
 tclXid.o: ${TCLX_UNIX_SRC_DIR}/tclXid.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXid.c

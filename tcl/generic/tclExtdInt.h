@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.7 1996/08/08 01:52:21 markd Exp $
+ * $Id: tclExtdInt.h,v 7.8 1996/08/09 04:12:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -575,6 +575,19 @@ extern void
 TclX_ServerInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
+ * From TclXxxxDup.c
+ */
+Tcl_Channel
+TclXOSDupChannel _ANSI_ARGS_((Tcl_Interp *interp,
+                              Tcl_Channel srcChannel,
+                              int         mode,
+                              char       *targetChannelId));
+
+Tcl_Channel
+TclXOSBindOpenFile _ANSI_ARGS_((Tcl_Interp *interp,
+                                char       *fileNumStr));
+
+/*
  * from tclXxxxOS.c
  */
 extern int
@@ -656,6 +669,11 @@ TclXOSFstat _ANSI_ARGS_((Tcl_Interp  *interp,
                          struct stat *statBuf,
                          int         *ttyDev));
     
+extern int
+TclXOSSeekable _ANSI_ARGS_((Tcl_Interp  *interp,
+                            Tcl_Channel  channel,
+                            int         *seekablePtr));
+
 extern int
 TclXOSWalkDir _ANSI_ARGS_((Tcl_Interp       *interp,
                            char             *path,
