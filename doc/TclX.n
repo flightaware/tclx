@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.25 1993/08/18 05:23:56 markd Exp markd $
+.\" $Id: TclX.man,v 2.26 1993/08/31 23:03:20 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -962,7 +962,7 @@ The \fB-bytes\fR option is particularly useful for mixing binary data
 in with ASCII commands or data in a data stream.
 '@endhelp
 '
- '@help: tcl/files/dup
+'@help: tcl/files/dup
 '@brief: Duplicate an open file
 .TP
 .B dup \fIfileId\fR ?\fItargetFileId\fR?
