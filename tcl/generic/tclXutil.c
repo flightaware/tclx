@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.16 1997/07/04 23:59:14 markd Exp $
+ * $Id: tclXutil.c,v 8.17 1997/07/10 07:21:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -417,7 +417,7 @@ TclX_GetOffsetFromObj (interp, objPtr, offsetPtr)
  * Parameters:
  *   o interp - A pointer to the interpreter.
  *   o exprPtr - Object with expression to evaluate.
- *   o stringLen - The length of the string.
+ *   o stringLen - The length of the string or list.
  *   o exprResultPtr - The result of the expression is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.

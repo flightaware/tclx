@@ -12,11 +12,15 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.8 1997/07/04 20:23:55 markd Exp $
+ * $Id: tclXlist.c,v 8.9 1997/07/05 01:40:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/* FIX: Need way to get lvarpush to append to end, or even fill in empty
+   entries
+*/
 
 /*
  * Only do look up of type once, its static.

@@ -12,9 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.10 1997/07/29 03:03:09 markd Exp $
+ * $Id: tclXstring.c,v 8.11 1997/07/30 17:08:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
+
+/*FIX: Add creplace to overwrite characters in a string. */
 
 #include "tclExtdInt.h"
 
@@ -349,6 +351,8 @@ TclX_ReplicateObjCmd (dummy, interp, objc, objv)
  *
  * Results:
  *      Returns the first token and removes it from the string variable.
+ * FIX: Add command to make a list.  Better yet, a new cparse command thats
+ * more flexable and includes this functionallity.
  *-----------------------------------------------------------------------------
  */
 static int
