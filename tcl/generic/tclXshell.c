@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 8.2 1997/06/12 21:08:30 markd Exp $
+ * $Id: tclXshell.c,v 8.3 1997/06/21 16:21:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -308,7 +308,9 @@ TclX_Main (argc, argv, appInitProc)
          */
 #ifndef __WIN32__
 	extern char *tclMemDumpFileName;
-	tclMemDumpFileName = "mem.lst";
+        static char dumpFileName [128];
+        sprintf (dumpFileName, "tclmem.%d.lst", getpid ());
+	tclMemDumpFileName = dumpFileName;
 #endif
 	Tcl_DeleteInterp (interp);
 	Tcl_Exit (0);
