@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 4.1 1995/01/01 19:47:38 markd Exp markd $
+# $Id: fstat.test,v 4.2 1995/03/31 08:19:58 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -72,8 +72,12 @@ Test fstat-3.1 {individual item returns} {
     puts $gorpFH "More text"
     flush $gorpFH
     set new [fstat $gorpFH mtime]
-    expr {($new > $old) && ($new <= ($old+5))}
-} 0 {1}
+    if {($new > $old) && ($new <= ($old+5))} {
+        concat OK
+    } else {
+        error "Bad mtimes: old = $old, new = $new"
+    }
+} 0 {OK}
 
 Test fstat-3.2 {individual item returns} {
     set oldsize [fstat $gorpFH size]
