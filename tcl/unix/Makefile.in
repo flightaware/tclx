@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.29 1999/07/07 02:47:12 wart Exp $
+# $Id: Makefile.in,v 8.30 1999/07/10 00:56:26 redman Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -31,7 +31,8 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${SYSCFLAGS} \
 	      -I${TCLX_UNIX_BLD_DIR} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
 
-LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
+LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${TCL_LD_SEARCH_FLAGS} \
+	      ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 LIBS = @SHARED_LIBS@
 
