@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.0 1992/10/16 04:50:41 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -55,7 +55,7 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp    *interp,
  *
  * Tcl_PipeCmd --
  *     Implements the pipe TCL command:
- *         pipe [handle_var_r handle_var_w]
+ *         pipe ?handle_var_r handle_var_w?
  *
  * Results:
  *      Standard TCL result.
@@ -78,7 +78,7 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
 
     if (!((argc == 1) || (argc == 3))) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
-                          " [handle_var_r handle_var_w]", (char*) NULL);
+                          " ?handle_var_r handle_var_w?", (char*) NULL);
         return TCL_ERROR;
     }
 
@@ -117,7 +117,7 @@ errorExit:
  *
  * Tcl_CopyfileCmd --
  *     Implements the copyfile TCL command:
- *         copyfile handle1 handle2 [lines]
+ *         copyfile handle1 handle2
  *
  * Results:
  *      Nothing if it worked, else an error.
@@ -409,7 +409,7 @@ ReturnStatItem (interp, filePtr, statBufPtr, itemName)
  *
  * Tcl_FstatCmd --
  *     Implements the fstat TCL command:
- *         fstat handle [item]|[stat arrayvar]
+ *         fstat handle ?item?|?stat arrayvar?
  *
  *-----------------------------------------------------------------------------
  */
@@ -425,7 +425,7 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " handle [item]|[stat arrayVar]", (char *) NULL);
+                          " handle ?item?|?stat arrayVar?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -462,7 +462,7 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
  * Tcl_LgetsCmd --
  *
  * Implements the `lgets' Tcl command:
- *    lgets fileId [varName]
+ *    lgets fileId ?varName?
  *
  * Results:
  *      A standard Tcl result.
@@ -486,7 +486,7 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
 
     if ((argc != 2) && (argc != 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " fileId [varName]", (char *) NULL);
+                          " fileId ?varName?", (char *) NULL);
         return TCL_ERROR;
     }
     if (TclGetOpenFile(interp, argv[1], &filePtr) != TCL_OK) {
@@ -584,7 +584,7 @@ errorExit:
  *
  * Parse the positional arguments common to both the flock and funlock
  * commands:
- *   ... handle [start] [length] [origin]
+ *   ... handle ?start? ?length? ?origin?
  *
  * Parameters:
  *   o interp (I) - Pointer to the interpreter, errors returned in result.
@@ -657,7 +657,7 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, filePtrPtr, lockInfoPtr)
  * Tcl_FlockCmd --
  *
  * Implements the `flock' Tcl command:
- *    flock [-read|-write] [-nowait] handle [start] [length] [origin]
+ *    flock ?-read|-write? ?-nowait? handle ?start? ?length? ?origin?
  *
  * Results:
  *      A standard Tcl result.
@@ -739,8 +739,8 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
      */
 
   invalidArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " [-read|-write] ",
-                      "[-nowait] handle [start] [length] [origin]",
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?-read|-write? ",
+                      "?-nowait? handle ?start? ?length? ?origin?",
                       (char *) NULL);
     return TCL_ERROR;
 
@@ -772,7 +772,7 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
  * Tcl_FunlockCmd --
  *
  * Implements the `funlock' Tcl command:
- *    funlock handle [start] [length] [origin]
+ *    funlock handle ?start? ?length? ?origin?
  *
  * Results:
  *      A standard Tcl result.
@@ -807,7 +807,7 @@ Tcl_FunlockCmd (notUsed, interp, argc, argv)
 
   invalidArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " handle [start] [length] [origin]", (char *) NULL);
+                      " handle ?start? ?length? ?origin?", (char *) NULL);
     return TCL_ERROR;
 
 }

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: list.test,v 1.2 1992/09/21 05:08:55 markd Exp markd $
+# $Id: list.test,v 2.0 1992/10/16 04:49:59 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -60,7 +60,7 @@ Test list-1.8 {lvarpop tests} {
 
 Test list-1.9 {lvarpop tests} {
     lvarpop
-} 1 {wrong # args: lvarpop var [index [string]]}
+} 1 {wrong # args: lvarpop var ?index? ?string?}
 
 Test list-1.10 {lvarpop tests} {
     unset a
@@ -134,7 +134,7 @@ Test list-2.11 {lvarpush tests} {
 
 Test list-2.12 {lvarpush tests} {
     lvarpush
-} 1 {wrong # args: lvarpush var string [index]}
+} 1 {wrong # args: lvarpush var string ?index?}
 
 
 Test list-3.1 {lvarcat} {
@@ -174,11 +174,11 @@ Test list-3.6 {lvarcat} {
 
 Test list-3.7 {lvarcat} {
     lvarcat a
-} 1 {wrong # args: lvarcat var string [string...]}
+} 1 {wrong # args: lvarcat var string ?string...?}
 
 Test list-3.8 {lvarcat} {
     lvarcat
-} 1 {wrong # args: lvarcat var string [string...]}
+} 1 {wrong # args: lvarcat var string ?string...?}
 
 
 

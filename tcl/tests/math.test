@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: math.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: math.test,v 2.0 1992/10/16 04:50:02 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -29,7 +29,7 @@ for {set i 0} {$i < 100} {set i [expr $i+1]} {
 
 Test math-1.2 {random tests} {
     random
-} 1 {wrong # args: random limit | seed [seedval]}
+} 1 {wrong # args: random limit | seed ?seedval?}
 
 Test math-1.3 {random tests} {
     # Max range varies on some machines, so don't validate that part of
@@ -59,7 +59,7 @@ Test math-2.4 {max tests} {
 
 Test math-2.5 {max tests} {
     max
-} 1 {wrong # args: max num1 num2 [..numN]}
+} 1 {wrong # args: max num1 num2 ?..numN?}
 
 Test math-2.6 {max tests} {
     max 1 2 3 foo
@@ -79,7 +79,7 @@ Test math-3.3 {min tests} {
 
 Test math-3.4 {min tests} {
     min
-} 1 {wrong # args: min num1 num2 [..numN]}
+} 1 {wrong # args: min num1 num2 ?..numN?}
 
 Test math-3.5 {min tests} {
     min 1 2 3 foo

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 2.1 1992/10/25 05:48:53 markd Exp markd $
+ * $Id: tclXprocess.c,v 2.2 1992/10/30 03:53:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,7 +34,7 @@
  *
  * Tcl_ExeclCmd --
  *     Implements the TCL execl command:
- *     execl prog [argList]
+ *     execl prog ?argList?
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -56,7 +56,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " prog [argList]", (char *) NULL);
+                          " prog ?argList?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -192,7 +192,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
  *
  * Tcl_WaitCmd --
  *   Implements the TCL wait command:
- *     wait [-nohang] [-untraced] [-pgroup] [pid]
+ *     wait ?-nohang? ?-untraced? ?-pgroup? ?pid?
  *
  * Results:
  *   Standard TCL results, may return the UNIX system error message.
@@ -290,7 +290,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
 
 usage:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", 
-                      "[-nohang] [-untraced] [-pgroup] [pid]",
+                      "?-nohang? ?-untraced? ?-pgroup? ?pid?",
                       (char *) NULL);
     return TCL_ERROR;
 }

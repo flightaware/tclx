@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 1.1 1992/09/20 23:20:37 markd Exp markd $
+ * $Id: tclXmsgcat.c,v 2.0 1992/10/16 04:51:02 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -173,7 +173,7 @@ CatOpFailed (interp, errorMsg)
  *
  * Tcl_CatopenCmd --
  *    Implements the TCL echo command:
- *        catopen [-fail|-nofail] catname
+ *        catopen ?-fail|-nofail? catname
  *
  * Results:
  *     Standard Tcl results.
@@ -192,7 +192,8 @@ Tcl_CatopenCmd (clientData, interp, argc, argv)
     nl_catd *catDescPtr;
 
     if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, argv [0], " [-fail|-nofail] catname",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                          " ?-fail|-nofail? catname",
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -236,7 +237,8 @@ Tcl_CatgetsCmd (clientData, interp, argc, argv)
     char      *localMsg;
 
     if (argc != 5) {
-        Tcl_AppendResult (interp, argv [0], " catHandle setnum msgnum ",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                          " catHandle setnum msgnum ",
                           "defaultstr", (char *) NULL);
         return TCL_ERROR;
     }
@@ -259,7 +261,7 @@ Tcl_CatgetsCmd (clientData, interp, argc, argv)
  *
  * Tcl_CatcloseCmd --
  *    Implements the TCL echo command:
- *        catclose [-fail|-nofail] catHandle
+ *        catclose ?-fail|-nofail? catHandle
  *
  * Results:
  *     Standard Tcl results.
@@ -277,7 +279,8 @@ Tcl_CatcloseCmd (clientData, interp, argc, argv)
     nl_catd *catDescPtr;
 
     if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, argv [0], " [-fail|-nofail] catHandle",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                          " ?-fail|-nofail? catHandle",
                           (char *) NULL);
         return TCL_ERROR;
     }

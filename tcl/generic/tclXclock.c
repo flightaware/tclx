@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 2.0 1992/10/16 04:50:28 markd Rel markd $
+ * $Id: tclXclock.c,v 2.1 1993/01/26 03:47:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -51,7 +51,7 @@ Tcl_GetclockCmd (clientData, interp, argc, argv)
  *
  * Tcl_FmtclockCmd --
  *     Implements the TCL fmtclock command:
- *         fmtclock clockval [format] [GMT|{}]
+ *         fmtclock clockval ?format? ?GMT|{}?
  *
  * Results:
  *     Standard TCL results.
@@ -73,7 +73,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " clockval [format] [GMT|{}]", (char *) NULL);
+                          " clockval ?format? ?GMT|{}?", (char *) NULL);
         return TCL_ERROR;
     }
 

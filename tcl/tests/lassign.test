@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lassign.test,v 2.0 1992/10/16 04:49:29 markd Rel markd $
+# $Id: lassign.test,v 2.1 1993/02/17 03:00:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -26,7 +26,7 @@ Test lassign-1.1 {lassign command} {
 
 Test lassign-1.2 {lassign command} {
     lassign "a b {c d} e"
-} 1 {wrong # args: lassign list varname [varname..]}
+} 1 {wrong # args: lassign list varname ?varname..?}
 
 catch {unset alpha beta gamma delta epsilon}
 rename unknown SAVED_UNKNOWN

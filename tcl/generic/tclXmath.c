@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXmath.c,v 2.0 1992/10/16 04:50:59 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,7 +32,7 @@ really_random _ANSI_ARGS_((int my_range));
  *
  * Tcl_MaxCmd --
  *      Implements the TCL max command:
- *        max num1 num2 [..numN]
+ *        max num1 num2 ?..numN?
  *
  * Results:
  *      Standard TCL results.
@@ -52,7 +52,7 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
 
     if (argc < 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " num1 num2 [..numN]", (char *) NULL);
+                          " num1 num2 ?..numN?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -73,7 +73,7 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
  *
  * Tcl_MinCmd --
  *     Implements the TCL min command:
- *         min num1 num2 [..numN]
+ *         min num1 num2 ?..numN?
  *
  * Results:
  *      Standard TCL results.
@@ -92,7 +92,7 @@ Tcl_MinCmd (clientData, interp, argc, argv)
 
     if (argc < 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " num1 num2 [..numN]", (char *) NULL);
+                          " num1 num2 ?..numN?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -142,7 +142,7 @@ ReallyRandom (myRange)
  *
  * Tcl_RandomCmd  --
  *     Implements the TCL random command:
- *     random limit
+ *     random limit | seed ?seedval?
  *
  * Results:
  *  Standard TCL results.
@@ -186,7 +186,7 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
 
 invalidArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " limit | seed [seedval]", (char *) NULL);
+                      " limit | seed ?seedval?", (char *) NULL);
     return TCL_ERROR;
 outOfRange:
     {

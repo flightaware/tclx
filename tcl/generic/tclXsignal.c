@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.2 1992/12/19 21:21:14 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.3 1993/02/22 04:27:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -224,7 +224,7 @@ SigNameToNum (sigName)
  *
  * Tcl_KillCmd --
  *     Implements the TCL kill command:
- *        kill [signal] proclist
+ *        kill ?signal? proclist
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -243,7 +243,7 @@ Tcl_KillCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " [signal] processlist", (char *) NULL);
+                          " ?signal? processlist", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -284,7 +284,7 @@ exitPoint:
 /*
  *-----------------------------------------------------------------------------
  *
- * GetSignal[State --
+ * GetSignalState --
  *     Get the current state of the specified signal.
  * Parameters:
  *   o signalNum (I) - Signal number to query.
@@ -884,7 +884,7 @@ BlockSignals (interp, action, signalListSize, signalList)
  *
  * Tcl_SignalCmd --
  *     Implements the TCL signal command:
- *         signal action siglist [command]
+ *         signal action siglist ?command?
  *
  * Results:
  *      Standard TCL results, may return the UNIX system error message.
@@ -908,7 +908,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " action signalList [commands]", (char *) NULL);
+                          " action signalList ?command?", (char *) NULL);
         return TCL_ERROR;
     }
 

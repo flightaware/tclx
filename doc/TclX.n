@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.6 1993/02/17 03:00:50 markd Exp markd $
+.\" $Id: TclX.man,v 2.7 1993/02/22 04:11:05 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -85,7 +85,7 @@ and a looping command.
 '@help: control/commandloop
 '@brief: Create an interactive command loop.
 .TP
-.B commandloop [\fIprompt\fR] [\fIprompt2\fR]
+.B commandloop ?\fIprompt\fR? ?\fIprompt2\fR?
 .br
 Create an interactive command loop for the current TCL interpreter.  This
 command receives commands from stdin and executes them.  It is
@@ -108,7 +108,7 @@ may be a \fBreturn\fR) will be used as the prompt.
 '@help: debug/cmdtrace
 '@brief: Trace Tcl execution.
 .TP
-.B cmdtrace \fIlevel\fR|\fBon\fR [\fBnoeval\fR] [\fBnotruncate\fR] [\fIprocs\fR] [\fIfilehandle\fR]
+.B cmdtrace \fIlevel\fR|\fBon\fR ?\fBnoeval\fR? ?\fBnotruncate\fR? ?\fIprocs\fR? ?\fIfileid\fR?
 .br
 Print a trace statement for all commands executed at depth of \fIlevel\fR or
 below (1 is the top level).  If \fBon\fR is specified, all commands at any
@@ -138,7 +138,7 @@ or some object-compatible language) are not traced if the \fBprocs\fR
 option is specified.  This option is particularly useful for greatly
 reducing the output of \fBcmdtrace\fR while debugging.
 .TP
-.B filehandle
+.B fileid
 This is a file id as returned by the \fBopen\fR command.  If specified, then
 the trace output will be written to the file rather than stdout.  A stdio
 buffer flush is done after every line is written so that the trace may be
@@ -156,7 +156,7 @@ Returns the current maximum trace level, or zero if trace is disabled.
 '@help: files/echo
 '@brief: Echo one or more strings to stdout, followed by a newline.
 .TP
-.B echo [\fIstr1..\fR]
+.B echo ?\fIstr ...\fR?
 .br
 Writes zero or more strings to standard output, followed by a newline.
 '@endhelp
@@ -202,7 +202,7 @@ application-specific value for this variable.
 '@help: control/loop
 '@brief: Higher-performance for-style loop.
 .TP
-.B loop \fIvar first limit [increment] body\fR
+.B loop \fIvar first limit ?increment? body\fR
 .br
 \fBLoop\fR is a looping command, similar in behavior to the Tcl \fBfor\fR
 statement, except that the \fBloop\fR statement achieves substantially higher
@@ -236,7 +236,7 @@ return immediately.
 '@help: debug/profile
 '@brief: Collect Tcl script performance profile data.
 .TP
-.B profile [-commands] on
+.B profile ?-commands? on
 .B profile off \fIarrayVar\fR
 .br
 This command is used to collect a performance profile of a Tcl script.  It
@@ -324,7 +324,7 @@ group of the specified user.
 '@help: time/convertclock
 '@brief: Parse and convert a date and time string to integer clock value.
 .TP
-.B convertclock \fIdateString\fR [\fBGMT\fR|{}] [\fIbaseClock\fR]
+.B convertclock \fIdateString\fR ?\fBGMT\fR|{}? ?\fIbaseClock\fR?
 .br
 Convert \fIdateString\fR to an integer clock value (see \fBgetclock\fR).
 This command can parse and convert virtually any standard date and/or time
@@ -425,7 +425,7 @@ Some examples are:
 '@help: processes/execl
 '@brief: Perform a process exec, executing a file.
 .TP
-.B execl \fIprog\fR [\fIarglist\fR]
+.B execl \fIprog\fR ?\fIarglist\fR?
 .br
 Do an execl, replacing the current program (either Extended Tcl or an
 application with Extended Tcl embedded into it) with \fIprog\fR and
@@ -435,7 +435,7 @@ passing the arguments in the list \fIarglist\fR.
 '@help: time/fmtclock
 '@brief: Convert an integer time value to human-readable format.
 .TP
-.B fmtclock \fIclockval\fR [\fIformat\fR] [\fBGMT|{}\fR]
+.B fmtclock \fIclockval\fR ?\fIformat\fR? ?\fBGMT|{}\fR?
 .br
 Converts a Unix integer time value, typically returned by
 \fBgetclock\fR, \fBconvertclock\fR, or the \fBatime\fR, \fBmtime\fR,
@@ -524,9 +524,9 @@ and process ids.  The \fBid\fR command has the following options:
 '
 .RS 5
 .TP
-.B id user \fR[\fIname\fR]
+.B id user \fR?\fIname\fR?
 .TP
-.B id userid \fR[\fIuid\fR]
+.B id userid \fR?\fIuid\fR?
 Set the real and effective user ID to \fIname\fR or \fIuid\fR, if the
 name (or uid) is valid and permissions allow it.  If the name (or uid)
 is not specified, the current name (or uid) is returned.
@@ -536,9 +536,9 @@ is not specified, the current name (or uid) is returned.
 .B id convert user \fIname\fR
 Convert a user ID number to a user name, or vice versa.
 .TP
-.B id group \fR[\fIname\fR]
+.B id group \fR?\fIname\fR?
 .TP
-.B id groupid \fR[\fIgid\fR]
+.B id groupid \fR?\fIgid\fR?
 Set the real and effective group ID to \fIname\fR or \fIgid\fR, if the
 name (or gid) is valid and permissions allow it.  If the group name
 (or gid) is not specified, the current group name (or gid) is returned.
@@ -579,7 +579,7 @@ Set the process group ID of the current process to its process ID.
 '@help: processes/kill
 '@brief: Send a signal to the specified process.
 .TP
-.B kill [\fIsignal\fR] \fIprocesslist\fR
+.B kill ?\fIsignal\fR? \fIprocesslist\fR
 .br
 Send a signal to the each process in the list \fIprocesslist\fR, if permitted.
 \fISignal\fR, if present, is the signal number or the symbolic name of the
@@ -591,7 +591,7 @@ The default for \fIsigno\fR is 15, SIGTERM.
 '@help: files/link
 '@brief: Create a link to a file.
 .TP
-.B link [\fB-sym\fR] \fIsrcpath destpath\fR
+.B link ?\fB-sym\fR? \fIsrcpath destpath\fR
 .br
 Create a directory entry, \fIdestpath\fR, linking it to the existing file,
 \fIsrcpath\fR.  If \fB-sym\fR is specified, a symbolic link, rather than
@@ -601,7 +601,7 @@ on systems that support symbolic links.)
 '@help: files/mkdir
 '@brief: Create a new directory
 .TP
-.B mkdir [-path] \fIdirList\fR
+.B mkdir ?-path? \fIdirList\fR
 .br
 Create each of the directories in the list \fIdirList\fR.  The mode on the
 new directories is 777, modified by the umask.  If \fB-path\fR is specified,
@@ -611,7 +611,7 @@ created.
 '@help: files/rmdir
 '@brief: Remove directories
 .TP
-.B rmdir [\fB-nocomplain\fR] \fIdirList\fR
+.B rmdir ?\fB-nocomplain\fR? \fIdirList\fR
 .br
 Remove each of the directories in the list \fIdirList\fR.
 If \fB-nocomplain\fR is specified, then errors will be ignored.
@@ -619,7 +619,7 @@ If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@help: signals/signal
 '@brief: Specify action to take when a signal is received.
 .TP
-.B signal \fIaction\fR \fIsiglist\fR [\fIcommand\fR]
+.B signal \fIaction\fR \fIsiglist\fR ?\fIcommand\fR?
 .br
 Specify the action to take when a Unix signal is received by Extended
 Tcl, or a program that embeds it.  \fISiglist\fR is a list
@@ -712,7 +712,7 @@ The values are in milliseconds.
 '@help: status/umask
 '@brief: Get or set the file-creation mode mask.
 .TP
-.B umask [\fIoctalmask\fR]
+.B umask ?\fIoctalmask\fR?
 .br
 Sets file-creation mode mask to the octal value of \fIoctalmask\fR.
 If \fIoctalmask\fR is omitted, the current mask is returned.
@@ -720,7 +720,7 @@ If \fIoctalmask\fR is omitted, the current mask is returned.
 '@help: files/unlink
 '@brief: Delete (unlink) files.
 .TP
-.B unlink [\fB-nocomplain\fR] \fIfilelist\fR
+.B unlink ?\fB-nocomplain\fR? \fIfilelist\fR
 .br
 Delete (unlink) the files whose names are in the list \fIfilelist\fR.
 If \fB-nocomplain\fR is specified, then errors will be ignored.
@@ -761,7 +761,7 @@ out.  Alternatively, the \fBfcntl\fR command may be used to set the buffering
 mode of a file to line-buffered or unbuffered.
 '@help: files/bsearch
 .TP
-.B bsearch \fIfilehandle key\fR [\fIretvar\fR] [\fIcompare_proc\fR]
+.B bsearch \fIfilehandle key\fR ?\fIretvar\fR? ?\fIcompare_proc\fR?
 .br
 Search an opened file containing lines of text sorted into ascending
 order for a match.  \fIFilehandle\fR is a Tcl filehandle as returned
@@ -798,7 +798,7 @@ position.
 '@help: files/dup
 '@brief: Duplicate an open filehandle.
 .TP
-.B dup \fIfilehandle\fR [\fIstdhandle\fR]
+.B dup \fIfilehandle\fR ?\fIstdhandle\fR?
 .br
 Duplicate an open file.  A file handle is created that addresses the
 same file as \fIfilehandle\fR.
@@ -840,7 +840,7 @@ our pair of pipes.
 '@help: files/fcntl
 '@brief: Get or set file access options for an open file.
 .TP
-.B fcntl \fIhandle\fR \fIattribute [value\fR] 
+.B fcntl \fIhandle\fR \fIattribute ?value\fR? 
 .br
 This command either sets or clears a file option or returns its current
 value.  If \fIvalue\fR are not specified, then the current value of
@@ -889,7 +889,7 @@ on the file or data may be lost.
 '@help: files/flock
 '@brief: Lock all or part of a file.
 .TP
-.B flock \fIoptions handle\fR [\fIstart\fR] [\fIlength\fR] [\fIorigin\fR]
+.B flock \fIoptions handle\fR ?\fIstart\fR? ?\fIlength\fR? ?\fIorigin\fR?
 .br
 This command places a lock on all or part of the file specified by
 \fIhandle\fR.  The lock is either advisory or mandatory, depending on the mode
@@ -922,7 +922,7 @@ file, it is best to use unbuffered file access (see the \fBfcntl\fR command).
 '@help: files/funlock
 '@brief: Remove a lock from part or all of a file.
 .TP
-.B funlock \fIhandle\fR [\fIstart\fR] [\fIlength\fR] [\fIorigin\fR]
+.B funlock \fIhandle\fR ?\fIstart\fR? ?\fIlength\fR? ?\fIorigin\fR?
 .br
 Remove a locked from a file that was previously placed with the \fIflock\fR
 command.  The arguments are the same as for the \fIflock\fR command, see
@@ -932,7 +932,7 @@ that command for more details.
 '@help: files/fstat
 '@brief: Obtain status information about an open file.
 .TP
-.B fstat \fIhandle\fR [\fIitem\fR]|[\fBstat \fIarrayvar\fR]
+.B fstat \fIhandle\fR ?\fIitem\fR?|?\fBstat \fIarrayvar\fR?
 .br
 Obtain status information about an open file.
 .sp
@@ -981,7 +981,7 @@ list.
 '@help: files/lgets
 '@brief: Read a list for a file, handles embedded newlines.
 .TP
-.B lgets \fIfileId\fR [\fIvarName\fR]
+.B lgets \fIfileId\fR ?\fIvarName\fR?
 .br
 Reads the next Tcl list from the file given by \fIfileId\fR and discards
 the terminating newline character.  This command differs from the \fBgets\fR
@@ -1007,7 +1007,7 @@ what really happened.
 '@help: files/pipe
 '@brief: Create a pipe.
 .TP
-.B pipe [\fIhandle_var_r handle_var_w\fR]
+.B pipe ?\fIhandle_var_r handle_var_w\fR?
 .br
 Create a pipe.  If \fIhandle_var_r\fR
 and \fIhandle_var_r\fR are specified, then \fBpipe\fR will set the a
@@ -1023,7 +1023,7 @@ result of the command.
 '@help: files/select
 '@brief: Synchronous I/O multiplexing.
 .TP
-.B select \fIreadhandles\fR [\fIwritehandles\fR] [\fIexcepthandles\fR] [\fItimeout\fR]
+.B select \fIreadhandles\fR ?\fIwritehandles\fR? ?\fIexcepthandles\fR? ?\fItimeout\fR?
 .br
 This command allows an Extended Tcl program to wait
 on zero or more files being ready for
@@ -1089,7 +1089,7 @@ expressions are matched.
 '@help: filescan/scancontext
 '@brief: Manage file scan contexts.
 .TP
-.B scancontext [\fIoption\fR]
+.B scancontext ?\fIoption\fR?
 .br
 This command manages file scan contexts.  A scan context is a collection of
 regular expressions and commands to execute when that regular expression
@@ -1127,7 +1127,7 @@ it, executing the match commands corresponding to patterns matched.
 '@help: filescan/scanmatch
 '@brief: Specify tcl code to execute when scanfile pattern is matched.
 .TP
-.B scanmatch [\fB-nocase\fR] \fIcontexthandle\fR [\fIregexp\fR] \fIcommands\fR
+.B scanmatch ?\fB-nocase\fR? \fIcontexthandle\fR ?\fIregexp\fR? \fIcommands\fR
 .br
 Specify Tcl \fIcommands\fR, to be evaluated when \fIregexp\fR is matched by a
 \fBscanfile\fR command.  The match is added to the scan context specified by
@@ -1276,7 +1276,7 @@ Returns \fInum1\fR modulo \fInum2\fR.
 '@help: math/max
 '@brief: Return the argument that has the highest numeric value.
 .TP
-.B max \fInum1 num2\fR [..\fInumN\fR]
+.B max \fInum1 num2\fR ?..\fInumN\fR?
 .br
 Returns the argument that has the highest numeric value. The arguments,
 \fInumN\fR may be any interger or floating point values.
@@ -1284,7 +1284,7 @@ Returns the argument that has the highest numeric value. The arguments,
 '@help: math/min
 '@brief: Return the argument that has the lowest numeric value.
 .TP
-.B min \fInum1 num2\fR [..\fInumN\fR]
+.B min \fInum1 num2\fR ?..\fInumN\fR?
 .br
 Returns the argument that has the lowest numeric value. The arguments,
 \fInumN\fR may be any interger or floating point values.
@@ -1313,7 +1313,7 @@ Returns \fInum1\fR to the power of \fInum2\fR.
 '@help: math/random
 '@brief: Return a pseudorandom integer or set the seed.
 .TP
-.B random \fBlimit\fR | \fBseed\fR [\fIseedval\fR]
+.B random \fBlimit\fR | \fBseed\fR ?\fIseedval\fR?
 .br
 Generate a pseudorandom integer number greater than or equal to zero and
 less than \fIlimit\fR.  If \fBseed\fR is specified, then the command
@@ -1368,7 +1368,7 @@ Extended Tcl provides two additional list manipulation commands.
 '@help: lists/lassign
 '@brief: Assign successive elements of a list to specified variables.
 .TP
-.B lassign \fIlist var\fR [\fIvar\fR...]
+.B lassign \fIlist var\fR ?\fIvar\fR...?
 .br
 Assign successive elements of a list to specified variables.
 Any leftover fields are discarded.  When there are more variable
@@ -1398,7 +1398,7 @@ alternative to comparing a list to an empty string.
 '@help: lists/lvarcat
 '@brief: Concatenate the contents lists or strings into a variable
 .TP
-\fBlvarcat\fI var string [\fR\fIstring...\fR]
+\fBlvarcat\fI var string ?\fR\fIstring...\fR?
 .br
 This command treats each \fIstring\fR argument as a list and concatenates them
 to the end of the contents of \fIvar\fR, forming a a single list.  The list is
@@ -1409,7 +1409,7 @@ not exist, it is created.
 '@help: lists/lvarpop
 '@brief: Pop or replace the specified element from a list.
 .TP
-.B lvarpop \fIvar\fR [\fIindex\fR \fR[\fIstring\fR]]
+.B lvarpop \fIvar\fR ?\fIindex\fR? ?\fIstring\fR?
 .br
 The \fBlvarpop\fR command pops (deletes) the element indexed by
 \fIindex\fR from the list contained in the variable \fIvar\fR.
@@ -1423,7 +1423,7 @@ argv to contain the remainder of the string.
 '@help: lists/lvarpush
 '@brief: Push or insert the an element into a list.
 .TP
-.B lvarpush \fIvar string\fR [\fIindex\fR]
+.B lvarpush \fIvar string\fR ?\fIindex\fR?
 .br
 The \fBlvarpush\fR command pushes (inserts) \fIstring\fR as an element in the
 list contained in the variable \fIvar\fR.  The element is inserted before
@@ -1489,7 +1489,7 @@ the keyed list.
 '@help: keyedlists/keylget
 '@brief: Get the value of a field of a keyed list.
 .TP
-.B keylget \fIlistvar\fR [\fIkey\fR [\fIretvar\fR | {}]]
+.B keylget \fIlistvar\fR ?\fIkey\fR? ?\fIretvar\fR | {}?
 .br
 Return the value associated with \fIkey\fR from the keyed list in the
 variable \fIlistvar\fR.  If \fIretvar\fR is not specified, then the value will
@@ -1513,7 +1513,7 @@ the keyed list is returned.
 '@help: keyedlists/keylkeys
 '@brief: Get the keys in a keyed list.
 .TP
-.B keylkeys \fIlistvar\fR [\fIkey\fR]
+.B keylkeys \fIlistvar\fR ?\fIkey\fR?
 .br
 Return the a list of the keyes in the keyed list in the
 variable \fIlistvar\fR.  If \fIkeys\fR is specified, then it is the
@@ -1523,7 +1523,7 @@ name of a key field  who's subfield keys are to be retrieve.
 '@help: keyedlists/keylset
 '@brief: Set the value of a field of a keyed list.
 .TP
-\fBkeylset\fR \fIlistvar\fR \fIkey\fR \fIvalue\fR [\fIkey2\fR \fIvalue2\fR ...]
+\fBkeylset\fR \fIlistvar\fR \fIkey\fR \fIvalue\fR ?\fIkey2\fR \fIvalue2\fR ...?
 .br
 Set the value associated with \fIkey\fR, in the keyed list contained in the
 variable \fIlistvar\fR, to \fIvalue\fR.
@@ -1551,7 +1551,7 @@ from \fIstring\fR. This command is a shortcut for:
 .sp
 .nf
 .ft CW
-    \fBstring index\fR \fIstring\fR [\fBexpr\fI indexExpr]\fR
+    \fBstring index\fR \fIstring\fR ?\fBexpr\fI indexExpr?\fR
 .ft R
 .fi
 '@endhelp
@@ -1582,7 +1582,7 @@ be extracted.  This command is a shortcut for:
 .sp
 .nf
 .ft CW
-    \fBstring range\fR \fIstring\fR [\fBexpr\fI firstExpr\fR] [\fBexpr\fI lastExpr]\fR
+    \fBstring range\fR \fIstring\fR ?\fBexpr\fI firstExpr\fR? ?\fBexpr\fI lastExpr?\fR
 .ft R
 .fi
 '@endhelp
@@ -1599,7 +1599,7 @@ extracted.  This command is a short cut for:
 .sp
 .nf
 .ft CW
-    \fBstring range\fR \fIstring\fR [\fBexpr\fI firstExpr\fR] [\fBexpr\fR \fIlength\fB-1\fR]
+    \fBstring range\fR \fIstring\fR ?\fBexpr\fI firstExpr\fR? ?\fBexpr\fR \fIlength\fB-1\fR?
 .ft R
 .fi
 '@endhelp
@@ -1747,7 +1747,7 @@ handles.
 '@help: internation/catopen
 '@brief: Open a message catalog.
 .TP
-.B catopen\fR [\fB-fail\fR|\fB-nofail\fR] \fIcatname\fR
+.B catopen\fR ?\fB-fail\fR|\fB-nofail\fR? \fIcatname\fR
 .br
 Open the message catalog \fIcatname\fR.  This may be a relative path name,
 in which case the \fBNLSPATH\fR environment variable is searched to find an
@@ -1779,7 +1779,7 @@ string, \fIdefaultstr\fR, is returned.
 '@help: internation/catclose
 '@brief: Close a message catalog.
 .TP
-.B catclose\fR [\fB-fail\fR|\fB-nofail\fR] \fIcathandle\fR
+.B catclose\fR ?\fB-fail\fR|\fB-nofail\fR? \fIcathandle\fR
 .br
 Close the message catalog specified by \fIcathandle\fR.
 Normally, errors are ignored.  If \fB-fail\fR is
@@ -1794,7 +1794,7 @@ specified in the call to \fBcatopen\fR.
 .sp
 '@help: tclshell/intro
 '@brief: Introduction to the tcl shell.
-.B tcl [-qn] [[-f] \fIscript\fB]|[-c \fIcommand\fB] [\fIargs\fR]
+.B tcl ?-qn? ?-f? \fIscript\fB?|?-c \fIcommand\fB? ?\fIargs\fR?
 .PP
 \fBTcl\fR starts the interactive Tcl command interpreter.  The Tcl shell
 provides an environment for writing, debugging and executing Tcl scripts.  The
@@ -1907,7 +1907,7 @@ Display the specified help file.  The help output is passed through a simple
 pager if output exceeds 23 lines, pausing waiting for a return to be entered.
 If any other character is entered, the output is terminated.
 .TP
-.B helpcd [\fIsubjectdir\fR]
+.B helpcd ?\fIsubjectdir\fR?
 Change the current subject directory, which is much like the Unix current
 directory.  If
 \fIsubjectdir\fR is not specified, return to the top-level of the help tree.
@@ -2068,7 +2068,7 @@ if the requested file could not be found.
 '@help: libraries/autoload
 '@brief: Autoloading of commands.
 .PP
-.B autoload \fIfile proc1\fR [..\fIprocN\fR]
+.B autoload \fIfile proc1\fR ?..\fIprocN\fR?
 .sp
 The \fIautoload\fR procedure, defined in \fBTclInit.tcl\fR, allows the Tcl
 programmer to name one or more procedures and the file they are defined in.
@@ -2104,7 +2104,7 @@ created by Tcl whenever it is out of date.
 The start of a package
 is delimited by:
 .IP
-.B #@package: \fIpackage_name proc1\fR [\fI..procN\fR]
+.B #@package: \fIpackage_name proc1\fR ?\fI..procN\fR?
 .PP
 These lines must start in column one.  Everything between the \fB#@package:\fR
 keyword and the next \fB#@package:\fR keyword or a \fB#@packend\fR keyword, or
@@ -2186,7 +2186,7 @@ the suffix \fB.tlib\fR.
 .TP
 '@help: libraries/convert_lib
 '@brief: Convert an Ousterhout style tclIndex file to a package library.
-.B convert_lib \fItclIndex packagelib [ignore]\fR
+.B convert_lib \fItclIndex packagelib ?ignore?\fR
 .br
 Convert a Ousterhout style \fItclIndex\fR index file and associate source
 files into a package library \fBpackagelib\fR.  If \fBpackagelib\fR does not
@@ -2230,7 +2230,7 @@ supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 .TP
 '@help: libraries/packages
 '@brief: List all known packages.
-.B packages [\fI-location\fR]
+.B packages ?\fI-location\fR?
 .br
 Returns a list of the names of all defined packages. If \fI-location\fR is
 specified, the an keyed list is returned of package name and the values being
@@ -2254,7 +2254,7 @@ List the directories in the directory stack.
 '@help: debug/edprocs
 '@brief: Edit named procs, or all procs.
 .TP
-.B edprocs [\fIproc\fR...]
+.B edprocs ?\fIproc\fR...?
 .br
 Writes the named procedures, or all currently defined procedures, to
 a temporary file, then calls an editor on it (as specified by the
@@ -2304,7 +2304,8 @@ expected.
 .TP
 .B intersect \fIlista listb\fR
 .br
-Return the logical intersection of two lists.
+Return the logical intersection of two lists.  The returned list will be
+sorted.
 '@endhelp
 '@help: lists/intersect3
 '@brief: Return three lists from an intersection of two lists.
@@ -2315,16 +2316,16 @@ Intersects two lists, returning a list containing
 three lists:  The first list returned is everything in \fIlista\fR
 that wasn't in \fIlistb\fR.  The second list contains the intersection
 of the two lists, and the third list contains all the elements that
-were in \fIlistb\fR but weren't in \fIlista\fR.
+were in \fIlistb\fR but weren't in \fIlista\fR.  The returned lists will be
+sorted.
 '@endhelp
 '@help: lists/lrmdups
 '@brief: Given a list, remove all of the duplicated elements.
 .TP
 .B lrmdups \fIlist\fR
 .br
-Remove duplicate elements from a list.
-Sorts the specified list, removes any duplicate elements, and returns
-the result.
+Remove duplicate elements from a list.  The returned list will be
+sorted.
 '@endhelp
 '@help: status/popd
 '@brief: Pop a directory from a stack of directories and cd to it.
@@ -2338,7 +2339,7 @@ directory.
 '@help: debug/profrep
 '@brief: Generate a report from data collect from the profile command.
 .TP
-.B profrep \fIprofDataVar sortKey stackDepth\fR [\fIoutFile\fR] [\fIuserTitle\fR]
+.B profrep \fIprofDataVar sortKey stackDepth\fR ?\fIoutFile\fR? ?\fIuserTitle\fR?
 .br
 Generate a report from data collect from the profile command.
 \fBProfDataVar\fR is the name of the array containing the data returned by the
@@ -2354,7 +2355,7 @@ output.
 '@help: status/pushd
 '@brief: Push a directory to a stack of directories.
 .TP
-.B pushd [\fIdir\fR]
+.B pushd ?\fIdir\fR?
 .br
 Push the current directory onto the directory stack and \fBcd\fR to the specified
 directory.  If the directory is not specified, then the current directory is
@@ -2363,7 +2364,7 @@ pushed, but remains unchanged.
 '@help: files/read_file
 '@brief: Read in a file to a string.
 .TP
-.B read_file \fIfileName\fR [\fInumBytes\fR|\fInonewline\fR]
+.B read_file \fIfileName\fR ?\fInumBytes\fR|\fInonewline\fR?
 .br
 Read the file \fIfileName\fR and returns the contents as a string.  If
 \fBnonewline\fR is specified as an additional argument, then the last
@@ -2384,7 +2385,7 @@ pattern in the list \fIgloblist\fR.
 '@help: debug/saveprocs
 '@brief: Save named procs to a file, or all procs.
 .TP
-.B saveprocs \fIfileName\fR [\fIproc\fR...]
+.B saveprocs \fIfileName\fR ?\fIproc\fR...?
 .br
 Save the definition of the named procedure, or all currently
 defined procedures if none is specified, to the named file.
@@ -2400,7 +2401,7 @@ loaded.
 '@help: status/showprocs
 '@brief: List the definition of the named, or all, procedures.
 .TP
-.B showprocs [\fIprocname\fR...]
+.B showprocs ?\fIprocname\fR...?
 .br
 List the definition of all of the named procedures, or 
 all defined procedures if none are specified.
@@ -2415,7 +2416,7 @@ are removed.
 '@help: files/write_file
 '@brief: Write strings out to a file.
 .TP
-.B write_file \fIfileName string [string...]\fR
+.B write_file \fIfileName string ?string...?\fR
 .br
 Writes the specified strings to the named file.
 '@endhelp

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXid.c,v 2.0 1992/10/16 04:50:51 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,16 +44,16 @@ GroupnameToGroupidResult _ANSI_ARGS_((Tcl_Interp *interp,
  * Tcl_IdCmd --
  *     Implements the TCL id command:
  *
- *        id user [name]
+ *        id user ?name?
  *        id convert user <name>
  *
- *        id userid [uid]
+ *        id userid ?uid?
  *        id convert userid <uid>
  *
- *        id group [name]
+ *        id group ?name?
  *        id convert group <name>
  *
- *        id groupid [gid]
+ *        id groupid ?gid?
  *        id convert groupid <gid>
  *
  *        id process
@@ -236,14 +236,15 @@ Tcl_IdCmd (clientData, interp, argc, argv)
             }
             if ((argc != 4) || !STREQU (argv[3], "set")) {
                 Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                                  " process group [set]", (char *) NULL);
+                                  " process group ?set?", (char *) NULL);
                 return TCL_ERROR;
             }
             setpgrp ();
             return TCL_OK;
         }
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " process [parent|group|group set]", (char *) NULL);
+                          " process ?parent|group|group? ?set?",
+                          (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -316,7 +317,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
                       (char *) NULL);
     return TCL_ERROR;
   bad_args:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " arg [arg..]",
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " arg ?arg..?",
                       (char *) NULL);
     return TCL_ERROR;
 

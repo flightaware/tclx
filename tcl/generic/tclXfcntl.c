@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 2.0 1992/10/16 04:50:38 markd Rel markd $
+ * $Id: tclXfcntl.c,v 2.1 1992/11/25 15:45:23 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -325,7 +325,7 @@ SetFcntlAttr (interp, filePtr, attrName, valueStr)
  *
  * Tcl_FcntlCmd --
  *     Implements the fcntl TCL command:
- *         fcntl handle [attribute value]
+ *         fcntl handle attribute ?value?
  *-----------------------------------------------------------------------------
  */
 int
@@ -339,7 +339,7 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " handle attribute [value]", (char *) NULL);
+                          " handle attribute ?value?", (char *) NULL);
         return TCL_ERROR;
     }
 

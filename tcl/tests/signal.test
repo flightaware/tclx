@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 1.3 1992/10/04 23:29:23 markd Exp markd $
+# $Id: signal.test,v 2.0 1992/10/16 04:50:11 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -117,7 +117,7 @@ Test signal-1.9 {signal tests} {
 
 Test signal-1.10 {signal tests} {
     signal
-} 1 {wrong # args: signal action signalList [commands]}
+} 1 {wrong # args: signal action signalList ?command?}
 
 Test signal-1.11 {signal tests} {
     signal ignore foo
@@ -237,7 +237,7 @@ if $posix {
 
 Test signal-2.1 {kill tests} {
     kill
-} 1 {wrong # args: kill [signal] processlist}
+} 1 {wrong # args: kill ?signal? processlist}
 
 signal error SIGINT
 

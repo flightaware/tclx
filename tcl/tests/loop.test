@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loop.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: loop.test,v 2.0 1992/10/16 04:50:01 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -48,10 +48,10 @@ test loop-1.3 {loop tests} {
 
 test loop-1.4 {loop tests} {
     list [catch {loop 1 2 3} msg] $msg
-} {1 {wrong # args: loop var first limit [incr] command}}
+} {1 {wrong # args: loop var first limit ?incr? command}}
 test loop-1.5 {loop tests} {
     list [catch {loop 1 2 3 4 5 6} msg] $msg
-} {1 {wrong # args: loop var first limit [incr] command}}
+} {1 {wrong # args: loop var first limit ?incr? command}}
 
 test loop-1.6 {loop tests} {
     set a {}

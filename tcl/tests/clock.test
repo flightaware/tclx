@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 2.3 1993/01/26 03:45:12 markd Exp markd $
+# $Id: clock.test,v 2.4 1993/02/07 22:04:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -36,14 +36,14 @@ test clock-2.1 {fmtclock tests} {
 
 test clock-2.2 {fmtclock tests} {
     list [catch {fmtclock} msg] $msg
-} {1 {wrong # args: fmtclock clockval [format] [GMT|{}]}}
+} {1 {wrong # args: fmtclock clockval ?format? ?GMT|{}?}}
 
 
 # Test convertclock
 
 test clock-3.1 {convertclock tests} {
     list [catch convertclock msg] $msg
-} {1 {wrong # args: convertclock dateString [GMT|{}] [baseclock]}}
+} {1 {wrong # args: convertclock dateString ?GMT|{}? ?baseclock?}}
 
 test clock-3.2 {convertclock tests} {
     fmtclock [convertclock "14 Feb 92" GMT] {%m/%d/%y %I:%M:%S %p} GMT

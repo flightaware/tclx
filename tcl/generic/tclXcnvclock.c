@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 2.2 1993/01/26 04:01:28 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 2.3 1993/02/07 22:04:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -69,7 +69,7 @@ GetTimeZone (currentTime)
  *
  * Tcl_ConvertclockCmd --
  *     Implements the TCL convertclock command:
- *         convertclock dateString [GMT|{}]
+ *         convertclock dateString ?GMT|{}?
  *
  * Results:
  *     Standard TCL results.
@@ -89,7 +89,7 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " dateString [GMT|{}] [baseclock]", (char *) NULL);
+                          " dateString ?GMT|{}? ?baseclock?", (char *) NULL);
 	return TCL_ERROR;
     }
     if (argc == 4) {

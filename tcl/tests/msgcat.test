@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: msgcat.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: msgcat.test,v 2.0 1992/10/16 04:50:04 markd Rel markd $
 #------------------------------------------------------------------------------
 
 if {[info procs test] != "test"} then {source testlib.tcl}
@@ -50,7 +50,7 @@ test message-cat-2.1 {catclose tests} {
     set msgcat [catopen "FOOBAZWAP"]
     catclose $msgcat 
     list [catch {catgets $msgcat} msg] $msg
-} {1 {catgets catHandle setnum msgnum defaultstr}}
+} {1 {wrong # args: catgets catHandle setnum msgnum defaultstr}}
 
 
 test message-cat-2.2 {catclose tests} {
@@ -76,7 +76,7 @@ test message-cat-2.5 {catclose tests} {
 
 test message-cat-2.6 {catclose tests} {
     list [catch {catclose} msg] $msg
-} {1 {catclose [-fail|-nofail] catHandle}}
+} {1 {wrong # args: catclose [-fail|-nofail] catHandle}}
 
 
 test message-cat-3.1 {catgets tests} {
@@ -111,5 +111,5 @@ test message-cat-3.5 {catgets tests} {
     set out [list [catch {catgets $msgcat 102 "This is an actual emergency"} msg] $msg]
     catclose $msgcat
     set out
-} {1 {catgets catHandle setnum msgnum defaultstr}}
+} {1 {wrong # args: catgets catHandle setnum msgnum defaultstr}}
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXselect.c,v 2.0 1992/10/16 04:51:10 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -258,7 +258,7 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescSet2Ptr, fileDescCnt,
  *
  * Tcl_SelectCmd --
  *  Implements the select TCL command:
- *      select readhandles [writehandles] [excepthandles] [timeout]
+ *      select readhandles ?writehandles? ?excepthandles? ?timeout?
  *
  *  This command is extra smart in the fact that it checks for read data
  * pending in the stdio buffer first before doing a select.
@@ -291,8 +291,8 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
 
     if (argc < 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " readhandles [writehandles] [excepthandles]",
-                          " [timeout]", (char *) NULL);
+                          " readhandles ?writehandles? ?excepthandles?",
+                          " ?timeout?", (char *) NULL);
         return TCL_ERROR;
     }
     

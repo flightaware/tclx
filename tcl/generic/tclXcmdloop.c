@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.0 1992/10/16 04:50:29 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -231,7 +231,7 @@ Tcl_CommandLoop (interp, inFile, outFile, evalProc, options)
     unsigned    options;
 {
     Tcl_CmdBuf cmdBuf;
-    char       inputBuf[256];
+    char       inputBuf [256];
     int        topLevel = TRUE;
     int        result;
     char      *cmd;
@@ -337,7 +337,7 @@ SetPromptVar (interp, hookVarName, newHookValue, oldHookValuePtr)
  *
  * Tcl_CommandloopCmd --
  *     Implements the TCL commandloop command:
- *       commandloop prompt prompt2
+ *       commandloop ?prompt? ?prompt2?
  *
  * Results:
  *     Standard TCL results.
@@ -357,7 +357,7 @@ Tcl_CommandloopCmd(clientData, interp, argc, argv)
 
     if (argc > 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " [prompt] [prompt2]", (char *) NULL);
+                          " ?prompt? ?prompt2?", (char *) NULL);
         return TCL_ERROR;
     }
     if (argc > 1) {

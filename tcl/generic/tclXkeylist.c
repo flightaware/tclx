@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXkeylist.c,v 2.0 1992/10/16 04:50:53 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -653,7 +653,7 @@ Tcl_KeyldelCmd (clientData, interp, argc, argv)
  *
  * Tcl_KeylgetCmd --
  *     Implements the TCL keylget command:
- *         keylget listvar [key] [retvar | {}]
+ *         keylget listvar ?key? ?retvar | {}?
  *
  * Results:
  *    Standard TCL results.
@@ -674,7 +674,7 @@ Tcl_KeylgetCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " listvar [key] [retvar | {}]", (char *) NULL);
+                          " listvar ?key? ?retvar | {}?", (char *) NULL);
         return TCL_ERROR;
     }
     keyedList = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
@@ -751,7 +751,7 @@ Tcl_KeylgetCmd (clientData, interp, argc, argv)
  *
  * Tcl_KeylkeysCmd --
  *     Implements the TCL keylkeys command:
- *         keylkeys listvar [key]
+ *         keylkeys listvar ?key?
  *
  * Results:
  *    Standard TCL results.
@@ -770,7 +770,7 @@ Tcl_KeylkeysCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " listvar [key]", (char *) NULL);
+                          " listvar ?key?", (char *) NULL);
         return TCL_ERROR;
     }
     keyedList = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
@@ -801,7 +801,7 @@ Tcl_KeylkeysCmd (clientData, interp, argc, argv)
  *
  * Tcl_KeylsetCmd --
  *     Implements the TCL keylset command:
- *         keylset listvar key value [key value...]
+ *         keylset listvar key value ?key value...?
  *
  * Results:
  *    Standard TCL results.
@@ -821,7 +821,7 @@ Tcl_KeylsetCmd (clientData, interp, argc, argv)
 
     if ((argc < 4) || ((argc % 2) != 0)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " listvar key value [key value...]", (char *) NULL);
+                          " listvar key value ?key value...?", (char *) NULL);
         return TCL_ERROR;
     }
 

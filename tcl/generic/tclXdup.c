@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXdup.c,v 2.0 1992/10/16 04:50:36 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -182,7 +182,7 @@ unixError:
  *
  * Tcl_DupCmd --
  *     Implements the dup TCL command:
- *         dup filehandle [stdhandle]
+ *         dup filehandle ?stdhandle?
  *
  * Results:
  *      Returns TCL_OK and interp->result containing a filehandle
@@ -208,7 +208,7 @@ Tcl_DupCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
-                          " filehandle [stdhandle]", (char *) NULL);
+                          " filehandle ?stdhandle?", (char *) NULL);
         return TCL_ERROR;
     }
 

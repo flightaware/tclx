@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 2.0 1992/10/16 04:50:57 markd Rel markd $
+ * $Id: tclXlist.c,v 2.1 1993/02/17 03:00:50 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,7 +24,7 @@
  *
  * Tcl_LvarcatCmd --
  *     Implements the TCL lvarpop command:
- *         lvarcat var string string string
+ *         lvarcat var string ?string...?
  *
  * Results:
  *      Standard TCL results.
@@ -45,7 +45,7 @@ Tcl_LvarcatCmd (clientData, interp, argc, argv)
 
     if (argc < 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var string [string...]", (char *) NULL);
+                          " var string ?string...?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -94,7 +94,7 @@ Tcl_LvarcatCmd (clientData, interp, argc, argv)
  *
  * Tcl_LvarpopCmd --
  *     Implements the TCL lvarpop command:
- *         lvarpop var [index [string]]
+ *         lvarpop var ?index? ?string?
  *
  * Results:
  *      Standard TCL results.
@@ -114,7 +114,7 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var [index [string]]", (char *) NULL);
+                          " var ?index? ?string?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -170,7 +170,7 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
  *
  * Tcl_LvarpushCmd --
  *     Implements the TCL lvarpush command:
- *         lvarpush var string [index]
+ *         lvarpush var string ?index?
  *
  * Results:
  *      Standard TCL results.
@@ -190,7 +190,7 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var string [index]", (char *) NULL);
+                          " var string ?index?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -282,7 +282,7 @@ Tcl_LemptyCmd (clientData, interp, argc, argv)
  *
  * Tcl_LassignCmd --
  *     Implements the TCL assign_fields command:
- *         lassign list varname [varname...]
+ *         lassign list varname ?varname...?
  *
  * Results:
  *      Standard TCL results.
@@ -302,7 +302,7 @@ Tcl_LassignCmd (clientData, interp, argc, argv)
 
     if (argc < 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " list varname [varname..]", (char *) NULL);
+                          " list varname ?varname..?", (char *) NULL);
         return TCL_ERROR;
     }
 

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.0 1992/10/16 04:50:43 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -235,7 +235,7 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
  *
  * Tcl_ScanmatchCmd --
  *     Implements the TCL command:
- *         scanmatch [-nocase] contexthandle [regexp] commands
+ *         scanmatch ?-nocase? contexthandle ?regexp? command
  *     This uses both Boyer_Moore and regular expressions matching.
  *
  * Results:
@@ -325,7 +325,7 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
 
 argError:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                      " [-nocase] contexthandle [regexp] command",
+                      " ?-nocase? contexthandle ?regexp? command",
                       (char *) NULL);
     return TCL_ERROR;
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 2.0 1992/10/16 04:51:05 markd Rel markd $
+ * $Id: tclXprofile.c,v 2.1 1992/12/19 18:34:32 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -546,7 +546,7 @@ DumpTableData (interp, infoPtr, varName)
  *
  * Tcl_ProfileCmd --
  *     Implements the TCL profile command:
- *     profile on
+ *     profile ?-commands? on
  *     profile off arrayvar
  *
  * Results:
@@ -648,7 +648,7 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
 
   wrongArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                      " [-commands] on|off arrayVar", (char *) NULL);
+                      " ?-commands? on|off arrayVar", (char *) NULL);
     return TCL_ERROR;
 }
 

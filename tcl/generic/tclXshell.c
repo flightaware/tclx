@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.3 1992/11/17 06:26:44 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.4 1992/11/19 15:29:29 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -181,7 +181,7 @@ ParseCmdArgs (argc, argv, tclParmsPtr)
 
 usageError:
     fprintf (stderr, "usage: %s %s\n", argv [0],
-             "[-qun] [[-f] script]|[-c command] [args]");
+             "?-qun? ?-f? ?script?|?-c command? ?args?");
     exit (1);
 }
 

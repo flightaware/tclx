@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.0 1992/10/16 04:51:18 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -212,7 +212,7 @@ Tcl_TimesCmd (clientData, interp, argc, argv)
  *
  * Tcl_UmaskCmd --
  *     Implements the TCL umask command:
- *     umask [octalmask]
+ *     umask ?octalmask?
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -229,7 +229,7 @@ Tcl_UmaskCmd (clientData, interp, argc, argv)
     int mask;
 
     if ((argc < 1) || (argc > 2)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " octalmask",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?octalmask?",
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -256,7 +256,7 @@ Tcl_UmaskCmd (clientData, interp, argc, argv)
  *
  * Tcl_LinkCmd --
  *     Implements the TCL link command:
- *         link [-sym] srcpath destpath
+ *         link ?-sym? srcpath destpath
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -274,7 +274,7 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " [-sym] srcpath destpath", (char *) NULL);
+                          " ?-sym? srcpath destpath", (char *) NULL);
         return TCL_ERROR;
     }
     if (argc == 4) {
@@ -325,7 +325,7 @@ errorExit:
  *
  * Tcl_UnlinkCmd --
  *     Implements the TCL unlink command:
- *         unlink [-nocomplain] fileList
+ *         unlink ?-nocomplain? fileList
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -381,7 +381,7 @@ errorExit:
 
 badArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " [-nocomplain] filelist", (char *) NULL);
+                      " ?-nocomplain? filelist", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -390,7 +390,7 @@ badArgs:
  *
  * Tcl_MkdirCmd --
  *     Implements the TCL Mkdir command:
- *         mkdir [-path] dirList
+ *         mkdir ?-path? dirList
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -457,7 +457,7 @@ mkdirError:
 
 usageError:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " [-path] dirlist", (char *) NULL);
+                      " ?-path? dirlist", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -466,7 +466,7 @@ usageError:
  *
  * Tcl_RmdirCmd --
  *     Implements the TCL Rmdir command:
- *         rmdir [-nocomplain]  dirList
+ *         rmdir ?-nocomplain?  dirList
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -521,6 +521,6 @@ errorExit:
 
 badArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " [-nocomplain] dirlist", (char *) NULL);
+                      " ?-nocomplain? dirlist", (char *) NULL);
     return TCL_ERROR;
 }

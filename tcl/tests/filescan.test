@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: filescan.test,v 2.0 1992/10/16 04:49:47 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -204,11 +204,11 @@ test filescan-3.1 {filescan tests} {
 
 test filescan-3.2 {filescan tests} {
     list [catch {scanmatch $testCH} msg] $msg
-} {1 {wrong # args: scanmatch [-nocase] contexthandle [regexp] command}}
+} {1 {wrong # args: scanmatch ?-nocase? contexthandle ?regexp? command}}
 
 test filescan-3.3 {filescan tests} {
     list [catch {scanmatch} msg] $msg
-} {1 {wrong # args: scanmatch [-nocase] contexthandle [regexp] command}}
+} {1 {wrong # args: scanmatch ?-nocase? contexthandle ?regexp? command}}
 
 test filescan-3.4 {filescan tests} {
     list [catch {scanfile} msg] $msg

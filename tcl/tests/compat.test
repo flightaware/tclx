@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.test,v 2.0 1992/10/16 04:49:32 markd Rel markd $
+# $Id: compat.test,v 2.1 1993/02/17 03:00:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -33,7 +33,7 @@ test compatibility-1.1 {fork, execvp, wait and kill tests} {
 
 test compatibility-1.2 {fork, execvp, wait and kill tests} {
     list [catch {kill} msg] $msg
-} {1 {wrong # args: kill [signal] processlist}}
+} {1 {wrong # args: kill ?signal? processlist}}
 
 set newPid [fork]
 if {$newPid == 0} {
@@ -54,6 +54,6 @@ Test assign_fields-1.1 {assign_fields command} {
 
 Test assign_fields-1.2 {assign_fields command} {
     assign_fields "a b {c d} e"
-} 1 {wrong # args: lassign list varname [varname..]}
+} 1 {wrong # args: lassign list varname ?varname..?}
 
 rename unknown SAVED_UNKNOWN

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXbsearch.c,v 2.0 1992/10/16 04:50:24 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -296,7 +296,7 @@ unixError:
  *
  * Tcl_BsearchCmd --
  *     Implements the TCL bsearch command:
- *        bsearch filehandle key [retvar]
+ *        bsearch filehandle key ?retvar?
  *
  * Results:
  *      Standard TCL results.
@@ -315,7 +315,7 @@ Tcl_BsearchCmd (clientData, interp, argc, argv)
 
     if ((argc < 3) || (argc > 5)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " handle key [retvar] [compare_proc]"
+                          " handle key ?retvar? ?compare_proc?"
                           , (char *) NULL);
         return TCL_ERROR;
     }

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 1.2 1992/10/06 15:30:25 markd Exp markd $
+# $Id: profile.test,v 2.0 1992/10/16 04:50:07 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -147,7 +147,7 @@ Test profile-3.1 {profile -command tests} {
 
 Test profile-4.1 {profile error tests} {
     profile off
-} 1 {wrong # args: profile [-commands] on|off arrayVar}
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
 
 Test profile-4.2 {profile error tests} {
     profile baz
@@ -159,15 +159,15 @@ Test profile-4.3 {profile error tests} {
 
 Test profile-4.4 {profile error tests} {
     profile -commands off
-} 1 {wrong # args: profile [-commands] on|off arrayVar}
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
 
 Test profile-4.5 {profile error tests} {
     profile -commands
-} 1 {wrong # args: profile [-commands] on|off arrayVar}
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
 
 Test profile-4.6 {profile error tests} {
     profile -commands on foo
-} 1 {wrong # args: profile [-commands] on|off arrayVar}
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
 
 Test profile-4.7 {profile error tests} {
     profile off foo

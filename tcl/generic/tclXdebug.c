@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 2.0 1992/10/16 04:50:34 markd Rel markd $
+ * $Id: tclXdebug.c,v 2.1 1993/02/13 17:44:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -221,7 +221,7 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
  *
  * Tcl_CmdtraceCmd --
  *     Implements the TCL trace command:
- *     cmdtrace level|on [noeval] [notruncate] [procs] [filehdl]
+ *     cmdtrace level|on ?noeval? ?notruncate? ?procs? ?fileid?
  *     cmdtrace off
  *     cmdtrace depth
  *
@@ -334,14 +334,14 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
 
 argumentError:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " level | on [noeval] [notruncate] [procs]",
-                      "[handle] | off | depth", (char *) NULL);
+                      " level | on ?noeval? ?notruncate? ?procs?",
+                      "?fileid? | off | depth", (char *) NULL);
     return TCL_ERROR;
 
 invalidOption:
     Tcl_AppendResult (interp, "invalid option: expected ",
                       "one of \"noeval\", \"notruncate\", \"procs\", ",
-                      "or a file handle", (char *) NULL);
+                      "or a file id", (char *) NULL);
     return TCL_ERROR;
 }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 2.0 1992/10/16 04:50:47 markd Rel markd $
+ * $Id: tclXgeneral.c,v 2.1 1993/02/22 04:11:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,7 +35,7 @@ char *tclAppVersion     = NULL;  /* Version number of the application       */
  *
  * Tcl_EchoCmd --
  *    Implements the TCL echo command:
- *        echo str1 [str2..]
+ *        echo ?str ...?
  *
  * Results:
  *      Always returns TCL_OK.
@@ -128,7 +128,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
  *
  * Tcl_LoopCmd --
  *     Implements the TCL loop command:
- *         loop var start end [increment] command
+ *         loop var start end ?increment? command
  *
  * Results:
  *      Standard TCL results.
@@ -149,7 +149,7 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
 
     if ((argc < 5) || (argc > 6)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var first limit [incr] command", (char *) NULL);
+                          " var first limit ?incr? command", (char *) NULL);
         return TCL_ERROR;
     }
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 2.0 1992/10/16 04:49:41 markd Rel markd $
+# $Id: fcntl.test,v 2.1 1993/01/22 06:53:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -88,7 +88,7 @@ test fcntl-1.13 {fcntl tests} {
 
 test fcntl-1.14 {fcntl tests} {
     list [catch "fcntl $testFH a b c" msg] $msg
-} {1 {wrong # args: fcntl handle attribute [value]}}
+} {1 {wrong # args: fcntl handle attribute ?value?}}
 
 test fcntl-1.15 {fcntl tests} {
     list [catch "fcntl $testFH BAZ 1" msg] $msg

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 1.2 1992/10/05 01:37:16 markd Exp markd $
+# $Id: unixcmds.test,v 2.0 1992/10/16 04:50:19 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -52,7 +52,7 @@ Test unixcmds-1.2 {link and unlink tests} {
 
 Test unixcmds-1.3 {link and unlink tests} {
     link
-} 1 {wrong # args: link [-sym] srcpath destpath}
+} 1 {wrong # args: link ?-sym? srcpath destpath}
 
 # Test -sym only if we have symbolic links.
 
@@ -91,7 +91,7 @@ Test unixcmds-2.2 {link and unlink tests} {
 
 Test unixcmds-2.3 {link and unlink tests} {
     unlink
-} 1 {wrong # args: unlink [-nocomplain] filelist}
+} 1 {wrong # args: unlink ?-nocomplain? filelist}
 
 Test unixcmds-2.4 {link and unlink tests} {
     set fh [open UNLINK.TMP w]
@@ -127,7 +127,7 @@ Test unixcmds-4.2 {umask tests} {
 
 Test unixcmds-4.3 {umask tests} {
     umask 7 7
-} 1 {wrong # args: umask octalmask}
+} 1 {wrong # args: umask ?octalmask?}
 
 # Test the system command
 
@@ -191,7 +191,7 @@ Test unixcmds-7.4 {mkdir and rmdir tests} {
 
 Test unixcmds-7.5 {mkdir and rmdir tests} {
     mkdir
-} 1 {wrong # args: mkdir [-path] dirlist}
+} 1 {wrong # args: mkdir ?-path? dirlist}
 
 Test unixcmds-7.6 {mkdir and rmdir tests} {
     catch {rmdir MKDIR1.TMP}
@@ -206,6 +206,6 @@ Test unixcmds-7.7 {mkdir and rmdir tests} {
 
 Test unixcmds-7.8 {mkdir and rmdir tests} {
     rmdir
-} 1 {wrong # args: rmdir [-nocomplain] dirlist}
+} 1 {wrong # args: rmdir ?-nocomplain? dirlist}
 
 
