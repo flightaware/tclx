@@ -49,6 +49,7 @@ the Tcl8.1a series.
 CHANGES IN TCLX 8.0.4
 =====================
   o Bug fixes.
+  o New configure options.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
