@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.6 1999/08/20 17:59:38 stanton Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.7 1999/08/25 00:53:16 wart Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -53,8 +53,8 @@ INSTALL_ROOT	=
 # Directory from which applications will reference the library of Tclx
 # scripts (note: you can set the TCLX_LIBRARY environment variable at
 # run-time to override this value):
-TCLX_LIBRARY	= $(prefix)/lib/tclX$(VERSION)
-TKX_LIBRARY	= $(prefix)/lib/tkX$(VERSION)
+TCLX_LIBRARY	= $(exec_prefix)/lib/tclX$(VERSION)
+TKX_LIBRARY	= $(exec_prefix)/lib/tkX$(VERSION)
 
 # Directory in which to install the program tclxsh:
 BIN_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/bin
@@ -556,7 +556,6 @@ install-libraries:
 	@$(RM) ./tclXTempPkgIndexFile
 	@echo " \
 	lassign \$$argv package indexPath dllName ; \
-	set dllPath  [file join .. bin \$$dllName] ; \
 	set fd       [open \$$indexPath w] ; \
 	set version  [package require Tcl] ; \
 	set xversion [package require Tclx] ; \
@@ -568,7 +567,7 @@ install-libraries:
 	puts \$$fd \"    return\" ; \
 	puts \$$fd \"}\" ; \
 	puts \$$fd \"package ifneeded \$$package \$$xversion \\\\\" ; \
-	puts \$$fd \"\\t\[list load \[file join \\$$dir \$$dllPath] \$$package]\" ; \
+	puts \$$fd \"\\t\[list load \[file join \\\$$dir .. .. bin \$$dllName] \$$package]\" ; \
 	close \$$fd ; \
 	" >> ./tclXTempPkgIndexFile
 	@echo "installing into $(TCLX_SCRIPT_INSTALL_DIR) pkgIndex.tcl"
@@ -577,7 +576,7 @@ install-libraries:
 	@echo "installing into $(TKX_SCRIPT_INSTALL_DIR) pkgIndex.tcl"
 	@$(RUN_TCLXSH) -q  ./tclXTempPkgIndexFile Tkx \
 		"$(TKX_SCRIPT_INSTALL_NATIVE)/pkgIndex.tcl" "$(TKX_DLL_FILE)"
-	@$(RM) ./tclXTempPkgIndexFile
+	#@$(RM) ./tclXTempPkgIndexFile
 
 install-doc:
 #	@echo "installing into $(TCLX_SCRIPT_INSTALL_DIR)/help help"
