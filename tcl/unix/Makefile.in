@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.28 1999/06/16 02:41:00 wart Exp $
+# $Id: Makefile.in,v 8.29 1999/07/07 02:47:12 wart Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -314,9 +314,9 @@ install-binaries: install-exec
 
 install-libraries: install-runtime install-misc
 
-install-doc:
+install-doc: 
 
-install-misc:
+install-misc: buildhelp
 	${INSTCOPY} ${TCLX_GENERIC_DIR}/tclExtend.h \
 	    ${INSTALL_ROOT}${TCLX_INST_INCL}
 	${INSTCOPY} ${TCLX_UNIX_SRC_DIR}/tclXAppInit.c \
