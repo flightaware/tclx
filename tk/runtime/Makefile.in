@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.20 1993/11/11 03:57:52 markd Exp markd $
+# $Id: Makefile.in,v 3.0 1993/11/19 07:01:13 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -81,7 +81,7 @@ ${DEMOS}:
 HELPCP: ${HELP}/Tk.brf
 
 ${HELP}/Tk.brf:
-	${srcbasedir}/tools/cphelpdir ${HELPSRC} ${HELP}
+	${bldbasedir}/tools/cphelpdir ${HELPSRC} ${HELP}
 
 #------------------------------------------------------------------------------
 # Build help for Tk.

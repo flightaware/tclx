@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.29 1993/11/11 03:57:52 markd Exp markd $
+# $Id: Makefile.in,v 3.0 1993/11/19 07:01:28 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -59,8 +59,8 @@ LIBTCLX.A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
 LDLIBS = ${LIBTKX.A} ${LIBTK.A} ${XLIBSW} ${LIBTCLX.A} ${LIBTCL.A} -lm ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
-           -I${srcbasedir}/src  -I${srcbasedir}/tksrc -I${TK_UCB_SRC} \
-           -I${TCL_UCB_SRC} ${XINCLUDES}
+           -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
+           -I${TK_UCB_SRC} -I${TCL_UCB_SRC} ${XINCLUDES}
  
 .c.o:
 	${CC} ${CC_FLAGS} -c $<

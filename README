@@ -1,23 +1,23 @@
 
-                  *** README file for Extended Tcl 7.2a ***
+                  *** README file for Extended Tcl 7.3a ***
 
 EXTENDED TCL
 ============
 
-    Extended Tcl (TclX), is a set of extensions to Tcl 7.2, the Tool
+    Extended Tcl (TclX), is a set of extensions to Tcl 7.3, the Tool
 Command Language invented by Dr. John Ousterhout of the University
 of California at Berkeley.  Tcl is a powerful, yet simple embeddable
 programming language.  Extended Tcl is oriented towards Unix system
 programming tasks, with many additional interfaces to the Unix
-operating system, It is upwardly compatible with Tcl 7.2.  You take
-the Extended Tcl package, add it to Tcl 7.2, and from that you get
+operating system, It is upwardly compatible with Tcl 7.3.  You take
+the Extended Tcl package, add it to Tcl 7.3, and from that you get
 Extended Tcl.  (Berkeley Tcl is not included in this distribution,
 obtain it from ftp.cs.berkeley.edu).
 
-   Support is also included for building a Tk 3.5 wish shell (wishx)
+   Support is also included for building a Tk 3.6 wish shell (wishx)
 with the Extended Tcl command set.
 
-   While this TclX distribution is tested with Tcl 7.2 and Tk 3.5, it will
+   While this TclX distribution is tested with Tcl 7.3 and Tk 3.6, it will
 probably work with new versions of Tcl & Tk with little or no changes.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
@@ -85,7 +85,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX7.2a*/man.  Start with the
+the extensions in the directory tclX7.3a*/man.  Start with the
 TclX.man manual.
 
 EXTENDED TCL VERSION NAMING
@@ -95,7 +95,7 @@ EXTENDED TCL VERSION NAMING
 version of Berkeley (Ousterhout) Tcl upon which it is based, with
 the addition of a trailing letter in case there are multiple
 releases of Extended Tcl within a single release of Berkeley Tcl.
-This release is TclX 7.2a.
+This release is TclX 7.3a.
 
 INTERFACING TCL AND C++
 =======================
@@ -193,17 +193,17 @@ WHERE TO GET IT
 
 Tcl & Tk is available via anonymous ftp from:
 
-   ftp.cs.berkeley.edu:/ucb/tcl/[tcl7.2.tar.Z tk3.5.tar.Z]
+   ftp.cs.berkeley.edu:/ucb/tcl/[tcl7.3.tar.Z tk3.6.tar.Z]
 or
-   ftp.neosoft.com:/pub/tcl/distrib/[tcl7.2.tar.gz tk3.5.tar.gz]
+   ftp.neosoft.com:/pub/tcl/distrib/[tcl7.3.tar.gz tk3.6.tar.gz]
 or
-   ftp.uu.net:languages/tcl/[tcl7.2.tar.Z tk3.5.tar.Z]
+   ftp.uu.net:languages/tcl/[tcl7.3.tar.Z tk3.6.tar.Z]
 
-Extended Tcl 7.2a can be downloaded by anonymous FTP from:
+Extended Tcl 7.3a can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/distrib/tclX7.2a.tar.gz
+   ftp.neosoft.com:/pub/tcl/distrib/tclX7.3a.tar.gz
 or
-   harbor.ecn.purdue.edu:tcl/extensions/tclX7.2a.tar.Z
+   harbor.ecn.purdue.edu:tcl/extensions/tclX7.3a.tar.Z
 
 A contributed sources archive resides on harbor.ecn.purdue.edu and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently
