@@ -13,21 +13,28 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkmanpages,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: tkmanpages,v 4.0 1994/07/16 05:29:01 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 return {
     {after.n        tk/control/after}
+    {bell.n         tk/control/bell}
     {bind.n         tk/control/bind}
+    {bindtags.n     tk/control/bindtags}
+    {bitmap.n       tk/images/bitmap}
     {button.n       tk/widgets/button}
     {canvas.n       tk/widgets/canvas}
     {checkbutton.n  tk/widgets/checkbutton}
+    {clipboard.n    tk/control/clipboard}
     {destroy.n      tk/control/destroy}
     {entry.n        tk/widgets/entry}
     {exit.n         tk/control/exit}
+    {fileevent.n    tk/control/fileevent}
     {focus.n        tk/control/focus}
+    {focusNext.n    tk/control/tk_focusNext}
     {frame.n        tk/widgets/frame}
     {grab.n         tk/control/grab}
+    {image.n        tk/images/image}
     {label.n        tk/widgets/label}
     {lbSingSel.n    tk/widgets/tk_listboxSingleSelect}
     {listbox.n      tk/widgets/listbox}
@@ -38,8 +45,11 @@ return {
     {message.n      tk/widgets/message}
     {option.n       tk/control/option}
     {options.n      tk/widgets/options}
+    {optionMenu.n   tk/widgets/tk_optionMenu}
     {pack.n         tk/control/pack}
+    {photo.n        tk/images/photo}
     {place.n        tk/control/place}
+    {popup.n        tk/widgets/tk_popup}
     {radiobutton.n  tk/widgets/radiobutton}
     {raise.n        tk/control/raise}
     {scale.n        tk/widgets/scale}
