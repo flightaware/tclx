@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 5.2 1996/02/16 07:51:31 markd Exp $
+# $Id: tcllib.test,v 5.3 1996/02/16 08:09:56 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -165,14 +165,22 @@ TclLibReset
 set auto_path [list [pwd]/tcllib2.dir [pwd]/../unix]
 
 if {[id user] != "root"} {
-    TestReg tcllib-4.1 {bad rebuild package library index} {
+    Test tcllib-4.1 {bad rebuild package library index} {
         global errorCode errorInfo
         BuildTestLib tcllib2.dir/test1.tlib TclLibAB
         chmod -w tcllib2.dir
-        list [catch {TclLibABB} msg] [string tolower $msg]
-
-    } 0 {^1 {error while autoloading "tcllibabb": building package index for.*tcllib2.dir/test1.tlib' failed: couldn't open ".*tcllib2.dir/test1.tndx": permission denied}}
-    echo NOTE: Tcl unknown command should not lose errorCode...
+        if ![catch {TclLibABB} msg] {
+            error "auto_load should have failed with permission denied"
+        }
+        set expect  {^error while autoloading "tcllibabb": building package index for.*/tcllib2.dir/test1.tlib' failed: couldn't open ".*/tcllib2.dir/test1.tndx": permission denied$}
+        if ![regexp -nocase $expect $msg] {
+            error "unexpected result \"$msg\""
+        }
+        if ![regexp -nocase {POSIX EACCES {permission denied}} $errorCode] {
+            error "unexpected errorCode \"$errorCode\""
+        }
+        concat OK
+    } 0 OK
 }
 TclLibCleanUp
 set auto_path [list [pwd]/tcllib1.dir [pwd]/../unix]
