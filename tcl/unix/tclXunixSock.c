@@ -358,7 +358,7 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
     }
 
     Tcl_AppendResult (interp, "invalid option \"", argv [1],
-                      "\", expected on of \"addresses\", \"official_name\"",
+                      "\", expected one of \"addresses\", \"official_name\"",
                       " or \"aliases\"", (char *) NULL);
     return TCL_ERROR;
 }
