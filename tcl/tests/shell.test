@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: shell.test,v 5.2 1996/03/11 04:11:09 markd Exp $
+# $Id: shell.test,v 5.3 1996/03/14 05:04:52 markd Exp $
 #------------------------------------------------------------------------------
 
 if {[info procs test] != "test"} then {source testlib.tcl}
@@ -34,14 +34,13 @@ Test shell-1.0 {TclX shell error handling} {
 } 0 {@@@Error handler got: invalid command name "badcommand"}
 
 
-# Test TclX shell event loop.
+# Test the eventloop command
 
 #
 # Program to handle read-ready events from stdin.  In deletes the event source
 # when told to stop, which should make the process exit.
 #
 set prog {
-    set tclx_enterEventLoop 1
     fconfigure stdout -buffering line
     fileevent stdin readable {
         if {[gets stdin line] < 0} {
@@ -55,6 +54,7 @@ set prog {
             puts "You said: $line"
         }
     }
+    mainloop
 }
 
 Test shell-2.0 {TclX shell event handling} {

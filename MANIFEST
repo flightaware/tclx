@@ -75,6 +75,7 @@
 ./tcl/help/tcl/events/after
 ./tcl/help/tcl/events/background-error
 ./tcl/help/tcl/events/fileevent
+./tcl/help/tcl/events/mainloop
 ./tcl/help/tcl/events/update
 ./tcl/help/tcl/events/vwait
 ./tcl/help/tcl/files/bsearch
@@ -233,6 +234,7 @@
 ./tcl/runtime/compat.tcl
 ./tcl/runtime/convlib.tcl
 ./tcl/runtime/edprocs.tcl
+./tcl/runtime/events.tcl
 ./tcl/runtime/fmath.tcl
 ./tcl/runtime/forfile.tcl
 ./tcl/runtime/globrecur.tcl

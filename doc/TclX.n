@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.10 1996/03/13 08:29:21 markd Exp $
+.\" $Id: TclX.n,v 5.11 1996/03/17 06:51:54 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2371,12 +2371,6 @@ The TclX shell is intended as an environment for Tcl program development and
 execution.  While it is not a full-featured interactive shell, it provides a
 comfortable environment for the interactive development of Tcl code. 
 .PP
-The TclX shell also supports event oriented programming.  If any event sources
-are created the shell will enter an event loop at the end of the top level
-script instead of exiting.   The loop will continue until all event sources
-are removed.  The most notable methods of create event loops in a Tcl-only
-application are with the \fBfileevent\fR and \fBsocket -server\fR commands.
-.PP
 The following command line flags are recognized by the Tcl shell command
 line parser:
 .TP
@@ -2524,11 +2518,33 @@ Generally the procedure should exit with a non-zero exit code once the error
 has been processed.
 It is not possible to continue executing the code in which the error occurred.
 This is useful for logging \fBerrorInfo\fR or e-mailing it to the maintainer.
+.sp
+Note, 
 .TP
 .B TCLXENV
 Array that contains information used internally by various Tcl procedures that
 are part of the TclX shell.  Don't change this array unless you know what
 your doing.
+'\"@endhelp
+'
+'\"@help: tcl/variables/mainloop
+'\"@brief: Setup a top-level event loop.
+.TP
+.B mainloop
+.br
+This procedure sets up a top-level event loop.
+Events are processed until there are no more active event sources, at which
+time the process exits.
+It is used to build event oriented programs using the TclX shell in a style
+similar to that used with \fBwish\fR.
+If the global variable \fBtcl_interactive\fR exists and has a true value
+an interactive command handler is started as well.   If the command handler
+is terminated by an EOF, the process will be exited.
+
+This commands is not useful in \fBwishx\fR, as it automatically enters an
+event loop after processing a script.
+'\"@:
+'\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
 '
 .SH "HELP FACILITY"

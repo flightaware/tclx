@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 5.6 1996/03/14 05:04:02 markd Exp $
+ * $Id: tclXshell.c,v 5.7 1996/03/17 06:52:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -234,7 +234,7 @@ TclX_Main (argc, argv, appInitProc)
     Tcl_AppInitProc  *appInitProc;
 {
     Tcl_Interp *interp;
-    char *evalStr, *eventVar;
+    char *evalStr;
 
     Tcl_FindExecutable (argv [0]);
 
@@ -292,16 +292,6 @@ TclX_Main (argc, argv, appInitProc)
         goto errorExit;
 
   evalComplete:
-    /*
-     * If any event sources have been set up, process events until no more
-     * sources remain.  This can be disabled by setting an Tcl variable.
-     */
-    eventVar = Tcl_GetVar (interp, "tclx_enterEventLoop", TCL_GLOBAL_ONLY);
-    if ((eventVar == NULL) || (!STREQU (eventVar, "0"))) {
-        while (Tcl_DoOneEvent (0))
-            continue;
-    }
-
     /* 
      * Delete the interpreter if memory debugging or explictly requested.
      * Useful for finding memory leaks.

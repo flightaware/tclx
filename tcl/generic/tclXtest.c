@@ -1,7 +1,7 @@
 /* 
  * tclXtest.c --
  *
- *    Tcl_AppInit function for Extended Tcl test program.
+ *    Tcl_AppInit and main functions for the Extended Tcl test program.
  *
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 5.6 1996/03/10 04:42:40 markd Exp $
+ * $Id: tclXtest.c,v 5.7 1996/03/14 05:04:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,6 +46,7 @@ int (*tclDummyMathPtr)() = matherr;
  *	This is the main program for the application.
  *----------------------------------------------------------------------
  */
+int
 main (argc, argv)
     int    argc;
     char **argv;
@@ -81,13 +82,5 @@ Tcl_AppInit (interp)
 	return TCL_ERROR;
     }
 
-    /*
-     * By default, don't enter the event loop.  Some of the Tcl socket tests
-     * create test processes that are supposed to fail creating event sources.
-     * If they succeed in creating the event source, you end up hung in the
-     * TclX shell event loop.
-     */
-    Tcl_SetVar (interp, "tclx_enterEventLoop", "0", TCL_GLOBAL_ONLY);
- 
     return Tcl_GlobalEval (interp, errorHandler);
 }
