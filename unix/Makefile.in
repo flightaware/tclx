@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.4 1994/01/23 03:39:30 markd Exp markd $
+# $Id: Makefile.in,v 3.5 1994/01/23 04:41:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -42,10 +42,10 @@ TK_INST_MASTER    = ${TK_MASTERDIR}/`tools/tkxversion`
 #------------------------------------------------------------------------------
 # Other macros.
 
-LIBTCL.A   = tclmaster/lib${ARCH}/libtcl.a
-TCL.H      = tclmaster/include/tcl.h
-LIBTK.A    = tkmaster/lib${ARCH}/libtk.a
-TK.H       = tkmaster/include/tk.h
+LIBTCL_A   = tclmaster/lib${ARCH}/LIBTCL_A
+TCL_H      = tclmaster/include/TCL_H
+LIBTK_A    = tkmaster/lib${ARCH}/LIBTK_A
+TK_H       = tkmaster/include/TK_H
 INSTCOPY   = ./runtcl tools/instcopy
 CPMANPAGES = ./runtcl ${bldbasedir}/tools/cpmanpages
 
@@ -81,7 +81,7 @@ TCLX: TCLCOPY runtcl
 # Copy include and library files from the UCB Tcl distribution to the
 # tclmaster directory.
 #
-TCLCOPY: MKTCLDIRS ${LIBTCL.A} ${TCL.H}
+TCLCOPY: MKTCLDIRS ${LIBTCL_A} ${TCL_H}
 
 MKTCLDIRS:
 	-mkdir tclmaster                2>/dev/null; exit 0
@@ -90,14 +90,14 @@ MKTCLDIRS:
 	-mkdir tclmaster/bin${ARCH}     2>/dev/null; exit 0
 	-mkdir tclmaster/src            2>/dev/null; exit 0
 
-${LIBTCL.A}: ${TCL_UCB_LIB}/libtcl.a
-	rm -f ${LIBTCL.A}
-	cp ${TCL_UCB_LIB}/libtcl.a ${LIBTCL.A}
-	${RANLIB} ${LIBTCL.A}
+${LIBTCL_A}: ${TCL_UCB_LIB}/LIBTCL_A
+	rm -f ${LIBTCL_A}
+	cp ${TCL_UCB_LIB}/LIBTCL_A ${LIBTCL_A}
+	${RANLIB} ${LIBTCL_A}
 
-${TCL.H}: ${TCL_UCB_SRC}/tcl.h
-	rm -f ${TCL.H}
-	cp ${TCL_UCB_SRC}/tcl.h ${TCL.H}
+${TCL_H}: ${TCL_UCB_SRC}/TCL_H
+	rm -f ${TCL_H}
+	cp ${TCL_UCB_SRC}/TCL_H ${TCL_H}
 
 #------------------------------------------------------------------------------
 # Generate a wish shell {wishx} with Extended Tcl commands.
@@ -112,7 +112,7 @@ WISHX: TKCOPY runwishx
 # tkmaster directory.
 #
 
-TKCOPY: MKTKDIRS ${LIBTK.A} ${TK.H}
+TKCOPY: MKTKDIRS ${LIBTK_A} ${TK_H}
 
 MKTKDIRS:
 	-mkdir tkmaster                2>/dev/null; exit 0
@@ -121,14 +121,14 @@ MKTKDIRS:
 	-mkdir tkmaster/bin${ARCH}     2>/dev/null; exit 0
 	-mkdir tkmaster/src            2>/dev/null; exit 0
 
-${LIBTK.A}: ${TK_UCB_LIB}/libtk.a
-	rm -f ${LIBTK.A}
-	cp ${TK_UCB_LIB}/libtk.a ${LIBTK.A}
-	${RANLIB} ${LIBTK.A}
+${LIBTK_A}: ${TK_UCB_LIB}/LIBTK_A
+	rm -f ${LIBTK_A}
+	cp ${TK_UCB_LIB}/LIBTK_A ${LIBTK_A}
+	${RANLIB} ${LIBTK_A}
 
-${TK.H}: ${TK_UCB_SRC}/tk.h
-	rm -f ${TK.H}
-	cp ${TK_UCB_SRC}/tk.h ${TK.H}
+${TK_H}: ${TK_UCB_SRC}/TK_H
+	rm -f ${TK_H}
+	cp ${TK_UCB_SRC}/TK_H ${TK_H}
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
