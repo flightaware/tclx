@@ -1,10 +1,8 @@
 /* 
  * tclXAppInit.c --
  *
- *      Provides a default version of the Tcl_AppInit procedure for use with
- *      applications built with Extended Tcl.  This is based on the the UCB
- *      Tcl file tclAppInit.c
- *
+ * Provides a default version of the Tcl_AppInit procedure for use with
+ * applications built with Extended Tcl on Unix systems.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -15,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 7.0 1996/06/16 05:30:03 markd Exp $
+ * $Id: tclXAppInit.c,v 7.1 1996/07/18 19:36:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,19 +25,15 @@
  * Even if matherr is not used on this system, there is a dummy version
  * in libtcl.
  */
-#ifndef WIN32
 EXTERN int matherr ();
 int (*tclDummyMathPtr)() = matherr;
-#endif
 
 
-/*
- *----------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * main --
  *
- *	This is the main program for the application.
- *----------------------------------------------------------------------
+ * This is the main program for the application.
+ *-----------------------------------------------------------------------------
  */
 #ifdef __cplusplus
 int
@@ -57,19 +51,17 @@ main (argc, argv)
 }
 
 
-/*
- *----------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_AppInit --
  *
- *      This procedure performs application-specific initialization.
- *      Most applications, especially those that incorporate additional
- *      packages, will have their own version of this procedure.
+ * This procedure performs application-specific initialization.  Most
+ * applications, especially those that incorporate additional packages, will
+ * have their own version of this procedure.
  *
  * Results:
- *      Returns a standard Tcl completion code, and leaves an error
- *      message in interp->result if an error occurs.
- *----------------------------------------------------------------------
+ *   Returns a standard Tcl completion code, and leaves an error message in
+ *  interp->result if an error occurs.
+ *-----------------------------------------------------------------------------
  */
 #ifdef __cplusplus
 int
