@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 3.3 1994/01/23 17:00:28 markd Exp markd $
+ * $Id: tclExtdInt.h,v 3.4 1994/01/25 01:07:01 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,9 +44,7 @@
 #include <sys/times.h>
 
 /*
- * Precompute milliseconds-per-tick, the " + CLK_TCK / 2" bit gets it to
- * round off instead of truncate.  Take care of defining CLK_TCK if its not
- * defined.
+ * Make sure CLK_TCK is defined.
  */
 #ifndef CLK_TCK
 #    ifdef HZ
@@ -54,27 +52,6 @@
 #    else
 #        define CLK_TCK 60
 #    endif
-#endif
-
-/*
- * We will need to convert OS ticks, as returned by times() for example,
- * into milliseconds. The macro TICKS_TO_MS() will return milliseconds as
- * an integer value.
- */
-#if 1000 > CLK_TCK
-        /*
-         * On low resolution systems we can get away with the constant
-         * expression MS_PER_TICK. Note that the addition of half the
-         * clock hertz results in appoximate rounding instead of truncation.
-         *
-         */
-#  define TICKS_TO_MS(_ticks_)  ((_ticks_) * (1000 + CLK_TCK/2) / CLK_TCK)
-#else
-        /*
-         * On systems where the question is ticks per millisecond, not
-         * milliseconds per tick, we need to use floating point arithmetic.
-         */
-#  define TICKS_TO_MS(_ticks_)  (long)((_ticks_) * 1000.0 / CLK_TCK)
 #endif
 
 #include <math.h>
@@ -282,6 +259,9 @@ Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
 extern void
 Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
                                int         fileNum));
+
+extern long
+Tcl_TicksToMS _ANSI_ARGS_((long numTicks));
 
 /*
  * Definitions required to initialize all extended commands.  These are either

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.13 1993/11/17 15:16:25 markd Exp markd $
+ * $Id: tclXutil.c,v 3.0 1993/11/19 06:59:28 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -633,3 +633,45 @@ Tcl_CloseForError (interp, fileNum)
     errno = saveErrNo;
 }
      
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_TicksToMS --
+ *
+ *   Convert clock ticks to milliseconds.
+ *
+ * Parameters:
+ *   o numTicks (I) - Number of ticks.
+ * Returns:
+ *   Milliseconds.
+ *-----------------------------------------------------------------------------
+ */
+long
+Tcl_TicksToMS (numTicks)
+     long numTicks;
+{
+    static long msPerTick = 0;
+
+    /*
+     * Some systems (SVR4) implement CLK_TCK as a call to sysconf, so lets only
+     * reference it once in the life of this process.
+     */
+    if (msPerTick == 0)
+        msPerTick = CLK_TCK;
+
+    if (msPerTick <= 100) {
+        /*
+         * On low resolution systems we can do this all with integer math. Note
+         * that the addition of half the clock hertz results in appoximate
+         * rounding instead of truncation.
+         */
+        return (numTicks) * (1000 + msPerTick / 2) / msPerTick;
+    } else {
+        /*
+         * On systems (Cray) where the question is ticks per millisecond, not
+         * milliseconds per tick, we need to use floating point arithmetic.
+         */
+        return (long) ((numTicks) * 1000.0 / msPerTick);
+    }
+}
