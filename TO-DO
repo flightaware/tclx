@@ -1,5 +1,7 @@
                          TclX bug, idea and task list
 
+
+
 switch to using Tcl's save/restore result functionality./
 
 *** Porting to 8.1 ***
@@ -25,7 +27,18 @@ o EvalFilePart should do everything Tcl_Eval files does with
 
 *** Serious Bugs ***
 
-    From: jph@solo.com (Jean-Pierre Hebert)
+o Peter-Klaus Schilling <pks@mail.desy.de>
+    INSTALL.generic says:
+    [..]
+       In addition, if you use an unusual directory layout you can give
+    options like `--bindir=PATH' to specify different values for particular
+    kinds of files.  Run `configure --help' for a list of the directories
+    you can set and what kinds of files go in them.
+    [..]
+
+    However, this doesn't work for me.
+
+o   From: jph@solo.com (Jean-Pierre Hebert)
     I am put off not being able to say:
             translit A-z "" $foo 
     or similar anymore. This was very handy.

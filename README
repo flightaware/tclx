@@ -1,8 +1,6 @@
                           Extended Tcl (TclX) 8.1.0
                           =========================
 
-                                Beta 2 release
-
 INTRODUCTION
 ============
 
@@ -48,6 +46,7 @@ CHANGES IN TCLX 8.1
 =====================
   o Compability with Tcl 8.1 and Tk 8.1
   o Added support of UniCode characters in most commands.
+  o Use new Tcl regular expression facility.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
