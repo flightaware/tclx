@@ -1,5 +1,3 @@
-echo @@@ HELP TESTS ARE NOT CURRENTLY WORKING @@@
-return
 #
 # help.test
 #
@@ -15,7 +13,7 @@ return
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 2.3 1993/06/01 05:43:37 markd Exp markd $
+# $Id: help.test,v 2.4 1993/06/21 05:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -24,7 +22,7 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 #
 # Only run help test if help has been installed.
 #
-if {"[glob -nocomplain ../tcllib/help/*]" == ""} {
+if {"[glob -nocomplain ../tclmaster/help/*]" == ""} {
     echo "****"
     echo "**** No help pages in tcllib/help - help not available test not run"
     echo "****"
@@ -138,14 +136,21 @@ Test help-1.1 {help tests} {
     HelpSend "help" promptCnt
 } 0 {
 Subjects available in /:
+   tcl/
+
+Help pages available in /:
+   help
+}
+
+Test help-1.1.1 {help tests} {
+    HelpSend "help tcl" promptCnt
+} 0 {
+Subjects available in /tcl:
    control/         debug/           files/           filescan/
    internation/     intro/           keyedlists/      libraries/
    lists/           math/            processes/       signals/
    status/          strings/         tclshell/        time/
-   variables/       
-
-Help pages available in /:
-   help             
+   variables/
 }
 
 Test help-1.2 {help tests} {
@@ -154,63 +159,63 @@ Test help-1.2 {help tests} {
 }
 
 Test help-1.3 {help tests} {
-    HelpSend "helpcd intro" promptCnt
+    HelpSend "helpcd tcl/filescan" promptCnt
 } 0 {}
 
 Test help-1.4 {help tests} {
     HelpSend "helppwd" promptCnt
-} 0 {Current help subject: /intro
+} 0 {Current help subject: /tcl/filescan
 }
 
 Test help-1.5 {help tests} {
-    set result [HelpSend "help comments" promptCnt]
-    set fh [open "../tcllib/help/intro/comments"]
+    set result [HelpSend "help /tcl/lists/lassign" promptCnt]
+    set fh [open "../tclmaster/help/tcl/lists/lassign"]
     set expect [read $fh]
     close $fh
     set summary {}
     if {"$expect" == "$result"} {
         append summary "CORRECT"
     } else {
-        append summary "DATA DOES NOT MATCH"
+        append summary "DATA DOES NOT MATCH : $result"
     }
     if {$promptCnt == 0} {
        append summary " : PROMPT OK"
     } else {
-       append summary " : TOO MANY PROMPTS"
+       append summary " : TOO MANY PROMPTS: $promptCnt"
     }
     set summary
 } 0 {CORRECT : PROMPT OK}
 
 Test help-1.6 {help tests} {
-    set result [HelpSend "help expressions" promptCnt]
-    set fh [open "../tcllib/help/intro/expressions"]
+    set result [HelpSend "help /tcl/math/expr" promptCnt]
+    set fh [open "../tclmaster/help/tcl/math/expr"]
     set expect [read $fh]
     close $fh
     set summary {}
     if {"$expect" == "$result"} {
         append summary "CORRECT"
     } else {
-        append summary "DATA DOES NOT MATCH"
+        append summary "DATA DOES NOT MATCH: $result"
     }
     if {$promptCnt >= 2} {
        append summary " : PROMPT OK"
     } else {
-       append summary " : NOT ENOUGH PROMPTS"
+       append summary " : NOT ENOUGH PROMPTS: $promptCnt"
     }
     set summary
 } 0 {CORRECT : PROMPT OK}
 
 Test help-1.7 {help tests} {
     HelpSend "apropos upvar" promptCnt
-} 0 {variables/upvar - Bind a variable to another variable up the procedure call stack.
+} 0 {tcl/variables/upvar - Create link to variable in a different stack frame
 }
 
 Test help-1.8 {help tests} {
     HelpSend "apropos clock" promptCnt
-} 0 {time/alarm - Set a process alarm clock.
-time/convertclock - Parse and convert a date and time string to integer clock value.
-time/fmtclock - Convert an integer time value to human-readable format.
-time/getclock - Return current date and time as an integer value.
+} 0 {tcl/time/alarm - Set a process alarm clock.
+tcl/time/convertclock - Parse and convert a date and time string to integer clock value.
+tcl/time/fmtclock - Convert an integer time value to human-readable format.
+tcl/time/getclock - Return current date and time as an integer value.
 }
 
 Test help-1.9 {help tests} {

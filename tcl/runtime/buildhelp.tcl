@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.4 1993/03/10 20:40:50 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.5 1993/03/15 06:39:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -369,7 +369,7 @@ proc GenerateHelp {helpDirPath briefFile sourceFiles} {
 
     close $G_briefHelpFH
     chmod a-w,a+r $G_helpDir/$briefFile
-    echo "*** completed extraction of all help files"
+    echo "Completed extraction of help files"
 }
 
 #-----------------------------------------------------------------------------

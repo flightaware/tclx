@@ -15,9 +15,10 @@
 #------------------------------------------------------------------------------
 # The help facility is based on a hierarchical tree of subjects (directories)
 # and help pages (files).  There is a virtual root to this tree. The root
-# being the merger of all "help" directories found along the $TCLPATH variable.
+# being the merger of all "help" directories found along the $auto_path
+# variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 2.3 1993/04/07 02:42:32 markd Exp markd $
+# $Id: help.tcl,v 2.4 1993/06/01 05:52:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -27,9 +28,9 @@
 # Return a list of help root directories.
 
 proc help:RootDirs {} {
-    global TCLPATH
+    global auto_path
     set roots {}
-    foreach dir $TCLPATH {
+    foreach dir $auto_path {
         if [file isdirectory $dir/help] {
             lappend roots $dir/help
         }
@@ -68,7 +69,7 @@ proc help:FlattenPath pathName {
 #------------------------------------------------------------------------------
 # Given a pathName relative to the virtual help root, convert it to a list of
 # real file paths.  A list is returned because the path could be "/", returning
-# a list of all roots. The list is returned in the same order of the TCLPATH
+# a list of all roots. The list is returned in the same order of the auto_path
 # variable. If path does not start with a "/", it is take as relative to the
 # current help subject.  Note:  The root directory part of the name is not
 # flattened.  This lets other commands pick out the part relative to the
@@ -212,7 +213,7 @@ proc help:DisplayColumns {nameList} {
         }
     }
     if {$count != 0} {
-        help:Display $outLine}
+        help:Display [string trimright $outLine]}
     return
 }
 
@@ -319,6 +320,6 @@ proc apropos {regexp} {
 #------------------------------------------------------------------------------
 # One time initialization done when the file is sourced.
 #
-global TCLENV TCLPATH
+global TCLENV
 
 set TCLENV(help:curSubject) "/"
