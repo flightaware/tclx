@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.3 1997/06/30 03:56:04 markd Exp $
+ * $Id: tclXsignal.c,v 8.4 1997/06/30 17:21:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -474,7 +474,7 @@ BlockSignals (interp, action, signals)
     }
 
     if (sigprocmask (action, &sigBlockSet, NULL)) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -509,7 +509,7 @@ SignalBlocked (interp, signalNum)
     sigset_t sigBlockSet;
 
     if (sigprocmask (SIG_BLOCK, NULL, &sigBlockSet)) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return NULL;
     }
     return sigismember (&sigBlockSet, signalNum) ? "1" : "0";
@@ -925,7 +925,7 @@ ProcessASignal (interp, background, signalNum)
  * 
  * Parameters:
  *   o clientData (I) - Not used.
- *   o interp (I/O) - interp->result should contain the result for
+ *   o interp (I/O) - interp result should contain the result for
  *     the command that just executed.  This will either be restored or
  *     replaced with a new result.  If this is NULL, then no interpreter
  *     is directly available (i.e. event loop).  In this case, the first

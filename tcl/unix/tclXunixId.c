@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixId.c,v 8.3 1997/06/30 03:56:07 markd Exp $
+ * $Id: tclXunixId.c,v 8.4 1997/06/30 07:57:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -473,7 +473,7 @@ IdHost (interp, objc, objv)
         return TclX_WrongArgs (interp, objv [0], "host");
 
 	if (gethostname (hostNameBuf, MAXHOSTNAMELEN) < 0) {
-	    interp->result = Tcl_PosixError (interp);
+            Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
 	    return TCL_ERROR;
 	}
 	hostNameBuf[MAXHOSTNAMELEN-1] = '\0';
@@ -525,7 +525,7 @@ IdUser (interp, objc, objv)
         goto errorExit;
     }
     if (setuid (pw->pw_uid) < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
     endpwent ();
@@ -559,7 +559,7 @@ IdUserId (interp, objc, objv)
         return TCL_ERROR;
 
     if (setuid ((uid_t) uid) < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -594,7 +594,7 @@ IdGroup (interp, objc, objv)
         goto errorExit;
     }
     if (setgid (grp->gr_gid) < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
     endgrent ();
@@ -628,7 +628,7 @@ IdGroupId (interp, objc, objv)
         return TCL_ERROR;
 
     if (setgid ((gid_t) gid) < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 

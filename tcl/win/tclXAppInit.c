@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 8.1 1997/04/17 04:59:55 markd Exp $
+ * $Id: tclXAppInit.c,v 8.2 1997/06/12 21:08:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -51,7 +51,7 @@ main (int    argc,
  *
  * Results:
  *   Returns a standard Tcl completion code, and leaves an error message in
- *  interp->result if an error occurs.
+ *  interp result if an error occurs.
  *-----------------------------------------------------------------------------
  */
 int

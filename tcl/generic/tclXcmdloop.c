@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 8.6 1997/06/30 03:55:55 markd Exp $
+ * $Id: tclXcmdloop.c,v 8.7 1997/06/30 17:21:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -118,7 +118,7 @@ IsSetVarCmd (command)
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter.  Result of command should be
- *     in interp->result.
+ *     in interp result.
  *   o intResult (I) - The integer result returned by Tcl_Eval.
  *   o checkCmd (I) - If not NULL and the command was sucessful, check to
  *     set if this is a "set" command setting a variable.  If so, don't echo

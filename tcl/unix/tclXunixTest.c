@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixTest.c,v 8.0.4.1 1997/04/14 02:02:53 markd Exp $
+ * $Id: tclXunixTest.c,v 8.1 1997/04/17 04:59:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -55,7 +55,7 @@ main (argc, argv)
  *
  * Results:
  *   Returns a standard Tcl completion code, and leaves an error message in
- * interp->result if an error occurs.
+ * interp result if an error occurs.
  *-----------------------------------------------------------------------------
  */
 int

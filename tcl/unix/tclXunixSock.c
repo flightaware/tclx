@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 8.1 1997/04/17 04:59:50 markd Exp $
+ * $Id: tclXunixSock.c,v 8.2 1997/06/12 21:08:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -240,7 +240,7 @@ TclX_ServerCreateCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 
   unixError:
-    interp->result = Tcl_PosixError (interp);
+    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
     CloseForError (interp, channel, socketFD);
     return TCL_ERROR;
 }
@@ -338,7 +338,7 @@ TclX_ServerAcceptCmd (clientData, interp, argc, argv)
      * Exit points for errors.
      */
   unixError:
-    interp->result = Tcl_PosixError (interp);
+    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
     if (socketFD >= 0)
         close (socketFD);
     return TCL_ERROR;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.4 1997/06/12 21:08:20 markd Exp $
+ * $Id: tclXinit.c,v 8.5 1997/06/30 17:21:40 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -183,7 +183,7 @@ TclX_EvalRCFile (interp)
  * TclX_ErrorExit --
  *
  * Display error information and abort when an error is returned in the
- * interp->result. It uses TCLXENV(noDump) to determine if the stack should be
+ * interp result. It uses TCLXENV(noDump) to determine if the stack should be
  * dumped.
  *
  * Parameters:

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 8.1 1997/04/17 04:58:54 markd Exp $
+ * $Id: tclXtest.c,v 8.2 1997/06/12 21:08:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,6 +42,12 @@ static char errorHandler [] =
  * Prototypes of internal functions.
  */
 static int
+DoTestEval _ANSI_ARGS_((Tcl_Interp  *interp,
+                        char        *levelStr,
+                        char        *command,
+                        Tcl_Obj     *resultList));
+
+static int
 TclxTestEvalCmd _ANSI_ARGS_((ClientData    clientData,
                              Tcl_Interp   *interp,
                              int           argc,
@@ -55,7 +61,8 @@ TclxTestEvalCmd _ANSI_ARGS_((ClientData    clientData,
  *   o interp - Errors are returned in result.
  *   o levelStr - Level string to parse.
  *   o command - Command to evaluate.
- *   o resultList - DString to append the two element eval code and result to.
+ *   o resultList - List object to append the two element eval code and result
+ *     to.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -65,19 +72,19 @@ DoTestEval (interp, levelStr, command, resultList)
     Tcl_Interp  *interp;
     char        *levelStr;
     char        *command;
-    Tcl_DString *resultList;
+    Tcl_Obj     *resultList;
 {
     Interp *iPtr = (Interp *) interp;
-    int result;
-    char numBuf [32];
+    int code;
+    Tcl_Obj *subResult;
     CallFrame *savedVarFramePtr, *framePtr;
 
     /*
      * Find the frame to eval in.
      */
-    result = TclGetFrame (interp, levelStr, &framePtr);
-    if (result <= 0) {
-        if (result == 0)
+    code = TclGetFrame (interp, levelStr, &framePtr);
+    if (code <= 0) {
+        if (code == 0)
             Tcl_AppendResult (interp, "invalid level \"", levelStr, "\"",
                               (char *) NULL);
         return TCL_ERROR;
@@ -89,20 +96,23 @@ DoTestEval (interp, levelStr, command, resultList)
     savedVarFramePtr = iPtr->varFramePtr;
     iPtr->varFramePtr = framePtr;
 
-    result = Tcl_Eval (interp, command);
+    code = Tcl_Eval (interp, command);
 
     iPtr->varFramePtr = savedVarFramePtr;
 
     /*
      * Append the two element list.
      */
-    Tcl_DStringStartSublist (resultList);
-    sprintf (numBuf, "%d", result);
-    Tcl_DStringAppendElement (resultList, numBuf);
-    Tcl_DStringAppendElement (resultList, interp->result);
-    Tcl_DStringEndSublist (resultList);
-
-    Tcl_ResetResult (interp);
+    subResult = Tcl_NewListObj (0, NULL);
+    if (Tcl_ListObjAppendElement (interp, subResult,
+                                  Tcl_NewIntObj (code)) != TCL_OK)
+        return TCL_ERROR;
+    if (Tcl_ListObjAppendElement (interp, subResult,
+                                  Tcl_GetObjResult (interp)) != TCL_OK)
+        return TCL_ERROR;
+    if (Tcl_ListObjAppendElement (interp, resultList, subResult) != TCL_OK)
+        return TCL_ERROR;
+    
     return TCL_OK;
 }
 
@@ -128,7 +138,7 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
     char        **argv;
 {
     int idx;
-    Tcl_DString resultList;
+    Tcl_Obj *resultList;
 
     if (((argc - 1) % 2) != 0) {
         Tcl_AppendResult (interp, "wrong # args: ", argv [0],
@@ -136,18 +146,17 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    Tcl_DStringInit (&resultList);
+    resultList = Tcl_NewListObj (0, NULL);
 
     for (idx = 1; idx < argc; idx += 2) {
         if (DoTestEval (interp, argv [idx], argv [idx + 1],
-                        &resultList) == TCL_ERROR) {
-            Tcl_DStringFree (&resultList);
+                        resultList) == TCL_ERROR) {
+            Tcl_DecrRefCount (resultList);
             return TCL_ERROR;
         }
     }
         
-    Tcl_DStringResult (interp, &resultList);
-    Tcl_DStringFree (&resultList);
+    Tcl_SetObjResult (interp, resultList);
     return TCL_OK;
 }
 
@@ -157,7 +166,7 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
  *
  * Results:
  *   Returns a standard Tcl completion code, and leaves an error message in
- * interp->result if an error occurs.
+ * interp result if an error occurs.
  *-----------------------------------------------------------------------------
  */
 int

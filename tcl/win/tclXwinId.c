@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinId.c,v 8.1 1997/04/17 04:59:59 markd Exp $
+ * $Id: tclXwinId.c,v 8.2 1997/06/30 03:56:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -80,16 +80,19 @@ IdHost (interp, argc, argv)
     int         argc;
     char      **argv;
 {
+    char hostName [TCL_RESULT_SIZE];
+
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " host", (char *) NULL);
         return TCL_ERROR;
     }
-    if (gethostname (interp->result, TCL_RESULT_SIZE) < 0) {
+    if (gethostname (hostName, sizeof (hostName)) < 0) {
         Tcl_AppendResult (interp, "failed to get host name: ",
                           Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
+    Tcl_AppendResult (interp, hostName, (char *) NULL);
     return TCL_OK;
 }
 

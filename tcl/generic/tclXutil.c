@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.7 1997/06/30 06:53:59 markd Exp $
+ * $Id: tclXutil.c,v 8.8 1997/06/30 07:57:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -468,8 +468,10 @@ CallEvalErrorHandler (interp)
 {
     static char *ERROR_HANDLER = "tclx_errorHandler";
     Tcl_CmdInfo cmdInfo;
-    Tcl_DString command;
+    char *errorHandler;
+    Tcl_Obj *command;
     int result;
+
 
     /*
      * Check if the tclx_errorHandler function exists.  For backwards
@@ -479,27 +481,26 @@ CallEvalErrorHandler (interp)
      * should be removed eventually. ????
      */
     if (!Tcl_GetCommandInfo (interp, ERROR_HANDLER, &cmdInfo)) {
-        char *errorHandler;
-
         errorHandler = Tcl_GetVar (interp, ERROR_HANDLER, TCL_GLOBAL_ONLY);
         if (errorHandler == NULL)
             return TCL_ERROR;  /* No handler specified */
-        Tcl_DStringInit (&command);
-        Tcl_DStringAppendElement (&command, errorHandler);
     } else {
-        Tcl_DStringInit (&command);
-        Tcl_DStringAppendElement (&command, ERROR_HANDLER);
+        errorHandler = ERROR_HANDLER;
     }
-
-    Tcl_DStringAppendElement (&command, interp->result);
-
-    result = Tcl_GlobalEval (interp, Tcl_DStringValue (&command));
+    command = Tcl_NewListObj (0, NULL);
+    Tcl_ListObjAppendElement (NULL, command,
+                              Tcl_NewStringObj (errorHandler,
+                                                -1));
+    Tcl_ListObjAppendElement (NULL, command,
+                              Tcl_GetObjResult (interp));
+                              
+    result = Tcl_GlobalEvalObj (interp, command);
     if (result == TCL_ERROR) {
         Tcl_AddErrorInfo (interp,
                           "\n    (while processing tclx_errorHandler)");
     }
 
-    Tcl_DStringFree (&command);
+    Tcl_DecrRefCount (command);
     return result;
 }
 
