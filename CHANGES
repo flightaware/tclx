@@ -1238,7 +1238,7 @@
   o libtclx and libtkx now use the same alogrithm for naming that includes the
     version number as Tcl and Tk.
 ===============================================================================
-20 Nov 96: Released TclX 7.6.0
+20 Nov 96: Released TclX 7.6.0, including Win 95/NT binary distribution.
 ===============================================================================
 
  
