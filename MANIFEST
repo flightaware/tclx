@@ -282,6 +282,7 @@
 ./tcl/tests/ftrunc.test
 ./tcl/tests/globrecur.test
 ./tcl/tests/help.test
+./tcl/tests/id.test
 ./tcl/tests/init.test
 ./tcl/tests/keylist.test
 ./tcl/tests/lassign.test
