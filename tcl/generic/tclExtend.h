@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.12.2.3 1998/07/10 01:29:26 markd Exp $
+ * $Id: tclExtend.h,v 8.12.2.4 1998/08/09 01:10:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,6 +21,15 @@
 
 #include <stdio.h>
 #include "tcl.h"
+
+/*
+ * The following is needed on Windows to deal with export/import of DLL
+ * functions.  See tcl8.0.3+/win/README.
+ */
+#ifdef BUILD_TCLX
+# undef TCL_STORAGE_CLASS
+# define TCL_STORAGE_CLASS DLLEXPORT
+#endif
 
 /*
  * The versions for TclX and TkX.  This is based on the versions of Tcl and Tk
@@ -243,9 +252,18 @@ TclX_AsyncCommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
                                    char       *prompt1,
                                    char       *prompt2));
 
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLIMPORT
+
+
 /*
  * Tk with TclX initialization.
  */
+
+#ifdef BUILD_tkx
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLEXPORT
+#endif
 
 EXTERN int
 Tkx_Init _ANSI_ARGS_((Tcl_Interp  *interp));
@@ -270,6 +288,11 @@ TkX_ConsoleInit _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void
 TkX_Panic _ANSI_ARGS_(TCL_VARARGS_DEF(char *,fmt));
 
+/*
+ * Return storage class to default state see tcl8.0.3+/generic/tcl.h or
+ * tk8.0.3+/generic/tk.h
+ */
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLIMPORT
+
 #endif
-
-

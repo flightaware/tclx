@@ -2,7 +2,7 @@
 INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
 ------------------------------------------------------------------------
 
-$Id$
+$Id: INSTALL,v 8.9.2.1 1998/07/08 05:21:21 markd Exp $
 
 COMPATIBILITY
 =============
@@ -133,7 +133,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 	  "--enable-shared" with no argument, it enables building shared 
 	  libraries.
 
-        o --with-tk=YES|NO
+        o --enable-tk=YES|NO
           If "YES", compile Tk specific code and wishx, if "NO", no Tk related
           code will be compiled.  Default is "YES".
  

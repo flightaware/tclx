@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 8.7 1997/08/08 10:04:21 markd Exp $
+ * $Id: tclXdup.c,v 8.7.2.1 1998/08/09 05:02:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -96,14 +96,14 @@ DupChannelOptions (interp, srcChannel, targetChannel)
 
     Tcl_DStringFree (&strValues);
     if (optArgv != NULL) {
-        ckfree(optArgv);
+        ckfree((char *)optArgv);
     }
     return TCL_OK;
 
   errorExit:
     Tcl_DStringFree (&strValues);
     if (optArgv != NULL) {
-        ckfree(optArgv);
+        ckfree((char *)optArgv);
     }
     return TCL_ERROR;
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXutil.c,v 8.21.2.1 1998/04/26 20:03:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1084,7 +1084,7 @@ TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
     resultPtr = Tcl_GetObjResult (interp);
 
     if (Tcl_IsShared(resultPtr)) {
-        resultPtr = Tcl_NewStringObj(0, NULL);
+        resultPtr = Tcl_NewStringObj((char *)NULL, 0);
         Tcl_SetObjResult(interp, resultPtr);
     }
 

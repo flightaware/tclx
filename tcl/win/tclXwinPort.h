@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXwinPort.h,v 8.2 1997/04/17 05:00:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -54,7 +54,7 @@
  * Define a macro to call wait pid.  We don't use Tcl_WaitPid on Unix because
  * it delays signals.
  */
-#define TCLX_WAITPID(pid, status, options) Tcl_WaitPid (pid, status, options)
+#define TCLX_WAITPID(pid, status, options) Tcl_WaitPid ((Tcl_Pid)pid, status, options)
 
 #define bcopy(from, to, length)    memmove((to), (from), (length))
 

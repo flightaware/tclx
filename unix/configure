@@ -12,7 +12,7 @@ ac_help=
 ac_default_prefix=/usr/local
 # Any additions from configure.in:
 ac_help="$ac_help
-  --with-tk=YES|NO         build Tk specific code and wishx"
+  --enable-tk=YES|NO         build Tk specific code and wishx"
 ac_help="$ac_help
   --enable-shared         build and link with shared libraries"
 
@@ -522,7 +522,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.20 dnl
+# From configure.in Revision: 8.20.2.1 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -583,13 +583,13 @@ if test ! -d ../tk/unix ; then
 fi
 
 #------------------------------------------------------------------------------
-# Check command line looking for the --with-tk=YES/NO option.
+# Check command line looking for the --enable-tk=YES/NO option.
 #------------------------------------------------------------------------------
 
-# Check whether --with-tk or --without-tk was given.
-if test "${with_tk+set}" = set; then
-  withval="$with_tk"
-  TKX_BUILD=$withval
+# Check whether --enable-tk or --disable-tk was given.
+if test "${enable_tk+set}" = set; then
+  enableval="$enable_tk"
+  TKX_BUILD=$enableval
 else
   TKX_BUILD=YES
 fi
@@ -605,7 +605,7 @@ case "$TKX_BUILD" in
         TKX_BUILD=NO
         ;;
      *)
-        { echo "configure: error: Invalid argument to --with-tk=" 1>&2; exit 1; }
+        { echo "configure: error: Invalid argument to --enable-tk=" 1>&2; exit 1; }
         ;;
 esac
 

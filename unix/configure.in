@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.20 1997/12/14 20:21:15 markd Exp $
+dnl $Id: configure.in,v 8.20.2.1 1998/08/09 06:46:38 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.20 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.20.2.1 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -77,12 +77,12 @@ if test ! -d ../tk/unix ; then
 fi
 
 #------------------------------------------------------------------------------
-# Check command line looking for the --with-tk=YES/NO option.
+# Check command line looking for the --enable-tk=YES/NO option.
 #------------------------------------------------------------------------------
 
-AC_ARG_WITH(tk,
-    [  --with-tk=YES|NO         build Tk specific code and wishx],
-    [TKX_BUILD=$withval],
+AC_ARG_ENABLE(tk,
+    [  --enable-tk=YES|NO         build Tk specific code and wishx],
+    [TKX_BUILD=$enableval],
     [TKX_BUILD=YES])
 
 case "$TKX_BUILD" in
@@ -95,7 +95,7 @@ case "$TKX_BUILD" in
         TKX_BUILD=NO
         ;;
      *)
-        AC_MSG_ERROR(Invalid argument to --with-tk=, expected YES or NO)
+        AC_MSG_ERROR(Invalid argument to --enable-tk=, expected YES or NO)
         ;;
 esac
 AC_SUBST(TKX_BUILD)

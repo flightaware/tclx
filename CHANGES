@@ -1395,3 +1395,11 @@
 -------------------------------------------------------------------------------
 8 Aug 98: Released TclX 8.0.3
 ===============================================================================
+19 Sept 98:
+  o Fixed TclX copy of Tcl auto_load proc out of sync; this broken ITcl.
+-------------------------------------------------------------------------------
+20 Sept 98:
+  o Include several Windows build fixes from Viktor Dukhovni <viktor@nyc.deshaw.com>.
+  o Renamed --with-tk configure option to --enable-tk.
+    Supplied by Viktor Dukhovni <viktor@nyc.deshaw.com>.
+-------------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.11 1997/09/01 00:58:06 markd Exp $
+ * $Id: tclXinit.c,v 8.12 1997/11/11 05:33:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -353,7 +353,7 @@ Tclx_Init (interp)
     if (TclXRuntimeInit (interp,
                          "tcl",
                          TCLX_LIBRARY,
-                         TCLX_FULL_VERSION) == TCL_ERROR)
+                         TCLX_VERSION) == TCL_ERROR)
         goto errorExit;
 
     if (Tclxlib_Init (interp) == TCL_ERROR)

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 8.3 1997/08/18 00:04:11 markd Exp $
+ * $Id: tkXAppInit.c,v 8.4 1997/08/23 18:56:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@
  * Even if matherr is not used on this system, there is a dummy version
  * in libtcl.
  */
-EXTERN int matherr ();
+extern int matherr ();
 int (*tclDummyMathPtr)() = matherr;
 
 

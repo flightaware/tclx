@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 8.2 1997/08/17 04:08:39 markd Exp $
+ * $Id: tkXinit.c,v 8.3 1997/08/23 18:56:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -66,7 +66,7 @@ int Tkx_Init (interp)
     if (TclXRuntimeInit (interp,
                          "tk",
                          TKX_LIBRARY,
-                         TKX_FULL_VERSION) == TCL_ERROR)
+                         TKX_VERSION) == TCL_ERROR)
         goto errorExit;
 
     return TCL_OK;
