@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 4.1 1995/01/01 19:50:08 markd Exp markd $
+# $Id: tclhelp.tcl,v 4.2 1995/01/26 19:16:07 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -92,6 +92,9 @@ proc DisplaySubject {subject} {
         lvarpush subjects ".."
     }
 
+    # Allow us to resize if the user has set the size.
+    wm geometry . ""
+
     set frame .tkhelp.pick
     catch {destroy $frame}
     frame $frame
@@ -140,8 +143,8 @@ proc DisplayPage {page} {
     $w.frame.page configure -state disabled
 
     button $w.dismiss -text Dismiss -command "destroy $w"
-    pack $w.frame -side top -fill both -expand 1
     pack $w.dismiss -side bottom -fill x
+    pack $w.frame -side top -fill both -expand 1
 }
 
 #------------------------------------------------------------------------------
@@ -157,6 +160,14 @@ proc AproposPanel {} {
     }
     toplevel .apropos
     wm minsize .apropos 1 1
+
+    # put in the dismiss button
+    set w .apropos.buttonFrame
+    frame $w
+    pack $w -side bottom -fill x
+    button $w.dismiss -text Dismiss -command "destroy .apropos"
+    pack $w.dismiss -side bottom -fill x
+
     frame .apropos.entryFrame
     pack .apropos.entryFrame -side top -fill x
 
@@ -183,14 +194,7 @@ proc AproposPanel {} {
     pack $w.xscroll -side bottom -fill x
     pack $w.yscroll -side right -fill y
     pack $w.canvas -in $w -expand yes -fill both
-    pack $w -side top -expand yes -fill both
-
-    # put in the dismiss button
-    set w .apropos.buttonFrame
-    frame $w
-    pack $w -side top -fill x
-    button $w.dismiss -text Dismiss -command "destroy .apropos"
-    pack $w.dismiss -side bottom -fill x
+    pack $w -side bottom -expand yes -fill both
 
     # Allow input without Button1 press.
     focus .apropos.entryFrame.entry
