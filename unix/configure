@@ -403,7 +403,7 @@ else
 fi
 
 
-# From configure.in Revision: 4.24 dnl
+# From configure.in Revision: 4.26 dnl
 
 
 
@@ -711,7 +711,7 @@ echo $ac_n "checking how make handles includes""... $ac_c" 1>&6
 cat > confmakeinc <<EOF
 
 EOF
-  cat > confmakefile <<EOF
+cat > confmakefile <<EOF
 include confmakeinc
 
 all:
@@ -3459,6 +3459,57 @@ else
 fi
 done
 
+for ac_func in fchown fchmod truncate ftruncate chsize
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 3470 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+char $ac_func(); 
+
+int main() { return 0; }
+int t() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+$ac_func();
+#endif
+
+; return 0; }
+EOF
+if eval $ac_link; then
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=no"
+fi
+rm -f conftest*
+
+fi
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
 
 #------------------------------------------------------------------------------
 # Test for socket related functions.  Note that "socket" is just used to
@@ -3475,7 +3526,7 @@ if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3479 "configure"
+#line 3530 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -3530,7 +3581,7 @@ if eval "test \"`echo '$''{'ac_cv_func_catgets'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3534 "configure"
+#line 3585 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char catgets(); below.  */
@@ -3570,7 +3621,7 @@ EOF
 
          echo $ac_n "checking catclose return value""... $ac_c" 1>&6
          cat > conftest.$ac_ext <<EOF
-#line 3574 "configure"
+#line 3625 "configure"
 #include "confdefs.h"
 #include <nl_types.h>
 int main() { return 0; }
@@ -3614,7 +3665,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lintl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3618 "configure"
+#line 3669 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -3645,7 +3696,7 @@ if eval "test \"`echo '$''{'ac_cv_func_strftime'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3649 "configure"
+#line 3700 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char strftime(); below.  */
@@ -3692,7 +3743,7 @@ if eval "test \"`echo '$''{'ac_cv_func_random'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3696 "configure"
+#line 3747 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char random(); below.  */
@@ -3741,7 +3792,7 @@ if eval "test \"`echo '$''{'ac_cv_func_rename'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3745 "configure"
+#line 3796 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char rename(); below.  */
@@ -3796,7 +3847,7 @@ esac
 #------------------------------------------------------------------------------
 
 cat > conftest.$ac_ext <<EOF
-#line 3800 "configure"
+#line 3851 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
@@ -3810,6 +3861,42 @@ EOF
 fi
 rm -f conftest*
 
+
+#------------------------------------------------------------------------------
+# Check for SunOS compile with /usr/ucb/cc.  Using this compiler causes
+# glob to not function.
+#------------------------------------------------------------------------------
+
+if test "`uname -s`" = "SunOS"
+then
+    echo $ac_n "checking for broken Sun compiler in path""... $ac_c" 1>&6
+    tcl_ok=yes
+ 
+    for dir in `echo $PATH | tr ":" " "`
+    do 
+        cc_path=$dir/${CC}
+        if test -x $cc_path
+        then
+            if test "$cc_path" = "/usr/ucb/cc"
+            then
+                tcl_ok=no
+            fi
+            break
+        fi
+    done
+    if test $tcl_ok = yes
+    then
+        echo "$ac_t""ok" 1>&6
+    else
+        echo "$ac_t""bad" 1>&6
+        echo "************************************************************"
+        echo "WARNING: /usr/ucb/cc is the first compile found in your     "
+        echo "path.  Compiling Tcl and TclX with this compiler causes     "
+        echo "the glob command to not function.  Suggest moving /usr/ucb  "
+        echo "to the end of your path and rebuilding both Tcl and TclX.   "
+        echo "************************************************************"
+    fi
+fi
 
 #------------------------------------------------------------------------------
 #       If Config.mk is not in the build directory, copy it local.
