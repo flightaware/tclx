@@ -13,21 +13,20 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkdemo.tcl,v 1.2 1992/12/19 07:57:51 markd Exp markd $
+# $Id: tkdemo.tcl,v 1.3 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #@package: Tk-demo tkdemo
 
 proc tkdemo {} {
-    global TCLPATH
+    global auto_path
     if {[info commands tkwait] == ""} {
         error "tkdemo may only be used from wishx"
     }
-    set demos [searchpath $TCLPATH demos]
+    set demos [searchpath $auto_path demos]
     if {$demos == "" || ![file isdirectory $demos]} {
-        error "can't find Tk `demos' directory on the TCLPATH ($TCLPATH)
-Extended Tcl must be installed with the Tk demos option to use this procedure"
+        error "can't find Tk `demos' directory on the auto_path (auto_path):
     }
     uplevel #0 source $demos/widget
 }

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.5 1993/06/21 06:15:01 markd Exp markd $
+# $Id: Makefile,v 2.6 1993/07/18 15:21:42 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -37,7 +37,7 @@ all: TCLX runtcl ${TK_BUILD}
 #
 
 TCLX: TCLCOPY runtcl
-#???	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} all
+	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} all
 	cd osSupport; ${MAKE} -${MAKEFLAGS} all
 	cd src;       ${MAKE} -${MAKEFLAGS} all
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} all
@@ -46,10 +46,10 @@ TCLX: TCLCOPY runtcl
 # Copy include and library files from the UCB Tcl distribution to the
 # tclmaster directory.
 #
-LIBTCL.A = tclmaster/lib/libtcl.a
-TCL.H    = tclmaster/include/tcl.h
+LIBTCLX.A = tclmaster/lib/libtclx.a
+TCL.H     = tclmaster/include/tcl.h
 
-TCLCOPY: MKTCLDIRS ${LIBTCL.A} ${TCL.H}
+TCLCOPY: MKTCLDIRS ${LIBTCLX.A} ${TCL.H}
 
 MKTCLDIRS:
 	-mkdir tclmaster         2>/dev/null; exit 0
@@ -57,10 +57,10 @@ MKTCLDIRS:
 	-mkdir tclmaster/include 2>/dev/null; exit 0
 	-mkdir tclmaster/bin     2>/dev/null; exit 0
 
-${LIBTCL.A}: ${TCL_UCB_DIR}/libtcl.a
-	rm -f ${LIBTCL.A}
-	cp ${TCL_UCB_DIR}/libtcl.a ${LIBTCL.A}
-	${RANLIB_CMD} ${LIBTCL.A}
+${LIBTCLX.A}: ${TCL_UCB_DIR}/libtcl.a
+	rm -f ${LIBTCLX.A}
+	cp ${TCL_UCB_DIR}/libtcl.a ${LIBTCLX.A}
+	${RANLIB_CMD} ${LIBTCLX.A}
 
 ${TCL.H}: ${TCL_UCB_DIR}/tcl.h
 	rm -f ${TCL.H}
@@ -71,7 +71,7 @@ ${TCL.H}: ${TCL_UCB_DIR}/tcl.h
 #
 
 WISHX: TKCOPY runwishx
-#????	cd tkucbsrc; ${MAKE} -${MAKEFLAGS} all
+	cd tkucbsrc; ${MAKE} -${MAKEFLAGS} all
 	cd tksrc;    ${MAKE} -${MAKEFLAGS} all
 	cd tktclsrc; ${MAKE} -${MAKEFLAGS} all
 
@@ -79,10 +79,10 @@ WISHX: TKCOPY runwishx
 # Copy include and library files from the UCB Tk distribution to the
 # tkmaster directory.
 #
-LIBTK.A  = tkmaster/lib/libtk.a
+LIBTKX.A = tkmaster/lib/libtkx.a
 TK.H     = tclmaster/include/tk.h
 
-TKCOPY: MKTKDIRS ${LIBTK.A} ${TK.H}
+TKCOPY: MKTKDIRS ${LIBTKX.A} ${TK.H}
 
 MKTKDIRS:
 	-mkdir tkmaster         2>/dev/null; exit 0
@@ -90,10 +90,10 @@ MKTKDIRS:
 	-mkdir tkmaster/include 2>/dev/null; exit 0
 	-mkdir tkmaster/bin     2>/dev/null; exit 0
 
-${LIBTK.A}: ${TK_UCB_DIR}/libtk.a
-	rm -f ${LIBTK.A}
-	cp ${TK_UCB_DIR}/libtk.a ${LIBTK.A}
-	${RANLIB_CMD} ${LIBTK.A}
+${LIBTKX.A}: ${TK_UCB_DIR}/libtk.a
+	rm -f ${LIBTKX.A}
+	cp ${TK_UCB_DIR}/libtk.a ${LIBTKX.A}
+	${RANLIB_CMD} ${LIBTKX.A}
 
 ${TK.H}: ${TK_UCB_DIR}/tk.h
 	rm -f ${TK.H}
@@ -149,11 +149,13 @@ extdtests: all
 	./runtcl -c "cd tests;source all"	
 
 tktest: all
-	cd tests ; ../runwishx -f tktests.tcl -n wish ../${TK_UCB_DIR}
+	cd tktests ; ../runwishx -f tktests.tcl -n wish ../${TK_UCB_DIR}
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
 # Tk versions have changed.
+
+buildhelp: buildtclhelp buildtkhelp
 
 buildtclhelp:
 	cd tclsrc;   ${MAKE} -${MAKEFLAGS} buildtclhelp

@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.6 1993/06/24 07:32:30 markd Exp markd $
+# $Id: Makefile,v 2.7 1993/07/18 15:21:42 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -38,8 +38,7 @@ HELP           = ../tclmaster/help
 TCL_SRCS=arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
          forfile.tcl      forrecur.tcl     globrecur.tcl    help.tcl        \
          profrep.tcl      pushd.tcl        setfuncs.tcl     showproc.tcl    \
-         stringfile.tcl   tkdemo.tcl       tcllib.tcl       fmath.tcl       \
-         tclshell.tcl \
+         stringfile.tcl   tcllib.tcl       fmath.tcl        tclshell.tcl    \
          parray.tcl       ../${TCL_UCB_DIR}/library/parray.tcl
 
 #------------------------------------------------------------------------------

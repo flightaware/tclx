@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 1.2 1993/06/17 05:25:41 markd Exp markd $
+# $Id: Makefile,v 1.3 1993/07/18 15:21:42 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -33,15 +33,17 @@ HELP      = ../tkmaster/help
 
 #------------------------------------------------------------------------------
 
-all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${DEMOS} ${MAN}
+all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} ${MAN}
 
 ${TK.TCL}: ../${TK_UCB_DIR}/library/tk.tcl
 	rm -f ${TK.TCL}
 	cp ../${TK_UCB_DIR}/library/tk.tcl ${TK.TCL}
 
-${TK.TLIB} ${TK.TNDX}: ../${TK_UCB_DIR}/library/tclIndex 
+${TK.TLIB} ${TK.TNDX}: ../${TK_UCB_DIR}/library/tclIndex tkdemo.tcl
 	../runtcl "-c convert_lib ../${TK_UCB_DIR}/library/tclIndex ${TK.TLIB}"
-
+	cat tkdemo.tcl >>${TK.TLIB}
+	../runtcl "-c buildpackageindex ${TK.TLIB}"
+	
 ${PROLOG.PS}: ../${TK_UCB_DIR}/library/prolog.ps
 	cp ../${TK_UCB_DIR}/library/prolog.ps ${PROLOG.PS}
 

@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.7 1993/06/24 07:31:52 markd Exp markd $
+# $Id: Makefile,v 2.8 1993/07/18 15:19:48 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -27,11 +27,10 @@ SHELL=/bin/sh
 
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
 TCL       = ../tclmaster/bin/tcl
-LIBTCL.A  = ../tclmaster/lib/libtcl.a
 
 CFLAGS= ${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} \
         ${SYS_DEP_FLAGS}
-LDLIBS= ${LIBTCLX.A} ${LIBTCL.A} ${LIBS}
+LDLIBS= ${LIBTCLX.A} ${LIBS}
 
 #------------------------------------------------------------------------------
 
@@ -49,13 +48,13 @@ OBJS= \
 
 all: made.tmp ${TCL}
 
-${TCL}: ${LIBTCLX.A} ${LIBTCL.A} made.tmp 
+${TCL}: main.o ${LIBTCLX.A} made.tmp 
 	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${LDLIBS} -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
 	    ${MCS_CMD} ${TCL}; fi
 
-made.tmp: ${OBJS} main.o ${CPLUSOBJS}
+made.tmp: ${OBJS} ${CPLUSOBJS}
 	${RANLIB_CMD} ${LIBTCLX.A}
 	${AR} cr ${LIBTCLX.A} ${OBJS} ${CPLUSOBJS}
 	touch made.tmp
@@ -75,9 +74,9 @@ tcl++.o: tcl++.C tcl++.h
 #------------------------------------------------------------------------------
 # This is just to test if it compiles.
 
-tcl++: main++.o
-	${CCPLUS} ${CFLAGS} main++.o ${LIBTCLX.A} ${LIBTCL.A} ${LIBS} \
-	          ${XLDFLAGS} -o ../tcl++
+tcl++: main++.o made.tmp
+	${CCPLUS} ${CFLAGS} main++.o ${LDLIBS} ${LIBS} ${XLDFLAGS} \
+	   -o ../tcl++
 
 main++.o: tcl++.h main++.C
 	${CCPLUS} -c -I${CPLUSINCL} ${CFLAGS} main++.C

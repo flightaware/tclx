@@ -114,7 +114,8 @@ LINKING TCL APPLICATIONS
    To build a TclX based application containing C code, start with either
 src/main.c (for just Tcl) or tksrc/tkMain.c (for Tk) and add your apllication
 initialization.  There are comments in the code to guide you.  These need
-to be linked with libtcl.a, libtclx.a, libtk.a and libtkx.a
+to be linked with libtclx.a and libtkx.a  These libraries are super-sets
+of the standard Tcl libraries and should be used in there place.
 
 SUPPORT FOR EXTENDED TCL
 ========================

@@ -46,6 +46,8 @@ The following directories are included under the tclX7.0a directory:
       are built or copied into this directory.  The entire contents of
       this directory are installed.
 
+    o tktests - Files used to test wishx.
+
     o experimental - An directory of expermintal and contributed Tcl source.
       The code is not normally built as part of TclX.
 
@@ -56,6 +58,14 @@ HOW TO BUILD EXTENDED TCL
 
     o Configure and compile Tcl 7.0 following the instructions the comes with
       Tcl.  You do not need to install it.
+
+    o If you are using a make were the make include format is:
+          `.include "file"'
+      instead of
+          `include file'
+      enter the command:
+          sh tools/editmkincl.sh
+      To convert all of the Makefile.  You need only do this once.
 
     o If you are going to be using Tk and want to build an Extended Tcl wish
       shell (wishx), configure and compile Tk 3.3.  You do not need to install
@@ -95,7 +105,7 @@ HOW TO BUILD EXTENDED TCL
       You must have nroff and the man macro package installed on your system
       to build the manual pages.  Enter "make buildtclhelp" to build the
       Tcl and TclX help pages and "make buildtkhelp" to build the Tk manual
-      pages.
+      pages or "make buildhelp" to build both.
 
 
    We have a limited number of systems available to test Extended Tcl on,
@@ -104,8 +114,8 @@ of the functionality TclX supports mean a great deal of system dependent code.
 Thanks to all of those who have submitted configuration files and changes to
 TclX.
 
-                             TESTING EXTENDED TCL
-                             ====================
+TESTING EXTENDED TCL
+====================
 
    There are three sets of tests: the tests from Berkeley Tcl, the tests for
 Tk and the tests for Extended Tcl, which test both the new commands added by
@@ -136,8 +146,10 @@ library.
 INSTALLING EXTENDED TCL
 =======================
 
+
+???Section not yet complete????
    All
-?  The Extended Tcl install script
+  The Extended Tcl install script
      install the Tcl manual pages and a super-set libtcl.a.  The standard
      Tcl library procs will be added to a TclX .tlib library instead of being
      installed as separate files.

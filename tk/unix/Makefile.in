@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.3 1993/06/06 15:05:35 markd Exp markd $
+# $Id: Makefile,v 2.4 1993/07/18 15:21:42 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -24,35 +24,30 @@ SHELL=/bin/sh
 #------------------------------------------------------------------------------
 
 LIBTKX.A  = ../tkmaster/lib/libtkx.a
-LIBTK.A   = ../tkmaster/lib/libtk.a
 WISHX     = ../tkmaster/bin/wishx
 
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
-LIBTCL.A  = ../tclmaster/lib/libtcl.a
 
 CFLAGS= ${OPTIMIZE_FLAG} ${XCFLAGS} -I../src -I../${TK_UCB_DIR} \
         -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} ${SYS_DEP_FLAGS}
 
-LDLIBS= ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} ${TK_LIBS} ${LIBS}
+LDLIBS= ${LIBTKX.A} ${LIBTCLX.A} ${TK_LIBS} ${LIBS}
 
 #------------------------------------------------------------------------------
 
-OBJS= tkMain.o tkXstartup.o
+OBJS= tkMain.o tkXstartup.o tkXsignal.o
 
 #------------------------------------------------------------------------------
 
-all: made.tmp
+all: made.tmp ${WISHX}
 
-made.tmp: ${WISHX}
-	touch made.tmp
-
-${WISHX}: ${LIBTKX.A} ${LIBTK.A}
+${WISHX}: tkMain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
 	${CC} ${CFLAGS} ${XLDFLAGS} tkMain.o -o ${WISHX} ${LDLIBS}
 	if ${DO_STRIPPING} ; then \
 	    strip ${WISHX}; \
 	    ${MCS_CMD} ${WISHX}; fi
 
-${LIBTKX.A}: ${OBJS} 
+made.tmp: ${OBJS}
 	${RANLIB_CMD} ${LIBTKX.A}
 	${AR} cr ${LIBTKX.A} ${OBJS}
 

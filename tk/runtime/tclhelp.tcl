@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.6 1993/06/24 07:31:01 markd Exp $
+# $Id: tclhelp.tcl,v 1.1 1993/07/18 15:51:55 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -51,10 +51,10 @@ proc AddButton {parent subject fileName row col} {
 
     set buttonName $nframe.col$col
     if $isDir {
-        button $buttonName -text $fileName -width 18 \
+        button $buttonName -text $fileName -width 20 \
             -command "DisplaySubject $filePath"
     } else {
-        button $buttonName -text $fileName -width 18 \
+        button $buttonName -text $fileName -width 20 \
             -command "DisplayPage $filePath"
     }
     pack append $nframe $buttonName {left frame w}
@@ -166,10 +166,4 @@ proc tkhelp {} {
     DisplaySubject "/"
 
 }
-catch {close $cmdlog}
-set cmdlog [open cmd.log w]
-echo @@@@ cmdtracing...
-cmdtrace on $cmdlog 
-if {[catch {tkhelp}] != 0} {
-    echo $errorInfo
-}
+tkhelp
