@@ -1,3 +1,11 @@
+2002-10-15  Andreas Kupries  <andreask@pliers.activestate.com>
+
+	* configure.in: Changed to propagate an initial CFLAGS value to
+	  the final definition. A TEA condition (SHARED_BUILD == 1)
+	  squashed it, causing it the build system to loose the
+	  +DAportable we specify for the AS PA-RISC2.2 build host. This is
+	  a problem for _all_ TEA and TEA 2 based configure files.
+
 2002-09-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclExtdInt.h: added TclX_(Struct)Offet header

@@ -3,7 +3,7 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.2 2002/04/02 23:49:37 hobbs Exp $
+# RCS: @(#) $Id: configure.in,v 1.3 2002/04/04 06:14:43 hobbs Exp $
 
 #--------------------------------------------------------------------
 # Sample configure.in for Tcl Extensions.  The only places you should
@@ -342,9 +342,9 @@ TEA_CONFIG_CFLAGS
 TEA_ENABLE_SYMBOLS
 
 if test "${SHARED_BUILD}" = "1" ; then
-    CFLAGS='${CFLAGS_DEFAULT} ${CFLAGS_WARNING} ${SHLIB_CFLAGS}'
+    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING} \${SHLIB_CFLAGS}"
 else
-    CFLAGS='${CFLAGS_DEFAULT} ${CFLAGS_WARNING}'
+    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING}"
 fi
 AC_SUBST(SHARED_BUILD)
 
