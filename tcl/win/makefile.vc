@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.0 1996/06/16 05:33:36 markd Exp $
+# $Id: makefile.vc,v 7.1 1996/07/18 19:36:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -36,7 +36,8 @@ TOOLS16 = c:\msdev
 TCLDIR  = ..\..\..\tcl7.5
 TKDIR   = ..\..\..\tk4.1
 
-TCLX_LIBRARY = \"\\usr\\lib\\tclX\\7.5\"
+#TCLX_LIBRARY = \"\\usr\\lib\\tclX\\7.5\"
+TCLX_LIBRARY =\"C:\\markd\\tcl\\tclX7.5.2\\tcl\\win\"
 
 # Comment the following line to compile with symbols
 #NODEBUG=1
@@ -49,7 +50,7 @@ PATH=$(TOOLS32)\bin;$(PATH)
 
 WINDIR          = $(ROOT)\win
 GENERICDIR      = $(ROOT)\generic
-
+RUNTIME_DIR     = $(ROOT)\runtime
 
 cc32 = $(TOOLS32)\bin\cl -I$(TOOLS32)\include
 rc32 = $(TOOLS32)\bin\rc
@@ -82,7 +83,6 @@ TCLXTESTOBJS = \
 
 #        $(TMPDIR)\tclXchmod.obj ???
 #        $(TMPDIR)\tclXfcntl.obj ???
-#        $(TMPDIR)\tclXid.obj ???
 #        $(TMPDIR)\tclXserver.obj 
 #        $(TMPDIR)\tclXunixcmds.obj
 
@@ -114,6 +114,7 @@ TCLXOBJS = \
         $(TMPDIR)\tclXsignal.obj \
         $(TMPDIR)\tclXstring.obj \
         $(TMPDIR)\tclXutil.obj \
+        $(TMPDIR)\tclXwinId.obj \
         $(TMPDIR)\tclXwinOS.obj \
         $(TMPDIR)\random.obj \
         $(TMPDIR)\getopt.obj
@@ -132,6 +133,23 @@ TCL = tcl.exe
 TCLXTEST = tclxtest.exe
 DUMPEXTS = dumpexts.exe
 
+TLIB_SRCS = $(RUNTIME_DIR)/arrayprocs.tcl \
+	    $(RUNTIME_DIR)/compat.tcl \
+	    $(RUNTIME_DIR)/convlib.tcl \
+	    $(RUNTIME_DIR)/edprocs.tcl \
+	    $(RUNTIME_DIR)/events.tcl \
+	    $(RUNTIME_DIR)/forfile.tcl \
+	    $(RUNTIME_DIR)/globrecur.tcl \
+	    $(RUNTIME_DIR)/help.tcl \
+	    $(RUNTIME_DIR)/profrep.tcl \
+	    $(RUNTIME_DIR)/pushd.tcl \
+	    $(RUNTIME_DIR)/setfuncs.tcl \
+	    $(RUNTIME_DIR)/showproc.tcl \
+	    $(RUNTIME_DIR)/stringfile.tcl \
+	    $(RUNTIME_DIR)/tcllib.tcl \
+	    $(RUNTIME_DIR)/fmath.tcl \
+	    $(RUNTIME_DIR)/buildhelp.tcl
+
 CPU=i386
 CP=copy
 
@@ -141,7 +159,7 @@ CP=copy
 # Targets
 #
 
-all:  $(DUMPEXTS) $(TCLXDLL) $(TCL)
+all:  $(DUMPEXTS) $(TCLXDLL) $(TCL) tcl.tlib
 release: $(DUMPEXTS) $(TCLXDLL) $(TCLX16DLL) $(TCL)
 test:  $(DUMPEXTS) $(TCLXDLL) $(TCLXTEST)
 
@@ -196,6 +214,9 @@ $(TCLXTEST): $(TCLXTESTOBJS) $(TCLXLIB)
 
 $(ROOT)\generic\patchlvl.h: $(ROOT)\generic\patchlevel.h
         $(CP) $(ROOT)\generic\patchlevel.h $(ROOT)\generic\patchlvl.h
+
+tcl.tlib: $(TLIB_SRCS)
+	cat $(TLIB_SRCS) >tcl.tlib
 
 #
 # Special case object file targets

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 7.0 1996/06/16 05:30:54 markd Exp $
+ * $Id: tclXsignal.c,v 7.1 1996/07/18 19:36:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1573,7 +1573,7 @@ Tcl_KillCmd (clientData, interp, argc, argv)
         if (pgroup)
             procId = -procId;
 
-        if (TclX_OSkill (interp, procId, signalNum, argv [0]) != TCL_OK)
+        if (TclXOSkill (interp, procId, signalNum, argv [0]) != TCL_OK)
             goto errorExit;
     }
 

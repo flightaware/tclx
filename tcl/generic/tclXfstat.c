@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 7.0 1996/06/16 05:30:24 markd Exp $
+ * $Id: tclXfstat.c,v 7.1 1996/07/18 19:36:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -36,6 +36,7 @@ ReturnStatArray _ANSI_ARGS_((Tcl_Interp   *interp,
 
 static int
 ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
+                            Tcl_Channel   channel,
                             int           fileNum,
                             struct stat  *statBufPtr,
                             char         *itemName));
@@ -211,6 +212,7 @@ ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
  *
  * Parameters:
  *   o interp (I) - Item or error returned in result.
+ *   o channel (I) - Channel the file is assoicated with.
  *   o fileNum (I) - File number.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
  *   o itemName (I) - The name of the desired item.
@@ -219,8 +221,9 @@ ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatItem (interp, fileNum, statBufPtr, itemName)
+ReturnStatItem (interp, channel, fileNum, statBufPtr, itemName)
     Tcl_Interp   *interp;
+    Tcl_Channel   channel;
     int           fileNum;
     struct stat  *statBufPtr;
     char         *itemName;
@@ -250,23 +253,11 @@ ReturnStatItem (interp, fileNum, statBufPtr, itemName)
     else if (STREQU (itemName, "tty"))
         interp->result = isatty (fileNum) ? "1" : "0";
     else if (STREQU (itemName, "remotehost")) {
-#ifndef WIN32
-        if (TclXGetHostInfo (interp, fileNum, TRUE) != TCL_OK)
+        if (TclXGetHostInfo (interp, channel, TRUE) != TCL_OK)
             return TCL_ERROR;
-#else
-	Tcl_AppendResult (interp, "Need to figure out TclXGetHostInfo",
-			  (char *) NULL);
-	return TCL_ERROR;
-#endif
     } else if (STREQU (itemName, "localhost")) {
-#ifndef WIN32
-        if (TclXGetHostInfo (interp, fileNum, FALSE) != TCL_OK)
+        if (TclXGetHostInfo (interp, channel, FALSE) != TCL_OK)
             return TCL_ERROR;
-#else
-	Tcl_AppendResult (interp, "Need to figure out TclXGetHostInfo",
-			  (char *) NULL);
-	return TCL_ERROR;
-#endif
     } else {
         Tcl_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
                           "\"atime\", \"ctime\", \"dev\", \"gid\", \"ino\", ",
@@ -293,14 +284,19 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     int fileNum;
-    struct stat  statBuf;
+    Tcl_Channel channel;
+    struct stat statBuf;
 
+    /* FIX: modify to use channel and pass to OS routines. */
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " fileId ?item?|?stat arrayVar?", (char *) NULL);
         return TCL_ERROR;
     }
     
+    channel = TclX_GetOpenChannel (interp, argv [1], 0);
+    if (channel == NULL)
+        return TCL_ERROR;
     fileNum = TclX_GetOpenFnum (interp, argv [1], 0);
     if (fileNum < 0)
         return TCL_ERROR;
@@ -322,7 +318,7 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
         return ReturnStatArray (interp, fileNum, &statBuf, argv [3]);
     }
     if (argc == 3)
-        return ReturnStatItem (interp, fileNum, &statBuf, argv [2]);
+        return ReturnStatItem (interp, channel, fileNum, &statBuf, argv [2]);
 
     ReturnStatList (interp, fileNum, &statBuf);
     return TCL_OK;

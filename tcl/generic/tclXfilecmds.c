@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.0 1996/06/16 05:30:18 markd Exp $
+ * $Id: tclXfilecmds.c,v 7.1 1996/07/18 19:36:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -69,11 +69,6 @@ TruncateByPath  _ANSI_ARGS_((Tcl_Interp  *interp,
                              off_t        newSize));
 
 static int
-TruncateByHandle  _ANSI_ARGS_((Tcl_Interp  *interp,
-                               char        *fileHandle,
-                               off_t        newSize));
-
-static int
 ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
                              char        *path,
                              char        *fileName,
@@ -108,7 +103,7 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (TclX_OSpipe (interp, fileNums) != TCL_OK)
+    if (TclXOSpipe (interp, fileNums) != TCL_OK)
         return TCL_ERROR;
 
     chans [0] = TclX_SetupFileEntry (interp,  fileNums [0], TCL_READABLE,
@@ -757,55 +752,6 @@ TruncateByPath (interp, filePath, newSize)
 }
 
 /*-----------------------------------------------------------------------------
- * TruncateByHandle --
- * 
- *  Truncate a file via a open file handle, if this is available on this
- * system.
- *
- * Parameters:
- *   o interp (I) - Error messages are returned in the interpreter.
- *   o fileHandle (I) - Path to file.
- *   o newSize (I) - Size to truncate the file to.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-static int
-TruncateByHandle (interp, fileHandle, newSize)
-    Tcl_Interp  *interp;
-    char        *fileHandle;
-    off_t        newSize;
-{
-#ifndef WIN32
-#if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE) 
-    int fileNum, stat;
-
-    fileNum = TclX_GetOpenFnum (interp, fileHandle, TCL_WRITABLE);
-    if (fileNum < 0)
-        return TCL_ERROR;
-
-#ifndef NO_FTRUNCATE
-    stat = ftruncate (fileNum, newSize);
-#else
-    stat = chsize (fileNum, newSize);
-#endif
-    if (stat != 0) {
-        Tcl_AppendResult (interp, fileHandle, ": ", Tcl_PosixError (interp),
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
-#else
-    Tcl_AppendResult (interp, FILE_ID_NOT_AVAIL, (char *) NULL);
-    return TCL_ERROR;
-#endif
-#endif
-    Tcl_AppendResult (interp, "not yet on windows", (char *) NULL);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- *
  * Tcl_FtruncateCmd --
  *     Implements the Tcl ftruncate command:
  *     ftruncate [-fileid] file newsize
@@ -850,7 +796,7 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
 
 
     if (fileIds) {
-        return TruncateByHandle (interp, argv [argIdx], newSize);
+        return TclXOSftruncate (interp, argv [argIdx], newSize);
     } else {
         return TruncateByPath (interp, argv [argIdx], newSize);
     }
@@ -931,11 +877,11 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
     if (dirPath == NULL)
         goto errorExit;
 
-    status = TclX_OSWalkDir (interp,
-                             dirPath,
-                             hidden,
-                             ReadDirCallback,
-                             (ClientData) &fileList);
+    status = TclXOSWalkDir (interp,
+                            dirPath,
+                            hidden,
+                            ReadDirCallback,
+                            (ClientData) &fileList);
     if (status == TCL_ERROR)
         goto errorExit;
 

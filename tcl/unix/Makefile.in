@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 6.0 1996/05/10 16:18:34 markd Exp $
+# $Id: Makefile.in,v 7.0 1996/06/16 05:33:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -46,12 +46,12 @@ GENERIC_OBJS = \
     tclXbsearch.o    tclXchmod.o      tclXcmdInit.o    tclXcmdloop.o  \
     tclXdebug.o      tclXdup.o        tclXfcntl.o      tclXfilecmds.o \
     tclXfilescan.o   tclXflock.o      tclXfstat.o      tclXgeneral.o  \
-    tclXhandles.o    tclXid.o         tclXinit.o       tclXkeylist.o  \
+    tclXhandles.o    tclXunixId.o     tclXinit.o       tclXkeylist.o  \
     tclXlib.o        tclXlist.o       tclXmath.o       tclXmsgcat.o   \
     tclXlibInit.o    tclXprocess.o    tclXprofile.o    tclXregexp.o   \
     tclXselect.o     tclXunixSock.o   tclXsignal.o     tclXshell.o    \
-    tclXstring.o     tclXunixCmds.o   tclXutil.o       tclXunixOS.o   \
-    tclXoscmds.o
+    tclXstring.o     tclXsocket.o     tclXunixCmds.o   tclXutil.o     \
+    tclXunixOS.o     tclXoscmds.o
 
 COMPAT_OBJS = @LIBOBJS@
 
@@ -117,8 +117,8 @@ tclXlibInit.o: ${TCLX_GENERIC_DIR}/tclXlibInit.c
 tclXcmdInit.o: ${TCLX_GENERIC_DIR}/tclXcmdInit.c
 	${CC} -c ${CC_SWITCHES}  ${TCLX_GENERIC_DIR}/tclXcmdInit.c
 
-tclXAppInit.o: ${TCLX_GENERIC_DIR}/tclXAppInit.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXAppInit.c
+tclXAppInit.o: ${TCLX_UNIX_SRC_DIR}/tclXAppInit.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXAppInit.c
 
 tclXbsearch.o: ${TCLX_GENERIC_DIR}/tclXbsearch.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXbsearch.c
@@ -189,6 +189,9 @@ tclXshell.o: ${TCLX_GENERIC_DIR}/tclXshell.c
 
 tclXsignal.o: ${TCLX_GENERIC_DIR}/tclXsignal.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXsignal.c
+
+tclXsocket.o: ${TCLX_GENERIC_DIR}/tclXsocket.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXsocket.c
 
 tclXstring.o: ${TCLX_GENERIC_DIR}/tclXstring.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXstring.c

@@ -1,5 +1,5 @@
-*** tclWinSock.c.ORG	Sun Jun 30 05:28:57 1996
---- tclWinSock.c	Thu Jul 18 04:03:03 1996
+*** win/tclWinSock.c.ORG	Sun Jun 30 05:28:57 1996
+--- win/tclWinSock.c	Thu Jul 18 04:03:03 1996
 ***************
 *** 702,708 ****
   

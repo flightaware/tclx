@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 6.1 1996/06/16 05:20:07 markd Exp $
+ * $Id: tclExtend.h,v 7.0 1996/06/16 05:30:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -131,6 +131,10 @@ TclX_SetAppInfo _ANSI_ARGS_((int   defaultValues,
                              char *appLongName,
                              char *appVersion,
                              int   appPatchlevel));
+
+EXTERN void
+TclX_SplitWinCmdLine _ANSI_ARGS_((int    *argcPtr,
+                                  char ***argvPtr));
 
 /*
  * Exported utility functions.

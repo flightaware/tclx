@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.0 1996/06/16 05:33:38 markd Exp $
+ * $Id: tclXwinOS.c,v 7.1 1996/07/18 19:36:36 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -30,34 +30,103 @@
 /*
  * Prototypes of internal functions.
  */
-static int
-NotAvailableError _ANSI_ARGS_((Tcl_Interp *interp,
-                               char       *funcName));
-
 static HANDLE
 ChannelToHandle _ANSI_ARGS_((Tcl_Channel channel,
                              int         direction));
 
 
 /*-----------------------------------------------------------------------------
- * NotAvailableError --
+ * TclXNotAvailableError --
  *   Return an error about functionality not being available under Windows.
  *
  * Parameters:
  *   o interp (I) - Errors returned in result.
  *   o funcName (I) - Command or other name to use in not available error.
- * Results:
+ * Returns:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-static int
-NotAvailableError (interp, funcName)
+int
+TclXNotAvailableError (interp, funcName)
     Tcl_Interp *interp;
     char       *funcName;
 {
-    Tcl_AppendResult (interp, funcName, " is not available under MS Windows",
+    Tcl_AppendResult (interp, funcName, " is not available on MS Windows",
                       (char *) NULL);
     return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_SplitWinCmdLine --
+ *   Parse the window command line into arguments.
+ *
+ * Parameters:
+ *   o argcPtr (O) - Count of arguments is returned here.
+ *   o argvPtr (O) - Argument vector is returned here.
+ * Notes:
+ *   This code taken from the Tcl file tclAppInit.c: Copyright (c) 1996 by
+ * Sun Microsystems, Inc.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_SplitWinCmdLine (argcPtr, argvPtr)
+    int    *argcPtr;
+    char ***argvPtr;
+{
+    char *args = GetCommandLine();
+    char **argvlist, *p;
+    int size, i;
+
+    /*
+     * Precompute an overly pessimistic guess at the number of arguments
+     * in the command line by counting non-space spans.
+     */
+    for (size = 2, p = args; *p != '\0'; p++) {
+        if (isspace (*p)) {
+            size++;
+            while (isspace (*p)) {
+                p++;
+            }
+            if (*p == '\0') {
+                break;
+            }
+        }
+    }
+    argvlist = (char **) ckalloc ((unsigned) (size * sizeof (char *)));
+    *argvPtr = argvlist;
+
+    /*
+     * Parse the Windows command line string.  If an argument begins with a
+     * double quote, then spaces are considered part of the argument until the
+     * next double quote.  The argument terminates at the second quote.  Note
+     * that this is different from the usual Unix semantics.
+     */
+    for (i = 0, p = args; *p != '\0'; i++) {
+        while (isspace (*p)) {
+            p++;
+        }
+        if (*p == '\0') {
+            break;
+        }
+        if (*p == '"') {
+            p++;
+            (*argvPtr) [i] = p;
+            while ((*p != '\0') && (*p != '"')) {
+                p++;
+            }
+        } else {
+            (*argvPtr) [i] = p;
+            while (*p != '\0' && !isspace(*p)) {
+                p++;
+            }
+        }
+        if (*p != '\0') {
+            *p = '\0';
+            p++;
+        }
+    }
+    (*argvPtr) [i] = NULL;
+    *argcPtr = i;
 }
 
 /*-----------------------------------------------------------------------------
@@ -94,29 +163,7 @@ ChannelToHandle (channel, direction)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSchroot --
- *   Portability interface to chroot functionallity, which is not available
- * on windows.
- *
- * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o path (I) - Directory path to make root.
- *   o funcName (I) - Command or other name to use in not available error.
- * Results:
- *   TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_OSchroot (interp, path, funcName)
-    Tcl_Interp *interp;
-    char       *path;
-    char       *funcName;
-{
-    return NotAvailableError (interp, funcName);
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_OSgetpriority --
+ * TclXOSgetpriority --
  *   Portability interface to getpriority functionality, which is not available
  * on windows.
  *
@@ -129,16 +176,17 @@ TclX_OSchroot (interp, path, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSgetpriority (interp, priority, funcName)
+TclXOSgetpriority (interp, priority, funcName)
     Tcl_Interp *interp;
     int        *priority;
     char       *funcName;
 {
-    return NotAvailableError (interp, funcName);
+    /*FIX: this should work */
+    return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSincrpriority--
+ * TclXOSincrpriority--
  *   Portability interface to increment or decrement the current priority,
  * which is not available on windows.
  *
@@ -152,17 +200,17 @@ TclX_OSgetpriority (interp, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSincrpriority (interp, priorityIncr, priority, funcName)
+TclXOSincrpriority (interp, priorityIncr, priority, funcName)
     Tcl_Interp *interp;
     int         priorityIncr;
     int        *priority;
     char       *funcName;
 {
-    return NotAvailableError (interp, funcName);
+    return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSpipe --
+ * TclXOSpipe --
  *   Portability interface to pipe.
  *
  * Parameters:
@@ -173,7 +221,7 @@ TclX_OSincrpriority (interp, priorityIncr, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSpipe (interp, fildes)
+TclXOSpipe (interp, fildes)
     Tcl_Interp *interp;
     int        *fildes;
 {
@@ -187,7 +235,7 @@ TclX_OSpipe (interp, fildes)
 
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsetitimer --
+ * TclXOSsetitimer --
  *   Portability interface to setitimer functionality, which is not available
  * on windows.
  *
@@ -201,16 +249,16 @@ TclX_OSpipe (interp, fildes)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSsetitimer (interp, seconds, funcName)
+TclXOSsetitimer (interp, seconds, funcName)
     Tcl_Interp *interp;
     double      *seconds;
     char       *funcName;
 {
-    return NotAvailableError (interp, funcName);
+    return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsleep --
+ * TclXOSsleep --
  *   Portability interface to sleep functionallity.
  *
  * Parameters:
@@ -218,25 +266,25 @@ TclX_OSsetitimer (interp, seconds, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_OSsleep (seconds)
+TclXOSsleep (seconds)
     unsigned seconds;
 {
     Sleep (seconds*100);
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsync --
+ * TclXOSsync --
  *   Portability interface to sync functionality.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_OSsync ()
+TclXOSsync ()
 {
     _flushall ();
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSfsync --
+ * TclXOSfsync --
  *   Portability interface to fsync functionallity.  Does a sync if fsync is
  * nor available.
  *
@@ -248,7 +296,7 @@ TclX_OSsync ()
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSfsync (interp, channelName)
+TclXOSfsync (interp, channelName)
     Tcl_Interp *interp;
     char       *channelName;
 {
@@ -276,7 +324,7 @@ TclX_OSfsync (interp, channelName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsystem --
+ * TclXOSsystem --
  *   Portability interface to system functionallity (executing a command
  * with the standard system shell).
  *
@@ -289,7 +337,7 @@ TclX_OSfsync (interp, channelName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSsystem (interp, command, exitCode)
+TclXOSsystem (interp, command, exitCode)
     Tcl_Interp *interp;
     char       *command;
     int        *exitCode;
@@ -319,7 +367,7 @@ TclX_OSsystem (interp, command, exitCode)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSmkdir --
+ * TclXOSmkdir --
  *   Portability interface to mkdir functionallity.
  *
  * Parameters:
@@ -330,7 +378,7 @@ TclX_OSsystem (interp, command, exitCode)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSmkdir (interp, path)
+TclXOSmkdir (interp, path)
     Tcl_Interp *interp;
     char       *path;
 {
@@ -364,7 +412,7 @@ TclX_OSlink (interp, srcPath, targetPath, funcName)
     char       *targetPath;
     char       *funcName;
 {
-    return NotAvailableError (interp, funcName);
+    return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
@@ -388,11 +436,11 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
     char       *targetPath;
     char       *funcName;
 {
-    return NotAvailableError (interp, funcName);
+    return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSElapsedTime --
+ * TclXOSElapsedTime --
  *   Portability interface to get the elapsed CPU and real time.  CPU time
  * is not available under windows and zero is always returned.
  *
@@ -402,7 +450,7 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_OSElapsedTime (realTime, cpuTime)
+TclXOSElapsedTime (realTime, cpuTime)
     clock_t *realTime;
     clock_t *cpuTime;
 {
@@ -430,7 +478,7 @@ TclX_OSElapsedTime (realTime, cpuTime)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSkill --
+ * TclXOSkill --
  *   Portability interface to functionallity, which is not available
  * on windows.
  *
@@ -444,17 +492,17 @@ TclX_OSElapsedTime (realTime, cpuTime)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSkill (interp, pid, signal, funcName)
+TclXOSkill (interp, pid, signal, funcName)
     Tcl_Interp *interp;
     pid_t       pid;
     int         signal;
     char       *funcName;
 {
-    return NotAvailableError (interp, funcName);
+    return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSGetOpenFileMode --
+ * TclXOSGetOpenFileMode --
  *   Portability interface to get the accessability on an open file number.
  *
  * Parameters:
@@ -466,7 +514,7 @@ TclX_OSkill (interp, pid, signal, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
+TclXOSGetOpenFileMode (fileNum, mode, nonBlocking)
     int  fileNum;
     int *mode;
     int *nonBlocking;
@@ -485,7 +533,7 @@ TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSWalkDir --
+ * TclXOSWalkDir --
  *   Portability interface to reading the contents of a directory.  The
  * specified directory is walked and a callback is called on each entry.
  * The "." and ".." entries are skipped.
@@ -509,7 +557,7 @@ TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSWalkDir (interp, path, hidden, callback, clientData)
+TclXOSWalkDir (interp, path, hidden, callback, clientData)
     Tcl_Interp       *interp;
     char             *path;
     int               hidden;
@@ -542,7 +590,7 @@ TclX_OSWalkDir (interp, path, hidden, callback, clientData)
     }
     p--;
     if (*p != '\\' && *p != ':') {
-	Tcl_DStringAppend(&pathBuf, "\\", 1);
+        Tcl_DStringAppend(&pathBuf, "\\", 1);
     }
     dir = Tcl_DStringValue(&pathBuf);
     
@@ -651,7 +699,7 @@ TclX_OSWalkDir (interp, path, hidden, callback, clientData)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSGetFileSize --
+ * TclXOSGetFileSize --
  *   Portability interface to get the size of an open file.
  *
  * Parameters:
@@ -664,7 +712,7 @@ TclX_OSWalkDir (interp, path, hidden, callback, clientData)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSGetFileSize (channel, direction, fileSize)
+TclXOSGetFileSize (channel, direction, fileSize)
     Tcl_Channel  channel;
     int          direction;
     off_t       *fileSize;
@@ -674,5 +722,164 @@ TclX_OSGetFileSize (channel, direction, fileSize)
         TclWinConvertError (GetLastError ());
         return TCL_ERROR;
     }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSftruncate --
+ *   Portability interface to ftruncate functionality.  Coded to be part of
+ * the ftruncate command to allow for good error messages.
+ *
+ * Parameters:
+ *   o interp (I) - Error messages are returned in the interpreter.
+ *   o fileHandle (I) - Path to file.
+ *   o newSize (I) - Size to truncate the file to.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSftruncate (interp, fileHandle, newSize)
+    Tcl_Interp  *interp;
+    char        *fileHandle;
+    off_t        newSize;
+{
+    Tcl_AppendResult (interp,
+                      "the -fileid option is not available on MS Windows";
+                      (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSfork --
+ *   Portability interface to fork functionallity.  Not supported on windows.
+ *
+ * Parameters:
+ *   o interp (I) - An error  is returned in result.
+ *   o funcName (I) - Command or other name to use in not available error.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSfork (interp, funcName)
+    Tcl_Interp *interp;
+    char       *funcName;
+{
+    return TclXNotAvailableError (interp, funcName);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSexecl --
+ *   Portability interface to execl functionallity.  On windows, this is the
+ * equivlant of a fork and an execl, so a process id is returned.
+ *
+ * Parameters:
+ *   o interp (I) - A process id or errors are returned in result.
+ *   o path (I) - Path to the program.
+ *   o argList (I) - NULL terminated argument vector.
+ * Results:
+ *   TCL_ERROR or does not return.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSexecl (interp, path, argList)
+    Tcl_Interp *interp;
+    char       *path;
+    char      **argList;
+{
+    int pid;
+    char numBuf [32];
+
+    pid = spawnvp (_P_NOWAIT , path, argList);
+    if (pid == -1) {
+        Tcl_AppendResult (interp, "exec of \"", path, "\" failed: ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    sprintf (numBuf, "%d", pid);
+    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSInetAtoN --
+ *
+ *   Convert an internet address to an "struct in_addr" representation.
+ *
+ * Parameters:
+ *   o interp (O) - If not NULL, an error message is return in the result.
+ *     If NULL, no error message is generated.
+ *   o strAddress (I) - String address to convert.
+ *   o inAddress (O) - Converted internet address is returned here.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSInetAtoN (interp, strAddress, inAddress)
+    Tcl_Interp     *interp;
+    char           *strAddress;
+    struct in_addr *inAddress;
+{
+    if (inet_aton (strAddress, inAddress))
+        return TCL_OK;
+    if (interp != NULL) {
+        Tcl_AppendResult (interp, "malformed address: \"",
+                          strAddress, "\"", (char *) NULL);
+    }
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSgetpeername --
+ *   Portability interface to getpeername functionallity.
+ *
+ * Parameters:
+ *   o channel (I) - Channel associated with the socket.
+ *   o sockaddr (I) - Pointer to sockaddr structure.
+ *   o sockaddrSize (I) - Size of the sockaddr struct.
+ * Results:
+ *   TCL_OK or TCL_ERROR, sets a posix error.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSgetpeername (channel, sockaddr, sockaddrSize)
+    Tcl_Channel channel;
+    void       *sockaddr;
+    int         sockaddrSize;
+{
+    int fnum;
+
+    fnum = TclX_ChannelFnum (channel, 0);
+    if (getpeername (fnum, (struct sockaddr *) sockaddr, &sockaddrSize) < 0)
+        return TCL_ERROR;
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSgetsockname --
+ *   Portability interface to getsockname functionallity.
+ *
+ * Parameters:
+ *   o channel (I) - Channel associated with the socket.
+ *   o sockaddr (I) - Pointer to sockaddr structure.
+ *   o sockaddrSize (I) - Size of the sockaddr struct.
+ * Results:
+ *   TCL_OK or TCL_ERROR, sets a posix error.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSgetsockname (channel, sockaddr, sockaddrSize)
+    Tcl_Channel channel;
+    void       *sockaddr;
+    int         sockaddrSize;
+{
+    int fnum;
+
+    fnum = TclX_ChannelFnum (channel, 0);
+    if (getsockname (fnum, (struct sockaddr *) sockaddr, &sockaddrSize) < 0)
+        return TCL_ERROR;
     return TCL_OK;
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.0 1996/06/16 05:30:33 markd Exp $
+ * $Id: tclXlib.c,v 7.1 1996/07/18 19:36:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,11 +35,6 @@
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
-
-#ifdef WIN32
-/*needed for _getcwd */
-#include <direct.h>
-#endif
 
 /*
  * Names of Tcl variables that are used.
@@ -241,7 +236,7 @@ EvalFilePart (interp, fileName, offset, length)
     if (channel == NULL)
         goto errorExit;
     
-    if (TclX_OSGetFileSize (channel, TCL_READABLE, &fileSize) == TCL_ERROR)
+    if (TclXOSGetFileSize (channel, TCL_READABLE, &fileSize) == TCL_ERROR)
         goto posixError;
 
     if ((fileSize < offset + length) || (offset < 0)) {
@@ -323,7 +318,7 @@ MakeAbsFile (interp, fileName, absNamePtr)
     char        *fileName;
     Tcl_DString *absNamePtr;
 {
-    char  curDir [MAXPATHLEN+1];
+    char  *curDir;
 
     Tcl_DStringFree (absNamePtr);
 
@@ -349,14 +344,10 @@ MakeAbsFile (interp, fileName, absNamePtr)
      * Otherwise its relative to the current directory, get the directory
      * and go from here.
      */
-#ifdef WIN32
-    if (_getcwd (curDir, MAXPATHLEN) == NULL) {
-#else
-    if (getcwd (curDir, MAXPATHLEN) == NULL) {
-#endif
-        Tcl_AppendResult (interp, "error getting working directory name: ",
-                          Tcl_PosixError (interp), (char *) NULL);
-    }
+    curDir = TclGetCwd (interp);
+    if (curDir == NULL)
+        return NULL;
+
     Tcl_DStringAppend (absNamePtr, curDir,   -1);
     Tcl_DStringAppend (absNamePtr, "/",      -1);
     Tcl_DStringAppend (absNamePtr, fileName, -1);
@@ -924,9 +915,9 @@ LoadDirIndexes (interp, dirName)
      * to report it.  A boolean is passed in to indicate if the error
      * returned involved parsing the file.
      */
-    if (TclX_OSWalkDir (interp, dirName, FALSE, /* hidden */
-                        LoadDirIndexCallback,
-                        (ClientData) &indexError) == TCL_ERROR) {
+    if (TclXOSWalkDir (interp, dirName, FALSE, /* hidden */
+                       LoadDirIndexCallback,
+                       (ClientData) &indexError) == TCL_ERROR) {
         if (!indexError) {
             Tcl_ResetResult (interp);
             return TCL_OK;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 7.0 1996/06/16 05:30:50 markd Exp $
+ * $Id: tclXselect.c,v 7.1 1996/07/18 19:36:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -25,22 +25,12 @@
 #endif
 
 /*
- * Cheat a little to avoid configure checking for floor being prototyped.
- * This breaks with GNU libc headers...really should check with autoconf.
- */
-
-#if !defined(__GNU_LIBRARY__) && !defined(WIN32)
-extern
-double floor ();
-#endif
-
-/*
  * A couple of systems (Xenix and older SCO unix) have bzero hidden away
  * in the X library that we don't use, but the select macros use bzero.
- * Make them use memset with this magic.
+ * Make them use memset.
  */
-#ifndef NO_BZERO
-#    define bzero(to,length)    memset(to,'\0',length)
+#ifdef NO_BZERO
+#    define bzero(to,length)  memset(to,'\0',length)
 #endif
 
 /*

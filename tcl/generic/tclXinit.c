@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.0 1996/06/16 05:30:29 markd Exp $
+ * $Id: tclXinit.c,v 7.1 1996/07/18 19:36:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -64,10 +64,11 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
     char       *libDir;
     char       *libEnvVar;
 {
-    Tcl_DString  initFilePath;
+    Tcl_DString initFileBuf, initFilePath;
     char *initFile;
     struct stat statInfo;
 
+    Tcl_DStringInit (&initFileBuf);
     Tcl_DStringInit (&initFilePath);
 
     /*
@@ -78,10 +79,25 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
     if (initFile == NULL)
         initFile = defaultInitFile;
 
+    initFile = Tcl_TranslateFileName (interp, initFile, &initFileBuf);
+    if (initFile == NULL)
+        goto errorExit;
+
     /*
      * Build path to file.
      */
-    if (initFile [0] != '/') {
+    switch (Tcl_GetPathType (initFile)) {
+      case TCL_PATH_ABSOLUTE:
+        break;
+
+      case TCL_PATH_VOLUME_RELATIVE:
+        /* FIX:???? WIN32 */
+        Tcl_AppendResult (interp, "TCL_PATH_VOLUME_RELATIVE not yet ",
+                          "supported by TclX library code \"", initFile, "\"",
+                          (char *) NULL);
+        goto errorExit;
+        
+      case TCL_PATH_RELATIVE:
         if (libDir == NULL) {
             Tcl_AppendResult (interp, "No runtime directory defined, ",
                               "can't find initialization file \"",
@@ -92,11 +108,13 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
                                   "file with the environment variable: \"",
                                   libEnvVar, "\"", (char *) NULL);
             }
-            return TCL_ERROR;;
+            goto errorExit;
         }
-        Tcl_DStringAppend (&initFilePath, libDir, -1);
-        Tcl_DStringAppend (&initFilePath, "/", -1);
     }
+    Tcl_DStringAppend (&initFilePath, libDir, -1);
+    Tcl_DStringAppend (&initFilePath, "/", -1);
+
+      
     Tcl_DStringAppend (&initFilePath, initFile, -1);
 
     /*
@@ -123,11 +141,13 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
                    initFilePath.string) == TCL_ERROR)
         goto errorExit;
 
+    Tcl_DStringFree (&initFileBuf);
     Tcl_DStringFree (&initFilePath);
     Tcl_ResetResult (interp);
     return TCL_OK;
 
   errorExit:
+    Tcl_DStringFree (&initFileBuf);
     Tcl_DStringFree (&initFilePath);
     Tcl_AddErrorInfo (interp,
                      "\n    (while processing initialization file)");

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 7.0 1996/06/16 05:30:45 markd Exp $
+ * $Id: tclXprofile.c,v 7.1 1996/07/18 19:36:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -396,7 +396,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     /*
      * Calculate the time spent since the last trace.
      */
-    TclX_OSElapsedTime (&realTime, &cpuTime);
+    TclXOSElapsedTime (&realTime, &cpuTime);
     infoPtr->realTime += realTime - infoPtr->lastRealTime;
     infoPtr->cpuTime  += cpuTime - infoPtr->lastCpuTime;
     
@@ -445,8 +445,8 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     /*
      * Save the exit time of the profiling trace handler.
      */
-    TclX_OSElapsedTime (&infoPtr->lastRealTime,
-                        &infoPtr->lastCpuTime);
+    TclXOSElapsedTime (&infoPtr->lastRealTime,
+                       &infoPtr->lastCpuTime);
 }
 
 /*
@@ -624,8 +624,8 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
                              (ClientData) infoPtr);
         infoPtr->realTime = 0;
         infoPtr->cpuTime  = 0;
-        TclX_OSElapsedTime (&infoPtr->lastRealTime,
-                            &infoPtr->lastCpuTime);
+        TclXOSElapsedTime (&infoPtr->lastRealTime,
+                           &infoPtr->lastCpuTime);
         infoPtr->allCommands = allCommands;
         return TCL_OK;
     }

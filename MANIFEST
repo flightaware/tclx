@@ -12,7 +12,8 @@
 ./tcl/compat/rename.c
 ./tcl/generic/tclExtdInt.h
 ./tcl/generic/tclExtend.h
-./tcl/generic/tclXAppInit.c
+./tcl/unix/tclXAppInit.c
+./tcl/win/tclAppInit.c
 ./tcl/generic/tclXbsearch.c
 ./tcl/generic/tclXcmdInit.c
 ./tcl/generic/tclXcmdloop.c
@@ -39,6 +40,7 @@
 ./tcl/generic/tclXselect.c
 ./tcl/generic/tclXshell.c
 ./tcl/generic/tclXsignal.c
+./tcl/generic/tclXsocket.c
 ./tcl/generic/tclXstring.c
 ./tcl/generic/tclXtest.c
 ./tcl/generic/tclXutil.c
@@ -295,17 +297,22 @@
 ./tcl/unix/Makefile.in
 ./tcl/unix/pkgIndex.proto.in
 ./tcl/unix/tclXchmod.c
-./tcl/unix/tclXid.c
 ./tcl/unix/tclXunixCmds.c
+./tcl/unix/tclXunixId.c
 ./tcl/unix/tclXunixOS.c
 ./tcl/unix/tclXunixPort.h
 ./tcl/unix/tclXunixSock.c
 ./tcl/unix/tclxConfig.sh.in
+./tcl/win/INSTALL
 ./tcl/win/makefile.vc
+./tcl/win/tcl.rc
 ./tcl/win/tclWinSock.c
 ./tcl/win/tclWinSock.c.diff
+./tcl/win/tclXwinCmds.c
+./tcl/win/tclXwinId.c
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h
+./tcl/win/tclx.rc
 ./tcl/win/winDumpExts.c
 ./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c
@@ -386,3 +393,4 @@
 ./unix/tools/tclmanpages
 ./unix/tools/tkmanpages
 ./win/tclWinSock.c.diff
+./tcl/win/INSTALL

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 7.0 1996/06/16 05:30:07 markd Exp $
+ * $Id: tclXcmdInit.c,v 7.1 1996/07/18 19:36:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,14 +46,12 @@ Tclxcmd_Init (interp)
     /*
      * from tclXchmod.c
      */
-#ifndef WIN32
     Tcl_CreateCommand (interp, "chgrp", Tcl_ChgrpCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "chmod", Tcl_ChmodCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "chown", Tcl_ChownCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-#endif
 
     /*
      * from tclXcmdloop.c
@@ -75,10 +73,8 @@ Tclxcmd_Init (interp)
     /*
      * from tclXfcntl.c
      */
-#ifndef WIN32
     Tcl_CreateCommand (interp, "fcntl", Tcl_FcntlCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-#endif
 
     /*
      * from tclXfilecmds.c
@@ -119,6 +115,14 @@ Tclxcmd_Init (interp)
     /*
      * from tclXoscmds.c
      */
+    Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp, "mkdir", Tcl_MkdirCmd,
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp, "nice", Tcl_NiceCmd,
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
                        (ClientData) NULL,(Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "sync", Tcl_SyncCmd,
@@ -127,35 +131,29 @@ Tclxcmd_Init (interp)
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "umask", Tcl_UmaskCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "link", Tcl_LinkCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "unlink", Tcl_UnlinkCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "mkdir", Tcl_MkdirCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
     /*
-     * from tclXunixcmds.c
+     * from tclXunixCmds.c or tclXwinCmds.c
      */
-#ifndef WIN32
-    Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "chroot", Tcl_ChrootCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "nice", Tcl_NiceCmd,
+    Tcl_CreateCommand (interp, "link", Tcl_LinkCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "times", Tcl_TimesCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-#endif
+    
+    /*
+     * from tclXsocket.c
+     */
+    Tcl_CreateCommand (interp, "host_info", Tcl_HostInfoCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
 
     /*
-     * from tclXxxxSock.c
+     * from tclXunixSock.c and stubbed in tclXwinCmds.
      */
-#ifndef WIN32
-    TclX_SocketInit (interp);
-#endif
+    TclX_ServerInit (interp);
 
     return TCL_OK;
 }
@@ -216,10 +214,8 @@ Tclxcmd_SafeInit (interp)
     /*
      * from tclXid.c
      */
-#ifndef WIN32
     Tcl_CreateCommand (interp, "id", Tcl_IdCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-#endif
 
     /*
      * from tclXkeylist.c

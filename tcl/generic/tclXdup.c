@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 6.0 1996/05/10 16:15:25 markd Exp $
+ * $Id: tclXdup.c,v 7.0 1996/06/16 05:30:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -306,7 +306,7 @@ BindOpenFile (interp, fileNumStr)
     /*
      * Make sure file is open and determine the access mode and file type.
      */
-    if (TclX_OSGetOpenFileMode (fileNum, &mode, &nonBlocking) != TCL_OK)
+    if (TclXOSGetOpenFileMode (fileNum, &mode, &nonBlocking) != TCL_OK)
         goto unixError;
 
     if (fstat (fileNum, &fileStat) < 0)

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 7.0 1996/06/16 05:30:05 markd Exp $
+ * $Id: tclXbsearch.c,v 7.1 1996/07/18 19:36:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -249,8 +249,8 @@ BinSearch (searchCBPtr)
     off_t middle, high, low;
 
     low = 0;
-    if (TclX_OSGetFileSize (searchCBPtr->channel, TCL_READABLE,
-                            &high) != TCL_OK)
+    if (TclXOSGetFileSize (searchCBPtr->channel, TCL_READABLE,
+                           &high) != TCL_OK)
         goto posixError;
 
     /*

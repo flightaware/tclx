@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 7.0 1996/06/16 05:31:00 markd Exp $
+ * $Id: tclXutil.c,v 7.1 1996/07/18 19:36:27 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -703,7 +703,6 @@ TclX_GetOpenFnum (interp, handle, direction)
  * Returns:
  *   The file number or -1 if a file number is not associated with this access
  * direction.
- *???No longer used???
  *-----------------------------------------------------------------------------
  */
 int

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.0 1996/06/16 05:33:27 markd Exp $
+ * $Id: tclXunixOS.c,v 7.1 1996/07/18 19:36:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -81,7 +81,7 @@ ChannelToFnum (channel, direction)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSTicksToMS --
+ * TclXOSTicksToMS --
  *
  *   Convert clock ticks to milliseconds.
  *
@@ -92,7 +92,7 @@ ChannelToFnum (channel, direction)
  *-----------------------------------------------------------------------------
  */
 clock_t
-TclX_OSTicksToMS (numTicks)
+TclXOSTicksToMS (numTicks)
     clock_t numTicks;
 {
     static clock_t msPerTick = 0;
@@ -121,34 +121,7 @@ TclX_OSTicksToMS (numTicks)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSchroot --
- *   Portability interface to chroot functionallity.
- *
- * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o path (I) - Directory path to make root.
- *   o funcName (I) - Command or other name to use in not available error.
- * Results:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_OSchroot (interp, path, funcName)
-    Tcl_Interp *interp;
-    char       *path;
-    char       *funcName;
-{
-    if (chroot (path) < 0) {
-        Tcl_AppendResult (interp, "changing root to \"", path,
-                          "\" failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_OSgetpriority --
+ * TclXOSgetpriority --
  *   Portability interface to getpriority functionality.
  *
  * Parameters:
@@ -160,7 +133,7 @@ TclX_OSchroot (interp, path, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSgetpriority (interp, priority, funcName)
+TclXOSgetpriority (interp, priority, funcName)
     Tcl_Interp *interp;
     int        *priority;
     char       *funcName;
@@ -174,7 +147,7 @@ TclX_OSgetpriority (interp, priority, funcName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSincrpriority--
+ * TclXOSincrpriority--
  *   Portability interface to increment or decrement the current priority.
  *
  * Parameters:
@@ -187,7 +160,7 @@ TclX_OSgetpriority (interp, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSincrpriority (interp, priorityIncr, priority, funcName)
+TclXOSincrpriority (interp, priorityIncr, priority, funcName)
     Tcl_Interp *interp;
     int         priorityIncr;
     int        *priority;
@@ -212,7 +185,7 @@ TclX_OSincrpriority (interp, priorityIncr, priority, funcName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSpipe --
+ * TclXOSpipe --
  *   Portability interface to pipe.
  *
  * Parameters:
@@ -223,7 +196,7 @@ TclX_OSincrpriority (interp, priorityIncr, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSpipe (interp, fildes)
+TclXOSpipe (interp, fildes)
     Tcl_Interp *interp;
     int        *fildes;
 {
@@ -237,7 +210,7 @@ TclX_OSpipe (interp, fildes)
 
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsetitimer --
+ * TclXOSsetitimer --
  *   Portability interface to setitimer functionality.
  *
  * Parameters:
@@ -250,7 +223,7 @@ TclX_OSpipe (interp, fildes)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSsetitimer (interp, seconds, funcName)
+TclXOSsetitimer (interp, seconds, funcName)
     Tcl_Interp *interp;
     double     *seconds;
     char       *funcName;
@@ -293,7 +266,7 @@ TclX_OSsetitimer (interp, seconds, funcName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsleep --
+ * TclXOSsleep --
  *   Portability interface to sleep functionallity.
  *
  * Parameters:
@@ -301,25 +274,25 @@ TclX_OSsetitimer (interp, seconds, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_OSsleep (seconds)
+TclXOSsleep (seconds)
     unsigned seconds;
 {
     sleep (seconds);
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsync --
+ * TclXOSsync --
  *   Portability interface to sync functionality.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_OSsync ()
+TclXOSsync ()
 {
     sync ();
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSfsync --
+ * TclXOSfsync --
  *   Portability interface to fsync functionallity.  Does a sync if fsync is
  * nor available.
  *
@@ -331,7 +304,7 @@ TclX_OSsync ()
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSfsync (interp, channelName)
+TclXOSfsync (interp, channelName)
     Tcl_Interp *interp;
     char       *channelName;
 {
@@ -364,7 +337,7 @@ TclX_OSfsync (interp, channelName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSsystem --
+ * TclXOSsystem --
  *   Portability interface to system functionallity (executing a command
  * with the standard system shell).
  *
@@ -377,7 +350,7 @@ TclX_OSfsync (interp, channelName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSsystem (interp, command, exitCode)
+TclXOSsystem (interp, command, exitCode)
     Tcl_Interp *interp;
     char       *command;
     int        *exitCode;
@@ -461,7 +434,7 @@ TclX_OSsystem (interp, command, exitCode)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSmkdir --
+ * TclXOSmkdir --
  *   Portability interface to mkdir functionallity.
  *
  * Parameters:
@@ -472,7 +445,7 @@ TclX_OSsystem (interp, command, exitCode)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSmkdir (interp, path)
+TclXOSmkdir (interp, path)
     Tcl_Interp *interp;
     char       *path;
 {
@@ -550,7 +523,7 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSElapsedTime --
+ * TclXOSElapsedTime --
  *   Portability interface to get the elapsed CPU and real time. 
  *
  * Parameters:
@@ -559,7 +532,7 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_OSElapsedTime (realTime, cpuTime)
+TclXOSElapsedTime (realTime, cpuTime)
     clock_t *realTime;
     clock_t *cpuTime;
 {
@@ -570,8 +543,8 @@ TclX_OSElapsedTime (realTime, cpuTime)
 #ifndef TIMES_RETS_STATUS
     struct tms cpuTimes;
 
-    *realTime = TclX_OSTicksToMS (times (&cpuTimes));
-    *cpuTime = TclX_OSTicksToMS (cpuTimes.tms_utime + cpuTimes.tms_stime);
+    *realTime = TclXOSTicksToMS (times (&cpuTimes));
+    *cpuTime = TclXOSTicksToMS (cpuTimes.tms_utime + cpuTimes.tms_stime);
 #else
     static struct timeval startTime = {0, 0};
     struct timeval currentTime;
@@ -588,12 +561,12 @@ TclX_OSElapsedTime (realTime, cpuTime)
     currentTime.tv_usec = currentTime.tv_usec - startTime.tv_usec;
     *realTime = (currentTime.tv_sec  * 1000) + (currentTime.tv_usec / 1000);
     times (&cpuTimes);
-    *cpuTime = TclX_OSTicksToMS (cpuTimes.tms_utime + cpuTimes.tms_stime);
+    *cpuTime = TclXOSTicksToMS (cpuTimes.tms_utime + cpuTimes.tms_stime);
 #endif
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSkill --
+ * TclXOSkill --
  *   Portability interface to functionallity.
  *
  * Parameters:
@@ -606,7 +579,7 @@ TclX_OSElapsedTime (realTime, cpuTime)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSkill (interp, pid, signal, funcName)
+TclXOSkill (interp, pid, signal, funcName)
     Tcl_Interp *interp;
     pid_t       pid;
     int         signal;
@@ -640,7 +613,7 @@ TclX_OSkill (interp, pid, signal, funcName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSGetOpenFileMode --
+ * TclXOSGetOpenFileMode --
  *   Portability interface to get the accessability on an open file number.
  *
  * Parameters:
@@ -653,7 +626,7 @@ TclX_OSkill (interp, pid, signal, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
+TclXOSGetOpenFileMode (fileNum, mode, nonBlocking)
     int  fileNum;
     int *mode;
     int *nonBlocking;
@@ -683,7 +656,7 @@ TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSWalkDir --
+ * TclXOSWalkDir --
  *   Portability interface to reading the contents of a directory.  The
  * specified directory is walked and a callback is called on each entry.
  * The "." and ".." entries are skipped.
@@ -708,7 +681,7 @@ TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSWalkDir (interp, path, hidden, callback, clientData)
+TclXOSWalkDir (interp, path, hidden, callback, clientData)
     Tcl_Interp       *interp;
     char             *path;
     int               hidden;
@@ -758,7 +731,7 @@ TclX_OSWalkDir (interp, path, hidden, callback, clientData)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSGetFileSize --
+ * TclXOSGetFileSize --
  *   Portability interface to get the size of an open file.
  *
  * Parameters:
@@ -771,7 +744,7 @@ TclX_OSWalkDir (interp, path, hidden, callback, clientData)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSGetFileSize (channel, direction, fileSize)
+TclXOSGetFileSize (channel, direction, fileSize)
     Tcl_Channel  channel;
     int          direction;
     off_t       *fileSize;
@@ -782,5 +755,197 @@ TclX_OSGetFileSize (channel, direction, fileSize)
         return TCL_ERROR;
     }
     *fileSize = statBuf.st_size;
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSftruncate --
+ *   Portability interface to ftruncate functionality.  Coded to be part of
+ * the ftruncate command to allow for good error messages.
+ *
+ * Parameters:
+ *   o interp (I) - Error messages are returned in the interpreter.
+ *   o fileHandle (I) - Path to file.
+ *   o newSize (I) - Size to truncate the file to.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSftruncate (interp, fileHandle, newSize)
+    Tcl_Interp  *interp;
+    char        *fileHandle;
+    off_t        newSize;
+{
+#if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE) 
+    int fileNum, stat;
+    Tcl_File file;
+
+    fileNum = TclX_GetOpenFnum (interp, fileHandle, TCL_WRITABLE);
+    if (fileNum < 0)
+        return TCL_ERROR;
+
+#ifndef NO_FTRUNCATE
+    stat = ftruncate (fileNum, newSize);
+#else
+    stat = chsize (fileNum, newSize);
+#endif
+    if (stat != 0) {
+        Tcl_AppendResult (interp, fileHandle, ": ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+#else
+    Tcl_AppendResult (interp,
+                      "the -fileid option is not available on this system";
+                      (char *) NULL);
+    return TCL_ERROR;
+#endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSfork --
+ *   Portability interface to fork functionallity.
+ *
+ * Parameters:
+ *   o interp (I) - A format process id or errors are returned in result.
+ *   o funcName (I) - Command or other name to use in not available error.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSfork (interp, funcName)
+    Tcl_Interp *interp;
+    char       *funcName;
+{
+    pid_t pid;
+    char numBuf [32];
+    
+    pid = fork ();
+    if (pid < 0) {
+        Tcl_AppendResult (interp, "fork failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    sprintf (numBuf, "%d", pid);
+    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSexecl --
+ *   Portability interface to execl functionallity.
+ *
+ * Parameters:
+ *   o interp (I) - Errors are returned in result.
+ *   o path (I) - Path to the program.
+ *   o argList (I) - NULL terminated argument vector.
+ * Results:
+ *   TCL_ERROR or does not return.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSexecl (interp, path, argList)
+    Tcl_Interp *interp;
+    char       *path;
+    char      **argList;
+{
+    execvp (path, argList);
+
+    /*
+     * Can only make it here on an error.
+     */
+    Tcl_AppendResult (interp, "exec of \"", path, "\" failed: ",
+                      Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSInetAtoN --
+ *
+ *   Convert an internet address to an "struct in_addr" representation.
+ *
+ * Parameters:
+ *   o interp (O) - If not NULL, an error message is return in the result.
+ *     If NULL, no error message is generated.
+ *   o strAddress (I) - String address to convert.
+ *   o inAddress (O) - Converted internet address is returned here.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSInetAtoN (interp, strAddress, inAddress)
+    Tcl_Interp     *interp;
+    char           *strAddress;
+    struct in_addr *inAddress;
+{
+#ifndef NO_INET_ATON
+    if (inet_aton (strAddress, inAddress))
+        return TCL_OK;
+#else
+    inAddress->s_addr = inet_addr (strAddress);
+    if (inAddress->s_addr != INADDR_NONE)
+        return TCL_OK;
+#endif
+    if (interp != NULL) {
+        Tcl_AppendResult (interp, "malformed address: \"",
+                          strAddress, "\"", (char *) NULL);
+    }
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSgetpeername --
+ *   Portability interface to getpeername functionallity.
+ *
+ * Parameters:
+ *   o channel (I) - Channel associated with the socket.
+ *   o sockaddr (I) - Pointer to sockaddr structure.
+ *   o sockaddrSize (I) - Size of the sockaddr struct.
+ * Results:
+ *   TCL_OK or TCL_ERROR, sets a posix error.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSgetpeername (channel, sockaddr, sockaddrSize)
+    Tcl_Channel channel;
+    void       *sockaddr;
+    int         sockaddrSize;
+{
+    int fnum;
+
+    fnum = TclX_ChannelFnum (channel, 0);
+    if (getpeername (fnum, (struct sockaddr *) sockaddr, &sockaddrSize) < 0)
+        return TCL_ERROR;
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSgetsockname --
+ *   Portability interface to getsockname functionallity.
+ *
+ * Parameters:
+ *   o channel (I) - Channel associated with the socket.
+ *   o sockaddr (I) - Pointer to sockaddr structure.
+ *   o sockaddrSize (I) - Size of the sockaddr struct.
+ * Results:
+ *   TCL_OK or TCL_ERROR, sets a posix error.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSgetsockname (channel, sockaddr, sockaddrSize)
+    Tcl_Channel channel;
+    void       *sockaddr;
+    int         sockaddrSize;
+{
+    int fnum;
+
+    fnum = TclX_ChannelFnum (channel, 0);
+    if (getsockname (fnum, (struct sockaddr *) sockaddr, &sockaddrSize) < 0)
+        return TCL_ERROR;
     return TCL_OK;
 }

@@ -12,19 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 7.0 1996/06/16 05:30:38 markd Exp $
+ * $Id: tclXmath.c,v 7.1 1996/07/18 19:36:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * Define return of random function unless stdlib does it.  If we are using
- * out own version, make sure to define it. ???Should be in port.h.
- */
-#if defined(NO_RANDOM) || defined(NO_RANDOM_PROTO)
-long random ();
-#endif
 
 /*
  * Prototypes of internal functions.

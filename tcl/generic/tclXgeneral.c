@@ -1,7 +1,7 @@
 /* 
  * tclXgeneral.c --
  *
- *      Contains general extensions to the basic TCL command set.
+ * A collection of general commands: echo, infox and loop.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 7.0 1996/06/16 05:30:25 markd Exp $
+ * $Id: tclXgeneral.c,v 7.1 1996/07/18 19:36:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -326,7 +326,7 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
     /*
      * Set variable to its final value.
      */
-    sprintf (itxt,"%ld",i);
+    sprintf (itxt, "%ld" ,i);
     if (Tcl_SetVar (interp, argv [1], itxt, TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 

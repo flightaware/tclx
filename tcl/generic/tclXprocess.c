@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 7.0 1996/06/16 05:30:43 markd Exp $
+ * $Id: tclXprocess.c,v 7.1 1996/07/18 19:36:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,13 +32,40 @@
 /*
  *-----------------------------------------------------------------------------
  *
+ * Tcl_ForkCmd --
+ *     Implements the TCL fork command:
+ *     fork
+ *
+ * Results:
+ *  Standard TCL results, may return the UNIX system error message.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_ForkCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    if (argc != 1) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    return TclXOSfork (interp, argv [0]);
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
  * Tcl_ExeclCmd --
  *     Implements the TCL execl command:
  *     execl prog ?argList?
  *
  * Results:
- *  Standard TCL results, may return the UNIX system error message.
- *
+ *   Standard TCL results, may return the UNIX system error message.  On Win32,
+ * a process id is returned.
  *-----------------------------------------------------------------------------
  */
 int
@@ -55,8 +82,11 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     char          *path;
     char          *argv0       = NULL;
     int            nextArg     = 1;
-    int            argInCnt, idx;
+    int            argInCnt, idx, status;
     Tcl_DString    pathBuf;
+
+
+    status = TCL_ERROR;  /* assume the worst */
 
     if (argc < 2)
         goto wrongArgs;
@@ -79,7 +109,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     if (argc - 1 > nextArg) {
         if (Tcl_SplitList (interp, argv [nextArg + 1],
                            &argInCnt, &argInList) != TCL_OK)
-            goto errorExit;
+            goto exitPoint;
 
         if (argInCnt > STATIC_ARG_SIZE - 2)
             argList = (char **) ckalloc ((argInCnt + 1) * sizeof (char **));
@@ -94,75 +124,29 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
 
     path = Tcl_TranslateFileName (interp, argv [nextArg], &pathBuf);
     if (path == NULL)
-        goto errorExit;
+        goto exitPoint;
 
     if (argv0 != NULL) {
         argList [0] = argv0;
     } else {
-	argList [0] = argv [nextArg];  /* Program name */
+	argList [0] = path;  /* Program name */
     }
 
-    execvp (path, argList);
+    status = TclXOSexecl (interp, path, argList);
 
-    /*
-     * Can only make it here on an error.
-     */
-    interp->result = Tcl_PosixError (interp);
-
+  exitPoint:
     if (argInList != NULL)
         ckfree ((char *) argInList);
     if (argList != staticArgv)
         ckfree ((char *) argList);
-
-  errorExit:
     Tcl_DStringFree (&pathBuf);
-    return TCL_ERROR;
+    return status;
 
   wrongArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " ?-argv0 argv0? prog ?argList?",
                       (char *) NULL);
     return TCL_ERROR;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_ForkCmd --
- *     Implements the TCL fork command:
- *     fork
- *
- * Results:
- *  Standard TCL results, may return the UNIX system error message.
- *
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_ForkCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-#ifndef WIN32
-    int pid;
-
-    if (argc != 1) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    pid = fork ();
-    if (pid < 0) {
-        interp->result = Tcl_PosixError (interp);
-        return TCL_ERROR;
-    }
-
-    sprintf(interp->result, "%d", pid);
-    return TCL_OK;
-#else
-    Tcl_AppendResult (interp, "does not work yet", (char *) NULL);
-#endif
 }
 
 /*

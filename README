@@ -1,5 +1,8 @@
-                           Extended Tcl (TclX) 7.5.2
+                           Extended Tcl (TclX) 7.5.3
                            =========================
+Alpha 1 release:  
+   This is an aplha release of Windows 95/NT functionality.  See win/INSTALL
+for details and restrictions.
 
 INTRODUCTION
 ============
@@ -7,14 +10,18 @@ INTRODUCTION
     Extended Tcl (TclX), is a set of extensions to Tcl 7.5, the Tool Command
 Language invented by Dr. John Ousterhout.  Tcl is a powerful, yet simple
 embeddable programming language.  Extended Tcl is oriented towards Unix system
-programming tasks and large application development.  Many additional
-interfaces to the Unix operating system are provided.  It is upwardly
-compatible with Tcl 7.5.  You take the Extended Tcl package, add it to Tcl
-7.5, and from that you get Extended Tcl.  (Tcl is not included in this
-distribution, obtain it from ftp.smli.com).
+programming tasks and large application development.  TclX provides additional
+interfaces to the Unix operating system are provided and many new programming
+constructs and debugging tools.
+
+    It is upwardly compatible with Tcl 7.5.  You take the Extended Tcl package,
+add it to Tcl 7.5, and from that you get Extended Tcl.  (Tcl is not included
+in this distribution, obtain it from ftp.smli.com).
 
    Support is also included for building a Tk 4.1 wish shell (wishx)
 with the Extended Tcl command set and signal handling.
+
+    Extended Tcl runs on most Unix like systems and Windows 95/NT.
 
    While this TclX distribution is tested with Tcl 7.5 and Tk 4.1, it will
 probably work with new versions of Tcl & Tk with little or no changes.
@@ -26,61 +33,16 @@ in the early stages from Peter da Silva (peter@NeoSoft.com).
    As with Tcl, all of Extended Tcl is freely redistributable, including for
 commercial use and resale.
 
-MS WINDOWS 95/NT
-================
-  A port of TclX to MS Windows 95 & NT is under way, contact us at 
-tcl-project@neosoft.com if you would like to be an alpha tester. The code
-as of this release is included in the distribution, but it does not currently
-build.
-
 BUILDING TCLX
 =============
 
    For instructions on how to build TclX on Unix and Unix-like systems,
-see unix/INSTALL.
+see unix/INSTALL.  For Windows 95/NT see win/INSTALL.
 
-CHANGES IN TCLX 7.5.2
+CHANGES IN TCLX 7.5.3
 =====================
-  o This is a bug fix release to fix a problem where copyfile would cause
-    an abort if used on a file open for both reading and writing file.
+  o Support for Windows 95/NT.
 
-
-CHANGES IN TCLX 7.5.1
-=====================
-  o This is a bug fix release to fix several build and install problems in
-    7.5.0.  Most of these have to do with shared libraries.
-
-
-CHANGES IN TCLX 7.5.0
-=====================
-
-  o The TclX runtime is no longer independent of the standard Tcl and
-    Tk runtimes.  Tcl_Init must now be called before Tclx_Init and Tk_Init
-    before Tkx_Init.
-    (* Potential Incompatibility for C code *)
-
-  o Dropped support for the C++ interfaces in tcl++.h.   This file was
-    outdated, not documented and of limited usefulness.  It was often
-    a source of portability problems.  If you need this support,
-    tcl++.h and tcl++.C from a previous release should work.  Contact
-    us if this causes you problems.
-    (* Potential Incompatibility for C code *)
-
-  o Added support for building shared libraries on systems where shared
-    library support is implemented by Tcl.  The TclX library (libtclx.so)
-    is now dynamically loadable using the load command.
-
-  o Deprecated server_* commands in favor of new Tcl socket command.
-    The server_info command has been renamed to host_info and the
-    server_cntl functionallity has been incorporated in the fcntl
-    command.  All old scripts using the server_* commands will continue
-    to work.
-
-  o Modified the commandloop command to support event based command input.
-    (* Potential Incompatibility for Tcl code *)
-
-  o Added a procedure, mainloop, which makes it easy to build event oriented
-    programs in the TclX shell in a manner similar to wish.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -89,28 +51,23 @@ FEATURES ADDED BY EXTENDED TCL
 more details on the commands and functionality provided by Extended
 Tcl, see the manual page man/TclX.man.
 
-    o A shell, which provides an environment for developing and
-      executing Tcl programs.  It also supports event driven programming
-      outside of Tk.
+    o Keyed lists, a type of list that provides functionality
+      similar to C structures.
 
-    o Advanced Tcl code library facility that is oriented towards building
-      large applications.  It is compatible with standard Tcl auto-loading.
+    o A command tracing facility for debugging and a performance profiler.
 
-    o General purpose commands which define new programming
-      constructs,  debugging and profiling facilities.
+    o A shell, which provides an environment for developing and executing
+      Tcl programs.  The command line is compatible with Unix shells.
 
     o Unix access commands provide access to many Unix system calls,
       including process management.
 
-    o File I/O commands provide added facilities for accessing and
-      manipulating open files.
+    o File control and status commands provide added facilities for accessing
+      and manipulating open files.
 
     o File scanning facility that provides awk-like functionality.
 
     o Extended list manipulation commands.
-
-    o Keyed lists, a type of list that provides functionality
-      similar to C structures.
 
     o Extended string and character manipulation commands.
 
@@ -119,6 +76,13 @@ Tcl, see the manual page man/TclX.man.
     o X/PG based internationalization commands.
 
     o Support for event-oriented programming in non-Tk applications.
+
+    o Advanced Tcl code library facility that is oriented towards building
+      large applications.  It is compatible with standard Tcl auto-loading.
+
+    o Additional general programming commands.
+
+    o Restricted use in a safe interpreter.
 
 ON-LINE HELP
 ============
@@ -175,13 +139,17 @@ Please send questions, bug reports, and bug fixes to:
 
          tcl-project@NeoSoft.com
 
+    There is a mailing list for the development of TclX on Windows 95/NT.
+To subscribe, mail majordomo@grizzly.com with the command "subscribe tclx-win"
+in the body of the mail.  Send messages to this list at tclx-win@grizzly.com.
+
+
 WHERE TO GET IT
 ===============
 
 Extended Tcl 7.5.2 can be downloaded by anonymous FTP from:
 
    ftp.neosoft.com:/pub/tcl/tclx-distrib/tclX7.5.2.tar.gz
-
 
 A contributed sources archive resides on ftp.aud.alcatel.com and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently

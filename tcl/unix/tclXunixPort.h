@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 7.0 1996/06/16 05:33:29 markd Exp $
+ * $Id: tclXunixPort.h,v 7.1 1996/07/18 19:36:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -68,6 +68,18 @@
 #    else
 #        define CLK_TCK 60
 #    endif
+#endif
+
+/*
+ * Define C lib prototypes that are either missing or being emulated by
+ * the compat library.
+ */
+#if defined(NO_RANDOM) || defined(NO_RANDOM_PROTO)
+extern long random ();
+#endif
+
+#ifdef NO_FLOOR_PROTO_
+extern double floor ();
 #endif
 
 /*

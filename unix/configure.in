@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 6.0 1996/05/10 16:19:51 markd Exp $
+dnl $Id: configure.in,v 7.0 1996/06/16 05:34:23 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 6.0 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.0 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -539,6 +539,19 @@ AC_HEADER_EGREP("random", math.h, [found_random=YES])
 
 if test "$found_random" = "NO"; then
     AC_DEFINE(NO_RANDOM_PROTO)
+fi
+
+#------------------------------------------------------------------------------
+# Determine if floor is declared in stdlib.h or math.h.  If it is, we don't
+# want to redeclare it.
+#------------------------------------------------------------------------------
+
+found_floor=NO
+AC_HEADER_EGREP("floor", stdlib.h, [found_floor=YES])
+AC_HEADER_EGREP("floor", math.h, [found_floor=YES])
+
+if test "$found_floor" = "NO"; then
+    AC_DEFINE(NO_FLOOR_PROTO)
 fi
 
 #------------------------------------------------------------------------------

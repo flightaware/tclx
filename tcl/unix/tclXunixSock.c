@@ -1,8 +1,10 @@
 /*
  * tclXunixSock.c --
  *
- * Socket utility functions for Unix.  This also has the deprecated server
- * creation commands, which are not supported on platforms other than Unix.
+ * Deprecated server creation commands, which are not supported on platforms
+ * other than Unix. These commands are deprecated in favor of the Tcl socket
+ * functionallity, however they can't be implemented as backwards
+ * compatibility procs.
  *---------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -13,392 +15,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 6.0 1996/05/10 16:18:48 markd Exp $
+ * $Id: tclXunixSock.c,v 7.0 1996/06/16 05:33:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-#ifndef INADDR_NONE
-#    define INADDR_NONE  ((long) -1)
-#endif
-
-#ifdef NO_BCOPY
-#    define bcopy(from, to, length)    memmove((to), (from), (length))
-#endif
-
-#ifndef NO_DATA
-#   define NO_DATA NO_ADDRESS
-#endif
-
-extern int h_errno;
+#define SERVER_BUF      1
+#define SERVER_NOBUF    2
 
 /*
  * Prototypes of internal functions.
  */
-static int
-ReturnGetHostError _ANSI_ARGS_((Tcl_Interp *interp,
-                                char       *host));
-
-static int
-InetAtoN  _ANSI_ARGS_((Tcl_Interp     *interp,
-                       char           *strAddress,
-                       struct in_addr *inAddress));
-
-static struct hostent *
-InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
-                         int         argc,
-                         char      **argv));
-
-
-/*-----------------------------------------------------------------------------
- * ReturnGetHostError --
- *
- *   Return an error message when gethostbyname or gethostbyaddr fails.
- *
- * Parameters:
- *   o interp (O) - The error message is returned in the result.
- *   o host (I) - Host name or address that got the error.
- * Globals:
- *   o h_errno (I) - The list of file handles to parse, may be empty.
- * Returns:
- *   Always returns TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-static int
-ReturnGetHostError (interp, host)
-    Tcl_Interp *interp;
-    char       *host;
-{
-    char  *errorMsg;
-    char  *errorCode;
-
-    switch (h_errno) {
-      case HOST_NOT_FOUND:
-        errorCode = "HOST_NOT_FOUND";
-        errorMsg = "host not found";
-        break;
-      case TRY_AGAIN:
-        errorCode = "TRY_AGAIN";
-        errorMsg = "try again";
-        break;
-      case NO_RECOVERY:
-        errorCode = "NO_RECOVERY";
-        errorMsg = "unrecordable server error";
-        break;
-      case NO_DATA:
-        errorCode = "NO_DATA";
-        errorMsg = "no data";
-        break;
-    }
-    Tcl_SetErrorCode (interp, "INET", errorCode, errorMsg, (char *)NULL);
-    Tcl_AppendResult (interp, "host lookup failure: ",
-                      host, " (", errorMsg, ")",
-                      (char *) NULL);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * TclXGetHostInfo --
- *    Return a host address, name (if it can be obtained) and port number.
- * Used by the fstat command.
- *     
- * Parameters:
- *   o interp (O) - List is returned in the result.
- *   o fileNum (I) - File number.  Should be a socket connection.
- *   o remoteHost (I) -  TRUE to get remote host information, FALSE to get 
- *     local host info.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXGetHostInfo (interp, fileNum, remoteHost)
-    Tcl_Interp *interp;
-    int         fileNum;
-    int         remoteHost;
-{
-    int nameLen;
-    struct sockaddr_in sockaddr;
-    struct hostent *hostEntry;
-    char *hostName;
-    char portText [32];
-
-    nameLen = sizeof (sockaddr);
-
-    if (remoteHost) {
-        if (getpeername (fileNum, (struct sockaddr *) &sockaddr,
-                         &nameLen) < 0)
-            goto unixError;
-    } else {
-        if (getsockname (fileNum, (struct sockaddr *) &sockaddr,
-                         &nameLen) < 0)
-            goto unixError;
-    }
-
-    hostEntry = gethostbyaddr ((char *) &(sockaddr.sin_addr),
-                               sizeof (sockaddr.sin_addr),
-                               AF_INET);
-    if (hostEntry != NULL)
-        hostName = hostEntry->h_name;
-    else
-        hostName = "";
-
-    Tcl_AppendElement (interp, inet_ntoa (sockaddr.sin_addr));
-
-    Tcl_AppendElement (interp, hostName);
-
-    sprintf (portText, "%u", ntohs (sockaddr.sin_port));
-    Tcl_AppendElement (interp, portText);
-       
-    return TCL_OK;
-
-  unixError:
-    Tcl_ResetResult (interp);
-    interp->result = Tcl_PosixError (interp);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * TclXGetKeepLive --
- *    Get the keepalive option on a socket.
- *     
- * Parameters:
- *   o interp (O) - Errors are returned in the result.
- *   o channel (I) - Channel associated with the socket.
- *   o valuePtr (I) -  TRUE is return if keepalive is set, FALSE if its not.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXGetKeepAlive (interp, channel, valuePtr)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int         *valuePtr;
-{
-    int fileNum, value, valueLen = sizeof (value);
-
-    fileNum = TclX_ChannelFnum (channel, 0);
-
-    if (getsockopt (fileNum, SOL_SOCKET, SO_KEEPALIVE,
-                    (void*) &value, &valueLen) != 0) {
-        Tcl_AppendResult (interp, "error getting socket KEEPALIVE option: ",
-                          Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
-    }
-    *valuePtr = value;
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * TclXSetKeepLive --
- *    Set the keepalive option on a socket.
- *     
- * Parameters:
- *   o interp (O) - Errors are returned in the result.
- *   o channel (I) - Channel associated with the socket.
- *   o value (I) -  TRUE or FALSE.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXSetKeepAlive (interp, channel, value)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          value;
-{
-    int fileNum, valueLen = sizeof (value);
-
-    fileNum = TclX_ChannelFnum (channel, 0);
-
-    if (setsockopt (fileNum, SOL_SOCKET, SO_KEEPALIVE,
-                    (void*) &value, valueLen) != 0) {
-        Tcl_AppendResult (interp, "error setting socket KEEPALIVE option: ",
-                          Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * InetAtoN --
- *
- *   Convert an internet address to an "struct in_addr" representation.
- *
- * Parameters:
- *   o interp (O) - If not NULL, an error message is return in the result.
- *     If NULL, no error message is generated.
- *   o strAddress (I) - String address to convert.
- *   o inAddress (O) - Converted internet address is returned here.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-static int
-InetAtoN (interp, strAddress, inAddress)
-    Tcl_Interp     *interp;
-    char           *strAddress;
-    struct in_addr *inAddress;
-{
-    int result = TCL_OK;
-
-#ifndef NO_INET_ATON
-    if (!inet_aton (strAddress, inAddress))
-        result = TCL_ERROR;
-#else
-    inAddress->s_addr = inet_addr (strAddress);
-    if (inAddress->s_addr == INADDR_NONE)
-        result = TCL_ERROR;
-#endif
-    if ((result == TCL_ERROR) && (interp != NULL)) {
-        Tcl_AppendResult (interp, "malformed address: \"",
-                          strAddress, "\"", (char *) NULL);
-    }
-    return result;
-}
-
-/*-----------------------------------------------------------------------------
- * InfoGetHost --
- *
- *   Validate arguments and call gethostbyaddr for the host_info options
- * that return info about a host.  This looks up host information either by
- * name or address.
- *
- * Parameters:
- *   o interp (O) - The error message is returned in the result.
- *   o argc, argv (I) - Command argments.  Host name or IP address is expected
- *     in argv [2].
- * Returns:
- *   Pointer to the host entry or NULL if an error occured.
- *-----------------------------------------------------------------------------
- */
-static struct hostent *
-InfoGetHost (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    struct hostent *hostEntry;
-    struct in_addr address;
-
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", argv [1],
-                          " host", (char *) NULL);
-        return NULL;
-    }
-
-    if (InetAtoN (NULL, argv [2], &address) == TCL_OK) {
-        hostEntry = gethostbyaddr ((char *) &address,
-                                   sizeof (address),
-                                   AF_INET);
-    } else {
-        hostEntry = gethostbyname (argv [2]);
-    }
-    if (hostEntry == NULL) {
-        ReturnGetHostError (interp, argv [2]);
-        return NULL;
-    }
-    return hostEntry;
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_HostInfoCmd --
- *     Implements the TCL host_info command:
- *
- *      host_info addresses host
- *      host_info official_name host
- *      host_info aliases host
- *
- * Results:
- *   For hostname, a list of address associated with the host.
- *-----------------------------------------------------------------------------
- */
-static int
-Tcl_ServerInfoCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    struct hostent *hostEntry;
-    struct in_addr  inAddr;
-    int             idx;
-
-    if (argc < 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " option ...", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    if (STREQU (argv [1], "addresses")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
-        if (hostEntry == NULL)
-            return TCL_ERROR;
-
-        for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy ((VOID *) hostEntry->h_addr_list [idx],
-                   (VOID *) &inAddr,
-                   hostEntry->h_length);
-            Tcl_AppendElement (interp, inet_ntoa (inAddr));
-        }
-        return TCL_OK;
-    }
-
-    if (STREQU (argv [1], "address_name")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
-        if (hostEntry == NULL)
-            return TCL_ERROR;
-
-        for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy ((VOID *) hostEntry->h_addr_list [idx],
-                   (VOID *) &inAddr,
-                   hostEntry->h_length);
-            Tcl_AppendElement (interp, hostEntry->h_name);
-        }
-        return TCL_OK;
-    }
-
-    if (STREQU (argv [1], "official_name")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
-        if (hostEntry == NULL)
-            return TCL_ERROR;
-
-        Tcl_SetResult (interp, hostEntry->h_name, TCL_STATIC);
-        return TCL_OK;
-    }
-
-    if (STREQU (argv [1], "aliases")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
-        if (hostEntry == NULL)
-            return TCL_ERROR;
-
-        for (idx = 0; hostEntry->h_aliases [idx] != NULL; idx++) {
-            Tcl_AppendElement (interp, hostEntry->h_aliases [idx]);
-        }
-        return TCL_OK;
-    }
-
-    Tcl_AppendResult (interp, "invalid option \"", argv [1],
-                      "\", expected one of \"addresses\", \"official_name\"",
-                      " or \"aliases\"", (char *) NULL);
-    return TCL_ERROR;
-}
-
-/*=============================================================================
- * The server_create and server_accept commands are deprecated in favor of the
- * Tcl socket -server functionallity, however they can't be implemented as
- * backwards compatibility procs.
- *=============================================================================
- */
-#define SERVER_BUF      1
-#define SERVER_NOBUF    2
-
-#ifdef NO_BZERO
-#    define bzero(to, length)          memset((to), '\0', (length))
-#endif
-
 static int
 BindFileHandles _ANSI_ARGS_((Tcl_Interp *interp,
                              unsigned    options,
@@ -495,8 +123,8 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
             if (nextArg >= argc - 1)
                 goto missingArg;
             nextArg++;
-            if (InetAtoN (interp, argv [nextArg],
-                          &local.sin_addr) == TCL_ERROR)
+            if (TclXOSInetAtoN (interp, argv [nextArg],
+                                &local.sin_addr) == TCL_ERROR)
                 return TCL_ERROR;
         } else if (STREQU ("-myport", argv [nextArg])) {
             if (nextArg >= argc - 1)
@@ -666,18 +294,15 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_SocketInit --
+ * TclX_ServerInit --
  *     
  *   Initialize the server commands in the specified interpreter.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SocketInit (interp)
+TclX_ServerInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateCommand (interp, "host_info", Tcl_ServerInfoCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-
     /*
      * These commands are deprecated in favor of the Tcl socket -server
      * functionallity, however they can't be implemented as backwards

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 6.2 1996/05/23 22:37:39 markd Exp $
+ * $Id: tclXtest.c,v 7.0 1996/06/16 05:30:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -39,35 +39,31 @@ EXTERN int matherr ();
 int (*tclDummyMathPtr)() = matherr;
 
 
-/*
- *----------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * main --
  *
- *	This is the main program for the application.
- *----------------------------------------------------------------------
+ * This is the main program for the application.
+ *-----------------------------------------------------------------------------
  */
 int
 main (argc, argv)
     int    argc;
     char **argv;
 {
-    TclX_Main(argc, argv, Tcl_AppInit);
+    TclX_Main (argc, argv, Tcl_AppInit);
     return 0;			/* Needed only to prevent compiler warning. */
 }
 
 
-/*
- *----------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_AppInit --
  *
  *  Initialize TclX test application.
  *
  * Results:
- *      Returns a standard Tcl completion code, and leaves an error
- *      message in interp->result if an error occurs.
- *----------------------------------------------------------------------
+ *   Returns a standard Tcl completion code, and leaves an error message in
+ * interp->result if an error occurs.
+ *-----------------------------------------------------------------------------
  */
 int
 Tcl_AppInit (interp)
@@ -84,7 +80,7 @@ Tcl_AppInit (interp)
 	return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
-            (Tcl_PackageInitProc *) NULL);
+                      (Tcl_PackageInitProc *) NULL);
 
     return Tcl_GlobalEval (interp, errorHandler);
 }
