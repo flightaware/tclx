@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.8 1997/07/04 09:39:00 markd Exp $
+ * $Id: tclXsignal.c,v 8.9 1997/07/04 17:23:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -732,7 +732,7 @@ EvalTrapCode (interp, signalNum)
     Tcl_DStringFree (&command);
 
     if (result == TCL_ERROR) {
-        char errorInfo [64];
+        char errorInfo [128];
 
         sprintf (errorInfo, "\n    while executing signal trap code for %s%s",
                  Tcl_SignalId (signalNum), " signal");
@@ -844,7 +844,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
     int         signalNum, result;
 
     /*
-     * Get the interpreter is it wasn't supplied, if none is available,
+     * Get the interpreter if it wasn't supplied, if none is available,
      * bail out.
      */
     if (interp == NULL) {
@@ -966,7 +966,7 @@ ParseSignalList (interp, signalListObjPtr, signals)
      * Handle individually specified signals.
      */
     for (idx = 0; idx < signalObjc; idx++) {
-        signalStr = Tcl_GetStringFromObj (signalObjv [0], NULL);
+        signalStr = Tcl_GetStringFromObj (signalObjv [idx], NULL);
         if (STREQU (signalStr, "*"))
             goto wildMustBeAlone;
 
@@ -1308,7 +1308,7 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
     char *actionStr;
 
     if ((objc < 3) || (objc > 4)) {
-        TclX_WrongArgs (interp, objv [0], " action signalList ?command?");
+        TclX_WrongArgs (interp, objv [0], "action signalList ?command?");
         return TCL_ERROR;
     }
 
