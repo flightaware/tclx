@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.tcl,v 6.0 1996/05/10 16:16:28 markd Exp $
+# $Id: convlib.tcl,v 7.0 1996/06/16 05:31:15 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -37,7 +37,8 @@ proc tclx:ParseTclIndex {tclIndex fileTblVar ignore} {
 
     set tclIndexFH [open $tclIndex r]
     set hdr [gets $tclIndexFH]
-    if {$hdr != "# Tcl autoload index file, version 2.0"} {
+    if {!(($hdr == {# Tcl autoload index file, version 2.0}) ||
+          ($hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}))} {
         error "can only convert version 2.0 Tcl auto-load files"
     }
     set dir [file dirname $tclIndex]  ;# Expected by the script.
