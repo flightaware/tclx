@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 3.1 1994/04/09 17:45:45 markd Exp markd $
+# $Id: buildutil.tcl,v 3.2 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -58,13 +58,13 @@ proc CopyFile {sourceFile target} {
 
 proc CopySubDir {sourceDir destDir} {
     foreach sourceFile [readdir $sourceDir] {
-        if [file isdirectory $sourceFile] {
-            set destFile $destDir/[file tail $sourceFile]
+        if [file isdirectory $sourceDir/$sourceFile] {
+            set destFile $destDir/$sourceFile
             if {![file exists $destFile]} {
                 mkdir $destFile}
-            CopySubDir $sourceFile $destFile
+            CopySubDir $sourceDir/$sourceFile $destFile
         } else {
-            CopyFile $sourceFile $destDir
+            CopyFile $sourceDir/$sourceFile $destDir
         }
     }
 }
