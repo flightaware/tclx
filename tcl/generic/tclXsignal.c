@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 3.3 1994/07/02 03:58:16 markd Exp markd $
+ * $Id: tclXsignal.c,v 3.4 1994/07/03 07:24:40 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -698,7 +698,7 @@ RestoreErrorState (interp, errStatePtr)
         Tcl_SetVar (interp, "errorCode", errStatePtr->errorCode,
                     TCL_GLOBAL_ONLY);
 
-    ckfree (errStatePtr);
+    ckfree ((char *) errStatePtr);
 }
 
 /*
@@ -1279,9 +1279,9 @@ ProcessSignalListEntry (interp, signalEntry)
     
   exitPoint:
     if (sigEntry != NULL)
-        ckfree (sigEntry);
+        ckfree ((char *) sigEntry);
     if (sigState != NULL)
-        ckfree (sigState);
+        ckfree ((char *) sigState);
     return TCL_OK;
 
   invalidEntry:
@@ -1290,9 +1290,9 @@ ProcessSignalListEntry (interp, signalEntry)
 
   errorExit:
     if (sigEntry != NULL)
-        ckfree (sigEntry);
+        ckfree ((char *) sigEntry);
     if (sigState != NULL)
-        ckfree (sigState);
+        ckfree ((char *) sigState);
     return TCL_ERROR;
 }
 
@@ -1377,11 +1377,11 @@ SetSignalStates (interp, signalKeyedList)
         if (ProcessSignalListEntry (interp, signalList [idx]) != TCL_OK)
             goto errorExit;
     }
-    ckfree (signalList);
+    ckfree ((char *) signalList);
     return TCL_OK;
 
   errorExit:
-    ckfree (signalList);
+    ckfree ((char *) signalList);
     return TCL_ERROR;
 }
 
@@ -1615,7 +1615,7 @@ SignalCmdCleanUp (clientData, interp)
      * If there are no more interpreters, clean everything up.
      */
     if (numInterps == 0) {
-        ckfree (interpTable);
+        ckfree ((char *) interpTable);
         interpTable = NULL;
         interpTableSize = 0;
 
@@ -1688,7 +1688,7 @@ Tcl_InitSignalHandling (interp)
             ckalloc (sizeof (interpHandler_t) * interpTableSize * 2);
         memcpy (newTable, interpTable,
                 sizeof (interpHandler_t) * interpTableSize);
-        ckfree (interpTable);
+        ckfree ((char *) interpTable);
         interpTable = newTable;
         interpTableSize *= 2;
     }

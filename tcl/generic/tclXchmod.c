@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 3.0 1993/11/19 06:58:22 markd Rel markd $
+ * $Id: tclXchmod.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -359,7 +359,7 @@ ConvertUserGroup (interp, userGroupList, ownerInfoPtr)
                 goto noUserForGroup;
         }
     }
-    ckfree (ownArgv);
+    ckfree ((char *) ownArgv);
     endpwent ();
     return TCL_OK;
 
@@ -372,7 +372,7 @@ ConvertUserGroup (interp, userGroupList, ownerInfoPtr)
                       (char *) NULL);
 
   errorExit:
-    ckfree (ownArgv);
+    ckfree ((char *) ownArgv);
     endpwent ();
     return TCL_ERROR;
 }

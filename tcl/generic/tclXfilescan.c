@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 3.2 1994/01/25 01:07:01 markd Exp markd $
+ * $Id: tclXfilescan.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -97,15 +97,15 @@ CleanUpContext (scanTablePtr, contextPtr)
     for (matchPtr = contextPtr->matchListHead; matchPtr != NULL;) {
         Tcl_RegExpClean (&matchPtr->regExpInfo);
         if (matchPtr->command != NULL)
-            ckfree(matchPtr->command);
+            ckfree (matchPtr->command);
         oldMatchPtr = matchPtr;
         matchPtr = matchPtr->nextMatchDefPtr;
         ckfree ((char *) oldMatchPtr);
         }
     if (contextPtr->defaultAction != NULL) {
-        ckfree(contextPtr->defaultAction);
+        ckfree (contextPtr->defaultAction);
     }
-    ckfree (contextPtr);
+    ckfree ((char *) contextPtr);
 }
 
 /*

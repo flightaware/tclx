@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 3.2 1994/02/16 06:53:20 markd Exp markd $
+ * $Id: tclXkeylist.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -196,7 +196,7 @@ SplitAndFindField (interp, fieldName, keyedList, fieldInfoPtr)
 
 errorExit:
     if (fieldInfoPtr->argv != NULL)
-        ckfree (fieldInfoPtr->argv);
+        ckfree ((char *) fieldInfoPtr->argv);
     fieldInfoPtr->argv = NULL;
     return TCL_ERROR;
 }
@@ -807,7 +807,7 @@ Tcl_KeylkeysCmd (clientData, interp, argc, argv)
     }
 
     Tcl_SetResult (interp, Tcl_Merge (keyesArgc, keyesArgv), TCL_DYNAMIC);
-    ckfree (keyesArgv);
+    ckfree ((char *) keyesArgv);
     return TCL_OK;
 }
 

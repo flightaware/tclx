@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 3.5 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXlib.c,v 3.6 1994/05/30 19:16:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -452,7 +452,7 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
      */
   invalidEntry:
     if (pkgDataArgv != NULL)
-        ckfree (pkgDataArgv);
+        ckfree ((char *) pkgDataArgv);
     Tcl_ResetResult (interp);
     Tcl_AppendResult (interp, "invalid entry in \"auto_pkg_index \"",
                       "for package \"", packageName, "\"", (char *) NULL);
@@ -591,7 +591,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
                     goto errorExit;
             }
         }
-        ckfree (lineArgv);
+        ckfree ((char *) lineArgv);
         lineArgv = NULL;
     }
 
@@ -623,7 +623,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
      */
   errorExit:
     if (lineArgv != NULL)
-        ckfree (lineArgv);
+        ckfree ((char *) lineArgv);
     Tcl_DStringFree (&lineBuffer);
     if (indexFilePtr != NULL)
         fclose (indexFilePtr);
@@ -924,7 +924,7 @@ LoadPackageIndexes (interp, infoPtr, path)
             break;
     }
 
-    ckfree (pathArgv);
+    ckfree ((char *) pathArgv);
     infoPtr->doingIdxSearch = FALSE;
     return result;
 }
