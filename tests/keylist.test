@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: keylist.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -112,12 +112,12 @@ Test keylist-1.18 {keylget tests} {
 Test keylist-1.19 {keylget tests} {
     set keyedlist {{} {keyB valueB} {keyD valueD}}
     keylget keyedlist keyB
-} 1 {keyed list entry must be a two element list, found ""}
+} 1 {keyed list entry must be a valid, 2 element list, got ""}
 
 Test keylist-1.20 {keylget tests} {
     set keyedlist {keyA {keyB valueB} {keyD valueD}}
     keylget keyedlist keyB
-} 1 {keyed list entry must be a two element list, found "keyA"}
+} 1 {keyed list entry must be a valid, 2 element list, got "keyA"}
 
 Test keylist-1.21 {keylget tests} {
     set keyedlist {{{} valueA} {keyB valueB} {keyD valueD}}
@@ -253,7 +253,7 @@ Test keylist-3.8 {keylset tests} {
     catch {unset keyedlist}
     set keyedlist {{keyA valueA valueBad} {keyB valueB}}
     keylset keyedlist keyA valueA
-} 1 {keyed list entry must be a two element list, found "keyA valueA valueBad"}
+} 1 {keyed list entry must be a valid, 2 element list, got "keyA valueA valueBad"}
 
 Test keylist-3.8.1 {keylset tests} {
     catch {unset keyedlist}

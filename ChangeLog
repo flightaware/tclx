@@ -1,3 +1,19 @@
+2005-02-03  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tests/keylist.test, generic/tclXkeylist.c: improve efficiency of
+	keyed lists by layering a hash table over the existing linear
+	list.  This has significant performance improvements for larger
+	lists.  To avoid use of the hash table, add
+	-DNO_KEYLIST_HASH_TABLE to your CFLAGS.
+
+	* tests/profile.test: update to pass 8.4 bcc changes
+
+	* generic/tclXsignal.c (FormatSignalListEntry): dup string passed
+	to TclX_KeyedListSet to ensure we don't break const-ness.
+
+	* configure, tclconfig/tcl.m4: increase Linux default opt level to
+	-O2.
+
 2005-01-21  Andreas Kupries <andreask@activestate.com>
 
 	* unix/tclXunixOS.c: Converted both implementations of TclXOSsleep

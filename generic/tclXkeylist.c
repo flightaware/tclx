@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXkeylist.c,v 1.2 2002/12/17 21:57:40 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,10 +28,24 @@
  */
 
 /*
- * An entry in a keyed list array.   (FIX: Should key be object?)
+ * Adding a hash table over the entries allows for much faster Find
+ * access to the keys (hash lookup instead of list search).  This adds
+ * a hash table to each keyed list object.  That uses more memory, but
+ * you can get an order of magnitude better performance with large
+ * keyed list sets.  Uncomment this line to not use the hash table.
+ */
+/* #define NO_KEYLIST_HASH_TABLE */
+
+/*
+ * An entry in a keyed list array.
+ *
+ * JH: There was the supposition that making the key an object would
+ * be faster, but I tried that and didn't find it to be true.  The
+ * use of the layered hash table is a big win though.
  */
 typedef struct {
-    char    *key;
+    char *key;
+    int keyLen;
     Tcl_Obj *valuePtr;
 } keylEntry_t;
 
@@ -42,6 +56,10 @@ typedef struct {
     int		 arraySize;   /* Current slots available in the array.	*/
     int		 numEntries;  /* Number of actual entries in the array. */
     keylEntry_t *entries;     /* Array of keyed list entries.		*/
+#ifndef NO_KEYLIST_HASH_TABLE
+    Tcl_HashTable *hashTbl;   /* hash table mirror of the entries */
+                              /* to improve speed */
+#endif
 } keylIntObj_t;
 
 /*
@@ -54,7 +72,7 @@ typedef struct {
  * than the parent.
  */
 #define DupSharedKeyListChild(keylIntPtr, idx) \
-    if (Tcl_IsShared (keylIntPtr->entries [idx].valuePtr)) { \
+    if (Tcl_IsShared(keylIntPtr->entries [idx].valuePtr)) { \
 	keylIntPtr->entries [idx].valuePtr = \
 	    Tcl_DuplicateObj (keylIntPtr->entries [idx].valuePtr); \
 	Tcl_IncrRefCount(keylIntPtr->entries [idx].valuePtr); \
@@ -82,12 +100,8 @@ typedef struct {
 static void
 ValidateKeyedList _ANSI_ARGS_((keylIntObj_t *keylIntPtr));
 #endif
-
 static int
-ValidateKey _ANSI_ARGS_((Tcl_Interp *interp,
-			 char *key,
-			 int keyLen,
-			 int isPath));
+ValidateKey _ANSI_ARGS_((Tcl_Interp *interp, char *key, int keyLen));
 
 static keylIntObj_t *
 AllocKeyedListIntRep _ANSI_ARGS_((void));
@@ -205,43 +219,25 @@ ValidateKeyedList (keylIntPtr)
  *   o interp - Used to return error messages.
  *   o key - Key string to check.
  *   o keyLen - Length of the string, used to check for binary data.
- *   o isPath - TRUE if this is a key path, FALSE if its a simple key and
- *     thus "." is illegal.
  * Returns:
  *    TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-ValidateKey (interp, key, keyLen, isPath)
+ValidateKey (interp, key, keyLen)
     Tcl_Interp *interp;
     char *key;
     int keyLen;
-    int isPath;
 {
-    char *p;
-
     if (strlen (key) != (size_t) keyLen) {
-	Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-				"keyed list key may not be a ",
-				"binary string", (char *) NULL);
+	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"keyed list key may not be a binary string", (char *) NULL);
 	return TCL_ERROR;
     }
-    if (key [0] == '\0') {
-	Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-				"keyed list key may not be an ",
-				"empty string", (char *) NULL);
+    if (keyLen == 0) {
+	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
+		"keyed list key may not be an empty string", (char *) NULL);
 	return TCL_ERROR;
-    }
-    if (!isPath) {
-	for (p = key; *p != '\0'; p++) {
-	    if (*p == '.') {
-		Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-			"keyed list key may not contain a \".\"; ",
-			"it is used as a separator in key paths",
-			(char *) NULL);
-		return TCL_ERROR;
-	    }
-	}
     }
     return TCL_OK;
 }
@@ -261,11 +257,13 @@ AllocKeyedListIntRep ()
     keylIntObj_t *keylIntPtr;
 
     keylIntPtr = (keylIntObj_t *) ckalloc (sizeof (keylIntObj_t));
-
-    keylIntPtr->arraySize = 0;
-    keylIntPtr->numEntries = 0;
-    keylIntPtr->entries = NULL;
-
+    memset(keylIntPtr, 0, sizeof (keylIntObj_t));
+#ifndef NO_KEYLIST_HASH_TABLE
+#if 1
+    keylIntPtr->hashTbl = (Tcl_HashTable *) ckalloc(sizeof(Tcl_HashTable));
+    Tcl_InitHashTable(keylIntPtr->hashTbl, TCL_STRING_KEYS);
+#endif
+#endif
     return keylIntPtr;
 }
 
@@ -289,6 +287,12 @@ FreeKeyedListData (keylIntPtr)
     }
     if (keylIntPtr->entries != NULL)
 	ckfree ((VOID*) keylIntPtr->entries);
+#ifndef NO_KEYLIST_HASH_TABLE
+    if (keylIntPtr->hashTbl != NULL) {
+	Tcl_DeleteHashTable(keylIntPtr->hashTbl);
+	ckfree((char *) (keylIntPtr->hashTbl));
+    }
+#endif
     ckfree ((VOID*) keylIntPtr);
 }
 
@@ -343,6 +347,32 @@ DeleteKeyedListEntry (keylIntPtr, entryIdx)
 {
     int idx;
 
+#ifndef NO_KEYLIST_HASH_TABLE
+    if (keylIntPtr->hashTbl != NULL) {
+	Tcl_HashEntry *entryPtr;
+	Tcl_HashSearch search;
+	int nidx;
+
+	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl,
+		keylIntPtr->entries [entryIdx].key);
+	if (entryPtr != NULL) {
+	    idx = (int) Tcl_GetHashValue(entryPtr);
+	    Tcl_DeleteHashEntry(entryPtr);
+	}
+	/*
+	 * In order to maintain consistency, we have to iterate over
+	 * the entire hash table to find and decr relevant idxs.
+	 */
+	for (entryPtr = Tcl_FirstHashEntry(keylIntPtr->hashTbl, &search);
+	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
+	    nidx = (int) Tcl_GetHashValue(entryPtr);
+	    if (nidx > idx) {
+		Tcl_SetHashValue(entryPtr, nidx - 1);
+	    }
+	}
+    }
+#endif
+
     ckfree (keylIntPtr->entries [entryIdx].key);
     Tcl_DecrRefCount(keylIntPtr->entries [entryIdx].valuePtr);
 
@@ -376,7 +406,7 @@ FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
     char	**nextSubKeyPtr;
 {
     char *keySeparPtr;
-    int keyLen, findIdx;
+    int keyLen, findIdx = -1;
 
     keySeparPtr = strchr (key, '.');
     if (keySeparPtr != NULL) {
@@ -385,10 +415,34 @@ FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
 	keyLen = strlen (key);
     }
 
-    for (findIdx = 0; findIdx < keylIntPtr->numEntries; findIdx++) {
-	if ((strncmp (keylIntPtr->entries [findIdx].key, key, keyLen) == 0) &&
-	    (keylIntPtr->entries [findIdx].key [keyLen] == '\0'))
-	    break;
+#ifndef NO_KEYLIST_HASH_TABLE
+    if (keylIntPtr->hashTbl != NULL) {
+	char tmp = key[keyLen];
+	if (keySeparPtr != NULL) {
+	    /*
+	     * A few extra guards in setting this, as if we are passed
+	     * a const char, this can crash.
+	     */
+	    key[keyLen] = '\0';
+	}
+	Tcl_HashEntry *entryPtr;
+	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl, key);
+	if (entryPtr != NULL) {
+	    findIdx = (int) Tcl_GetHashValue(entryPtr);
+	}
+	if (keySeparPtr != NULL) {
+	    key[keyLen] = tmp;
+	}
+    }
+#endif
+
+    if (findIdx == -1) {
+	for (findIdx = 0; findIdx < keylIntPtr->numEntries; findIdx++) {
+	    if (keylIntPtr->entries [findIdx].keyLen == keyLen
+		    && STRNEQU(keylIntPtr->entries [findIdx].key, key, keyLen)) {
+		break;
+	    }
+	}
     }
 
     if (nextSubKeyPtr != NULL) {
@@ -401,68 +455,12 @@ FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
     if (keyLenPtr != NULL) {
 	*keyLenPtr = keyLen;
     }
-    
+
     if (findIdx >= keylIntPtr->numEntries) {
 	return -1;
     }
-    
+
     return findIdx;
-}
-
-/*-----------------------------------------------------------------------------
- * ObjToKeyedListEntry --
- *   Convert an object to a keyed list entry. (Keyword/value pair).
- *
- * Parameters:
- *   o interp - Used to return error messages, if not NULL.
- *   o objPtr - Object to convert.  Each entry must be a two element list,
- *     with the first element being the key and the second being the
- *     value.
- *   o entryPtr - The keyed list entry to initialize from the object.
- * Returns:
- *    TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-static int
-ObjToKeyedListEntry (interp, objPtr, entryPtr)
-    Tcl_Interp	*interp;
-    Tcl_Obj	*objPtr;
-    keylEntry_t *entryPtr;
-{
-    int objc;
-    Tcl_Obj **objv;
-    char *key;
-    int keyLen;
-
-    if (Tcl_ListObjGetElements (interp, objPtr, &objc, &objv) != TCL_OK) {
-	Tcl_ResetResult (interp);
-	Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-				"keyed list entry not a valid list, ",
-				"found \"", 
-				Tcl_GetStringFromObj (objPtr, NULL),
-				"\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-
-    if (objc != 2) {
-	Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-				"keyed list entry must be a two ",
-				"element list, found \"",
-				Tcl_GetStringFromObj (objPtr, NULL),
-				"\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-
-    key = Tcl_GetStringFromObj (objv [0], &keyLen);
-    if (ValidateKey (interp, key, keyLen, FALSE) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-
-    entryPtr->key = ckstrdup (key);
-    entryPtr->valuePtr = Tcl_DuplicateObj (objv [1]);
-    Tcl_IncrRefCount(entryPtr->valuePtr);
-
-    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
@@ -506,13 +504,28 @@ DupKeyedListInternalRep (srcPtr, copyPtr)
     copyIntPtr->numEntries = srcIntPtr->numEntries;
     copyIntPtr->entries = (keylEntry_t *)
 	ckalloc (copyIntPtr->arraySize * sizeof (keylEntry_t));
+#ifndef NO_KEYLIST_HASH_TABLE
+#if 0
+    copyIntPtr->hashTbl = (Tcl_HashTable *) ckalloc(sizeof(Tcl_HashTable));
+    Tcl_InitHashTable(copyIntPtr->hashTbl, TCL_STRING_KEYS);
+#else
+    copyIntPtr->hashTbl = NULL;
+#endif
+#endif
 
     for (idx = 0; idx < srcIntPtr->numEntries ; idx++) {
 	copyIntPtr->entries [idx].key =
 	    ckstrdup (srcIntPtr->entries [idx].key);
+	copyIntPtr->entries [idx].keyLen = srcIntPtr->entries [idx].keyLen;
 	copyIntPtr->entries [idx].valuePtr =
 	    Tcl_DuplicateObj(srcIntPtr->entries [idx].valuePtr);
 	Tcl_IncrRefCount(copyIntPtr->entries [idx].valuePtr);
+#ifndef NO_KEYLIST_HASH_TABLE
+	/*
+	 * If we dup the hash table as well and do other better tracking
+	 * of all access, then we could remove the entries list.
+	 */
+#endif
     }
 
     copyPtr->internalRep.otherValuePtr = (VOID *) copyIntPtr;
@@ -537,20 +550,64 @@ SetKeyedListFromAny (interp, objPtr)
     Tcl_Obj    *objPtr;
 {
     keylIntObj_t *keylIntPtr;
-    int idx, objc;
-    Tcl_Obj **objv;
+    keylEntry_t *keyEntryPtr;
+    char *key;
+    int keyLen, idx, objc, subObjc;
+    Tcl_Obj **objv, **subObjv;
+#ifndef NO_KEYLIST_HASH_TABLE
+    int dummy;
+    Tcl_HashEntry *entryPtr;
+#endif
 
-    if (Tcl_ListObjGetElements (interp, objPtr, &objc, &objv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, objPtr, &objc, &objv) != TCL_OK) {
 	return TCL_ERROR;
-    
-    keylIntPtr = AllocKeyedListIntRep ();
+    }
 
-    EnsureKeyedListSpace (keylIntPtr, objc);
+    keylIntPtr = AllocKeyedListIntRep();
+
+    EnsureKeyedListSpace(keylIntPtr, objc);
 
     for (idx = 0; idx < objc; idx++) {
-	if (ObjToKeyedListEntry (interp, objv [idx], 
-		&(keylIntPtr->entries [keylIntPtr->numEntries])) != TCL_OK)
-	    goto errorExit;
+	if ((Tcl_ListObjGetElements(interp, objv[idx],
+		     &subObjc, &subObjv) != TCL_OK)
+		|| (subObjc != 2)) {
+	    Tcl_ResetResult(interp);
+	    Tcl_AppendStringsToObj(Tcl_GetObjResult (interp),
+		    "keyed list entry must be a valid, 2 element list, got \"",
+		    Tcl_GetString(objv[idx]), "\"", (char *) NULL);
+	    FreeKeyedListData(keylIntPtr);
+	    return TCL_ERROR;
+	}
+
+	key = Tcl_GetStringFromObj(subObjv[0], &keyLen);
+	if (ValidateKey(interp, key, keyLen) == TCL_ERROR) {
+	    FreeKeyedListData (keylIntPtr);
+	    return TCL_ERROR;
+	}
+	/*
+	 * When setting from a random list/string, we cannot allow
+	 * keys to have embedded '.' path separators
+	 */
+	if ((strchr(key, '.') != NULL)) {
+	    Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
+		    "keyed list key may not contain a \".\"; ",
+		    "it is used as a separator in key paths",
+		    (char *) NULL);
+	    FreeKeyedListData (keylIntPtr);
+	    return TCL_ERROR;
+	}
+	keyEntryPtr = &(keylIntPtr->entries[idx]);
+
+	keyEntryPtr->key = ckstrdup(key);
+	keyEntryPtr->keyLen = keyLen;
+	keyEntryPtr->valuePtr = Tcl_DuplicateObj(subObjv[1]);
+	Tcl_IncrRefCount(keyEntryPtr->valuePtr);
+#ifndef NO_KEYLIST_HASH_TABLE
+	entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
+		keyEntryPtr->key, &dummy);
+	Tcl_SetHashValue(entryPtr, idx);
+#endif
+
 	keylIntPtr->numEntries++;
     }
 
@@ -563,10 +620,6 @@ SetKeyedListFromAny (interp, objPtr)
 
     KEYL_REP_ASSERT (keylIntPtr);
     return TCL_OK;
-    
-  errorExit:
-    FreeKeyedListData (keylIntPtr);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -607,7 +660,7 @@ UpdateStringOfKeyedList (keylPtr)
     for (idx = 0; idx < keylIntPtr->numEntries; idx++) {
 	entryObjv [0] = 
 	    Tcl_NewStringObj (keylIntPtr->entries [idx].key,
-			      strlen (keylIntPtr->entries [idx].key));
+		    keylIntPtr->entries [idx].keyLen);
 	entryObjv [1] = keylIntPtr->entries [idx].valuePtr;
 	listObjv [idx] = Tcl_NewListObj (2, entryObjv);
     }
@@ -670,33 +723,33 @@ TclX_KeyedListGet (interp, keylPtr, key, valuePtrPtr)
     char *nextSubKey;
     int findIdx;
 
-    if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
-	return TCL_ERROR;
-    keylIntPtr = (keylIntObj_t *) keylPtr->internalRep.otherValuePtr;
-    KEYL_REP_ASSERT (keylIntPtr);
+    while (1) {
+	if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
+	    return TCL_ERROR;
+	keylIntPtr = (keylIntObj_t *) keylPtr->internalRep.otherValuePtr;
+	KEYL_REP_ASSERT (keylIntPtr);
 
-    findIdx = FindKeyedListEntry (keylIntPtr, key, NULL, &nextSubKey);
+	findIdx = FindKeyedListEntry(keylIntPtr, key, NULL, &nextSubKey);
 
-    /*
-     * If not found, return status.
-     */
-    if (findIdx < 0) {
-	*valuePtrPtr = NULL;
-	return TCL_BREAK;
-    }
+	/*
+	 * If not found, return status.
+	 */
+	if (findIdx < 0) {
+	    *valuePtrPtr = NULL;
+	    return TCL_BREAK;
+	}
 
-    /*
-     * If we are at the last subkey, return the entry, otherwise recurse
-     * down looking for the entry.
-     */
-    if (nextSubKey == NULL) {
-	*valuePtrPtr = keylIntPtr->entries [findIdx].valuePtr;
-	return TCL_OK;
-    } else {
-	return TclX_KeyedListGet (interp, 
-				  keylIntPtr->entries [findIdx].valuePtr,
-				  nextSubKey,
-				  valuePtrPtr);
+	/*
+	 * If we are at the last subkey, return the entry, otherwise recurse
+	 * down looking for the entry.
+	 */
+	if (nextSubKey == NULL) {
+	    *valuePtrPtr = keylIntPtr->entries [findIdx].valuePtr;
+	    return TCL_OK;
+	} else {
+	    keylPtr = keylIntPtr->entries [findIdx].valuePtr;
+	    key = nextSubKey;
+	}
     }
 }
 
@@ -707,7 +760,7 @@ TclX_KeyedListGet (interp, keylPtr, key, valuePtrPtr)
  * Parameters:
  *   o interp - Error message will be return in result object.
  *   o keylPtr - Keyed list object to update.
- *   o key - The name of the key to extract.  Will recusively process
+ *   o key - The name of the key to extract.  Will recursively process
  *     sub-key seperated by `.'.
  *   o valueObjPtr - The value to set for the key.
  * Returns:
@@ -722,73 +775,107 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
     Tcl_Obj    *valuePtr;
 {
     keylIntObj_t *keylIntPtr;
+    keylEntry_t *keyEntryPtr;
     char *nextSubKey;
     int findIdx, keyLen, status = TCL_OK;
     Tcl_Obj *newKeylPtr;
 
-    if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
-	return TCL_ERROR;
-    keylIntPtr = (keylIntObj_t *) keylPtr->internalRep.otherValuePtr;
-    KEYL_REP_ASSERT (keylIntPtr);
+    while (1) {
+	if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
+	    return TCL_ERROR;
+	keylIntPtr = (keylIntObj_t *) keylPtr->internalRep.otherValuePtr;
+	KEYL_REP_ASSERT (keylIntPtr);
 
-    findIdx = FindKeyedListEntry (keylIntPtr, key, &keyLen, &nextSubKey);
+	findIdx = FindKeyedListEntry (keylIntPtr, key, &keyLen, &nextSubKey);
 
-    /*
-     * If we are at the last subkey, either update or add an entry.
-     */
-    if (nextSubKey == NULL) {
-	if (findIdx < 0) {
+	/*
+	 * If we are at the last subkey, either update or add an entry.
+	 */
+	if (nextSubKey == NULL) {
+#ifndef NO_KEYLIST_HASH_TABLE
+	    int dummy;
+	    Tcl_HashEntry *entryPtr;
+#endif
+	    if (findIdx < 0) {
+		EnsureKeyedListSpace (keylIntPtr, 1);
+		findIdx = keylIntPtr->numEntries++;
+	    } else {
+		ckfree (keylIntPtr->entries [findIdx].key);
+		Tcl_DecrRefCount(keylIntPtr->entries [findIdx].valuePtr);
+	    }
+	    keyEntryPtr = &(keylIntPtr->entries[findIdx]);
+	    keyEntryPtr->key = (char *) ckalloc (keyLen + 1);
+	    memcpy(keyEntryPtr->key, key, keyLen);
+	    keyEntryPtr->key[keyLen] = '\0';
+	    keyEntryPtr->keyLen      = keyLen;
+	    keyEntryPtr->valuePtr    = valuePtr;
+	    Tcl_IncrRefCount(valuePtr);
+#ifndef NO_KEYLIST_HASH_TABLE
+	    if (keylIntPtr->hashTbl == NULL) {
+		keylIntPtr->hashTbl =
+		    (Tcl_HashTable *) ckalloc(sizeof(Tcl_HashTable));
+		Tcl_InitHashTable(keylIntPtr->hashTbl, TCL_STRING_KEYS);
+	    }
+	    entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
+		    keyEntryPtr->key, &dummy);
+	    Tcl_SetHashValue(entryPtr, findIdx);
+#endif
+	    Tcl_InvalidateStringRep (keylPtr);
+
+	    KEYL_REP_ASSERT (keylIntPtr);
+	    return TCL_OK;
+	}
+
+	/*
+	 * If we are not at the last subkey, recurse down, creating new
+	 * entries if neccessary.  If this level key was not found, it
+	 * means we must build new subtree. Don't insert the new tree until we
+	 * come back without error.
+	 */
+	if (findIdx >= 0) {
+	    DupSharedKeyListChild (keylIntPtr, findIdx);
+	    status = TclX_KeyedListSet (interp,
+		    keylIntPtr->entries [findIdx].valuePtr,
+		    nextSubKey, valuePtr);
+	    if (status == TCL_OK) {
+		Tcl_InvalidateStringRep (keylPtr);
+	    }
+	} else {
+#ifndef NO_KEYLIST_HASH_TABLE
+	    int dummy;
+	    Tcl_HashEntry *entryPtr;
+#endif
+	    newKeylPtr = TclX_NewKeyedListObj ();
+	    Tcl_IncrRefCount(newKeylPtr);
+	    if (TclX_KeyedListSet (interp, newKeylPtr,
+			nextSubKey, valuePtr) != TCL_OK) {
+		Tcl_DecrRefCount(newKeylPtr);
+		return TCL_ERROR;
+	    }
 	    EnsureKeyedListSpace (keylIntPtr, 1);
 	    findIdx = keylIntPtr->numEntries++;
-	} else {
-	    ckfree (keylIntPtr->entries [findIdx].key);
-	    Tcl_DecrRefCount(keylIntPtr->entries [findIdx].valuePtr);
-	}
-	keylIntPtr->entries [findIdx].key = (char *) ckalloc (keyLen + 1);
-	strncpy (keylIntPtr->entries [findIdx].key, key, keyLen);
-	keylIntPtr->entries [findIdx].key [keyLen] = '\0';
-	keylIntPtr->entries [findIdx].valuePtr = valuePtr;
-	Tcl_IncrRefCount(valuePtr);
-	Tcl_InvalidateStringRep (keylPtr);
-
-	KEYL_REP_ASSERT (keylIntPtr);
-	return TCL_OK;
-    }
-
-    /*
-     * If we are not at the last subkey, recurse down, creating new
-     * entries if neccessary.  If this level key was not found, it
-     * means we must build new subtree. Don't insert the new tree until we
-     * come back without error.
-     */
-    if (findIdx >= 0) {
-	DupSharedKeyListChild (keylIntPtr, findIdx);
-	status =
-	    TclX_KeyedListSet (interp, 
-			       keylIntPtr->entries [findIdx].valuePtr,
-			       nextSubKey, valuePtr);
-	if (status == TCL_OK) {
+	    keyEntryPtr = &(keylIntPtr->entries[findIdx]);
+	    keyEntryPtr->key = (char *) ckalloc (keyLen + 1);
+	    memcpy(keyEntryPtr->key, key, keyLen);
+	    keyEntryPtr->key[keyLen] = '\0';
+	    keyEntryPtr->keyLen      = keyLen;
+	    keyEntryPtr->valuePtr    = newKeylPtr;
+#ifndef NO_KEYLIST_HASH_TABLE
+	    if (keylIntPtr->hashTbl == NULL) {
+		keylIntPtr->hashTbl =
+		    (Tcl_HashTable *) ckalloc(sizeof(Tcl_HashTable));
+		Tcl_InitHashTable(keylIntPtr->hashTbl, TCL_STRING_KEYS);
+	    }
+	    entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
+		    keyEntryPtr->key, &dummy);
+	    Tcl_SetHashValue(entryPtr, findIdx);
+#endif
 	    Tcl_InvalidateStringRep (keylPtr);
 	}
-    } else {
-	newKeylPtr = TclX_NewKeyedListObj ();
-	Tcl_IncrRefCount(newKeylPtr);
-	if (TclX_KeyedListSet (interp, newKeylPtr,
-			       nextSubKey, valuePtr) != TCL_OK) {
-	    Tcl_DecrRefCount(newKeylPtr);
-	    return TCL_ERROR;
-	}
-	EnsureKeyedListSpace (keylIntPtr, 1);
-	findIdx = keylIntPtr->numEntries++;
-	keylIntPtr->entries [findIdx].key = (char *) ckalloc (keyLen + 1);
-	strncpy (keylIntPtr->entries [findIdx].key, key, keyLen);
-	keylIntPtr->entries [findIdx].key [keyLen] = '\0';
-	keylIntPtr->entries [findIdx].valuePtr = newKeylPtr;
-	Tcl_InvalidateStringRep (keylPtr);
-    }
 
-    KEYL_REP_ASSERT (keylIntPtr);
-    return status;
+	KEYL_REP_ASSERT (keylIntPtr);
+	return status;
+    }
 }
 
 /*-----------------------------------------------------------------------------
@@ -919,7 +1006,8 @@ TclX_KeyedListGetKeys (interp, keylPtr, key, listObjPtrPtr)
     listObjPtr = Tcl_NewObj();
     for (idx = 0; idx < keylIntPtr->numEntries; idx++) {
 	Tcl_ListObjAppendElement(interp, listObjPtr,
-		Tcl_NewStringObj (keylIntPtr->entries [idx].key, -1));
+		Tcl_NewStringObj(keylIntPtr->entries[idx].key,
+			keylIntPtr->entries[idx].keyLen));
     }
     *listObjPtrPtr = listObjPtr;
     TclX_Assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);
@@ -963,7 +1051,7 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
      * Handle retrieving a value for a specified key.
      */
     key = Tcl_GetStringFromObj (objv [2], &keyLen);
-    if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
+    if (ValidateKey(interp, key, keyLen) == TCL_ERROR) {
 	return TCL_ERROR;
     }
 
@@ -1045,7 +1133,7 @@ TclX_KeylsetObjCmd (clientData, interp, objc, objv)
 
     for (idx = 2; idx < objc; idx += 2) {
 	key = Tcl_GetStringFromObj (objv [idx], &keyLen);
-	if ((ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR)
+	if ((ValidateKey(interp, key, keyLen) == TCL_ERROR)
 		|| (TclX_KeyedListSet (interp, keylVarPtr, key, objv [idx+1])
 			!= TCL_OK)) {
 	    result = TCL_ERROR;
@@ -1109,7 +1197,7 @@ TclX_KeyldelObjCmd (clientData, interp, objc, objv)
 
     for (idx = 2; idx < objc; idx++) {
 	key = Tcl_GetStringFromObj (objv [idx], &keyLen);
-	if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
+	if (ValidateKey(interp, key, keyLen) == TCL_ERROR) {
 	    return TCL_ERROR;
 	}
 
@@ -1161,7 +1249,7 @@ TclX_KeylkeysObjCmd (clientData, interp, objc, objv)
 	key = NULL;
     } else {
 	key = Tcl_GetStringFromObj (objv [2], &keyLen);
-	if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
+	if (ValidateKey(interp, key, keyLen) == TCL_ERROR) {
 	    return TCL_ERROR;
 	}
     }
