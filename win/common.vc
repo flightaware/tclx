@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 8.6.2.3 1998/11/25 08:04:44 markd Exp $
+# $Id: common.vc,v 8.6.2.4 1998/12/05 20:45:55 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -32,8 +32,8 @@ PREFIXU=C:/tcl
 #
 # TclX and TkX versions.
 #
-TCLX_VERSION = 8.0.4
-TKX_VERSION  = 8.0.4
+TCLX_VERSION = 8.0.5
+TKX_VERSION  = 8.0.5
 
 #
 # Project directories
