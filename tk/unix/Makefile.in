@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.10 1996/11/17 08:53:00 markd Exp $
+# $Id: Makefile.in,v 7.11 1996/11/17 17:23:52 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,9 +41,8 @@ LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
-       ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS}\
-       ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+LIBS = ${TK_LIB} ${TK_XLIBSW} ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} \
+       ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
        ${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
@@ -76,11 +75,11 @@ all: ${TKX_STLIB_NAME} SHLIB_@BUILD_SHARED@ wishx RUNTIME tktest runtest \
 static: wishx.static
 
 wishx: tkXAppInit.o ${TKX_STLIB_NAME} ${LIBTCLX}
-	${CC} ${LD_SWITCHES} tkXAppInit.o ${LIBS} -o wishx || \
-	    (rm -f wishx; exit 1)
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${TKX_BUILD_LIB_SPEC} ${LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
 
 wishx.static: tkXAppInit.o ${TKX_STLIB_NAME} ${LIBTCLX}
-	${CC} ${LD_SWITCHES} tkXAppInit.o ${SALIBS} -o $@ || \
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${TKX_STLIB_NAME} ${LIBS} -o $@ || \
 	    (rm -f $@; exit 1)
 
 ${TKX_STLIB_NAME}: ${OBJS}
@@ -92,9 +91,7 @@ SHLIB_YES: ${TKX_SHLIB_NAME}
 
 ${TKX_SHLIB_NAME}: ${SOBJS}
 	rm -f ${TKX_SHLIB_NAME}
-	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${TCLX_LD_SEARCH_FLAGS} \
-	    ${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${SOBJS} \
-	    ${TCL_SHLIB_LD_LIBS}
+	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
 
 SHLIB_NO:
 	touch SHLIB_NO
@@ -163,8 +160,8 @@ help:
 #
 
 tktest: ${TEST_OBJS} ${TKX_STLIB_NAME} ${LIBTCLX}
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LIBS} -o tktest || \
-	    (rm -f tktest; exit 1)
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${TKX_BUILD_LIB_SPEC} ${LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
 
 tkTest.o: ${TK_SRC}/generic/tkTest.c
 	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkTest.c
@@ -246,9 +243,9 @@ install-exec:
 
 #------------------------------------------------------------------------------
 clean:
-	-rm -f tkXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} wishx
-	-rm -rf ${TKX_STLIB_NAME} tkx.tcl tclhelp help help.tmp
-	-rm -f SHLIB_YES SHLIB_NO ${TKX_SHLIB_NAME}
+	-rm -f tkXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} wishx wishx.static
+	-rm -rf libtkx* tkx.tcl tclhelp help help.tmp
+	-rm -f SHLIB_YES SHLIB_NO
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

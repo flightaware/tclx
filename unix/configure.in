@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.10 1996/11/17 01:12:23 markd Exp $
+dnl $Id: configure.in,v 7.11 1996/11/17 08:53:04 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.10 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.11 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -271,6 +271,8 @@ AC_PROG_RANLIB
 #
 # Generate the library names using the Tcl macros.
 #
+SHLIB_SUFFIX=${TCL_SHLIB_SUFFIX}
+
 VERSION=$TCLX_VERSION
 eval "TCLX_STLIB_NAME=libtclx${TCL_UNSHARED_LIB_SUFFIX}"
 eval "TCLX_SHLIB_NAME=libtclx${TCL_SHARED_LIB_SUFFIX}"

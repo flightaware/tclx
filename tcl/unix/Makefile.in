@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.16 1996/11/16 08:05:20 markd Exp $
+# $Id: Makefile.in,v 7.17 1996/11/17 08:52:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -34,9 +34,8 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
-LIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
-       ${TCL_DL_LIBS} ${XLDLIBS} ${TCL_LD_SEARCH_FLAGS} \
-       ${TCLX_LD_SEARCH_FLAGS}
+LIBS = ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+       ${TCL_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -114,12 +113,12 @@ all: ${TCLX_STLIB_NAME} SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest \
 static:	tcl.static
 
 tcl: tclXAppInit.o ${TCLX_STLIB_NAME} SHLIB_@BUILD_SHARED@
-	${CC} ${LD_SWITCHES} tclXAppInit.o ${LIBS} -o tcl || \
-	    (rm -f tcl; exit 1)
+	${CC} ${LD_SWITCHES} tclXAppInit.o  ${TCLX_BUILD_LIB_SPEC} ${LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
 
 tcl.static: tclXAppInit.o ${TCLX_STLIB_NAME}
-	${CC} ${LD_SWITCHES} tclXAppInit.o ${SALIBS} -o $@ || \
-	    (rm -f $@; exit 1)
+	${CC} ${LD_SWITCHES} tclXAppInit.o ${TCLX_STLIB_NAME} ${LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
 
 
 ${TCLX_STLIB_NAME}: ${OBJS}
@@ -549,8 +548,8 @@ help:
 # Generate the test program.
 #
 tclXtest: ${TEST_OBJS} ${TCLX_STLIB_NAME}
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LIBS} -o tclXtest || \
-	    (rm -f tclXtest; exit 1)
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${TCLX_BUILD_LIB_SPEC} ${LIBS} \
+	    -o $@ || (rm -f $@; exit 1)
 
 tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXtest.c
@@ -655,7 +654,7 @@ install-exec:
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} ${TCLX_STLIB_NAME} tcl
+	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} tcl tcl.static libtclx*
 	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
 	-rm -f checkup.done SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME}
 	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
