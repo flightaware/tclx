@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 2.6 1993/09/07 14:44:09 markd Exp markd $
+ * $Id: tclXlist.c,v 2.7 1993/10/01 13:48:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -94,7 +94,7 @@ Tcl_LvarcatCmd (clientData, interp, argc, argv)
  *
  * Tcl_LvarpopCmd --
  *     Implements the TCL lvarpop command:
- *         lvarpop var ?index? ?string?
+ *         lvarpop var ?indexExpr? ?string?
  *
  * Results:
  *      Standard TCL results.
@@ -108,13 +108,14 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int        listArgc, listIdx, idx;
+    int        listArgc, idx;
+    long       listIdx;
     char     **listArgv;
     char      *varContents, *resultList, *returnElement;
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var ?index? ?string?", (char *) NULL);
+                          " var ?indexExpr? ?string?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -125,11 +126,11 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
     if (Tcl_SplitList (interp, varContents, &listArgc, &listArgv) == TCL_ERROR)
         return TCL_ERROR;
 
-    if (argc == 2) 
+    if (argc == 2) {
         listIdx = 0;
-    else {
-        if (Tcl_GetInt (interp, argv[2], &listIdx) != TCL_OK)
-            goto errorExit;
+    } else if (Tcl_RelativeExpr (interp, argv[2], listArgc, &listIdx)
+               != TCL_OK) {
+        return TCL_ERROR;
     }
 
     /*
@@ -170,7 +171,7 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
  *
  * Tcl_LvarpushCmd --
  *     Implements the TCL lvarpush command:
- *         lvarpush var string ?index?
+ *         lvarpush var string ?indexExpr?
  *
  * Results:
  *      Standard TCL results.
@@ -184,13 +185,14 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int        listArgc, listIdx, idx;
+    int        listArgc, idx;
+    long       listIdx;
     char     **listArgv;
     char      *varContents, *resultList;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var string ?index?", (char *) NULL);
+                          " var string ?indexExpr?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -201,11 +203,11 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
     if (Tcl_SplitList (interp, varContents, &listArgc, &listArgv) == TCL_ERROR)
         return TCL_ERROR;
 
-    if (argc == 3) 
+    if (argc == 3) {
         listIdx = 0;
-    else {
-        if (Tcl_GetInt (interp, argv[3], &listIdx) != TCL_OK)
-            goto errorExit;
+    } else if (Tcl_RelativeExpr (interp, argv[3], listArgc, &listIdx)
+               != TCL_OK) {
+        return TCL_ERROR;
     }
 
     /*
@@ -246,7 +248,7 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  *
  * Tcl_LemptyCmd --
- *     Implements the strcat TCL command:
+ *     Implements the lempty TCL command:
  *         lempty list
  *
  * Results:

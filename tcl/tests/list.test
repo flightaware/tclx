@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: list.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
+# $Id: list.test,v 2.2 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -33,10 +33,30 @@ Test list-1.3 {lvarpop tests} {
     list [lvarpop a 4] $a
 } 0 {e {a bbbbbb c d f g h i j}}
 
+Test list-1.3.1 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a end] $a
+} 0 {j {a bbbbbb c d e f g h i}}
+
+Test list-1.3.2 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a end-1] $a
+} 0 {i {a bbbbbb c d e f g h j}}
+
 Test list-1.4 {lvarpop tests} {
     set a {a bbbbbb c d e f g h i j}
     list [lvarpop a 2 frobozz] $a
 } 0 {c {a bbbbbb frobozz d e f g h i j}}
+
+Test list-1.4.1 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a end frobozz] $a
+} 0 {j {a bbbbbb c d e f g h i frobozz}}
+
+Test list-1.4.2 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a end-1 frobozz] $a
+} 0 {i {a bbbbbb c d e f g h frobozz j}}
 
 Test list-1.5 {lvarpop tests} {
     set a {a bbbbbb frozbozz d e f g h i j}
@@ -60,7 +80,7 @@ Test list-1.8 {lvarpop tests} {
 
 Test list-1.9 {lvarpop tests} {
     lvarpop
-} 1 {wrong # args: lvarpop var ?index? ?string?}
+} 1 {wrong # args: lvarpop var ?indexExpr? ?string?}
 
 Test list-1.10 {lvarpop tests} {
     unset a
@@ -110,6 +130,24 @@ Test list-2.7 {lvarpush tests} {
     set a
 } 0 {a b c d e}
 
+Test list-2.7.1 {lvarpush tests} {
+    set a {a b c d}
+    lvarpush a e end
+    set a
+} 0 {a b c e d}
+
+Test list-2.7.2 {lvarpush tests} {
+    set a {a b c d}
+    lvarpush a e end+1
+    set a
+} 0 {a b c d e}
+
+Test list-2.7.3 {lvarpush tests} {
+    set a {a b c d}
+    lvarpush a e end-1
+    set a
+} 0 {a b e c d}
+
 Test list-2.8 {lvarpush tests} {
     set a "a bbbbbb \{a"
     lvarpush a 2 frobozz
@@ -134,7 +172,7 @@ Test list-2.11 {lvarpush tests} {
 
 Test list-2.12 {lvarpush tests} {
     lvarpush
-} 1 {wrong # args: lvarpush var string ?index?}
+} 1 {wrong # args: lvarpush var string ?indexExpr?}
 
 
 Test list-3.1 {lvarcat} {
