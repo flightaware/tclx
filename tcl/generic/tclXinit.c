@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.6 1996/10/21 03:07:09 markd Exp $
+ * $Id: tclXinit.c,v 8.0 1996/11/21 00:24:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -202,18 +202,32 @@ TclX_ErrorExit (interp, exitCode)
         Tcl_Flush (stdoutChan);
 
     if (stderrChan != NULL) {
-        TclX_WriteStr (stderrChan, "Error: ");
+        /*
+         * Get the error stack, if available.
+         */
         if (Tcl_GetVar2 (interp, "TCLXENV", "noDump",
                          TCL_GLOBAL_ONLY) == NULL) {
             errorStack = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
-            if ((errorStack != NULL) && (errorStack [0] != '\0'))
-                TclX_WriteStr (stderrChan, errorStack);
-            else
-                TclX_WriteStr (stderrChan, Tcl_DStringValue (&savedResult));
+            if ((errorStack != NULL) && (errorStack [0] == '\0'))
+                errorStack = NULL;
         } else {
-                TclX_WriteStr (stderrChan, Tcl_DStringValue (&savedResult));
+            errorStack = NULL;
         }
-        TclX_WriteNL (stderrChan);
+        TclX_WriteStr (stderrChan, "Error: ");
+        
+        /*
+         * Don't output the result if its the first thing on the error stack.
+         */
+        if ((errorStack == NULL) || 
+            (strncmp (Tcl_DStringValue (&savedResult),
+                      errorStack, Tcl_DStringLength (&savedResult) != 0))) {
+            TclX_WriteStr (stderrChan, Tcl_DStringValue (&savedResult));
+            TclX_WriteNL (stderrChan);
+        }
+        if (errorStack != NULL) {
+            TclX_WriteStr (stderrChan, errorStack);
+            TclX_WriteNL (stderrChan);
+        }
         Tcl_Flush (stderrChan);
     }
 
