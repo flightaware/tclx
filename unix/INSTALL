@@ -77,7 +77,7 @@ Both "exec_prefix" and "prefix" default to "/usr/local".  All of these
 directories can be changed independently by editing "Config.mk".  To set
 the prefix directories:
 
-    ./configure --prefix=/usr/site  --exec_prefix==/usr/site.cray
+    ./configure --prefix=/usr/site  --exec_prefix=/usr/site.cray
 
 With the standard model, only Extended Tcl files are installed.  Its is
 assumed that the Tcl & Tk standard libraries, include files and manual
