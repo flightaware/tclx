@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profrep.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
+# $Id: profrep.tcl,v 2.2 1993/05/13 06:07:08 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -45,7 +45,7 @@ proc profrep:summarize {profDataVar stackDepth sumProfDataVar} {
             set     new [expr [lindex $cur 0]+[lindex $add 0]]
             lappend new [expr [lindex $cur 1]+[lindex $add 1]]
             lappend new [expr [lindex $cur 2]+[lindex $add 2]]
-            set $sumProfData($sigProcStack) $new
+            set sumProfData($sigProcStack) $new
         } else {
             set sumProfData($sigProcStack) $profData($procStack)
         }
