@@ -12,11 +12,23 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 2.8 1993/10/31 16:55:57 markd Exp markd $
+# $Id: process.test,v 3.0 1993/11/19 06:57:49 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+#
+# Fork without exec will not work under Tk, skip this test
+#
+if ![lempty [info commands button]] {
+    puts stderr "*************************************************************"
+    puts stderr "Process tests are constructed in a way that does not work"
+    puts stderr "under Tk.  Test skipped."
+    puts stderr "*************************************************************"
+    puts stderr ""
+    return
+}
 
 # Test fork, execl, and wait commands.
 

@@ -13,3 +13,5 @@ foreach i [lsort [glob *.test]] {
         puts stdout [replicate "=" 75]
     }
 }
+
+exit

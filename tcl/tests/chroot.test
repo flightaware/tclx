@@ -18,6 +18,18 @@
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
+#
+# Fork without exec will not work under Tk, skip this test
+#
+if ![lempty [info commands button]] {
+    puts stderr "*************************************************************"
+    puts stderr "Chroot tests are constructed in a way that does not work"
+    puts stderr "under Tk.  Test skipped."
+    puts stderr "*************************************************************"
+    puts stderr ""
+    return
+}
+
 Test chroot-1.1 {chroot tests} {
     chroot
 } 1 {wrong # args: chroot path}
@@ -45,9 +57,6 @@ mkdir CHROOTDIR
 # actual chroot
 #
 set pid [fork]
-if {$pid < 0} {
-    error "couldn't fork"
-}
 
 #
 # parent waits for child to complete

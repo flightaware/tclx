@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.8 1993/10/31 16:59:31 markd Exp markd $
+# $Id: testlib.tcl,v 3.0 1993/11/19 06:57:00 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -29,14 +29,17 @@ global SAVED_UNKNOWN TCL_PROGRAM env
 # Save path to Tcl program to exec, use it when running children in the
 # tests.
 #
-if [info exists env(TCL_PROGRAM)] {
-   set TCL_PROGRAM $env(TCL_PROGRAM)
-} else {
-   puts stderr ""
-   puts stderr {WARNING: No environment variable TCL_PROGRAM,}
-   puts stderr {         assuming "tcl" as program under test.}
-   puts stderr ""
-   set TCL_PROGRAM tcl
+if ![info exists TCL_PROGRAM] {
+    if [info exists env(TCL_PROGRAM)] {
+       set TCL_PROGRAM $env(TCL_PROGRAM)
+    } else {
+       puts stderr ""
+       puts stderr {WARNING: No environment variable TCL_PROGRAM,}
+       puts stderr {         assuming "tcl" as program to use for}
+       puts stderr {         running subprocesses in the tests.}
+       puts stderr ""
+       set TCL_PROGRAM tcl
+    }
 }
 
 if {([info command unknown] == "") && ![info exists SAVED_UNKNOWN]} {

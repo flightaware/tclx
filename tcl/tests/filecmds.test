@@ -12,11 +12,23 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 2.8 1993/11/11 03:57:52 markd Exp markd $
+# $Id: filecmds.test,v 3.0 1993/11/19 06:57:26 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+#
+# Fork without exec will not work under Tk, skip this test
+#
+if ![lempty [info commands button]] {
+    puts stderr "*************************************************************"
+    puts stderr "File commands tests are constructed in a way that does not"
+    puts stderr "work under Tk.  Test skipped."
+    puts stderr "*************************************************************"
+    puts stderr ""
+    return
+}
 
 # Create a test file
 
