@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 2.2 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXlist.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -194,7 +194,7 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    varContents = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
+    varContents = Tcl_GetVar (interp, argv[1], 0);
     if (varContents == NULL)
         varContents = "";
 
