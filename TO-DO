@@ -1,4 +1,9 @@
                          TclX bug, idea and task list
+*** Serious Bugs ***
+
+o Remove check for whitespace in keyedlist field names.
+
+*** Minor bugs and enhancements ***
 
 o Convert sleep command to use Tcl_Sleep.  Perhaps just convert it to
   a proc that calls after.
@@ -18,8 +23,6 @@ o syslog interface.  Commands that give explicit access to syslog, plus
 
 o Making packages out of some of the new TclX functionallity, such as 
   syslog idea above.
-
-o Remove check for whitespace in keyedlist field names.
 
 o Install instructions for WinDozes.
 
