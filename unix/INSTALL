@@ -2,7 +2,7 @@
 INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
 ------------------------------------------------------------------------
 
-$Id: INSTALL,v 8.2 1997/06/15 23:59:25 karl Exp $
+$Id: INSTALL,v 8.3 1997/08/17 21:46:45 markd Exp $
 
 QUICK START
 ===========
@@ -20,12 +20,12 @@ in the manner that addresses the needs of most users.   If you:
 
     o don't care about NFS sharing to multiple arcitectures.
 
-    o There are no patchs in tclX8.0.0/TCL-REQUIRED-PATCHES
-
 ...then the following steps will build, test and install TclX:
 
     cd tclX8.0.0/unix
     configure          # add --enable-shared to build shared libraries
+    # If there are patches in tclX8.0.0/TCL-REQUIRED-PATCHES:
+        make patch-tcl-core
     make
     make test          # Run both standard and extended Tcl tests
     make tktest        # Run Tk tests with wishx
