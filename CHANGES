@@ -710,6 +710,8 @@
    o Added #ifndef checks around internal math function declarations to 
      prevent conflicts with GNU libc header files. (Should really check in
      autoconf).
-   o Added "cexpand" command.
+   o Added "cexpand" and "cequal" commands.
    o Added various changes to support Linux.
--------------------------------------------------------------------------------
+===============================================================================
+18 Nov 93: Released TclX7.2a.
+===============================================================================
