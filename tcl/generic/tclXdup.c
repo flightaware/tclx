@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 5.7 1996/03/13 08:30:16 markd Exp $
+ * $Id: tclXdup.c,v 5.8 1996/03/18 08:49:41 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -105,6 +105,7 @@ DupChannelOptions (interp, srcChannel, targetChannel)
      * Walk (rather than split) the list for each name/value pair and set
      * the new channel.  Only modify blocking if its not the default, as
      * setting blocking on standard files generates an error on some systems.
+     * Skip options that can't be set.
      */
     scanPtr = strValues.string;
 
@@ -121,6 +122,9 @@ DupChannelOptions (interp, srcChannel, targetChannel)
         value [size] = '\0';
 
         if (STREQU (option, "-blocking") && (value [0] != '0'))
+            continue;
+
+        if (STREQU (option, "-peername") || STREQU (option, "-sockname"))
             continue;
 
         if (Tcl_SetChannelOption (interp, targetChannel, option,

@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 5.6 1996/03/10 22:16:55 markd Exp $
+# $Id: server.test,v 5.7 1996/03/14 06:14:15 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -229,14 +229,7 @@ if $safeHost {
 # If we can't connect to the echo server, then skip these tests.
 
 if [catch {
-    echo
-    echo Work around potential async connect problem (will be fixed in 7.5 final)
-    echo
-    set fh [server_connect [id host] echo]
-    puts $fh "hi"
-    flush $fh
-    gets $fh
-    close $fh
+    close [server_connect [id host] echo]
 } msg] {
     puts "*************************************************************"
     puts "Unable to connect to the \"echo\" server ($msg)."
