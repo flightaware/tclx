@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.17 1993/07/12 05:26:12 markd Exp markd $
+.\" $Id: TclX.man,v 2.18 1993/07/12 06:28:33 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -840,20 +840,38 @@ If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@help: tcl/processes/wait
 '@brief: Wait for a child process to terminate.
 .TP
-.B wait \fIpid\fR
+.B wait \fR?\fB-nohang\fR? ?\fB-untraced\fR? ?\fB-pgroup\fR? ?\fIpid\fR?
 .br
-Waits for the process identified by process id \fIpid\fR to terminate,
-either due to an untrapped signal or
-call to \fIexit\fR system call.  \fBWait\fR returns a list containing
-three elements:  The first element is the process id of the process
-that terminated.
-If the process exited normally, the second element is `EXIT',
-and the third contains the numeric exit code.
-If the process terminated due to a signal,
-the second element is `SIG', and the third contains
-the signal name.  If the process is
-currently stopped (on systems that support SIGSTP), the second element
-is `STOP', followed by the signal name.
+Waits for a process created with the \fBexecl\fR command to terminate, either
+due to an untrapped signal or call to \fIexit\fR system call.
+If the process id \fIpid\fR is specified, they wait on that process, otherwise
+wait on any child process to terminate.
+.sp
+If \fB-nohang\fR is specified, then don't block waiting on a process to
+terminate.  If no process is immediately available, return an empty list.
+If \fB-untraced\fR is specified then the status of child processes
+that are stopped, and whose status has not yet been reported since they
+stopped, are also returned.
+If \fB-pgroup\fR is specfied and \fIpid\fR is not specified, then wait
+on any child process whose process groupd ID is they same as the
+calling process. If \fIpid\fR is specified with \fB-pgroup\fR, then
+it is take as a process group ID, waiting on any process in that process group
+to terminate.
+.sp
+\fBWait\fR returns a list containing three elements: The first element is the
+process id of the process that terminated.
+If the process exited normally, the second element is `EXIT', and the third
+contains the numeric exit code.
+If the process terminated due to a signal, the second element is `SIG', and
+the third contains the signal name.
+If the process is currently stopped (on systems that support SIGSTP), the
+second element is `STOP', followed by the signal name.
+.sp
+Note that it is possible to wait on processes to terminate that were create
+in the background with the \fBexec\fR command.  However, if any other
+\fBexec\fR command is executed after the process terminates, then the
+process status will be reaped by the \fBexec\fR command and will not be
+available to the \fBwait\fR command.  
 '@endhelp
 '
 .SH "FILE I/O COMMANDS"
