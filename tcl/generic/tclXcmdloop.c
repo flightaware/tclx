@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 7.2 1996/07/24 02:17:57 markd Exp $
+ * $Id: tclXcmdloop.c,v 7.3 1996/09/09 22:13:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -84,7 +84,7 @@ static int
 IsSetVarCmd (command)
     char  *command;
 {
-    char  *nextPtr;
+    CONST char  *nextPtr;
     int    wordCnt;
 
     if ((!STRNEQU (command, "set", 3)) || (!ISSPACE (command [3])))

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 7.1 1996/07/18 19:36:16 markd Exp $
+ * $Id: tclXdebug.c,v 7.2 1996/07/26 05:55:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -502,7 +502,7 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
     }
     infoPtr->traceHolder = Tcl_CreateTrace (interp,
                                             infoPtr->depth,
-                                            CmdTraceRoutine,
+                                            (Tcl_CmdTraceProc*)CmdTraceRoutine,
                                             (ClientData) infoPtr);
     return TCL_OK;
 
