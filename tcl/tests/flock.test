@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 3.0 1993/11/19 06:57:21 markd Rel markd $
+# $Id: flock.test,v 3.1 1994/01/23 16:58:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -197,7 +197,7 @@ Test flock-4.3 {flock/unlock of a file that is not locked} {
    funlock $rdwrFH
 } 0 {}
 
-Test flock-4.2 {flock/unlock of a file that is not locked} {
+Test flock-4.4 {flock/unlock of a file that is not locked} {
    flock -read $readFH
    funlock $readFH
 } 0 {}
