@@ -320,7 +320,6 @@
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
 ./tk/generic/tkXshell.c.diff
-./tk/generic/tkXtest.c
 ./tk/help/Tk.brf
 ./tk/help/tk/control/bell
 ./tk/help/tk/control/bind
