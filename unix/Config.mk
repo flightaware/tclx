@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.1 1992/11/07 22:34:13 markd Exp markd $
+# $Id: Config.mk,v 2.2 1992/11/09 05:59:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -276,8 +276,9 @@ TK_MAN_FUNC_SECTION=3
 #
 #      o TCL_NO_ITIMER - Set if setitimer is not available.
 #
-#      o NO_MATH_ERR - Set if matherr is not used, and NaN is returned by
-#        floating math library routines.
+#      o TCL_IEEE_FP_MATH - Set if IEEE 745-1985 error reporting via the value
+#        a function returns is to be used instead of the standard matherr
+#        mechanism.
 #
 #      o TCL_NO_FILE_LOCKING - Set if the fcntl system call does not support
 #        file locking.

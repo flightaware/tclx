@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fmath.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: fmath.test,v 2.0 1992/10/16 04:49:44 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -58,6 +58,10 @@ test fmath-1.4 {acos tests} {
 test fmath-1.5 {acos tests} {
     fchecknum [acos $F_PI_4] 0.667457
 } 1
+test fmath-1.6 {acos tests} {
+    fchecknum [acos .25*.25] 1.50826
+} 1
+
 
 test fmath-2.1 {asin tests} {
     list [catch {asin} msg] $msg
@@ -236,6 +240,7 @@ test fmath-19.2 {math error tests} {
     list [catch {acos 1000} msg] $msg
 } {1 {floating point domain error}}
 test fmath-19.3 {math error tests} {
-    fchecknum [acos .25*.25] 1.50826
-} 1
+    list [catch {pow 10000 100000} msg] $msg
+} {1 {floating point overflow error}}
+
 
