@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 4.0 1994/07/16 05:27:04 markd Rel markd $
+ * $Id: tclXhandles.c,v 4.1 1994/12/29 00:28:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -25,6 +25,11 @@
  * It is set on the first table initialization.
  */
 static int entryAlignment = 0;
+
+/*
+ * Rounded size of an entry header
+ */
+static int entryHeaderSize = 0;
 
 /*
  * Marco to rounded up a size to be a multiple of (void *).  This is required
@@ -49,7 +54,7 @@ typedef ubyte_t *ubyte_pt;
 
 typedef struct {
     int      useCount;          /* Keeps track of the number sharing       */
-    int      entrySize;         /* Entry size in bytes, including overhead */
+    int      entrySize;         /* Entry size in bytes, including header   */
     int      tableSize;         /* Current number of entries in the table  */
     int      freeHeadIdx;       /* Index of first free entry in the table  */
     ubyte_pt bodyPtr;           /* Pointer to table body                   */
@@ -63,8 +68,6 @@ typedef struct {
   } entryHeader_t;
 typedef entryHeader_t *entryHeader_pt;
 
-#define ENTRY_HEADER_SIZE (ROUND_ENTRY_SIZE (sizeof (entryHeader_t)))
-
 /*
  * This macro is used to return a pointer to an entry, given its index.
  */
@@ -75,10 +78,10 @@ typedef entryHeader_t *entryHeader_pt;
  * This macros to convert between pointers to the user and header area of
  * an table entry.
  */
-#define USER_AREA(entryPtr) \
- (void_pt) (((ubyte_pt) entryPtr) + ENTRY_HEADER_SIZE);
+#define USER_AREA(entryHdrPtr) \
+    ((void_pt) (((ubyte_pt) entryHdrPtr) + entryHeaderSize))
 #define HEADER_AREA(entryPtr) \
- (entryHeader_pt) (((ubyte_pt) entryPtr) - ENTRY_HEADER_SIZE);
+    ((entryHeader_pt) (((ubyte_pt) entryPtr) - entryHeaderSize))
 
 /*
  * Prototypes of internal functions.
@@ -118,16 +121,16 @@ LinkInNewEntries (tblHdrPtr, newIdx, numEntries)
     int          numEntries;
 {
     int            entIdx, lastIdx;
-    entryHeader_pt entryPtr;
+    entryHeader_pt entryHdrPtr;
     
     lastIdx = newIdx + numEntries - 1;
 
     for (entIdx = newIdx; entIdx < lastIdx; entIdx++) {
-        entryPtr = TBL_INDEX (tblHdrPtr, entIdx);
-        entryPtr->freeLink = entIdx + 1;
+        entryHdrPtr = TBL_INDEX (tblHdrPtr, entIdx);
+        entryHdrPtr->freeLink = entIdx + 1;
     }
-    entryPtr = TBL_INDEX (tblHdrPtr, lastIdx);
-    entryPtr->freeLink = tblHdrPtr->freeHeadIdx;
+    entryHdrPtr = TBL_INDEX (tblHdrPtr, lastIdx);
+    entryHdrPtr->freeLink = tblHdrPtr->freeHeadIdx;
     tblHdrPtr->freeHeadIdx = newIdx;
 
 }
@@ -183,18 +186,18 @@ AllocEntry (tblHdrPtr, entryIdxPtr)
     int          *entryIdxPtr;
 {
     int            entryIdx;
-    entryHeader_pt entryPtr;
+    entryHeader_pt entryHdrPtr;
 
     if (tblHdrPtr->freeHeadIdx == NULL_IDX)
         ExpandTable (tblHdrPtr, -1);
 
     entryIdx = tblHdrPtr->freeHeadIdx;    
-    entryPtr = TBL_INDEX (tblHdrPtr, entryIdx);
-    tblHdrPtr->freeHeadIdx = entryPtr->freeLink;
-    entryPtr->freeLink = ALLOCATED_IDX;
+    entryHdrPtr = TBL_INDEX (tblHdrPtr, entryIdx);
+    tblHdrPtr->freeHeadIdx = entryHdrPtr->freeLink;
+    entryHdrPtr->freeLink = ALLOCATED_IDX;
     
     *entryIdxPtr = entryIdx;
-    return entryPtr;
+    return entryHdrPtr;
     
 }
 
@@ -265,6 +268,7 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
             entryAlignment = sizeof (double);
         if (sizeof (off_t) > entryAlignment)
             entryAlignment = sizeof (off_t);
+        entryHeaderSize = ROUND_ENTRY_SIZE (sizeof (entryHeader_t));
     }
 
     /*
@@ -279,7 +283,7 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
     /* 
      * Calculate entry size, including header, rounded up to sizeof (void *). 
      */
-    tblHdrPtr->entrySize = ENTRY_HEADER_SIZE + ROUND_ENTRY_SIZE (entrySize);
+    tblHdrPtr->entrySize = entryHeaderSize + ROUND_ENTRY_SIZE (entrySize);
     tblHdrPtr->freeHeadIdx = NULL_IDX;
     tblHdrPtr->tableSize = initEntries;
     tblHdrPtr->bodyPtr =
@@ -352,13 +356,13 @@ Tcl_HandleAlloc (headerPtr, handlePtr)
     char     *handlePtr;
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
-    entryHeader_pt entryPtr;
+    entryHeader_pt entryHdrPtr;
     int            entryIdx;
 
-    entryPtr = AllocEntry ((tblHeader_pt) headerPtr, &entryIdx);
+    entryHdrPtr = AllocEntry ((tblHeader_pt) headerPtr, &entryIdx);
     sprintf (handlePtr, "%s%d", tblHdrPtr->handleBase, entryIdx);
      
-    return USER_AREA (entryPtr);
+    return USER_AREA (entryHdrPtr);
 
 }
 
@@ -381,21 +385,21 @@ Tcl_HandleXlate (interp, headerPtr, handle)
     CONST char *handle;
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
-    entryHeader_pt entryPtr;
+    entryHeader_pt entryHdrPtr;
     int            entryIdx;
     
     if ((entryIdx = HandleDecode (interp, tblHdrPtr, handle)) < 0)
         return NULL;
-    entryPtr = TBL_INDEX (tblHdrPtr, entryIdx);
+    entryHdrPtr = TBL_INDEX (tblHdrPtr, entryIdx);
 
     if ((entryIdx >= tblHdrPtr->tableSize) ||
-            (entryPtr->freeLink != ALLOCATED_IDX)) {
+            (entryHdrPtr->freeLink != ALLOCATED_IDX)) {
         Tcl_AppendResult (interp, tblHdrPtr->handleBase, " is not open",
                           (char *) NULL);
         return NULL;
     }     
 
-    return USER_AREA (entryPtr);
+    return USER_AREA (entryHdrPtr);
  
 }
 
@@ -420,7 +424,7 @@ Tcl_HandleWalk (headerPtr, walkKeyPtr)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     int            entryIdx;
-    entryHeader_pt entryPtr;
+    entryHeader_pt entryHdrPtr;
 
     if (*walkKeyPtr == -1)
         entryIdx = 0;
@@ -428,10 +432,10 @@ Tcl_HandleWalk (headerPtr, walkKeyPtr)
         entryIdx = *walkKeyPtr + 1;
         
     while (entryIdx < tblHdrPtr->tableSize) {
-        entryPtr = TBL_INDEX (tblHdrPtr, entryIdx);
-        if (entryPtr->freeLink == ALLOCATED_IDX) {
+        entryHdrPtr = TBL_INDEX (tblHdrPtr, entryIdx);
+        if (entryHdrPtr->freeLink == ALLOCATED_IDX) {
             *walkKeyPtr = entryIdx;
-            return USER_AREA (entryPtr);
+            return USER_AREA (entryHdrPtr);
         }
         entryIdx++;
     }
@@ -477,12 +481,15 @@ Tcl_HandleFree (headerPtr, entryPtr)
     void_pt entryPtr;
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
-    entryHeader_pt freeentryPtr;
+    entryHeader_pt entryHdrPtr;
 
-    freeentryPtr = HEADER_AREA (entryPtr);
-    freeentryPtr->freeLink = tblHdrPtr->freeHeadIdx;
-    tblHdrPtr->freeHeadIdx = (((ubyte_pt) entryPtr) - tblHdrPtr->bodyPtr) /
-                           tblHdrPtr->entrySize;
+    entryHdrPtr = HEADER_AREA (entryPtr);
+    if (entryHdrPtr->freeLink != ALLOCATED_IDX)
+        panic ("Tcl_HandleFree: entry not allocated %x\n", entryHdrPtr);
+
+    entryHdrPtr->freeLink = tblHdrPtr->freeHeadIdx;
+    tblHdrPtr->freeHeadIdx =
+        (((ubyte_pt) entryHdrPtr) - tblHdrPtr->bodyPtr) / tblHdrPtr->entrySize;
     
 }
 
