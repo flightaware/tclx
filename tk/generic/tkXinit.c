@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 8.5 1999/03/31 06:37:55 markd Exp $
+ * $Id: tkXinit.c,v 8.6 1999/06/26 00:25:12 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -64,20 +64,20 @@ int Tkx_Init (interp)
      * Initialize the stubs before making any calls to Tcl or Tk APIs.
      */
 
-    if (Tcl_InitStubs(interp, "8.0", 0) == NULL) {
+    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
 	abort();
     }
-    if (Tk_InitStubs(interp, "8.0", 0) == NULL) {
+    if (Tk_InitStubs(interp, TK_VERSION, 0) == NULL) {
 	abort();
     }
 
     if (InitSetup(interp) != TCL_OK) {
 	goto errorExit;
     }
-    if (TclXRuntimeInit (interp,
-                         "tk",
-                         TKX_LIBRARY,
-                         TKX_VERSION) == TCL_ERROR)
+    if (TclXRuntimeInit(interp,
+                        "tk",
+                        TKX_LIBRARY,
+                        TKX_VERSION) == TCL_ERROR)
         goto errorExit;
 
     return TCL_OK;

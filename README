@@ -1,10 +1,10 @@
-                          Extended Tcl (TclX) 8.2.0
+                          Extended Tcl (TclX) 8.3.0
                           =========================
 
 INTRODUCTION
 ============
 
-    Extended Tcl (TclX), is a set of extensions to Tcl 8.2, the Tool Command
+    Extended Tcl (TclX), is a set of extensions to Tcl 8.3, the Tool Command
 Language invented by Dr. John Ousterhout.  Tcl is a powerful, yet simple
 embeddable programming language.  Extended Tcl is oriented towards system
 programming tasks and large application development.  TclX provides additional
@@ -20,13 +20,13 @@ with the Extended Tcl command set and signal handling.
 
    Extended Tcl runs on most Unix-like systems and Windows 95/NT.
 
-   While this TclX distribution is tested with Tcl 8.2 and Tk 8.2, it will
-probably work with newer versions of 8.2.*-series Tcl & Tk with little or no 
+   While this TclX distribution is tested with Tcl 8.3 and Tk 8.3, it will
+probably work with newer versions of 8.3.*-series Tcl & Tk with little or no 
 changes.  Please check the Extended Tcl homepage at http://www.neosoft.com/tclx
 for the latest release and information.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
-(karl@NeoSoft.com) and Mark Diekhans (markd@Grizzly.com), with help
+(karl@NeoSoft.com) and Mark Diekhans (markd@Kermodei.com), with help
 in the earliest stages from Peter da Silva (peter@NeoSoft.com).
 
    As with Tcl, all of Extended Tcl is freely redistributable, including for
@@ -39,7 +39,7 @@ BUILDING TCLX
    For instructions on how to build TclX on Unix and Unix-like systems,
 see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
 
-CHANGES IN TCLX 8.2
+CHANGES IN TCLX 8.3
 =====================
   o Library naming and version numbering changed to match Tcl's.
 
@@ -103,9 +103,8 @@ try typing "help help" to learn how to use help.
 MANUAL PAGES
 ============
 
-    Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX8.2.1/doc.  Start with the
-TclX.n manual.
+    Man pages in nroff/troff format are provided for all of Tcl and the
+extensions in the doc directory.  Start with the TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
 ===========================

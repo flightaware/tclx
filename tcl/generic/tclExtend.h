@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.25 1999/07/22 21:49:59 redman Exp $
+ * $Id: tclExtend.h,v 8.26 1999/08/10 23:19:31 redman Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,7 +24,7 @@
 
 /*
  * The following is needed on Windows to deal with export/import of DLL
- * functions.  See tcl8.0.3+/win/README.
+ * functions.  See tcl???/win/README.
  */
 #ifdef BUILD_TCLX
 # undef TCL_STORAGE_CLASS
@@ -50,11 +50,11 @@
 
 #define TCLX_PATCHLEVEL     0
 
-#define TCLX_VERSION        "8.2"
-#define TCLX_FULL_VERSION   "8.2.0"
+#define TCLX_VERSION        "8.3"
+#define TCLX_FULL_VERSION   "8.3.0"
 
-#define TKX_VERSION         "8.2"
-#define TKX_FULL_VERSION    "8.2.0"
+#define TKX_VERSION         "8.3"
+#define TKX_FULL_VERSION    "8.3.0"
 
 #define TCLX_DEBUG
 

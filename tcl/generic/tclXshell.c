@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 8.8 1999/06/25 23:59:31 redman Exp $
+ * $Id: tclXshell.c,v 8.9 1999/06/26 00:26:36 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -231,12 +231,14 @@ TclX_MainEx (argc, argv, appInitProc, interp)
     /* 
      * Initialize the stubs before making any calls to Tcl APIs.
      */
-
-    if (Tcl_InitStubs(interp, "8.0", 0) == NULL) {
+    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
+	abort();
+    }
+    if (TclX_InitTclStubs(interp, TCLX_VERSION, 0) == NULL) {
 	abort();
     }
 
-#ifdef __WIN32
+#ifdef __WIN32 
 #ifndef BORLAND
     TclX_SplitWinCmdLine (&argc, &argv);
 #endif

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.12 2000/02/05 17:09:59 markd Exp $
+ * $Id: tkXshell.c,v 8.13 2000/06/06 20:31:09 wart Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -31,7 +31,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkXshell.c,v 8.12 2000/02/05 17:09:59 markd Exp $
+ * RCS: @(#) $Id: tkXshell.c,v 8.13 2000/06/06 20:31:09 wart Exp $
  */
 
 /*
@@ -155,7 +155,7 @@ Tk_MainEx(argc, argv, appInitProc, interp)
 	abort();
     }
 #ifdef TKX_SHELL
-    if (TclX_InitTclStubs(interp, "8.0", 0) == NULL) {
+    if (TclX_InitTclStubs(interp, TCLX_VERSION, 0) == NULL) {
 	abort();
     }
     
@@ -306,7 +306,7 @@ Tk_MainEx(argc, argv, appInitProc, interp)
 #endif
     }
 #ifdef TKX_SHELL
-    if (Tk_InitStubs(interp, "8.0", 0) == NULL) {
+    if (Tk_InitStubs(interp, TK_VERSION, 0) == NULL) {
 	abort();
     }
 #endif
