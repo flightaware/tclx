@@ -319,6 +319,33 @@ These files are recompiled as they have compiled in paths to the library
 directories, which are different under TclX.  We are talking with John
 Ousterhout about a solution.
 
+INTEGRATING WITH OTHER EXTENSIONS
+=================================
+
+TkPixmap:
+    o Build Tk with TkPixmap as directed.
+
+    o If TclX is already built, do a "make clean".
+
+    o Change the XCFLAGS line in Config.mk to:
+        XCFLAGS=-DUSE_PINFO
+
+    o Change the XLDLIBS line in Config.mk to:
+        XLDLIBS=/full/path/to/libXpm.a
+
+    o Configure and build TclX as directed.
+
+    o If you want to have the pixmap documentation added to the TclX help
+      pages (this is a slow process):
+
+        o Added the line:
+            {pinfo.n        tk/control/pinfo}
+          to the list in tools/tkmanpages.
+
+        o Do a "make buildtkhelp".
+
+        o Do another "make"
+
 PORTING NOTES
 =============
 
