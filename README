@@ -1,4 +1,4 @@
-                           Extended Tcl (TclX) 7.5.0
+                           Extended Tcl (TclX) 7.5.1
                            =========================
 
 INTRODUCTION
@@ -38,6 +38,12 @@ BUILDING TCLX
 
    For instructions on how to build TclX on Unix and Unix-like systems,
 see unix/INSTALL.
+
+CHANGES IN TCLX 7.5.1
+=====================
+  o This is a bug fix release to fix several build and install problems in
+    7.5.0.  Most of these have to do with shared libraries.
+
 
 CHANGES IN TCLX 7.5.0
 =====================
@@ -148,11 +154,12 @@ with other extensions:
 
    o Build an application based on the TclX shells (tcl or wishx).
 
-See the TclXInit.3 manual page for more details.  The pkg_mkIndex does not
-generate a pkgIndex.tcl file that works with TclX.  See TclXInit.3 for
+See the TclX_Init.3 manual page for more details.  The pkg_mkIndex does not
+generate a pkgIndex.tcl file that works with TclX.  See TclX_Init.3 for
 instructions on how to setup a pkgIndex.tcl file for use with the
 package require command.  A prototype pkgIndex.tcl file is installed into the
-TclX run time directory.
+TclX run time directory.  There is no need to dynamically load libtkx, its
+only there to support wishx and applications that want wishx's signal handling.
 
 SUPPORT FOR EXTENDED TCL
 ========================
