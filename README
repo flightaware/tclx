@@ -4,8 +4,15 @@
 BETA RELEASE
 ============
 
-    This is the TclX 7.4a beta 3 release.  It corresponds to the Tcl 7.4 b3
+    This is the TclX 7.4a beta 4 release.  It corresponds to the Tcl 7.4 b3
 and Tk 4.0 b3 releases.  Please report bugs ASAP to tcl-project@neosoft.com.
+
+SGI IRIX Note:
+   The files tcl7.4b3/tclPort.h and tk4.0b3/tkPort.h contain prototypes of
+gettimeofday that conflict with the one in /usr/include/sys/time.h.  To
+to get Tcl, Tk and TclX to compile, you need to delete the gettimeofday
+prototypes in these two files.
+
 
 INTRODUCTION
 ============
