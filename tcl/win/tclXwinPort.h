@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 7.2 1996/07/26 05:56:32 markd Exp $
+ * $Id: tclXwinPort.h,v 7.3 1996/08/02 10:59:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -30,10 +30,10 @@
 #include <direct.h>
 
 /*
- * Types needed for fstat.
+ * Types needed for fstat, but are not directly supported (we emulate).  If
+ * defined before tclWinPort.h is include, it will define the access macros.
  */
-#define S_IFIFO  11  /*FIX: Real values from real OS */
-#define S_IFSOCK 12
+#define	S_IFSOCK 0140000		/* socket */
 
 
 /*
