@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXprofile.c,v 1.1 1992/09/20 23:21:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -157,7 +157,8 @@ ProcEntry (infoPtr, procName, procLevel, evalLevel)
     /*
      * Calculate the size of an entry.  One byte for name is in the entry.
      */
-    entryPtr = ckalloc (sizeof (profStackEntry_t) + strlen (procName));
+    entryPtr = (profStackEntry_t *) ckalloc (sizeof (profStackEntry_t) +
+                                             strlen (procName));
     
     /*
      * Fill it in and push onto the stack.  Note that the procedures frame has
@@ -278,7 +279,7 @@ StackSync (infoPtr, procLevel, evalLevel)
 
             infoPtr->stackPtr = saveEntryPtr->topPtr;
             infoPtr->saveStackPtr = saveEntryPtr->prevEntryPtr;
-            ckfree (saveEntryPtr);
+            ckfree ((char *) saveEntryPtr);
 
         } else {
 
@@ -531,8 +532,9 @@ DumpTableData (interp, infoPtr, varName)
             return TCL_ERROR;
         }
         ckfree (dataListPtr);
-
+        ckfree ((char *) dataEntryPtr);
         Tcl_DeleteHashEntry (hashEntryPtr);
+
         hashEntryPtr = Tcl_NextHashEntry (&searchCookie);
     }
 
