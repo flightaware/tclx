@@ -1,3 +1,7 @@
+2000-07-20 Brent Welch <welch@ajubasolutions.com>
+	* win/Makefile.in - fixed because of new definition of
+	TCL_SRC_DIR and TK_SRC_DIR
+
 2000-07-12 Brent Welch <welch@ajubasolutions.com>
 	* Changed the HELP_DIR to be configurable so I could have parallel
 		builds not all trying to create the same help files.
