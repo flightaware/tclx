@@ -44,6 +44,13 @@ CHANGES IN TCLX 7.6.0
 =====================
   o Partial support for Windows 95/NT.
 
+  o New commands cconcat and lcontain.
+
+  o Improved profiling.
+
+  o Package index files are built and installed shared libraries are
+    generated.  If the same installation prefix is used as was used
+    for Tcl, TclX can be loaded with the package require command.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
