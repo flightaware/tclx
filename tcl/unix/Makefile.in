@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.29 1996/03/29 22:22:06 markd Exp $
+# $Id: Makefile.in,v 5.30 1996/03/29 22:23:32 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -81,7 +81,7 @@ TLIB_SRCS = ${RUNTIME_DIR}/arrayprocs.tcl \
 
 HELP_DIR = ${srcbasedir}/tcl/help
 
-TEST_OBJS = tclTest.o tclXtest.o
+TEST_OBJS = tclTest.o tclUnixTest.o tclXtest.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -296,6 +296,9 @@ tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
 
 tclTest.o: ${TCL_SRC}/generic/tclTest.c
 	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclTest.c
+
+tclUnixTest.o: ${TCL_SRC}/unix/tclUnixTest.c
+	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/unix/tclUnixTest.c
 
 dltest.tmp: dltest
 	touch dltest.tmp
