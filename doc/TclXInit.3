@@ -12,14 +12,13 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Startup.man,v 2.3 1993/03/15 06:39:07 markd Exp markd $
+.\" $Id: Startup.3,v 2.4 1993/06/21 05:48:34 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Tcl_Startup" TCL "" "Tcl"
 .ad b
 .SH NAME
-Tcl_ShellEnvInit, Tcl_Startup, Tcl_CommandLoop, Tcl_ErrorAbort - Extended Tcl
-Shell startup facilities.
+Tcl_ShellEnvInit, Tcl_Startup, Tcl_ProcessInitFile - Extended Tcl Shell startup facilities.
 '
 .SH SYNOPSIS
 .nf
@@ -32,37 +31,26 @@ extern char *tclAppVersion;
 
 int
 Tcl_ShellEnvInit (Tcl_Interp  *interp,
-                  unsigned     options,
-                  const char  *programName,
-                  int          argc,
-                  const char **argv,
-                  int          interactive,
-                  const char  *initFile);
+                  unsigned     options);
 
 void
 Tcl_Startup (Tcl_Interp  *interp,
-             int          argc,
-             const char **argv,
-             const char  *initFile,
              unsigned     options);
+             int          argc,
+             const char **argv);
 
-void
-Tcl_CommandLoop (Tcl_Interp *interp,
-                 FILE       *inFile,
-                 FILE       *outFile,
-                 unsigned    options);
-
-void
-Tcl_ErrorAbort (Tcl_Interp  *interp,
-                int          noStackDump,
-                int          exitCode);
-
+int
+Tcl_ProcessInitFile (Tcl_Interp *interp,
+                     char       *dirEnvVar,
+                     char       *dir1,   
+                     char       *dir2,
+                     char       *dir3,
+                     char       *initFile);
 .ft R
 .fi
 .SH DESCRIPTION
-These commands control the startup of a Tcl shell and related functions.
-They allow any program to use Tcl shell functionality such as 
-initialization files and Tcl package libraries.
+These functions control the startup of the Extended Tcl shell and related
+applications.
 '
 .SS tclAppName
 The application name to be returned by the \fBinfox\fR
@@ -81,12 +69,11 @@ procedures are called.
 '
 .SS Tcl_ShellEnvInit
 .PP
-Setup the environment used by the Tcl shell.  Global variables used 
-by the shell are initialized and the TCLINIT file is located and
-processed.  This is normally done as part of Tcl_Startup, however this
-interface is provided for application that want to use the Tcl features,
-such as libraries, without using the standard command loop.  Windowed
-applications require this, since input is done via an event loop.
+Initialize the Tcl shell environment.  Including evaluating the standard
+TclX init file and setting various variable and values for infox to access.
+If this is an interactive Tcl session, SIGINT is set to generate a Tcl
+error.  This routine is provided for the wishx shell or similar
+environments where the Tcl_Startup command line parsing is not desired.
 .PP
 Parameters:
 .RS 2
@@ -97,30 +84,15 @@ following option is supported:
 .RE
 .br
 .RS 5
+.br
+\fB- TCLSH_INTERACTIVE\fR - Set interactiveSession to 1.
+.br
 \fB- TCLSH_QUICK_STARTUP\fR - Don't source the Tcl inititialization file.
 .br
 \fB- TCLSH_ABORT_STARTUP_ERR\fR - If set, abort the process if an error occurs.
 .br
 \fB- TCLSH_NO_STACK_DUMP\fR - If an error occurs, don't dump out the procedure
 call stack, just print an error message.
-.RE
-.sp
-.RS 2
-o \fIprogramName\fR - The name of the program being executed, usually
-taken from the main argv [0].  Used to set the Tcl variable.  If NULL
-then the variable will not be set.
-.br
-o \fIargc, argv\fR - Arguments to pass to the program in a Tcl list variable
-`argv'.  Argv [0] should contain the first argument, not the program
-name. If argv is NULL, then the variable will not be set.
-.br
-o \fIinteractive\fR - The value to assign to the `interactiveSession' Tcl
-variable. TRUE if an interactive Tcl command loop will be entered,
-FALSE if a script will be executed .  The function does not enter the
-command loop, it just sets the variable.
-.br
-o \fIinitFile\fR - The path of the initialization file to use.  If NULL,
-then the standard Tcl initialization file is used.
 .RE
 .PP
 Notes:
@@ -147,13 +119,10 @@ Parameters
 .RS 2
 \fBo \fIinterp\fR - A pointer to the interpreter.
 .br
-\fBo \fIargc, argv\fR - Arguments passed to main for the command line.
-.br
-\fBo \fIinitFile\fR (I) - The file name of the initialization file to use.  If
-NULL, then the standard Tcl initialization file is used.
-.br
 \fBo \fIoptions\fR - Options that control startup behavior.  None are currently
 defined.
+.br
+\fBo \fIargc, argv\fR - Arguments passed to main for the command line.
 .RE
 .PP
 Notes:
@@ -162,40 +131,28 @@ The variables \fBtclAppName\fR, \fBtclAppLongname\fR, \fBtclAppVersion\fR
 must be set before calling thus routine if special values are desired.
 .RE
 '
-.SS Tcl_CommandLoop
+.SS Tcl_ProcessInitFile
 .PP
-Run a Tcl command loop.  The command loop interactively prompts for,
-reads and executes commands. Two entries in the global array TCLENV
-contain prompt hooks.  A prompt hook is Tcl code that is executed and
-its result is used as the prompt string.  The element `topLevelPromptHook'
-is the hook that generates the main prompt.  The element
-`downLevelPromptHook' is the hook to generate the prompt for reading
-continuation lines for incomplete commands.  If a signal occurs while
-in the command loop, it is reset and ignored.  EOF terminates the loop.
+Find and evaludate a Tcl init file.  This assumes that the init file
+lives in a master directory and appends the directory name to the 
+"auto_path" variable.
 .PP
 Parameters:
 .RS 2
 \fBo \fIinterp\fR - A pointer to the interpreter
 .br
-\fBo \fIinFile\fR - The file to read commands from.
+\fBo dirEnvVar (I) - Environment variable used to override the directory path.
 .br
-\fBo \fIoutFile\fR - The file to write the prompts to. 
+\fBo dir1, dir2, dir3 (I) - 3 part directory name.  These strings are
+concatinated together to form the directory path.  Any of these maybe NULL.
 .br
-\fBo \fIoptions\fR - Currently unused.
+\fBo initFile (I) - The name of the init file, which is found either in the
+directory pointed to by envVar or by the directory formed from dir1,
+dir2 & dir3.
+.RE
+.PP
+Returns:
+.RS 2
+\fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS Tcl_ErrorAbort
-.PP
-Display error information and abort when an error is returned in the
-\fIinterp->result\fR.
-.PP
-Parameters:
-.RS 2
-\fBo \fIinterp\fR - A pointer to the interpreter, should contain the
-error message in `result'.
-.br
-\fBo noStackDump\fR - If TRUE, then the procedure call stack will not be
-displayed.
-.br
-\fBo \fIexitCode\fR - The code to pass to exit.
-.RE

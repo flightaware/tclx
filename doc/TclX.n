@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.15 1993/06/21 05:48:34 markd Exp markd $
+.\" $Id: TclX.man,v 2.16 1993/06/28 06:17:56 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1950,13 +1950,9 @@ The following command line flags are recognized by the Tcl shell command
 line parser:
 .TP
 .B \-q
-Quick initialization flag.  If this flag is set the only initialization step
-performed is to locate the initialization files and save their paths in
-the Tcl variable TCLINITS.  The auto_path variable is also set to be the
-directories containing the initialization files.
-The files are not evaluated.
-This provides for a fast startup, but does not make any of the Extended
-Tcl library procedures available.
+Quick initialization flag.  The Tcl initiaization file is not evaluated
+and the \fBauto_path\fR variable is not set.  Tcl auto-load libraries will
+not be available.
 .TP
 .B \-n
 No procedure call stack dump.  The procedure call stack will not be displayed
@@ -2078,11 +2074,9 @@ If the \fBTCLINIT\fR environment variable is not set, the file
 .PP
 \fBTcl\fR then evaulates the Tcl initialization file.  The \fBauto_path\fR
 variable is initialized to the Tcl master directory and may be augmented by
-the intialization file.
-The \fBauto_path\fR maybe overridden with an environment variable
-\fBTCLLIBPATH\fR
-containing a space-separated directory list.  Other procedures and variables
-used by the Extended Tcl shell are also set by this file.
+the intialization file or the application.
+Other procedures and variables used by the Extended Tcl shell are also defined
+by this file.
 .PP
 If the Tcl is invoked interactively, it will source a file
 named \fI.tclrc\fR in the
@@ -2096,9 +2090,8 @@ on the user's environment in such a manner.
 Some applications, such as \fBwishx\fR, have additional initialization files.
 They may have environment variables that override the default location
 of thise initialization files.
-The Tcl global variable \fBTCLINITS\fR will be set to contain the
-list of intialization files and the Tcl global variable \fBauto_path\fR
-will contain the directories contain those initialization files.
+Tcl global variable \fBauto_path\fR will contain the directories contain those
+initialization files.
 '@endhelp
 '
 .SH "TCL SHELL VARIABLES"
@@ -2109,9 +2102,11 @@ will contain the directories contain those initialization files.
 The following variables are set and/or used by the Tcl shell.
 .TP
 .TP
-.B programName
-The name that the Tcl shell is executing as.  All directory
-components are removed from the program name.
+.B argv0
+Contains the name of the Tcl program specified on the command line or
+the name that the Tcl shell was invoked under if no program was specified.
+.B argc
+Contains a count of the number of \fIargv\fR arguments (0 if none).
 .B argv
 A list containing the arguments passed in from the command line, excluding
 arguments used by the Tcl shell.  The first element is the first passed
@@ -2124,18 +2119,10 @@ that they can function as a standalone application if specified on the
 command line, but merely load in and not execute if loaded during an
 interactive invocation of Tcl.
 .TP
-.B auto_noexec
-If this variable exists and has a value of \fB1\fR, then the Tcl shell will not
-attempt to exec an non-existent command as a Unix command.
-.TP
-.B TCLINITS
-A list of the initialization files used to startup Tcl.
-.TP
-.B TCLPATH
-Path to search to locate Tcl scripts.  Used by the \fBload\fR and 
-\fBdemand_load\fR commands.  The path is a Tcl list (i.e.
-zero or more space-separated directory names).
-This can be overridden by an environmental variable \fBTCLPATH\fR.
+.B auto_path
+Path to search to locate Tcl scripts.  Used by the 
+\fBauto_load\fR command and the TclX unknown command handler.
+The path is a Tcl list of directory names.
 .TP
 .B TCLENV
 Array that contains information used internally by various Tcl procedures that
@@ -2151,6 +2138,7 @@ used for the prompt.
 Contains code to run to generate the prompt used when interactively prompting
 for continuation of an incomplete command.  The code in this hook
 will be evaluated and the result will be used for the prompt
+.TP
 '@endhelp
 '
 .SH "TCL SHELL PROCEDURES"

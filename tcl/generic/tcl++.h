@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.6 1993/05/04 06:29:22 markd Exp markd $
+ * $Id: tcl++.h,v 2.7 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -441,26 +441,11 @@ public:
      * implementation.
      */
 
-    inline void
-    CommandLoop (FILE       *inFile,
-                 FILE       *outFile,
-                 unsigned    options)
-    {
-        Tcl_CommandLoop (interp, inFile, outFile, options);
-    }
-
     inline char *
     DeleteKeyedListField (const char  *fieldName,
                           const char  *keyedList)
     {
         return Tcl_DeleteKeyedListField (interp, fieldName, keyedList);
-    }
-
-    inline void
-    ErrorAbort (int  noStackDump,
-                int  exitCode)
-    {
-        Tcl_ErrorAbort (interp, noStackDump, exitCode);
     }
 
     inline int
@@ -497,6 +482,21 @@ public:
          return Tcl_GetUnsigned (interp, string, unsignedPtr);
     }
 
+    inline int
+    ProcessInitFile (const char  *dirEnvVar,
+                     const char  *dir1,
+                     const char  *dir2,
+                     const char  *dir3,
+                     const char  *initFile)
+    {
+        return Tcl_ProcessInitFile (interp,
+                                    (char *) dirEnvVar,
+                                    (char *) dir1,
+                                    (char *) dir2,
+                                    (char *) dir3,
+                                    (char *) initFile);
+    }
+
     inline char *
     SetKeyedListField (const char  *fieldName,
                        const char  *fieldvalue,
@@ -507,23 +507,17 @@ public:
     }
 
     inline int
-    ShellEnvInit (unsigned         options,
-                  const char      *programName, 
-                  int              argc,
-                  const char     **argv,
-                  tclInitFile_t **initFiles)
-     {
-         return Tcl_ShellEnvInit (interp, options, programName, argc, argv,
-                                  initFiles);
-     }
+    ShellEnvInit (unsigned  options)
+    {
+         return Tcl_ShellEnvInit (interp, options);
+    }
 
     inline void 
     Startup (unsigned        options,
              int             argc,
-             const char    **argv,
-             tclInitFile_t **initFiles)
+             const char    **argv)
     {
-        Tcl_Startup (interp, options, argc, argv, initFiles);
+        Tcl_Startup (interp, options, argc, argv);
     }
 };
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.8 1993/04/16 04:24:53 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.9 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -234,6 +234,18 @@ Tcl_ConvertclockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 /*
  * from tclXcmdloop.c
  */
+extern void 
+Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp));
+
+extern void
+Tcl_OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
+                              int         topLevel));
+
+extern void
+Tcl_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
+                             int         intResult,
+                             char       *checkCmd));
+
 extern int 
 Tcl_CommandloopCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 

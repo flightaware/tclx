@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.5 1993/06/06 15:05:35 markd Exp markd $
+ * $Id: tclExtend.h,v 2.6 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -59,36 +59,12 @@ extern char *tclAppVersion;      /* Version number of the application       */
 extern int tclReceivedSignal;
 
 /*
- * Structure used to pass initialization file information to Tcl_Startup
- * or Tcl_ShellEnvInit.  Any of these items maybe NULL to have them ignored.
- * A NULL initFile name just sets the path.
- */
-typedef struct tclInitFile_t {
-    CONST char *envVar;    /* Environment variable used to find file.   */
-    CONST char *dir1;      /* 3 part directory name to concat.  Usually */
-    CONST char *dir2;      /* contains version numbers.                 */
-    CONST char *dir3;
-    CONST char *initFile;  /* Actual initialization file in dir.        */
-} tclInitFile_t;
-
-/*
- * Pointer to the standard init file entry for TclX.
- */
-extern tclInitFile_t tclDefaultInitFile;
-
-/*
  * Exported Extended Tcl functions.
  */
 
 EXTERN int
 Tcl_CheckForSignal _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         cmdResultCode));
-
-EXTERN void 
-Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
-                             FILE       *inFile,
-                             FILE       *outFile,
-                             unsigned    options));
 
 EXTERN Tcl_Interp * 
 Tcl_CreateExtendedInterp ();
@@ -100,11 +76,6 @@ Tcl_DeleteKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
 EXTERN char * 
 Tcl_DownShift _ANSI_ARGS_((char       *targetStr,
                            CONST char *sourceStr));
-EXTERN void
-Tcl_ErrorAbort _ANSI_ARGS_((Tcl_Interp  *interp,
-                            int          noStackDump,
-                            int          exitCode));
-
 EXTERN char * 
 Tcl_UpShift _ANSI_ARGS_((char       *targetStr,
                          CONST char *sourceStr));
@@ -131,6 +102,14 @@ EXTERN int
 Tcl_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
                              CONST char *string,
                              unsigned   *unsignedPtr));
+
+int
+Tcl_ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
+                                 char       *dirEnvVar,
+                                 char       *dir1,
+                                 char       *dir2,
+                                 char       *dir3,
+                                 char       *initFile));
 
 EXTERN char *
 Tcl_SetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -195,14 +174,9 @@ EXTERN void
 Tcl_Startup _ANSI_ARGS_((Tcl_Interp     *interp,
                          unsigned        options,
                          int             argc,
-                         CONST char    **argv,
-                         tclInitFile_t **initFiles));
+                         CONST char    **argv));
 
 EXTERN int
-Tcl_ShellEnvInit _ANSI_ARGS_((Tcl_Interp     *interp,
-                              unsigned        options,
-                              CONST char     *programName,
-                              int             argc,
-                              CONST char    **argv,
-                              tclInitFile_t **initFiles));
+Tcl_ShellEnvInit _ANSI_ARGS_((Tcl_Interp  *interp,
+                              unsigned     options));
 #endif

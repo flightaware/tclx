@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,24 +21,13 @@
 /*
  * Prototypes of internal functions.
  */
-int
-IsSetVarCmd _ANSI_ARGS_((Tcl_Interp *interp,
-                         char       *command));
+static int
+IsSetVarCmd _ANSI_ARGS_((char  *command));
 
-void
+static void
 OutFlush _ANSI_ARGS_((FILE *filePtr));
 
-void
-Tcl_PrintResult _ANSI_ARGS_((FILE   *fp,
-                             int     returnval,
-                             char   *resultText));
-
-void
-OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
-                          FILE       *outFP,
-                          int         topLevel));
-
-int
+static int
 SetPromptVar _ANSI_ARGS_((Tcl_Interp  *interp,
                           char        *hookVarName,
                           char        *newHookValue,
@@ -49,16 +38,15 @@ SetPromptVar _ANSI_ARGS_((Tcl_Interp  *interp,
  *-----------------------------------------------------------------------------
  * IsSetVarCmd --
  *
- *      Determine if the current command is a `set' command that sets a
- * variable (i.e. two arguments).  This routine should only be called if the
- * command returned TCL_OK.  Returns TRUE if it sets a variable, FALSE if its
- * some other command.
+ *    Determine if a command is a `set' command that sets a variable
+ * (i.e. two arguments).  This routine should only be called if the command
+ * returned TCL_OK.  Returns TRUE if it sets a variable, FALSE if its some
+ * other command.
  *-----------------------------------------------------------------------------
  */
 static int
-IsSetVarCmd (interp, command)
-    Tcl_Interp *interp;
-    char       *command;
+IsSetVarCmd (command)
+    char  *command;
 {
     char  *nextPtr;
     int    wordCnt;
@@ -86,8 +74,8 @@ IsSetVarCmd (interp, command)
  *
  * OutFlush --
  *
- *   Flush a stdio file and check for errors.
- *
+ *   Flush a stdio file and check for errors.  Keeps us from going on if
+ * we are really not outputting anything.
  *-----------------------------------------------------------------------------
  */
 static void
@@ -110,34 +98,43 @@ OutFlush (filePtr)
  *
  * Tcl_PrintResult --
  *
- *      Print a Tcl result
+ *   Print the result of a Tcl.  It can optionally not echo "set" commands
+ * that successfully set a variable.
  *
- * Results:
- *
- *      Takes an open file pointer, a return value and some result
- *      text.  Prints the result text if the return value is TCL_OK,
- *      prints "Error:" and the result text if it's TCL_ERROR,
- *      else prints "Bad return code:" and the result text.
- *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.  Result of command should be
+ *     in interp->result.
+ *   o intResult (I) - The integer result returned by Tcl_Eval.
+ *   o checkCmd (I) - If not NULL and the command was sucessful, check to
+ *     set if this is a "set" command setting a variable.  If so, don't echo
+ *     the result. 
  *-----------------------------------------------------------------------------
  */
-static void
-Tcl_PrintResult (fp, returnval, resultText)
-    FILE   *fp;
-    int     returnval;
-    char   *resultText;
+void
+Tcl_PrintResult (interp, intResult, checkCmd)
+    Tcl_Interp *interp;
+    int         intResult;
+    char       *checkCmd;
 {
+    /*
+     * If the command was supplied and it was a successful set of a variable,
+     * don't output the result.
+     */
+    if ((checkCmd != NULL) && (intResult == TCL_OK) && IsSetVarCmd (checkCmd))
+        return;
 
-    if (returnval == TCL_OK) {
-        if (resultText [0] != '\0') {
-            fputs (resultText, fp);
-            fputs ("\n", fp);
+    if (intResult == TCL_OK) {
+        if (interp->result [0] != '\0') {
+            fputs (interp->result, stdout);
+            fputs ("\n", stdout);
         }
     } else {
-        OutFlush (fp);
-        fputs ((returnval == TCL_ERROR) ? "Error" : "Bad return code", stderr);
-        fputs (": ", stderr);
-        fputs (resultText, stderr);
+        OutFlush (stdout);
+        if (intResult == TCL_ERROR)  
+            fputs ("Error: ", stderr);
+        else
+            fprintf (stderr, "Bad return code (%d): ", intResult);
+        fputs (interp->result, stderr);
         fputs ("\n", stderr);
         OutFlush (stderr);
     }
@@ -146,16 +143,15 @@ Tcl_PrintResult (fp, returnval, resultText)
 /*
  *-----------------------------------------------------------------------------
  *
- * OutputPromp --
+ * Tcl_OutputPrompt --
  *     Outputs a prompt by executing either the command string in
  *     TCLENV(topLevelPromptHook) or TCLENV(downLevelPromptHook).
  *
  *-----------------------------------------------------------------------------
  */
-static void
-OutputPrompt (interp, outFP, topLevel)
+void
+Tcl_OutputPrompt (interp, topLevel)
     Tcl_Interp *interp;
-    FILE       *outFP;
     int         topLevel;
 {
     char *hookName;
@@ -163,30 +159,29 @@ OutputPrompt (interp, outFP, topLevel)
     int   result;
     int   promptDone = FALSE;
 
-    hookName = topLevel ? "topLevelPromptHook"
-                        : "downLevelPromptHook";
+    hookName = topLevel ? "topLevelPromptHook" : "downLevelPromptHook";
 
     promptHook = Tcl_GetVar2 (interp, "TCLENV", hookName, 1);
-    if ((promptHook != NULL) && (promptHook [0] != '\0')) {
-        result = Tcl_Eval (interp, promptHook, 0, (char **)NULL);
-        if (!((result == TCL_OK) || (result == TCL_RETURN))) {
+    if (promptHook != NULL) {
+        result = Tcl_Eval (interp, promptHook);
+        if (result == TCL_ERROR) {
             fputs ("Error in prompt hook: ", stderr);
             fputs (interp->result, stderr);
             fputs ("\n", stderr);
-            Tcl_PrintResult (outFP, result, interp->result);
+            Tcl_PrintResult (interp, result, NULL);
         } else {
-            fputs (interp->result, outFP);
+            fputs (interp->result, stdout);
             promptDone = TRUE;
         }
     } 
     if (!promptDone) {
         if (topLevel)
-            fputs ("%", outFP);
+            fputs ("%", stdout);
         else
-            fputs (">", outFP);
+            fputs (">", stdout);
     }
-    OutFlush (outFP);
-
+    OutFlush (stdout);
+    Tcl_ResetResult (interp);
 }
 
 /*
@@ -205,17 +200,11 @@ OutputPrompt (interp, outFP, topLevel)
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter
- *   o inFile (I) - The file to read commands from.
- *   o outFile (I) - The file to write the prompts to. 
- *   o options (I) - Currently unused.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_CommandLoop (interp, inFile, outFile, options)
+Tcl_CommandLoop (interp)
     Tcl_Interp *interp;
-    FILE       *inFile;
-    FILE       *outFile;
-    unsigned    options;
 {
     Tcl_DString cmdBuf;
     char        inputBuf [128];
@@ -236,16 +225,16 @@ Tcl_CommandLoop (interp, inFile, outFile, options)
         /*
          * Output a prompt and input a command.
          */
-        clearerr (inFile);
-        clearerr (outFile);
-        OutputPrompt (interp, outFile, topLevel);
+        clearerr (stdin);
+        clearerr (stdout);
+        Tcl_OutputPrompt (interp, topLevel);
         errno = 0;
-        if (fgets (inputBuf, sizeof (inputBuf), inFile) == NULL) {
-            if (!feof(inFile) && (errno == EINTR)) {
+        if (fgets (inputBuf, sizeof (inputBuf), stdin) == NULL) {
+            if (!feof(stdin) && (errno == EINTR)) {
                 putchar('\n');
                 continue;  /* Next command */
             }
-            if (ferror (inFile))
+            if (ferror (stdin))
                 panic ("command loop: error on input file: %s\n",
                        strerror (errno));
             goto endOfFile;
@@ -256,13 +245,15 @@ Tcl_CommandLoop (interp, inFile, outFile, options)
             topLevel = FALSE;
             continue;  /* Next line */
         }
+
         /*
          * Finally have a complete command, go eval it and maybe output the
          * result.
          */
         result = Tcl_RecordAndEval (interp, cmdBuf.string, 0);
-        if (result != TCL_OK || !IsSetVarCmd (interp, cmdBuf.string))
-            Tcl_PrintResult (outFile, result, interp->result);
+
+        Tcl_PrintResult (interp, result, cmdBuf.string);
+
         topLevel = TRUE;
         Tcl_DStringFree (&cmdBuf);
     }
@@ -355,7 +346,7 @@ Tcl_CommandloopCmd(clientData, interp, argc, argv)
             goto exitPoint;
     }
 
-    Tcl_CommandLoop (interp, stdin, stdout, 0);
+    Tcl_CommandLoop (interp);
 
     if (oldTopLevelHook != NULL)
         SetPromptVar (interp, "topLevelPromptHook", oldTopLevelHook, NULL);
