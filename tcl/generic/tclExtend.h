@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 4.1 1994/11/25 19:00:41 markd Exp markd $
+ * $Id: tclExtend.h,v 4.2 1994/12/28 05:19:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -206,5 +206,10 @@ Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              void_pt      headerPtr,
                              CONST  char *handle));
 
+/*
+ * Tk with TclX initialization.
+ */
+int
+TkX_Init _ANSI_ARGS_((Tcl_Interp  *interp));
 
 #endif

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXmsgcat.c,v 4.0 1994/07/16 05:27:33 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -316,8 +316,6 @@ void
 Tcl_InitMsgCat (interp)
     Tcl_Interp *interp;
 {
-    int incrUseCount;
-
     /*
      * Set up the table.  It is shared between all interpreters, so the use
      * count reflects the number of interpreters.

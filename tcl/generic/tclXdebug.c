@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 3.2 1994/06/28 15:44:52 markd Exp markd $
+ * $Id: tclXdebug.c,v 4.0 1994/07/16 05:26:43 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -230,7 +230,6 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
     int           argc;
     char        **argv;
 {
-    Interp       *iPtr = (Interp *) interp;
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;
     int           idx;
     char         *fileHandle;

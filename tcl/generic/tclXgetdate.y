@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXgetdate.y,v 4.0 1994/07/16 05:28:35 markd Rel markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 3.1 $
+ * $Revision: 4.0 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -42,10 +42,6 @@
 #include <ctype.h>
 #include <time.h>
 #include "tcl.h"
-
-#define yyparse         date_parse
-#define yylex           date_lex
-#define yyerror         date_error
 
 #define EPOCH           1970
 #define START_OF_TIME   1902
@@ -492,7 +488,7 @@ static TABLE    MilitaryTable[] = {
 /*
  * Prototypes of internal functions.
  */
-static
+static void
 yyerror _ANSI_ARGS_((char *s));
 
 static time_t
@@ -533,9 +529,9 @@ yylex ();
 
 
 /*
- * Dump error messages in the bit bucket, not to useful.
+ * Dump error messages in the bit bucket.
  */
-static
+static void
 yyerror(s)
     char  *s;
 {
@@ -565,7 +561,7 @@ ToSeconds(Hours, Minutes, Seconds, Meridian)
             return -1;
         return (((Hours % 12) + 12) * 60L + Minutes) * 60L + Seconds;
     }
-    /* NOTREACHED */
+    return -1;  /* Should never be reached */
 }
 
 

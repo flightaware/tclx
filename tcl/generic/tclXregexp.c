@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 4.2 1994/11/25 20:09:18 markd Exp markd $
+ * $Id: tclXregexp.c,v 4.3 1994/11/29 04:35:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -189,8 +189,8 @@ BoyerMooreCompile (pat, patlen)
     char *pat;
     int   patlen;
 {
-        register unsigned char *p, *t;
-        register unsigned i, p1, j, *delta;
+        register unsigned char *p;
+        register unsigned i, p1, *delta;
         struct compiled_search_struct *cp;
         int alloc_len;
 

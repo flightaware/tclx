@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 4.0 1994/07/16 05:27:39 markd Rel markd $
+ * $Id: tclXprofile.c,v 4.1 1994/12/28 05:17:24 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -131,7 +131,7 @@ Tcl_ProfileCmd _ANSI_ARGS_((ClientData    clientData,
                             char        **argv));
 
 static void
-CleanUpProfMon _ANSI_ARGS_((ClientData  clientData,
+ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
                             Tcl_Interp *interp));
 
 #ifdef TIMES_RETS_REAL_TIME
@@ -646,7 +646,6 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
     int           argc;
     char        **argv;
 {
-    Interp      *iPtr = (Interp *) interp;
     profInfo_t  *infoPtr = (profInfo_t *) clientData;
     int          idx;
     int          cmdArgc,   optionsArgc = 0;

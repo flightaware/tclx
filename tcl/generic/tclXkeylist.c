@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 4.0 1994/07/16 05:27:12 markd Rel markd $
+ * $Id: tclXkeylist.c,v 4.1 1994/10/22 05:16:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -659,8 +659,6 @@ Tcl_KeyldelCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     char  *keyedList, *newList;
-    int    listArgc, fieldIdx, idx;
-    char **listArgv;
     char  *varPtr;
 
     if (argc != 3) {

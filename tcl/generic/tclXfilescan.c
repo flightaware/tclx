@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 4.5 1994/11/29 06:53:48 markd Exp markd $
+ * $Id: tclXfilescan.c,v 4.6 1994/12/29 00:28:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -311,7 +311,6 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     scanContext_t  *contextPtr, **tableEntryPtr;
-    char           *result;
     matchDef_t     *newmatch;
     int             compFlags = TCLX_REXP_BOTH_ALGORITHMS;
     int             firstArg = 1;
@@ -526,7 +525,6 @@ ScanFile (interp, contextPtr, filePtr)
     matchDef_t       *matchPtr;
     int               result, matchedAtLeastOne, status, storedThisLine;
     long              scanLineNum = 0;
-    char             *fileHandle;
     Tcl_SubMatchInfo  subMatchInfo;
     FILE             *copyFilePtr;
 

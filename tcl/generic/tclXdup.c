@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 4.1 1994/11/29 07:15:11 markd Exp markd $
+ * $Id: tclXdup.c,v 4.2 1994/12/29 00:28:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -133,7 +133,6 @@ DoSpecifiedDup (interp, oldFilePtr, targetFileId)
 {
     int    targetFileNum = -1;
     FILE  *targetFilePtr;
-    char  *mode;
 
     /*
      * Determine if the target file is currently open.  Also get the file

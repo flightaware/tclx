@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 3.5 1994/07/04 22:15:08 markd Exp markd $
+ * $Id: tclXsignal.c,v 4.0 1994/07/16 05:27:50 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -53,111 +53,111 @@ static struct {
     short num;
 } sigNameTable [] = {
 #ifdef SIGABRT
-    "ABRT",    SIGABRT,
+    {"ABRT",    SIGABRT},
 #endif
 #ifdef SIGALRM
-    "ALRM",    SIGALRM,
+    {"ALRM",    SIGALRM},
 #endif
 #ifdef SIGBUS
-    "BUS",     SIGBUS,
+    {"BUS",     SIGBUS},
 #endif
 #ifdef SIGCHLD
-    "CHLD",    SIGCHLD,
+    {"CHLD",    SIGCHLD},
 #endif
 #ifdef SIGCLD
-    "CLD",     SIGCLD,
+    {"CLD",     SIGCLD},
 #endif
 #ifdef SIGCONT
-    "CONT",    SIGCONT,
+    {"CONT",    SIGCONT},
 #endif
 #ifdef SIGEMT
-    "EMT",     SIGEMT,
+    {"EMT",     SIGEMT},
 #endif
 #ifdef SIGFPE
-    "FPE",     SIGFPE,
+    {"FPE",     SIGFPE},
 #endif
 #ifdef SIGHUP
-    "HUP",     SIGHUP,
+    {"HUP",     SIGHUP},
 #endif
 #ifdef SIGILL
-    "ILL",     SIGILL,
+    {"ILL",     SIGILL},
 #endif
 #ifdef SIGINT
-    "INT",     SIGINT,
+    {"INT",     SIGINT},
 #endif
 #ifdef SIGIO
-    "IO",      SIGIO,
+    {"IO",      SIGIO},
 #endif
 #ifdef SIGIOT
-    "IOT",     SIGIOT,
+    {"IOT",     SIGIOT},
 #endif
 #ifdef SIGKILL
-    "KILL",    SIGKILL,
+    {"KILL",    SIGKILL},
 #endif
 #ifdef SIGLOST
-    "LOST",    SIGLOST,
+    {"LOST",    SIGLOST},
 #endif
 #ifdef SIGPIPE
-    "PIPE",    SIGPIPE,
+    {"PIPE",    SIGPIPE},
 #endif
 #ifdef SIGPOLL
-    "POLL",    SIGPOLL,
+    {"POLL",    SIGPOLL},
 #endif
 #ifdef SIGPROF
-    "PROF",    SIGPROF,
+    {"PROF",    SIGPROF},
 #endif
 #ifdef SIGPWR
-    "PWR",     SIGPWR,
+    {"PWR",     SIGPWR},
 #endif
 #ifdef SIGQUIT
-    "QUIT",    SIGQUIT,
+    {"QUIT",    SIGQUIT},
 #endif
 #ifdef SIGSEGV
-    "SEGV",    SIGSEGV,
+    {"SEGV",    SIGSEGV},
 #endif
 #ifdef SIGSTOP
-    "STOP",    SIGSTOP,
+    {"STOP",    SIGSTOP},
 #endif
 #ifdef SIGSYS
-    "SYS",     SIGSYS,
+    {"SYS",     SIGSYS},
 #endif
 #ifdef SIGTERM
-    "TERM",    SIGTERM,
+    {"TERM",    SIGTERM},
 #endif
 #ifdef SIGTRAP
-    "TRAP",    SIGTRAP,
+    {"TRAP",    SIGTRAP},
 #endif
 #ifdef SIGTSTP
-    "TSTP",    SIGTSTP,
+    {"TSTP",    SIGTSTP},
 #endif
 #ifdef SIGTTIN
-    "TTIN",    SIGTTIN,
+    {"TTIN",    SIGTTIN},
 #endif
 #ifdef SIGTTOU
-    "TTOU",    SIGTTOU,
+    {"TTOU",    SIGTTOU},
 #endif
 #ifdef SIGURG
-    "URG",     SIGURG,
+    {"URG",     SIGURG},
 #endif
 #ifdef SIGUSR1
-    "USR1",    SIGUSR1,
+    {"USR1",    SIGUSR1},
 #endif
 #ifdef SIGUSR2
-    "USR2",    SIGUSR2,
+    {"USR2",    SIGUSR2},
 #endif
 #ifdef SIGVTALRM
-    "VTALRM",  SIGVTALRM,
+    {"VTALRM",  SIGVTALRM},
 #endif
 #ifdef SIGWINCH
-    "WINCH",   SIGWINCH,
+    {"WINCH",   SIGWINCH},
 #endif
 #ifdef SIGXCPU
-    "XCPU",    SIGXCPU,
+    {"XCPU",    SIGXCPU},
 #endif
 #ifdef SIGXFSZ
-    "XFSZ",    SIGXFSZ,
+    {"XFSZ",    SIGXFSZ},
 #endif
-    NULL,         -1};
+    {NULL,         -1}};
 
 #ifndef RETSIGTYPE
 #   define RETSIGTYPE void
@@ -459,7 +459,6 @@ SignalBlocked (interp, signalNum)
     int          signalNum;
 {
 #ifdef HAVE_SIGACTION
-    int      idx;
     sigset_t sigBlockSet;
 
     if (sigprocmask (SIG_BLOCK, NULL, &sigBlockSet)) {
@@ -720,7 +719,7 @@ FormatTrapCode (interp, signalNum, command)
     int          signalNum;
     Tcl_DString *command;
 {
-    char  *signalName, *copyPtr, *scanPtr, prevChar;
+    char  *signalName, *copyPtr, *scanPtr;
 
     /*
      * Force name to always be SIGCHLD, even if system defines only SIGCLD.
@@ -1406,9 +1405,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int            signalNum, idx;
     unsigned char  signals [MAXSIG];
-    char          *signalName;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 

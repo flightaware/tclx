@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 4.0 1994/07/16 05:26:53 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -200,7 +200,7 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
 #define TCL_COPY_MAX_BYTES  2
 
     FILE  *inFilePtr, *outFilePtr;
-    long   bytesToRead, bytesRead, totalBytesToRead, totalBytesRead, bytesLeft;
+    long   totalBytesToRead, totalBytesRead;
     int    copyMode;
 
     if (!(argc == 3 || argc == 5))

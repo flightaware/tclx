@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 4.1 1994/10/04 00:56:22 markd Exp markd $
+ * $Id: tclXlib.c,v 4.2 1994/12/29 00:28:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -63,10 +63,6 @@ typedef struct libInfo_t {
 /*
  * Prototypes of internal functions.
  */
-static int
-GlobalEvalFile _ANSI_ARGS_((Tcl_Interp *interp,
-                            char       *file));
-
 static int
 EvalFilePart _ANSI_ARGS_((Tcl_Interp  *interp,
                           char        *fileName,
@@ -148,29 +144,6 @@ LoadCommand _ANSI_ARGS_((Tcl_Interp  *interp,
 static void
 TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
                            Tcl_Interp *interp));
-
-/*
- *-----------------------------------------------------------------------------
- * GlobalEvalFile --
- *
- *  Evaluate a file at global level in an interpreter.
- *-----------------------------------------------------------------------------
- */
-static int
-GlobalEvalFile(interp, file)
-    Tcl_Interp *interp;
-    char       *file;
-{
-    register Interp *iPtr = (Interp *) interp;
-    int result;
-    CallFrame *savedVarFramePtr;
-
-    savedVarFramePtr = iPtr->varFramePtr;
-    iPtr->varFramePtr = NULL;
-    result = Tcl_EvalFile (interp, file);
-    iPtr->varFramePtr = savedVarFramePtr;
-    return result;
-}
 
 /*
  *-----------------------------------------------------------------------------
@@ -408,7 +381,7 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
      off_t       *offsetPtr;
      unsigned   *lengthPtr;
 {
-    int   pkgDataArgc, idx;
+    int   pkgDataArgc;
     char *dataStr, **pkgDataArgv = NULL;
     char *srcPtr, *destPtr;
 
@@ -1092,10 +1065,8 @@ LoadCommand (interp, command)
     Tcl_Interp  *interp;
     char        *command;
 {
-    char              *loadCmd;
-    ClientData         clientData;
-    Tcl_CmdDeleteProc *deleteProc;
-    Tcl_CmdInfo        cmdInfo;
+    char        *loadCmd;
+    Tcl_CmdInfo  cmdInfo;
 
     loadCmd = Tcl_GetVar2 (interp, AUTO_INDEX, command, TCL_GLOBAL_ONLY);
     if (loadCmd == NULL)

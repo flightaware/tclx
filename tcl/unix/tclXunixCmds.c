@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 3.6 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 4.0 1994/07/16 05:28:03 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -262,8 +262,7 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    unsigned time;
-    FILE *filePtr;
+    FILE  *filePtr;
 
     if ((argc < 1) || (argc > 2)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?filehandle?",
@@ -352,6 +351,7 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
                           (char *) NULL);
         return TCL_ERROR;
     }
+    return TCL_ERROR;  /* Should never reach here */
 }
 
 /*

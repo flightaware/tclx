@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 4.0 1994/07/16 05:26:40 markd Rel markd $
+ * $Id: tclXshell.c,v 4.1 1994/11/25 19:00:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,7 +76,7 @@ ParseCmdLine (interp, argc, argv)
     int           argc;
     char        **argv;
 {
-    char  *scanPtr, *tclArgv, *errorStack, numBuf [32];
+    char  *tclArgv, numBuf [32];
     int    option;
     char  *evalFile = NULL;
     char  *evalCmd  = NULL;
