@@ -1,0 +1,96 @@
+#
+# nice.test
+#
+# Tests for the nice command.
+#---------------------------------------------------------------------------
+# Copyright 1993 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: 
+#------------------------------------------------------------------------------
+#
+
+if {[info procs test] != "test"} then {source testlib.tcl}
+
+Test nice-1.1 {nice tests} {
+    nice
+} 1 {wrong # args: nice niceness}
+
+Test nice-1.2 {nice tests} {
+    nice a b
+} 1 {wrong # args: nice niceness}
+
+Test nice-1.3 {nice tests} {
+    nice 0
+} 0 {0}
+
+#
+# since you can't nice back up unless you're root, we spawn a child process 
+# to run the nice tests
+#
+set pid [fork]
+if {$pid < 0} {
+    error "couldn't fork"
+}
+
+#
+# parent waits for child to complete
+#
+if {$pid > 0} {
+    wait $pid
+    return
+}
+
+
+Test nice-1.4 {nice tests} {
+    nice 8
+} 0 {8}
+
+Test nice-1.5 {nice tests} {
+    nice 8
+} 0 {16}
+
+Test nice-1.6 {nice tests} {
+    nice 20
+} 0 {19}
+
+if {[id user] != "root"} {
+
+    Test nice-1.7 {nice tests} {
+        nice -1
+    } 1 {Not owner}
+
+    puts stderr "*************************************************************"
+    puts stderr "You are not running as `root', certain nice tests will be"
+    puts stderr "skipped"
+    puts stderr "*************************************************************"
+    exit
+}
+
+Test nice-1.8 {nice tests} {
+    nice -1
+} 0 {18}
+
+Test nice-1.10 {nice tests} {
+    nice -9
+} 0 {9}
+
+Test nice-1.11 {nice tests} {
+    nice -10
+} 0 {-1}
+
+Test nice-1.12 {nice tests} {
+    nice -10
+} 0 {-11}
+
+Test nice-1.13 {nice tests} {
+    nice -10
+} 0 {-20}
+
+exit
