@@ -29,7 +29,10 @@
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
 
-/* Define if your sys/time.h declares struct tm.  */
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* Define if your <sys/time.h> declares struct tm.  */
 #undef TM_IN_SYS_TIME
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
@@ -119,11 +122,29 @@
 /* Define if fd_set is not defined. */
 #undef NO_FD_SET
 
+/* Define if you have bcopy.  */
+#undef HAVE_BCOPY
+
+/* Define if you have bzero.  */
+#undef HAVE_BZERO
+
 /* Define if you have catgets.  */
 #undef HAVE_CATGETS
 
+/* Define if you have fsync.  */
+#undef HAVE_FSYNC
+
 /* Define if you have getcwd.  */
 #undef HAVE_GETCWD
+
+/* Define if you have gethostbyname.  */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define if you have getpriority.  */
+#undef HAVE_GETPRIORITY
+
+/* Define if you have gettimeofday.  */
+#undef HAVE_GETTIMEOFDAY
 
 /* Define if you have select.  */
 #undef HAVE_SELECT
@@ -134,50 +155,41 @@
 /* Define if you have setlinebuf.  */
 #undef HAVE_SETLINEBUF
 
-/* Define if you have sigaction.  */
-#undef HAVE_SIGACTION
-
 /* Define if you have setpgid.  */
 #undef HAVE_SETPGID
 
-/* Define if you have bzero.  */
-#undef HAVE_BZERO
-
-/* Define if you have bcopy.  */
-#undef HAVE_BCOPY
-
-/* Define if you have gethostbyname.  */
-#undef HAVE_GETHOSTBYNAME
-
-/* Define if you have fsync.  */
-#undef HAVE_FSYNC
-
-/* Define if you have getpriority.  */
-#undef HAVE_GETPRIORITY
-
-/* Define if you have gettimeofday.  */
-#undef HAVE_GETTIMEOFDAY
-
-/* Define if you have the X11_s library (-lX11_s).  */
-#undef HAVE_X11_S
+/* Define if you have sigaction.  */
+#undef HAVE_SIGACTION
 
 /* Define if you have the X11 library (-lX11).  */
-#undef HAVE_X11
+#undef HAVE_LIBX11
 
-/* Define if you have the Xwindow library (-lXwindow).  */
-#undef HAVE_XWINDOW
+/* Define if you have the X11_s library (-lX11_s).  */
+#undef HAVE_LIBX11_S
 
 /* Define if you have the Xbsd library (-lXbsd).  */
-#undef HAVE_XBSD
+#undef HAVE_LIBXBSD
 
-/* Define if you have the socket library (-lsocket).  */
-#undef HAVE_SOCKET
+/* Define if you have the Xt library (-lXt).  */
+#undef HAVE_LIBXT
 
-/* Define if you have the nsl library (-lnsl).  */
-#undef HAVE_NSL
-
-/* Define if you have the sun library (-lsun).  */
-#undef HAVE_SUN
+/* Define if you have the Xwindow library (-lXwindow).  */
+#undef HAVE_LIBXWINDOW
 
 /* Define if you have the c_s library (-lc_s).  */
-#undef HAVE_C_S
+#undef HAVE_LIBC_S
+
+/* Define if you have the ieee library (-lieee).  */
+#undef HAVE_LIBIEEE
+
+/* Define if you have the intl library (-lintl).  */
+#undef HAVE_LIBINTL
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET
+
+/* Define if you have the sun library (-lsun).  */
+#undef HAVE_LIBSUN

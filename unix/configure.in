@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.20 1993/11/17 15:16:25 markd Exp markd $
+dnl $Id: configure.in,v 3.0 1993/11/19 07:01:55 markd Rel markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.20 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 3.0 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -89,13 +89,6 @@ EOF
 fi
 AC_SUBST(MAKEINCLUDE)
 AC_SUBST(MAKEQUOTE)
-
-#------------------------------------------------------------------------------
-#       Check for various Unix or library functions that can be used by TclX.
-#------------------------------------------------------------------------------
-
-AC_HAVE_FUNCS(catgets getcwd select setitimer setlinebuf sigaction setpgid)
-AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync getpriority)
 
 #------------------------------------------------------------------------------
 #       Check for system header files.
@@ -423,6 +416,14 @@ AC_HAVE_LIBRARY(nsl, [LIBS="$LIBS -lnsl"])
 AC_HAVE_LIBRARY(sun, [LIBS="$LIBS -lsun"])
 AC_HAVE_LIBRARY(c_s, [LIBS="$LIBS -lc_s"])
 AC_HAVE_LIBRARY(ieee, [LIBS="$LIBS -lieee"])
+
+#------------------------------------------------------------------------------
+#       Check for various Unix or library functions that can be used by TclX.
+#       These must be after the library checks.
+#------------------------------------------------------------------------------
+
+AC_HAVE_FUNCS(catgets getcwd select setitimer setlinebuf sigaction setpgid)
+AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync getpriority)
 
 #------------------------------------------------------------------------------
 #       If Config.mk is not in the build directory, copy it local.
