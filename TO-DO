@@ -7,3 +7,6 @@ o Use Tcl_RegExpCompile and Tcl_RegExpExec.
 
 o Use install-sh for installation.
 
+o tkdemo proc is not installed.
+
+o tclhelp is not built for windows.
