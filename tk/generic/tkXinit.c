@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 1.9 1993/10/23 23:33:57 markd Exp markd $
+ * $Id: tkXinit.c,v 3.0 1993/11/19 07:01:31 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,22 +47,10 @@ TkX_Init (interp)
     Tcl_Interp          *interp;
 {
     char        *value;
-    Tcl_DString  libDir;
 
     tclAppName     = "Wishx";
     tclAppLongname = "Extended Tk Shell - Wishx";
     tclAppVersion  = TK_VERSION;
-
-    Tcl_DStringInit (&libDir);
-
-    /*
-     * Get the path to the master (library) directory.
-     */
-    value = Tcl_GetVar2 (interp, "env", "TK_LIBRARY", TCL_GLOBAL_ONLY);
-    if (value != NULL)
-        Tcl_DStringAppend (&libDir, value, -1);
-    else
-        Tcl_DStringAppend (&libDir, TK_MASTERDIR, -1);
 
     /*
      * If we are going to be interactive, Setup SIGINT handling.
