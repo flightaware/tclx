@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.28 1999/07/08 04:01:10 wart Exp $
+dnl $Id: configure.in,v 8.29 2000/02/05 17:24:27 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.28 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.29 $),)dnl
 
 #------------------------------------------------------------------------------
 # Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
@@ -147,6 +147,7 @@ AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(TCL_LD_FLAGS)
 AC_SUBST(TCL_LD_SEARCH_FLAGS)
 AC_SUBST(TCL_EXTRA_CFLAGS)
+AC_SUBST(TCL_CFLAGS_WARNING)
 AC_SUBST(TCL_BUILD_LIB_SPEC)
 AC_SUBST(TCL_LIB_SPEC)
 AC_SUBST(TCL_BUILD_STUB_LIB_SPEC)

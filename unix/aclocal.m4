@@ -565,6 +565,11 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
     TCL_LIB_VERSIONS_OK=ok
     CFLAGS_DEBUG=-g
     CFLAGS_OPTIMIZE=-O
+    if test "$using_gcc" = "yes" ; then
+        CFLAGS_WARNING="-Wall -Wconversion -Wno-implicit-int"
+    else
+        CFLAGS_WARNING=""
+    fi
     TCL_NEEDS_EXP_FILE=0
     TCL_BUILD_EXP_FILE=""
     TCL_EXP_FILE=""
@@ -1094,6 +1099,7 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
     AC_SUBST(DL_LIBS)
     AC_SUBST(CFLAGS_DEBUG)
     AC_SUBST(CFLAGS_OPTIMIZE)
+    AC_SUBST(CFLAGS_WARNING)
 ])
 
 #--------------------------------------------------------------------
