@@ -1,132 +1,318 @@
 #!/bin/sh
 # Guess values for system-dependent variables and create Makefiles.
-# Generated automatically using autoconf.
-# Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
+# Generated automatically using autoconf version 1.8 
+# Copyright (C) 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
+# This configure script is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as published
+# by the Free Software Foundation; either version 2, or (at your option)
 # any later version.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# This script is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# Usage: configure [--srcdir=DIR] [--host=HOST] [--gas] [--nfp]
-#        [--prefix=PREFIX] [--exec-prefix=PREFIX] [--with-PACKAGE[=VALUE]]
-# Ignores all args except --srcdir, --prefix, --exec-prefix, and
-# --with-PACKAGE[=VALUE] unless this script has special code to handle it.
+# Save the original args to write them into config.status later.
+configure_args="$*"
 
-for arg
+# Only options that might do something get documented.
+ac_usage="Usage: configure [options] [host]
+Options: [defaults in brackets after descriptions]
+--build=BUILD		configure for building on BUILD [BUILD=HOST]
+--disable-FEATURE	do not include FEATURE (same as --enable-FEATURE=no)
+--enable-FEATURE[=ARG]	include FEATURE [ARG=yes]
+--exec-prefix=PREFIX	install host dependent files in PREFIX [/usr/local]
+--help			print this message
+--host=HOST		configure for HOST [guessed]
+--prefix=PREFIX		install host independent files in PREFIX [/usr/local]
+--quiet, --silent	do not print \`checking for...' messages
+--srcdir=DIR		find the sources in DIR [configure dir or ..]
+--target=TARGET		configure for TARGET [TARGET=HOST]
+--verbose		print results of checks
+--version		print the version of autoconf that created configure
+--with-PACKAGE[=ARG]	use PACKAGE [ARG=yes]
+--without-PACKAGE	do not use PACKAGE (same as --with-PACKAGE=no)
+--x-includes=DIR	X include files are in DIR
+--x-libraries=DIR	X library files are in DIR"
+
+# Initialize some variables set by options.
+# The variables have the same names as the options, with
+# dashes changed to underlines.
+build=NONE
+exec_prefix=
+host=NONE
+no_create=
+nonopt=NONE
+norecursion=
+prefix=
+program_prefix=
+program_suffix=
+program_transform_name=
+silent=
+srcdir=
+target=NONE
+verbose=
+x_includes=
+x_libraries=
+
+ac_prev=
+for ac_option
 do
-  # Handle --exec-prefix with a space before the argument.
-  if test x$next_exec_prefix = xyes; then exec_prefix=$arg; next_exec_prefix=
-  # Handle --host with a space before the argument.
-  elif test x$next_host = xyes; then next_host=
-  # Handle --prefix with a space before the argument.
-  elif test x$next_prefix = xyes; then prefix=$arg; next_prefix=
-  # Handle --srcdir with a space before the argument.
-  elif test x$next_srcdir = xyes; then srcdir=$arg; next_srcdir=
-  else
-    case $arg in
-     # For backward compatibility, recognize -exec-prefix and --exec_prefix.
-     -exec-prefix=* | --exec_prefix=* | --exec-prefix=* | --exec-prefi=* | --exec-pref=* | --exec-pre=* | --exec-pr=* | --exec-p=* | --exec-=* | --exec=* | --exe=* | --ex=* | --e=*)
-	exec_prefix=`echo $arg | sed 's/[-a-z_]*=//'` ;;
-     -exec-prefix | --exec_prefix | --exec-prefix | --exec-prefi | --exec-pref | --exec-pre | --exec-pr | --exec-p | --exec- | --exec | --exe | --ex | --e)
-	next_exec_prefix=yes ;;
 
-     -gas | --gas | --ga | --g) ;;
-
-     -host=* | --host=* | --hos=* | --ho=* | --h=*) ;;
-     -host | --host | --hos | --ho | --h)
-	next_host=yes ;;
-
-     -nfp | --nfp | --nf) ;;
-
-     -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
-	prefix=`echo $arg | sed 's/[-a-z_]*=//'` ;;
-     -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
-	next_prefix=yes ;;
-
-     -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=* | --s=*)
-	srcdir=`echo $arg | sed 's/[-a-z_]*=//'` ;;
-     -srcdir | --srcdir | --srcdi | --srcd | --src | --sr | --s)
-	next_srcdir=yes ;;
-
-     -with-* | --with-*)
-       package=`echo $arg|sed -e 's/-*with-//' -e 's/=.*//'`
-       # Reject names that aren't valid shell variable names.
-       if test -n "`echo $package| sed 's/[-a-zA-Z0-9_]//g'`"; then
-         echo "configure: $package: invalid package name" >&2; exit 1
-       fi
-       package=`echo $package| sed 's/-/_/g'`
-       case "$arg" in
-         *=*) val="`echo $arg|sed 's/[^=]*=//'`" ;;
-         *) val=1 ;;
-       esac
-       eval "with_$package='$val'" ;;
-
-     -v | -verbose | --verbose | --verbos | --verbo | --verb | --ver | --ve | --v)
-       verbose=yes ;;
-
-     *) ;;
-    esac
+  # If the previous option needs an argument, assign it.
+  if test -n "$ac_prev"; then
+    eval "$ac_prev=\$ac_option"
+    ac_prev=
+    continue
   fi
+
+  # Accept (but ignore some of) the important Cygnus configure
+  # options, so we can diagnose typos.
+
+  case "$ac_option" in
+  -*=*) ac_optarg=`echo "$ac_option" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+  *) ac_optarg= ;;
+  esac
+
+  case "$ac_option" in
+
+  -build | --build | --buil | --bui | --bu | --b)
+    ac_prev=build ;;
+  -build=* | --build=* | --buil=* | --bui=* | --bu=* | --b=*)
+    build="$ac_optarg" ;;
+
+  -disable-* | --disable-*)
+    ac_feature=`echo $ac_option|sed -e 's/-*disable-//'`
+    # Reject names that aren't valid shell variable names.
+    if test -n "`echo $ac_feature| sed 's/[-a-zA-Z0-9_]//g'`"; then
+      echo "configure: $ac_feature: invalid feature name" >&2; exit 1
+    fi
+    ac_feature=`echo $ac_feature| sed 's/-/_/g'`
+    eval "enable_${ac_feature}=no" ;;
+
+  -enable-* | --enable-*)
+    ac_feature=`echo $ac_option|sed -e 's/-*enable-//' -e 's/=.*//'`
+    # Reject names that aren't valid shell variable names.
+    if test -n "`echo $ac_feature| sed 's/[-_a-zA-Z0-9]//g'`"; then
+      echo "configure: $ac_feature: invalid feature name" >&2; exit 1
+    fi
+    ac_feature=`echo $ac_feature| sed 's/-/_/g'`
+    case "$ac_option" in
+      *=*) ;;
+      *) ac_optarg=yes ;;
+    esac
+    eval "enable_${ac_feature}='$ac_optarg'" ;;
+
+  # For backward compatibility, recognize -exec-prefix and --exec_prefix.
+  -exec-prefix | --exec_prefix | --exec-prefix | --exec-prefi \
+  | --exec-pref | --exec-pre | --exec-pr | --exec-p | --exec- \
+  | --exec | --exe | --ex)
+    ac_prev=exec_prefix ;;
+  -exec-prefix=* | --exec_prefix=* | --exec-prefix=* | --exec-prefi=* \
+  | --exec-pref=* | --exec-pre=* | --exec-pr=* | --exec-p=* | --exec-=* \
+  | --exec=* | --exe=* | --ex=*)
+    exec_prefix="$ac_optarg" ;;
+
+  -gas | --gas | --ga | --g)
+    with_gas=1 ;; # Obsolete; use --with-gas.
+
+  -help | --help | --hel | --he)
+    cat << EOF
+$ac_usage
+EOF
+    exit 0 ;;
+
+  -host | --host | --hos | --ho)
+    ac_prev=host ;;
+  -host=* | --host=* | --hos=* | --ho=*)
+    host="$ac_optarg" ;;
+
+  -nfp | --nfp | --nf)
+    with_fp=no ;; # Obsolete; use --without-fp.
+
+  -no-create | --no-create | --no-creat | --no-crea | --no-cre \
+  | --no-cr | --no-c)
+    no_create=yes ;;
+
+  -norecursion | --norecursion | --norecursio | --norecursi \
+  | --norecurs | --norecur | --norecu | --norec | --nore | --nor)
+    norecursion=yes ;;
+
+  -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
+    ac_prev=prefix ;;
+  -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
+    prefix="$ac_optarg" ;;
+
+  -program-prefix | --program-prefix | --program-prefi | --program-pref \
+  | --program-pre | --program-pr | --program-p)
+    ac_prev=program_prefix ;;
+  -program-prefix=* | --program-prefix=* | --program-prefi=* \
+  | --program-pref=* | --program-pre=* | --program-pr=* | --program-p=*)
+    program_prefix="$ac_optarg" ;;
+
+  -program-suffix | --program-suffix | --program-suffi | --program-suff \
+  | --program-suf | --program-su | --program-s)
+    ac_prev=program_suffix ;;
+  -program-suffix=* | --program-suffix=* | --program-suffi=* \
+  | --program-suff=* | --program-suf=* | --program-su=* | --program-s=*)
+    program_suffix="$ac_optarg" ;;
+
+  -program-transform-name | --program-transform-name \
+  | --program-transform-nam | --program-transform-na \
+  | --program-transform-n | --program-transform- \
+  | --program-transform | --program-transfor \
+  | --program-transfo | --program-transf \
+  | --program-trans | --program-tran \
+  | --progr-tra | --program-tr | --program-t)
+    ac_prev=program_transform_name ;;
+  -program-transform-name=* | --program-transform-name=* \
+  | --program-transform-nam=* | --program-transform-na=* \
+  | --program-transform-n=* | --program-transform-=* \
+  | --program-transform=* | --program-transfor=* \
+  | --program-transfo=* | --program-transf=* \
+  | --program-trans=* | --program-tran=* \
+  | --progr-tra=* | --program-tr=* | --program-t=*)
+    program_transform_name="$ac_optarg" ;;
+
+  -q | -quiet | --quiet | --quie | --qui | --qu | --q \
+  | -silent | --silent | --silen | --sile | --sil)
+    silent=yes ;;
+
+  -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
+    ac_prev=srcdir ;;
+  -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
+    srcdir="$ac_optarg" ;;
+
+  -target | --target | --targe | --targ | --tar | --ta | --t)
+    ac_prev=target ;;
+  -target=* | --target=* | --targe=* | --targ=* | --tar=* | --ta=* | --t=*)
+    target="$ac_optarg" ;;
+
+  -v | -verbose | --verbose | --verbos | --verbo | --verb)
+    verbose=yes ;;
+
+  -version | --version | --versio | --versi | --vers)
+    echo "configure generated by autoconf version 1.8"
+    exit 0 ;;
+
+  -with-* | --with-*)
+    ac_package=`echo $ac_option|sed -e 's/-*with-//' -e 's/=.*//'`
+    # Reject names that aren't valid shell variable names.
+    if test -n "`echo $ac_package| sed 's/[-_a-zA-Z0-9]//g'`"; then
+      echo "configure: $ac_package: invalid package name" >&2; exit 1
+    fi
+    ac_package=`echo $ac_package| sed 's/-/_/g'`
+    case "$ac_option" in
+      *=*) ;;
+      *) ac_optarg=yes ;;
+    esac
+    eval "with_${ac_package}='$ac_optarg'" ;;
+
+  -without-* | --without-*)
+    ac_package=`echo $ac_option|sed -e 's/-*without-//'`
+    # Reject names that aren't valid shell variable names.
+    if test -n "`echo $ac_package| sed 's/[-a-zA-Z0-9_]//g'`"; then
+      echo "configure: $ac_package: invalid package name" >&2; exit 1
+    fi
+    ac_package=`echo $ac_package| sed 's/-/_/g'`
+    eval "with_${ac_package}=no" ;;
+
+  --x) with_x=1 ;; # Obsolete; use --with-x.
+
+  -x-includes | --x-includes | --x-include | --x-includ | --x-inclu \
+  | --x-incl | --x-inc | --x-in | --x-i)
+    ac_prev=x_includes ;;
+  -x-includes=* | --x-includes=* | --x-include=* | --x-includ=* | --x-inclu=* \
+  | --x-incl=* | --x-inc=* | --x-in=* | --x-i=*)
+    x_includes="$ac_optarg" ;;
+
+  -x-libraries | --x-libraries | --x-librarie | --x-librari \
+  | --x-librar | --x-libra | --x-libr | --x-lib | --x-li | --x-l)
+    ac_prev=x_libraries ;;
+  -x-libraries=* | --x-libraries=* | --x-librarie=* | --x-librari=* \
+  | --x-librar=* | --x-libra=* | --x-libr=* | --x-lib=* | --x-li=* | --x-l=*)
+    x_libraries="$ac_optarg" ;;
+
+  -*) echo "configure: $ac_option: invalid option; use --help to show usage" >&2; exit 1
+    ;;
+
+  *) 
+    if test -n "`echo $ac_option| sed 's/[-a-z0-9]//g'`"; then
+      echo "configure: warning: $ac_option: invalid host type" >&2
+    fi
+    if test "x$nonopt" -ne xNONE; then
+      echo "configure: can only configure for one host and one target at a time" >&2; exit 1
+    fi
+    nonopt="$ac_option"
+    ;;
+
+  esac
 done
 
-trap 'rm -fr conftest* confdefs* core; exit 1' 1 3 15
-trap 'rm -f confdefs*' 0
+if test -n "$ac_prev"; then
+  echo "configure: missing argument to --`echo $ac_prev | sed 's/_/-/g'`" >&2; exit 1
+fi
+
+trap 'rm -fr conftest* confdefs* core $ac_clean_files; exit 1' 1 2 15
+trap 'rm -fr confdefs* $ac_clean_files' 0
+
+# Save the original args if we used an alternate arg parser.
+ac_configure_temp="${configure_args-$*}"
+# Strip out --no-create and --norecursion so they don't pile up.
+configure_args=
+for ac_arg in $ac_configure_temp; do
+  case "$ac_arg" in
+  -no-create | --no-create | --no-creat | --no-crea | --no-cre \
+  | --no-cr | --no-c) ;;
+  -norecursion | --norecursion | --norecursio | --norecursi \
+  | --norecurs | --norecur | --norecu | --norec | --nore | --nor) ;;
+  *) configure_args="$configure_args $ac_arg" ;;
+  esac
+done
 
 # NLS nuisances.
 # These must not be set unconditionally because not all systems understand
 # e.g. LANG=C (notably SCO).
-if test "${LC_ALL+set}" = 'set' ; then LC_ALL=C; export LC_ALL; fi
-if test "${LANG+set}"   = 'set' ; then LANG=C;   export LANG;   fi
+if test "${LC_ALL+set}" = 'set'; then LC_ALL=C; export LC_ALL; fi
+if test "${LANG+set}"   = 'set'; then LANG=C;   export LANG;   fi
 
-rm -f conftest* confdefs.h
+# confdefs.h avoids OS command line length limits that DEFS can exceed.
+rm -rf conftest* confdefs.h
 # AIX cpp loses on an empty file, so make sure it contains at least a newline.
 echo > confdefs.h
-compile='${CC-cc} $CFLAGS conftest.c -o conftest $LIBS >/dev/null 2>&1'
 
 # A filename unique to this package, relative to the directory that
 # configure is in, which we can look for to find out if srcdir is correct.
-unique_file=src/tclExtend.h
+ac_unique_file=src/tclExtend.h
 
 # Find the source files, if location was not specified.
 if test -z "$srcdir"; then
-  srcdirdefaulted=yes
+  ac_srcdir_defaulted=yes
   # Try the directory containing this script, then `..'.
-  prog=$0
-  confdir=`echo $prog|sed 's%/[^/][^/]*$%%'`
-  test "X$confdir" = "X$prog" && confdir=.
-  srcdir=$confdir
-  if test ! -r $srcdir/$unique_file; then
+  ac_prog=$0
+  ac_confdir=`echo $ac_prog|sed 's%/[^/][^/]*$%%'`
+  test "x$ac_confdir" = "x$ac_prog" && ac_confdir=.
+  srcdir=$ac_confdir
+  if test ! -r $srcdir/$ac_unique_file; then
     srcdir=..
   fi
 fi
-if test ! -r $srcdir/$unique_file; then
-  if test x$srcdirdefaulted = xyes; then
-    echo "configure: Can not find sources in \`${confdir}' or \`..'." 1>&2
+if test ! -r $srcdir/$ac_unique_file; then
+  if test x$ac_srcdir_defaulted = xyes; then
+    echo "configure: can not find sources in ${ac_confdir} or .." >&2; exit 1
   else
-    echo "configure: Can not find sources in \`${srcdir}'." 1>&2
+    echo "configure: can not find sources in ${srcdir}" >&2; exit 1
   fi
-  exit 1
 fi
-# Preserve a srcdir of `.' to avoid automounter screwups with pwd.
-# But we can't avoid them for `..', to make subdirectories work.
-case $srcdir in
-  .|/*|~*) ;;
-  *) srcdir=`cd $srcdir; pwd` ;; # Make relative path absolute.
-esac
 
-
-# Save the original args to write them into config.status later.
-configure_args="$*"
+ac_ext=c
+ac_cpp='${CPP} $CFLAGS'
+ac_compile='${CC-cc} $CFLAGS $LDFLAGS conftest.${ac_ext} -o conftest $LIBS >/dev/null 2>&1'
 
 #!/bin/sh
 # From configure.in Revision: 3.13 
@@ -137,7 +323,7 @@ configure_args="$*"
 #      command line looking for the --arch= option.
 #------------------------------------------------------------------------------
 
-# check whether --with-arch was given
+# check whether --with-arch or --without-arch was given.
 withval="$with_arch"
 if test -n "$withval"; then
   TCL_ARCH=.$withval
@@ -155,21 +341,21 @@ fi
 #       Check for various programs used during the build.
 #------------------------------------------------------------------------------
 
-for p in 'bison -y' byacc
+for ac_prog in 'bison -y' byacc
 do
 if test -z "$YACC"; then
-  # Extract the first word of `$p', so it can be a program name with args.
-  set dummy $p; word=$2
-  echo checking for $word
-  IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
-  for dir in $PATH; do
-    test -z "$dir" && dir=.
-    if test -f $dir/$word; then
-      YACC="$p"
+  # Extract the first word of `$ac_prog', so it can be a program name with args.
+  set ac_dummy $ac_prog; ac_word=$2
+  test -n "$silent" || echo "checking for $ac_word"
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      YACC="$ac_prog"
       break
     fi
   done
-  IFS="$saveifs"
+  IFS="$ac_save_ifs"
 fi
 
 test -n "$YACC" && test -n "$verbose" && echo "	setting YACC to $YACC"
@@ -180,17 +366,17 @@ test -n "$YACC" || YACC="yacc"
 
 if test -z "$RANLIB"; then
   # Extract the first word of `ranlib', so it can be a program name with args.
-  set dummy ranlib; word=$2
-  echo checking for $word
-  IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
-  for dir in $PATH; do
-    test -z "$dir" && dir=.
-    if test -f $dir/$word; then
+  set ac_dummy ranlib; ac_word=$2
+  test -n "$silent" || echo "checking for $ac_word"
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
       RANLIB="ranlib"
       break
     fi
   done
-  IFS="$saveifs"
+  IFS="$ac_save_ifs"
 fi
 test -z "$RANLIB" && RANLIB=":"
 test -n "$RANLIB" && test -n "$verbose" && echo "	setting RANLIB to $RANLIB"
@@ -199,17 +385,17 @@ CC=${CC-cc}
 
 if test -z "$MCS_CMD"; then
   # Extract the first word of `"mcs"', so it can be a program name with args.
-  set dummy "mcs"; word=$2
-  echo checking for $word
-  IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
-  for dir in $PATH; do
-    test -z "$dir" && dir=.
-    if test -f $dir/$word; then
+  set ac_dummy "mcs"; ac_word=$2
+  test -n "$silent" || echo "checking for $ac_word"
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
       MCS_CMD="mcs -d"
       break
     fi
   done
-  IFS="$saveifs"
+  IFS="$ac_save_ifs"
 fi
 test -z "$MCS_CMD" && MCS_CMD="touch"
 test -n "$MCS_CMD" && test -n "$verbose" && echo "	setting MCS_CMD to $MCS_CMD"
@@ -221,24 +407,24 @@ test -n "$MCS_CMD" && test -n "$verbose" && echo "	setting MCS_CMD to $MCS_CMD"
 #       we must check for it up front or other configure tests will fail.
 #------------------------------------------------------------------------------
 
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -ldl"
-have_lib=""
-echo checking for -ldl
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -ldl"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; LIBS="$LIBS -ldl"
 else
    :; 
@@ -254,24 +440,24 @@ fi
 #       check just fails since it doesn't link (yea, its strange).
 #------------------------------------------------------------------------------
 
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lXbsd"
-have_lib=""
-echo checking for -lXbsd
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lXbsd"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; LIBS="$LIBS -lXbsd"
 else
    :; 
@@ -281,24 +467,24 @@ fi
 socket_libs=""
 SAVED_LIBS=$LIBS
 LIBS="$LIBS -lsocket"
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lnsl"
-have_lib=""
-echo checking for -lnsl
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lnsl"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; socket_libs="-lsocket -lnsl"
 else
    :; 
@@ -306,47 +492,47 @@ fi
 
 LIBS=$SAVED_LIBS
 if test -z "$socket_libs"; then
-    LIBS_save="${LIBS}"
+    ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lsocket"
-have_lib=""
-echo checking for -lsocket
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lsocket"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; socket_libs="$socket_libs -lsocket"
 else
    :; 
 fi
 
-    LIBS_save="${LIBS}"
+    ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lnsl"
-have_lib=""
-echo checking for -lnsl
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lnsl"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; socket_libs="$socket_libs -lnsl"
 else
    :; 
@@ -359,70 +545,70 @@ LIBS="$LIBS $socket_libs"
 #       Check for additional libraries the Tcl/Tk does not check for.
 #------------------------------------------------------------------------------
 
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lsun"
-have_lib=""
-echo checking for -lsun
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lsun"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; LIBS="$LIBS -lsun"
 else
    :; 
 fi
 
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lc_s"
-have_lib=""
-echo checking for -lc_s
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lc_s"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; LIBS="$LIBS -lc_s"
 else
    :; 
 fi
 
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lieee"
-have_lib=""
-echo checking for -lieee
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lieee"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; LIBS="$LIBS -lieee"
 else
    :; 
@@ -430,24 +616,24 @@ fi
 
 
 # This is needed for DEC Alphas
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -ldnet_stub"
-have_lib=""
-echo checking for -ldnet_stub
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -ldnet_stub"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; LIBS="$LIBS -ldnet_stub"
 else
    :; 
@@ -490,20 +676,35 @@ fi
 #       Check for system header files.
 #------------------------------------------------------------------------------
 
-echo checking for values.h
-echo checking how to run the C preprocessor
+test -n "$silent" || echo "checking for values.h"
+test -n "$silent" || echo "checking how to run the C preprocessor"
 if test -z "$CPP"; then
   # This must be in double quotes, not single quotes, because CPP may get
   # substituted into the Makefile and ``${CC-cc}'' will simply confuse
   # make.  It must be expanded now.
   CPP="${CC-cc} -E"
-  cat > conftest.c <<EOF
+  cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <stdio.h>
 Syntax Error
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
+  :
+else
+  rm -rf conftest*
+  CPP="${CC-cc} -E -traditional-cpp"
+  cat > conftest.${ac_ext} <<EOF
+#include "confdefs.h"
+#include <stdio.h>
+Syntax Error
+EOF
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -511,14 +712,18 @@ else
 fi
 rm -f conftest*
 fi
-test ".${verbose}" != "." && echo "	setting CPP to $CPP"
+rm -f conftest*
+fi
+test -n "$verbose" && echo "	setting CPP to $CPP"
 
-cat > conftest.c <<EOF
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <values.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -526,24 +731,26 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_VALUES_H"
-echo "#define" NO_VALUES_H 1 >> confdefs.h
+echo "#define" NO_VALUES_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_VALUES_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_VALUES_H\${SEDdB}NO_VALUES_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_VALUES_H\${SEDuB}NO_VALUES_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_VALUES_H\${SEDeB}NO_VALUES_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_VALUES_H\${ac_dB}NO_VALUES_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_VALUES_H\${ac_uB}NO_VALUES_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_VALUES_H\${ac_eB}NO_VALUES_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for sys/socket.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for sys/socket.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/socket.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -551,11 +758,11 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_SYS_SOCKET_H"
-echo "#define" NO_SYS_SOCKET_H 1 >> confdefs.h
+echo "#define" NO_SYS_SOCKET_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_SYS_SOCKET_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_SYS_SOCKET_H\${SEDdB}NO_SYS_SOCKET_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_SYS_SOCKET_H\${SEDuB}NO_SYS_SOCKET_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_SYS_SOCKET_H\${SEDeB}NO_SYS_SOCKET_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_SYS_SOCKET_H\${ac_dB}NO_SYS_SOCKET_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_SYS_SOCKET_H\${ac_uB}NO_SYS_SOCKET_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_SYS_SOCKET_H\${ac_eB}NO_SYS_SOCKET_H\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -567,26 +774,26 @@ rm -f conftest*
 #       Check for missing typedefs.
 #------------------------------------------------------------------------------
 
-echo checking for time_t
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for time_t"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/types.h>
-int main() { exit(0); }
-int t() {  }
+int main() { return 0; }
+int t() { ; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
-echo "	defining" time_t to be long
-echo "#define" time_t long >> confdefs.h
+echo "	defining" time_t to be "long"
+echo "#define" time_t "long" >> confdefs.h
 DEFS="$DEFS -Dtime_t=long"
-SEDDEFS="${SEDDEFS}\${SEDdA}time_t\${SEDdB}time_t\${SEDdC}long\${SEDdD}
-\${SEDuA}time_t\${SEDuB}time_t\${SEDuC}long\${SEDuD}
-\${SEDeA}time_t\${SEDeB}time_t\${SEDeC}long\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}time_t\${ac_dB}time_t\${ac_dC}long\${ac_dD}
+\${ac_uA}time_t\${ac_uB}time_t\${ac_uC}long\${ac_uD}
+\${ac_eA}time_t\${ac_eB}time_t\${ac_eC}long\${ac_eD}
 "
 }
 
@@ -598,8 +805,8 @@ rm -f conftest*
 #       What type do signals return?
 #------------------------------------------------------------------------------
 
-echo checking for return type of signal handlers
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for return type of signal handlers"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/types.h>
 #include <signal.h>
@@ -607,20 +814,20 @@ cat > conftest.c <<EOF
 #undef signal
 #endif
 extern void (*signal ()) ();
-int main() { exit(0); }
-int t() { int i; }
+int main() { return 0; }
+int t() { int i;; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
-echo "	defining" RETSIGTYPE to be void
-echo "#define" RETSIGTYPE void >> confdefs.h
+echo "	defining" RETSIGTYPE to be "void"
+echo "#define" RETSIGTYPE "void" >> confdefs.h
 DEFS="$DEFS -DRETSIGTYPE=void"
-SEDDEFS="${SEDDEFS}\${SEDdA}RETSIGTYPE\${SEDdB}RETSIGTYPE\${SEDdC}void\${SEDdD}
-\${SEDuA}RETSIGTYPE\${SEDuB}RETSIGTYPE\${SEDuC}void\${SEDuD}
-\${SEDeA}RETSIGTYPE\${SEDeB}RETSIGTYPE\${SEDeC}void\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}RETSIGTYPE\${ac_dB}RETSIGTYPE\${ac_dC}void\${ac_dD}
+\${ac_uA}RETSIGTYPE\${ac_uB}RETSIGTYPE\${ac_uC}void\${ac_uD}
+\${ac_eA}RETSIGTYPE\${ac_eB}RETSIGTYPE\${ac_eC}void\${ac_eD}
 "
 }
 
@@ -630,12 +837,12 @@ else
   
 {
 test -n "$verbose" && \
-echo "	defining" RETSIGTYPE to be int
-echo "#define" RETSIGTYPE int >> confdefs.h
+echo "	defining" RETSIGTYPE to be "int"
+echo "#define" RETSIGTYPE "int" >> confdefs.h
 DEFS="$DEFS -DRETSIGTYPE=int"
-SEDDEFS="${SEDDEFS}\${SEDdA}RETSIGTYPE\${SEDdB}RETSIGTYPE\${SEDdC}int\${SEDdD}
-\${SEDuA}RETSIGTYPE\${SEDuB}RETSIGTYPE\${SEDuC}int\${SEDuD}
-\${SEDeA}RETSIGTYPE\${SEDeB}RETSIGTYPE\${SEDeC}int\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}RETSIGTYPE\${ac_dB}RETSIGTYPE\${ac_dC}int\${ac_dD}
+\${ac_uA}RETSIGTYPE\${ac_uB}RETSIGTYPE\${ac_uC}int\${ac_uD}
+\${ac_eA}RETSIGTYPE\${ac_eB}RETSIGTYPE\${ac_eC}int\${ac_eD}
 "
 }
 
@@ -648,26 +855,26 @@ rm -f conftest*
 #       Find out all about time handling differences.
 #------------------------------------------------------------------------------
 
-echo checking for whether time.h and sys/time.h may both be included
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for whether time.h and sys/time.h may both be included"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
-int main() { exit(0); }
-int t() { struct tm *tp; }
+int main() { return 0; }
+int t() { struct tm *tp;; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining TIME_WITH_SYS_TIME"
-echo "#define" TIME_WITH_SYS_TIME 1 >> confdefs.h
+echo "#define" TIME_WITH_SYS_TIME "1" >> confdefs.h
 DEFS="$DEFS -DTIME_WITH_SYS_TIME=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}TIME_WITH_SYS_TIME\${SEDdB}TIME_WITH_SYS_TIME\${SEDdC}1\${SEDdD}
-\${SEDuA}TIME_WITH_SYS_TIME\${SEDuB}TIME_WITH_SYS_TIME\${SEDuC}1\${SEDuD}
-\${SEDeA}TIME_WITH_SYS_TIME\${SEDeB}TIME_WITH_SYS_TIME\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}TIME_WITH_SYS_TIME\${ac_dB}TIME_WITH_SYS_TIME\${ac_dC}1\${ac_dD}
+\${ac_uA}TIME_WITH_SYS_TIME\${ac_uB}TIME_WITH_SYS_TIME\${ac_uC}1\${ac_uD}
+\${ac_eA}TIME_WITH_SYS_TIME\${ac_eB}TIME_WITH_SYS_TIME\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -675,15 +882,15 @@ SEDDEFS="${SEDDEFS}\${SEDdA}TIME_WITH_SYS_TIME\${SEDdB}TIME_WITH_SYS_TIME\${SEDd
 fi
 rm -f conftest*
 
-echo checking for struct tm in time.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for struct tm in time.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/types.h>
 #include <time.h>
-int main() { exit(0); }
-int t() { struct tm *tp; tp->tm_sec; }
+int main() { return 0; }
+int t() { struct tm *tp; tp->tm_sec;; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
@@ -691,77 +898,77 @@ else
 {
 test -n "$verbose" && \
 echo "	defining TM_IN_SYS_TIME"
-echo "#define" TM_IN_SYS_TIME 1 >> confdefs.h
+echo "#define" TM_IN_SYS_TIME "1" >> confdefs.h
 DEFS="$DEFS -DTM_IN_SYS_TIME=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}TM_IN_SYS_TIME\${SEDdB}TM_IN_SYS_TIME\${SEDdC}1\${SEDdD}
-\${SEDuA}TM_IN_SYS_TIME\${SEDuB}TM_IN_SYS_TIME\${SEDuC}1\${SEDuD}
-\${SEDeA}TM_IN_SYS_TIME\${SEDeB}TM_IN_SYS_TIME\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}TM_IN_SYS_TIME\${ac_dB}TM_IN_SYS_TIME\${ac_dC}1\${ac_dD}
+\${ac_uA}TM_IN_SYS_TIME\${ac_uB}TM_IN_SYS_TIME\${ac_uC}1\${ac_uD}
+\${ac_eA}TM_IN_SYS_TIME\${ac_eB}TM_IN_SYS_TIME\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-decl='#include <sys/types.h>
+ac_decl='#include <sys/types.h>
 '
 case "$DEFS" in
-  *TM_IN_SYS_TIME*) decl="$decl
+  *TM_IN_SYS_TIME*) ac_decl="$ac_decl
 #include <sys/time.h>
 " ;;
-  *) decl="$decl
+  *) ac_decl="$ac_decl
 #include <time.h>
 " ;;
 esac
-echo checking for tm_zone in struct tm
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for tm_zone in struct tm"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
-$decl
-int main() { exit(0); }
-int t() { struct tm tm; tm.tm_zone; }
+$ac_decl
+int main() { return 0; }
+int t() { struct tm tm; tm.tm_zone;; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining HAVE_TM_ZONE"
-echo "#define" HAVE_TM_ZONE 1 >> confdefs.h
+echo "#define" HAVE_TM_ZONE "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_TM_ZONE=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_TM_ZONE\${SEDdB}HAVE_TM_ZONE\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_TM_ZONE\${SEDuB}HAVE_TM_ZONE\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_TM_ZONE\${SEDeB}HAVE_TM_ZONE\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}HAVE_TM_ZONE\${ac_dB}HAVE_TM_ZONE\${ac_dC}1\${ac_dD}
+\${ac_uA}HAVE_TM_ZONE\${ac_uB}HAVE_TM_ZONE\${ac_uC}1\${ac_uD}
+\${ac_eA}HAVE_TM_ZONE\${ac_eB}HAVE_TM_ZONE\${ac_eC}1\${ac_eD}
 "
 }
 
 
 else
   rm -rf conftest*
-  no_tm_zone=1
+  ac_no_tm_zone=1
 fi
 rm -f conftest*
 
-if test -n "$no_tm_zone"; then
-echo checking for tzname
-cat > conftest.c <<EOF
+if test -n "$ac_no_tm_zone"; then
+test -n "$silent" || echo "checking for tzname"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <time.h>
 #ifndef tzname /* For SGI.  */
 extern char *tzname[]; /* RS6000 and others want it this way.  */
 #endif
-int main() { exit(0); }
-int t() { atoi(*tzname); }
+int main() { return 0; }
+int t() { atoi(*tzname);; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining HAVE_TZNAME"
-echo "#define" HAVE_TZNAME 1 >> confdefs.h
+echo "#define" HAVE_TZNAME "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_TZNAME=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_TZNAME\${SEDdB}HAVE_TZNAME\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_TZNAME\${SEDuB}HAVE_TZNAME\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_TZNAME\${SEDeB}HAVE_TZNAME\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}HAVE_TZNAME\${ac_dB}HAVE_TZNAME\${ac_dC}1\${ac_dD}
+\${ac_uA}HAVE_TZNAME\${ac_uB}HAVE_TZNAME\${ac_uC}1\${ac_uD}
+\${ac_eA}HAVE_TZNAME\${ac_eB}HAVE_TZNAME\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -772,24 +979,24 @@ rm -f conftest*
 fi
 
 
-echo checking for tm_tzadj in struct tm
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for tm_tzadj in struct tm"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <time.h>
-int main() { exit(0); }
-int t() { struct tm tm; tm.tm_tzadj; }
+int main() { return 0; }
+int t() { struct tm tm; tm.tm_tzadj;; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining HAVE_TM_TZADJ"
-echo "#define" HAVE_TM_TZADJ 1 >> confdefs.h
+echo "#define" HAVE_TM_TZADJ "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_TM_TZADJ=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_TM_TZADJ\${SEDdB}HAVE_TM_TZADJ\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_TM_TZADJ\${SEDuB}HAVE_TM_TZADJ\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_TM_TZADJ\${SEDeB}HAVE_TM_TZADJ\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}HAVE_TM_TZADJ\${ac_dB}HAVE_TM_TZADJ\${ac_dC}1\${ac_dD}
+\${ac_uA}HAVE_TM_TZADJ\${ac_uB}HAVE_TM_TZADJ\${ac_uC}1\${ac_uD}
+\${ac_eA}HAVE_TM_TZADJ\${ac_eB}HAVE_TM_TZADJ\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -798,24 +1005,24 @@ fi
 rm -f conftest*
 
 
-echo checking for tm_gmtoff in struct tm
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for tm_gmtoff in struct tm"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <time.h>
-int main() { exit(0); }
-int t() { struct tm tm; tm.tm_gmtoff; }
+int main() { return 0; }
+int t() { struct tm tm; tm.tm_gmtoff;; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining HAVE_TM_GMTOFF"
-echo "#define" HAVE_TM_GMTOFF 1 >> confdefs.h
+echo "#define" HAVE_TM_GMTOFF "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_TM_GMTOFF=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_TM_GMTOFF\${SEDdB}HAVE_TM_GMTOFF\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_TM_GMTOFF\${SEDuB}HAVE_TM_GMTOFF\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_TM_GMTOFF\${SEDeB}HAVE_TM_GMTOFF\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}HAVE_TM_GMTOFF\${ac_dB}HAVE_TM_GMTOFF\${ac_dC}1\${ac_dD}
+\${ac_uA}HAVE_TM_GMTOFF\${ac_uB}HAVE_TM_GMTOFF\${ac_uC}1\${ac_uD}
+\${ac_eA}HAVE_TM_GMTOFF\${ac_eB}HAVE_TM_GMTOFF\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -824,36 +1031,36 @@ fi
 rm -f conftest*
 
 
-for func in gettimeofday
+for ac_func in gettimeofday
 do
-trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
-echo checking for ${func}
-cat > conftest.c <<EOF
+ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+test -n "$silent" || echo "checking for ${ac_func}"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_${func}) || defined (__stub___${func})
+#if defined (__stub_${ac_func}) || defined (__stub___${ac_func})
 choke me
 #else
 /* Override any gcc2 internal prototype to avoid an error.  */
-extern char ${func}(); ${func}();
+extern char ${ac_func}(); ${ac_func}();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   {
 test -n "$verbose" && \
-echo "	defining ${trfunc}"
-echo "#define" ${trfunc} 1 >> confdefs.h
-DEFS="$DEFS -D${trfunc}=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}${trfunc}\${SEDdB}${trfunc}\${SEDdC}1\${SEDdD}
-\${SEDuA}${trfunc}\${SEDuB}${trfunc}\${SEDuC}1\${SEDuD}
-\${SEDeA}${trfunc}\${SEDeB}${trfunc}\${SEDeC}1\${SEDeD}
+echo "	defining ${ac_tr_func}"
+echo "#define" ${ac_tr_func} "1" >> confdefs.h
+DEFS="$DEFS -D${ac_tr_func}=1"
+ac_sed_defs="${ac_sed_defs}\${ac_dA}${ac_tr_func}\${ac_dB}${ac_tr_func}\${ac_dC}1\${ac_dD}
+\${ac_uA}${ac_tr_func}\${ac_uB}${ac_tr_func}\${ac_uC}1\${ac_uD}
+\${ac_eA}${ac_tr_func}\${ac_eB}${ac_tr_func}\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -867,29 +1074,29 @@ done
 # Its important to include time.h in this check, as some systems (like convex)
 # have timezone functions, etc.
 #
-echo checking for timezone variable
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for timezone variable"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 #include <time.h>
 extern long timezone;
 timezone += 1;
 exit (0);
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining HAVE_TIMEZONE_VAR"
-echo "#define" HAVE_TIMEZONE_VAR 1 >> confdefs.h
+echo "#define" HAVE_TIMEZONE_VAR "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_TIMEZONE_VAR=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_TIMEZONE_VAR\${SEDdB}HAVE_TIMEZONE_VAR\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_TIMEZONE_VAR\${SEDuB}HAVE_TIMEZONE_VAR\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_TIMEZONE_VAR\${SEDeB}HAVE_TIMEZONE_VAR\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}HAVE_TIMEZONE_VAR\${ac_dB}HAVE_TIMEZONE_VAR\${ac_dC}1\${ac_dD}
+\${ac_uA}HAVE_TIMEZONE_VAR\${ac_uB}HAVE_TIMEZONE_VAR\${ac_uC}1\${ac_uD}
+\${ac_eA}HAVE_TIMEZONE_VAR\${ac_eB}HAVE_TIMEZONE_VAR\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -904,7 +1111,7 @@ rm -f conftest*
 #------------------------------------------------------------------------------
 
 echo "checking to see if 'times' returns the elapsed real time"
-cat > conftest.c <<EOF
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
 #include <sys/types.h>
@@ -920,17 +1127,17 @@ else
 }
 
 EOF
-eval $compile
+eval $ac_compile
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   
 {
 test -n "$verbose" && \
 echo "	defining TIMES_RETS_REAL_TIME"
-echo "#define" TIMES_RETS_REAL_TIME 1 >> confdefs.h
+echo "#define" TIMES_RETS_REAL_TIME "1" >> confdefs.h
 DEFS="$DEFS -DTIMES_RETS_REAL_TIME=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}TIMES_RETS_REAL_TIME\${SEDdB}TIMES_RETS_REAL_TIME\${SEDdC}1\${SEDdD}
-\${SEDuA}TIMES_RETS_REAL_TIME\${SEDuB}TIMES_RETS_REAL_TIME\${SEDuC}1\${SEDuD}
-\${SEDeA}TIMES_RETS_REAL_TIME\${SEDeB}TIMES_RETS_REAL_TIME\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}TIMES_RETS_REAL_TIME\${ac_dB}TIMES_RETS_REAL_TIME\${ac_dC}1\${ac_dD}
+\${ac_uA}TIMES_RETS_REAL_TIME\${ac_uB}TIMES_RETS_REAL_TIME\${ac_uC}1\${ac_uD}
+\${ac_eA}TIMES_RETS_REAL_TIME\${ac_eB}TIMES_RETS_REAL_TIME\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -998,11 +1205,11 @@ bldbasedir=`pwd`
 #       set flags so Tcl uses alternate procedures.
 #--------------------------------------------------------------------
 
-echo checking for gettimeofday
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for gettimeofday"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
@@ -1013,20 +1220,20 @@ choke me
 /* Override any gcc2 internal prototype to avoid an error.  */
 extern char gettimeofday(); gettimeofday();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
   {
 test -n "$verbose" && \
 echo "	defining NO_GETTOD"
-echo "#define" NO_GETTOD 1 >> confdefs.h
+echo "#define" NO_GETTOD "1" >> confdefs.h
 DEFS="$DEFS -DNO_GETTOD=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_GETTOD\${SEDdB}NO_GETTOD\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_GETTOD\${SEDuB}NO_GETTOD\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_GETTOD\${SEDeB}NO_GETTOD\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_GETTOD\${ac_dB}NO_GETTOD\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_GETTOD\${ac_uB}NO_GETTOD\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_GETTOD\${ac_eB}NO_GETTOD\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1044,26 +1251,28 @@ rm -f conftest*
 #             as strstr
 #--------------------------------------------------------------------
 
-for hdr in unistd.h
+for ac_hdr in unistd.h
 do
-trhdr=HAVE_`echo $hdr | tr '[a-z]./' '[A-Z]__'`
-echo checking for ${hdr}
-cat > conftest.c <<EOF
+ac_tr_hdr=HAVE_`echo $ac_hdr | tr '[a-z]./' '[A-Z]__'`
+test -n "$silent" || echo "checking for ${ac_hdr}"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
-#include <${hdr}>
+#include <${ac_hdr}>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
-echo "	defining ${trhdr}"
-echo "#define" ${trhdr} 1 >> confdefs.h
-DEFS="$DEFS -D${trhdr}=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}${trhdr}\${SEDdB}${trhdr}\${SEDdC}1\${SEDdD}
-\${SEDuA}${trhdr}\${SEDuB}${trhdr}\${SEDuC}1\${SEDuD}
-\${SEDeA}${trhdr}\${SEDeB}${trhdr}\${SEDeC}1\${SEDeD}
+echo "	defining ${ac_tr_hdr}"
+echo "#define" ${ac_tr_hdr} "1" >> confdefs.h
+DEFS="$DEFS -D${ac_tr_hdr}=1"
+ac_sed_defs="${ac_sed_defs}\${ac_dA}${ac_tr_hdr}\${ac_dB}${ac_tr_hdr}\${ac_dC}1\${ac_dD}
+\${ac_uA}${ac_tr_hdr}\${ac_uB}${ac_tr_hdr}\${ac_uC}1\${ac_uD}
+\${ac_eA}${ac_tr_hdr}\${ac_eB}${ac_tr_hdr}\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1072,12 +1281,12 @@ fi
 rm -f conftest*
 done
 
-echo checking for dirent.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for dirent.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/types.h>
 #include <dirent.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 DIR *d;
 struct dirent *entryPtr;
@@ -1086,9 +1295,9 @@ d = opendir("foobar");
 entryPtr = readdir(d);
 p = entryPtr->d_name;
 closedir(d);
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   tcl_ok=1
 
@@ -1099,8 +1308,8 @@ fi
 rm -f conftest*
 
 echo '#include "confdefs.h"
-#include <tcl_ok=0>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <tcl_ok=0>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "Sprite version.* NOT POSIX" conftest.out >/dev/null 2>&1; then
   :
 fi
@@ -1111,22 +1320,24 @@ if test $tcl_ok = 0; then
 {
 test -n "$verbose" && \
 echo "	defining NO_DIRENT_H"
-echo "#define" NO_DIRENT_H 1 >> confdefs.h
+echo "#define" NO_DIRENT_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_DIRENT_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_DIRENT_H\${SEDdB}NO_DIRENT_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_DIRENT_H\${SEDuB}NO_DIRENT_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_DIRENT_H\${SEDeB}NO_DIRENT_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_DIRENT_H\${ac_dB}NO_DIRENT_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_DIRENT_H\${ac_uB}NO_DIRENT_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_DIRENT_H\${ac_eB}NO_DIRENT_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
-echo checking for errno.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for errno.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <errno.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -1134,24 +1345,26 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_ERRNO_H"
-echo "#define" NO_ERRNO_H 1 >> confdefs.h
+echo "#define" NO_ERRNO_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_ERRNO_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_ERRNO_H\${SEDdB}NO_ERRNO_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_ERRNO_H\${SEDuB}NO_ERRNO_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_ERRNO_H\${SEDeB}NO_ERRNO_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_ERRNO_H\${ac_dB}NO_ERRNO_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_ERRNO_H\${ac_uB}NO_ERRNO_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_ERRNO_H\${ac_eB}NO_ERRNO_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for float.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for float.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <float.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -1159,24 +1372,26 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_FLOAT_H"
-echo "#define" NO_FLOAT_H 1 >> confdefs.h
+echo "#define" NO_FLOAT_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_FLOAT_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_FLOAT_H\${SEDdB}NO_FLOAT_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_FLOAT_H\${SEDuB}NO_FLOAT_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_FLOAT_H\${SEDeB}NO_FLOAT_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_FLOAT_H\${ac_dB}NO_FLOAT_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_FLOAT_H\${ac_uB}NO_FLOAT_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_FLOAT_H\${ac_eB}NO_FLOAT_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for limits.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for limits.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <limits.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -1184,24 +1399,26 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_LIMITS_H"
-echo "#define" NO_LIMITS_H 1 >> confdefs.h
+echo "#define" NO_LIMITS_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_LIMITS_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_LIMITS_H\${SEDdB}NO_LIMITS_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_LIMITS_H\${SEDuB}NO_LIMITS_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_LIMITS_H\${SEDeB}NO_LIMITS_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_LIMITS_H\${ac_dB}NO_LIMITS_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_LIMITS_H\${ac_uB}NO_LIMITS_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_LIMITS_H\${ac_eB}NO_LIMITS_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for stdlib.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for stdlib.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   rm -rf conftest*
   tcl_ok=1
 
@@ -1212,8 +1429,8 @@ fi
 rm -f conftest*
 
 echo '#include "confdefs.h"
-#include <stdlib.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <stdlib.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "strtol" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1223,8 +1440,8 @@ fi
 rm -f conftest*
 
 echo '#include "confdefs.h"
-#include <stdlib.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <stdlib.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "strtoul" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1234,8 +1451,8 @@ fi
 rm -f conftest*
 
 echo '#include "confdefs.h"
-#include <stdlib.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <stdlib.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "strtod" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1249,22 +1466,24 @@ if test $tcl_ok = 0; then
 {
 test -n "$verbose" && \
 echo "	defining NO_STDLIB_H"
-echo "#define" NO_STDLIB_H 1 >> confdefs.h
+echo "#define" NO_STDLIB_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_STDLIB_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_STDLIB_H\${SEDdB}NO_STDLIB_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_STDLIB_H\${SEDuB}NO_STDLIB_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_STDLIB_H\${SEDeB}NO_STDLIB_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_STDLIB_H\${ac_dB}NO_STDLIB_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_STDLIB_H\${ac_uB}NO_STDLIB_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_STDLIB_H\${ac_eB}NO_STDLIB_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
-echo checking for string.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for string.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <string.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   rm -rf conftest*
   tcl_ok=1
 
@@ -1275,8 +1494,8 @@ fi
 rm -f conftest*
 
 echo '#include "confdefs.h"
-#include <string.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <string.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "strstr" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1286,8 +1505,8 @@ fi
 rm -f conftest*
 
 echo '#include "confdefs.h"
-#include <string.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <string.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "strerror" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1301,22 +1520,24 @@ if test $tcl_ok = 0; then
 {
 test -n "$verbose" && \
 echo "	defining NO_STRING_H"
-echo "#define" NO_STRING_H 1 >> confdefs.h
+echo "#define" NO_STRING_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_STRING_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_STRING_H\${SEDdB}NO_STRING_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_STRING_H\${SEDuB}NO_STRING_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_STRING_H\${SEDeB}NO_STRING_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_STRING_H\${ac_dB}NO_STRING_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_STRING_H\${ac_uB}NO_STRING_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_STRING_H\${ac_eB}NO_STRING_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
-echo checking for sys/time.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for sys/time.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/time.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -1324,24 +1545,26 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_SYS_TIME_H"
-echo "#define" NO_SYS_TIME_H 1 >> confdefs.h
+echo "#define" NO_SYS_TIME_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_SYS_TIME_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_SYS_TIME_H\${SEDdB}NO_SYS_TIME_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_SYS_TIME_H\${SEDuB}NO_SYS_TIME_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_SYS_TIME_H\${SEDeB}NO_SYS_TIME_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_SYS_TIME_H\${ac_dB}NO_SYS_TIME_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_SYS_TIME_H\${ac_uB}NO_SYS_TIME_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_SYS_TIME_H\${ac_eB}NO_SYS_TIME_H\${ac_eC}1\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for sys/wait.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for sys/wait.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/wait.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -1349,11 +1572,11 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_SYS_WAIT_H"
-echo "#define" NO_SYS_WAIT_H 1 >> confdefs.h
+echo "#define" NO_SYS_WAIT_H "1" >> confdefs.h
 DEFS="$DEFS -DNO_SYS_WAIT_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_SYS_WAIT_H\${SEDdB}NO_SYS_WAIT_H\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_SYS_WAIT_H\${SEDuB}NO_SYS_WAIT_H\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_SYS_WAIT_H\${SEDeB}NO_SYS_WAIT_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_SYS_WAIT_H\${ac_dB}NO_SYS_WAIT_H\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_SYS_WAIT_H\${ac_uB}NO_SYS_WAIT_H\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_SYS_WAIT_H\${ac_eB}NO_SYS_WAIT_H\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1366,10 +1589,10 @@ rm -f conftest*
 #       they don't exist.
 #--------------------------------------------------------------------
 
-echo checking for mode_t in sys/types.h
+test -n "$silent" || echo "checking for mode_t in sys/types.h"
 echo '#include "confdefs.h"
-#include <sys/types.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <sys/types.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "mode_t" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1377,22 +1600,22 @@ else
   
 {
 test -n "$verbose" && \
-echo "	defining" mode_t to be int
-echo "#define" mode_t int >> confdefs.h
+echo "	defining" mode_t to be "int"
+echo "#define" mode_t "int" >> confdefs.h
 DEFS="$DEFS -Dmode_t=int"
-SEDDEFS="${SEDDEFS}\${SEDdA}mode_t\${SEDdB}mode_t\${SEDdC}int\${SEDdD}
-\${SEDuA}mode_t\${SEDuB}mode_t\${SEDuC}int\${SEDuD}
-\${SEDeA}mode_t\${SEDeB}mode_t\${SEDeC}int\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}mode_t\${ac_dB}mode_t\${ac_dC}int\${ac_dD}
+\${ac_uA}mode_t\${ac_uB}mode_t\${ac_uC}int\${ac_uD}
+\${ac_eA}mode_t\${ac_eB}mode_t\${ac_eC}int\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for pid_t in sys/types.h
+test -n "$silent" || echo "checking for pid_t in sys/types.h"
 echo '#include "confdefs.h"
-#include <sys/types.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <sys/types.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "pid_t" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1400,22 +1623,22 @@ else
   
 {
 test -n "$verbose" && \
-echo "	defining" pid_t to be int
-echo "#define" pid_t int >> confdefs.h
+echo "	defining" pid_t to be "int"
+echo "#define" pid_t "int" >> confdefs.h
 DEFS="$DEFS -Dpid_t=int"
-SEDDEFS="${SEDDEFS}\${SEDdA}pid_t\${SEDdB}pid_t\${SEDdC}int\${SEDdD}
-\${SEDuA}pid_t\${SEDuB}pid_t\${SEDuC}int\${SEDuD}
-\${SEDeA}pid_t\${SEDeB}pid_t\${SEDeC}int\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}pid_t\${ac_dB}pid_t\${ac_dC}int\${ac_dD}
+\${ac_uA}pid_t\${ac_uB}pid_t\${ac_uC}int\${ac_uD}
+\${ac_eA}pid_t\${ac_eB}pid_t\${ac_eC}int\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for size_t in sys/types.h
+test -n "$silent" || echo "checking for size_t in sys/types.h"
 echo '#include "confdefs.h"
-#include <sys/types.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <sys/types.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "size_t" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1423,22 +1646,22 @@ else
   
 {
 test -n "$verbose" && \
-echo "	defining" size_t to be unsigned
-echo "#define" size_t unsigned >> confdefs.h
+echo "	defining" size_t to be "unsigned"
+echo "#define" size_t "unsigned" >> confdefs.h
 DEFS="$DEFS -Dsize_t=unsigned"
-SEDDEFS="${SEDDEFS}\${SEDdA}size_t\${SEDdB}size_t\${SEDdC}unsigned\${SEDdD}
-\${SEDuA}size_t\${SEDuB}size_t\${SEDuC}unsigned\${SEDuD}
-\${SEDeA}size_t\${SEDeB}size_t\${SEDeC}unsigned\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}size_t\${ac_dB}size_t\${ac_dC}unsigned\${ac_dD}
+\${ac_uA}size_t\${ac_uB}size_t\${ac_uC}unsigned\${ac_uD}
+\${ac_eA}size_t\${ac_eB}size_t\${ac_eC}unsigned\${ac_eD}
 "
 }
 
 fi
 rm -f conftest*
 
-echo checking for uid_t in sys/types.h
+test -n "$silent" || echo "checking for uid_t in sys/types.h"
 echo '#include "confdefs.h"
-#include <sys/types.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <sys/types.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "uid_t" conftest.out >/dev/null 2>&1; then
   :
 else
@@ -1446,23 +1669,23 @@ else
   
 {
 test -n "$verbose" && \
-echo "	defining" uid_t to be int
-echo "#define" uid_t int >> confdefs.h
+echo "	defining" uid_t to be "int"
+echo "#define" uid_t "int" >> confdefs.h
 DEFS="$DEFS -Duid_t=int"
-SEDDEFS="${SEDDEFS}\${SEDdA}uid_t\${SEDdB}uid_t\${SEDdC}int\${SEDdD}
-\${SEDuA}uid_t\${SEDuB}uid_t\${SEDuC}int\${SEDuD}
-\${SEDeA}uid_t\${SEDeB}uid_t\${SEDeC}int\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}uid_t\${ac_dB}uid_t\${ac_dC}int\${ac_dD}
+\${ac_uA}uid_t\${ac_uB}uid_t\${ac_uC}int\${ac_uD}
+\${ac_eA}uid_t\${ac_eB}uid_t\${ac_eC}int\${ac_eD}
 "
 }
  
 {
 test -n "$verbose" && \
-echo "	defining" gid_t to be int
-echo "#define" gid_t int >> confdefs.h
+echo "	defining" gid_t to be "int"
+echo "#define" gid_t "int" >> confdefs.h
 DEFS="$DEFS -Dgid_t=int"
-SEDDEFS="${SEDDEFS}\${SEDdA}gid_t\${SEDdB}gid_t\${SEDdC}int\${SEDdD}
-\${SEDuA}gid_t\${SEDuB}gid_t\${SEDuC}int\${SEDuD}
-\${SEDeA}gid_t\${SEDeB}gid_t\${SEDeC}int\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}gid_t\${ac_dB}gid_t\${ac_dC}int\${ac_dD}
+\${ac_uA}gid_t\${ac_uB}gid_t\${ac_uC}int\${ac_uD}
+\${ac_eA}gid_t\${ac_eB}gid_t\${ac_eC}int\${ac_eD}
 "
 }
 
@@ -1477,11 +1700,11 @@ rm -f conftest*
 #       provided.  This version only works with V7-style directories.
 #--------------------------------------------------------------------
 
-echo checking for opendir
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for opendir"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
@@ -1492,20 +1715,20 @@ choke me
 /* Override any gcc2 internal prototype to avoid an error.  */
 extern char opendir(); opendir();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
   {
 test -n "$verbose" && \
 echo "	defining USE_DIRENT2_H"
-echo "#define" USE_DIRENT2_H 1 >> confdefs.h
+echo "#define" USE_DIRENT2_H "1" >> confdefs.h
 DEFS="$DEFS -DUSE_DIRENT2_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}USE_DIRENT2_H\${SEDdB}USE_DIRENT2_H\${SEDdC}1\${SEDdD}
-\${SEDuA}USE_DIRENT2_H\${SEDuB}USE_DIRENT2_H\${SEDuC}1\${SEDuD}
-\${SEDeA}USE_DIRENT2_H\${SEDeB}USE_DIRENT2_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}USE_DIRENT2_H\${ac_dB}USE_DIRENT2_H\${ac_dC}1\${ac_dD}
+\${ac_uA}USE_DIRENT2_H\${ac_uB}USE_DIRENT2_H\${ac_uC}1\${ac_uD}
+\${ac_eA}USE_DIRENT2_H\${ac_eB}USE_DIRENT2_H\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1521,19 +1744,19 @@ rm -f conftest*
 #       the trick.
 #--------------------------------------------------------------------
 
-echo checking for union wait
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for union wait"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/types.h> 
 #include <sys/wait.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 union wait x;
 WIFEXITED(x);           /* Generates compiler error if WIFEXITED
                          * uses an int. */
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
@@ -1541,11 +1764,11 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_UNION_WAIT"
-echo "#define" NO_UNION_WAIT 1 >> confdefs.h
+echo "#define" NO_UNION_WAIT "1" >> confdefs.h
 DEFS="$DEFS -DNO_UNION_WAIT=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_UNION_WAIT\${SEDdB}NO_UNION_WAIT\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_UNION_WAIT\${SEDuB}NO_UNION_WAIT\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_UNION_WAIT\${SEDeB}NO_UNION_WAIT\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_UNION_WAIT\${ac_dB}NO_UNION_WAIT\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_UNION_WAIT\${ac_uB}NO_UNION_WAIT\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_UNION_WAIT\${ac_eB}NO_UNION_WAIT\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1575,31 +1798,31 @@ rm -f conftest*
 #--------------------------------------------------------------------
 
 echo checking for sys/select.h
-echo checking for fd_set
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for fd_set"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <sys/types.h>
-int main() { exit(0); }
-int t() { fd_set readMask, writeMask; }
+int main() { return 0; }
+int t() { fd_set readMask, writeMask;; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
   echo '#include "confdefs.h"
-#include <sys/select.h>' > conftest.c
-eval "$CPP conftest.c > conftest.out 2>&1"
+#include <sys/select.h>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
 if egrep "fd_mask" conftest.out >/dev/null 2>&1; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining HAVE_SYS_SELECT_H"
-echo "#define" HAVE_SYS_SELECT_H 1 >> confdefs.h
+echo "#define" HAVE_SYS_SELECT_H "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_SYS_SELECT_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_SYS_SELECT_H\${SEDdB}HAVE_SYS_SELECT_H\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_SYS_SELECT_H\${SEDuB}HAVE_SYS_SELECT_H\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_SYS_SELECT_H\${SEDeB}HAVE_SYS_SELECT_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}HAVE_SYS_SELECT_H\${ac_dB}HAVE_SYS_SELECT_H\${ac_dC}1\${ac_dD}
+\${ac_uA}HAVE_SYS_SELECT_H\${ac_uB}HAVE_SYS_SELECT_H\${ac_uC}1\${ac_uD}
+\${ac_eA}HAVE_SYS_SELECT_H\${ac_eB}HAVE_SYS_SELECT_H\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1610,11 +1833,11 @@ else
 {
 test -n "$verbose" && \
 echo "	defining NO_FD_SET"
-echo "#define" NO_FD_SET 1 >> confdefs.h
+echo "#define" NO_FD_SET "1" >> confdefs.h
 DEFS="$DEFS -DNO_FD_SET=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}NO_FD_SET\${SEDdB}NO_FD_SET\${SEDdC}1\${SEDdD}
-\${SEDuA}NO_FD_SET\${SEDuB}NO_FD_SET\${SEDuC}1\${SEDuD}
-\${SEDeA}NO_FD_SET\${SEDeB}NO_FD_SET\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}NO_FD_SET\${ac_dB}NO_FD_SET\${ac_dC}1\${ac_dD}
+\${ac_uA}NO_FD_SET\${ac_uB}NO_FD_SET\${ac_uC}1\${ac_uD}
+\${ac_eA}NO_FD_SET\${ac_eB}NO_FD_SET\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1634,17 +1857,17 @@ rm -f conftest*
 
 if test -z "$tk_ok"; then
   # Extract the first word of `xmkmf', so it can be a program name with args.
-  set dummy xmkmf; word=$2
-  echo checking for $word
-  IFS="${IFS= 	}"; saveifs="$IFS"; IFS="${IFS}:"
-  for dir in $PATH; do
-    test -z "$dir" && dir=.
-    if test -f $dir/$word; then
+  set ac_dummy xmkmf; ac_word=$2
+  test -n "$silent" || echo "checking for $ac_word"
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  for ac_dir in $PATH; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
       tk_ok="1"
       break
     fi
   done
-  IFS="$saveifs"
+  IFS="$ac_save_ifs"
 fi
 test -z "$tk_ok" && tk_ok="0"
 test -n "$tk_ok" && test -n "$verbose" && echo "	setting tk_ok to $tk_ok"
@@ -1652,64 +1875,95 @@ test -n "$tk_ok" && test -n "$verbose" && echo "	setting tk_ok to $tk_ok"
 if test $tk_ok = 1; then
     # If we find X, set shell vars x_includes and x_libraries to the paths.
 no_x=true
-echo checking for X include and library files with xmkmf
+test -n "$silent" || echo "checking for X include and library files with xmkmf"
 rm -fr conftestdir
 if mkdir conftestdir; then
   cd conftestdir
-  cat > Imakefile <<\EOF
+  cat > Imakefile <<'EOF'
 acfindx:
-	@echo "im_incroot=$(INCROOT); im_usrlibdir=$(USRLIBDIR); im_libdir=$(LIBDIR)"
+	@echo 'ac_imake_incroot="${INCROOT}"; ac_imake_usrlibdir="${USRLIBDIR}"; ac_imake_libdir="${LIBDIR}"'
 EOF
   if (xmkmf) >/dev/null 2>/dev/null && test -f Makefile; then
     no_x=
     # GNU make sometimes prints "make[1]: Entering...", which would confuse us.
-    eval `make acfindx | grep -v make`
+    eval `make acfindx 2>/dev/null | grep -v make`
     # Open Windows xmkmf reportedly sets LIBDIR instead of USRLIBDIR.
-    if test ! -f $im_usrlibdir/libX11.a && test -f $im_libdir/libX11.a; then
-      im_usrlibdir=$im_libdir
+    if test ! -f $ac_imake_usrlibdir/libX11.a && test -f $ac_imake_libdir/libX11.a; then
+      ac_imake_usrlibdir=$ac_imake_libdir
     fi
-    case "$im_incroot" in
+    case "$ac_imake_incroot" in
 	/usr/include) ;;
-	*) x_includes="$im_incroot" ;;
+	*) x_includes="${x_includes-$ac_imake_incroot}" ;;
     esac
-    case "$im_usrlibdir" in
+    case "$ac_imake_usrlibdir" in
 	/usr/lib | /lib) ;;
-	*) x_libraries="$im_usrlibdir" ;;
+	*) x_libraries="${x_libraries-$ac_imake_usrlibdir}" ;;
     esac
   fi
   cd ..
   rm -fr conftestdir
 fi
 
-if test -z "$im_usrlibdir"; then
-echo checking for X include and library files directly
-cat > conftest.c <<EOF
+if test -z "$ac_imake_usrlibdir"; then
+test -n "$silent" || echo "checking for X include and library files directly"
+if test ".$x_direct_test_library" = . ; then
+   x_direct_test_library='Xt'
+fi
+if test ".$x_direct_test_include" = . ; then
+   x_direct_test_include='X11/Intrinsic.h'
+fi
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
-#include <X11/Intrinsic.h>
+#include <$x_direct_test_include>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   rm -rf conftest*
   no_x=
 
 else
   rm -rf conftest*
-  for dir in \
-    /usr/local/include \
-    /usr/unsupported/include \
-    /usr/x386/include \
-    /usr/local/x11r5/include \
-    /usr/include/X11R5 \
-    /usr/include/X11R4 \
-    /usr/X11R5/include \
-    /usr/X11/include \
-    /usr/openwin/include \
+  for ac_dir in               \
+    /usr/X11R6/include        \
+    /usr/X11R5/include        \
+    /usr/X11R4/include        \
+                              \
+    /usr/include/X11R6        \
+    /usr/include/X11R5        \
+    /usr/include/X11R4        \
+                              \
+    /usr/local/X11R6/include  \
+    /usr/local/X11R5/include  \
+    /usr/local/X11R4/include  \
+                              \
+    /usr/local/include/X11R6  \
+    /usr/local/include/X11R5  \
+    /usr/local/include/X11R4  \
+                              \
+    /usr/X11/include          \
+    /usr/include/X11          \
+    /usr/local/X11/include    \
+    /usr/local/include/X11    \
+                              \
+    /usr/X386/include         \
+    /usr/x386/include         \
+    /usr/XFree86/include/X11  \
+                              \
+    /usr/include              \
+    /usr/local/include        \
+    /usr/unsupported/include  \
+    /usr/athena/include       \
+    /usr/local/x11r5/include  \
+    /usr/lpp/Xamples/include  \
+                              \
+    /usr/openwin/include      \
     /usr/openwin/share/include \
-    /usr/lpp/Xamples/include \
     ; \
   do
-    if test -r $dir/X11/Intrinsic.h; then
-      x_includes=$dir; no_x=
+    if test -r "$ac_dir/$x_direct_test_include"; then
+      x_includes=${x_includes-$ac_dir}; no_x=
       break
     fi
   done
@@ -1718,42 +1972,66 @@ rm -f conftest*
 
 # Check for the libraries.  First see if replacing the `include' by
 # `lib' works.
-LIBS_save="${LIBS}"
-LIBS="${LIBS} -lXt"
-have_lib=""
-echo checking for -lXt
-cat > conftest.c <<EOF
+ac_save_LIBS="${LIBS}"
+LIBS="${LIBS} -l"$x_direct_test_library""
+ac_have_lib=""
+test -n "$silent" || echo "checking for -l"$x_direct_test_library""
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; no_x=
 else
-   :; for dir in `echo "$x_includes" | sed s/include/lib/` \
-  /usr/local/lib \
-  /usr/unsupported/lib \
-  /usr/x386/lib \
-  /usr/local/x11r5/lib \
-  /usr/lib/X11 \
-  /usr/lib/X11R4 \
-  /usr/X11R5/lib \
-  /usr/X11/lib \
-  /usr/openwin/lib \
-  /usr/lpp/Xamples/lib \
-  ; \
+   :; for ac_dir in `echo "$x_includes" | sed s/include/lib/` \
+    /usr/X11R6/lib        \
+    /usr/X11R5/lib        \
+    /usr/X11R4/lib        \
+                          \
+    /usr/lib/X11R6        \
+    /usr/lib/X11R5        \
+    /usr/lib/X11R4        \
+                          \
+    /usr/local/X11R6/lib  \
+    /usr/local/X11R5/lib  \
+    /usr/local/X11R4/lib  \
+                          \
+    /usr/local/lib/X11R6  \
+    /usr/local/lib/X11R5  \
+    /usr/local/lib/X11R4  \
+                          \
+    /usr/X11/lib          \
+    /usr/lib/X11          \
+    /usr/local/X11/lib    \
+    /usr/local/lib/X11    \
+                          \
+    /usr/X386/lib         \
+    /usr/x386/lib         \
+    /usr/XFree86/lib/X11  \
+                          \
+    /usr/lib              \
+    /usr/local/lib        \
+    /usr/unsupported/lib  \
+    /usr/athena/lib       \
+    /usr/local/x11r5/lib  \
+    /usr/lpp/Xamples/lib  \
+                          \
+    /usr/openwin/lib      \
+    /usr/openwin/share/lib \
+    ; \
 do
-  for extension in a so sl; do
-    if test -r $dir/libXt.$extension; then
-      x_libraries=$dir; no_x=
+  for ac_extension in a so sl; do
+    if test -r $ac_dir/lib${x_direct_test_library}.$ac_extension; then
+      x_libraries=${x_libraries-$ac_dir}; no_x=
       break 2
     fi
   done
@@ -1761,10 +2039,9 @@ done
 fi
 
 fi
-if test -n "$verbose"; then
-  test -n "$x_includes" && echo "	found X11 headers in $x_includes"
-  test -n "$x_libraries" && echo "	found X11 libraries in $x_libraries"
-fi
+test -n "$x_includes" && test -n "$verbose" && echo "	X11 headers are in $x_includes"
+test -n "$x_libraries" && test -n "$verbose" && echo "	X11 libraries are in $x_libraries"
+
 fi
 if test "$XINCLUDE_DIR" != ""; then
      x_includes="$XINCLUDE_DIR"
@@ -1776,12 +2053,14 @@ elif test "$x_includes" != ""; then
 else
     echo checking for X11 header files
     XINCLUDES="# no special path needed"
-    cat > conftest.c <<EOF
+    cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <X11/Intrinsic.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   :
 else
   rm -rf conftest*
@@ -1812,48 +2091,48 @@ elif test "$x_libraries" != ""; then
     XLIBSW="-L$x_libraries -lX11"
 else
     echo "checking for X11 library archive"
-    LIBS_save="${LIBS}"
+    ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lX11_s"
-have_lib=""
-echo checking for -lX11_s
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lX11_s"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; XLIBSW="-lX11_s"
 else
    :; XLIBSW=nope
 fi
 
     if test "$XLIBSW" = nope; then
-        LIBS_save="${LIBS}"
+        ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lX11"
-have_lib=""
-echo checking for -lX11
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lX11"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; XLIBSW="-lX11"
 else
    :; XLIBSW=nope
@@ -1870,24 +2149,24 @@ fi
     fi
 fi
 if test "$XLIBSW" = nope ; then
-    LIBS_save="${LIBS}"
+    ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lXwindow"
-have_lib=""
-echo checking for -lXwindow
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lXwindow"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; XLIBSW=-lXwindow
 else
    :; 
@@ -1909,36 +2188,36 @@ fi
 #       These must be after the library checks.
 #------------------------------------------------------------------------------
 
-for func in catgets getcwd select setitimer setvbuf sigaction setpgid
+for ac_func in catgets getcwd select setitimer setvbuf sigaction setpgid
 do
-trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
-echo checking for ${func}
-cat > conftest.c <<EOF
+ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+test -n "$silent" || echo "checking for ${ac_func}"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_${func}) || defined (__stub___${func})
+#if defined (__stub_${ac_func}) || defined (__stub___${ac_func})
 choke me
 #else
 /* Override any gcc2 internal prototype to avoid an error.  */
-extern char ${func}(); ${func}();
+extern char ${ac_func}(); ${ac_func}();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   {
 test -n "$verbose" && \
-echo "	defining ${trfunc}"
-echo "#define" ${trfunc} 1 >> confdefs.h
-DEFS="$DEFS -D${trfunc}=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}${trfunc}\${SEDdB}${trfunc}\${SEDdC}1\${SEDdD}
-\${SEDuA}${trfunc}\${SEDuB}${trfunc}\${SEDuC}1\${SEDuD}
-\${SEDeA}${trfunc}\${SEDeB}${trfunc}\${SEDeC}1\${SEDeD}
+echo "	defining ${ac_tr_func}"
+echo "#define" ${ac_tr_func} "1" >> confdefs.h
+DEFS="$DEFS -D${ac_tr_func}=1"
+ac_sed_defs="${ac_sed_defs}\${ac_dA}${ac_tr_func}\${ac_dB}${ac_tr_func}\${ac_dC}1\${ac_dD}
+\${ac_uA}${ac_tr_func}\${ac_uB}${ac_tr_func}\${ac_uC}1\${ac_uD}
+\${ac_eA}${ac_tr_func}\${ac_eB}${ac_tr_func}\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1947,36 +2226,36 @@ fi
 rm -f conftest*
 done
 
-for func in bzero bcopy gethostbyname fsync getpriority
+for ac_func in bzero bcopy gethostbyname fsync getpriority
 do
-trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
-echo checking for ${func}
-cat > conftest.c <<EOF
+ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
+test -n "$silent" || echo "checking for ${ac_func}"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_${func}) || defined (__stub___${func})
+#if defined (__stub_${ac_func}) || defined (__stub___${ac_func})
 choke me
 #else
 /* Override any gcc2 internal prototype to avoid an error.  */
-extern char ${func}(); ${func}();
+extern char ${ac_func}(); ${ac_func}();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
   {
 test -n "$verbose" && \
-echo "	defining ${trfunc}"
-echo "#define" ${trfunc} 1 >> confdefs.h
-DEFS="$DEFS -D${trfunc}=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}${trfunc}\${SEDdB}${trfunc}\${SEDdC}1\${SEDdD}
-\${SEDuA}${trfunc}\${SEDuB}${trfunc}\${SEDuC}1\${SEDuD}
-\${SEDeA}${trfunc}\${SEDeB}${trfunc}\${SEDeC}1\${SEDeD}
+echo "	defining ${ac_tr_func}"
+echo "#define" ${ac_tr_func} "1" >> confdefs.h
+DEFS="$DEFS -D${ac_tr_func}=1"
+ac_sed_defs="${ac_sed_defs}\${ac_dA}${ac_tr_func}\${ac_dB}${ac_tr_func}\${ac_dC}1\${ac_dD}
+\${ac_uA}${ac_tr_func}\${ac_uB}${ac_tr_func}\${ac_uC}1\${ac_uD}
+\${ac_eA}${ac_tr_func}\${ac_eB}${ac_tr_func}\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -1985,23 +2264,25 @@ fi
 rm -f conftest*
 done
 
-echo checking for vfork.h
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for vfork.h"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <vfork.h>
 EOF
-err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
-if test -z "$err"; then
+# Some shells (Coherent) do redirections in the wrong order, so need
+# the parens.
+ac_err=`eval "($ac_cpp conftest.${ac_ext} >/dev/null) 2>&1"`
+if test -z "$ac_err"; then
   rm -rf conftest*
   
 {
 test -n "$verbose" && \
 echo "	defining HAVE_VFORK_H"
-echo "#define" HAVE_VFORK_H 1 >> confdefs.h
+echo "#define" HAVE_VFORK_H "1" >> confdefs.h
 DEFS="$DEFS -DHAVE_VFORK_H=1"
-SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_VFORK_H\${SEDdB}HAVE_VFORK_H\${SEDdC}1\${SEDdD}
-\${SEDuA}HAVE_VFORK_H\${SEDuB}HAVE_VFORK_H\${SEDuC}1\${SEDuD}
-\${SEDeA}HAVE_VFORK_H\${SEDeB}HAVE_VFORK_H\${SEDeC}1\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}HAVE_VFORK_H\${ac_dB}HAVE_VFORK_H\${ac_dC}1\${ac_dD}
+\${ac_uA}HAVE_VFORK_H\${ac_uB}HAVE_VFORK_H\${ac_uC}1\${ac_uD}
+\${ac_eA}HAVE_VFORK_H\${ac_eB}HAVE_VFORK_H\${ac_eC}1\${ac_eD}
 "
 }
 
@@ -2009,9 +2290,9 @@ SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_VFORK_H\${SEDdB}HAVE_VFORK_H\${SEDdC}1\${SEDdD}
 fi
 rm -f conftest*
 
-echo checking for working vfork
+test -n "$silent" || echo "checking for working vfork"
 
-cat > conftest.c <<EOF
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 /* Thanks to Paul Eggert for this test.  */
 #include <stdio.h>
@@ -2095,19 +2376,19 @@ main() {
   }
 }
 EOF
-eval $compile
+eval $ac_compile
 if test -s conftest && (./conftest; exit) 2>/dev/null; then
   :
 else
   
 {
 test -n "$verbose" && \
-echo "	defining" vfork to be fork
-echo "#define" vfork fork >> confdefs.h
+echo "	defining" vfork to be "fork"
+echo "#define" vfork "fork" >> confdefs.h
 DEFS="$DEFS -Dvfork=fork"
-SEDDEFS="${SEDDEFS}\${SEDdA}vfork\${SEDdB}vfork\${SEDdC}fork\${SEDdD}
-\${SEDuA}vfork\${SEDuB}vfork\${SEDuC}fork\${SEDuD}
-\${SEDeA}vfork\${SEDeB}vfork\${SEDeC}fork\${SEDeD}
+ac_sed_defs="${ac_sed_defs}\${ac_dA}vfork\${ac_dB}vfork\${ac_dC}fork\${ac_dD}
+\${ac_uA}vfork\${ac_uB}vfork\${ac_uC}fork\${ac_uD}
+\${ac_eA}vfork\${ac_eB}vfork\${ac_eC}fork\${ac_eD}
 "
 }
 
@@ -2122,35 +2403,35 @@ rm -fr conftest*
 #       checks.
 #------------------------------------------------------------------------------
 
-LIBS_save="${LIBS}"
+ac_save_LIBS="${LIBS}"
 LIBS="${LIBS} -lintl"
-have_lib=""
-echo checking for -lintl
-cat > conftest.c <<EOF
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lintl"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 
-int main() { exit(0); }
-int t() { main(); }
+int main() { return 0; }
+int t() { main();; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   rm -rf conftest*
-  have_lib="1"
+  ac_have_lib="1"
 
 fi
 rm -f conftest*
-LIBS="${LIBS_save}"
-if test -n "${have_lib}"; then
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
    :; LIBS="$LIBS -lintl"
 else
    :; 
 fi
 
 
-echo checking for strftime
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for strftime"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
@@ -2161,9 +2442,9 @@ choke me
 /* Override any gcc2 internal prototype to avoid an error.  */
 extern char strftime(); strftime();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
@@ -2171,11 +2452,11 @@ else
 fi
 rm -f conftest*
 
-echo checking for random
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for random"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
@@ -2186,9 +2467,9 @@ choke me
 /* Override any gcc2 internal prototype to avoid an error.  */
 extern char random(); random();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
@@ -2196,11 +2477,11 @@ else
 fi
 rm -f conftest*
 
-echo checking for rename
-cat > conftest.c <<EOF
+test -n "$silent" || echo "checking for rename"
+cat > conftest.${ac_ext} <<EOF
 #include "confdefs.h"
 #include <ctype.h>
-int main() { exit(0); }
+int main() { return 0; }
 int t() { 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
@@ -2211,9 +2492,9 @@ choke me
 /* Override any gcc2 internal prototype to avoid an error.  */
 extern char rename(); rename();
 #endif
- }
+; return 0; }
 EOF
-if eval $compile; then
+if eval $ac_compile; then
   :
 else
   rm -rf conftest*
@@ -2264,23 +2545,30 @@ fi
 
 # Set default prefixes.
 if test -n "$prefix"; then
-  test -z "$exec_prefix" && exec_prefix='${prefix}'
-  prsub="s%^prefix\\([ 	]*\\)=\\([ 	]*\\).*$%prefix\\1=\\2$prefix%"
+  test -z "$exec_prefix" && exec_prefix='${prefix}' # Let make expand it.
+  ac_prsub="s%^prefix\\([ 	]*\\)=\\([ 	]*\\).*$%prefix\\1=\\2$prefix%"
 fi
 if test -n "$exec_prefix"; then
-  prsub="$prsub
+  ac_prsub="$ac_prsub
 s%^exec_prefix\\([ 	]*\\)=\\([ 	]*\\).*$%exec_prefix\\1=\\2$exec_prefix%"
 fi
+# Any assignment to VPATH causes Sun make to only execute
+# the first set of double-colon rules, so remove it if not needed.
+# If there is a colon in the path, we need to keep it.
+if test "x$srcdir" = x.; then
+  ac_vpsub='/^[ 	]*VPATH[ 	]*=[^:]*$/d'
+fi
+
 # Quote sed substitution magic chars in DEFS.
 cat >conftest.def <<EOF
 $DEFS
 EOF
-escape_ampersand_and_backslash='s%[&\\]%\\&%g'
-DEFS=`sed "$escape_ampersand_and_backslash" <conftest.def`
+ac_escape_ampersand_and_backslash='s%[&\\]%\\&%g'
+DEFS=`sed "$ac_escape_ampersand_and_backslash" <conftest.def`
 rm -f conftest.def
 # Substitute for predefined variables.
 
-trap 'rm -f config.status; exit 1' 1 3 15
+trap 'rm -f config.status; exit 1' 1 2 15
 echo creating config.status
 rm -f config.status
 cat > config.status <<EOF
@@ -2292,17 +2580,23 @@ cat > config.status <<EOF
 #
 # $0 $configure_args
 
-for arg
+ac_cs_usage="Usage: config.status [--recheck] [--version] [--help]"
+for ac_option
 do
-  case "\$arg" in
-    -recheck | --recheck | --rechec | --reche | --rech | --rec | --re | --r)
-    echo running \${CONFIG_SHELL-/bin/sh} $0 $configure_args
-    exec \${CONFIG_SHELL-/bin/sh} $0 $configure_args ;;
-    *) echo "Usage: config.status --recheck" 2>&1; exit 1 ;;
+  case "\$ac_option" in
+  -recheck | --recheck | --rechec | --reche | --rech | --rec | --re | --r)
+    echo running \${CONFIG_SHELL-/bin/sh} $0 $configure_args --no-create
+    exec \${CONFIG_SHELL-/bin/sh} $0 $configure_args --no-create ;;
+  -version | --version | --versio | --versi | --vers | --ver | --ve | --v)
+    echo "config.status generated by autoconf version 1.8"
+    exit 0 ;;
+  -help | --help | --hel | --he | --h)
+    echo "\$ac_cs_usage"; exit 0 ;;
+  *) echo "\$ac_cs_usage"; exit 1 ;;
   esac
 done
 
-trap 'rm -fr Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile src/SYSLIBS tksrc/SYSLIBS src/tclXconfig.h conftest*; exit 1' 1 3 15
+trap 'rm -fr Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile src/SYSLIBS tksrc/SYSLIBS src/tclXconfig.h conftest*; exit 1' 1 2 15
 TCL_ARCH='$TCL_ARCH'
 YACC='$YACC'
 RANLIB='$RANLIB'
@@ -2322,29 +2616,48 @@ prefix='$prefix'
 execprefix='$execprefix'
 LIBS='$LIBS'
 srcdir='$srcdir'
-prefix='$prefix'
+top_srcdir='$top_srcdir'
 exec_prefix='$exec_prefix'
-prsub='$prsub'
+ac_prsub='$ac_prsub'
+ac_vpsub='$ac_vpsub'
 extrasub='$extrasub'
 EOF
 cat >> config.status <<\EOF
 
-top_srcdir=$srcdir
+ac_given_srcdir=$srcdir
 
 CONFIG_FILES=${CONFIG_FILES-"Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile src/SYSLIBS tksrc/SYSLIBS"}
-for file in .. ${CONFIG_FILES}; do if test "x$file" != x..; then
-  srcdir=$top_srcdir
+for ac_file in .. ${CONFIG_FILES}; do if test "x$ac_file" != x..; then
   # Remove last slash and all that follows it.  Not all systems have dirname.
-  dir=`echo $file|sed 's%/[^/][^/]*$%%'`
-  if test "$dir" != "$file"; then
-    test "$top_srcdir" != . && srcdir=$top_srcdir/$dir
-    test ! -d $dir && mkdir $dir
+  ac_dir=`echo $ac_file|sed 's%/[^/][^/]*$%%'`
+  if test "$ac_dir" != "$ac_file"; then
+    # The file is in a subdirectory.
+    test ! -d "$ac_dir" && mkdir "$ac_dir"
+    ac_dir_suffix="/$ac_dir"
+  else
+    ac_dir_suffix=
   fi
-  echo creating $file
-  rm -f $file
-  echo "# Generated automatically from `echo $file|sed 's|.*/||'`.in by configure." > $file
+
+  # A "../" for each directory in $ac_dir_suffix.
+  ac_dots=`echo $ac_dir_suffix|sed 's%/[^/]*%../%g'`
+  case "$ac_given_srcdir" in
+  .)  srcdir=.; top_srcdir="$ac_dots." ;;
+  /*) srcdir="$ac_given_srcdir$ac_dir_suffix"; top_srcdir="$ac_given_srcdir" ;;
+  *) # Relative path.
+    srcdir="$ac_dots$ac_given_srcdir$ac_dir_suffix"
+    top_srcdir="$ac_dots$ac_given_srcdir" ;;
+  esac
+
+  echo creating "$ac_file"
+  rm -f "$ac_file"
+  comment_str="Generated automatically from `echo $ac_file|sed 's|.*/||'`.in by configure."
+  case "$ac_file" in
+    *.c | *.h | *.C | *.cc | *.m )  echo "/* $comment_str */" > "$ac_file" ;;
+    * )          echo "# $comment_str"     > "$ac_file" ;;
+  esac
   sed -e "
-$prsub
+$ac_prsub
+$ac_vpsub
 $extrasub
 s%@TCL_ARCH@%$TCL_ARCH%g
 s%@YACC@%$YACC%g
@@ -2365,56 +2678,56 @@ s%@prefix@%$prefix%g
 s%@execprefix@%$execprefix%g
 s%@LIBS@%$LIBS%g
 s%@srcdir@%$srcdir%g
-s%@DEFS@%-DHAVE_CONFIG_H%" $top_srcdir/${file}.in >> $file
+s%@top_srcdir@%$top_srcdir%g
+s%@exec_prefix@%$exec_prefix%g
+s%@DEFS@%-DHAVE_CONFIG_H%" $ac_given_srcdir/${ac_file}.in >> $ac_file
 fi; done
 
-CONFIG_HEADERS=${CONFIG_HEADERS-"src/tclXconfig.h"}
-for file in .. ${CONFIG_HEADERS}; do if test "x$file" != x..; then
-echo creating $file
-
-# These sed commands are put into SEDDEFS when defining a macro.
+# These sed commands are put into ac_sed_defs when defining a macro.
 # They are broken into pieces to make the sed script easier to manage.
 # They are passed to sed as "A NAME B NAME C VALUE D", where NAME
 # is the cpp macro being defined and VALUE is the value it is being given.
 # Each defining turns into a single global substitution command.
+# Hopefully no one uses "!" as a variable value.
+# Other candidates for the sed separators, like , and @, do get used.
 #
-# SEDd sets the value in "#define NAME VALUE" lines.
-SEDdA='s@^\([ 	]*\)#\([ 	]*define[ 	][ 	]*\)'
-SEDdB='\([ 	][ 	]*\)[^ 	]*@\1#\2'
-SEDdC='\3'
-SEDdD='@g'
-# SEDu turns "#undef NAME" with trailing blanks into "#define NAME VALUE".
-SEDuA='s@^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
-SEDuB='\([ 	]\)@\1#\2define\3'
-SEDuC=' '
-SEDuD='\4@g'
-# SEDe turns "#undef NAME" without trailing blanks into "#define NAME VALUE".
-SEDeA='s@^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
-SEDeB='$@\1#\2define\3'
-SEDeC=' '
-SEDeD='@g'
+# ac_d sets the value in "#define NAME VALUE" lines.
+ac_dA='s!^\([ 	]*\)#\([ 	]*define[ 	][ 	]*\)'
+ac_dB='\([ 	][ 	]*\)[^ 	]*!\1#\2'
+ac_dC='\3'
+ac_dD='!g'
+# ac_u turns "#undef NAME" with trailing blanks into "#define NAME VALUE".
+ac_uA='s!^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
+ac_uB='\([ 	]\)!\1#\2define\3'
+ac_uC=' '
+ac_uD='\4!g'
+# ac_e turns "#undef NAME" without trailing blanks into "#define NAME VALUE".
+ac_eA='s!^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
+ac_eB='$!\1#\2define\3'
+ac_eC=' '
+ac_eD='!g'
 rm -f conftest.sed
 EOF
 # Turn off quoting long enough to insert the sed commands.
 rm -f conftest.sh
 cat > conftest.sh <<EOF
-$SEDDEFS
+$ac_sed_defs
 EOF
 
-# Break up $SEDDEFS (now in conftest.sh) because some shells have a limit
+# Break up $ac_sed_defs (now in conftest.sh) because some shells have a limit
 # on the size of here documents.
 
 # Maximum number of lines to put in a single here document.
-maxshlines=9
+ac_max_sh_lines=9
 
 while :
 do
-  # wc gives bogus results for an empty file on some systems.
-  lines=`grep -c . conftest.sh`
-  if test -z "$lines" || test "$lines" -eq 0; then break; fi
+  # wc gives bogus results for an empty file on some AIX systems.
+  ac_lines=`grep -c . conftest.sh`
+  if test -z "$ac_lines" || test "$ac_lines" -eq 0; then break; fi
   rm -f conftest.s1 conftest.s2
-  sed ${maxshlines}q conftest.sh > conftest.s1 # Like head -20.
-  sed 1,${maxshlines}d conftest.sh > conftest.s2 # Like tail +21.
+  sed ${ac_max_sh_lines}q conftest.sh > conftest.s1 # Like head -20.
+  sed 1,${ac_max_sh_lines}d conftest.sh > conftest.s2 # Like tail +21.
   # Write a limited-size here document to append to conftest.sed.
   echo 'cat >> conftest.sed <<CONFEOF' >> config.status
   cat conftest.s1 >> config.status
@@ -2435,32 +2748,37 @@ s,^[ 	]*#[ 	]*undef[ 	][ 	]*[a-zA-Z_][a-zA-Z_0-9]*,/* & */,
 CONFEOF
 rm -f conftest.h
 # Break up the sed commands because old seds have small limits.
-maxsedlines=20
-cp $top_srcdir/$file.in conftest.h1
-while :
-do
-  lines=`grep -c . conftest.sed`
-  if test -z "$lines" || test "$lines" -eq 0; then break; fi
-  rm -f conftest.s1 conftest.s2 conftest.h2
-  sed ${maxsedlines}q conftest.sed > conftest.s1 # Like head -20.
-  sed 1,${maxsedlines}d conftest.sed > conftest.s2 # Like tail +21.
-  sed -f conftest.s1 < conftest.h1 > conftest.h2
-  rm -f conftest.s1 conftest.h1 conftest.sed
-  mv conftest.h2 conftest.h1
-  mv conftest.s2 conftest.sed
-done
-rm -f conftest.sed conftest.h
-echo "/* $file.  Generated automatically by configure.  */" > conftest.h
-cat conftest.h1 >> conftest.h
-rm -f conftest.h1
-if cmp -s $file conftest.h 2>/dev/null; then
-  # The file exists and we would not be changing it.
-  echo "$file is unchanged"
-  rm -f conftest.h
-else
-  rm -f $file
-  mv conftest.h $file
-fi
+ac_max_sed_lines=20
+
+CONFIG_HEADERS=${CONFIG_HEADERS-"src/tclXconfig.h"}
+for ac_file in .. ${CONFIG_HEADERS}; do if test "x$ac_file" != x..; then
+  echo creating $ac_file
+
+  cp $ac_given_srcdir/$ac_file.in conftest.h1
+  while :
+  do
+    ac_lines=`grep -c . conftest.sed`
+    if test -z "$ac_lines" || test "$ac_lines" -eq 0; then break; fi
+    rm -f conftest.s1 conftest.s2 conftest.h2
+    sed ${ac_max_sed_lines}q conftest.sed > conftest.s1 # Like head -20.
+    sed 1,${ac_max_sed_lines}d conftest.sed > conftest.s2 # Like tail +21.
+    sed -f conftest.s1 < conftest.h1 > conftest.h2
+    rm -f conftest.s1 conftest.h1 conftest.sed
+    mv conftest.h2 conftest.h1
+    mv conftest.s2 conftest.sed
+  done
+  rm -f conftest.sed conftest.h
+  echo "/* $ac_file.  Generated automatically by configure.  */" > conftest.h
+  cat conftest.h1 >> conftest.h
+  rm -f conftest.h1
+  if cmp -s $ac_file conftest.h 2>/dev/null; then
+    # The file exists and we would not be changing it.
+    echo "$ac_file is unchanged"
+    rm -f conftest.h
+  else
+    rm -f $ac_file
+    mv conftest.h $ac_file
+  fi
 fi; done
 
 
@@ -2468,5 +2786,5 @@ fi; done
 exit 0
 EOF
 chmod +x config.status
-${CONFIG_SHELL-/bin/sh} config.status
+test -n "$no_create" || ${CONFIG_SHELL-/bin/sh} config.status
 
