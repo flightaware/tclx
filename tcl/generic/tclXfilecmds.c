@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.3 1996/02/12 07:21:16 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.4 1996/02/12 18:15:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -59,7 +59,7 @@ CopyOpenFile _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 GetsListElement _ANSI_ARGS_((Tcl_Interp    *interp,
-                             Tcl_Channel    inChan,
+                             Tcl_Channel    channel,
                              Tcl_DString   *bufferPtr,
                              int           *idxPtr));
 
@@ -297,13 +297,13 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
  *
  * Paramaters:
  *   o interp (I) - Errors are returned in result.
- *   o inChan (I) - The channel to read from.
+ *   o channel (I) - The channel to read from.
  *   o bufferPtr (I) - Buffer that file is read into.  The first line of the
  *     list should already have been read in.
  *   o idxPtr (I/O) - Pointer to the index of the next element in the buffer.
  *     initialize to zero before the first call.
  * Returns:
- *   o TCL_OK if an element was validated but there are more in the buffer.
+ *   o TCL_OK if an element was validated but there is more in the buffer.
  *   o TCL_BREAK if the end of the list was reached.
  *   o TCL_ERROR if an error occured.
  * Notes:
@@ -311,9 +311,9 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-GetsListElement (interp, inChan, bufferPtr, idxPtr)
+GetsListElement (interp, channel, bufferPtr, idxPtr)
     Tcl_Interp    *interp;
-    Tcl_Channel    inChan;
+    Tcl_Channel    channel;
     Tcl_DString   *bufferPtr;
     int           *idxPtr;
 {
@@ -322,6 +322,13 @@ GetsListElement (interp, inChan, bufferPtr, idxPtr)
     int inQuotes = 0;
 
     p = bufferPtr->string + *idxPtr;
+
+    /*
+     * If an EOF is pending even though data was read, it indicates that
+     * a newline was not read.
+     */
+    if (Tcl_Eof (channel))
+        goto errorOrEof;
 
     /*
      * Skim off leading white space and check for an opening brace or
@@ -454,29 +461,10 @@ GetsListElement (interp, inChan, bufferPtr, idxPtr)
                 oldString = bufferPtr->string;
                 Tcl_DStringAppend (bufferPtr, "\n", -1);
 
-                stat = Tcl_Gets (inChan, bufferPtr);
+                stat = Tcl_Gets (channel, bufferPtr);
+                if (stat < 0)
+                    goto errorOrEof;
                 p = bufferPtr->string + (p - oldString);
-
-                if (stat >= 0)
-                    break;  /* Got some data */
-
-                if (!(Tcl_Eof (inChan) || Tcl_InputBlocked (inChan)))
-                    goto fileError;
-
-                /*
-                 * EOF in list error.
-                 */
-                if (openBraces != 0) {
-                    Tcl_SetResult(interp,
-                            "unmatched open brace in list read from file (at EOF)",
-                            TCL_STATIC);
-                    return TCL_ERROR;
-                } else {
-                    Tcl_SetResult(interp,
-                            "unmatched open quote in list read from file (at EOF)",
-                            TCL_STATIC);
-                    return TCL_ERROR;
-                }
             }
         }
         p++;
@@ -489,9 +477,16 @@ GetsListElement (interp, inChan, bufferPtr, idxPtr)
     *idxPtr = p - bufferPtr->string;
     return (*p == '\0') ? TCL_BREAK : TCL_OK;
 
-  fileError:
-    Tcl_AppendResult (interp, "error reading list from file: ",
-                      Tcl_PosixError (interp), (char *) NULL);
+  errorOrEof:
+    if (Tcl_Eof (channel)) {
+        Tcl_SetResult (interp,
+                       "eof encountered while reading list from channel",
+                       TCL_STATIC);
+    } else {
+        Tcl_AppendResult (interp,
+                          "error reading list from : ",
+                          Tcl_PosixError (interp), (char *) NULL);
+    }
     return TCL_ERROR;
 }
 
@@ -515,8 +510,9 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    Tcl_Channel inChan;
+    Tcl_Channel channel;
     Tcl_DString buffer;
+    int blocking;
     int stat, bufIdx = 0;
 
     if ((argc != 2) && (argc != 3)) {
@@ -524,9 +520,21 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
                           " fileId ?varName?", (char *) NULL);
         return TCL_ERROR;
     }
-    inChan = TclX_GetOpenChannel (interp, argv [1], TCL_READABLE);
-    if (inChan == NULL)
+    channel = TclX_GetOpenChannel (interp, argv [1], TCL_READABLE);
+    if (channel == NULL)
         return TCL_ERROR;
+
+    /*
+     * If the channel is non-blocking, temporarily set blocking mode, since
+     * the channel I/O system doesn't give control over leaving data in the
+     * buffer (yet).
+     */
+    blocking = *Tcl_GetChannelOption (channel, "-blocking") == '1';
+    if (!blocking) {
+        if (Tcl_SetChannelOption (interp, channel, "-blocking",
+                                  "1") == TCL_ERROR)
+            return TCL_ERROR;
+    }
 
     /*
      * Read the list, parsing off each element until the list is read.
@@ -535,14 +543,14 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      */
     Tcl_DStringInit (&buffer);
 
-    if (Tcl_Gets (inChan, &buffer) < 0) {
-        if (Tcl_Eof (inChan) || Tcl_InputBlocked (inChan))
+    if (Tcl_Gets (channel, &buffer) < 0) {
+        if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))
             goto done;
         goto readError;
     }
 
     do {
-        stat = GetsListElement (interp, inChan, &buffer, &bufIdx);
+        stat = GetsListElement (interp, channel, &buffer, &bufIdx);
         if (stat == TCL_ERROR)
             goto errorExit;
     } while (stat == TCL_OK);
@@ -551,6 +559,11 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      * Return the string as a result or in a variable.
      */
   done:
+    if (!blocking) {
+        if (Tcl_SetChannelOption (interp, channel, "-blocking",
+                                  "0") == TCL_ERROR)
+            return TCL_ERROR;
+    }
     if (argc == 2) {
         Tcl_DStringResult (interp, &buffer);
     } else {
@@ -558,12 +571,11 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
                         TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
-        if ((Tcl_Eof (inChan) || Tcl_InputBlocked (inChan)) &&
-            (buffer.length == 0))
+        if (Tcl_Eof (channel) || Tcl_InputBlocked (channel)) {
             interp->result = "-1";
-        else
+        } else {
             sprintf (interp->result, "%d", buffer.length);
-
+        }
         Tcl_DStringFree (&buffer);
     }
     return TCL_OK;
@@ -573,7 +585,18 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
                       Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
+    /* 
+     * If a variable is supplied, return whatever data we have.
+     */
+    if (argc > 2) {
+        Tcl_SetVar (interp, argv[2], buffer.string, TCL_LEAVE_ERR_MSG);
+    }
     Tcl_DStringFree (&buffer);
+    if (!blocking) {
+        if (Tcl_SetChannelOption (interp, channel, "-blocking",
+                                  "0") == TCL_ERROR)
+            return TCL_ERROR;
+    }
     return TCL_ERROR;
 }
 
