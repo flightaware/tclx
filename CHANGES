@@ -1403,3 +1403,7 @@
   o Renamed --with-tk configure option to --enable-tk.
     Supplied by Viktor Dukhovni <viktor@nyc.deshaw.com>.
 -------------------------------------------------------------------------------
+28 Sept 98:
+  o Handle systems that don't implement restart of system calls on signal.
+    Added infox have_signal_restart.
+-------------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 8.2 1997/04/17 05:00:01 markd Exp $
+ * $Id: tclXwinPort.h,v 8.2.2.1 1998/09/22 02:52:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -50,6 +50,12 @@
 #ifndef MAXDOUBLE
 #    define MAXDOUBLE HUGE_VAL
 #endif
+
+/*
+ * No restartable signals in WIN32.
+ */
+#define NO_SIG_RESTART
+
 /*
  * Define a macro to call wait pid.  We don't use Tcl_WaitPid on Unix because
  * it delays signals.

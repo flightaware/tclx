@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id$
+.\" $Id: TclX.n,v 8.12.2.1 1998/08/08 16:43:53 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -209,6 +209,11 @@ catalogs, always returning the default string.
 .B have_posix_signals
 Return \fB1\fR if Posix signals are available (\fBblock\fR and \fBunblock\fR
 options available for the signal command).  \fB0\fR is returned if Posix
+signals are not available.
+.TP
+.B have_signal_restart
+Return \fB1\fR if restartable signals are available (\fB-restart\fR
+option available for the signal command).  \fB0\fR is returned if restartable
 signals are not available.
 .TP
 .B have_truncate
@@ -831,10 +836,14 @@ option.  This causes a blocked system call, such as \fBread\fR or
 \fBwaitpid\fR to be restarted rather than generate an error.  Failure
 to do this may results in unexpected errors when a signal arrives
 while in one of these system calls.
+When available, the \fB-restart\fR option can prevent this problem.
 .IP
 If \fB-restart\fR is specified, restart blocking system calls rather than
 generating an error.  The signal will be handled once the Tcl command 
 that issued the system call completes.
+The \fB-restart\fR options is not available on all operating systems and
+its use will generate an error when it is not supported.  
+Use \fBinfox have_signal_restart\fR to check for availability.
 .IP
 Specify the action to take when a Unix signal is received by Extended
 Tcl, or a program that embeds it.  \fISiglist\fR is a list

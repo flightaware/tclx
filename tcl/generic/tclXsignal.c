@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXsignal.c,v 8.12.2.1 1998/08/08 16:43:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1352,10 +1352,9 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
         TclX_WrongArgs (interp, objv [0], "?-restart? action signalList ?command?");
         return TCL_ERROR;
     }
-#ifdef NO_SIGACTION
+#ifdef NO_SIG_RESTART
     if (restart) {
-        TclX_AppendObjResult(interp, "this system does not support POSIX ",
-                             "signals (sigaction); -restart no implemented",
+        TclX_AppendObjResult(interp, "restarting of system calls from signals is not available on this system",
                              NULL);
         return TCL_ERROR;
     }
