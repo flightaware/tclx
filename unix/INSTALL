@@ -430,12 +430,15 @@ SGI:
 
 
 BSDI:
-   o The BSDI make is broken.  It does not correctly handle the setting of
+   o The BSDI 1.0  make is broken.  It does not correctly handle the setting of
      ${MAKEFLAGS} and quits on an error when an empty make flags set is passed
      to the next level of make.  GNU make is advised instead.  Use the
      following make command to work around the problem:
 
           make -k MAKEFLAGS=k
+
+   o BSDI 1.1 nice system call does not return an error on attempts to increase
+     priority for non-root users.  This causes nice test 1.7 to fail.
 
    o Also seee the 386BSD/BSDI section below.
 
