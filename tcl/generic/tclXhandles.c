@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 2.1 1992/12/01 14:53:55 markd Exp markd $
+ * $Id: tclXhandles.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -115,7 +115,7 @@ LinkInNewEntries (tblHdrPtr, newIdx, numEntries)
     entryPtr->freeLink = tblHdrPtr->freeHeadIdx;
     tblHdrPtr->freeHeadIdx = newIdx;
 
-} /* LinkInNewEntries */
+}
 
 /*=============================================================================
  * ExpandTable --
@@ -149,7 +149,7 @@ ExpandTable (tblHdrPtr, neededIdx)
     tblHdrPtr->tableSize += numNewEntries;
     ckfree (oldBodyP);
     
-} /* ExpandTable */
+}
 
 /*=============================================================================
  * AllocEntry --
@@ -181,7 +181,7 @@ AllocEntry (tblHdrPtr, entryIdxPtr)
     *entryIdxPtr = entryIdx;
     return entryPtr;
     
-} /* AllocEntry */
+}
 
 /*=============================================================================
  * HandleDecode --
@@ -214,7 +214,7 @@ HandleDecode (interp, tblHdrPtr, handle)
     }
     return entryIdx;
 
-} /* HandleDecode */
+}
 
 /*=============================================================================
  * Tcl_HandleTblInit --
@@ -257,7 +257,7 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
 
     return (void_pt) tblHdrPtr;
 
-} /* Tcl_HandleTblInit */
+}
 
 /*=============================================================================
  * Tcl_HandleTblUseCount --
@@ -329,7 +329,7 @@ Tcl_HandleAlloc (headerPtr, handlePtr)
      
     return USER_AREA (entryPtr);
 
-} /* Tcl_HandleAlloc */
+}
 
 /*=============================================================================
  * Tcl_HandleXlate --
@@ -366,7 +366,7 @@ Tcl_HandleXlate (interp, headerPtr, handle)
 
     return USER_AREA (entryPtr);
  
-} /* Tcl_HandleXlate */
+}
 
 /*=============================================================================
  * Tcl_HandleWalk --
@@ -406,7 +406,7 @@ Tcl_HandleWalk (headerPtr, walkKeyPtr)
     }
     return NULL;
 
-} /* Tcl_HandleWalk */
+}
 
 /*=============================================================================
  * Tcl_WalkKeyToHandle --
@@ -429,7 +429,7 @@ Tcl_WalkKeyToHandle (headerPtr, walkKey, handlePtr)
 
     sprintf (handlePtr, "%s%d", tblHdrPtr->handleBase, walkKey);
 
-} /* Tcl_WalkKeyToHandle */
+}
 
 /*=============================================================================
  * Tcl_HandleFree --
@@ -453,5 +453,5 @@ Tcl_HandleFree (headerPtr, entryPtr)
     tblHdrPtr->freeHeadIdx = (((ubyte_pt) entryPtr) - tblHdrPtr->bodyP) /
                            tblHdrPtr->entrySize;
     
-} /* Tcl_HandleFree */
+}
 

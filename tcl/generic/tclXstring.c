@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.0 1992/10/16 04:51:16 markd Rel markd $
+ * $Id: tclXstring.c,v 2.1 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -63,7 +63,7 @@ Tcl_CindexCmd (clientData, interp, argc, argv)
     interp->result [1] = 0;
     return TCL_OK;
 
-} /* Tcl_CindexCmd */
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ Tcl_ClengthCmd (clientData, interp, argc, argv)
     sprintf (interp->result, "%d", strlen (argv[1]));
     return TCL_OK;
 
-} /* Tcl_ClengthCmd */
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -164,7 +164,7 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
 
     return TCL_OK;
 
-} /* Tcl_CrangeCmd */
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -213,7 +213,7 @@ Tcl_ReplicateCmd (clientData, interp, argc, argv)
 
     return TCL_OK;
 
-} /* Tcl_ReplicateCmd */
+}
 
 /*
  *-----------------------------------------------------------------------------
