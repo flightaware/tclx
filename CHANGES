@@ -284,3 +284,10 @@
      for supporting full waitpid functionallity once the support has been
      added to UCB Tcl.  (*POTENTIAL INCOMPATIBILITY*)
 -------------------------------------------------------------------------------
+ 2 Oct 92:
+  o Reorganized help categories.
+  o Changed floating point commands to always return floating point numbers
+    without lose of precision or demotion to integer.
+  o Patch the UCB tclExpr.c file to return doubles without lose of precision.
+    This is temporary until a fix is povided in the UCB code.
+-------------------------------------------------------------------------------
