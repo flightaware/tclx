@@ -11,11 +11,11 @@ dnl	Although the generated configure script is under the GNU Public,
 dnl	License Extended Tcl remains freely redistributable for any purpose,
 dnl	including commercial use.
 dnl--------------------------------------------------------------------
-dnl $Id: configure.in,v 1.1 1993/07/30 15:09:18 markd Exp markd $
+dnl $Id: configure.in,v 1.2 1993/08/01 05:43:35 markd Exp markd $
 dnl--------------------------------------------------------------------
 
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.1 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.2 $),)dnl
 
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
@@ -198,18 +198,20 @@ dnl     Test to see if "times" returns a status or the amount of
 dnl     elapsed real time.
 dnl--------------------------------------------------------------------
 
-AC_COMPILE_CHECK(["times" returning elapsed real time], [
+echo "checking to see if 'times' returns the elapsed real time"
+AC_TEST_PROGRAM([
 #include <sys/types.h>
-#include <sys/times.h>], [
+#include <sys/times.h>
+main() {
 struct tms cpu;
 times (&cpu);
 sleep (2);
 if (times (&cpu) > 0)
      exit (0);
 else 
-     exit (255);
-], AC_DEFINE(TIMES_RETS_REAL_TIME), [
-echo "times" does not appear to return the elasped real time])
+     exit (1);
+}
+], AC_DEFINE(TIMES_RETS_REAL_TIME), )
 
 dnl--------------------------------------------------------------------
 dnl     Determine if "." is used as separator for the manual directory
