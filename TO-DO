@@ -3,7 +3,22 @@
 
 o Remove check for whitespace in keyedlist field names.
 
+o waitpid status not checked in tclXunixOS.c
+
 *** Minor bugs and enhancements ***
+
+o Added --with-tcl and --with-tk dir
+  (requested by sstanton@ghostwheel.Eng.Sun.COM)
+    >You might want to take a look at the configuration files for expect.  It does 
+    >a great job of handling this case, including looking for internal Tcl header 
+    >files, etc.
+
+o Better doc on package require.
+
+o Testing of package require in test scripts.
+
+o Add math functions for string compares ceq(), clt, cgt and for
+  list compares?
 
 o Convert sleep command to use Tcl_Sleep.  Perhaps just convert it to
   a proc that calls after.
