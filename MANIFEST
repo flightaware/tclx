@@ -370,6 +370,7 @@
 ./tools/Makefile.in
 ./tools/bldmanhelp.tcl
 ./tools/buildutil.tcl
+./tools/checkup.tcl
 ./tools/cphelpdir.sh
 ./tools/cpmanpages.tcl
 ./tools/genindex.tcl
