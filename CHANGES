@@ -295,4 +295,9 @@
   o Fixed behavior of Posix signals and SIGCHLD.
   o Added block and unblock options.
   o Added return of block state in the get option.
+  o Fixed potential bug in lrmdup.
+  o Process signals when encountered in the command loop rather than just clear
+    them.
+  o Stored the "wrong # args: " string in a single global  variable to save
+    memory rather than repeating in each command.
 -------------------------------------------------------------------------------
