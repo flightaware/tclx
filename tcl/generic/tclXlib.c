@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 3.2 1993/12/16 06:18:15 markd Exp markd $
+ * $Id: tclXlib.c,v 3.3 1994/01/05 06:10:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -738,8 +738,8 @@ LoadPackageIndex (interp, tlibFilePath)
  *   The real work of loading an index is done by a procedure that is defined
  * in a seperate file.  Its not possible to put this file in the standard
  * tcl.tlib as a tclIndex might get loaded before the tcl.tndx file is found
- * on the search path.  The function sets up the auto_index array to load the
- * procedure if its not already defined. 
+ * on the search path.  The function sources [info library]/loadouster.tcl
+ * if it has not been loaded before.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -748,24 +748,40 @@ LoadOusterIndex (interp, indexFilePath)
      char       *indexFilePath;
 {
     Tcl_DString  command;
+    Tcl_CmdInfo  loadCmdInfo;
     
     Tcl_DStringInit (&command);
-    Tcl_DStringAppend (&command, "set auto_index(auto_load_ouster_index) ",
-                       -1);
-    Tcl_DStringAppend (&command, "\"source [info library]/loadouster.tcl\";",
-                       -1);
-    Tcl_DStringAppend (&command, "auto_load_ouster_index {", -1);
-    Tcl_DStringAppend (&command, indexFilePath, -1);
-    Tcl_DStringAppend (&command, "}", -1);
 
-    if (Tcl_GlobalEval (interp, command.string) == TCL_ERROR) {
-        AddLibIndexErrorInfo (interp, indexFilePath);
-        Tcl_DStringFree (&command);
-        return TCL_ERROR;
+    /*
+     * Check if "auto_load_ouster_index" is defined, if its not, source
+     * the file that defines it.
+     */
+    if (!Tcl_GetCommandInfo (interp,
+                             "auto_load_ouster_index",
+                             &loadCmdInfo)) {
+        char cmd [] = "source [info library]/loadouster.tcl";
+
+        if (Tcl_GlobalEval (interp, cmd) == TCL_ERROR)
+            goto errorExit;
     }
+
+    /*
+     * Now, actually do the load.
+     */
+    Tcl_DStringAppendElement (&command, "auto_load_ouster_index");
+    Tcl_DStringAppendElement (&command, indexFilePath);
+
+    if (Tcl_GlobalEval (interp, command.string) == TCL_ERROR)
+        goto errorExit;
+
     Tcl_DStringFree (&command);
     Tcl_ResetResult (interp);
     return TCL_OK;
+
+  errorExit:
+    AddLibIndexErrorInfo (interp, indexFilePath);
+    Tcl_DStringFree (&command);
+    return TCL_ERROR;
 }
 
 /*
