@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.11 1997/07/30 17:08:08 markd Exp $
+ * $Id: tclXstring.c,v 8.12 1997/08/08 09:58:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -586,6 +586,7 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
  *       One or zero: Depending if all the characters in the string are of
  *       the desired class.  Char and ord provide conversions and return the
  *       converted value.
+ * FIX: Add check for legal number (can be negative, hex, etc).
  *-----------------------------------------------------------------------------
  */
 static int
