@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 2.6 1993/07/19 05:53:22 markd Exp markd $
+ * $Id: tclXdup.c,v 2.7 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -30,9 +30,9 @@ DoNormalDup _ANSI_ARGS_((Tcl_Interp *interp,
                          OpenFile   *oldFilePtr));
 
 static FILE *
-DoSpecialDup _ANSI_ARGS_((Tcl_Interp *interp,
-                          OpenFile   *oldFilePtr,
-                          char       *newFileId));
+DoSpecifiedDup _ANSI_ARGS_((Tcl_Interp *interp,
+                            OpenFile   *oldFilePtr,
+                            char       *newFileId));
 
 
 /*
@@ -110,9 +110,9 @@ unixError:
 /*
  *-----------------------------------------------------------------------------
  *
- * DoSpecialDup --
- *   Process a special dup command where the file is dupped to a specified
- * fileid.  The new file may or be open or closed, but its better if is open 
+ * DoSpecifiedDup --
+ *   Process a dup command where the file is dupped to a specified fileid.
+ * The new file may or be open or closed, but its better if is open 
  * if stdin, stdout or stderr are being used, otherwise the a different
  * stdio file descriptior maybe bound to these descriptors.
  *
@@ -126,7 +126,7 @@ unixError:
  *-----------------------------------------------------------------------------
  */
 static FILE *
-DoSpecialDup (interp, oldFilePtr, targetFileId)
+DoSpecifiedDup (interp, oldFilePtr, targetFileId)
     Tcl_Interp *interp;
     OpenFile   *oldFilePtr;
     char       *targetFileId;
@@ -158,7 +158,7 @@ DoSpecialDup (interp, oldFilePtr, targetFileId)
      * If this is not one of the standard files, close it.  This will do all
      * Tcl cleanup in case its a pipeline, etc.
      */
-    if (targetFileNum > 2) {
+    if ((targetFilePtr != NULL) && (targetFileNum > 2)) {
         char *argv [2];
 
         argv [0] = "dup";
@@ -269,7 +269,7 @@ Tcl_DupCmd (clientData, interp, argc, argv)
     if (argc == 2)
         newFilePtr = DoNormalDup (interp, oldFilePtr);
     else
-        newFilePtr = DoSpecialDup (interp, oldFilePtr, argv [2]);
+        newFilePtr = DoSpecifiedDup (interp, oldFilePtr, argv [2]);
 
     if (newFilePtr == NULL)
         return TCL_ERROR;

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.28 1993/09/03 14:42:14 markd Exp markd $
+.\" $Id: TclX.man,v 2.29 1993/09/07 14:44:09 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -972,10 +972,12 @@ same file as \fIfileId\fR.
 .sp
 If \fItargetFileId\fR is specified, the the file is dup to this specified file
 id.  Normally this is \fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.
-The dup command will handle flushing output and closing this file.  It is
-recommended that the file not be closed in advanced if it is one of
-\fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.  Otherwise internal C code that
-uses one of these files via direct access to stdio FILE struct may fail.
+The dup command will handle flushing output and closing this file.
+The target file should be open if its one of
+\fBstdin\fR, \fBstdout\fR, or \fBstderr\fR and the process is not going to
+do an \fBexecl\fR.    Otherwise internal C code that
+uses one of these files via direct access to stdio FILE struct may behave
+strangely or fail.
 .sp
 The procedure shown below will create a child process and
 set its standard input and output files to a pair
