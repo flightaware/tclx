@@ -1,15 +1,3 @@
-dnl aclocal.m4 generated automatically by aclocal 1.4a
-
-dnl Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
-dnl This file is free software; the Free Software Foundation
-dnl gives unlimited permission to copy and/or distribute it,
-dnl with or without modifications, as long as this notice is preserved.
-
-dnl This program is distributed in the hope that it will be useful,
-dnl but WITHOUT ANY WARRANTY, to the extent permitted by law; without
-dnl even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-dnl PARTICULAR PURPOSE.
-
 #------------------------------------------------------------------------
 # SC_PATH_TCLCONFIG --
 #
@@ -378,8 +366,14 @@ AC_DEFUN(SC_ENABLE_THREADS, [
 	    # The space is needed
 	    THREADS_LIBS=" -lpthread"
 	else
-	    TCL_THREADS=0
-	    AC_MSG_WARN("Don t know how to find pthread lib on your system - you must disable thread support or edit the LIBS in the Makefile...")
+            AC_CHECK_LIB(c_r,pthread_mutex_init,tcl_ok=yes,tcl_ok=no)
+            if test "$tcl_ok" = "yes"; then
+                # The space is needed
+                THREADS_LIBS=" -lc_r"
+            else
+                TCL_THREADS=0
+                AC_MSG_WARN("Don t know how to find pthread lib on your system - you must disable thread support or edit the LIBS in the Makefile...")
+            fi
 	fi
     else
 	TCL_THREADS=0
@@ -574,6 +568,7 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
     TCL_NEEDS_EXP_FILE=0
     TCL_BUILD_EXP_FILE=""
     TCL_EXP_FILE=""
+    STLIB_LD="ar cr"
     case $system in
 	AIX-4.[[2-9]])
 	    SHLIB_CFLAGS=""
@@ -589,7 +584,7 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    ;;
 	AIX-*)
 	    SHLIB_CFLAGS=""
-	    SHLIB_LD="$fullSrcDir/ldAix /bin/ld -bhalt:4 -bM:SRE -bE:lib.exp -H512 -T512"
+	    SHLIB_LD="$fullSrcDir/ldAix /bin/ld -bhalt:4 -bM:SRE -bE:lib.exp -H512 -T512 -bnoentry"
 	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
@@ -657,7 +652,7 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	IRIX-5.*|IRIX-6.*|IRIX64-6.5*)
 	    SHLIB_CFLAGS=""
 	    SHLIB_LD="ld -n32 -shared -rdata_shared"
-	    SHLIB_LD_LIBS=""
+	    SHLIB_LD_LIBS='${LIBS}'
 	    SHLIB_SUFFIX=".so"
 	    DL_OBJS="tclLoadDl.o"
 	    DL_LIBS=""
@@ -713,6 +708,9 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 		    LDFLAGS=""
 		    LD_SEARCH_FLAGS=""])
 	    fi
+	    if test "`uname -m`" = "alpha" ; then
+		EXTRA_CFLAGS="-mieee"
+	    fi
 	    ;;
 	MP-RAS-02*)
 	    SHLIB_CFLAGS="-K PIC"
@@ -734,7 +732,7 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    LDFLAGS="-Wl,-Bexport"
 	    LD_SEARCH_FLAGS=""
 	    ;;
-	NetBSD-*|FreeBSD-[[12]].*|OpenBSD-*)
+	NetBSD-*|FreeBSD-[[1-2]].*|OpenBSD-*)
 	    # Not available on all versions:  check for include file.
 	    AC_CHECK_HEADER(dlfcn.h, [
 		SHLIB_CFLAGS="-fpic"
@@ -1704,4 +1702,3 @@ AC_DEFUN(SC_TCL_LINK_LIBS, [
     AC_SUBST(TCL_LIBS)
     AC_SUBST(MATH_LIBS)
 ])
-
