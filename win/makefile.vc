@@ -12,14 +12,27 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 1.1 1996/10/20 06:14:38 markd Exp $
+# $Id: makefile.vc,v 1.2 1996/10/21 03:07:54 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 all:
-        cd ..\tcl\win; nmake all /F makefile.vc
-        cd ..\tk\win; nmake /f makefile.vc
+        cd ..\tcl\win
+        nmake /f makefile.vc all
+        cd ..\..\tk\win
+        nmake /f makefile.vc all
 
 test:
-        cd ..\tcl\win; nmake -f makefile.vc test
+        cd ..\tcl\win
+        nmake -f makefile.vc test
+
+tktest:
+        cd ..\tk\win
+        nmake /f makefile.vc test
+        
+clean:
+        cd ..\tcl\win
+        nmake -f makefile.vc clean
+        cd ..\..\tk\win
+        nmake /f makefile.vc clean
         

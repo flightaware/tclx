@@ -304,6 +304,7 @@
 ./tcl/unix/tclXunixOS.c
 ./tcl/unix/tclXunixPort.h
 ./tcl/unix/tclXunixSock.c
+./tcl/unix/tclXunixTest.c
 ./tcl/unix/tclxConfig.sh.in
 ./tcl/win/cattcl.c
 ./tcl/win/makefile.vc
@@ -314,6 +315,7 @@
 ./tcl/win/tclXwinId.c
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h
+./tcl/win/tclXwinTest.c
 ./tcl/win/tclx.rc
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
@@ -378,6 +380,9 @@
 ./tk/unix/tkxConfig.sh.in
 ./tk/win/makefile.vc
 ./tk/win/tkXAppInit.c
+./tk/win/tkXwinTest.c
+./tk/win/tkx.rc
+./tk/win/wishx.rc
 ./unix/Common.mk.in
 ./unix/Config.mk
 ./unix/INSTALL

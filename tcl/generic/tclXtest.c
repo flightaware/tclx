@@ -1,7 +1,7 @@
 /* 
  * tclXtest.c --
  *
- *    Tcl_AppInit and main functions for the Extended Tcl test program.
+ *  Test support functions for the Extended Tcl test program.
  *
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
@@ -13,14 +13,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 7.2 1996/08/06 07:15:30 markd Exp $
+ * $Id: tclXtest.c,v 7.3 1996/09/28 16:22:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-extern int
-Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+int
+Tclxtest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * Error handler proc that causes errors to come out in the same format as
@@ -33,28 +33,13 @@ static char errorHandler [] =
      exit 1}";
 
 /*
- * The following variable is a special hack that insures the tcl
- * version of matherr() is used when linking against shared libraries.
- * Even if matherr is not used on this system, there is a dummy version
- * in libtcl.
+ * Prototypes of internal functions.
  */
-EXTERN int matherr ();
-int (*tclDummyMathPtr)() = matherr;
-
-
-/*-----------------------------------------------------------------------------
- * main --
- * This is the main program for the application.
- *-----------------------------------------------------------------------------
- */
-int
-main (argc, argv)
-    int    argc;
-    char **argv;
-{
-    TclX_Main (argc, argv, Tcl_AppInit);
-    return 0;			/* Needed only to prevent compiler warning. */
-}
+static int
+TclxTestEvalCmd _ANSI_ARGS_((ClientData    clientData,
+                             Tcl_Interp   *interp,
+                             int           argc,
+                             char        **argv));
 
 
 /*-----------------------------------------------------------------------------
@@ -140,7 +125,7 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
     Tcl_DString resultList;
 
     if (((argc - 1) % 2) != 0) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+        Tcl_AppendResult (interp, "wrong # args: ", argv [0],
                           " ?level cmd? ?level cmd? ...", (char *) NULL);
         return TCL_ERROR;
     }
@@ -161,8 +146,8 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_AppInit --
- *  Initialize TclX test application.
+ * Tclxtest_Init --
+ *  Initialize TclX test support.
  *
  * Results:
  *   Returns a standard Tcl completion code, and leaves an error message in
@@ -170,22 +155,9 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_AppInit (interp)
+Tclxtest_Init (interp)
     Tcl_Interp *interp;
 {
-    if (Tcl_Init (interp) == TCL_ERROR) {
-        return TCL_ERROR;
-    }
-    if (Tclx_Init (interp) == TCL_ERROR) {
-        return TCL_ERROR;
-    }
-    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
-    if (Tcltest_Init (interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
-                      (Tcl_PackageInitProc *) NULL);
-
     Tcl_CreateCommand (interp, "tclx_test_eval", TclxTestEvalCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 

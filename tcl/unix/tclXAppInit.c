@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 1.1 1996/07/22 17:04:56 markd Exp $
+ * $Id: tclXAppInit.c,v 1.2 1996/08/17 02:10:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -75,6 +75,7 @@ Tcl_AppInit (interp)
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
+
     if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }

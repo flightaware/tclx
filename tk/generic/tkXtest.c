@@ -13,11 +13,15 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXtest.c,v 6.2 1996/05/23 22:37:49 markd Exp $
+ * $Id: tkXtest.c,v 7.0 1996/06/16 05:33:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtend.h"
+#include "tk.h"
+
+int
+Tktest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * The following variable is a special hack that insures the tcl
@@ -25,8 +29,10 @@
  * Even if matherr is not used on this system, there is a dummy version
  * in libtcl.
  */
+#ifndef __WIN32__
 EXTERN int matherr ();
 int (*tclDummyMathPtr)() = matherr;
+#endif
 
 
 /*
@@ -65,6 +71,7 @@ Tcl_AppInit (interp)
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
+
     if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
@@ -72,10 +79,12 @@ Tcl_AppInit (interp)
     if (Tk_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
+
     Tcl_StaticPackage (interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
     if (Tkx_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
+
     Tcl_StaticPackage(interp, "Tkx", Tkx_Init, (Tcl_PackageInitProc *) NULL);
     if (Tktest_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;

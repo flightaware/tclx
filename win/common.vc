@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 1.1 1996/10/20 06:14:37 markd Exp $
+# $Id: common.vc,v 1.2 1996/10/21 03:07:53 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -56,6 +56,8 @@ TOOLS16  = c:\msdev
 TCL_DIR          = ..\..\..\tcl7.6
 TCL_GENERIC_DIR  = $(TCL_DIR)\generic
 TCL_WIN_DIR      = $(TCL_DIR)\win
+TCL_RUNTIME_DIR  = $(TCL_DIR)\library
+TCL_TESTS_DIR    = $(TCL_DIR)\tests
 TCL_LIB          = $(TCL_WIN_DIR)\tcl76.lib
 TCL_DLL          = $(TCL_WIN_DIR)\tcl76.dll
 
@@ -66,6 +68,8 @@ TK_DIR           = ..\..\..\tk4.2
 TK_GENERIC_DIR   = $(TK_DIR)\generic
 TK_WIN_DIR       = $(TK_DIR)\win
 TK_XLIB_DIR      = $(TK_DIR)\xlib
+TK_RUNTIME_DIR   = $(TK_DIR)\library
+TK_TESTS_DIR     = $(TK_DIR)\tests
 TK_LIB           = $(TK_WIN_DIR)\tk42.lib
 TK_DLL           = $(TK_WIN_DIR)\tk42.dll
 
@@ -109,4 +113,5 @@ LIB=$(TOOLS32)\LIB;\$(TOOLS32)\MFC\lib
 CPU=i386
 CP=copy
 
-!include    <ntwin32.mak>
+!include <ntwin32.mak>
+

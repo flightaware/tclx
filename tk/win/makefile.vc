@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.1 1996/10/20 06:14:36 markd Exp $
+# $Id: makefile.vc,v 7.2 1996/10/21 03:07:51 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,7 +22,7 @@ TKX_INCLUDES = \
 	-I$(TOOLS32)\include -I$(TK_XLIB_DIR)\
 	-I$(TKX_WIN_DIR) -I$(TKX_GENERIC_DIR) \
         -I$(TCLX_WIN_DIR) -I$(TCLX_GENERIC_DIR) \
-        -I$(TK_GENERIC_DIR) -I$(TCL_WIN_DIR) \
+        -I$(TK_GENERIC_DIR) -I$(TK_WIN_DIR) \
 	-I$(TCL_GENERIC_DIR) -I$(TCL_WIN_DIR)
 
 TKX_DEFINES = \
@@ -34,25 +34,24 @@ WISHXOBJS = \
 TKXTESTOBJS = \
         $(TMP_DIR)\tkTest.obj \
         $(TMP_DIR)\tkSquare.obj \
-        $(TMP_DIR)\tkXtest.obj
+        $(TMP_DIR)\tkXwinTest.obj
 
 TKXOBJS = \
         $(TMP_DIR)\tkXinit.obj \
         $(TMP_DIR)\tkXshell.obj \
+        $(TMP_DIR)\tkConsole.obj
 
 WISHX = wishx.exe
-TCLXTEST = tclxtest.exe
+TKTEST = tktest.exe
 DUMPEXTS = $(TCLX_WIN_DIR)\dumpexts.exe
 
-#
+#------------------------------------------------------------------------------
 # Targets
 #
-all: $(TKX_DLL) $(WISHX) RUNTIME
+all: $(TKX_DLL) $(WISHX) RUNTIME $(TKTEST) runwishx.bat runtest.bat runtest.tcl
 
-test:  all
-        set TCL_PROGRAM=..\win\tcl
-        cd ..\tests
-        ..\win\tkXtest all
+test: all $(TKTEST) runtest.bat runtest.tcl
+        .\runtest -geometry +0+0 runtest.tcl
 
 tkXvc.def: $(TKXOBJS)
         $(DUMPEXTS) -o $@ $(TKX_DLL) @<<
@@ -69,10 +68,17 @@ $(TKX_DLL): $(TKXOBJS) tkXvc.def $(TMP_DIR)\tkx.res
 
 $(WISHX): $(WISHXOBJS) $(TKX_LIB) $(TCLX_LIB) $(TMP_DIR)\wishx.res
         set LIB=$(LIB)
-        $(link) $(linkdebug) $(conlflags) \
+        $(link) $(linkdebug) $(guilflags) \
                 $(WISHXOBJS) $(TMP_DIR)\wishx.res $(TKX_LIB) $(TK_LIB) \
 		$(TCLX_LIB) $(TCL_LIB) \
-		$(conlibsdll) -out:$(WISHX)
+		$(guilibsdll) -out:$(WISHX)
+
+$(TKTEST): $(TKXTESTOBJS) $(TKX_LIB) $(TCLX_LIB) $(TMP_DIR)\wishx.res
+        set LIB=$(LIB)
+        $(link) $(linkdebug) $(guiflags) \
+                $(TKXTESTOBJS) $(TMP_DIR)\wishx.res $(TKX_LIB) $(TK_LIB) \
+		$(TCLX_LIB) $(TCL_LIB) \
+		$(guilibsdll) -out:$(TKTEST)
 
 #------------------------------------------------------------------------------
 # Copyruntime files into this directory so it can be used as a temporary
@@ -84,7 +90,67 @@ tkx.tcl: $(TKX_RUNTIME_DIR)\tkx.tcl
         -del tkx.tcl
 	copy $(TKX_RUNTIME_DIR)\tkx.tcl tkx.tcl
 
+#------------------------------------------------------------------------------
+# Generate script used to run programs before DLLs and runtime is installed.
+# To prevent %var% from get
 #
+runwishx.bat: makefile.vc ..\..\win\common.vc
+        -del runwishx.bat
+        echo echo off>>runwishx.bat
+        echo PATH $(TKX_WIN_DIR);$(TK_WIN_DIR);$(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runwishx.bat
+        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runwishx.bat
+        echo set TK_LIBRARY=$(TK_RUNTIME_DIR)>>runwishx.bat
+        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runwishx.bat
+        echo set TKX_LIBRARY=$(TKX_WIN_DIR)>>runwishx.bat
+        echo $(TKX_WIN_DIR)\wishx.exe %1 %2 %3 %4>>runwishx.bat
+
+runtest.bat: makefile.vc ..\..\win\common.vc
+        -del runtest.bat
+        echo echo off>>runtest.bat
+        echo PATH $(TKX_WIN_DIR);$(TK_WIN_DIR);$(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
+        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
+        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
+        echo $(TKX_WIN_DIR)\tktest.exe %1 %2 %3 %4>>runtest.bat
+
+#------------------------------------------------------------------------------
+# Tcl script to actually run the tests.
+#
+runtest.tcl: makefile.vc
+        -del runtest.tcl
+	echo cd $(TK_TESTS_DIR)>>runtest.tcl
+        echo source all>>runtest.tcl
+        echo exit>>runtest.tcl
+
+#------------------------------------------------------------------------------
+clean:
+        -del *.exp
+        -del *.lib
+        -del *.dll
+        -del *.exe
+        -del $(TMP_DIR)\*.obj
+        -del *.def
+        -del *.res
+        -del tkx.tcl
+        -del runwishx.bat
+        -del runtest.bat
+        -del runtest.tcl
+
+#------------------------------------------------------------------------------
+# Special case object file targets
+#
+$(TMP_DIR)\tkConsole.obj: $(TK_GENERIC_DIR)\tkConsole.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TKX_INCLUDES) \
+                $(TKX_DEFINES) -Fo$(TMP_DIR)\ $?
+
+$(TMP_DIR)\tkTest.obj: $(TK_GENERIC_DIR)\tkTest.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TKX_INCLUDES) \
+                $(TKX_DEFINES) -Fo$(TMP_DIR)\ $?
+
+$(TMP_DIR)\tkSquare.obj: $(TK_GENERIC_DIR)\tkSquare.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TKX_INCLUDES) \
+                $(TKX_DEFINES) -Fo$(TMP_DIR)\ $?
+
+#------------------------------------------------------------------------------
 # Implicit rules
 #
 {$(TKX_GENERIC_DIR)}.c{$(TMP_DIR)}.obj:
@@ -97,14 +163,4 @@ tkx.tcl: $(TKX_RUNTIME_DIR)\tkx.tcl
 
 {$(TKX_WIN_DIR)}.rc{$(TMP_DIR)}.res:
         $(rc32) -fo $@ -r -i $(TCLX_GENERIC_DIR) -i $(TCLX_WIN_DIR) $<
-
-clean:
-        -del *.exp
-        -del *.lib
-        -del *.dll
-        -del *.exe
-        -del $(TMP_DIR)\*.obj
-        -del *.def
-        -del *.res
-        -del tkx.tcl
 

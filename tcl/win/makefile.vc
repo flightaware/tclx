@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.10 1996/10/20 06:14:35 markd Exp $
+# $Id: makefile.vc,v 7.11 1996/10/21 03:07:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -30,7 +30,9 @@ TCLOBJS = \
         $(TMP_DIR)\tclXAppInit.obj
 
 TCLXTESTOBJS = \
-        $(TMP_DIR)\tclXTest.obj
+        $(TMP_DIR)\tclXTest.obj \
+        $(TMP_DIR)\tclTest.obj \
+        $(TMP_DIR)\tclWinTest.obj
 
 TCLXOBJS = \
         $(TMP_DIR)\tclXbsearch.obj \
@@ -93,15 +95,15 @@ TLIB_SRCS = $(TCLX_RUNTIME_DIR)/arrayprocs.tcl \
 	    $(TCLX_RUNTIME_DIR)/buildhelp.tcl
 
 
-#
+#------------------------------------------------------------------------------
 # Targets
 #
-all: $(DUMPEXTS) $(TCLX_DLL) $(TCL) RUNTIME
+all: $(DUMPEXTS) $(TCLX_DLL) $(TCL) $(TCLXTEST) runtcl.bat runtest.bat RUNTIME
 
-test: all
+test: all $(TCLXTEST) runtest.bat
         set TCL_PROGRAM=..\win\tcl
         cd ..\tests
-        ..\win\tcl all
+        ..\win\runtest.bat all
 
 tclXvc.def: $(DUMPEXTS) $(TCLXOBJS)
         $(DUMPEXTS) -o $@ $(TCLX_DLL) @<<
@@ -126,6 +128,13 @@ $(TCL): $(TCLOBJS) $(TCLX_LIB) $(TMP_DIR)\tcl.res
                 $(TCLOBJS) $(TMP_DIR)\tcl.res $(TCLX_LIB) $(TCL_LIB) \
 		$(conlibsdll) -out:$(TCL)
 
+$(TCLXTEST): $(TCLXTESTOBJS) $(TCLX_LIB) $(TMP_DIR)\tcl.res
+        set LIB=$(LIB)
+        $(link) $(linkdebug) $(conlflags) \
+                $(TCLXTESTOBJS) $(TMP_DIR)\tcl.res $(TCLX_LIB) $(TCL_LIB) \
+		$(conlibsdll) -out:$(TCLXTEST)
+
+
 #------------------------------------------------------------------------------
 # Generate the runtime .tlib library in the current directory.  Copy other
 # runtime files into this directory so it can be used as a temporary runtime
@@ -137,10 +146,9 @@ tcl.tlib: $(TLIB_SRCS) cattcl.exe
         -del tcl.tlib
 	cattcl $(TLIB_SRCS) >tcl.tlib
 
-tcl.tndx: tcl.tlib tclx.tcl buildidx.tcl
+tcl.tndx: tcl.tlib tclx.tcl buildidx.tcl $(TCL) runtcl.bat
         -del tcl.tndx
-        set TCL_LIBRARY=$(TCL_DIR)\library
-	.\tcl -q $(ROOT)\unix\tools\genindex.tcl tcl.tlib
+	.\runtcl -q $(ROOT)\unix\tools\genindex.tcl tcl.tlib
 
 tclx.tcl: $(TCLX_RUNTIME_DIR)\tclx.tcl
         -del tclx.tcl
@@ -159,11 +167,55 @@ cattcl.exe: $(TMP_DIR)\cattcl.obj
         $(link) $(conlflags) -out:cattcl.exe  $(TMP_DIR)\cattcl.obj \
                 $(guilibs) $(libc)
 
-
+#------------------------------------------------------------------------------
+# Generate script used to run programs before DLLs and runtime is installed.
+# To prevent %var% from get
 #
+runtcl.bat: makefile.vc ..\..\win\common.vc
+        -del runtcl.bat
+        echo echo off>>runtcl.bat
+        echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtcl.bat
+        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtcl.bat
+        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtcl.bat
+        echo $(TCLX_WIN_DIR)\tcl.exe %1 %2 %3 %4>>runtcl.bat
+
+runtest.bat: makefile.vc ..\..\win\common.vc
+        -del runtest.bat
+        echo echo off>>runtest.bat
+        echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
+        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
+        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
+        echo $(TCLX_WIN_DIR)\tclXtest.exe %1 %2 %3 %4>>runtest.bat
+
+#------------------------------------------------------------------------------
+clean:
+        -del *.exp
+        -del *.lib
+        -del *.dll
+        -del *.exe
+        -del $(TMP_DIR)\*.obj
+        -del *.def
+        -del *.res
+        -del tcl.tlib
+        -del tcl.tndx
+        -del tclx.tcl
+	-del buildidx.tcl
+	-del loadouster.tcl
+        -del runtcl.bat
+        -del runtest.bat
+
+#------------------------------------------------------------------------------
 # Special case object file targets
 #
 $(TMP_DIR)\winDumpExts.obj: $(TCL_WIN_DIR)\winDumpExts.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
+                $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?
+
+$(TMP_DIR)\tclTest.obj: $(TCL_GENERIC_DIR)\tclTest.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
+                $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?
+
+$(TMP_DIR)\tclWinTest.obj: $(TCL_WIN_DIR)\tclWinTest.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
                 $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?
 
@@ -189,16 +241,3 @@ $(TMP_DIR)\cattcl.obj: $(TCLX_WIN_DIR)\cattcl.c
 {$(TCLX_WIN_DIR)}.rc{$(TMP_DIR)}.res:
         $(rc32) -fo $@ -r -i $(TCLX_GENERIC_DIR) -i $(TCLX_WIN_DIR) $<
 
-clean:
-        -del *.exp
-        -del *.lib
-        -del *.dll
-        -del *.exe
-        -del $(TMP_DIR)\*.obj
-        -del *.def
-        -del *.res
-        -del tcl.tlib
-        -del tcl.tndx
-        -del tclx.tcl
-	-del buildidx.tcl
-	-del loadouster.tcl

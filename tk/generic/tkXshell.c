@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 7.0 1996/06/16 05:33:46 markd Exp $
+ * $Id: tkXshell.c,v 7.1 1996/10/21 03:07:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -48,7 +48,7 @@
  * some systems.
  */
 
-#ifndef _WIN32_
+#ifndef __WIN32__
 extern char * strrchr _ANSI_ARGS_((CONST char *string, int c));
 #endif
 

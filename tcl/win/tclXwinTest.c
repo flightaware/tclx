@@ -1,7 +1,7 @@
 /* 
- * tclXAppInit.c --
+ * tclXwinTest.c --
  *
- * Provides a default version of the Tcl_AppInit procedure for use with
+ * Provides a test version of the Tcl_AppInit procedure for use with
  * applications built with Extended Tcl on  Windows 95/NT systems.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
@@ -32,9 +32,7 @@ main (int    argc,
       char **argv)
 {
     TclX_SplitWinCmdLine (&argc, &argv);
-
     TclX_Main (argc, argv, Tcl_AppInit);
-
     return 0;                   /* Needed only to prevent compiler warning. */
 }
 

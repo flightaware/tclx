@@ -1,9 +1,8 @@
 /* 
- * tkXAppInit.c --
+ * tclXwinTest.c --
  *
- * Provides a default version of the Tcl_AppInit procedure for use with
- * applications built with Extended Tcl and Tk on Windows 95/NT systems.
- * This is based on the the UCB Tk file tkAppInit.c
+ * Tcl_AppInit and main functions for the Extended Tcl test program on wIN32.
+ *
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -14,11 +13,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 1.2 1996/10/21 03:07:51 markd Exp $
+ * $Id: tclXtest.c,v 7.3 1996/09/28 16:22:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
-#include "tclExtend.h"
+#include "tclExtdInt.h"
 #include "tk.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -32,11 +31,14 @@
  * interfaces are available for use, but are not supported.
  */
 
-EXTERN void
+extern void
 TkConsoleCreate (void);
 
-EXTERN int
+extern int
 TkConsoleInit (Tcl_Interp *interp);
+
+int
+Tktest_Init (Tcl_Interp *interp);
 
 
 /*-----------------------------------------------------------------------------
@@ -93,27 +95,25 @@ WinMain(hInstance, hPrevInstance, lpszCmdLine, nCmdShow)
 
 /*-----------------------------------------------------------------------------
  * Tcl_AppInit --
- *
- * This procedure performs application-specific initialization. Most
- * applications, especially those that incorporate additional packages, will
- * have their own version of this procedure.
+ *  Initialize TclX test application.
  *
  * Results:
- *    Returns a standard Tcl completion code, and leaves an error message in
+ *   Returns a standard Tcl completion code, and leaves an error message in
  * interp->result if an error occurs.
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_AppInit (Tcl_Interp *interp)
+Tcl_AppInit (interp)
+    Tcl_Interp *interp;
 {
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
 
-    if (Tclx_Init(interp) == TCL_ERROR) {
+    if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tclx", Tclx_Init, Tclx_SafeInit);
+    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
 
     if (Tk_Init(interp) == TCL_ERROR) {
         return TCL_ERROR;
@@ -125,17 +125,11 @@ Tcl_AppInit (Tcl_Interp *interp)
     }
     Tcl_StaticPackage(interp, "Tkx", Tkx_Init, (Tcl_PackageInitProc *) NULL);
 
-    /*
-     * Call Tcl_CreateCommand for application-specific commands, if
-     * they weren't already created by the init procedures called above.
-     */
+    if (Tktest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage (interp, "Tktest", Tktest_Init,
+                      (Tcl_PackageInitProc *) NULL);
 
-    /*
-     * Specify a user-specific startup file to invoke if the application
-     * is run interactively.  Typically the startup file is "~/.apprc"
-     * where "app" is the name of the application.  If this line is deleted
-     * then no user-specific startup file will be run under any conditions.
-     */
-    Tcl_SetVar(interp, "tcl_rcFileName", "~/.wishxrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
