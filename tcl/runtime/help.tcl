@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 2.5 1993/06/24 07:30:29 markd Exp markd $
+# $Id: help.tcl,v 2.6 1993/09/16 05:37:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -226,7 +226,7 @@ proc help:HelpOnHelp {} {
     if [lempty $helpPage] {
         error "No help page on help found"
     }
-    help:DisplayFile $helpPage
+    help:DisplayPage $helpPage
 }
 
 #------------------------------------------------------------------------------
