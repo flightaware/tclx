@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.16 1996/02/26 00:56:01 markd Exp $
+dnl $Id: configure.in,v 5.17 1996/02/29 07:03:00 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.16 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.17 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -207,11 +207,11 @@ echo '	@echo TK_CONFIG=\"${TK_CONFIG}\"' >>confmakefile
 eval `${MAKE-make} -f confmakefile`
 rm confmakefile
 
-if test ! -e "$TCL_CONFIG" ; then
+if test ! -r "$TCL_CONFIG" ; then
     AC_MSG_ERROR(Config.mk does not set TCL_CONFIG to a valid path to tclConfig.sh)
 fi
 if test "$TKX_BUILD" = "YES"; then
-    if test ! -e "$TK_CONFIG" ; then
+    if test ! -r "$TK_CONFIG" ; then
         AC_MSG_ERROR(Config.mk does not set TK_CONFIG to a valid path to tkConfig.sh)
     fi
 fi
@@ -338,6 +338,7 @@ AC_SUBST(MAKEQUOTE)
 #------------------------------------------------------------------------------
 
 AC_HEADER_CHECK(limits.h, , AC_DEFINE(NO_LIMITS_H))
+AC_HEADER_CHECK(sys/select.h, , AC_DEFINE(NO_SYS_SELECT_H))
 
 #------------------------------------------------------------------------------
 # Check for missing typedefs.
@@ -448,7 +449,7 @@ AC_CHECK_FUNC(setitimer, , AC_DEFINE(NO_SETITIMER))
 AC_CHECK_FUNC(sigaction, , AC_DEFINE(NO_SIGACTION))
 AC_CHECK_FUNC(setpgid, , AC_DEFINE(NO_SETPGID))
 AC_CHECK_FUNC(getgroups, , AC_DEFINE(NO_GETGROUPS))
-AC_HAVE_FUNCS(bzero, , AC_DEFINE(NO_BZERO))
+AC_CHECK_FUNC(bzero, , AC_DEFINE(NO_BZERO))
 AC_CHECK_FUNC(bcopy, , AC_DEFINE(NO_BCOPY))
 AC_CHECK_FUNC(fsync, , AC_DEFINE(NO_FSYNC))
 AC_CHECK_FUNC(getpriority, , AC_DEFINE(NO_GETPRIORITY))
@@ -514,8 +515,6 @@ fi
 #------------------------------------------------------------------------------
 
 AC_SUBST(TCLX_LIBS)
-TCLX_DEFS=$DEFS
-AC_SUBST(TCLX_DEFS)
 
 AC_SUBST(prefix)
 AC_SUBST(execprefix)

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.14 1996/02/26 00:55:50 markd Exp $
+# $Id: Makefile.in,v 5.15 1996/02/29 07:02:39 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -89,10 +89,10 @@ all: libtclx.a SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest runtest \
      ${bldbasedir}/tcl/tests
 
 tcl: tclXAppInit.o libtclx.a SHLIB_@BUILD_SHARED@
-	if test "@BUILD_SHARED@" = "YES"; then \
+	if test "@BUILD_SHARED@" = "YES" ; then \
 	    ${CC} ${LD_SWITCHES} tclXAppInit.o ${SHLDLIBS} -o tcl || \
 	        (rm -f tcl; exit 1) ;\
-	else ;\
+	else \
 	    ${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
 	        (rm -f tcl; exit 1) ;\
 	fi
@@ -261,7 +261,7 @@ help.tmp: help
 	touch help.tmp
 
 help:
-	if [ "@HAVE_SYML@" = "YES" ]; then \
+	if [ "@HAVE_SYML@" = "YES" ] ; then \
 	    rm -rf help ;\
 	    ln -s ${HELP_DIR} help ;\
 	else \
@@ -276,7 +276,7 @@ tclXtest: ${TEST_OBJS} libtclx.a
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${SHLDLIBS} -o tclXtest || \
 	        (rm -f tclXtest; exit 1) ;\
-	else ;\
+	else \
 	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tclXtest || \
 	        (rm -f tclXtest; exit 1) ;\
 	fi
@@ -293,7 +293,7 @@ dltest.tmp: dltest
 dltest:
 	if [ "@HAVE_SYML@" = "YES" ]; then \
 	    ln -s `cd ${TCL_SRC}/unix/dltest; pwd` dltest ;\
-	else ;\
+	else \
 	    touch dltest ;\
 	fi
 

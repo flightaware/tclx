@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.13 1996/02/26 00:55:55 markd Exp $
+# $Id: Makefile.in,v 5.14 1996/02/29 07:02:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -73,7 +73,7 @@ wishx: tkXAppInit.o libtkx.a ${LIBTK}
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${CC} ${LD_SWITCHES} tkXAppInit.o ${SHLDLIBS} -o wishx || \
 	        (rm -f wishx; exit 1) ;\
-	else ;\
+	else \
 	    ${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
 	        (rm -f wishx; exit 1) ;\
 	fi
@@ -139,7 +139,7 @@ tktest: ${TEST_OBJS} libtkx.a ${LIBTCLX}
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${SHLDLIBS} -o tktest || \
 	        (rm -f tktest; exit 1) ;\
-	else ;\
+	else \
 	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
 	        (rm -f tktest; exit 1) ;\
 	fi
