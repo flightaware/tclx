@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.3 1993/05/04 06:29:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -314,10 +314,10 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
     ckfree (srcpath);
     return TCL_OK;
 
-unixError:
+  unixError:
     interp->result = Tcl_UnixError (interp);
 
-errorExit:
+  errorExit:
     ckfree (srcpath);
     return TCL_ERROR;
 }
@@ -377,11 +377,11 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
     ckfree ((char *) fileArgv);
     return TCL_OK;
 
-errorExit:
+  errorExit:
     ckfree ((char *) fileArgv);
     return TCL_ERROR;
 
-badArgs:
+  badArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " ?-nocomplain? filelist", (char *) NULL);
     return TCL_ERROR;
@@ -407,7 +407,7 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     int           idx, dirArgc, result;
-    char        **dirArgv, *scanPtr;
+    char        **dirArgv, *dirName, *scanPtr;
     struct stat   statBuf;
 
     if ((argc < 2) || (argc > 3))
@@ -422,11 +422,15 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
      */
 
     for (idx = 0; idx < dirArgc; idx++) {
+        dirName = Tcl_TildeSubst (interp, dirArgv [idx]);
+        if (dirName == NULL)
+           goto errorExit;
+
         /*
          * Make leading directories, if requested.
          */
         if (argc == 3) {
-            scanPtr = dirArgv [idx];
+            scanPtr = dirName;
             result = 0;  /* Start out ok, for dirs that are skipped */
 
             while (*scanPtr != '\0') {
@@ -444,20 +448,21 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
         /*
          * Make final directory in the path.
          */
-        if (mkdir (dirArgv [idx], S_IFDIR | 0777) != 0)
+        if (mkdir (dirName, S_IFDIR | 0777) != 0)
            goto mkdirError;
     }
 
     ckfree ((char *) dirArgv);
     return TCL_OK;
 
-mkdirError:
+  mkdirError:
     Tcl_AppendResult (interp, dirArgv [idx], ": ", Tcl_UnixError (interp),
                       (char *) NULL);
+  errorExit:
     ckfree ((char *) dirArgv);
     return TCL_ERROR;
 
-usageError:
+  usageError:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " ?-path? dirlist", (char *) NULL);
     return TCL_ERROR;
@@ -517,11 +522,11 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
     ckfree ((char *) dirArgv);
     return TCL_OK;
 
-errorExit:
+  errorExit:
     ckfree ((char *) dirArgv);
     return TCL_ERROR;;
 
-badArgs:
+  badArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " ?-nocomplain? dirlist", (char *) NULL);
     return TCL_ERROR;

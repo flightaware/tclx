@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 2.0 1992/10/16 04:50:26 markd Rel markd $
+ * $Id: tclXchmod.c,v 2.1 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -198,7 +198,7 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
     char       **argv;
 {
     int           idx, modeVal, fileArgc, absMode;
-    char        **fileArgv;
+    char        **fileArgv, *fileName;
     struct stat   fileStat;
 
     if (argc != 3) {
@@ -218,14 +218,18 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        if (fileName == NULL)
+            goto errorExit;
+        
         if (!absMode) {
-            if (stat (fileArgv [idx], &fileStat) != 0)
+            if (stat (fileName, &fileStat) != 0)
                 goto fileError;
             modeVal = ConvSymMode (interp, argv [1], fileStat.st_mode & 07777);
             if (modeVal < 0)
                 goto errorExit;
         }
-        if (chmod (fileArgv [idx], (unsigned short) modeVal) < 0)
+        if (chmod (fileName, (unsigned short) modeVal) < 0)
             goto fileError;
     }
 
@@ -266,7 +270,7 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
     char       **argv;
 {
     int            idx, ownArgc, fileArgc;
-    char         **ownArgv, **fileArgv = NULL;
+    char         **ownArgv, **fileArgv = NULL, *fileName;
     struct stat    fileStat;
     int            useOwnerGrp, chGroup, ownerId, groupId;
     struct passwd *passwdPtr;
@@ -281,6 +285,7 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
 
     if (Tcl_SplitList (interp, argv[1], &ownArgc, &ownArgv) != TCL_OK)
         return TCL_ERROR;
+
     if ((ownArgc < 1) || (ownArgc > 2)) {
         interp->result = "owner arg should be: owner or {owner group}";
         goto exitPoint;
@@ -336,8 +341,12 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
         goto exitPoint;
 
     for (idx = 0; idx < fileArgc; idx++) {
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        if (fileName == NULL)
+            goto exitPoint;
+        
         if (!chGroup) {
-            if (stat (fileArgv [idx], &fileStat) != 0) {
+            if (stat (fileName, &fileStat) != 0) {
                 Tcl_AppendResult (interp, fileArgv [idx], ": ",
                                   Tcl_UnixError (interp), (char *) NULL);
                 goto exitPoint;
@@ -345,7 +354,7 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
             groupId = fileStat.st_gid;
         }
 
-        if (chown (fileArgv[idx], ownerId, groupId) < 0) {
+        if (chown (fileName, ownerId, groupId) < 0) {
             Tcl_AppendResult (interp, fileArgv [idx], ": ",
                               Tcl_UnixError (interp), (char *) NULL);
             goto exitPoint;
@@ -381,7 +390,7 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
     char       **argv;
 {
     int            idx, fileArgc, groupId, result = TCL_ERROR;
-    char         **fileArgv;
+    char         **fileArgv, *fileName;
     struct stat    fileStat;
     struct group  *groupPtr;
 
@@ -405,7 +414,11 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        if ((stat (fileArgv [idx], &fileStat) != 0) ||
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        if (fileName == NULL)
+            goto exitPoint;
+        
+        if ((stat (fileName, &fileStat) != 0) ||
                 (chown (fileArgv[idx], fileStat.st_uid, groupId) < 0)) {
             Tcl_AppendResult (interp, fileArgv [idx], ": ",
                               Tcl_UnixError (interp), (char *) NULL);
