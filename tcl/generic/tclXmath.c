@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 4.1 1995/01/01 19:49:30 markd Exp markd $
+ * $Id: tclXmath.c,v 4.2 1995/01/23 23:41:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -152,7 +152,6 @@ Tcl_MaxFunc (clientData, interp, args, resultPtr)
         }
     } else {
         double values [2];
-        int    idx;
 
         resultPtr->type = TCL_DOUBLE;
 
@@ -199,7 +198,6 @@ Tcl_MinFunc (clientData, interp, args, resultPtr)
         }
     } else {
         double values [2];
-        int    idx;
 
         resultPtr->type = TCL_DOUBLE;
 
