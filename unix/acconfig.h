@@ -196,6 +196,9 @@
 /* Define if stdio FILE has _flag field */
 #undef HAVE_STDIO_FLAG
 
+/* Define if stdio FILE has __flag field */
+#undef HAVE_STDIO__FLAG
+
 /* Define if stdio FILE has _cnt field */
 #undef HAVE_STDIO_CNT
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 4.1 1995/01/01 19:49:24 markd Exp markd $
+ * $Id: tclXfcntl.c,v 4.2 1995/04/24 06:38:31 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -61,6 +61,9 @@
 #endif
 #ifdef HAVE_STDIO_FLAG
 #   define STDIO_FLAGS _flag
+#endif
+#ifdef HAVE_STDIO__FLAG
+#   define STDIO_FLAGS __flag
 #endif
 #ifndef STDIO_FLAGS
     Unable to determine stdio flags;

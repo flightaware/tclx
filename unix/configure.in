@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.20 1995/04/21 21:07:47 markd Exp markd $
+dnl $Id: configure.in,v 4.21 1995/04/24 06:38:31 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.20 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.21 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -206,6 +206,10 @@ AC_TRY_COMPILE([#include <stdio.h>],
         [FILE *fptr = stdin; fptr->_flag = 0;],
         [AC_DEFINE(HAVE_STDIO_FLAG)
          AC_MSG_RESULT(_flag)])
+AC_TRY_COMPILE([#include <stdio.h>],
+        [FILE *fptr = stdin; fptr->__flag = 0;],
+        [AC_DEFINE(HAVE_STDIO__FLAG)
+         AC_MSG_RESULT(__flag)])
 
 #------------------------------------------------------------------------------
 # Figure out how to find out whether a FILE structure contains buffered
