@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: common.vc,v 8.10 1999/06/26 04:22:12 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -32,8 +32,8 @@ PREFIXU=C:/tcl
 #
 # TclX and TkX versions.
 #
-TCLX_VERSION = 8.1.1
-TKX_VERSION  = 8.1.1
+TCLX_VERSION = 8.2b1
+TKX_VERSION  = 8.2b1
 
 #
 # Project directories
@@ -82,7 +82,7 @@ TK_DBGX         = d
 #
 # Tcl build directories and files.
 #
-TCL_DIR          = $(ROOT)\..\tcl8.1.1
+TCL_DIR          = $(ROOT)\..\tcl8.2b1
 TCL_GENERIC_DIR  = $(TCL_DIR)\generic
 TCL_WIN_DIR      = $(TCL_DIR)\win
 TCL_BUILD_DIR    = $(TCL_WIN_DIR)\$(TCL_TMP_DIR)
@@ -95,7 +95,7 @@ TCL_SALIB        = $(TCL_WIN_DIR)\tcl81sa.lib
 #
 # TK build directories and files.
 #
-TK_DIR           = $(ROOT)\..\tk8.1.1
+TK_DIR           = $(ROOT)\..\tk8.2b1
 TK_GENERIC_DIR   = $(TK_DIR)\generic
 TK_WIN_DIR       = $(TK_DIR)\win
 TK_BUILD_DIR     = $(TK_WIN_DIR)\$(TK_TMP_DIR)

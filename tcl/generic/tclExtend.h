@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.22 1999/06/26 19:33:11 redman Exp $
+ * $Id: tclExtend.h,v 8.23 1999/06/26 22:23:14 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,19 +42,19 @@
  * version numbers in hopes that we will remember to change it.
  *
  * Examples:
- *   Release        _VERSION  _FULL_VERSION
- *   8.2            8.2       8.2  
- *   8.2 beta 1     8.2       7.1b1
- *   8.2 patch 1    8.2       8.2.1  
+ *   Release        _VERSION  _FULL_VERSION  _PATCHLEVEL
+ *   8.2            8.2       8.2            0
+ *   8.2 beta 1     8.2       8.2b1          0
+ *   8.2 patch 1    8.2       8.2.1          1
  */
 
-#define TCLX_PATCHLEVEL      2
+#define TCLX_PATCHLEVEL     0
 
-#define TCLX_VERSION        "8.1"
-#define TCLX_FULL_VERSION   "8.1.2"
+#define TCLX_VERSION        "8.2"
+#define TCLX_FULL_VERSION   "8.2b1"
 
-#define TKX_VERSION         "8.1"
-#define TKX_FULL_VERSION    "8.1.2"
+#define TKX_VERSION         "8.2"
+#define TKX_FULL_VERSION    "8.2b1"
 
 #define TCLX_DEBUG
 

@@ -2,11 +2,11 @@
 INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
 ------------------------------------------------------------------------
 
-$Id: INSTALL,v 8.13 1999/06/26 04:22:10 markd Exp $
+$Id: INSTALL,v 8.14 1999/07/07 02:47:13 wart Exp $
 
 COMPATIBILITY
 =============
-This version is compatible Tcl 8.1.1 and Tk 8.1.1.
+This version is compatible Tcl 8.2b1 and Tk 8.2b1.
 
 QUICK START
 ===========
@@ -18,7 +18,7 @@ in the manner that addresses the needs of most users.   If you:
       directories adjacent to the TclX source directory.  i.e.
 
                             mybuilddir/
-                tcl8.1.1/      tk8.1.1/      tclX8.1.1/
+                tcl8.2b1/      tk8.2b1/      tclX8.2b1/
  
     o are installing under /usr/local.
 
@@ -26,7 +26,7 @@ in the manner that addresses the needs of most users.   If you:
 
 ...then the following steps will build, test and install TclX:
 
-    cd tclX8.1.1/unix
+    cd tclX8.2b1/unix
     configure          # add --enable-shared to build shared libraries
     make
     make test          # Run both standard and extended Tcl tests
@@ -70,19 +70,19 @@ The following directories are included under the TclX directory:
 HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 ==========================================
 
-    o Configure, compile and install Tcl 8.1 following the instructions that
-      come with Tcl.  Tcl 8.1 can be obtained from
+    o Configure, compile and install Tcl 8.2 following the instructions that
+      come with Tcl.  Tcl 8.2 can be obtained from
 
 	ftp://ftp.scriptics.com/pub/tcl/
 
     o If you are going to be using Tk and want to build an Extended Tcl wish
       shell (wishx), you will also need to configure, compile and install 
-      Tk 8.1.  Generic instructions on how to build and work worth packages
+      Tk 8.2.  Generic instructions on how to build and work worth packages
       configured by "configure" scripts may be found in the file
       INSTALL.generic, located in the same directory as the file you are
       currently reading.
 
-    o After building and installing Tcl and Tk, cd to tclX8.1.1/unix
+    o After building and installing Tcl and Tk, cd to tclX8.2b1/unix
 
     o Enter ./configure to run the configure script.  If you are going to
       be compiling with gcc, set the environment variable CC to "gcc".
@@ -110,7 +110,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           use this to compile in a separate directory from the source.  You
           must create a directory called "unix" in your build tree and run
           configure while in the "unix" directory.  The --srcdir argument must
-          specify the "tclX8.1.1/unix" directory, not the top-level TclX 
+          specify the "tclX8.2b1/unix" directory, not the top-level TclX 
           directory.
           Note: The source directory must be clean, it can't contain a built
           copy of TclX.
@@ -141,8 +141,8 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       can't be run directly.  To run them before installation, use the
       "runtcl" and "runwishx" scripts generated in the unix directory.
 
-    o Extended Tcl comes with help pages that are built from the Tcl 8.1 and
-      Tk 8.1 manual pages as well as the TclX manual page.  If you are building
+    o Extended Tcl comes with help pages that are built from the Tcl 8.2 and
+      Tk 8.2 manual pages as well as the TclX manual page.  If you are building
       TclX with a later version of Tcl or Tk, you might want to rebuild these
       manual pages.  If new manual pages have been added, you can add them
       by editing the "unix/tools/tclmanpages" and "unix/tools/tkmanpages".
@@ -176,7 +176,7 @@ Tk and the tests for Extended Tcl, which test both the new commands added by
 Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
-    o Run TclX tests by typing "make test" in the tclX8.1.1/unix directory.
+    o Run TclX tests by typing "make test" in the tclX8.2b1/unix directory.
       This runs both the TclX specific tests and an the Tcl tests though
       a interpreter built with TclX.
 
@@ -195,8 +195,8 @@ library.
 
     o If you're having trouble with the Berkeley tests, and you suspect that
       the extensions might be involved, you can build a special minimal
-      version of Berkeley Tcl by cd'ing to the tcl8.1 directory and doing
-      a "make test".  Similarly, you can do "make test" in the tk8.1 directory.
+      version of Berkeley Tcl by cd'ing to the tcl8.2 directory and doing
+      a "make test".  Similarly, you can do "make test" in the tk8.2 directory.
       If the test works with standard Tcl or Tk and fails with TclX, contact
       us.
 
