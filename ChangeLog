@@ -1,3 +1,49 @@
+2002-04-01  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* README: added some notes
+
+	* Makefile.in (new):
+	* aclocal.m4 (new):
+	* configure (new):
+	* configure.in (new):
+	* pkgIndex.tcl.in (new):
+	* tclconfig/ChangeLog (new):
+	* tclconfig/README.txt (new):
+	* tclconfig/install-sh (new):
+	* tclconfig/tcl.m4 (new): updated to new TEA architecture
+
+	* library/tclx.tcl: changed to force loading of most tclx runtime
+	library files directly
+
+	* library/arrayprocs.tcl:
+	* library/autoload.tcl:
+	* library/fmath.tcl: minor code cleanup
+
+	* generic/tclExtend.h: removed all TkX references
+	* generic/tclXcmdInit.c (removed): streamlined into tclXinit.c
+	* generic/tclXinit.c: cleaned up TclX initialization
+	* generic/tclXlibInit.c (removed): streamlined info tclXinit.c
+	* generic/tclXshell.c (removed): shell functionality removed from 8.4+.
+
+	* unix/Common.mk.in (removed):
+	* unix/Makefile.in (removed):
+	* unix/Makefile.in.sub (removed):
+	* unix/aclocal.m4 (removed):
+	* unix/configure (removed):
+	* unix/configure.in (removed):
+	* unix/pkgIndex.tcl.in (removed):
+	* unix/tcl.m4 (removed):
+	* win/Makefile.in (removed):
+	* win/aclocal.m4 (removed):
+	* win/configure.in (removed): old cygwin make files removed
+
+	* generic/hello.tcl (removed): no longer used
+
+	* tests/shell.test (removed): the shell functionality of TclX is
+	being removed in 8.4+
+	* tests/ucbtests.tcl (removed): old file
+	* tests/*: revamp of test files to use tcltest 'test' command.
+
 2001-10-24  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	**** POTENTIAL INCOMPATABILITY ****
