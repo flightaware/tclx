@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 5.0 1995/07/25 06:00:36 markd Rel $
+# $Id: tclhelp.tcl,v 5.1 1996/01/10 22:12:53 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -138,7 +138,13 @@ proc DisplayPage {page} {
     scrollbar $w.frame.yscroll -relief sunken \
         -command "$w.frame.page yview"
     text $w.frame.page -yscrollcommand "$w.frame.yscroll set" \
-        -width 80 -height 20 -relief sunken -wrap word
+        -width 80 -height 20 -relief sunken -wrap word \
+        -highlightthickness 0
+    focus $w.frame.page
+    bind $w.frame.page <space> [bind Text <Next>]
+    bind $w.frame.page <Delete> [bind Text <Prior>]
+    bind $w.frame.page <BackSpace> [bind text <Prior>]
+
     pack $w.frame.yscroll -side right -fill y
     pack $w.frame.page -side top -expand 1 -fill both
 
