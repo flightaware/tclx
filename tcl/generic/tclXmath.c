@@ -12,15 +12,19 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXmath.c,v 2.3 1993/04/06 05:58:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-#ifndef rand
-extern int rand();
-#endif
+/*
+ * Prototypes of random functions, since we may be using one out of osSupport.
+ */
+void srandom ();
+long random ();
+
+
 
 /*
  * Prototypes of internal functions.
@@ -119,11 +123,7 @@ Tcl_MinCmd (clientData, interp, argc, argv)
  *
  *-----------------------------------------------------------------------------
  */
-#ifdef TCL_32_BIT_RANDOM
-#    define RANDOM_RANGE ((1 << 31) - 1)
-#else
-#    define RANDOM_RANGE ((1 << 15) - 1)
-#endif
+#define RANDOM_RANGE 0x7fffffff
 
 static int 
 
@@ -134,7 +134,7 @@ ReallyRandom (myRange)
 
     maxMultiple = RANDOM_RANGE / myRange;
     maxMultiple *= myRange;
-    while ((rnum = rand()) >= maxMultiple)
+    while ((rnum = random ()) >= maxMultiple)
         continue;
     return (rnum % myRange);
 }
@@ -164,15 +164,15 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
         goto invalidArgs;
 
     if (STREQU (argv [1], "seed")) {
-        long seed;
+        unsigned seed;
 
         if (argc == 3) {
-            if (Tcl_GetLong (interp, argv[2], &seed) != TCL_OK)
+            if (Tcl_GetUnsigned (interp, argv[2], &seed) != TCL_OK)
                 return TCL_ERROR;
         } else
             seed = (unsigned) (getpid() + time((time_t *)NULL));
 
-        srand(seed);
+        srandom (seed);
 
     } else {
         if (argc != 2)
