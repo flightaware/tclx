@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.0 1992/10/16 04:54:45 markd Rel markd $
+# $Id: Makefile,v 2.1 1992/12/19 05:36:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -55,8 +55,9 @@ TCLX_MAKES: libtcl.a
 # Makefiles to add their .o files to the library by nuking their made.tmp file.
 
 libtcl.a: $(TCL_UCB_DIR)/libtcl.a
-	cp $(TCL_UCB_DIR)/libtcl.a .
-	rm -f  $(MADE.FILES)
+	cp $(TCL_UCB_DIR)/libtcl.a libtcl.a
+	$(RANLIB_CMD) libtcl.a
+	rm -f $(MADE.FILES)
 
 #------------------------------------------------------------------------------
 # Generate a libtk.a with extensions and a wish shell (wishx) with Extended Tcl
@@ -74,6 +75,7 @@ TKX_MAKES: libtk.a
 
 libtk.a: $(TCL_TK_DIR)/libtk.a
 	cp $(TCL_TK_DIR)/libtk.a libtk.a
+	$(RANLIB_CMD) libtk.a
 	rm -f $(TKMADE.FILES)
 
 
