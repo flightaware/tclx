@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.9 1999/03/31 06:37:46 markd Exp $
+ * $Id: tclXselect.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -396,26 +396,25 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
     }
     return result;
 }
-#else
+#else /* NO_SELECT */
 /*-----------------------------------------------------------------------------
  * TclX_SelectCmd --
  *     Dummy select command that returns an error for systems that don't
  *     have select.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_SelectObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
     Tcl_Obj     *CONST objv[];
 {
-    TclX_AppendObjResult (interp, 
-                          "select is not available on this version of Unix",
-                          (char *) NULL);
+    Tcl_AppendResult(interp, Tcl_GetString(objv[0]),
+	    " is not available on this OS", (char *) NULL);
     return TCL_ERROR;
 }
-#endif
+#endif /* NO_SELECT */
 
 
 /*-----------------------------------------------------------------------------
