@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.14 1997/08/08 10:04:25 markd Exp $
+ * $Id: tclXlib.c,v 8.15 1997/08/17 04:08:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Really should use original auto_load instead load_ouster_index,
@@ -1483,19 +1483,40 @@ TclX_LoadlibindexObjCmd (clientData, interp, objc, objv)
     } else if ((pathLen > 4) && STREQU (pathName + pathLen - 4, ".tli")) {
         if (LoadPackageIndex (interp, pathName, TCLLIB_TND) != TCL_OK)
             goto errorExit;
-    } else if (STREQU (pathName + pathLen - 9, "/tclIndex") ||
-               STREQU (pathName + pathLen - 9, "/tclindex")) {
-        /* FIX: Should we check for DOS before allowing lower case???*/
-        if (LoadOusterIndex (interp, pathName) != TCL_OK)
-            goto errorExit;
     } else {
-        TclX_AppendObjResult (interp, "invalid library name, must have an ",
-                              " extension of \".tlib\", \".tli\" or the name ",
-                              "\"tclIndex\", got \"",
-                              Tcl_GetStringFromObj (objv [1], NULL), "\"",
-                              (char *) NULL);
-        goto errorExit;
+        /*
+         * Need to split the file name to check the last component and to
+         * be able to pass in the dir name.
+         * FIX: Should we check for DOS before allowing lower case???
+         */
+        int pathArgc;
+        char **pathArgv;
+        Tcl_DString dirPath;
+
+        Tcl_SplitPath (pathName, &pathArgc, &pathArgv);
+        if ((pathArgc > 0) &&
+            (STREQU (pathArgv [pathArgc -1], "tclIndex") ||
+             STREQU (pathArgv [pathArgc -1], "tclindex"))) {
+            Tcl_DStringInit (&dirPath);
+            Tcl_JoinPath (pathArgc-1, pathArgv, &dirPath);
+            ckfree ((char *) pathArgv);
+
+            if (LoadOusterIndex (interp, dirPath.string) != TCL_OK) {
+                Tcl_DStringFree (&dirPath);
+                goto errorExit;
+            }
+            Tcl_DStringFree (&dirPath);
+        } else {
+            ckfree ((char *) pathArgv);
+            TclX_AppendObjResult (interp, "invalid library name, must have ",
+                                  "an extension of \".tlib\", \".tli\" or ",
+                                  "the name \"tclIndex\", got \"",
+                                  Tcl_GetStringFromObj (objv [1], NULL), "\"",
+                                  (char *) NULL);
+            goto errorExit;
+        }
     }
+
 
     Tcl_DStringFree (&pathNameBuf);
     return TCL_OK;
