@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.4 1995/04/02 16:40:38 markd Exp markd $
+# $Id: server.test,v 1.5 1995/04/02 19:00:01 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -238,37 +238,37 @@ if [catch {
     close $fh
 } msg] {
     puts "*************************************************************"
-    puts "Unable to connect to the "echo" server ($msg)."
+    puts "Unable to connect to the \"echo\" server ($msg)."
     puts "Some tests skipped."
     puts "*************************************************************"
+} else {
+
+    Test server-7.1 {simple client interaction} {
+        set fh [server_connect [id host] echo]
+        TalkToEcho server-7.1 $fh $fh 1
+    } 0 {}
+
+    Test server-7.2 {simple client interaction} {
+        set ip [lindex [server_info addresses [id host]] 0]
+        set fh [server_connect -nobuf $maybeIP echo]
+        TalkToEcho server-7.2 $fh $fh 0
+    } 0 {}
+
+    Test server-7.3 {simple client interaction} {
+        set fh [server_connect -buf $maybeIP echo]
+        TalkToEcho server-7.3 $fh $fh 1
+    } 0 {}
+
+    Test server-7.4 {simple client interaction} {
+        set fhs [server_connect -twoids -buf $maybeIP echo]
+        TalkToEcho server-7.4 [lindex $fhs 0] [lindex $fhs 1] 1
+    } 0 {}
+
+    Test server-7.5 {simple client interaction} {
+        set fhs [server_connect -twoids -nobuf $maybeIP echo]
+        TalkToEcho server-7.5 [lindex $fhs 0] [lindex $fhs 1] 0
+    } 0 {}
 }
-
-Test server-7.1 {simple client interaction} {
-    set fh [server_connect [id host] echo]
-    TalkToEcho server-7.1 $fh $fh 1
-} 0 {}
-
-Test server-7.2 {simple client interaction} {
-    set ip [lindex [server_info addresses [id host]] 0]
-    set fh [server_connect -nobuf $maybeIP echo]
-    TalkToEcho server-7.2 $fh $fh 0
-} 0 {}
-
-Test server-7.3 {simple client interaction} {
-    set fh [server_connect -buf $maybeIP echo]
-    TalkToEcho server-7.3 $fh $fh 1
-} 0 {}
-
-Test server-7.4 {simple client interaction} {
-    set fhs [server_connect -twoids -buf $maybeIP echo]
-    TalkToEcho server-7.4 [lindex $fhs 0] [lindex $fhs 1] 1
-} 0 {}
-
-Test server-7.5 {simple client interaction} {
-    set fhs [server_connect -twoids -nobuf $maybeIP echo]
-    TalkToEcho server-7.5 [lindex $fhs 0] [lindex $fhs 1] 0
-} 0 {}
-
 
 #
 # Fork a server to echo slightly modified versions of the messages.
