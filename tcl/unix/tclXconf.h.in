@@ -144,9 +144,6 @@
 /* Define if you have the bzero function.  */
 #undef HAVE_BZERO
 
-/* Define if you have the catgets function.  */
-#undef HAVE_CATGETS
-
 /* Define if you have the fsync function.  */
 #undef HAVE_FSYNC
 
