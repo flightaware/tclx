@@ -6,6 +6,7 @@
 ./config/aux
 ./config/bsd
 ./config/bsd-4.3
+./config/convex10.0
 ./config/cray-ymp
 ./config/hpux
 ./config/rs6000
