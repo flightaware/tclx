@@ -17,7 +17,7 @@
 ./man/CreateExte.3
 ./man/Handles.3
 ./man/Keylist.3
-./man/TclX.man
+./man/TclX.n
 ./man/TclXInit.3
 ./osSupport/Makefile.in
 ./osSupport/random.c
@@ -240,7 +240,6 @@
 ./tclsrc/edprocs.tcl
 ./tclsrc/fmath.tcl
 ./tclsrc/forfile.tcl
-./tclsrc/forrecur.tcl
 ./tclsrc/globrecur.tcl
 ./tclsrc/help.tcl
 ./tclsrc/loadouster.tcl
@@ -268,7 +267,6 @@
 ./tests/flock.test
 ./tests/fmath.test
 ./tests/forfile.test
-./tests/forrecur.test
 ./tests/fstat.test
 ./tests/globrecur.test
 ./tests/help.test
@@ -348,6 +346,6 @@
 ./tools/cphelpdir.sh
 ./tools/cpmanpages.tcl
 ./tools/getversion.c
-./tools/installTcl.tcl
+./tools/instcopy.tcl
 ./tools/tclmanpages
 ./tools/tkmanpages
