@@ -920,5 +920,5 @@
     can return a single file id for buffered files.  The server_open command
     is now a compatibility proc in tcl.tlib.
 -------------------------------------------------------------------------------
- 31 Mar 95: Released TclX7.4a-beta3.
+ 1 Apr 95: Released TclX7.4a-beta3.
 ===============================================================================
