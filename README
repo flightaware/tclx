@@ -34,7 +34,8 @@ BUILDING TCLX
 =============
 
    For instructions on how to build TclX on Unix and Unix-like systems,
-see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
+see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.  A binary
+release for Windows 95/NT is also available.
 
 CHANGES IN TCLX 7.6.0
 =====================
@@ -177,6 +178,10 @@ Thanks to Michael E. Shorter <mike@globalware.com>, Christopher M. Sedore
 <cmsedore@zombie.maxwell.syr.edu>,  Philip Chow <pchow@isgtec.com>, and
 Kirk Benson <benson@healthcare.com> for their initial work on porting TclX
 to MS Windows.
+
+Thanks to Jan Nijtmans <nijtmans@nici.kun.nl> of Plus Patch fame for helping
+to get shared library support working for several system.
+
 
 NEOSOFT TCL CONSULTING
 ======================
