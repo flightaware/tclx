@@ -689,5 +689,5 @@
    o Changed "infox posix_signals" to "infox have_posix_signals".
      (*POTENTIAL INCOMPATIBILITY*) 
    o Added "infox have_sockets" and "infox have_msgcats".
-   o "
+   o chartype ord will not return an error on multi-char strings.
 -------------------------------------------------------------------------------

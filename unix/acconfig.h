@@ -168,3 +168,6 @@
 
 /* Define if fd_set is not defined. */
 #undef NO_FD_SET
+
+/* Define if have gethostbyname (sockets). */
+#undef HAVE_GETHOSTBYNAME
