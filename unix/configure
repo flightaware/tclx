@@ -519,7 +519,7 @@ else
 fi
 
 
-# From configure.in Revision: 5.31 dnl
+# From configure.in Revision: 5.32 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -572,8 +572,8 @@ fi
 if test ! -d ../tk ; then
    mkdir ../tk || exit 1
 fi
-if test ! -d ../tk ; then
-   mkdir ../tk || exit 1
+if test ! -d ../tk/unix ; then
+   mkdir ../tk/unix || exit 1
 fi
 
 #------------------------------------------------------------------------------
