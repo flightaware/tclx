@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.7 1999/06/16 02:41:01 wart Exp $
+# $Id: Makefile.in,v 8.8 1999/07/07 02:47:13 wart Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -119,7 +119,7 @@ buildhelp:
 #
 install: install-binaries install-libraries install-doc
 
-install-binaries: TCLX_INSTALL TKX_INSTALL_${TKX_BUILD}
+install-binaries: TCLX_INSTALL_BIN TKX_INSTALL_BIN_${TKX_BUILD}
 
 install-libraries: TCLX_INSTALL TKX_INSTALL_${TKX_BUILD}
 
@@ -133,14 +133,21 @@ TCLX_INSTALL:
 TCLX_INSTALL_EXEC:
 	(cd ../tcl/unix && ${MAKE} install-exec)
 
+TCLX_INSTALL_BIN:
+	(cd ../tcl/unix && ${MAKE} install-binaries)
+
 TKX_INSTALL_YES:
 	(cd ../tk/unix && ${MAKE} install)
 
 TKX_INSTALL_EXEC_YES:
 	(cd ../tk/unix && ${MAKE} install-exec)
 
+TKX_INSTALL_BIN_YES:
+	(cd ../tk/unix && ${MAKE} install-binaries)
+
 TKX_INSTALL_NO:
 TKX_INSTALL_EXEC_NO:
+TKX_INSTALL_BIN_NO:
 
 TCLX_INSTALL_MAN:
 	${CPMANPAGES} -rmcat @${MAN_DIR_SEPARATOR}@ \
