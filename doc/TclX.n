@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.13 1996/03/17 19:43:14 markd Exp $
+.\" $Id: TclX.n,v 5.14 1996/03/20 06:57:42 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1300,12 +1300,12 @@ be returned with the array or keyed list forms:
 o\ \fBremotehost\fR - If \fIfileId\fR is a TCP/IP socket connection, then a
 list is returned with the first element being the remote host IP address.  If
 the remote host name can be found, it is returned as the second element of
-the list.  The remote host IP port number is returned as the this element.
+the list.  The remote host IP port number is the third element.
 .IP
 o\ \fBlocalhost\fR - If \fIfileId\fR is a TCP/IP socket connection, then a
 list is returned with the first element being the local host IP address.  If
 the local host name can be found, it is returned as the second element of
-the list.  The local host IP port number is returned as the this element.
+the list.  The local host IP port number is the third element.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
