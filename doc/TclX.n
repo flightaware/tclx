@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.3 1994/11/29 06:53:48 markd Exp markd $
+.\" $Id: TclX.n,v 4.4 1994/11/29 16:09:18 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2183,7 +2183,7 @@ the string following the token.
 .TP
 .B cexpand \fIstring\fR
 .br
-Expand backslash sequences in \fIstring\fR to there actual characters.
+Expand backslash sequences in \fIstring\fR to their actual characters.
 No other substitution takes place.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
