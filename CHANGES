@@ -998,3 +998,10 @@
 ===============================================================================
 16 Jul 95: Released TclX 7.4a-beta5.
 ===============================================================================
+17 Jul 95:
+  o Changed ftruncate command to work with chsize.
+  o Deprecated the cexpand command, as the functionality is available from
+    the new Tcl subst command.  A proc is provided for compatibility.
+===============================================================================
+24 Jul 95: Released TclX 7.4a.
+===============================================================================
