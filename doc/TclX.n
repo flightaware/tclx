@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.5 1993/02/13 17:44:55 markd Exp markd $
+.\" $Id: TclX.man,v 2.6 1993/02/17 03:00:50 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -177,6 +177,11 @@ the documentation for version \fBtcl6.2b\fR.
 .TP
 .B patchlevel
 Return the patchlevel for Extended Tcl.
+.TP
+.B posix_signals
+Return \fB1\fR if Posix signals are available (\fBblock\fR and \fBunblock\fR
+options available for the signal command).  \fB0\fR is returned if Posix
+signals are not available.
 .TP
 .B appname
 Return the symbolic application name of the current application linked with
@@ -650,7 +655,8 @@ blocked. The actions maybe one of `\fBdefault\fR',`\fBignore\fR',
 `\fBerror\fR' or `\fBtrap\fR.  If the action is trap, the third element is the
 command associated with the action.
 .IP
-\fBblock\fR - Block the specified signals from being received. (Posix systems only).
+\fBblock\fR - Block the specified signals from being received. (Posix systems
+only).
 .IP
 \fBunblock\fR - Allow the specified signal to be received. Pending signals
 will not occur. (Posix systems only).

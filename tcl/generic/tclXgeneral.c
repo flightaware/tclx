@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXgeneral.c,v 2.0 1992/10/16 04:50:47 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -84,26 +84,43 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
 
     if (STREQU ("version", argv [1])) {
         Tcl_SetResult (interp, tclxVersion, TCL_STATIC);
-    } else if (STREQU ("patchlevel", argv [1])) {
+        return TCL_OK;
+    }
+    if (STREQU ("patchlevel", argv [1])) {
         char numBuf [32];
         sprintf (numBuf, "%d", tclxPatchlevel);
         Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
-    } else if (STREQU ("appname", argv [1])) {
+        return TCL_OK;
+    }
+    if (STREQU ("posix_signals", argv [1])) {
+#       ifdef TCL_POSIX_SIG
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
+    if (STREQU ("appname", argv [1])) {
         if (tclAppName != NULL)
             Tcl_SetResult (interp, tclAppName, TCL_STATIC);
-    } else if (STREQU ("applongname", argv [1])) {
+        return TCL_OK;
+    }
+    if (STREQU ("applongname", argv [1])) {
         if (tclAppLongname != NULL)
             Tcl_SetResult (interp, tclAppLongname, TCL_STATIC);
-    } else if (STREQU ("appversion", argv [1])) {
+        return TCL_OK;
+    }
+    if (STREQU ("appversion", argv [1])) {
         if (tclAppVersion != NULL)
             Tcl_SetResult (interp, tclAppVersion, TCL_STATIC);
-    } else {
-        Tcl_AppendResult (interp, "illegal option \"", argv [1], 
-                          "\" expect one of: version, patchlevel, appname, ",
-                          "applongname, or appversion", (char *) NULL);
-        return TCL_ERROR;
+        return TCL_OK;
     }
-    return TCL_OK;
+
+    Tcl_AppendResult (interp, "illegal option \"", argv [1], 
+                      "\" expect one of: version, patchlevel, posix_signals, ",
+                      "appname, applongname, or appversion",
+                      (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*
