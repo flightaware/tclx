@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.7 1996/02/20 09:10:49 markd Exp $
+# $Id: Common.mk.in,v 5.8 1996/02/26 00:55:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -21,15 +21,17 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # TclX version information extracted from tclExtend.h.
 #
-TCLX_FULL_VERSION = @TCLX_FULL_VERSION@
-TKX_FULL_VERSION  = @TKX_FULL_VERSION@
+TCLX_FULL_VERSION  = @TCLX_FULL_VERSION@
+TCLX_SHLIB_VERSION = @TCLX_SHLIB_VERSION@
+TKX_FULL_VERSION   = @TKX_FULL_VERSION@
+TKX_SHLIB_VERSION  = @TKX_SHLIB_VERSION@
 
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk.
 #
 CC           = @CC@
 CFLAGS       = @CFLAGS@
-RANLIB       = @TCL_RANLIB@
+RANLIB       = @RANLIB@
 srcbasedir   = @srcbasedir@
 bldbasedir   = @bldbasedir@
 VPATH        = ${srcdir}
@@ -40,9 +42,25 @@ ARCH         = @TCLX_ARCH@
 #------------------------------------------------------------------------------
 # TclX configuration information determined by configure.
 #
+BUILD_SHARED = @BUILD_SHARED@
 TKX_BUILD    = @TKX_BUILD@
 TCLX_DEFS    = @TCLX_DEFS@
 TCLX_LIBS    = @TCLX_LIBS@
+
+#------------------------------------------------------------------------------
+# Shared library names if BUILD_SHARED is YES.  Base name is the name of
+# the library less the version, for dynamic loading.
+#
+TCLX_SHLIB_BASE_NAME = @TCLX_SHLIB_BASE_NAME@
+TCLX_SHLIB_NAME      = @TCLX_SHLIB_NAME@
+TKX_SHLIB_BASE_NAME  = @TKX_SHLIB_BASE_NAME@
+TKX_SHLIB_NAME       = @TKX_SHLIB_NAME@
+
+#------------------------------------------------------------------------------
+# Tcl/Tk libraries to use.  References macros defined in Config.mk.
+#
+TCL_USE_LIB = ${@TCL_USE_LIB@}
+TK_USE_LIB  = ${@TK_USE_LIB@}
 
 #------------------------------------------------------------------------------
 # Configuration information from tclConfig.sh and tkConfig.sh.
@@ -52,12 +70,12 @@ TCL_LIBS         = @TCL_LIBS@
 TCL_SHLIB_CFLAGS = @TCL_SHLIB_CFLAGS@
 TCL_LD_FLAGS     = @TCL_LD_FLAGS@
 TCL_DL_LIBS      = @TCL_DL_LIBS@
+TCL_SHLIB_LD     = @TCL_SHLIB_LD@
 
 TK_DEFS          = @TK_DEFS@
 TK_LIBS          = @TK_LIBS@
 TK_XINCLUDES     = @TK_XINCLUDES@
 TK_XLIBSW        = @TK_XLIBSW@
-
 
 #------------------------------------------------------------------------------
 # Location of directories.

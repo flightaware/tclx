@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.15 1996/02/22 07:37:03 markd Exp $
+dnl $Id: configure.in,v 5.16 1996/02/26 00:56:01 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.15 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.16 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -101,6 +101,35 @@ AC_ARG_WITH(arch,
 AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
+# Handle the --enable-shared option.
+#------------------------------------------------------------------------------
+
+AC_ARG_ENABLE(shared,
+    [  --enable-shared         build and link with shared libraries],
+    [BUILD_SHARED=$enableval],
+    [BUILD_SHARED=NO])
+case "$BUILD_SHARED" in
+    YES|yes)
+        AC_MSG_RESULT(Will build shared libraries)
+        BUILD_SHARED=YES
+        TCL_USE_LIB=TCL_SHLIB
+        TK_USE_LIB=TK_SHLIB
+        ;;
+    NO|no)
+        AC_MSG_RESULT(Will not build shared libraries)
+        BUILD_SHARED=NO
+        TCL_USE_LIB=TCL_LIB
+        TK_USE_LIB=TK_LIB
+        ;;
+     *)
+        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
+        ;;
+esac
+AC_SUBST(BUILD_SHARED)
+AC_SUBST(TCL_USE_LIB)
+AC_SUBST(TK_USE_LIB)
+
+#------------------------------------------------------------------------------
 # Handle the --enable-master option.
 #------------------------------------------------------------------------------
 
@@ -152,11 +181,13 @@ AC_SUBST(bldbasedir)
 
 AC_MSG_CHECKING(TclX versions)
 
-eval `egrep '^#define T.*_FULL_VERSION' $srcbasedir/tcl/generic/tclExtend.h | \
+eval `egrep '^#define T.*_VERSION' $srcbasedir/tcl/generic/tclExtend.h | \
       sed -e 's/#define //' -e 's/ *"/="/'`
 AC_MSG_RESULT($TCLX_FULL_VERSION)
 AC_SUBST(TCLX_FULL_VERSION)
+AC_SUBST(TCLX_SHLIB_VERSION)
 AC_SUBST(TKX_FULL_VERSION)
+AC_SUBST(TKX_SHLIB_VERSION)
 
 #------------------------------------------------------------------------------
 # Generate tmp makefile that outputs macro values in Config.mk as shell
@@ -196,7 +227,8 @@ AC_SUBST(TCL_LIBS)
 AC_SUBST(TCL_SHLIB_CFLAGS)
 AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(TCL_LD_FLAGS)
-AC_SUBST(TCL_RANLIB)
+AC_SUBST(TCL_SHLIB_LD)
+AC_SUBST(SHLIB_LD)
 
 # Get defines from tkConfig.sh
 if test "$TKX_BUILD" = "YES"; then
@@ -220,6 +252,41 @@ else
     AC_MSG_RESULT(using C compiler specified in by CC env var)
 fi
 AC_SUBST(CC)
+AC_PROG_RANLIB
+
+#------------------------------------------------------------------------------
+# Determine the names of the shared libraries to build.
+#
+case "$TCL_SHLIB_SUFFIX" in
+   *.so) TCLX_SHLIB_BASE_NAME=libtclx.so
+         TCLX_SHLIB_NAME=libtclx.so.${TCLX_SHLIB_VERSION}
+         TKX_SHLIB_BASE_NAME=libtkx.so
+         TKX_SHLIB_NAME=libtkx.so.${TKX_SHLIB_VERSION}
+         ;;
+   *.sl) TCLX_SHLIB_BASE_NAME=libtclx.sl
+         TCLX_SHLIB_NAME=libtclx.sl
+         TKX_SHLIB_BASE_NAME=libtkx.sl
+         TKX_SHLIB_NAME=libtkx.sl
+         ;;
+   *..o) TCLX_SHLIB_BASE_NAME=libtclx..o
+         TCLX_SHLIB_NAME=libtclx..o
+         TKX_SHLIB_BASE_NAME=libtkx..o
+         TKX_SHLIB_NAME=libtkx..o
+         ;;
+      *) TCLX_SHLIB_BASE_NAME=""
+         TCLX_SHLIB_NAME=""
+         TKX_SHLIB_BASE_NAME=""
+         TKX_SHLIB_NAME=""
+         if test "X$BUILD_SHARED" = "XYES" ; then
+             AC_MSG_ERROR(do not know how to build shared libraries for this Unix system)
+         fi
+         ;;
+esac
+
+AC_SUBST(TCLX_SHLIB_BASE_NAME)
+AC_SUBST(TCLX_SHLIB_NAME)
+AC_SUBST(TKX_SHLIB_BASE_NAME)
+AC_SUBST(TKX_SHLIB_NAME)
 
 #------------------------------------------------------------------------------
 # Determine if we have symbolic links on the filesystem we are building

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.9 1996/02/20 09:10:50 markd Exp $
+# $Id: Config.mk,v 5.10 1996/02/24 02:42:47 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -49,22 +49,28 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# The Tcl source distribution directory, the path to tclConfig.sh, and the Tcl
-# library (libtcl.a),  Note, access is required to tclInt.h which is not
+# The Tcl source distribution directory, the path to tclConfig.sh, the Tcl
+# library (libtcl7.4.a) and the flags neccessary to link with the Tcl shared
+# library (libtcl7.4.so).  Note, access is required to tclInt.h which is not
 # installed by Tcl.
 
 TCL_SRC=${srcbasedir}/../tcl7.5b2
 TCL_CONFIG=${srcbasedir}/../tcl7.5b2/unix/tclConfig.sh
 TCL_LIB=${bldbasedir}/../tcl7.5b2/unix/libtcl7.5.a
+TCL_SHLIB_DIR=${bldbasedir}/../tcl7.5b2/unix
+TCL_SHLIB=-L ${TCL_SHLIB_DIR} -ltcl7.5
 
 #------------------------------------------------------------------------------
 # Unless configure is going to be run with --with-tk=NO, these defines must be
 # set.  They define the directory containing the Tk source distribution, the
-# path to tkCOnfig.sh, and the path to the Tk library (libtk.a).
+# path to tkConfig.sh, the path to the Tk library (libtk4.1.a) and the flags
+# neccessary to link with the Tk shared library (libtk4.1.so).
 
 TK_SRC=${srcbasedir}/../tk4.1b2
 TK_CONFIG=${srcbasedir}/../tk4.1b2/unix/tkConfig.sh
 TK_LIB=${bldbasedir}/../tk4.1b2/unix/libtk4.1.a
+TK_SHLIB_DIR=${bldbasedir}/../tk4.1b2/unix
+TK_SHLIB=-L ${TK_SHLIB_DIR} -ltk4.1
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,
@@ -100,16 +106,6 @@ STRIP=strip
 XCFLAGS=
 XLDFLAGS=
 XLDLIBS=
-
-#------------------------------------------------------------------------------
-# Library arguments to use when building share library versions of the TclX
-# programs. This can be user to set absolute paths to shared libraries, etc.
-# This is used on the "make shlink" target.  Shared libraries must still be
-# built by hand, but this makes it easier to link the programs.  See
-# README.SHLIB for details.
-
-TCLX_SHLIBS=-L${TCL_LIBDIR} -ltclx -ltcl
-TKX_SHLIBS=-L${TCL_LIBDIR} -ltkx -ltk
 
 #------------------------------------------------------------------------------
 # The following definition can be set to non-null for special systems

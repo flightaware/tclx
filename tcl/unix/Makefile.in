@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.13 1996/02/21 06:09:05 markd Exp $
+# $Id: Makefile.in,v 5.14 1996/02/26 00:55:50 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,9 +27,6 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-LDLIBS = libtclx.a ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
-         ${XLDLIBS}
-
 CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} \
 	      ${TCL_DEFS} ${TCLX_DEFS} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
@@ -37,6 +34,12 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
 
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
+
+LDLIBS = libtclx.a ${TCL_USE_LIB} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
+         ${XLDLIBS}
+
+SHLDLIBS = -L . -ltclx ${TCL_USE_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
+           ${TCL_DL_LIBS} ${XLDLIBS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -82,15 +85,33 @@ TEST_OBJS = tclTest.o tclXtest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtclx.a tcl checkup RUNTIME tclXtest runtest ${bldbasedir}/tcl/tests
+all: libtclx.a SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest runtest \
+     ${bldbasedir}/tcl/tests
 
-tcl: tclXAppInit.o libtclx.a ${TCL_LIB}
-	${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
-	    (rm -f tcl; exit 1)
+tcl: tclXAppInit.o libtclx.a SHLIB_@BUILD_SHARED@
+	if test "@BUILD_SHARED@" = "YES"; then \
+	    ${CC} ${LD_SWITCHES} tclXAppInit.o ${SHLDLIBS} -o tcl || \
+	        (rm -f tcl; exit 1) ;\
+	else ;\
+	    ${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
+	        (rm -f tcl; exit 1) ;\
+	fi
 
 libtclx.a: ${OBJS}
 	${AR} cr libtclx.a ${OBJS}
 	${RANLIB} libtclx.a
+
+SHLIB_YES: ${TCLX_SHLIB_NAME}
+	touch SHLIB_YES
+
+${TCLX_SHLIB_NAME}: ${OBJS}
+	rm -f ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_BASE_NAME}
+	${TCL_SHLIB_LD} -o ${TCLX_SHLIB_NAME} ${OBJS} ${SHLDLIBS}
+	if test "${TCLX_SHLIB_NAME}" != "${TCLX_SHLIB_BASE_NAME}"; then \
+	    ln ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_BASE_NAME} ;\
+	fi
+
+SHLIB_NO:
 
 #------------------------------------------------------------------------------
 # Dependencies for generating objects.
@@ -198,16 +219,13 @@ random.o: ${COMPAT_DIR}/random.c
 rename.o: ${COMPAT_DIR}/rename.c
 	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/rename.c
 
-strftime.o: ${COMPAT_DIR}/strftime.c
-	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/strftime.c
-
 #------------------------------------------------------------------------------
 # Do some special checks to make sure TclX is built ok.
 
 checkup: checkup.done
 
 checkup.done: tcl
-	./tcl -q ${srcbasedir}/unix/tools/checkup.tcl
+	${RUNTCL} -q ${srcbasedir}/unix/tools/checkup.tcl
 	touch checkup.done
 
 #------------------------------------------------------------------------------
@@ -217,7 +235,8 @@ checkup.done: tcl
 # the help command will work before installation.  Normally just symlink,
 # unless we don't have them.
 #
-RUNTIME: tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help.tmp
+RUNTIME: tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help.tmp \
+         dltest.tmp
 
 tcl.tlib: ${TLIB_SRCS}
 	-rm -f tcl.tlib tcl.tndx
@@ -254,14 +273,29 @@ help:
 # Generate the test program.
 #
 tclXtest: ${TEST_OBJS} libtclx.a
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tclXtest || \
-	    (rm -f tclXtest; exit 1)
+	if test "@BUILD_SHARED@" = "YES"; then \
+	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${SHLDLIBS} -o tclXtest || \
+	        (rm -f tclXtest; exit 1) ;\
+	else ;\
+	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tclXtest || \
+	        (rm -f tclXtest; exit 1) ;\
+	fi
 
 tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXtest.c
 
 tclTest.o: ${TCL_SRC}/generic/tclTest.c
 	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclTest.c
+
+dltest.tmp: dltest
+	touch dltest.tmp
+
+dltest:
+	if [ "@HAVE_SYML@" = "YES" ]; then \
+	    ln -s `cd ${TCL_SRC}/unix/dltest; pwd` dltest ;\
+	else ;\
+	    touch dltest ;\
+	fi
 
 #------------------------------------------------------------------------------
 
@@ -271,6 +305,8 @@ runtest: Makefile
 	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tclXtest"          >>runtest
 	@echo "export TCLX_LIBRARY TCL_PROGRAM TCL_LIBRARY"        >>runtest
+	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}" >>runtest
+	@echo "export LD_LIBRARY_PATH"                             >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
 	@echo "    exec \$$TCL_PROGRAM"                            >>runtest
@@ -330,14 +366,20 @@ install-exec:
 	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
 	${INSTCOPY} libtclx.a ${INSTALL_ROOT}${TCLX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/libtclx.a
+	if test "@BUILD_SHARED@" = "YES"; then \
+	    ${INSTCOPY} ${TCLX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
+	    if test "${TCLX_SHLIB_NAME}" != "${TCLX_SHLIB_BASE_NAME}"; then \
+	        ${INSTCOPY} ${TCLX_SHLIB_BASE_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
+	    fi ;\
+	fi
 	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
 
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclXAppInit.o ${OBJS} libtclx.a tcl checkup.done
+	-rm -f tclXAppInit.o ${OBJS} libtclx.a tcl checkup.done SHLIB_YES
 	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl
-	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest
+	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

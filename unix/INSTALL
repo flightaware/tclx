@@ -19,7 +19,7 @@ in the manner that addresses the needs of most users.   If you:
 then the following steps will build, test and installed TclX:
 
     cd tclX7.5a/unix
-    configure
+    configure          # add --enable-shared to build shared libraries
     make
     make test          # Run both standard and extended Tcl tests
     make tktest        # Run Tk tests with wishx
@@ -177,9 +177,13 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       be compiling with gcc, set the environment variable CC to "gcc".
       The following options are recognized by the TclX configure script:
 
+        o --enable-shared=YES|NO
+          If "YES", build and link with shared libraries if "NO", no shared
+          libraries will be compiled.  Default is "NO".
+ 
         o --with-tk=YES|NO
-          If "YES" compile Tk specific code and wishx, if "NO", not Tk code
-          will be compiled.  Default is "YES".
+          If "YES", compile Tk specific code and wishx, if "NO", no Tk related
+          code will be compiled.  Default is "YES".
  
         o --srcdir=DIR
           If you are using a make that supports VPATH (e.g. GNU make) you can

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.12 1996/02/21 06:09:10 markd Exp $
+# $Id: Makefile.in,v 5.13 1996/02/26 00:55:55 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -26,16 +26,8 @@ srcdir = @srcdir@
 
 #------------------------------------------------------------------------------
 # Local macros.
-
-# The ordering of the libraries is important.  Some X libs on SysV include
-# "random" in a BSD module.  This would conflict with the one in the TclX
-# library if it was brought in.
-
-LDLIBS = libtkx.a ${TK_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_LIB} ${TK_LIBS} \
-	 ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
-
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} \
-	      ${TK_DEFS} \
+#
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} ${TK_DEFS} \
 	      -I${TKX_GENERIC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
@@ -44,6 +36,17 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} \
 	      ${XINCLUDES}
 
 LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
+
+# The ordering of the libraries is important.  Some X libs on SysV include
+# "random" in a BSD module.  This would conflict with the one in the TclX
+# library if it was brought in.
+
+LDLIBS = libtkx.a ${TK_USE_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_USE_LIB} \
+         ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
+
+SHLDLIBS = -L . -ltkx ${TK_USE_LIB} ${TK_XLIBSW} -L ../../tcl/unix -ltclx \
+           ${TCL_USE_LIB} ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
+           ${XLDLIBS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -63,15 +66,33 @@ TEST_OBJS = tkTest.o tkSquare.o tkXtest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtkx.a wishx tclhelp help.tmp tktest runtest ${bldbasedir}/tk/tests
+all: libtkx.a SHLIB_@BUILD_SHARED@ wishx tclhelp help.tmp tktest runtest \
+     ${bldbasedir}/tk/tests
 
-wishx: tkXAppInit.o libtkx.a ${LIBTK} ${TCL_LIB} ${TK_LIB}
-	${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
-	    (rm -f wishx; exit 1)
+wishx: tkXAppInit.o libtkx.a ${LIBTK}
+	if test "@BUILD_SHARED@" = "YES"; then \
+	    ${CC} ${LD_SWITCHES} tkXAppInit.o ${SHLDLIBS} -o wishx || \
+	        (rm -f wishx; exit 1) ;\
+	else ;\
+	    ${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
+	        (rm -f wishx; exit 1) ;\
+	fi
 
 libtkx.a: ${OBJS}
 	${AR} cr libtkx.a ${OBJS}
 	${RANLIB} libtkx.a
+
+SHLIB_YES: ${TKX_SHLIB_NAME}
+	touch SHLIB_YES
+
+${TKX_SHLIB_NAME}: ${OBJS}
+	rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME}
+	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${OBJS} ${SHLDLIBS}
+	if test "${TKX_SHLIB_NAME}" != "${TKX_SHLIB_BASE_NAME}"; then \
+	    ln ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME} ;\
+	fi
+
+SHLIB_NO:
 
 #------------------------------------------------------------------------------
 # Dependencies for generating objects.
@@ -115,8 +136,13 @@ help:
 #
 
 tktest: ${TEST_OBJS} libtkx.a ${LIBTCLX}
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
-	    (rm -f tktest; exit 1)
+	if test "@BUILD_SHARED@" = "YES"; then \
+	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${SHLDLIBS} -o tktest || \
+	        (rm -f tktest; exit 1) ;\
+	else ;\
+	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
+	        (rm -f tktest; exit 1) ;\
+	fi
 
 tkTest.o: ${TK_SRC}/generic/tkTest.c
 	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkTest.c
@@ -136,6 +162,8 @@ runtest: Makefile
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtest
 	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tktest"                >>runtest
 	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"        >>runtest
+	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_SHLIB_DIR}:${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}" >>runtest
+	@echo "export LD_LIBRARY_PATH"                             >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
 	@echo "    exec \$$TESTWISH"                               >>runtest
@@ -180,13 +208,19 @@ install-exec:
 	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
 	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TKX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/libtkx.a
+	if test "@BUILD_SHARED@" = "YES"; then \
+	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
+	    if test "${TKX_SHLIB_NAME}" != "${TKX_SHLIB_BASE_NAME}"; then \
+	        ${INSTCOPY} ${TKX_SHLIB_BASE_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
+	    fi ;\
+	fi
 	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
 	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
 
 #------------------------------------------------------------------------------
 clean:
 	-rm -f tkXAppInit.o ${OBJS} ${TEST_OBJS} wishx libtkx.a
-	-rm -rf tclhelp help help.tmp
+	-rm -rf tclhelp help help.tmp SHLIB_YES
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

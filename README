@@ -7,6 +7,9 @@ TclX 7.5 Beta 2 Release
 This is the first TclX beta release that is compatible with the Tcl 7.5 /
 Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 2 releases.
 
+Shared library support has been added.  It needs a lot of testing
+on different platforms.  Please try it (configure --enable-shared).
+
 No support is currently available for MS Windows or the MacIntosh.  We
 are interested in supporting these platforms, but don't have the time
 or expertise to do it in the near future.  If anyone is interested in
