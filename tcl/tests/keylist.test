@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 8.1 1997/04/17 04:59:24 markd Exp $
+# $Id: keylist.test,v 8.2 1997/06/25 08:23:49 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -313,6 +313,20 @@ Test keylist-3.14 {keylset tests} {
     keylset keyedlist B.BC.BBB bbb
     set keyedlist
 } 0 {{C {{CC {{CCC ccc}}}}} {A {{AA aa} {AB ab}}} {B {{BA ba} {BB bb} {BC {{BBB bbb}}}}}}
+
+Test keylist-3.15 {keylset tests} {
+    set keyedlist {}
+    keylset keyedlist ABCDEF value1
+    keylset keyedlist A.SUB  value2
+    list $keyedlist [keylkeys keyedlist]
+} 0 {{{ABCDEF value1} {A {{SUB value2}}}} {ABCDEF A}}
+
+Test keylist-3.16 {keylset tests} {
+    set keyedlist {}
+    keylset keyedlist A.SUB  value1
+    keylset keyedlist ABCDEF value2
+    list $keyedlist [keylkeys keyedlist]
+} 0 {{{A {{SUB value1}}} {ABCDEF value2}} {A ABCDEF}}
 
 Test keylist-4.1 {keyldel tests} {
     set keyedlist {{keyA valueA} {keyB valueB} {keyD valueD}}

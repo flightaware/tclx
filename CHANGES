@@ -1311,3 +1311,7 @@
   o Modified cmdtrace so that errors in callbacks are saved and returned as
     command errors rather than printing them to stderr.
 -------------------------------------------------------------------------------
+25 Jul 97:
+  o Fixed invalid keyed list key comparisons when two keys started with the
+    same string.
+-------------------------------------------------------------------------------
