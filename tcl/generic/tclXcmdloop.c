@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.5 1993/07/12 05:26:12 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.6 1993/07/27 05:17:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -200,11 +200,13 @@ Tcl_OutputPrompt (interp, topLevel)
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter
+ *   o interactive (I) - If TRUE print prompts and non-error results.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_CommandLoop (interp)
+Tcl_CommandLoop (interp, interactive)
     Tcl_Interp *interp;
+    int         interactive;
 {
     Tcl_DString cmdBuf;
     char        inputBuf [128];
@@ -233,7 +235,8 @@ Tcl_CommandLoop (interp)
          */
         clearerr (stdin);
         clearerr (stdout);
-        Tcl_OutputPrompt (interp, topLevel);
+        if (interactive)
+            Tcl_OutputPrompt (interp, topLevel);
         errno = 0;
         if (fgets (inputBuf, sizeof (inputBuf), stdin) == NULL) {
             if (!feof(stdin) && (errno == EINTR)) {
@@ -258,7 +261,8 @@ Tcl_CommandLoop (interp)
          */
         result = Tcl_RecordAndEval (interp, cmdBuf.string, 0);
 
-        Tcl_PrintResult (interp, result, cmdBuf.string);
+        if (interactive || result != TCL_OK)
+            Tcl_PrintResult (interp, result, cmdBuf.string);
 
         topLevel = TRUE;
         Tcl_DStringFree (&cmdBuf);
@@ -352,7 +356,7 @@ Tcl_CommandloopCmd(clientData, interp, argc, argv)
             goto exitPoint;
     }
 
-    Tcl_CommandLoop (interp);
+    Tcl_CommandLoop (interp, TRUE);
 
     if (oldTopLevelHook != NULL)
         SetPromptVar (interp, "topLevelPromptHook", oldTopLevelHook, NULL);

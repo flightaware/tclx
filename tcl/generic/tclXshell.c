@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.14 1993/07/20 03:43:10 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.15 1993/07/23 06:42:57 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -472,7 +472,7 @@ Tcl_Startup (interp, options, argc, argv)
         if (result != TCL_OK)
             goto errorAbort;
     } else {
-        Tcl_CommandLoop (interp);
+        Tcl_CommandLoop (interp, isatty (0));
     }
 
     Tcl_ResetResult (interp);

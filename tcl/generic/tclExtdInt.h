@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.15 1993/07/25 00:56:25 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.16 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -162,7 +162,8 @@ extern char *tclXWrongArgs;
  * Prototypes for utility procedures.
  */
 extern void 
-Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp));
+Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
+                             int         interactive));
 
 extern int
 Tcl_DStringGets _ANSI_ARGS_((FILE         *filePtr,
