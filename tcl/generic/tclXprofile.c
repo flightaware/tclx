@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 7.4 1996/09/28 16:18:50 markd Exp $
+ * $Id: tclXprofile.c,v 7.5 1996/09/28 21:02:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,12 +28,13 @@
  * (and commands in command mode).  This stack mirrors the Tcl procedure stack.
  * A chain of variable scope entries is also kept.  This tracks the uplevel
  * chain kept in the Tcl stack.  Unlike the Tcl stack, an entry is also make
- * for the global context and for commands when in command mode.
+ * for the global context and for the last command executed when in command
+ * mode.  Commands that eval other
  */
 
 typedef struct profEntry_t {
-    clock_t             cumRealTime;   /* Cumulative real time.         */
-    clock_t             cumCpuTime;    /* Cumulative CPU.               */
+    clock_t             entryRealTime; /* Real and CPU virtual time the */
+    clock_t             entryCpuTime;  /* entry was pushed at.          */
     int                 isProc;        /* Procedure, not command.       */
     int                 procLevel;     /* Procedure level.              */ 
     int                 scopeLevel;    /* Varaible scope level.         */ 
@@ -63,8 +64,15 @@ typedef struct profInfo_t {
     Tcl_Trace       traceHandle;       /* Handle to current trace.           */
     int             commandMode;       /* Prof all commands, not just procs. */
     int             evalMode;          /* Use eval stack, not scope stack.   */
-    clock_t         lastRealTime;      /* Real and CPU time of last trace    */
-    clock_t         lastCpuTime;       /* from profiling routines.           */
+    Command        *currentCmdPtr;     /* Current Tcl command table entry.   */
+    Tcl_CmdProc    *savedCmdProc;      /* Saved command executor function.   */
+    ClientData      savedCmdClientData;/* Save command clientData.           */
+    int             evalLevel;         /* Eval level when invoked.           */
+    clock_t         realTime;          /* Virtual Real and CPU time clocks   */
+    clock_t         cpuTime;           /* use to exclude prof overhead.      */
+    clock_t         startRealTime;     /* Actual time the virtual clock was  */
+    clock_t         startCpuTime;      /* started.                           */
+    int             clockRunning;      /* Is virtual clock on.               */
     profEntry_t    *stackPtr;          /* Proc/command nesting stack.        */
     int             stackSize;         /* Size of the stack.                 */
     profEntry_t    *scopeChainPtr;     /* Variable scope chain.              */
@@ -81,6 +89,12 @@ static char *PROF_PANIC = "TclX profile bug id = %d\n";
  * Prototypes of internal functions.
  */
 static void
+StartClock _ANSI_ARGS_((profInfo_t *infoPtr));
+
+static void
+StopClock _ANSI_ARGS_((profInfo_t *infoPtr));
+
+static void
 PushEntry _ANSI_ARGS_((profInfo_t *infoPtr,
                        char       *cmdName,
                        int         isProc,
@@ -94,6 +108,12 @@ RecordData _ANSI_ARGS_((profInfo_t  *infoPtr,
 
 static void
 PopEntry _ANSI_ARGS_((profInfo_t *infoPtr));
+
+static int
+ProfCommandEval _ANSI_ARGS_((ClientData    clientData,
+                             Tcl_Interp   *interp,
+                             int           argc,
+                             char        **argv));
 
 static void
 ProfTraceRoutine _ANSI_ARGS_((ClientData    clientData,
@@ -128,6 +148,50 @@ TurnOffProfiling _ANSI_ARGS_((Tcl_Interp *interp,
 static void
 ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
                             Tcl_Interp *interp));
+
+
+/*-----------------------------------------------------------------------------
+ * StartClock --
+ *   Start the virtual clock.
+ *
+ * Parameters:
+ *   o infoPtr - The global profiling info.
+ *-----------------------------------------------------------------------------
+ */
+static void
+StartClock (infoPtr)
+    profInfo_t *infoPtr;
+{
+    if (infoPtr->clockRunning)
+        panic (PROF_PANIC, 1);
+    infoPtr->clockRunning = TRUE;
+    TclXOSElapsedTime (&infoPtr->startRealTime, &infoPtr->startCpuTime);
+}
+
+
+/*-----------------------------------------------------------------------------
+ * StopClock --
+ *   Stop the virtual clock.
+ *
+ * Parameters:
+ *   o infoPtr - The global profiling info.
+ *-----------------------------------------------------------------------------
+ */
+static void
+StopClock (infoPtr)
+    profInfo_t *infoPtr;
+{
+    clock_t realTime, cpuTime;
+
+    TclXOSElapsedTime (&realTime, &cpuTime);
+
+    infoPtr->realTime += (realTime - infoPtr->startRealTime);
+    infoPtr->cpuTime += (cpuTime - infoPtr->startCpuTime);
+
+    if (!infoPtr->clockRunning)
+        panic (PROF_PANIC, 2);
+    infoPtr->clockRunning = FALSE;
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -170,8 +234,8 @@ PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
      * not yet been layed down or the procedure body eval execute, so the value
      * they will be in the procedure is recorded.
      */
-    entryPtr->cumRealTime = 0;
-    entryPtr->cumCpuTime = 0;
+    entryPtr->entryRealTime = infoPtr->realTime;
+    entryPtr->entryCpuTime = infoPtr->cpuTime;
     entryPtr->isProc = isProc;
     entryPtr->procLevel = procLevel;
     entryPtr->scopeLevel = scopeLevel;
@@ -196,7 +260,7 @@ PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
          * Only global level can be NULL.
          */
         if (scanPtr == NULL)
-            panic (PROF_PANIC, 1);
+            panic (PROF_PANIC, 3);
     }
     entryPtr->prevScopePtr = scanPtr;
     infoPtr->scopeChainPtr = entryPtr;
@@ -237,8 +301,6 @@ RecordData (infoPtr, entryPtr)
     } else {
         for (idx= 0, scanPtr = entryPtr; scanPtr != NULL;
              scanPtr = scanPtr->prevScopePtr) {
-            if ((scanPtr != entryPtr) && !scanPtr->isProc)
-                continue;  /* Skip */
             stackArgv [idx++] = scanPtr->cmdName;
         }
     }
@@ -272,8 +334,8 @@ RecordData (infoPtr, entryPtr)
      * Increment the cumulative data.
      */
     dataEntryPtr->count++;
-    dataEntryPtr->realTime += entryPtr->cumRealTime;
-    dataEntryPtr->cpuTime += entryPtr->cumCpuTime;
+    dataEntryPtr->realTime += (infoPtr->realTime - entryPtr->entryRealTime);
+    dataEntryPtr->cpuTime += (infoPtr->cpuTime - entryPtr->entryCpuTime);
 }
 
 /*-----------------------------------------------------------------------------
@@ -304,28 +366,41 @@ PopEntry (infoPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * ProfTraceRoutine --
- *  Routine called by Tcl_Eval to do profiling.
+ * ProfCommandEval --
+ *   Function to evaluate a command.  The procedure trace routine substitutes
+ * this function for the command executor function in the Tcl command table.
+ * We restore the command table, record data about the start of the command
+ * and then actually execute the command.  When the command returns, we record
+ * data about the time it took.
+ *
+ * FIX:  This all falls apart if another trace is executed between the
+ * doctoring of the command entry and this function being called.
  *-----------------------------------------------------------------------------
  */
-static void
-ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
-                  cmdClientData, argc, argv)
+static int
+ProfCommandEval (clientData, interp, argc, argv)
     ClientData    clientData;
     Tcl_Interp   *interp;
-    int           evalLevel;
-    char         *command;
-    int           (*cmdProc)();
-    ClientData    cmdClientData;
     int           argc;
     char        **argv;
 {
     Interp *iPtr = (Interp *) interp;
     profInfo_t *infoPtr = (profInfo_t *) clientData;
+    Command *currentCmdPtr;
     CallFrame *framePtr;
-    int procLevel, scopeLevel, isProc;
-    clock_t realTime, cpuTime, deltaRealTime, deltaCpuTime;
-    profEntry_t *scanStackPtr;
+    int procLevel, scopeLevel, isProc, result;
+
+    StopClock (infoPtr);
+
+    /*
+     * Restore the command table entry.
+     */
+    currentCmdPtr = infoPtr->currentCmdPtr;
+    currentCmdPtr->proc = infoPtr->savedCmdProc;
+    currentCmdPtr->clientData = infoPtr->savedCmdClientData;
+    infoPtr->currentCmdPtr = NULL;
+    infoPtr->savedCmdProc = NULL;
+    infoPtr->savedCmdClientData = NULL;
 
     /*
      * Determine current proc and var levels.
@@ -337,29 +412,14 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     }
     scopeLevel = (iPtr->varFramePtr == NULL) ? 0 : iPtr->varFramePtr->level;
 
-    /*
-     * Calculate the time spent since the last trace.
-     */
-    TclXOSElapsedTime (&realTime, &cpuTime);
-    deltaRealTime = (realTime - infoPtr->lastRealTime);
-    deltaCpuTime = (cpuTime - infoPtr->lastCpuTime);
-
-    /*
-     * Update cumulative times for the scope chain.
-     */
-    for (scanStackPtr = infoPtr->scopeChainPtr; scanStackPtr != NULL; 
-         scanStackPtr = scanStackPtr->prevScopePtr) {
-        scanStackPtr->cumRealTime += deltaRealTime;
-        scanStackPtr->cumCpuTime += deltaCpuTime;
-    }
-
     /* 
-     * Pop entries for commands or procedures that completed in the previous
-     * eval.
+     * If there are entries on the stack that are at a higher proc call level
+     * than we are, we have exited into the initial entries that where pushed
+     * on the stack before we started.  Pop those entries.
      */
-    while ((infoPtr->stackPtr->procLevel > procLevel) ||
-           ((infoPtr->stackPtr->evalLevel >= evalLevel) &&
-            (infoPtr->stackPtr->evalLevel != UNKNOWN_LEVEL))) {
+    while (infoPtr->stackPtr->procLevel > procLevel) {
+        if (infoPtr->stackPtr->evalLevel != UNKNOWN_LEVEL) 
+            panic (PROF_PANIC, 4);  /* Not an initial entry */
         PopEntry (infoPtr);
     }
 
@@ -390,10 +450,10 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
 	Tcl_DStringAppend (&commandWithNs, argv[0], -1); 
         if (isProc) {
             PushEntry (infoPtr, Tcl_DStringValue (&commandWithNs), TRUE,
-                       procLevel + 1, scopeLevel + 1, evalLevel);
+                       procLevel + 1, scopeLevel + 1, infoPtr->evalLevel);
         } else {
             PushEntry (infoPtr, Tcl_DStringValue (&commandWithNs), FALSE,
-                       procLevel, scopeLevel, evalLevel);
+                       procLevel, scopeLevel, infoPtr->evalLevel);
         }
 	Tcl_DStringFree (&commandWithNs);
     }
@@ -401,19 +461,73 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     if (infoPtr->commandMode || isProc) {
         if (isProc) {
             PushEntry (infoPtr, argv [0], TRUE,
-                       procLevel + 1, scopeLevel + 1, evalLevel);
+                       procLevel + 1, scopeLevel + 1, infoPtr->evalLevel);
         } else {
             PushEntry (infoPtr, argv [0], FALSE,
-                       procLevel, scopeLevel, evalLevel);
+                       procLevel, scopeLevel, infoPtr->evalLevel);
         }
     }
 #endif
 
     /*
-     * Save the exit time of the profiling trace handler.
+     * Call the command we intercepted.
      */
-    TclXOSElapsedTime (&infoPtr->lastRealTime,
-                       &infoPtr->lastCpuTime);
+    StartClock (infoPtr);
+    result = (*currentCmdPtr->proc) (currentCmdPtr->clientData, interp,
+                                     argc, argv);
+
+    /*
+     * If tracing is still running, pop the entry, recording the information.
+     */
+    if (infoPtr->traceHandle != NULL) {
+        if (infoPtr->commandMode || isProc) {
+            StopClock (infoPtr);
+            PopEntry (infoPtr);
+            StartClock (infoPtr);
+        }
+    }
+    return result;
+}
+
+/*-----------------------------------------------------------------------------
+ * ProfTraceRoutine --
+ *   Routine called by Tcl_Eval to do profiling.  It intercepts the current
+ * command being executed by temporarily editing the command table.
+ *-----------------------------------------------------------------------------
+ */
+static void
+ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
+                  cmdClientData, argc, argv)
+    ClientData    clientData;
+    Tcl_Interp   *interp;
+    int           evalLevel;
+    char         *command;
+    int           (*cmdProc)();
+    ClientData    cmdClientData;
+    int           argc;
+    char        **argv;
+{
+    Interp *iPtr = (Interp *) interp;
+    profInfo_t *infoPtr = (profInfo_t *) clientData;
+    Tcl_HashEntry *hPtr;
+    Command *cmdPtr;
+    
+    if (infoPtr->currentCmdPtr != NULL)
+        panic (PROF_PANIC, 5);
+
+    hPtr = Tcl_FindHashEntry (&iPtr->commandTable, argv [0]);
+    cmdPtr = (Command *) Tcl_GetHashValue (hPtr);
+
+    if ((cmdPtr->proc != cmdProc) || (cmdPtr->clientData != cmdClientData))
+        panic (PROF_PANIC, 6);
+
+    infoPtr->currentCmdPtr = cmdPtr;
+    infoPtr->savedCmdProc = cmdPtr->proc;
+    infoPtr->savedCmdClientData = cmdPtr->clientData;
+    infoPtr->evalLevel = evalLevel;
+
+    cmdPtr->proc = ProfCommandEval;
+    cmdPtr->clientData = clientData;
 }
 
 /*-----------------------------------------------------------------------------
@@ -497,10 +611,12 @@ TurnOnProfiling (infoPtr, commandMode, evalMode)
         Tcl_CreateTrace (infoPtr->interp, MAXINT,
                          (Tcl_CmdTraceProc *) ProfTraceRoutine,
                          (ClientData) infoPtr);
-    TclXOSElapsedTime (&infoPtr->lastRealTime,
-                       &infoPtr->lastCpuTime);
     infoPtr->commandMode = commandMode;
     infoPtr->evalMode = evalMode;
+    infoPtr->realTime = 0;
+    infoPtr->cpuTime = 0;
+    infoPtr->startRealTime = 0;
+    infoPtr->startCpuTime = 0;
     
     /*
      * Add entry for global context, then add in current procedures.
@@ -520,9 +636,11 @@ TurnOnProfiling (infoPtr, commandMode, evalMode)
          * Only global level can be NULL.
          */
         if (scanPtr == NULL)
-            panic (PROF_PANIC, 1);
+            panic (PROF_PANIC, 4);
     }
     infoPtr->scopeChainPtr = scanPtr;
+    
+    StartClock (infoPtr);
 }
 
 /*-----------------------------------------------------------------------------
@@ -572,6 +690,7 @@ TurnOffProfiling (interp, infoPtr, varName)
     char countBuf [32], realTimeBuf [32], cpuTimeBuf [32];
 
     DeleteProfTrace (infoPtr);
+    StopClock (infoPtr);
 
     dataArgv [0] = countBuf;
     dataArgv [1] = realTimeBuf;
@@ -735,8 +854,15 @@ Tcl_InitProfile (interp)
     infoPtr->traceHandle = NULL;
     infoPtr->commandMode = FALSE;
     infoPtr->evalMode = FALSE;
-    infoPtr->lastRealTime = 0;
-    infoPtr->lastCpuTime = 0;
+    infoPtr->currentCmdPtr = NULL;
+    infoPtr->savedCmdProc = NULL;
+    infoPtr->savedCmdClientData = NULL;
+    infoPtr->evalLevel = UNKNOWN_LEVEL;
+    infoPtr->realTime = 0;
+    infoPtr->cpuTime = 0;
+    infoPtr->startRealTime = 0;
+    infoPtr->startCpuTime = 0;
+    infoPtr->clockRunning = FALSE;
     infoPtr->stackPtr = NULL;
     infoPtr->stackSize = 0;
     infoPtr->scopeChainPtr = NULL;

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 7.2 1996/09/28 16:18:50 markd Exp $
+# $Id: profile.test,v 7.3 1996/09/28 21:02:39 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -147,207 +147,206 @@ proc SumCntData {profDataVar} {
 #
 # Test of normal procedure calls.
 #
-proc ProcA1 {} {ProcB1; set j 1; incr j; set k 1}
-proc ProcB1 {} {ProcC1; concat a b; ProcC1; list a b; list c d}
-proc ProcC1 {} {expr 1+1}
+proc ProcA2 {} {ProcB2; set j 1; incr j; set k 1}
+proc ProcB2 {} {ProcC2; concat a b; ProcC2; list a b; list c d}
+proc ProcC2 {} {expr 1+1}
 
 Test profile-2.1 {profile count tests} {
    profile on
-   ProcA1
+   ProcA2
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA1 <global>} 1} \
-          {{ProcB1 ProcA1 <global>} 1} \
-          {{ProcC1 ProcB1 ProcA1 <global>} 2}]
+          {{ProcA2 <global>} 1} \
+          {{ProcB2 ProcA2 <global>} 1} \
+          {{ProcC2 ProcB2 ProcA2 <global>} 2}]
 
 Test profile-2.2 {profile count tests} {
    profile -commands on
-   ProcA1
+   ProcA2
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA1 <global>} 1} \
-          {{ProcB1 ProcA1 <global>} 1} \
-          {{ProcC1 ProcB1 ProcA1 <global>} 2} \
-          {{concat ProcB1 ProcA1 <global>} 1} \
-          {{expr ProcC1 ProcB1 ProcA1 <global>} 2} \
-          {{incr ProcA1 <global>} 1} \
-          {{list ProcB1 ProcA1 <global>} 2} \
+          {{ProcA2 <global>} 1} \
+          {{ProcB2 ProcA2 <global>} 1} \
+          {{ProcC2 ProcB2 ProcA2 <global>} 2} \
+          {{concat ProcB2 ProcA2 <global>} 1} \
+          {{expr ProcC2 ProcB2 ProcA2 <global>} 2} \
+          {{incr ProcA2 <global>} 1} \
+          {{list ProcB2 ProcA2 <global>} 2} \
           {{profile <global>} 1} \
-          {{set ProcA1 <global>} 2}]
+          {{set ProcA2 <global>} 2}]
 
 Test profile-2.3 {profile count tests} {
    profile -eval on
-   ProcA1
+   ProcA2
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA1 <global>} 1} \
-          {{ProcB1 ProcA1 <global>} 1} \
-          {{ProcC1 ProcB1 ProcA1 <global>} 2}]
+          {{ProcA2 <global>} 1} \
+          {{ProcB2 ProcA2 <global>} 1} \
+          {{ProcC2 ProcB2 ProcA2 <global>} 2}]
 
 Test profile-2.4 {profile count tests} {
    profile -commands -eval on
-   ProcA1
+   ProcA2
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA1 <global>} 1} \
-          {{ProcB1 ProcA1 <global>} 1} \
-          {{ProcC1 ProcB1 ProcA1 <global>} 2} \
-          {{concat ProcB1 ProcA1 <global>} 1} \
-          {{expr ProcC1 ProcB1 ProcA1 <global>} 2} \
-          {{incr ProcA1 <global>} 1} \
-          {{list ProcB1 ProcA1 <global>} 2} \
+          {{ProcA2 <global>} 1} \
+          {{ProcB2 ProcA2 <global>} 1} \
+          {{ProcC2 ProcB2 ProcA2 <global>} 2} \
+          {{concat ProcB2 ProcA2 <global>} 1} \
+          {{expr ProcC2 ProcB2 ProcA2 <global>} 2} \
+          {{incr ProcA2 <global>} 1} \
+          {{list ProcB2 ProcA2 <global>} 2} \
           {{profile <global>} 1} \
-          {{set ProcA1 <global>} 2}]
+          {{set ProcA2 <global>} 2}]
 
 #
 # Test of uplevel.
 #
-proc ProcA2 {} {ProcB2}
-proc ProcB2 {} {ProcC2}
-proc ProcC2 {} {uplevel ProcD2; ProcD2}
-proc ProcD2 {} {set a 1; incr a; concat a b}
+proc ProcA3 {} {ProcB3}
+proc ProcB3 {} {ProcC3}
+proc ProcC3 {} {uplevel ProcD3; ProcD3}
+proc ProcD3 {} {set a 1; incr a; concat a b}
 
 Test profile-3.1 {profile count tests} {
    profile on
-   ProcA2
+   ProcA3
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA2 <global>} 1} \
-          {{ProcB2 ProcA2 <global>} 1} \
-          {{ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1}]
+          {{ProcA3 <global>} 1} \
+          {{ProcB3 ProcA3 <global>} 1} \
+          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1}]
 
 Test profile-3.2 {profile count tests} {
    profile -commands on
-   ProcA2
+   ProcA3
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA2 <global>} 1} \
-          {{ProcB2 ProcA2 <global>} 1} \
-          {{ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{concat ProcD2 ProcB2 ProcA2 <global>} 1} \
-          {{concat ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{incr ProcD2 ProcB2 ProcA2 <global>} 1} \
-          {{incr ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{ProcA3 <global>} 1} \
+          {{ProcB3 ProcA3 <global>} 1} \
+          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{concat ProcD3 ProcB3 ProcA3 <global>} 1} \
+          {{concat ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{incr ProcD3 ProcB3 ProcA3 <global>} 1} \
+          {{incr ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{profile <global>} 1} \
-          {{set ProcD2 ProcB2 ProcA2 <global>} 1} \
-          {{set ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{uplevel ProcC2 ProcB2 ProcA2 <global>} 1}]
+          {{set ProcD3 ProcB3 ProcA3 <global>} 1} \
+          {{set ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{uplevel ProcC3 ProcB3 ProcA3 <global>} 1}]
 
 Test profile-3.3 {profile count tests} {
    profile -eval on
-   ProcA2
+   ProcA3
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA2 <global>} 1} \
-          {{ProcB2 ProcA2 <global>} 1} \
-          {{ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 2}]
+          {{ProcA3 <global>} 1} \
+          {{ProcB3 ProcA3 <global>} 1} \
+          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 2}]
 
 Test profile-3.4 {profile count tests} {
    profile -eval -commands on
-   ProcA2
+   ProcA3
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA2 <global>} 1} \
-          {{ProcB2 ProcA2 <global>} 1} \
-          {{ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 uplevel ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{concat ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{concat ProcD2 uplevel ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{incr ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{incr ProcD2 uplevel ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{ProcA3 <global>} 1} \
+          {{ProcB3 ProcA3 <global>} 1} \
+          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{concat ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{concat ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{incr ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{incr ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{profile <global>} 1} \
-          {{set ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{set ProcD2 uplevel ProcC2 ProcB2 ProcA2 <global>} 1} \
-          {{uplevel ProcC2 ProcB2 ProcA2 <global>} 1}]
+          {{set ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{set ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{uplevel ProcC3 ProcB3 ProcA3 <global>} 1}]
 
 #
 # Test of error unwind.
 #
-proc ProcA3 {} {ProcB3}
-proc ProcB3 {} {catch {ProcC3}; ProcE3}
-proc ProcC3 {} {ProcD3}
-proc ProcD3 {} {error baz}
-proc ProcE3 {} {}
+proc ProcA4 {} {ProcB4}
+proc ProcB4 {} {catch {ProcC4}; ProcE4}
+proc ProcC4 {} {ProcD4}
+proc ProcD4 {} {error baz}
+proc ProcE4 {} {}
 
 Test profile-4.1 {profile count tests} {
    profile on
-   ProcA3
+   ProcA4
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA3 <global>} 1} \
-          {{ProcB3 ProcA3 <global>} 1} \
-          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{ProcE3 ProcB3 ProcA3 <global>} 1}]
+          {{ProcA4 <global>} 1} \
+          {{ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4 ProcB4 ProcA4 <global>} 1} \
+          {{ProcD4 ProcC4 ProcB4 ProcA4 <global>} 1} \
+          {{ProcE4 ProcB4 ProcA4 <global>} 1}]
 
 Test profile-4.2 {profile count tests} {
    profile -commands on
-   ProcA3
+   ProcA4
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA3 <global>} 1} \
-          {{ProcB3 ProcA3 <global>} 1} \
-          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{ProcE3 ProcB3 ProcA3 <global>} 1} \
-          {{catch ProcB3 ProcA3 <global>} 1} \
-          {{error ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcA4 <global>} 1} \
+          {{ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{ProcE4 ProcB4 ProcA4 <global>} 1} \
+          {{catch ProcB4 ProcA4 <global>} 1} \
+          {{error ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
           {{profile <global>} 1}]
 
 Test profile-4.3 {profile count tests} {
    profile -eval on
-   ProcA3
+   ProcA4
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA3 <global>} 1} \
-          {{ProcB3 ProcA3 <global>} 1} \
-          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{ProcE3 ProcB3 ProcA3 <global>} 1}]
+          {{ProcA4 <global>} 1} \
+          {{ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4 ProcB4 ProcA4 <global>} 1} \
+          {{ProcD4 ProcC4 ProcB4 ProcA4 <global>} 1} \
+          {{ProcE4 ProcB4 ProcA4 <global>} 1}]
 
 Test profile-4.4 {profile count tests} {
    profile -commands -eval on
-   ProcA3
+   ProcA4
    profile off profData
    SumCntData profData
 } 0 [list {<global> 1} \
-          {{ProcA3 <global>} 1} \
-          {{ProcB3 ProcA3 <global>} 1} \
-          {{ProcC3 catch ProcB3 ProcA3 <global>} 1} \
-          {{ProcD3 ProcC3 catch ProcB3 ProcA3 <global>} 1} \
-          {{ProcE3 ProcB3 ProcA3 <global>} 1} \
-          {{catch ProcB3 ProcA3 <global>} 1} \
-          {{error ProcD3 ProcC3 catch ProcB3 ProcA3 <global>} 1} \
+          {{ProcA4 <global>} 1} \
+          {{ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{ProcE4 ProcB4 ProcA4 <global>} 1} \
+          {{catch ProcB4 ProcA4 <global>} 1} \
+          {{error ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
           {{profile <global>} 1}]
 
 #
 # Test of a command that calls procedures from different levels.
 #
-
-proc ProcA4 {} {ProcB4}
-proc ProcB4 {} {tclx_test_eval 0 ProcC4a #0 ProcC4b 0 ProcC4c 1 ProcC4d }
-proc ProcC4a {} {ProcD4}
-proc ProcC4b {} {ProcD4}
-proc ProcC4c {} {ProcD4}
-proc ProcC4d {} {ProcD4}
-proc ProcD4 {} {concat a b; list c d}
+proc ProcA5 {} {ProcB5}
+proc ProcB5 {} {tclx_test_eval 0 ProcC5a #0 ProcC5b 0 ProcC5c 1 ProcC5d }
+proc ProcC5a {} {ProcD5}
+proc ProcC5b {} {ProcD5}
+proc ProcC5c {} {ProcD5}
+proc ProcC5d {} {ProcD5}
+proc ProcD5 {} {concat a b; list c d}
 
 if [cequal [info commands tclx_test_eval] {}] {
     puts "*** Command \"tclx_test_eval\" is not available in the interpreter,"
@@ -355,92 +354,185 @@ if [cequal [info commands tclx_test_eval] {}] {
 } else {
     Test profile-5.1 {profile count tests} {
        profile on
-       ProcA4
+       ProcA5
        profile off profData
        SumCntData profData
     } 0 [list {<global> 1} \
-              {{ProcA4 <global>} 1} \
-              {{ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4b <global>} 1} \
-              {{ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4d ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4b <global>} 1} \
-              {{ProcD4 ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4d ProcA4 <global>} 1}]
+              {{ProcA5 <global>} 1} \
+              {{ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5a ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5b <global>} 1} \
+              {{ProcC5c ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5d ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5a ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5b <global>} 1} \
+              {{ProcD5 ProcC5c ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5d ProcA5 <global>} 1}]
 
     Test profile-5.2 {profile count tests} {
        profile -commands on
-       ProcA4
+       ProcA5
        profile off profData
        SumCntData profData
     } 0 [list {<global> 1} \
-              {{ProcA4 <global>} 1} \
-              {{ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4b <global>} 1} \
-              {{ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4d ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4b <global>} 1} \
-              {{ProcD4 ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4d ProcA4 <global>} 1} \
-              {{concat ProcD4 ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{concat ProcD4 ProcC4b <global>} 1} \
-              {{concat ProcD4 ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{concat ProcD4 ProcC4d ProcA4 <global>} 1} \
-              {{list ProcD4 ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{list ProcD4 ProcC4b <global>} 1} \
-              {{list ProcD4 ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{list ProcD4 ProcC4d ProcA4 <global>} 1} \
+              {{ProcA5 <global>} 1} \
+              {{ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5b <global>} 1} \
+              {{ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5d ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5b <global>} 1} \
+              {{ProcD5 ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5d ProcA5 <global>} 1} \
+              {{concat ProcD5 ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{concat ProcD5 ProcC5b <global>} 1} \
+              {{concat ProcD5 ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{concat ProcD5 ProcC5d ProcA5 <global>} 1} \
+              {{list ProcD5 ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{list ProcD5 ProcC5b <global>} 1} \
+              {{list ProcD5 ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{list ProcD5 ProcC5d ProcA5 <global>} 1} \
               {{profile <global>} 1} \
-              {{tclx_test_eval ProcB4 ProcA4 <global>} 1}]
+              {{tclx_test_eval ProcB5 ProcA5 <global>} 1}]
 
     Test profile-5.3 {profile count tests} {
        profile -eval on
-       ProcA4
+       ProcA5
        profile off profData
        SumCntData profData
     } 0 [list {<global> 1} \
-              {{ProcA4 <global>} 1} \
-              {{ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4b ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4d ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4a ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4b ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4c ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4d ProcB4 ProcA4 <global>} 1}]
+              {{ProcA5 <global>} 1} \
+              {{ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5a ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5b ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5c ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5d ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5a ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5b ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5c ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5d ProcB5 ProcA5 <global>} 1}]
 
     Test profile-5.4 {profile count tests} {
        profile -eval -commands on
-       ProcA4
+       ProcA5
        profile off profData
        SumCntData profData
     } 0 [list {<global> 1} \
-              {{ProcA4 <global>} 1} \
-              {{ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4a tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4b tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4c tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{ProcC4d tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4a tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4b tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4c tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{ProcD4 ProcC4d tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{concat ProcD4 ProcC4a tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{concat ProcD4 ProcC4b tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{concat ProcD4 ProcC4c tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{concat ProcD4 ProcC4d tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{list ProcD4 ProcC4a tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{list ProcD4 ProcC4b tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{list ProcD4 ProcC4c tclx_test_eval ProcB4 ProcA4 <global>} 1} \
-              {{list ProcD4 ProcC4d tclx_test_eval ProcB4 ProcA4 <global>} 1} \
+              {{ProcA5 <global>} 1} \
+              {{ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5b tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcC5d tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5b tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{ProcD5 ProcC5d tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{concat ProcD5 ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{concat ProcD5 ProcC5b tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{concat ProcD5 ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{concat ProcD5 ProcC5d tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{list ProcD5 ProcC5a tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{list ProcD5 ProcC5b tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{list ProcD5 ProcC5c tclx_test_eval ProcB5 ProcA5 <global>} 1} \
+              {{list ProcD5 ProcC5d tclx_test_eval ProcB5 ProcA5 <global>} 1} \
               {{profile <global>} 1} \
-              {{tclx_test_eval ProcB4 ProcA4 <global>} 1}]
+              {{tclx_test_eval ProcB5 ProcA5 <global>} 1}]
 }
+
+#
+# Test evaling from other commands.
+#
+proc ProcA6 {} {
+    if {[string compare "y" "x"]} {
+	set foo [ProcB6]
+	set bar [ProcC6]
+    }
+}
+proc ProcB6 {} {
+    set t 0
+    for {set i 1} {$i < 1000} {incr i} {
+        incr t $i
+    }
+    return $t
+}
+
+proc ProcC6 {} {
+    set t 0
+    for {set i 1} {$i < 2000} {incr i} {
+        incr t $i
+    }
+    return $t
+}
+
+Test profile-6.1 {profile count tests} {
+   profile on
+   ProcA6
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA6 <global>} 1} \
+          {{ProcB6 ProcA6 <global>} 1} \
+          {{ProcC6 ProcA6 <global>} 1}]
+
+Test profile-6.2 {profile count tests} {
+   profile -commands on
+   ProcA6
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA6 <global>} 1} \
+          {{ProcB6 if ProcA6 <global>} 1} \
+          {{ProcC6 if ProcA6 <global>} 1} \
+          {{for ProcB6 if ProcA6 <global>} 1} \
+          {{for ProcC6 if ProcA6 <global>} 1} \
+          {{if ProcA6 <global>} 1} \
+          {{incr for ProcB6 if ProcA6 <global>} 1998} \
+          {{incr for ProcC6 if ProcA6 <global>} 3998} \
+          {{profile <global>} 1} \
+          {{return ProcB6 if ProcA6 <global>} 1} \
+          {{return ProcC6 if ProcA6 <global>} 1} \
+          {{set ProcB6 if ProcA6 <global>} 1} \
+          {{set ProcC6 if ProcA6 <global>} 1} \
+          {{set for ProcB6 if ProcA6 <global>} 1} \
+          {{set for ProcC6 if ProcA6 <global>} 1} \
+          {{set if ProcA6 <global>} 2} \
+          {{string if ProcA6 <global>} 1}]
+
+Test profile-6.3 {profile count tests} {
+   profile -eval on
+   ProcA6
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA6 <global>} 1} \
+          {{ProcB6 ProcA6 <global>} 1} \
+          {{ProcC6 ProcA6 <global>} 1}]
+
+Test profile-6.4 {profile count tests} {
+   profile -eval -commands on
+   ProcA6
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA6 <global>} 1} \
+          {{ProcB6 if ProcA6 <global>} 1} \
+          {{ProcC6 if ProcA6 <global>} 1} \
+          {{for ProcB6 if ProcA6 <global>} 1} \
+          {{for ProcC6 if ProcA6 <global>} 1} \
+          {{if ProcA6 <global>} 1} \
+          {{incr for ProcB6 if ProcA6 <global>} 1998} \
+          {{incr for ProcC6 if ProcA6 <global>} 3998} \
+          {{profile <global>} 1} \
+          {{return ProcB6 if ProcA6 <global>} 1} \
+          {{return ProcC6 if ProcA6 <global>} 1} \
+          {{set ProcB6 if ProcA6 <global>} 1} \
+          {{set ProcC6 if ProcA6 <global>} 1} \
+          {{set for ProcB6 if ProcA6 <global>} 1} \
+          {{set for ProcC6 if ProcA6 <global>} 1} \
+          {{set if ProcA6 <global>} 2} \
+          {{string if ProcA6 <global>} 1}]
 
 #
 # Function to build a list from the profile output data with each entry
