@@ -115,9 +115,11 @@ STANDALONE_OBJS = \
 
 HELP_DIR = ${srcbasedir}/tcl/help
 
-TEST_OBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o tclXunixTest.o
+TEST_OBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o \
+	@TCL_THREAD_TEST@ tclXunixTest.o
 
-TEST_SAOBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o tclXunixTestSA.o
+TEST_SAOBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o \
+	@TCL_THREAD_TEST@ tclXunixTestSA.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -241,6 +243,9 @@ tclTestObj.o: ${TCL_SRC}/generic/tclTestObj.c
 
 tclUnixTest.o: ${TCL_SRC}/unix/tclUnixTest.c
 	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/unix/tclUnixTest.c
+
+tclThreadTest.o: ${TCL_SRC}/generic/tclThreadTest.c
+	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclThreadTest.c
 
 dltest.tmp: dltest
 	touch dltest.tmp

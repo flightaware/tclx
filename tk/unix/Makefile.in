@@ -76,9 +76,9 @@ TCL = ../../tcl/unix/tcl
 
 HELP_DIR = ${srcbasedir}/tk/help
 
-TEST_OBJS = tkTest.o tkSquare.o tkXunixTest.o
+TEST_OBJS = tkTest.o tkSquare.o @TCL_THREAD_TEST@ tkXunixTest.o
 
-TEST_SAOBJS = tkTest.o tkSquare.o tkXunixTestSA.o
+TEST_SAOBJS = tkTest.o tkSquare.o @TCL_THREAD_TEST@ tkXunixTestSA.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -173,6 +173,9 @@ tkSquare.o: ${TK_SRC}/generic/tkSquare.c
 
 tkXtest.o: ${TKX_GENERIC_DIR}/tkXtest.c
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXtest.c
+
+tclThreadTest.o: ${TCL_SRC}/generic/tclThreadTest.c
+	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclThreadTest.c
 
 #------------------------------------------------------------------------------
 # If test directory in not in build tree, copy it from the source tree.
