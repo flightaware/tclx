@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 5.3 1996/02/12 18:15:45 markd Exp $
+ * $Id: tclXflock.c,v 6.0 1996/05/10 16:15:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

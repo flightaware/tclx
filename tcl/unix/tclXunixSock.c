@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 5.14 1996/03/21 06:10:38 markd Exp $
+ * $Id: tclXunixSock.c,v 6.0 1996/05/10 16:18:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

@@ -24,7 +24,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: checkup.tcl,v 5.3 1996/02/21 06:09:23 markd Exp $
+# $Id: checkup.tcl,v 6.0 1996/05/10 16:20:03 markd Exp $
 #------------------------------------------------------------------------------
 #
 

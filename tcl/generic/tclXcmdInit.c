@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.11 1996/03/21 06:35:47 markd Exp $
+ * $Id: tclXcmdInit.c,v 6.0 1996/05/10 16:15:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
