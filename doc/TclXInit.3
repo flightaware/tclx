@@ -12,13 +12,13 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 5.0 1995/07/25 05:40:34 markd Rel $
+.\" $Id: TclXInit.3,v 5.1 1995/11/05 03:54:28 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
 .ad b
 .SH NAME
-TclX_Init, TclXCmd_Init, TclXLib_Init, TclX_Main - Extended Tcl initialization.
+TclX_Init, TclXCmd_Init, TclXLib_Init, TclX_Main, TkX_Init, TkX_Main - Extended Tcl initialization.
 '
 .SH SYNOPSIS
 .nf
@@ -39,7 +39,13 @@ int
 TclX_Init (Tcl_Interp *interp);
 
 int
+Tclx_Init (Tcl_Interp *interp);
+
+int
 TclXCmd_Init (Tcl_Interp *interp);
+
+int
+Tclxcmd_Init (Tcl_Interp *interp);
 
 int
 TclXLib_Init (Tcl_Interp *interp);
@@ -51,6 +57,9 @@ TclX_Main (int               argc,
 
 int
 TkX_Init (Tcl_Interp *interp);
+
+int
+Tkx_Init (Tcl_Interp *interp);
 
 void
 TkX_Main (int               argc,
@@ -138,7 +147,7 @@ or
 .ft R
 .fi
 '
-.SS TclX_Init
+.SS "TclX_Init, Tclx_Init"
 .PP
 Initializes Extended Tcl, adding the extended command set to the interpreter.
 This is called from \fBTcl_AppInit\fR.  Normally, this function is used in
@@ -146,7 +155,9 @@ an application in place of the \fBTcl_Init\fR function.  If used in this
 way, the UCB Tcl run time environment is not required and startup will be
 faster.  This function may also be called after \fBTcl_Init\fR has been called.
 In this case, the Tcl library mechanism defined in \fBinit.tcl\fR will be
-replaced with the TclX mechanism.
+replaced with the TclX mechanism.  The function is also available under the
+name \fBTclx_Init\fR, which conforms to the Tcl \fBload\fR command package
+naming conventions.
 .PP
 Parameters
 .RS 2
@@ -158,12 +169,14 @@ Returns:
 \fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS TclXCmd_Init
+.SS "TclXCmd_Init, Tclxcmd_Init"
 .PP
 Add the TclX command set to the interpreter, with the exception of the
 TclX library management commands.  This is normally called by
 \fBTclX_Init\fR and should only be used if you don't want the TclX library
-handling.
+handling.  The function is also available under the
+name \fBTclxcmd_Init\fR, which conforms to the Tcl \fBload\fR command package
+naming conventions.
 .PP
 Parameters
 .RS 2
@@ -202,7 +215,7 @@ or enters an interactive command loop.
 This procedure never returns, it exits the process when it's done.  Using
 the TclX shell also gives you SIGINT handling in interactive shells.
 '
-.SS TkX_Init
+.SS "TkX_Init, Tkx_Init"
 .PP
 Initializes Extended Tcl Tk environment.
 This is called from \fBTcl_AppInit\fR.  Normally, this function is used in
@@ -210,6 +223,10 @@ an application in place of the \fBTk_Init\fR function.  If used in this
 way, the UCB Tk run time environment is not required and startup will be
 faster.  This function may also be called after \fBTk_Init\fR has been called.
 In this case, the TclX Tk runtime environment will not be used or required.
+The function is also available under the name \fBTkx_Init\fR, which conforms
+to the Tcl \fBload\fR command package naming conventions.  However, there
+is probably no good reason to dynamically load this function, as it only
+provides standard \fBTk_Init\fR functionallity for the \fBTkX_Main\fR shell.
 .PP
 Parameters
 .RS 2

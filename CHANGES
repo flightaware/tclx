@@ -1036,3 +1036,5 @@
 ===============================================================================
 20 Oct 95: Released TclX 7.5a Alpha 2
 -------------------------------------------------------------------------------
+  o Added an interface to TclXCmd_Init that follows the new calling 
+    convention for dynamic loading.

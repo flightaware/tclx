@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 4.7 1995/07/20 02:31:23 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 5.0 1995/07/25 05:59:14 markd Rel $
  *-----------------------------------------------------------------------------
  */
 
@@ -286,4 +286,21 @@ TclXCmd_Init (interp)
     Tcl_ServerInit (interp);
 
     return TCL_OK;
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tclxcmd_Init --
+ *
+ *   Version of TclXCmd_Init that conforms to the Tcl dynamic loading naming
+ * convention.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tclxcmd_Init (interp)
+    Tcl_Interp *interp;
+{
+    return TclXCmd_Init (interp);
 }
