@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.16 1999/03/31 06:37:44 markd Exp $
+ * $Id: tclXinit.c,v 8.17 1999/06/23 00:24:57 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -405,5 +405,25 @@ Tclx_SafeInit (interp)
                      "\n    (while initializing safe TclX)");
     return TCL_ERROR;
 }
+
+/*-----------------------------------------------------------------------------
+ * Tclx_InitTclStubs --
+ *
+ *   Initialize Tcl stubs inside of the TclX dynamic library.
+ *-----------------------------------------------------------------------------
+ */
+char *
+TclX_InitTclStubs (interp, version, exact)
+    Tcl_Interp *interp;
+    char *version;
+    int exact;
+{
+    char *actualVersion;
 
-
+    actualVersion = Tcl_InitStubs(interp, version, exact);
+    if (actualVersion == NULL) {
+	return NULL;
+    } else {
+	return actualVersion;
+    }
+}

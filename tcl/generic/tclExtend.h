@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.18 1999/05/03 02:47:01 markd Exp $
+ * $Id: tclExtend.h,v 8.19 1999/06/23 00:24:57 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -121,6 +121,11 @@ Tclx_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN int
 Tclx_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
+
+EXTERN char*
+TclX_InitTclStubs _ANSI_ARGS_((Tcl_Interp *interp,
+			       char       *version,
+			       int         exact));
 
 EXTERN int
 Tclx_InitStandAlone _ANSI_ARGS_((Tcl_Interp *interp));
@@ -288,6 +293,16 @@ TclX_AsyncCommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
 #define TCL_STORAGE_CLASS DLLEXPORT
 #endif
 
+/* Removed TclX_Main, use macro instead */
+#define TkX_Main(argc, argv, proc) \
+    TkX_MainEx(argc, argv, proc, Tcl_CreateInterp())
+
+EXTERN void
+TkX_MainEx _ANSI_ARGS_((int            argc,
+                      char             **argv,
+                      Tcl_AppInitProc  *appInitProc,
+		      Tcl_Interp       *interp));
+
 EXTERN int
 Tkx_Init _ANSI_ARGS_((Tcl_Interp  *interp));
 
@@ -296,11 +311,6 @@ Tkx_InitStandAlone _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN int
 Tkx_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
-
-EXTERN void
-TkX_Main _ANSI_ARGS_((int               argc,
-                      char            **argv,
-                      Tcl_AppInitProc  *appInitProc));
 
 /*
  * These are for Windows only.
