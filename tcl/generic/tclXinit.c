@@ -12,11 +12,17 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 1.1 1993/09/16 05:39:59 markd Exp markd $
+ * $Id: tclXinit.c,v 1.2 1993/10/11 04:24:49 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * The following is used to force the version of tclCmdIL.c that was compiled
+ * for TclX to be brought in rather than the standard version.
+ */
+int *tclxDummyInfoCmdPtr = (int *) Tcl_InfoCmd;
 
 static char *tclLibraryEnv = "TCL_LIBRARY";
 
@@ -75,55 +81,6 @@ TclX_ErrorExit (interp, exitCode)
 
 /*
  *-----------------------------------------------------------------------------
- * TclX_InitLibDirPath --
- *
- *   Initialize the path to the library directory.  If the specified
- * environment variable exists, use it, otherwise set the environment variable
- * to fool various pieces of Tcl/Tk code.  The path is also returned so it may
- * be used when its time to run the init file, etc.
- *
- * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- *   o libDirPtr (O) - Pointer to a dynamic string to return the library path
- *     that is to be used.  Will be initialized.
- *   o envVar (I) - Environement variable to set if it does not exist or return
- *     in libDirPath if it does.
- *   o dir (I) - The directory name.
- *   o version1, version2 - Two part version number forming a directory under
- *     dir.  Either maybe NULL.
- *-----------------------------------------------------------------------------
- */
-void
-TclX_InitLibDirPath (interp, libDirPtr, envVar, dir, version1, version2)
-    Tcl_Interp  *interp;
-    Tcl_DString *libDirPtr;
-    char        *envVar;
-    char        *dir;
-    char        *version1;
-    char        *version2;
-{
-    char  *envValue;
-
-    Tcl_DStringInit (libDirPtr);
-
-    envValue = Tcl_GetVar2 (interp, "env", envVar, TCL_GLOBAL_ONLY);
-    if (envValue != NULL) {
-        Tcl_DStringAppend (libDirPtr, envValue, -1);
-        return;
-    }
-
-    Tcl_DStringAppend (libDirPtr, dir, -1);
-    Tcl_DStringAppend (libDirPtr, "/", -1);
-    if (version1 != NULL)
-        Tcl_DStringAppend (libDirPtr, version1, -1);
-    if (version2 != NULL)
-        Tcl_DStringAppend (libDirPtr, version2, -1);
-
-    Tcl_SetVar2 (interp, "env", envVar, libDirPtr->string, TCL_GLOBAL_ONLY);
-}
-
-/*
- *-----------------------------------------------------------------------------
  * ProcessInitFile --
  *
  *   Evaluate the specified init file.
@@ -177,6 +134,7 @@ int
 TclX_Init (interp)
     Tcl_Interp *interp;
 {
+    char        *value;
     Tcl_DString  libDir;
 
     if (TclXCmd_Init (interp) == TCL_ERROR)
@@ -185,16 +143,16 @@ TclX_Init (interp)
     if (TclXLib_Init (interp) == TCL_ERROR)
         return TCL_ERROR;
 
+    Tcl_DStringInit (&libDir);
+
     /*
-     * Get the path to the library directory and deal with the environment
-     * variable.
+     * Get the path to the master (library) directory.
      */
-    TclX_InitLibDirPath (interp,
-                         &libDir,
-                         tclLibraryEnv,
-                         TCL_MASTERDIR,
-                         TCL_VERSION,
-                         TCL_EXTD_VERSION_SUFFIX);
+    value = Tcl_GetVar2 (interp, "env", tclLibraryEnv, TCL_GLOBAL_ONLY);
+    if (value != NULL)
+        Tcl_DStringAppend (&libDir, value, -1);
+    else
+        Tcl_DStringAppend (&libDir, TCL_MASTERDIR, -1);
 
     /*
      * Set auto_path.

@@ -13,12 +13,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 1.7 1993/09/16 05:42:02 markd Exp markd $
+ * $Id: tkXinit.c,v 1.8 1993/09/16 13:53:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tk.h"
+
+/*
+ * The following is used to force the version of tkWindow.c that was compiled
+ * for TclX to be brought in rather than the standard version.
+ */
+int *tclxDummyMainWindowPtr = (int *) Tk_MainWindow;
 
 
 /*
@@ -47,13 +53,16 @@ TkX_Init (interp)
     tclAppLongname = "Extended Tk Shell - Wishx";
     tclAppVersion  = TK_VERSION;
 
-    TclX_InitLibDirPath (interp,
-                         &libDir,
-                         "TK_LIBRARY",
-                         TK_MASTERDIR,
-                         TK_VERSION,
-                         TCL_EXTD_VERSION_SUFFIX);
-    Tcl_SetVar (interp, "tk_library", libDir.string, TCL_GLOBAL_ONLY);
+    Tcl_DStringInit (&libDir);
+
+    /*
+     * Get the path to the master (library) directory.
+     */
+    value = Tcl_GetVar2 (interp, "env", "TK_LIBRARY", TCL_GLOBAL_ONLY);
+    if (value != NULL)
+        Tcl_DStringAppend (&libDir, value, -1);
+    else
+        Tcl_DStringAppend (&libDir, TK_MASTERDIR, -1);
 
     /*
      * If we are going to be interactive, Setup SIGINT handling.

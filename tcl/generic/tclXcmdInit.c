@@ -14,12 +14,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcreate.c,v 2.7 1993/09/07 14:44:09 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 2.8 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-#include "patchlevel.h"
+#include "tclXpatchl.h"
 
 
 /*
@@ -44,7 +44,7 @@ TclXCmd_Init (interp)
     strcpy (tclxVersion, TCL_VERSION);
     strcat (tclxVersion, TCL_EXTD_VERSION_SUFFIX);
 
-    tclxPatchlevel = PATCHLEVEL;
+    tclxPatchlevel = TCLX_PATCHLEVEL;
     tclAppName     = "TclX";
     tclAppLongname = "Extended Tcl";
     tclAppVersion  = tclxVersion;
