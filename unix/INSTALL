@@ -409,21 +409,9 @@ SGI:
 
    o The strftime function does not work correctly on SGI (tested on
      IRIX 4.0.5).  This is a known bug and will be fixed in the next IRIX
-     release.  The fmtclock command specifying the GMT argument (perhaps
-     only during daylight  savings time) returns a formated time that is one
-     hour off.  This causes the following clock tests to fail:
-
-        clock-3.2
-        clock-4.0
-        clock-4.1
-     
-     If this is a problem to your application, add the following macro to your
-     Config.mk:
- 
-         LIBOBJS=strftime.o
-
-     This will cause a functioning (but not internationalized) strftime
-     to be built and added to libtclx.a.
+     release.  The %I format specifier is broken.  The configure script 
+     explictly checks for this version of IRIX and forces a functioning
+     (but not internationalized) strftime to be built and added to libtclx.a.
 
 BSDI:
    o The BSDI make is broken.  It does not correctly handle the setting of

@@ -129,7 +129,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 3.9 
+# From configure.in Revision: 3.11 
 
 
 
@@ -838,6 +838,10 @@ rm -f conftest*
 done
 
 
+#
+# Its important to include time.h in this check, as some systems (like convex)
+# have timezone functions, etc.
+#
 echo checking for timezone variable
 cat > conftest.c <<EOF
 #include "confdefs.h"
@@ -915,8 +919,8 @@ rm -fr conftest*
 #------------------------------------------------------------------------------
 
 echo "checking man directory/section separator (man/man.1 vs man/man1)"
-mandirs="/usr/man/man.1 /usr/man/cat.1 /usr/share/man.1 /usr/share/man.1 
-        /usr/man/cat.C"
+mandirs="/usr/man/man.1 /usr/man/cat.1 /usr/share/man.1 /usr/share/cat.1
+         /usr/man/u_man/man.1 /usr/man/cat.C"
 gotdotdir="NO"
 for d in $mandirs
 do
@@ -927,7 +931,8 @@ do
 done
 
 mandirs="/usr/man/man1   /usr/man/cat1   /usr/share/man1   /usr/share/man1
-         /usr/man/man1.Z /usr/man/cat1.Z /usr/share/man1.Z /usr/share/man1.Z"
+         /usr/man/man1.Z /usr/man/cat1.Z /usr/share/man1.Z /usr/share/man1.Z
+         /usr/man/u_man/man1"
 gotnodotdir="NO"
 for d in $mandirs
 do
@@ -2190,6 +2195,12 @@ else
   LIBOBJS="$LIBOBJS rename.o"
 fi
 rm -f conftest*
+
+
+# SGI IRIX 4.0.5 has a broken strftime.
+case `uname -sr 2>/dev/null` in
+  IRIX\ 4.0.1-5*) LIBOBJS="$LIBOBJS strftime.o" ;;
+esac
 
 
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 3.0 1993/11/19 06:59:07 markd Rel markd $
+ * $Id: tclXprocess.c,v 3.1 1994/03/02 07:26:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -183,9 +183,8 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    WAIT_STATUS_TYPE  status;
-    int               idx, tmpPid, options = 0, pgroup = FALSE;
-    pid_t             pid, returnedPid;
+    int    status, idx, tmpPid, options = 0, pgroup = FALSE;
+    pid_t  pid, returnedPid;
     
     for (idx = 1; idx < argc; idx++) {
         if (argv [idx][0] != '-')

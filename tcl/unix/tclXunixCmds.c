@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 3.3 1994/01/25 01:07:01 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 3.4 1994/02/03 06:06:29 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -314,8 +314,7 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int               sysStatus;
-    WAIT_STATUS_TYPE  waitStatus;
+    int  waitStatus;
 
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " command",
@@ -323,12 +322,11 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    sysStatus = system (argv [1]);
-    if (sysStatus == -1) {
+    waitStatus = system (argv [1]);
+    if (waitStatus == -1) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
-    waitStatus = *((WAIT_STATUS_TYPE *) &sysStatus);
     if (WIFEXITED (waitStatus)) {
         sprintf (interp->result, "%d", WEXITSTATUS (waitStatus));
         return TCL_OK;
