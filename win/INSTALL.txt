@@ -1,5 +1,8 @@
                         Building TclX on Windows 95/NT
 
+*WARNING*  You must apply the pactch TCL-REQUIRED-PATCHES/format.patch
+to the Tcl core or your will get memory corruption in bsearch.test,
+
 The Win32 port of TclX is a work in progress, and is not yet complete.
 Several features that should work under Windows are not yet ported.
 Many of the tests have not yet been converted to work under Windows,
@@ -16,10 +19,7 @@ To send mail to the list, user tclx-win@grizzly.com.
 
 To build the release:
 
-   o You need Borland C++ 5.01 or above
-
-   o It used to run with Visual C++ 4.0 and probably will again with some
-     tweaking.
+   o You need Borland C++ 5.01 or above or Visual C++ 4.0 or above.
      
    o Tcl 8.0 and Tk 8.0 should be in a directory adjacent to the tclX8.0.0
      directory or the paths in common.bc/common.vc need to be changed.
