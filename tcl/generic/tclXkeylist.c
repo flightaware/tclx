@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.13 1997/11/12 06:47:48 markd Exp $
+ * $Id: tclXkeylist.c,v 8.14 1997/12/14 18:25:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -220,7 +220,7 @@ ValidateKey (interp, key, keyLen, isPath)
 {
     char *keyp;
 
-    if (strlen (key) != keyLen) {
+    if (strlen (key) != (size_t) keyLen) {
         Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
                                 "keyed list key may not be a ",
                                 "binary string", (char *) NULL);

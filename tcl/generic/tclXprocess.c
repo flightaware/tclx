@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 8.7 1997/06/30 17:21:41 markd Exp $
+ * $Id: tclXprocess.c,v 8.8 1997/07/04 20:23:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -237,7 +237,7 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
             pid = 0;
     }
 
-    returnedPid = TCLX_WAITPID (pid, (int *) (&status), options);
+    returnedPid = (pid_t) TCLX_WAITPID (pid, (int *) (&status), options);
 
     if (returnedPid < 0) {
         TclX_AppendObjResult (interp, "wait for process failed: ",

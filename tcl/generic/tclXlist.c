@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.10 1997/08/08 09:58:36 markd Exp $
+ * $Id: tclXlist.c,v 8.11 1997/10/22 08:07:45 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -453,7 +453,7 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
         return TCL_ERROR;
 
     patternStr = Tcl_GetStringFromObj (objv [objc - 1], &patternLen);
-    if ((mode != EXACT) && (strlen (patternStr) != patternLen)) {
+    if ((mode != EXACT) && (strlen (patternStr) != (size_t) patternLen)) {
         goto binData;
     }
 
@@ -467,14 +467,14 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
             break;
 
           case GLOB:
-            if (strlen (valueStr) != valueLen) {
+            if (strlen (valueStr) != (size_t) valueLen) {
                 goto binData;
             }
             match = Tcl_StringMatch (valueStr, patternStr);
             break;
 
           case REGEXP:
-            if (strlen (valueStr) != valueLen) {
+            if (strlen (valueStr) != (size_t) valueLen) {
                 goto binData;
             }
             match = Tcl_RegExpMatch (interp, valueStr, patternStr);

@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 8.1 1997/04/17 05:00:29 markd Exp $
+# $Id: instcopy.tcl,v 8.2 1997/08/23 18:56:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
@@ -96,7 +96,7 @@ while {[string match -* [lindex $argv 0]]} {
             set binary 1
         }
         default {
-            puts stderr "unknown flag
+            puts stderr "unknown flag"
         }
     }
 }

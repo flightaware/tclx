@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 8.4 1997/07/08 05:15:30 markd Exp $
+# $Id: buildutil.tcl,v 8.5 1997/08/23 18:56:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -121,8 +121,8 @@ proc CopyDir {sourceDir destDir} {
     
     # Dirs must be absolutes paths, as we are going to change directories.
 
-    set sourceDir [MakeAbs [glob $sourceDir]]
-    set destDir [MakeAbs [glob $destDir]]
+    set sourceDir [MakeAbs $sourceDir]
+    set destDir [MakeAbs $destDir]
 
     file mkdir $destDir
     if ![file isdirectory $destDir] {

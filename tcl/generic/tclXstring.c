@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.13 1997/08/16 16:25:35 markd Exp $
+ * $Id: tclXstring.c,v 8.14 1997/11/22 00:09:31 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -288,7 +288,8 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     
     string1 = Tcl_GetStringFromObj (objv [argIndex], &string1Len);
     string2 = Tcl_GetStringFromObj (objv [argIndex + 1], &string2Len);
-    if ((strlen (string1) != string1Len) || (strlen (string1) != string1Len)) {
+    if ((strlen (string1) != (size_t) string1Len) ||
+	(strlen (string1) != (size_t) string1Len)) {
         TclX_AppendObjResult (interp, "The " ,
                               Tcl_GetStringFromObj (objv [0], NULL),
                               " command does not support binary data",
@@ -388,8 +389,8 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
 
     tokenString = Tcl_GetStringFromObj (objv [2], &tokenStrLen);
 
-    if ((strlen (varValue) != varValueLen) ||
-        (strlen (tokenString) != tokenStrLen)) {
+    if ((strlen (varValue) != (size_t) varValueLen) ||
+        (strlen (tokenString) != (size_t) tokenStrLen)) {
         TclX_AppendObjResult (interp, "The ",
                               Tcl_GetStringFromObj (objv [0], NULL),
                               " command does not support binary data",
@@ -564,7 +565,7 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     for (s = (unsigned char *) transString, stringIndex = 0; 
          stringIndex < transStringLen; stringIndex++) {
         if (map [*s] >= 0) {
-            *s = map [*s];
+            *s = (unsigned char) map [*s];
             s++;
         }
     }
@@ -659,7 +660,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
             return TCL_ERROR;
         }
 
-        myChar = number;
+        myChar = (char) number;
         Tcl_SetStringObj (Tcl_GetObjResult (interp),
                           &myChar, 1);
         return TCL_OK;

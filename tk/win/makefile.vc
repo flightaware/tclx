@@ -19,7 +19,7 @@
 !include "..\..\win\common.vc"
 
 TKX_INCLUDES = \
-	-I$(TOOLS32)\include -I$(TK_XLIB_DIR)\
+	-I"$(TOOLS32)\include" -I$(TK_XLIB_DIR)\
 	-I$(TKX_WIN_DIR) -I$(TKX_GENERIC_DIR) \
         -I$(TCLX_WIN_DIR) -I$(TCLX_GENERIC_DIR) \
         -I$(TK_GENERIC_DIR) -I$(TK_WIN_DIR) \
@@ -129,11 +129,11 @@ runtest.tcl: makefile.vc
 # Installation.
 
 install:
-        $(INSTCOPY) $(WISHX) $(TKX_INST_BIN)
-        $(INSTCOPY) $(TKX_DLL) $(TCLX_INST_BIN)
-        $(INSTCOPY) $(TKX_LIB) $(TKX_INST_LIB)
-        $(INSTCOPY) tkx.tcl $(TKX_INST_RUNTIME)
-        $(INSTCOPY) ..\help $(TKX_INST_RUNTIME)
+        $(INSTCOPY) $(WISHX) "$(TKX_INST_BIN)"
+        $(INSTCOPY) $(TKX_DLL) "$(TCLX_INST_BIN)"
+        $(INSTCOPY) $(TKX_LIB) "$(TKX_INST_LIB)"
+        $(INSTCOPY) tkx.tcl "$(TKX_INST_RUNTIME)"
+        $(INSTCOPY) ..\help "$(TKX_INST_RUNTIME)\help"
 
 #------------------------------------------------------------------------------
 clean:
@@ -154,8 +154,8 @@ clean:
 #
 $(TMP_DIR)\tkXinit.obj: $(TKX_GENERIC_DIR)\tkXinit.c
         $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TKX_INCLUDES) \
-            $(TKX_DEFINES) -DTKX_LIBRARY=\"$(TKX_INST_RUNTIMEU)\"\
-            -Fo$(TMP_DIR)\ $(TKX_GENERIC_DIR)\tkXinit.c
+            $(TKX_DEFINES) -DTKX_LIBRARY="\"$(TKX_INST_RUNTIMEU)\"" \
+            -Fo$(TMP_DIR)\ $?
 
 $(TMP_DIR)\tkConsole.obj: $(TK_GENERIC_DIR)\tkConsole.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TKX_INCLUDES) \

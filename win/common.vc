@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 8.3 1997/08/30 22:30:23 markd Exp $
+# $Id: common.vc,v 8.4 1997/10/01 02:35:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -32,8 +32,8 @@ PREFIXU=C:/tcl
 #
 # TclX and TkX versions.
 #
-TCLX_VERSION = 8.0.0
-TKX_VERSION  = 8.0.0
+TCLX_VERSION = 8.0.2
+TKX_VERSION  = 8.0.2
 
 #
 # Project directories
@@ -44,11 +44,13 @@ TKX_VERSION  = 8.0.0
 # o TOOLS32 - Location of VC++ 32-bit development tools. Note that the
 #   VC++ 2.0 header files are broken, so you need to use the ones that
 #   come with the developer network CD's, or later versions of VC++.
+# o IDE32 - With VC++ 5.0 the resource compiler is in a separate directory
 #
 
 ROOT     = ..\..
 TMP_DIR  = .
-TOOLS32  = c:\msdev
+TOOLS32	= c:\Program Files\DevStudio\Vc
+IDE32	= c:\Program Files\DevStudio\SharedIDE
 
 # Comment the following line to compile with symbols
 #NODEBUG=1
@@ -87,9 +89,9 @@ TK_SALIB         = $(TK_WIN_DIR)\tk80sa.dll
 TCLX_WIN_DIR      = $(ROOT)\tcl\win
 TCLX_GENERIC_DIR  = $(ROOT)\tcl\generic
 TCLX_RUNTIME_DIR  = $(ROOT)\tcl\runtime
-TCLX_LIB          = $(TCLX_WIN_DIR)\tclx800.lib
-TCLX_DLL          = $(TCLX_WIN_DIR)\tclx800.dll
-TCLX_SALIB        = $(TCLX_WIN_DIR)\tclx800s.lib
+TCLX_LIB          = $(TCLX_WIN_DIR)\tclx802.lib
+TCLX_DLL          = $(TCLX_WIN_DIR)\tclx802.dll
+TCLX_SALIB        = $(TCLX_WIN_DIR)\tclx802s.lib
 TCLX_INST_BIN     = $(PREFIX)\bin
 TCLX_INST_INCL    = $(PREFIX)\include
 TCLX_INST_LIB     = $(PREFIX)\lib
@@ -103,9 +105,9 @@ TCLX_INST_RUNTIMEU= $(TCLX_INST_LIBU)/tclX$(TCLX_VERSION)
 TKX_WIN_DIR      = $(ROOT)\tk\win
 TKX_GENERIC_DIR  = $(ROOT)\tk\generic
 TKX_RUNTIME_DIR  = $(ROOT)\tk\runtime
-TKX_LIB          = $(TKX_WIN_DIR)\tkx800.lib
-TKX_DLL          = $(TKX_WIN_DIR)\tkx800.dll
-TKX_SALIB        = $(TKX_WIN_DIR)\tkx800sa.dll
+TKX_LIB          = $(TKX_WIN_DIR)\tkx802.lib
+TKX_DLL          = $(TKX_WIN_DIR)\tkx802.dll
+TKX_SALIB        = $(TKX_WIN_DIR)\tkx802sa.dll
 TKX_INST_BIN     = $(PREFIX)\bin
 TKX_INST_INCL    = $(PREFIX)\include
 TKX_INST_LIB     = $(PREFIX)\lib
@@ -123,8 +125,8 @@ INSTCOPY = $(RUNTCL) $(TCLX_WIN_DIR)\instcopy
 # Make sure the VC++ tools are at the head of the path
 PATH=$(TOOLS32)\bin;$(PATH)
 
-cc32 = $(TOOLS32)\bin\cl -I$(TOOLS32)\include
-rc32 = $(TOOLS32)\bin\rc
+cc32 = "$(TOOLS32)\bin\cl" -I"$(TOOLS32)\include"
+rc32 = "$(IDE32)\bin\rc"
 
 # On Win95, developer studio defines INCLUDE and LIB, but not nmake.
 # On NT you don't need these (same VC++ release!).
