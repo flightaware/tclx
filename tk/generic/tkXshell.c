@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 3.1 1993/11/19 08:21:29 markd Exp markd $
+ * $Id: tkXshell.c,v 3.2 1993/12/02 03:56:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -285,7 +285,11 @@ TkX_Wish (argc, argv)
      * to do additional cleanup.
      */
 
-    Tcl_GlobalEval(interp, exitCmd);
+    if (!tclDeleteInterpAtEnd) {
+        Tcl_GlobalEval(interp, exitCmd);
+    } else {
+        Tcl_DeleteInterp (interp);
+    }
     exit(1);
 
 error:
@@ -294,7 +298,12 @@ error:
 	msg = interp->result;
     }
     fprintf(stderr, "%s\n", msg);
-    Tcl_GlobalEval(interp, errorExitCmd);
+
+    if (!tclDeleteInterpAtEnd) {
+        Tcl_GlobalEval(interp, errorExitCmd);
+    } else {
+        Tcl_DeleteInterp (interp);
+    }
     exit (1);
 }
 

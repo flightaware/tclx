@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 3.0 1993/11/19 06:59:21 markd Rel markd $
+ * $Id: tclExtend.h,v 3.1 1993/11/25 23:13:13 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -60,6 +60,14 @@ extern void (*tclErrorSignalProc) _ANSI_ARGS_((int signalNum));
  */
 extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
 
+
+/*
+ * If this variable is non-zero, the TclX shell will delete the interpreter
+ * at the end of a script instead of evaluating the "exit" command.  This is
+ * for applications that want to track down memory leaks.  This does not
+ * alter the behavior of explicit calls to exit.
+ */
+extern int tclDeleteInterpAtEnd;
 
 /*
  * Exported Tcl initialization functions.

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 3.0 1993/11/19 06:58:30 markd Rel markd $
+ * $Id: tclXshell.c,v 3.1 1993/12/02 03:56:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -263,23 +263,24 @@ TclX_Shell (argc, argv)
      * Useful for finding memory leaks.
      */
 
-#if defined(TCL_MEM_DEBUG) || defined(TCL_DELETE_INTERP)
-    Tcl_DeleteInterp(interp);
-
-#ifdef TCL_SHELL_MEM_LEAK
-    printf (" >>> Dumping active memory list to mem.lst <<<\n");
+#if defined(TCL_MEM_DEBUG)
+    Tcl_DeleteInterp (interp);
+    fprintf (stderr, " >>> Dumping active memory list to mem.lst <<<\n");
     if (Tcl_DumpActiveMemory ("mem.lst") != TCL_OK)
         panic ("error accessing `mem.lst': %s", strerror (errno));
-#endif
-    exit(0);
+    exit (0);
 #endif
 
     /*
-     * If no memory debugging, exit though the exit command to clean up.
+     * Exit though the exit command to clean up, unless the interpreter is
+     * to be deleted.
      */
-    Tcl_GlobalEval (interp, exitCmd);
-
-    exit (0);  /* Just in case */
+    if (!tclDeleteInterpAtEnd) {
+        Tcl_GlobalEval (interp, exitCmd);
+    } else {
+        Tcl_DeleteInterp (interp);
+    }
+    exit (0);
 
   errorExit:
     TclX_ErrorExit (interp, 255);

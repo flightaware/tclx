@@ -12,11 +12,19 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 1.4 1993/11/09 05:42:59 markd Exp markd $
+ * $Id: tclXinit.c,v 3.0 1993/11/19 06:59:35 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * If this variable is non-zero, the TclX shell will delete the interpreter
+ * at the end of a script instead of evaluating the "exit" command.  This is
+ * for applications that want to track down memory leaks.
+ */
+int tclDeleteInterpAtEnd = FALSE;
+
 
 /*
  * The following is used to force the version of tclCmdIL.c that was compiled
