@@ -2,4 +2,4 @@
 # 
 # Package index TkX  @TKX_VERSION@.
 #
-package ifneeded Tkx @TKX_VERSION@ {package require Tclx @TCLX_VERSION@; load @TKX_INST_LIB@/@TKX_SHLIB_NAME@}
+package ifneeded Tkx @TKX_VERSION@ {package require Tclx @TCLX_VERSION@; package require Tk @TK_VERSION@; load @TKX_INST_LIB@/@TKX_SHLIB_NAME@}
