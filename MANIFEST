@@ -41,7 +41,6 @@
 ./tcl/generic/tclXoscmds.c
 ./tcl/generic/tclXprocess.c
 ./tcl/generic/tclXprofile.c
-./tcl/generic/tclXregexp.c
 ./tcl/generic/tclXselect.c
 ./tcl/generic/tclXshell.c
 ./tcl/generic/tclXsignal.c

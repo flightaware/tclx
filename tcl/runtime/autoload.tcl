@@ -3,7 +3,7 @@
 # command load TclX .tndx library indices. 
 #
 # $Id$
-# from Tcl: init.tcl,v 1.22 1998/11/12 05:54:02 welch Exp 
+# from Tcl: init.tcl,v 1.1.2.4 1998/12/02 20:08:05 welch Exp
 #
 
 # init.tcl --
@@ -81,4 +81,3 @@ proc auto_load_index {} {
     }
     return 1
 }
-

@@ -21,11 +21,6 @@
 #include "tclRegexp.h"
 
 /*
- * FIX: Does not support binary data.  Can't fix until the regexp facility
- * handles it.
- */
-
-/*
  * A scan context describes a collection of match patterns and commands,
  * along with a match default command to apply to a file on a scan.
  */

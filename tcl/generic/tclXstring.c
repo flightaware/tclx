@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.18 1998/02/28 02:33:12 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -24,6 +24,12 @@
 /*
  * Prototypes of internal functions.
  */
+static int
+CheckForUniCode _ANSI_ARGS_((Tcl_Interp *interp,
+                             char *str,
+                             int strLen,
+                             char *which));
+
 static unsigned int
 ExpandString _ANSI_ARGS_((unsigned char *inStr,
                           int            inLength,
@@ -452,6 +458,34 @@ TclX_CequalObjCmd (dummy, interp, objc, objv)
                         (memcmp (string1Ptr, string2Ptr, string1Len) == 0)));
     return TCL_OK;
 }
+
+/*-----------------------------------------------------------------------------
+ * Check for non-ascii characters in a translit string until we actually
+ * make it work for UniCode.
+ *-----------------------------------------------------------------------------
+ */
+static int CheckForUniCode(interp, str, strLen, which)
+    Tcl_Interp  *interp;
+    char *str;
+    int strLen;
+    char *which;
+{
+    int idx, nbytes;
+    Tcl_UniChar uc;
+
+    for (idx = 0; idx < strLen; idx++) {
+        nbytes = Tcl_UtfToUniChar(&str[idx], &uc);
+        if (nbytes != 1) {
+            Tcl_AppendResult(interp, "Unicode character found in ", which,
+                             ", the translit command does not yet support Unicode",
+                             (char*)NULL);
+            return TCL_ERROR;
+        }
+    }
+    return TCL_OK;
+}
+
+
 
 /*-----------------------------------------------------------------------------
  * ExpandString --
@@ -465,7 +499,7 @@ TclX_CequalObjCmd (dummy, interp, objc, objv)
 #define MAX_EXPANSION 255
 
 static unsigned int
-ExpandString (inStr, inLength, outStr, outLengthPtr)
+ExpandString(inStr, inLength, outStr, outLengthPtr)
     unsigned char *inStr;
     int            inLength;
     unsigned char  outStr [];
@@ -497,6 +531,7 @@ ExpandString (inStr, inLength, outStr, outLengthPtr)
  *
  * Results:
  *  Standard Tcl results.
+ * FIXME:  Does not currently support non-ascii characters.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -504,7 +539,7 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    *CONST objv[];
+    Tcl_Obj     *CONST objv[];
 {
     unsigned char from [MAX_EXPANSION+1];
     int           fromLen;
@@ -531,6 +566,10 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
      * Expand ranges into descrete values.
      */
     fromString = Tcl_GetStringFromObj (objv[1], &fromStringLen);
+    if (CheckForUniCode(interp, fromString, fromStringLen,
+                        "in-range") != TCL_OK) {
+        return TCL_ERROR;
+    }
     if (!ExpandString ((unsigned char *) fromString, fromStringLen,
                        from, &fromLen)) {
         TclX_AppendObjResult (interp, "inrange expansion too long",
@@ -539,6 +578,10 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     }
 
     toString = Tcl_GetStringFromObj (objv [2], &toStringLen);
+    if (CheckForUniCode(interp, toString, toStringLen,
+                        "out-range") != TCL_OK) {
+        return TCL_ERROR;
+    }
     if (!ExpandString ((unsigned char *) toString, toStringLen,
                        to, &toLen)) {
         TclX_AppendObjResult (interp, "outrange expansion too long",
@@ -569,6 +612,12 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
      * Get a string object to transform.
      */
     transString = Tcl_GetStringFromObj (objv[3], &transStringLen);
+    if (CheckForUniCode(interp, transString, transStringLen,
+                        "string to translate") != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+
     transStringObj = Tcl_NewStringObj (transString, transStringLen);
     transString = Tcl_GetStringFromObj (transStringObj, &transStringLen);
 
@@ -610,14 +659,14 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
 {
     int failIndex = FALSE;
     char *optStr, *class, *scanPtr;
-    int scanStrLen, cnt, idx, numBytes;
+    int scanStrLen, cnt, idx;
     char *failVar = NULL;
     Tcl_Obj *classObj, *stringObj;
-    unsigned long number;
+    int number;
     char charBuf[TCL_UTF_MAX];
 
     if (TCL_UTF_MAX > sizeof(number)) {
-        panic("TclX_CtypeObjCmd: UTF character longer than a long");
+        panic("TclX_CtypeObjCmd: UTF character longer than a int");
     }
 
     /*FIX:  UTF-safe not finished. */
@@ -654,51 +703,28 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     class = Tcl_GetStringFromObj (classObj, NULL);
 
     /*
-     * Handle conversion requests.  Works on UTF-8, not unicode.
+     * Handle conversion requests.
      */
     if (STREQU (class, "char")) {
-        static int maxCharValue = TCL_UTF_MAX * 255;
-
-        if (failIndex) 
+        if (failIndex) {
           goto failInvalid;
-        if (Tcl_GetLongFromObj (interp, stringObj, &number) != TCL_OK)
-            return TCL_ERROR;
-        if ((number < 0) || (number > maxCharValue)) {
-            char numBuf[32];
-            sprintf(numBuf, "%d", maxCharValue);
-            TclX_AppendObjResult (interp, "number must be in the range 0..",  
-                                  numBuf, (char *) NULL);
+        }
+        if (Tcl_GetIntFromObj(interp, stringObj, &number) != TCL_OK) {
             return TCL_ERROR;
         }
-
-        /*
-         * Shift off bytes into the string until the number is zero.
-         * Allow for a zero.
-         */
-        idx = TCL_UTF_MAX;
-        cnt = 0;
-        do {
-            charBuf[--idx] = number & 0xFF;
-            number = (number >> 8);
-            cnt++;
-        } while ((number != 0) && (idx > 0));
-        if (cnt == 0) {
-            cnt = 1;
-        }
-        Tcl_SetStringObj (Tcl_GetObjResult (interp), &charBuf[idx], cnt);
+        cnt = Tcl_UniCharToUtf(number, charBuf);
+        charBuf[cnt] = '\0';
+        Tcl_SetStringObj(Tcl_GetObjResult(interp), charBuf, cnt);
         return TCL_OK;
     }
 
     if (STREQU (class, "ord")) {
         Tcl_UniChar uniChar;
-        if (failIndex) 
+        if (failIndex) {
           goto failInvalid;
-        number = 0;
-        numBytes = Tcl_UtfToUniChar(scanPtr, &uniChar);
-        for (cnt = 0; cnt < numBytes; cnt++) {
-            number = (number << 8) | ((unsigned char*) scanPtr)[cnt];
         }
-        Tcl_SetIntObj (Tcl_GetObjResult (interp), (long) number);
+        Tcl_UtfToUniChar(scanPtr, &uniChar);
+        Tcl_SetIntObj(Tcl_GetObjResult(interp), (int)uniChar);
         return TCL_OK;
     }
 

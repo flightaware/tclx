@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.13 1998/02/02 22:33:00 markd Exp $
+.\" $Id$
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2168,7 +2168,7 @@ occasionally useful to have a command that returns a string.
 The is generally useful when a command to evaluate is required.
 No separators are inserted between the strings.
 .sp
-This command if UTF-aware.
+This command is UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2184,7 +2184,7 @@ and \fB0\fR if they are not.
 This command is a short-cut for \fBstring compare\fR and avoids the
 problems with string expressions being treated unintentionally as numbers.
 .sp
-This command if UTF-aware and will also work on binary data.
+This command is UTF-aware and will also work on binary data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2202,7 +2202,7 @@ If the expression \fIindexExpr\fR starts with the string \fBend\fR, then
 the expression starts with \fBlen\fR, then \fBlen\fR is replaced with the
 length of the string.
 .sp
-This command if UTF-aware.
+This command is UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2220,7 +2220,7 @@ This command is a shortcut for:
 .ft R
 .fi
 .sp
-This command if UTF-aware.
+This command is UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2239,7 +2239,7 @@ If the expression \fIfirstExpr\fR or \fBlastExpr\fR starts with the string
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
 .sp
-This command if UTF-aware.
+This command is UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2258,7 +2258,7 @@ If the expression \fIfirstExpr\fR or \fBlengthExpr\fR starts with the string
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
 .sp
-This command if UTF-aware.
+This command is UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2310,8 +2310,7 @@ than 0200).
 .TP
 .B ctype char \fInumber\fR
 Converts the numeric value, \fIstring\fR, to an ASCII character.  Number must
-be in the range 0 through the maximum UTF-8 values.  If the number is 128, it is
-converted as a UTF-8 encoding value, not a Unicode character value.
+be in the range 0 through the maximum Unicode values.
 .TP
 .B ctype \fI?\-failindex var? cntrl \fIstring\fR
 Tests that all characters are ``control characters'' as defined by the
@@ -2330,8 +2329,7 @@ set.
 .TP
 .B ctype ord \fIcharacter\fR
 Convert a character into its decimal numeric value.  The first character of
-the string is converted.  If the character is a UTF-8 encoding, the numeric
-value of the UTF-8 multi-byte character is returned, not the Unicode character. 
+the string is converted to its numeric Unicode value.
 .TP
 .B ctype \fI?\-failindex var? space \fIstring\fR
 Tests that all characters are either a space, horizontal-tab, carriage
@@ -2370,7 +2368,7 @@ first character that did not match the class is returned in \fIvar\fR.
 Returns \fIstring\fR, replicated the number of times indicated by the
 expression \fIcountExpr\fR.
 .sp
-This command if UTF-aware and will work with binary data.
+This command is UTF-aware and will work with binary data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2392,6 +2390,9 @@ For example:
 .ft R
 .if
 returns "FOOBAR".
+.sp
+This command currently only supports characters in ASCII range; UTF-8 characters
+out of this range will generate an error.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

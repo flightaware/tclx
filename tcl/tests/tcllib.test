@@ -13,13 +13,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 8.7 1997/11/11 05:33:20 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
+echo CMDTRACE ON:;cmdtrace on [open cmd.log w ]
 eval $SAVED_UNKNOWN
+
+auto_load auto_reset  ;# Make sure we have this before changing path.
 
 global save_auto_path auto_path
 set save_auto_path $auto_path
@@ -106,6 +109,7 @@ Test tcllib-2.1 {bogus path test} {
     set auto_path [list /bogus/dir/path/no/work $tclx_library]
     TclLibAAA
 } 1 {invalid command name "TclLibAAA"}
+echo CMDTRACE OFF:;cmdtrace off
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.21 1997/12/14 20:25:57 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
@@ -52,7 +52,7 @@ GENERIC_OBJS = \
     tclXfilescan.o   tclXflock.o      tclXfstat.o      tclXgeneral.o  \
     tclXhandles.o    tclXunixId.o     tclXinit.o       tclXkeylist.o  \
     tclXlib.o        tclXlist.o       tclXmath.o       tclXmsgcat.o   \
-    tclXlibInit.o    tclXprocess.o    tclXprofile.o    tclXregexp.o   \
+    tclXlibInit.o    tclXprocess.o    tclXprofile.o   \
     tclXselect.o     tclXunixSock.o   tclXsignal.o     tclXshell.o    \
     tclXstring.o     tclXsocket.o     tclXunixCmds.o   tclXutil.o     \
     tclXunixOS.o     tclXoscmds.o     tclXunixDup.o    tclXlgets.o

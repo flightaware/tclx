@@ -12,15 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 8.8 1997/08/08 10:04:19 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * FIX: Does not support binary data.
- */
 
 /*
  * Control block used to pass data used by the binary search routines.

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 8.8 1998/02/01 08:52:10 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
@@ -248,11 +248,6 @@ Test string-6.2 {translit tests} {
     translit {A-MN-Za-mn-z} {N-ZA-Mn-za-m} $str2
 } 0 {Captain Midnight Secret Decoder Ring}
 
-Test string-6.3 {translit tests} {
-    set str "abc\0\1\2ABC"
-    set str2 [translit "\0-\2ABCabc" "XYZdef\0\0\0"  $str]
-} 0 "\0\0\0XYZdef"
-
 Test string-6.4 {translit tests} {
     translit
 } 1 {wrong # args: translit from to string}
@@ -265,6 +260,23 @@ Test string-6.5 {translit tests} {
     array get xxx
 } 0 {This-is-a-test value}
 catch {unset xxx}
+
+# Check for detection of unsupported UniCode
+Test string-6.6 {translit tests} {
+    set str "Captain Midnight Secret Decoder Ring"
+    translit "A-MN-Za-m\u1234-z" "N-ZA-Mn-za-m" $str
+} 1 {Unicode character found in in-range, the translit command does not yet support Unicode}
+
+Test string-6.7 {translit tests} {
+    set str "Captain Midnight Secret Decoder Ring"
+    translit "A-MN-Za-mn-z" "N-ZA-Mn-za-\u5134" $str
+} 1 {Unicode character found in out-range, the translit command does not yet support Unicode}
+
+Test string-6.8 {translit tests} {
+    set str "Captain Midnight Secret \u1543ecoder Ring"
+    translit "A-MN-Za-mn-z" "N-ZA-Mn-za-m" $str
+} 1 {Unicode character found in string to translate, the translit command does not yet support Unicode}
+
 
 # Test the ctoken command
 
