@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: filescan.test,v 4.0 1994/07/16 05:24:59 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -304,7 +304,54 @@ scanmatch -nocase $testCH {\Aa(x*)B(C*)Dd} {
 
 scanfile $testCH $testFH
 
+scancontext delete $testCH
 close $testFH
+
+#
+# Test optional match patterns.
+#
+set testFH [open TEST.TMP w]
+puts $testFH {ABCD : efgh 123435}
+puts $testFH {HIJK : efgh 123435}
+puts $testFH {ABCD : efgh X123435}
+puts $testFH {HIJK : efgh X123435}
+close $testFH
+
+set testCH [scancontext create]
+scanmatch $testCH {([H-Z]+)? : ([a-z]+) (X)?([0-9]+)} {
+    set thisLine {}
+    for {set idx 0} {$idx < 50} {incr idx} {
+        if {!([info exists matchInfo(submatch$idx)] ||
+              [info exists matchInfo(subindex$idx)])} continue
+
+        set this [list $idx]
+        lappend this [info exists matchInfo(submatch$idx)]
+        lappend this [info exists matchInfo(subindex$idx)]
+        if [info exists matchInfo(submatch$idx)] {
+            lappend this $matchInfo(submatch$idx)
+        } 
+        if [info exists matchInfo(subindex$idx)] {
+            lappend this $matchInfo(subindex$idx)
+        } 
+        lappend thisLine $this
+    }
+    lappend matches $thisLine
+    catch {unset this}
+    unset thisLine
+}
+
+set testFH [open TEST.TMP r]
+Test 6.1 {filescan tests} {
+    set matches {}
+    scanfile $testCH $testFH
+    set matches
+} 0  [list {{1 1 1 efgh {7 10}} {3 1 1 123435 {12 17}}} \
+        {{0 1 1 HIJK {0 3}} {1 1 1 efgh {7 10}} {3 1 1 123435 {12 17}}} \
+        {{1 1 1 efgh {7 10}} {2 1 1 X {12 12}} {3 1 1 123435 {13 18}}} \
+        {{0 1 1 HIJK {0 3}} {1 1 1 efgh {7 10}} {2 1 1 X {12 12}} {3 1 1 123435 {13 18}}}]
+
+close $testFH
+scancontext delete $testCH
 unlink {TEST.TMP TEST2.TMP TESTCHK.TMP}
 
 rename GenScanRec {}

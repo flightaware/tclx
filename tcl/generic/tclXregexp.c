@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 4.0 1994/07/16 05:27:42 markd Rel markd $
+ * $Id: tclXregexp.c,v 4.1 1994/11/25 19:00:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -480,8 +480,10 @@ TclX_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
          * If no regexp, its a match!
          */
         if (regExpPtr->progPtr == NULL) {
-            subMatchInfo [0].start = -1;
-            subMatchInfo [0].end = -1;
+            for (idx = 0; idx < NSUBEXP; idx++) {
+                subMatchInfo [idx].start = -1;
+                subMatchInfo [idx].end = -1;
+            }
             result = TRUE; 
             goto exitPoint;
         }
@@ -498,13 +500,18 @@ TclX_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
      */
     if (result) {
         for (idx = 1; idx < NSUBEXP; idx++) {
-            if (progPtr->startp [idx] == NULL)
-                break;
-            subMatchInfo [idx - 1].start = progPtr->startp [idx] - matchStr;
-            subMatchInfo [idx - 1].end = progPtr->endp [idx] - matchStr - 1;
+            if (progPtr->startp [idx] == NULL) {
+                subMatchInfo [idx - 1].start = -1;
+                subMatchInfo [idx - 1].end = -1;
+            } else {
+                subMatchInfo [idx - 1].start =
+                    progPtr->startp [idx] - matchStr;
+                subMatchInfo [idx - 1].end =
+                    progPtr->endp [idx] - matchStr - 1;
+            }
+            subMatchInfo [NSUBEXP-1].start = -1;
+            subMatchInfo [NSUBEXP-1].end = -1;
         }
-        subMatchInfo [idx - 1].start = -1;
-        subMatchInfo [idx - 1].end = -1;
     }
 
     /*

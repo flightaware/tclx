@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 4.1 1994/11/23 01:58:04 markd Exp markd $
+ * $Id: tclXfilescan.c,v 4.2 1994/11/25 19:00:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -385,7 +385,9 @@ SetSubMatchVar (interp, fileLine, subMatchInfo)
     int  idx, start, end;
     char key [32], buf [32], *varPtr, holdChar;
     
-    for (idx = 0; subMatchInfo [idx].start >= 0; idx++) {
+    for (idx = 0; idx < NSUBEXP; idx++) {
+        if (subMatchInfo [idx].start < 0)
+            continue;  /* Skip unmatched subexpressions */
         start = subMatchInfo [idx].start;
         end = subMatchInfo [idx].end;
 
