@@ -4,8 +4,8 @@
 # Test support routines.  Some of these are based on routines provided with
 # standard Tcl.
 #------------------------------------------------------------------------------
-# Set the global variable TEST_ERROR_INFO to display errorInfo when a test
-# fails.
+# Set the global variable or environment variable TEST_ERROR_INFO to display
+# errorInfo when a test fails.
 #------------------------------------------------------------------------------
 # Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
@@ -16,14 +16,18 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 4.0 1994/07/16 05:24:26 markd Rel markd $
+# $Id: testlib.tcl,v 4.1 1995/01/01 19:49:13 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 # Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
 # that variable.  Don't do this more than once.
 
-global SAVED_UNKNOWN TCL_PROGRAM env
+global SAVED_UNKNOWN TCL_PROGRAM env TEST_ERROR_INFO
+
+if [info exists env(TEST_ERROR_INFO)] {
+    set TEST_ERROR_INFO 1
+}
 
 #
 # Save path to Tcl program to exec, use it when running children in the
@@ -64,17 +68,17 @@ proc OutTestError {test_name test_description contents_of_test
     set int(3) TCL_BREAK
     set int(4) TCL_CONTINUE
 
-    puts stdout "==== $test_name $test_description"
-    puts stdout "==== Contents of test case:"
-    puts stdout "$contents_of_test"
-    puts stdout "==== Result was: $int($int_result)"
-    puts stdout "$result"
-    puts stdout "---- Result should have been: $int($passing_int_result)"
-    puts stdout "$passing_result"
-    puts stdout "---- $test_name FAILED" 
+    puts stderr "==== $test_name $test_description"
+    puts stderr "==== Contents of test case:"
+    puts stderr "$contents_of_test"
+    puts stderr "==== Result was: $int($int_result)"
+    puts stderr "$result"
+    puts stderr "---- Result should have been: $int($passing_int_result)"
+    puts stderr "$passing_result"
+    puts stderr "---- $test_name FAILED" 
     if {[info exists TEST_ERROR_INFO] && [info exists errorInfo]} {
-        puts stdout $errorInfo
-        puts stdout "---------------------------------------------------"
+        puts stderr $errorInfo
+        puts stderr "---------------------------------------------------"
     }
 }
 

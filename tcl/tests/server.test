@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.9 1995/04/25 05:48:12 markd Exp markd $
+# $Id: server.test,v 1.10 1995/04/30 03:22:33 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -180,8 +180,8 @@ proc TalkToEcho {testId readFH writeFH buffered} {
         if $buffered {
             flush $writeFH
         }
-        gets $readFH
-    } 0 {Test #1}
+        list [gets $readFH result] $result
+    } 0 {7 {Test #1}}
 
     # Queue serveral messages on buffered access
 
@@ -202,8 +202,8 @@ proc TalkToEcho {testId readFH writeFH buffered} {
 
     Test $testId.3 {simple client interaction} {
         server_send $writeFH "Test #8"
-        gets $readFH
-    } 0 {Test #8}
+        list [gets $readFH result] $result
+    } 0 {7 {Test #8}}
 
     Test $testId.4 {simple client interaction} {
         server_send $writeFH "Test #9"
@@ -217,7 +217,7 @@ proc TalkToEcho {testId readFH writeFH buffered} {
 
     # Make sure we can dup a socket.
 
-    Test $testId.6 {simple client interaction} {
+    Test $testId.6 {dup of a server connection} {
         set write2FH [dup $writeFH]
         if {"$readFH" != "$writeFH"} {
             set read2FH [dup $readFH]
@@ -225,40 +225,82 @@ proc TalkToEcho {testId readFH writeFH buffered} {
             set read2FH $write2FH
         }
         server_send $write2FH "Test #11"
-        set result [gets $read2FH]
+        set stat [gets $read2FH result]
 
         close $write2FH
         if ![cequal $readFH $writeFH] {
             close $read2FH
         }
-        set result
-    } 0 {Test #11}
+        list $stat $result
+    } 0 {8 {Test #11}}
 
-    # Try dup to stdin/stdout.
+    # Try dup to stdin/stdout.  Skip under Tk, as fork with out exec will
+    # not work.
 
-    flush stdout
-    flush stderr
-    if {[set pid [fork]] == 0} {
-        Test $testId.8 {simple client interaction} {
-            dup $readFH stdin
-            dup $writeFH stdout
-            close $writeFH
-            if ![cequal $readFH $writeFH] {
-                close $readFH
+    if [lempty [info commands button]] {
+        flush stdout
+        flush stderr
+        if {[set pid [fork]] == 0} {
+            catch {
+                Test $testId.8 {dup of a server connection} {
+                    dup $readFH stdin
+                    dup $writeFH stdout
+                    close $writeFH
+                    if ![cequal $readFH $writeFH] {
+                        close $readFH
+                    }
+                    puts stdout "Test #12"
+                    flush stdout
+                    list [gets stdin result] $result
+                } 0 {8 {Test #12}}
             }
-            puts stdout "Test #12"
-            flush stdout
-            gets stdin
-        } 0 {Test #12}
+            exit 0
+        }
+        wait $pid
     }
-    wait $pid
 
+    # Test some of the fcntl options against a socket.
 
+    Test $testId.9 {fcntl on a server connection} {
+        fcntl $readFH NOBUF
+    } 0 [expr !$buffered]
+
+    Test $testId.10 {fcntl on a server connection} {
+        fcntl $writeFH NOBUF
+    } 0 [expr !$buffered]
+
+    if $buffered {
+        Test $testId.11 {fcntl on a server connection} {
+            # This will hang and get alarm if buffered
+            alarm 120
+            fcntl $writeFH NOBUF 1
+            puts $writeFH "Test #13"
+            set stat [gets $readFH result]
+            alarm 0
+            list $stat $result
+        } 0 {8 {Test #13}}
+    }
+
+    Test $testId.12 {fcntl on a server connection} {
+        fcntl $writeFH READ
+    } 0 1
+
+    Test $testId.13 {fcntl on a server connection} {
+        fcntl $writeFH WRITE
+    } 0 1
+        
+    Test $testId.14 {fcntl on a server connection} {
+        fcntl $writeFH RDONLY
+    } 0 0
+        
+    Test $testId.15 {fcntl on a server connection} {
+        fcntl $writeFH WRONLY
+    } 0 0
+        
     close $readFH
     if ![cequal $readFH $writeFH] {
         close $writeFH
     }
-
     return
 }
 

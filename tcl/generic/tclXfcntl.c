@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 4.2 1995/04/24 06:38:31 markd Exp markd $
+ * $Id: tclXfcntl.c,v 4.3 1995/04/25 03:04:32 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,13 +38,31 @@
 #endif
 
 /*
- * Attributes used by fcntl command and the maximum length of any attribute
- * name.
+ * Attributes sets used by fcntl command.  Also a structure to return parsed
+ * attribute information in.
  */
-#define   ATTR_CLOEXEC  1
-#define   ATTR_NOBUF    2
-#define   ATTR_LINEBUF  4
-#define   MAX_ATTR_NAME_LEN  20
+#define ATTR_NONE     0  /* No attributes in this class */
+
+#define ATTR_RDONLY   1  /* Access checks desired.      */
+#define ATTR_WRONLY   2
+#define ATTR_READ     4
+#define ATTR_WRITE    8
+
+#define ATTR_CLOEXEC  1  /* Other attribute sets */
+#define ATTR_NOBUF    2
+#define ATTR_LINEBUF  4
+
+typedef struct {
+    int  access;
+    int  fcntl;
+    int  other;
+} fcntlAttr_t;
+
+/*
+ * The maximum length of any attribute name.
+ */
+#define MAX_ATTR_NAME_LEN  20
+
 
 /*
  * Determine the field names and defines used to determine if a file is line
@@ -91,25 +109,29 @@
  * Prototypes of internal functions.
  */
 static int
-XlateFcntlAttr  _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *attrName,
-                             int        *fcntlAttrPtr,
-                             int        *otherAttrPtr));
+XlateFcntlAttr  _ANSI_ARGS_((Tcl_Interp  *interp,
+                             char        *attrName,
+                             fcntlAttr_t *attrPtr));
 
 static int
 GetFcntlAttr _ANSI_ARGS_((Tcl_Interp *interp,
-                          FILE       *filePtr,
+                          OpenFile   *tclFilePtr,
                           char       *attrName));
 
 static int
+SetAttrOnFile _ANSI_ARGS_((Tcl_Interp *interp,
+                           FILE       *filePtr,
+                           fcntlAttr_t attrib,
+                           int         value));
+
+static int
 SetFcntlAttr _ANSI_ARGS_((Tcl_Interp *interp,
-                          FILE       *filePtr,
+                          OpenFile   *tclFilePtr,
                           char       *attrName,
                           char       *valueStr));
 
 /*
  *-----------------------------------------------------------------------------
- *
  * XlateFcntlAttr --
  *    Translate an fcntl attribute.
  *
@@ -117,26 +139,23 @@ SetFcntlAttr _ANSI_ARGS_((Tcl_Interp *interp,
  *   o interp (I) - Tcl interpreter.
  *   o attrName (I) - The attrbute name to translate, maybe upper or lower
  *     case.
- *   o fcntlAttrPtr (O) - If the attr specified is one of the standard
- *     fcntl attrs, it is returned here, otherwise zero is returned.
- *   o otherAttrPtr (O) - If the attr specified is one of the additional
- *     attrs supported by the Tcl command, it is returned here, otherwise
- *     zero is returned.
+ *   o attrPtr (O) - Structure containing the parsed attributes.  Only one of
+ *     the fields will be set, the others will be set to ATTR_NONE.
  * Result:
  *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
  *-----------------------------------------------------------------------------
  */
 static int
-XlateFcntlAttr (interp, attrName, fcntlAttrPtr, otherAttrPtr)
-    Tcl_Interp *interp;
-    char       *attrName;
-    int        *fcntlAttrPtr;
-    int        *otherAttrPtr;
+XlateFcntlAttr (interp, attrName, attrPtr)
+    Tcl_Interp  *interp;
+    char        *attrName;
+    fcntlAttr_t *attrPtr;
 {
     char attrNameUp [MAX_ATTR_NAME_LEN];
 
-    *fcntlAttrPtr = 0;
-    *otherAttrPtr = 0;
+    attrPtr->access = ATTR_NONE;
+    attrPtr->fcntl = ATTR_NONE;
+    attrPtr->other = ATTR_NONE;
 
     if (strlen (attrName) >= MAX_ATTR_NAME_LEN)
         goto invalidAttrName;
@@ -144,43 +163,43 @@ XlateFcntlAttr (interp, attrName, fcntlAttrPtr, otherAttrPtr)
     Tcl_UpShift (attrNameUp, attrName);
 
     if (STREQU (attrNameUp, "RDONLY")) {
-        *fcntlAttrPtr = O_RDONLY;
+        attrPtr->access = ATTR_RDONLY;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "WRONLY")) {
-        *fcntlAttrPtr = O_WRONLY;
+        attrPtr->access = ATTR_WRONLY;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "RDWR")) {
-        *fcntlAttrPtr = O_RDWR;
+        attrPtr->access = ATTR_READ | ATTR_WRITE;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "READ")) {
-        *fcntlAttrPtr = O_RDONLY | O_RDWR;
+        attrPtr->access = ATTR_READ;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "WRITE")) {
-        *fcntlAttrPtr = O_WRONLY | O_RDWR;
+        attrPtr->access = ATTR_WRITE;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "NONBLOCK")) {
-        *fcntlAttrPtr = O_NONBLOCK;
+        attrPtr->fcntl = O_NONBLOCK;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "APPEND")) {
-        *fcntlAttrPtr = O_APPEND;
+        attrPtr->fcntl = O_APPEND;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "CLOEXEC")) {
-        *otherAttrPtr = ATTR_CLOEXEC;
+        attrPtr->other = ATTR_CLOEXEC;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "NOBUF")) {
-        *otherAttrPtr = ATTR_NOBUF;
+        attrPtr->other = ATTR_NOBUF;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "LINEBUF")) {
-        *otherAttrPtr = ATTR_LINEBUF;
+        attrPtr->other = ATTR_LINEBUF;
         return TCL_OK;
     }
 
@@ -193,18 +212,16 @@ XlateFcntlAttr (interp, attrName, fcntlAttrPtr, otherAttrPtr)
                       "NONBLOCK, NOBUF, READ, RDONLY, RDWR, WRITE, WRONLY",
                       (char *) NULL);
     return TCL_ERROR;
-
 }
 
 /*
  *-----------------------------------------------------------------------------
- *
  * GetFcntlAttr --
  *    Return the value of a specified fcntl attribute.
  *
  * Parameters:
  *   o interp (I) - Tcl interpreter, value is returned in the result
- *   o filePtr (I) - Pointer to the file descriptor.
+ *   o tclFilePtr (I) - Pointer to the Tcl file descriptor.
  *   o attrName (I) - The attrbute name to translate, maybe upper or lower
  *     case.
  * Result:
@@ -212,26 +229,66 @@ XlateFcntlAttr (interp, attrName, fcntlAttrPtr, otherAttrPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-GetFcntlAttr (interp, filePtr, attrName)
+GetFcntlAttr (interp, tclFilePtr, attrName)
     Tcl_Interp *interp;
-    FILE       *filePtr;
+    OpenFile   *tclFilePtr;
     char       *attrName;
 {
-    int fcntlAttr, otherAttr, current;
+    fcntlAttr_t attrib;
+    int         current;
 
-    if (XlateFcntlAttr (interp, attrName, &fcntlAttr, &otherAttr) != TCL_OK)
+    if (XlateFcntlAttr (interp, attrName, &attrib) != TCL_OK)
         return TCL_ERROR;
 
-    if (fcntlAttr != 0) {
-        current = fcntl (fileno (filePtr), F_GETFL, 0);
-        if (current == -1)
-            goto unixError;
-        interp->result = (current & fcntlAttr) ? "1" : "0";
+    /*
+     * Special handling for read/write check on files that have more than one
+     * FILE struct associated with them.  They are always read/write.
+     */
+    if ((attrib.access != ATTR_NONE) && (tclFilePtr->f2 != NULL)) {
+        interp->result =
+            (attrib.access & (ATTR_READ | ATTR_WRITE)) ? "1" : "0";
         return TCL_OK;
     }
-    
-    if (otherAttr & ATTR_CLOEXEC) {
-        current = fcntl (fileno (filePtr), F_GETFD, 0);
+
+    /*
+     * Access check on single FILE files.  We access fcntl just to make sure.
+     */
+    if (attrib.access != ATTR_NONE) {
+        current = fcntl (fileno (tclFilePtr->f), F_GETFL, 0);
+        if (current == -1)
+            goto unixError;
+        switch (current & O_ACCMODE) {
+          case O_RDONLY:
+            interp->result = 
+                (attrib.access & (ATTR_RDONLY | ATTR_READ)) ? "1" : "0";
+            break;
+          case O_WRONLY:
+            interp->result = 
+                (attrib.access & (ATTR_WRONLY | ATTR_WRITE)) ? "1" : "0";
+            break;
+          case O_RDWR:
+            interp->result = 
+                (attrib.access & (ATTR_READ | ATTR_WRITE)) ? "1" : "0";
+            break;
+        }
+        return TCL_OK;
+    }
+
+    /*
+     * For fcntl attributes.  For dual FILE files, we assume the
+     * second file has the same attributes as the first.  This would be
+     * true if the attributes were set via this function.
+     */
+    if (attrib.fcntl != ATTR_NONE) {
+        current = fcntl (fileno (tclFilePtr->f), F_GETFL, 0);
+        if (current == -1)
+            goto unixError;
+        interp->result = (current & attrib.fcntl) ? "1" : "0";
+        return TCL_OK;
+    }
+
+    if (attrib.other == ATTR_CLOEXEC) {
+        current = fcntl (fileno (tclFilePtr->f), F_GETFD, 0);
         if (current == -1)
             goto unixError;
         interp->result = (current & 1) ? "1" : "0";
@@ -240,101 +297,75 @@ GetFcntlAttr (interp, filePtr, attrName)
 
     /*
      * Poke the stdio FILE structure to determine the buffering status.
+     * Also assume both files are the same.
      */
-    if (otherAttr & ATTR_NOBUF) {
-        interp->result = (filePtr->STDIO_FLAGS & STDIO_NBUF) ? "1" : "0";
+    if (attrib.other == ATTR_NOBUF) {
+        interp->result = (tclFilePtr->f->STDIO_FLAGS & STDIO_NBUF) ? "1" : "0";
         return TCL_OK;
     }
-    if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->STDIO_FLAGS & STDIO_LBUF) ? "1" : "0";
+    if (attrib.other == ATTR_LINEBUF) {
+        interp->result = (tclFilePtr->f->STDIO_FLAGS & STDIO_LBUF) ? "1" : "0";
         return TCL_OK;
     }
 
-unixError:
+  unixError:
     interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }
 
 /*
  *-----------------------------------------------------------------------------
- *
- * SetFcntlAttr --
- *    Set the specified fcntl attr to the given value.
+ * SetAttrOnFile --
+ *    Set the the attributes on a file.  This is called twice for dual FILE
+ * struct files.
  *
  * Parameters:
  *   o interp (I) - Tcl interpreter, value is returned in the result
  *   o filePtr (I) - Pointer to the file descriptor.
- *   o attrName (I) - The attrbute name to translate, maybe upper or lower
- *     case.
- *   o valueStr (I) - The string value to set the attribiute to.
- *
+ *   o attrib (I) - Structure describing attribute to set.
+ *   o value (I) - Boolean value to set the attributes to.
  * Result:
  *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
  *-----------------------------------------------------------------------------
  */
 static int
-SetFcntlAttr (interp, filePtr, attrName, valueStr)
+SetAttrOnFile (interp, filePtr, attrib, value)
     Tcl_Interp *interp;
     FILE       *filePtr;
-    char       *attrName;
-    char       *valueStr;
+    fcntlAttr_t attrib;
+    int         value;
 {
-
-    int fcntlAttr, otherAttr, current, setValue;
+    int current;
  
-    if (Tcl_GetBoolean (interp, valueStr, &setValue) != TCL_OK)
-        return TCL_ERROR;
+    if (attrib.fcntl != ATTR_NONE) {
+        current = fcntl (fileno (filePtr), F_GETFL, 0);
+        if (current == -1)
+            goto unixError;
+        current &= ~attrib.fcntl;
+        if (value)
+            current |= attrib.fcntl;
+        if (fcntl (fileno (filePtr), F_SETFL, current) == -1)
+            goto unixError;
 
-    if (XlateFcntlAttr (interp, attrName, &fcntlAttr, &otherAttr) != TCL_OK)
-        return TCL_ERROR;
-
-    /*
-     * Validate that this the attribute may be set (or cleared).
-     */
-
-    if (fcntlAttr & (O_RDONLY | O_WRONLY | O_RDWR)) {
-        Tcl_AppendResult (interp, "Attribute \"", attrName, "\" may not be ",
-                          "altered after open", (char *) NULL);
-        return TCL_ERROR;
+        return TCL_OK;
     }
 
-    if ((otherAttr & (ATTR_NOBUF | ATTR_LINEBUF)) && !setValue) {
-        Tcl_AppendResult (interp, "Attribute \"", attrName, "\" may not be ",
-                          "cleared once set", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    if (otherAttr == ATTR_CLOEXEC) {
-        if (fcntl (fileno (filePtr), F_SETFD, setValue) == -1)
+    if (attrib.other == ATTR_CLOEXEC) {
+        if (fcntl (fileno (filePtr), F_SETFD, value) == -1)
             goto unixError;
         return TCL_OK;
     }
 
-    if (otherAttr == ATTR_NOBUF) {
+    if (attrib.other == ATTR_NOBUF) {
         setbuf (filePtr, NULL);
         return TCL_OK;
     }
 
-    if (otherAttr == ATTR_LINEBUF) {
+    if (attrib.other == ATTR_LINEBUF) {
         if (SET_LINE_BUF (filePtr) != 0)
             goto unixError;
         return TCL_OK;
     }
-
-    /*
-     * Handle standard fcntl attrs.
-     */
-       
-    current = fcntl (fileno (filePtr), F_GETFL, 0);
-    if (current == -1)
-        goto unixError;
-    current &= ~fcntlAttr;
-    if (setValue)
-        current |= fcntlAttr;
-    if (fcntl (fileno (filePtr), F_SETFL, current) == -1)
-        goto unixError;
-
-    return TCL_OK;
 
   unixError:
     interp->result = Tcl_PosixError (interp);
@@ -344,7 +375,63 @@ SetFcntlAttr (interp, filePtr, attrName, valueStr)
 
 /*
  *-----------------------------------------------------------------------------
+ * SetFcntlAttr --
+ *    Set the specified fcntl attr to the given value.
  *
+ * Parameters:
+ *   o interp (I) - Tcl interpreter, value is returned in the result
+ *   o tclFilePtr (I) - Pointer to the tcl file descriptor.
+ *   o attrName (I) - The attrbute name to translate, maybe upper or lower
+ *     case.
+ *   o valueStr (I) - The string value to set the attribiute to.
+ * Result:
+ *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
+ *-----------------------------------------------------------------------------
+ */
+static int
+SetFcntlAttr (interp, tclFilePtr, attrName, valueStr)
+    Tcl_Interp *interp;
+    OpenFile   *tclFilePtr;
+    char       *attrName;
+    char       *valueStr;
+{
+    fcntlAttr_t attrib;
+    int         value;
+
+    if (XlateFcntlAttr (interp, attrName, &attrib) != TCL_OK)
+        return TCL_ERROR;
+
+    if (Tcl_GetBoolean (interp, valueStr, &value) != TCL_OK)
+        return TCL_ERROR;
+
+    /*
+     * Validate that this the attribute may be set (or cleared).
+     */
+
+    if (attrib.access != ATTR_NONE) {
+        Tcl_AppendResult (interp, "Attribute \"", attrName, "\" may not be ",
+                          "altered after open", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if ((attrib.other & (ATTR_NOBUF | ATTR_LINEBUF)) && !value) {
+        Tcl_AppendResult (interp, "Attribute \"", attrName, "\" may not be ",
+                          "cleared once set", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (SetAttrOnFile (interp, tclFilePtr->f, attrib, value) == TCL_ERROR)
+        return TCL_ERROR;
+
+    if (tclFilePtr->f2 != NULL) {
+        if (SetAttrOnFile (interp, tclFilePtr->f2, attrib, value) == TCL_ERROR)
+            return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
  * Tcl_FcntlCmd --
  *     Implements the fcntl TCL command:
  *         fcntl handle attribute ?value?
@@ -357,7 +444,8 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    FILE  *filePtr;
+    OpenFile *tclFilePtr;
+    FILE     *filePtr;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -369,11 +457,17 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
                          FALSE, FALSE,   /* No access checking */
                          &filePtr) != TCL_OK)
 	return TCL_ERROR;
+    tclFilePtr = tclOpenFiles [fileno (filePtr)];
+
+    /*
+     * Get or set attributes.  These functions handle more than
+     * one FILE struct in a single Tcl file.
+     */
     if (argc == 3) {    
-        if (GetFcntlAttr (interp, filePtr, argv [2]) != TCL_OK)
+        if (GetFcntlAttr (interp, tclFilePtr, argv [2]) != TCL_OK)
             return TCL_ERROR;
     } else {
-        if (SetFcntlAttr (interp, filePtr, argv [2], argv [3]) != TCL_OK)
+        if (SetFcntlAttr (interp, tclFilePtr, argv [2], argv [3]) != TCL_OK)
             return TCL_ERROR;
     }
     return TCL_OK;

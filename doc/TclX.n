@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.14 1995/03/31 06:20:29 markd Exp markd $
+.\" $Id: TclX.n,v 4.15 1995/04/17 01:24:02 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1188,11 +1188,8 @@ same file as \fIfileId\fR.
 If \fItargetFileId\fR is specified, the the file is dup to this specified file
 id.  Normally this is \fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.
 The dup command will handle flushing output and closing this file.
-The target file should be open if its one of
-\fBstdin\fR, \fBstdout\fR, or \fBstderr\fR and the process is not going to
-do an \fBexecl\fR.    Otherwise internal C code that
-uses one of these files via direct access to stdio FILE struct may behave
-strangely or fail.
+The new file will be buffered, if its needs to be unbuffered, use the
+\fBfcntl\fR command to set it unbuffered.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
