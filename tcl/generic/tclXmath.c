@@ -12,16 +12,17 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXmath.c,v 3.4 1994/07/02 06:12:23 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
- * Define return of random function unless stdlib does it.
+ * Define return of random function unless stdlib does it.  If we are using
+ * out own version, make sure to define it.
  */
-#ifndef STDLIB_DEFS_RANDOM
+#if defined(NO_RANDOM) || !defined(STDLIB_DEFS_RANDOM)
 long random ();
 #endif
 

@@ -168,3 +168,7 @@
 
 /* Define if stdlib.h defines random */
 #undef STDLIB_DEFS_RANDOM
+
+/* Define if we must use our own version of random */
+#undef NO_RANDOM
+

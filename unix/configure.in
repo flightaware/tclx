@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 3.15 1994/06/30 06:14:31 markd Exp markd $
+dnl $Id: configure.in,v 3.16 1994/07/02 06:12:23 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 3.15 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 3.16 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -439,7 +439,7 @@ AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync getpriority)
 
 AC_SCO_INTL
 AC_FUNC_CHECK(strftime, ,[LIBOBJS="$LIBOBJS strftime.o"])
-AC_FUNC_CHECK(random, ,[LIBOBJS="$LIBOBJS random.o"])
+AC_FUNC_CHECK(random, ,[LIBOBJS="$LIBOBJS random.o"] AC_DEFINE(NO_RANDOM))
 AC_FUNC_CHECK(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
 
 # SGI IRIX 4.0.5 has a broken strftime.
@@ -455,7 +455,7 @@ AC_SUBST(LIBOBJS)
 # are returning int rather than long, since long is 64 bit.
 #------------------------------------------------------------------------------
 
-AC_HEADER_EGREP(stdlib.h, AC_DEFINE(STDLIB_DEFS_RANDOM))
+AC_HEADER_EGREP("random", stdlib.h, AC_DEFINE(STDLIB_DEFS_RANDOM))
 
 #------------------------------------------------------------------------------
 #       If Config.mk is not in the build directory, copy it local.
