@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.6 1995/05/24 15:19:50 markd Exp markd $
+# $Id: Makefile.in,v 1.7 1995/06/26 06:21:08 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -57,30 +57,30 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS= tkXtest.o tkSquare.o
+OBJS= tktest.o tkSquare.o
 
 #------------------------------------------------------------------------------
 # Compile the test proram.  It is generated from the Tk test program with 
 # a sed script.
 #
 
-all: tkXtest runtest
+all: tktest runtest
 
-tkXtest: tkXtest.o tkSquare.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A}
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXtest.o tkSquare.o ${LDLIBS} \
-	    ${XLDLIBS} -o tkXtest || (rm -f tkXtest; exit 1)
+tktest: tktest.o tkSquare.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A}
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tktest.o tkSquare.o ${LDLIBS} \
+	    ${XLDLIBS} -o tktest || (rm -f tktest; exit 1)
 
-tkXtest.o: tkXtest.c
+tktest.o: tktest.c
 
 tkSquare.o: tkSquare.c
 
-tkXtest.c: ${TK_UCB_SRC}/tkTest.c
-	rm -f tkXtest.c	
-	echo '#include "../src/tclXconf.h"' >tkXtest.c
+tktest.c: ${TK_UCB_SRC}/tkTest.c
+	rm -f tktest.c	
+	echo '#include "../src/tclXconf.h"' >tktest.c
 	sed -e 's/Tcl_Init(/TclX_Init(/' \
 	    -e 's/Tk_Init(/TkX_Init(/' \
 	    -e 's/Tk_Main(/TkX_Main(/' \
-	    -e '/tcl_RcFileName =/d' ${TK_UCB_SRC}/tkTest.c >>tkXtest.c
+	    -e '/tcl_RcFileName =/d' ${TK_UCB_SRC}/tkTest.c >>tktest.c
 
 tkSquare.c: ${TK_UCB_SRC}/tkSquare.c
 	rm -f tkSquare.c	
@@ -89,14 +89,14 @@ tkSquare.c: ${TK_UCB_SRC}/tkSquare.c
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
-# the local master directories so tkXtest can be run.
+# the local master directories so tktest can be run.
 
 runtest:
 	@echo ':'                                                   >runtest
 	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"                >>runtest
 	@echo "TK_LIBRARY=${bldbasedir}/tkmaster"                  >>runtest
 	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runtest
-	@echo "TESTWISH=${bldbasedir}/tktests/tkXtest"             >>runtest
+	@echo "TESTWISH=${bldbasedir}/tktests/tktest"              >>runtest
 	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"          >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
@@ -112,12 +112,10 @@ runtest:
 test: all
 	echo "cd ${TK_UCB_SRC}/tests; source all; exit" | ./runtest -n tktest
 
-tktest: test
-
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f ${OBJS} tkXtest.c tkSquare.c tkXtest runtest
+	-rm -f ${OBJS} tktest.c tkSquare.c tktest runtest
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
