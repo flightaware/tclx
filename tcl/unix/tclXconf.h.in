@@ -1,0 +1,157 @@
+/* src/tclXconfig.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define to the type of elements in the array set by `getgroups'.
+   Usually this is either `int' or `gid_t'.  */
+#undef GETGROUPS_T
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef gid_t
+
+/* Define if your struct tm has tm_zone.  */
+#undef HAVE_TM_ZONE
+
+/* Define if you don't have tm_zone but do have the external array
+   tzname.  */
+#undef HAVE_TZNAME
+
+/* Define if you have unistd.h.  */
+#undef HAVE_UNISTD_H
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef pid_t
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if your sys/time.h declares struct tm.  */
+#undef TM_IN_SYS_TIME
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef uid_t
+
+/* Define if you don't have sys/socket.h */
+#undef NO_SYS_SOCKET_H
+
+/* Define if you have and need sys/select.h */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if don't you have values.h */
+#undef NO_VALUES_H
+
+/* Define if your struct tm has tm_zone.  */
+#undef HAVE_TM_ZONE
+
+/* Define if you have the timezone variable.  */
+#undef HAVE_TIMEZONE_VAR
+
+/* Define if your struct tm has tm_tzadj.  */
+#undef HAVE_TM_TZADJ
+
+/* Define if your struct tm has tm_gmtoff.  */
+#undef HAVE_TM_GMTOFF
+
+/* Define if you don't have tm_zone but do have the external array
+   tzname.  */
+#undef HAVE_TZNAME
+
+/* Define if you have unistd.h.  */
+#undef HAVE_UNISTD_H
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define if your sys/time.h declares struct tm.  */
+#undef TM_IN_SYS_TIME
+
+/* Define to `int' if <sys/types.h> doesn't define.  */
+#undef uid_t
+#undef gid_t
+#undef pid_t
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define to the type of elements in the array set by `getgroups'.
+   Usually this is either `int' or `gid_t'.  */
+#undef GETGROUPS_T
+
+/* Define if you do not have dirent.h */
+#undef NO_DIRENT_H
+
+/* Define if you do not have readdir but you do have V7-style directories */
+#undef USE_DIRENT2_H
+
+/* Define if you do not have float.h */
+#undef NO_FLOAT_H
+
+/* Define if you do not have limits.h */
+#undef NO_LIMITS_H
+
+/* Define if you do not have stdlib.h */
+#undef NO_STDLIB_H
+
+/* Define if you do not have string.h */
+#undef NO_STRING_H
+
+/* Define if you do not have sys/time.h */
+#undef NO_SYS_TIME_H
+
+/* Define if you do not have sys/wait.h */
+#undef NO_SYS_WAIT_H
+
+/* Define if time.h can be included with sys/time.h */
+#undef TIME_WITH_SYS_TIME
+
+/* Define if wait does not return a union */
+#undef NO_UNION_WAIT
+
+/* Define if "times" returns the elasped real time */
+#undef TIMES_RETS_REAL_TIME
+
+/* Define if you have catgets.  */
+#undef HAVE_CATGETS
+
+/* Define if you have getcwd.  */
+#undef HAVE_GETCWD
+
+/* Define if you have select.  */
+#undef HAVE_SELECT
+
+/* Define if you have setitimer.  */
+#undef HAVE_SETITIMER
+
+/* Define if you have setlinebuf.  */
+#undef HAVE_SETLINEBUF
+
+/* Define if you have sigaction.  */
+#undef HAVE_SIGACTION
+
+/* Define if you have setpgid.  */
+#undef HAVE_SETPGID
+
+/* Define if you have bzero.  */
+#undef HAVE_BZERO
+
+/* Define if you have gettimeofday.  */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_SOCKET
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_NSL
+
+/* Define if you have the c_s library (-lc_s).  */
+#undef HAVE_C_S
+
+/* Define if you have the X11_s library (-lX11_s).  */
+#undef HAVE_X11_S
+
+/* Define if you have the X11 library (-lX11).  */
+#undef HAVE_X11
+
+/* Define if you have the Xwindow library (-lXwindow).  */
+#undef HAVE_XWINDOW
