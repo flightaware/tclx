@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.46 1993/11/07 18:39:51 markd Exp markd $
+.\" $Id: TclX.n,v 2.47 1993/11/08 04:46:07 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -139,10 +139,20 @@ the documentation for version \fB7.0a\fR.
 .B patchlevel
 Return the patchlevel for Extended Tcl.
 .TP
-.B posix_signals
+.B have_msgcats
+Return \fB1\fR if XPG message catalogs are available, \fB0\fR if they are
+not.  The \fBcatgets\fR is designed to continue to function without message
+catalogs, always returning the default string.
+.TP
+.B have_posix_signals
 Return \fB1\fR if Posix signals are available (\fBblock\fR and \fBunblock\fR
 options available for the signal command).  \fB0\fR is returned if Posix
 signals are not available.
+.TP
+.B have_sockets
+Return \fB1\fR if sockets are available (\fBserver_open\fR command and
+\fBfstat removehost\fR option).
+\fB0\fR is returned if sockets are not available.
 .TP
 .B appname
 Return the symbolic application name of the current application linked with
@@ -2090,8 +2100,8 @@ Tests that all characters are lowercase letters as defined by the character
 set.
 .TP
 .B ctype ord \fIcharacter\fR
-Convert a character into its decimal numeric value.  The string must be one
-character long.
+Convert a character into its decimal numeric value.  The first character of
+the string is converted.
 .TP
 .B ctype \fI?-failindex var? space \fIstring\fR
 Tests that all characters are either a space, horizontal-tab, carriage
