@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.10 1995/04/30 03:22:33 markd Exp markd $
+# $Id: server.test,v 1.11 1995/04/30 05:46:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -288,14 +288,6 @@ proc TalkToEcho {testId readFH writeFH buffered} {
     Test $testId.13 {fcntl on a server connection} {
         fcntl $writeFH WRITE
     } 0 1
-        
-    Test $testId.14 {fcntl on a server connection} {
-        fcntl $writeFH RDONLY
-    } 0 0
-        
-    Test $testId.15 {fcntl on a server connection} {
-        fcntl $writeFH WRONLY
-    } 0 0
         
     close $readFH
     if ![cequal $readFH $writeFH] {
