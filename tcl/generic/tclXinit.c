@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.1 1995/08/28 02:10:59 markd Exp markd $
+ * $Id: tclXinit.c,v 5.2 1995/09/05 07:55:47 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -272,20 +272,11 @@ TclX_EvalRCFile (interp)
     if (path == NULL)
         return;
 
-    /*
-     * Since we will be passing the file name into Tcl_EvalFile, we
-     * need to make sure it gets copied into the buffer.  Tcl_TildeSubst
-     * doesn't copy the string if it doesn't start with `~'.
-     */
     Tcl_DStringInit (&buffer);
 
-    if (path [0] == '~') {
-        path = Tcl_TildeSubst (interp, path, &buffer);
-        if (path == NULL)
-            TclX_ErrorExit (interp, 1);
-    } else {
-        Tcl_DStringAppend (&buffer, path, -1);
-    }
+    path = Tcl_TildeSubst (interp, path, &buffer);
+    if (path == NULL)
+        TclX_ErrorExit (interp, 1);
         
     if (access (path, R_OK) == 0) {
         if (TclX_Eval (interp,
