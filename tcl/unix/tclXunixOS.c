@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.5 1996/08/04 18:21:25 markd Exp $
+ * $Id: tclXunixOS.c,v 7.6 1996/08/06 07:15:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1374,4 +1374,42 @@ TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
 #else
     return TclXNotAvailableError (interp, funcName);
 #endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSGetSelectFnum --
+ *   Convert a channel its read and write file numbers for use in select.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get the numbers for.
+ *   o readFnumPtr - The read file number is returned here.  -1 is returned if
+ *     the file is not open for reading.
+ *   o writeFnumPtr - The write file number is returned here.  -1 is returned
+ *     if the file is not open for writing.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSGetSelectFnum (interp, channel, readFnumPtr, writeFnumPtr)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int        *readFnumPtr;
+    int        *writeFnumPtr;
+{
+    Tcl_File file;
+
+    file = Tcl_GetChannelFile (channel, TCL_READABLE);
+    if (file != NULL)
+        *readFnumPtr = (int) Tcl_GetFileInfo (file, NULL);
+    else
+        *readFnumPtr = -1;
+    file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+    if (file != NULL)
+        *readFnumPtr = (int) Tcl_GetFileInfo (file, NULL);
+    else
+        *readFnumPtr = -1;
+    return TCL_OK;
 }

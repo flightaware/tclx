@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.1 1996/08/03 01:25:22 markd Exp $
+.\" $Id: TclX.n,v 7.2 1996/08/03 01:50:28 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1435,8 +1435,7 @@ a timeout period to expire.
 of fileIds, as returned from \fBopen\fR, to query.  An empty list ({}) may
 be specified if a category is not used. 
 .sp
-The files 
-specified by
+The files specified by
 the \fIreadFileIds\fR list are checked to see if data is available for
 reading. The \fIwriteFileIds\fR are checked if the specified
 files are clear for writing.
@@ -1471,7 +1470,9 @@ or perhaps
 
         file3 {} {}
 .fi
-.sp
+.br
+On \fBWindows 95/NT\fR systems, only sockets can be used with the \fBselect\fR
+command.  Pipes, as returned by the \fBopen\fR command, are not supported.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

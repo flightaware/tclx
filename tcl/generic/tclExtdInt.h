@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.5 1996/08/04 07:29:56 markd Exp $
+ * $Id: tclExtdInt.h,v 7.6 1996/08/04 18:21:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -738,4 +738,10 @@ TclXOSFChangeOwnGrp _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *groupStr,
                                  char      **channelIds,
                                  char       *funcName));
+
+int
+TclXOSGetSelectFnum _ANSI_ARGS_((Tcl_Interp *interp,
+                                 Tcl_Channel channel,
+                                 int        *readFnumPtr,
+                                 int        *writeFnumPtr));
 #endif

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 7.1 1996/08/04 18:21:23 markd Exp $
+ * $Id: tclXfcntl.c,v 7.2 1996/08/06 07:15:27 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -55,9 +55,9 @@ struct {
     {"WRITE",     ATTR_WRITE,     FALSE},
     {"APPEND",    ATTR_APPEND,    TRUE},
     {"CLOEXEC",   ATTR_CLOEXEC,   TRUE},
-    {"NONBLOCK",  ATTR_NOBUF,     TRUE},
+    {"NONBLOCK",  ATTR_NONBLOCK,  TRUE},
     {"LINEBUF",   ATTR_LINEBUF,   TRUE},
-    {"NOBUF",     ATTR_NONBLOCK,  TRUE},
+    {"NOBUF",     ATTR_NOBUF,     TRUE},
     {"KEEPALIVE", ATTR_KEEPALIVE, TRUE},
     {NULL,        0,              FALSE}};
 

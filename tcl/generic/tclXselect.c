@@ -1,7 +1,13 @@
 /*
  * tclXselect.c
  *
- * Extended Tcl file I/O commands.
+ * Select command.  This is the generic code associated with the select system
+ * call.  It relies on the Unix style select, which operates on bit sets of
+ * file numbers.  Platform specific code is called to translate channels into
+ * file numbers, but all operations are generic.  On Win32, this only works
+ * on sockets.  Ideally, it would push more code into the platform specific
+ * modules and work on more file types.  However, right now, I don't see a
+ * good way to do this on Win32.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -12,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 7.2 1996/07/22 17:10:10 markd Exp $
+ * $Id: tclXselect.c,v 7.3 1996/07/26 05:55:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -69,7 +75,6 @@ FindPendingData _ANSI_ARGS_((int            fileDescCnt,
 
 static char *
 ReturnSelectedFileList _ANSI_ARGS_((fd_set        *fileDescSetPtr,
-                                    fd_set        *fileDescSet2Ptr,
                                     int            fileDescCnt,
                                     channelData_t *channelListPtr));
 
@@ -134,21 +139,20 @@ ParseSelectFileList (interp, handleList, fileSetPtr, channelListPtr,
             TclX_GetOpenChannel (interp,
                                  handleArgv [idx],
                                  0);
-        if (channelList [idx].channel == NULL) {
-            ckfree ((char *) handleArgv);
-            ckfree ((char *) channelList);
-            return -1;
-        }
+        if (channelList [idx].channel == NULL)
+            goto errorExit;
         
-        channelList [idx].readFd =
-            TclX_ChannelFnum (channelList [idx].channel, TCL_READABLE);
+        if (TclXOSGetSelectFnum (interp, 
+                                 channelList [idx].channel,
+                                 &channelList [idx].readFd,
+                                 &channelList [idx].writeFd) != TCL_OK)
+            goto errorExit;
+
         if (channelList [idx].readFd >= 0) {
             FD_SET (channelList [idx].readFd, fileSetPtr);
             if (channelList [idx].readFd > *maxFileIdPtr)
                 *maxFileIdPtr = channelList [idx].readFd;
         }
-        channelList [idx].writeFd =
-            TclX_ChannelFnum (channelList [idx].channel, TCL_WRITABLE);
         if (channelList [idx].writeFd >= 0) {
             FD_SET (channelList [idx].writeFd, fileSetPtr);
             if (channelList [idx].writeFd > *maxFileIdPtr)
@@ -159,6 +163,12 @@ ParseSelectFileList (interp, handleList, fileSetPtr, channelListPtr,
     *channelListPtr = channelList;
     ckfree ((char *) handleArgv);
     return handleCnt;
+
+  errorExit:
+    ckfree ((char *) handleArgv);
+    ckfree ((char *) channelList);
+    return -1;
+
 }
 
 /*-----------------------------------------------------------------------------
@@ -204,8 +214,6 @@ FindPendingData (fileDescCnt, channelList, fileDescSetPtr)
  *
  * Parameters:
  *   o fileDescSetPtr (I) - The select fd_set.
- *   o fileDescSet2Ptr (I) - Pointer to a second descriptor to also check
- *     (their may be overlap).  NULL if no second set.
  *   o fileDescCnt (I) - Number of descriptors in the list.
  *   o channelListPtr (I) - A pointer to a list of the FILE pointers for
  *     files that are in the set.
@@ -215,10 +223,8 @@ FindPendingData (fileDescCnt, channelList, fileDescSetPtr)
  *-----------------------------------------------------------------------------
  */
 static char *
-ReturnSelectedFileList (fileDescSetPtr, fileDescSet2Ptr, fileDescCnt,
-                        channelList) 
+ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList) 
     fd_set        *fileDescSetPtr;
-    fd_set        *fileDescSet2Ptr;
     int            fileDescCnt;
     channelData_t *channelList;
 {
@@ -243,14 +249,6 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescSet2Ptr, fileDescCnt,
              FD_ISSET (channelList [idx].readFd, fileDescSetPtr)) ||
             ((channelList [idx].writeFd >= 0) &&
              FD_ISSET (channelList [idx].writeFd, fileDescSetPtr))) {
-            fileHandleArgv [handleCnt] =
-                Tcl_GetChannelName (channelList [idx].channel);
-            handleCnt++;
-        } else if ((fileDescSet2Ptr != NULL) &&
-                   (((channelList [idx].readFd >= 0) &&
-                    FD_ISSET (channelList [idx].readFd, fileDescSet2Ptr)) ||
-                   ((channelList [idx].writeFd >= 0) &&
-                    FD_ISSET (channelList [idx].writeFd, fileDescSet2Ptr)))) {
             fileHandleArgv [handleCnt] =
                 Tcl_GetChannelName (channelList [idx].channel);
             handleCnt++;
@@ -365,6 +363,17 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
                           (char *) NULL);
         goto exitPoint;
     }
+    
+    /*
+     * If there is read data pending in the buffers, force the bits to be set
+     * in the read fdSet.
+     */
+    if (pending) {
+        for (idx = 0; idx < descCnts [0]; idx++) {
+            if (FD_ISSET (descLists [0] [idx].readFd, &readPendingFDSet))
+                FD_SET (descLists [0] [idx].readFd, &(fdSets [0]));
+        }
+    }
 
     /*
      * Return the result, either a 3 element list, or leave the result
@@ -374,7 +383,6 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
         for (idx = 0; idx < 3; idx++) {
             retListArgv [idx] =
                 ReturnSelectedFileList (&fdSets [idx],
-                                        (idx == 0) ? &readPendingFDSet : NULL,
                                         descCnts [idx],
                                         descLists [idx]);
         }
