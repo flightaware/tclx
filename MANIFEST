@@ -21,7 +21,6 @@
 ./osSupport/strftime.c
 ./osSupport/system.c
 ./src/Makefile.in
-./src/SYSLIBS.in
 ./src/tcl++.C
 ./src/tcl++.h
 ./src/tclExtdInt.h
@@ -63,6 +62,7 @@
 ./src/tclXstring.c
 ./src/tclXunixcmds.c
 ./src/tclXutil.c
+./src/tclxlibs.mk.in
 ./tclhelp/Tcl.brf
 ./tclhelp/TclX.brf
 ./tclhelp/help
@@ -358,10 +358,10 @@
 ./tkhelp/tk/widgets/tk_popup
 ./tkhelp/tk/widgets/toplevel
 ./tksrc/Makefile.in
-./tksrc/SYSLIBS.in
 ./tksrc/tkXAppInit.c
 ./tksrc/tkXinit.c
 ./tksrc/tkXshell.c
+./tksrc/tkxlibs.mk.in
 ./tktclsrc/Makefile.in
 ./tktclsrc/tclhelp.tcl
 ./tktclsrc/tk.tcl.sed

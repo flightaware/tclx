@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.17 1995/06/26 06:21:08 markd Exp markd $
+# $Id: Makefile.in,v 4.18 1995/07/01 00:12:12 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -147,7 +147,7 @@ install-exec:
 	${STRIP} ${TCL_BINDIR}/tcl
 	${INSTCOPY} libtclx.a ${TCL_LIBDIR}
 	${RANLIB} ${TCL_LIBDIR}/libtclx.a
-	${INSTCOPY} -filename SYSLIBS ${INST_MASTER}/src/SYSLIBS${ARCH}
+	${INSTCOPY} tclxlibs.mk ${TCL_LIBDIR}
 
 install-master: install-master-exec
 	${INSTCOPY} ${TCL_UCB_SRC}/tcl.h ${srcdir}/tclExtend.h \
@@ -159,7 +159,7 @@ install-master-exec:
 	${STRIP} ${INST_MASTER}/bin${ARCH}/tcl
 	${INSTCOPY} ${LIBTCL} libtclx.a ${INST_MASTER}/lib${ARCH}
 	${RANLIB} ${INST_MASTER}/lib${ARCH}/*.a
-	${INSTCOPY} -filename SYSLIBS ${INST_MASTER}/src/SYSLIBS${ARCH}
+	${INSTCOPY} tclxlibs.mk ${INST_MASTER}/lib${ARCH}
 	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
 	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
 
@@ -174,7 +174,7 @@ clean:
 # Restore to the distributed state.
 
 distclean: clean
-	rm -f Makefile tclXconf.h SYSLIBS
+	rm -f Makefile tclXconf.h tclxlibs.mk
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:

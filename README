@@ -155,23 +155,25 @@ LINKING TCL APPLICATIONS
    To build a TclX based application containing C code, start with
 either:
 
-        tclmaster/src/tclXAppInit.c for just TclX
+        src/tclXAppInit.c for just TclX
 or
-        tkmaster/src/tkXAppInit.c for TclX & Tk
+        src/tkXAppInit.c for TclX & Tk
 
 and add your application initialization.  These files contain an application
 specific initialization function as well as "main".  There are comments in the
 code to guide you.  For example:
 
-  cc tclXAppInit.o mystuff.a libtclx.a libtcl.a ${SYSLIBS} -o myapp
+  cc tclXAppInit.o mystuff.a libtclx.a libtcl.a ${TCLXLIBS} -o myapp
 
-  cc tkXAppInit.o mystuff.a libtkx.a libtk.a libtclx.a libtcl.a ${SYSLIBS} \
+  cc tkXAppInit.o mystuff.a libtkx.a libtk.a libtclx.a libtcl.a ${TKXLIBS} \
      -o myapp
 
-Each of those directories has a file SYSLIBS that contains the
-system libraries that the TclX configure script thinks you should
-use for linking programs. These file are in a format that can be included
-from a make file.
+The *AppInit.c files are also installed in the src directory under the
+TclX/TkX master directories.
+
+The files tclxlibs.mk and tkxlibs.mk define system libraries that the TclX
+configure script thinks you should use for linking programs. These file are
+in a format that can be included from a make file.
 
 IMPORTANT NOTE:  libtclx.a must be specified on the link command line
 before libtcl.a.  If the order is reversed, incorrect command line
