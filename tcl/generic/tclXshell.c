@@ -13,11 +13,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 1.3 1992/10/12 16:38:44 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.0 1992/10/16 04:51:14 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+#include "patchlevel.h"
 
 extern char * etenv ();
 
