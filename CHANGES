@@ -317,3 +317,6 @@
     before they are handle and if trap code is associated with that signal,
     then the trap code will be run once for every signal received.
 -------------------------------------------------------------------------------
+ 8 Oct 92:
+  o Recoded assign_fields to use upvar.
+-------------------------------------------------------------------------------
