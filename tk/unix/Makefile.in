@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.6 1993/07/18 22:15:05 markd Exp markd $
+# $Id: Makefile,v 2.7 1993/07/18 22:38:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -58,4 +58,4 @@ tkXstartup.o: tkXstartup.c
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp ${WISHX} ${OBJS}
+	-rm -f made.tmp ${WISHX} ${OBJS} tkMain.o
