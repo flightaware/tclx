@@ -1,5 +1,5 @@
 /*
- * tclXunixOS.c --
+ * tclXwinOS.c --
  *
  * OS portability interface for Windows systems.  The idea behind these
  * functions is to provide interfaces to various functions that vary on the
@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.4 1996/08/02 10:59:54 markd Exp $
+ * $Id: tclXwinOS.c,v 7.5 1996/08/04 07:30:03 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -34,6 +34,11 @@ static HANDLE
 ChannelToHandle(Tcl_Channel channel,
                 int         direction,
                 int        *type);
+
+static SOCKET
+ChannelToSocket (Tcl_Interp  *interp
+                 Tcl_Channel  channel)
+
 static time_t
 ConvertToUnixTime (FILETIME fileTime);
 
@@ -43,8 +48,8 @@ ConvertToUnixTime (FILETIME fileTime);
  *   Return an error about functionality not being available under Windows.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - Errors returned in result.
+ *   o funcName - Command or other name to use in not available error.
  * Returns:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -63,8 +68,8 @@ TclXNotAvailableError (Tcl_Interp *interp,
  *   Parse the window command line into arguments.
  *
  * Parameters:
- *   o argcPtr (O) - Count of arguments is returned here.
- *   o argvPtr (O) - Argument vector is returned here.
+ *   o argcPtr - Count of arguments is returned here.
+ *   o argvPtr - Argument vector is returned here.
  * Notes:
  *   This code taken from the Tcl file tclAppInit.c: Copyright (c) 1996 by
  * Sun Microsystems, Inc.
@@ -136,15 +141,16 @@ TclX_SplitWinCmdLine (int    *argcPtr,
  *    Convert a channel to a handle.
  *
  * Parameters:
- *   o channel (I) - Channel to get file number for.
- *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *   o channel - Channel to get file number for.
+ *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
  *     return the first of the read and write numbers.
- *   o type (O) - The type of the file. TCL_WIN_FILE if an error occurs
+ *   o type - The type of the file. TCL_WIN_FILE if an error occurs
  *     (so something is in the value).  Maybe NULL.
  * Returns:
  *   The file number or NULL if a file number is not associated with this
  * access direction.  Just go ahead and pass this to a system call to
- * get a useful error message, they should never happen.
+ * get a useful error message, they should never happen.  If type is 
+ * TCL_WIN_SOCK, the return value is not valid.
  *-----------------------------------------------------------------------------
  */
 HANDLE
@@ -170,12 +176,44 @@ ChannelToHandle (Tcl_Channel channel,
 }
 
 /*-----------------------------------------------------------------------------
+ * ChannelToSocket --
+ *
+ *    Convert a channel to a socket.
+ *
+ * Parameters:
+ *   o interp - An error is returned if the channel is not a socket.
+ *   o channel - Channel to get file number for.
+ * Returns:
+ *   The socked number or -1 if an error occurs.
+ *-----------------------------------------------------------------------------
+ */
+static SOCKET
+ChannelToSocket (Tcl_Interp  *interp
+                 Tcl_Channel  channel)
+{
+    Tcl_File file;
+    SOCKET sock;
+    int type;
+    
+    file = Tcl_GetChannelFile (channel, TCL_READABLE);
+    if (file == NULL)
+        file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+    sock = (SOCKET) Tcl_GetFileInfo (file, &type);
+    if (type != TCL_WIN_SOCK) {
+        Tcl_AppendResult (interp, "channel \"", Tcl_GetChannelName (channel),
+                          "\" is not a socket", (char *) NULL);
+        return -1;
+
+    }
+    return sock;}
+
+/*-----------------------------------------------------------------------------
  * ConvertToUnixTime --
  *
  *    Convert a FILETIME structure to Unix style time.
  *
  * Parameters:
- *   o fileTime (I) - Time to convert.
+ *   o fileTime - Time to convert.
  * Returns:
  *   Unix time: seconds since Jan 1, 1970.
  *-----------------------------------------------------------------------------
@@ -193,9 +231,9 @@ ConvertToUnixTime (FILETIME fileTime)
  * on windows.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o priority (O) - Process priority is returned here.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - Errors returned in result.
+ *   o priority - Process priority is returned here.
+ *   o funcName - Command or other name to use in not available error.
  * Results:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -215,10 +253,10 @@ TclXOSgetpriority (Tcl_Interp *interp,
  * which is not available on windows.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o priorityIncr (I) - Amount to adjust the priority by.
- *   o priority (O) - The new priority..
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - Errors returned in result.
+ *   o priorityIncr - Amount to adjust the priority by.
+ *   o priority - The new priority..
+ *   o funcName - Command or other name to use in not available error.
  * Results:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -237,8 +275,8 @@ TclXOSincrpriority (Tcl_Interp *interp,
  *   Portability interface to pipe.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o fildes (O) - Array to return file descriptors in.
+ *   o interp - Errors returned in result.
+ *   o fildes - Array to return file descriptors in.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -262,10 +300,10 @@ TclXOSpipe (Tcl_Interp *interp,
  * on windows.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
+ *   o interp - Errors returned in result.
  *   o seconds (I/O) - Seconds to pause for, it is updated with the time
  *     remaining on the last alarm.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o funcName - Command or other name to use in not available error.
  * Results:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -283,7 +321,7 @@ TclXOSsetitimer (Tcl_Interp *interp,
  *   Portability interface to sleep functionallity.
  *
  * Parameters:
- *   o seconds (I) - Seconds to sleep.
+ *   o seconds - Seconds to sleep.
  *-----------------------------------------------------------------------------
  */
 void
@@ -309,8 +347,8 @@ TclXOSsync ()
  * fsync is no available.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o channel (I) - The channel to sync.
+ *   o interp - Errors returned in result.
+ *   o channel - The channel to sync.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -319,12 +357,6 @@ int
 TclXOSfsync (Tcl_Interp *interp,
              Tcl_Channel channel)
 {
-    int fileNum;
-
-    fileNum = TclX_GetOpenFnum (interp, channelName, TCL_WRITABLE);
-    if (fileNum < 0)
-        return TCL_ERROR;
-
     if (Tcl_Flush (channel) < 0)
         goto posixError;
 
@@ -342,9 +374,9 @@ TclXOSfsync (Tcl_Interp *interp,
  * with the standard system shell).
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o command (I) - Command to execute.
- *   o exitCode (O) - Exit code of the child process.
+ *   o interp - Errors returned in result.
+ *   o command - Command to execute.
+ *   o exitCode - Exit code of the child process.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -383,8 +415,8 @@ TclXOSsystem (Tcl_Interp *interp,
  *   Portability interface to mkdir functionallity.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o path (I) - Directory to create.
+ *   o interp - Errors returned in result.
+ *   o path - Directory to create.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -408,10 +440,10 @@ TclXOSmkdir (Tcl_Interp *interp,
  * on windows.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o srcPath (I) - File to link.
- *   o targetPath (I) - Path to new link.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - Errors returned in result.
+ *   o srcPath - File to link.
+ *   o targetPath - Path to new link.
+ *   o funcName - Command or other name to use in not available error.
  * Results:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -431,10 +463,10 @@ TclX_OSlink (Tcl_Interp *interp,
  * on windows.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o srcPath (I) - Value of symbolic link.
- *   o targetPath (I) - Path to new symbolic link.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - Errors returned in result.
+ *   o srcPath - Value of symbolic link.
+ *   o targetPath - Path to new symbolic link.
+ *   o funcName - Command or other name to use in not available error.
  * Results:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -454,8 +486,8 @@ TclX_OSsymlink (Tcl_Interp *interp,
  * is not available under windows and zero is always returned.
  *
  * Parameters:
- *   o realTime (O) - Elapsed real time, in milliseconds is returned here.
- *   o cpuTime (O) - Elapsed CPU time, zero is always returned.
+ *   o realTime - Elapsed real time, in milliseconds is returned here.
+ *   o cpuTime - Elapsed CPU time, zero is always returned.
  *-----------------------------------------------------------------------------
  */
 void
@@ -491,10 +523,10 @@ TclXOSElapsedTime (clock_t *realTime,
  * on windows.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o pid (I) - Process id, negative process group, etc.
- *   o signal (I) - Signal to send.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - Errors returned in result.
+ *   o pid - Process id, negative process group, etc.
+ *   o signal - Signal to send.
+ *   o funcName - Command or other name to use in not available error.
  * Results:
  *   TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -513,9 +545,9 @@ TclXOSkill (Tcl_Interp *interp,
  *   Portability interface to get the accessability on an open file number.
  *
  * Parameters:
- *   o fileNum (I) - Number to return permissions on.
- *   o mode (O) - Set of TCL_READABLE and TCL_WRITABLE.
- *   o nonBlocking (O) - Non-blocking mode, always returns FALSE under windows.
+ *   o fileNum - Number to return permissions on.
+ *   o mode - Set of TCL_READABLE and TCL_WRITABLE.
+ *   o nonBlocking - Non-blocking mode, always returns FALSE under windows.
  * Results:
  *   TCL_OK or TCL_ERROR.  The Posix error number describes the error.
  *-----------------------------------------------------------------------------
@@ -545,13 +577,13 @@ TclXOSGetOpenFileMode (int  fileNum,
  *   Portability interface to get status information on an open file.
  *
  * Parameters:
- *   o interp (I) - Errors are returned in result.
- *   o channel (I) - Channel to get file number for.
- *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *   o interp - Errors are returned in result.
+ *   o channel - Channel to get file number for.
+ *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
  *     return the first of the read and write numbers.
- *   o statBuf (O) - Status information, made to look as much like Unix as
+ *   o statBuf - Status information, made to look as much like Unix as
  *     possible.
- *   o ttyDev (O) - If not NULL, a boolean indicating if the device is
+ *   o ttyDev - If not NULL, a boolean indicating if the device is
  *     associated with a tty. (Always FALSE on windows).
  * Results:
  *   TCL_OK or TCL_ERROR.
@@ -639,18 +671,18 @@ TclXOSFstat (Tcl_Interp  *interp,
  * The "." and ".." entries are skipped.
  *
  * Parameters:
- *   o interp (I) - Interp to return errors in.
- *   o path (I) - Path to the directory.
- *   o hidden (I) - Include hidden files.  Ignored on Unix.
- *   o callback (I) - Callback function to call on each directory entry.
+ *   o interp - Interp to return errors in.
+ *   o path - Path to the directory.
+ *   o hidden - Include hidden files.  Ignored on Unix.
+ *   o callback - Callback function to call on each directory entry.
  *     It should return TCL_OK to continue processing, TCL_ERROR if an
  *     error occured and TCL_BREAK to stop processing.  The parameters are:
- *        o interp (I) - Interp is passed though.
- *        o path (I) - Normalized path to directory.
- *        o fileName (I) - Tcl normalized file name in directory.
- *        o caseSensitive (I) - Are the file names case sensitive?
- *        o clientData (I) - Client data that was passed.
- *   o clientData (I) - Client data to pass to callback.
+ *        o interp - Interp is passed though.
+ *        o path - Normalized path to directory.
+ *        o fileName - Tcl normalized file name in directory.
+ *        o caseSensitive - Are the file names case sensitive?
+ *        o clientData - Client data that was passed.
+ *   o clientData - Client data to pass to callback.
  * Results:
  *   TCL_OK if completed directory walk.  TCL_BREAK if callback returned
  * TCL_BREAK and TCL_ERROR if an error occured.
@@ -808,9 +840,9 @@ TclXOSWalkDir (Tcl_Interp       *interp,
  *   Portability interface to get the size of an open file.
  *
  * Parameters:
- *   o channel (I) - Channel.
- *   o fileSize (O) - File size is returned here.
- *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *   o channel - Channel.
+ *   o fileSize - File size is returned here.
+ *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
  *     return the first of the read and write numbers.
  * Results:
  *   TCL_OK or TCL_ERROR.  A POSIX error will be set.
@@ -847,10 +879,10 @@ TclXOSGetFileSize (Tcl_Channel  channel,
  *   Portability interface to ftruncate functionality. 
  *
  * Parameters:
- *   o interp (I) - Error messages are returned in the interpreter.
- *   o channel (I) - Channel to truncate.
- *   o newSize (I) - Size to truncate the file to.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - Error messages are returned in the interpreter.
+ *   o channel - Channel to truncate.
+ *   o newSize - Size to truncate the file to.
+ *   o funcName - Command or other name to use in not available error.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -869,8 +901,8 @@ TclXOSftruncate (Tcl_Interp  *interp,
  *   Portability interface to fork functionallity.  Not supported on windows.
  *
  * Parameters:
- *   o interp (I) - An error  is returned in result.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o interp - An error  is returned in result.
+ *   o funcName - Command or other name to use in not available error.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -888,9 +920,9 @@ TclXOSfork (Tcl_Interp *interp,
  * equivlant of a fork and an execl, so a process id is returned.
  *
  * Parameters:
- *   o interp (I) - A process id or errors are returned in result.
- *   o path (I) - Path to the program.
- *   o argList (I) - NULL terminated argument vector.
+ *   o interp - A process id or errors are returned in result.
+ *   o path - Path to the program.
+ *   o argList - NULL terminated argument vector.
  * Results:
  *   TCL_ERROR or does not return.
  *-----------------------------------------------------------------------------
@@ -921,10 +953,10 @@ TclXOSexecl (Tcl_Interp *interp,
  *   Convert an internet address to an "struct in_addr" representation.
  *
  * Parameters:
- *   o interp (O) - If not NULL, an error message is return in the result.
+ *   o interp - If not NULL, an error message is return in the result.
  *     If NULL, no error message is generated.
- *   o strAddress (I) - String address to convert.
- *   o inAddress (O) - Converted internet address is returned here.
+ *   o strAddress - String address to convert.
+ *   o inAddress - Converted internet address is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -949,23 +981,30 @@ TclXOSInetAtoN (Tcl_Interp     *interp,
  *   Portability interface to getpeername functionallity.
  *
  * Parameters:
- *   o channel (I) - Channel associated with the socket.
- *   o sockaddr (I) - Pointer to sockaddr structure.
- *   o sockaddrSize (I) - Size of the sockaddr struct.
+ *   o interp - Errors are returned in result.
+ *   o channel - Channel associated with the socket.
+ *   o sockaddr - Pointer to sockaddr structure.
+ *   o sockaddrSize - Size of the sockaddr struct.
  * Results:
  *   TCL_OK or TCL_ERROR, sets a posix error.
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetpeername (Tcl_Channel channel,
+TclXOSgetpeername (Tcl_Interp *interp,
+                   Tcl_Channel channel,
                    void       *sockaddr,
                    int         sockaddrSize)
 {
-    int fnum;
+    SOCKET sock;
 
-    fnum = TclX_ChannelFnum (channel, 0);
-    if (getpeername (fnum, (struct sockaddr *) sockaddr, &sockaddrSize) < 0)
+    sock = ChannelToSocket (interp, channel);
+    if (sock == -1)
         return TCL_ERROR;
+    if (getpeername (sock, (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
     return TCL_OK;
 }
 
@@ -974,23 +1013,103 @@ TclXOSgetpeername (Tcl_Channel channel,
  *   Portability interface to getsockname functionallity.
  *
  * Parameters:
- *   o channel (I) - Channel associated with the socket.
- *   o sockaddr (I) - Pointer to sockaddr structure.
- *   o sockaddrSize (I) - Size of the sockaddr struct.
+ *   o interp - Errors are returned in result.
+ *   o channel - Channel associated with the socket.
+ *   o sockaddr - Pointer to sockaddr structure.
+ *   o sockaddrSize - Size of the sockaddr struct.
  * Results:
  *   TCL_OK or TCL_ERROR, sets a posix error.
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetsockname (Tcl_Channel channel,
+TclXOSgetsockname (Tcl_Interp *interp,
+                   Tcl_Channel channel,
                    void       *sockaddr,
                    int         sockaddrSize)
 {
-    int fnum;
+    SOCKET sock;
 
-    fnum = TclX_ChannelFnum (channel, 0);
-    if (getsockname (fnum, (struct sockaddr *) sockaddr, &sockaddrSize) < 0)
+    sock = ChannelToSocket (interp, channel);
+    if (sock == -1)
         return TCL_ERROR;
+
+    if (getsockname (sock, (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSgetsockopt --
+ *    Get the value of a integer socket option.
+ *     
+ * Parameters:
+ *   o interp - Errors are returned in the result.
+ *   o channel - Channel associated with the socket.
+ *   o option - Socket option to get.
+ *   o valuePtr -  Integer value is returned here.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSgetsockopt (interp, channel, option, valuePtr)
+    Tcl_Interp  *interp;
+    Tcl_Channel  channel;
+    int          option;
+    int         *valuePtr;
+{
+    int valueLen = sizeof (*valuePtr);
+    SOCKET sock;
+
+    sock = ChannelToSocket (interp, channel);
+    if (sock == -1)
+        return TCL_ERROR;
+
+    if (getsockopt (sock, SOL_SOCKET, option, 
+                    (void*) valuePtr, &valueLen) != 0) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSsetsockopt --
+ *    Set the value of a integer socket option.
+ *     
+ * Parameters:
+ *   o interp - Errors are returned in the result.
+ *   o channel - Channel associated with the socket.
+ *   o option - Socket option to get.
+ *   o value - Valid integer value for the option.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSsetsockopt (interp, channel, option, value)
+    Tcl_Interp  *interp;
+    Tcl_Channel  channel;
+    int          option;
+    int          value;
+{
+    int valueLen = sizeof (value);
+    SOCKET sock;
+
+    sock = ChannelToSocket (interp, channel);
+    if (sock == -1)
+        return TCL_ERROR;
+
+    if (setsockopt (sock, SOL_SOCKET, option,
+                    (void*) &value, valueLen) != 0) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
     return TCL_OK;
 }
 
@@ -999,9 +1118,9 @@ TclXOSgetsockname (Tcl_Channel channel,
  *   Portability interface to chmod functionallity.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o fileName (I) - Name of to set the mode on.
- *   o mode (I) - New, unix style file access mode.
+ *   o interp - Errors returned in result.
+ *   o fileName - Name of to set the mode on.
+ *   o mode - New, unix style file access mode.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -1032,10 +1151,10 @@ TclXOSchmod (interp, fileName, mode)
  *   Portability interface to fchmod functionallity.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o channel (I) - Channel to set the mode on.
- *   o mode (I) - New, unix style file access mode.
- *   o funcName (I) - Command or other string to use in not available error.
+ *   o interp - Errors returned in result.
+ *   o channel - Channel to set the mode on.
+ *   o mode - New, unix style file access mode.
+ *   o funcName - Command or other string to use in not available error.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -1075,8 +1194,8 @@ TclXOSfchmod (interp, channel, mode, funcName)
  *   o groupStr - String containing owner name or id.  NULL if TCLX_CHOWN
  *     not specified.  If NULL and TCLX_CHOWN is specified, the user's group
  *     is used.
- *   o files (I) - NULL terminated list of file names.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o files - NULL terminated list of file names.
+ *   o funcName - Command or other name to use in not available error.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -1108,8 +1227,8 @@ TclXOSChangeOwnGrp (interp, options, ownerStr, groupStr, files, funcName)
  *   o groupStr - String containing owner name or id.  NULL if TCLX_CHOWN
  *     not specified.  If NULL and TCLX_CHOWN is specified, the user's group
  *     is used.
- *   o channelIds (I) - NULL terminated list of channel ids.
- *   o funcName (I) - Command or other name to use in not available error.
+ *   o channelIds - NULL terminated list of channel ids.
+ *   o funcName - Command or other name to use in not available error.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 1.1 1996/07/25 04:12:27 markd Exp $
+ * $Id: tclXsocket.c,v 1.2 1996/07/26 05:55:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -116,11 +116,13 @@ TclXGetHostInfo (interp, channel, remoteHost)
     char portText [32];
 
     if (remoteHost) {
-        if (TclXOSgetpeername (channel, &sockaddr, sizeof (sockaddr)) < 0)
-            goto unixError;
+        if (TclXOSgetpeername (interp, channel,
+                               &sockaddr, sizeof (sockaddr)) != TCL_OK)
+            return TCL_ERROR;
     } else {
-        if (TclXOSgetsockname (channel,  &sockaddr, sizeof (sockaddr)) < 0)
-            goto unixError;
+        if (TclXOSgetsockname (interp, channel, &sockaddr,
+                               sizeof (sockaddr)) != TCL_OK)
+            return TCL_ERROR;
     }
 
     hostEntry = gethostbyaddr ((char *) &(sockaddr.sin_addr),
@@ -138,74 +140,6 @@ TclXGetHostInfo (interp, channel, remoteHost)
     sprintf (portText, "%u", ntohs (sockaddr.sin_port));
     Tcl_AppendElement (interp, portText);
        
-    return TCL_OK;
-
-  unixError:
-    Tcl_ResetResult (interp);
-    interp->result = Tcl_PosixError (interp);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * TclXGetKeepLive --
- *    Get the keepalive option on a socket.
- *     
- * Parameters:
- *   o interp (O) - Errors are returned in the result.
- *   o channel (I) - Channel associated with the socket.
- *   o valuePtr (I) -  TRUE is return if keepalive is set, FALSE if its not.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXGetKeepAlive (interp, channel, valuePtr)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int         *valuePtr;
-{
-    int fileNum, value, valueLen = sizeof (value);
-
-    fileNum = TclX_ChannelFnum (channel, 0);
-
-    if (getsockopt (fileNum, SOL_SOCKET, SO_KEEPALIVE,
-                    (void*) &value, &valueLen) != 0) {
-        Tcl_AppendResult (interp, "error getting socket KEEPALIVE option: ",
-                          Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
-    }
-    *valuePtr = value;
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * TclXSetKeepLive --
- *    Set the keepalive option on a socket.
- *     
- * Parameters:
- *   o interp (O) - Errors are returned in the result.
- *   o channel (I) - Channel associated with the socket.
- *   o value (I) -  TRUE or FALSE.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXSetKeepAlive (interp, channel, value)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          value;
-{
-    int fileNum, valueLen = sizeof (value);
-
-    fileNum = TclX_ChannelFnum (channel, 0);
-
-    if (setsockopt (fileNum, SOL_SOCKET, SO_KEEPALIVE,
-                    (void*) &value, valueLen) != 0) {
-        Tcl_AppendResult (interp, "error setting socket KEEPALIVE option: ",
-                          Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
-    }
     return TCL_OK;
 }
 

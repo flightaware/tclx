@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.4 1996/08/02 10:59:47 markd Exp $
+ * $Id: tclExtdInt.h,v 7.5 1996/08/04 07:29:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -563,16 +563,6 @@ TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
                              int         remoteHost));
 
 extern int
-TclXGetKeepAlive _ANSI_ARGS_((Tcl_Interp  *interp,
-                              Tcl_Channel  channel,
-                              int         *valuePtr));
-
-extern int
-TclXSetKeepAlive _ANSI_ARGS_((Tcl_Interp  *interp,
-                              Tcl_Channel  channel,
-                              int          value));
-
-extern int
 Tcl_HostInfoCmd _ANSI_ARGS_((ClientData  clientData,
                              Tcl_Interp *interp,
                              int         argc,
@@ -581,7 +571,7 @@ Tcl_HostInfoCmd _ANSI_ARGS_((ClientData  clientData,
 /*
  * from tclXunixSock.c and stubbed in tclXwinCmds.c.
  */
-void
+extern void
 TclX_ServerInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
@@ -693,33 +683,47 @@ TclXOSexecl _ANSI_ARGS_((Tcl_Interp *interp,
                          char       *path,
                          char      **argList));
 
-int
-TclXOSInetAtoN  _ANSI_ARGS_((Tcl_Interp     *interp,
-                             char           *strAddress,
-                             struct in_addr *inAddress));
+extern int
+TclXOSInetAtoN _ANSI_ARGS_((Tcl_Interp     *interp,
+                            char           *strAddress,
+                            struct in_addr *inAddress));
 
-int
-TclXOSgetpeername _ANSI_ARGS_((Tcl_Channel channel,
+extern int
+TclXOSgetpeername _ANSI_ARGS_((Tcl_Interp *interp,
+                               Tcl_Channel channel,
                                void       *sockaddr,
                                int         sockaddrSize));
 
-int
-TclXOSgetsockname _ANSI_ARGS_((Tcl_Channel channel,
+extern int
+TclXOSgetsockname _ANSI_ARGS_((Tcl_Interp *interp,
+                               Tcl_Channel channel,
                                void       *sockaddr,
                                int         sockaddrSize));
 
-int
+extern int
+TclXOSgetsockopt _ANSI_ARGS_((Tcl_Interp  *interp,
+                              Tcl_Channel  channel,
+                              int          option,
+                              int         *valuePtr));
+
+extern int
+TclXOSsetsockopt _ANSI_ARGS_((Tcl_Interp  *interp,
+                              Tcl_Channel  channel,
+                              int          option,
+                              int          value));
+
+extern int
 TclXOSchmod _ANSI_ARGS_((Tcl_Interp *interp,
                          char       *fileName,
                          int         mode));
 
-int
+extern int
 TclXOSfchmod _ANSI_ARGS_((Tcl_Interp *interp,
                           Tcl_Channel channel,
                           int         mode,
                           char       *funcName));
 
-int
+extern int
 TclXOSChangeOwnGrp _ANSI_ARGS_((Tcl_Interp  *interp,
                                 unsigned     options,
                                 char        *ownerStr,
@@ -727,7 +731,7 @@ TclXOSChangeOwnGrp _ANSI_ARGS_((Tcl_Interp  *interp,
                                 char       **files,
                                 char       *funcName));
 
-int
+extern int
 TclXOSFChangeOwnGrp _ANSI_ARGS_((Tcl_Interp *interp,
                                  unsigned    options,
                                  char       *ownerStr,

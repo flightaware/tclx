@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 6.0 1996/05/10 16:15:27 markd Exp $
+ * $Id: tclXfcntl.c,v 7.0 1996/06/16 05:30:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -277,7 +277,7 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
     }
 
     if (attrib.other == ATTR_KEEPALIVE) {
-        if (TclXGetKeepAlive (interp, channel, &value) != TCL_OK)
+        if (TclXOSgetsockopt (interp, channel, SO_KEEPALIVE, &value) != TCL_OK)
             return TCL_ERROR;
         interp->result = value ? "1" : "0";
         return TCL_OK;
@@ -351,7 +351,7 @@ SetAttrOnFile (interp, channel, fileNum, attrib, value)
     }
 
     if (attrib.other == ATTR_KEEPALIVE) {
-        return TclXSetKeepAlive (interp, channel, value);
+        return TclXOSsetsockopt (interp, channel, SO_KEEPALIVE, value);
     }
 
   unixError:
