@@ -1,8 +1,9 @@
                            Extended Tcl (TclX) 7.6.0
                            =========================
-Alpha 1 release:  
-   This is an aplha release of Windows 95/NT functionality.  See win/INSTALL
-for details and restrictions.
+Beta 1 release:  
+   This is an beta 1 release for TclX 7.6.0.  It corresponds to the Tcl 7.6b1
+and Tk 4.1b1 releases.  It also includes partial support for Windows 95/NT
+functionality.  See win/INSTALL for details and restrictions.
 
 INTRODUCTION
 ============
@@ -41,7 +42,7 @@ see unix/INSTALL.  For Windows 95/NT see win/INSTALL.
 
 CHANGES IN TCLX 7.6.0
 =====================
-  o Support for Windows 95/NT.
+  o Partial support for Windows 95/NT.
 
 
 FEATURES ADDED BY EXTENDED TCL
@@ -165,9 +166,6 @@ THANKS
 who have helped us debug problems and given us valuable suggestions.
 A special thanks to John Ousterhout and his team at Sun for Tcl, Tk and
 all the support they have given us.
-
-Thanks to Dr. Joseph E. Sacco <jsacco@ssl.com> for his initial work on
-building shared libraries.
 
 Thanks to Michael E. Shorter <mike@globalware.com>, Christopher M. Sedore
 <cmsedore@zombie.maxwell.syr.edu>,  Philip Chow <pchow@isgtec.com>, and
