@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.4 1997/06/30 17:21:42 markd Exp $
+ * $Id: tclXsignal.c,v 8.5 1997/07/01 02:58:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -821,7 +821,9 @@ EvalTrapCode (interp, signalNum)
 {
     int          result;
     Tcl_DString  command;
+    Tcl_Obj     *saveObjPtr;
 
+    saveObjPtr = TclX_SaveResultErrorInfo (interp);
     Tcl_ResetResult (interp);
 
     /*
@@ -848,7 +850,7 @@ EvalTrapCode (interp, signalNum)
         return TCL_ERROR;
     }
     
-    Tcl_ResetResult (interp);
+    TclX_RestoreResultErrorInfo (interp, saveObjPtr);
     return TCL_OK;
 }
 

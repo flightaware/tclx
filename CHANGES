@@ -1281,3 +1281,8 @@
 16 Jun 97: Released TclX 8.0.0 Beta 1
 17 Jun 97: Re-releases TclX 8.0.0 Beta 1 due to mangled patch.
 ===============================================================================
+ 4 Jul 97:
+  o Converted all commands that can be converted to work with binary data;
+    documented those that don't support binary data.
+  o
+-------------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.3 1997/06/30 16:05:38 markd Exp $
+ * $Id: tclXdebug.c,v 8.4 1997/06/30 17:21:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -255,14 +255,12 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
     char        **argv;
 {
     Interp       *iPtr = (Interp *) interp;
-    Tcl_DString   callback, resultBuf, errorInfoBuf, errorCodeBuf;
-    char         *cmdList, *errorInfo, *errorCode;
+    Tcl_DString   callback;
+    Tcl_Obj      *saveObjPtr;
+    char         *cmdList;
     char          numBuf [32];
 
     Tcl_DStringInit (&callback);
-    Tcl_DStringInit (&resultBuf);
-    Tcl_DStringInit (&errorInfoBuf);
-    Tcl_DStringInit (&errorCodeBuf);
 
     /*
      * Build the command to evaluate.
@@ -286,16 +284,7 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
              iPtr->varFramePtr->level));
     Tcl_DStringAppendElement (&callback, numBuf);
 
-    /*
-     * Save errorInfo and errorCode.
-     */
-    Tcl_DStringGetResult (interp, &resultBuf);
-    errorInfo = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
-    if (errorInfo != NULL)
-        Tcl_DStringAppend (&errorInfoBuf, errorInfo, -1);
-    errorCode = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
-    if (errorCode != NULL)
-        Tcl_DStringAppend (&errorCodeBuf, errorCode, -1);
+    saveObjPtr = TclX_SaveResultErrorInfo (interp);
 
     /*
      * Evaluate the command.  If an error occurs, dump something to stderr
@@ -322,21 +311,9 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
         TraceDelete (interp, infoPtr);
     }
 
-    /*
-     * Restore errorInfo and errorCode.
-     */
-    if (errorInfo != NULL)
-        Tcl_SetVar (interp, "errorInfo", Tcl_DStringValue (&errorInfoBuf),
-                    TCL_GLOBAL_ONLY);
-    if (errorCode != NULL)
-        Tcl_SetVar (interp, "errorCode", Tcl_DStringValue (&errorCodeBuf),
-                    TCL_GLOBAL_ONLY);
-    Tcl_DStringResult (interp, &resultBuf);
+    TclX_RestoreResultErrorInfo (interp, saveObjPtr);
 
     Tcl_DStringFree (&callback);
-    Tcl_DStringFree (&resultBuf);
-    Tcl_DStringFree (&errorInfoBuf);
-    Tcl_DStringFree (&errorCodeBuf);
 }
 
 /*

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.10 1997/07/03 07:14:15 markd Exp $
+ * $Id: tclXutil.c,v 8.11 1997/07/03 20:09:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1027,4 +1027,80 @@ TclX_IsNullObj (objPtr)
     }
     Tcl_GetStringFromObj (objPtr, &length);
     return (length == 0);
+}
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_SaveResultErrorInfo --
+ *
+ *   Saves the Tcl interp result plus errorInfo and errorCode in a structure.
+ *
+ * Parameters:
+ *   o interp - Interpreter to save state for.
+ * Returns:
+ *   A list object containing the state.
+ *-----------------------------------------------------------------------------
+ */
+Tcl_Obj *
+TclX_SaveResultErrorInfo (interp)
+    Tcl_Interp  *interp;
+{
+    Tcl_Obj *saveObjv [3];
+    Tcl_Obj *nameObjPtr;
+
+    saveObjv [0] = Tcl_GetObjResult (interp);
+    
+    nameObjPtr = Tcl_NewStringObj ("errorInfo", -1);
+    saveObjv [1] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL, TCL_PARSE_PART1);
+    if (saveObjv [1] == NULL) {
+        saveObjv [1] = Tcl_NewObj ();
+    }
+
+    nameObjPtr = Tcl_NewStringObj ("errorCode", -1);
+    saveObjv [2] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL, TCL_PARSE_PART1);
+    if (saveObjv [2] == NULL) {
+        saveObjv [2] = Tcl_NewObj ();
+    }
+
+    Tcl_DecrRefCount (nameObjPtr);
+
+    return Tcl_NewListObj (3, saveObjv);
+}
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_RestoreResultErrorInfo --
+ *
+ *   Restores the Tcl interp state from TclX_SaveResultErrorInfo.
+ *
+ * Parameters:
+ *   o interp - Interpreter to save state for.
+ *   o saveObjPtr - Object returned from TclX_SaveResultErrorInfo.  Ref count
+ *     will be decremented.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_RestoreResultErrorInfo (interp, saveObjPtr)
+    Tcl_Interp *interp;
+    Tcl_Obj    *saveObjPtr;
+{
+    Tcl_Obj **saveObjv, *nameObjPtr;
+    int saveObjc;
+
+    if ((Tcl_ListObjGetElements (NULL, saveObjPtr, &saveObjc,
+                                 &saveObjv) != TCL_OK) ||
+        (saveObjc != 3)) {
+        panic ("invalid TclX result save object");
+    }
+
+    nameObjPtr = Tcl_NewStringObj ("errorInfo", -1);
+    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [1], TCL_PARSE_PART1);
+
+    nameObjPtr = Tcl_NewStringObj ("errorCode", -1);
+    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [2], TCL_PARSE_PART1);
+
+    Tcl_SetObjResult (interp, saveObjv [0]);
+
+    Tcl_DecrRefCount (nameObjPtr);
+    Tcl_DecrRefCount (saveObjPtr);
 }
