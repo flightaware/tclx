@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 2.0 1992/10/16 04:50:31 markd Rel markd $
+ * $Id: tclXcnvclock.c,v 2.1 1992/11/07 22:23:03 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,6 +44,10 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
     time_t      baseClock;
     struct tm  *timeDataPtr;
     long        zone;
+#ifdef TCL_USEGETTOD
+    struct timeval tv;
+    struct timezone tz;
+#endif
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -68,13 +72,17 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
         /*
          * Get the minutes east of GMT.
          */
+#ifdef TCL_USEGETTOD
+      gettimeofday( &tv, &tz );
+      zone = tz.tz_minuteswest;
+#endif
 #ifdef TCL_TM_GMTOFF
         zone = -(timeDataPtr->tm_gmtoff / 60);
 #endif
 #ifdef TCL_TIMEZONE_VAR 
         zone = timezone / 60;
 #endif
-#if  !defined(TCL_TM_GMTOFF) && !defined(TCL_TIMEZONE_VAR)
+#if  !defined(TCL_TM_GMTOFF) && !defined(TCL_TIMEZONE_VAR) && !defined(TCL_USEGETTOD)
         zone = timeDataPtr->tm_tzadj  / 60;
 #endif
     }

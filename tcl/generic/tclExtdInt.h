@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.0 1992/10/16 04:51:27 markd Rel markd $
+ * $Id: tclExtdInt.h,v 2.1 1992/11/17 06:26:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -66,7 +66,14 @@
 #    include <sys/times.h>
 #endif 
 
+#ifdef TCL_NOVALUES_H
+#include <math.h>
+#include <limits.h>
+#define MAXDOUBLE HUGE_VAL
+#define DSIGNIF 52
+#else
 #include <values.h>
+#endif
 #include <grp.h>
 /*
  * On some systems this is not included by tclUnix.h.

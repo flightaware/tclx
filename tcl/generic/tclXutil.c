@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXutil.c,v 2.0 1992/10/16 04:51:21 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,7 +28,9 @@
  */
 char *tclXWrongArgs = "wrong # args: ";
 
+#ifndef pow
 extern double pow ();
+#endif
 
 
 /*

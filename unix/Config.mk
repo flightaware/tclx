@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.6 1992/12/19 06:42:52 markd Exp markd $
+# $Id: Config.mk,v 2.7 1993/01/15 02:21:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -288,6 +288,12 @@ TK_MAN_FUNC_SECTION=3
 #        sys/time.h, tclUnix.h defines CLK_TCK then tclExtdInt.h includes
 #        time.h and you get a redefiniton warning.  Set this flag to prevent
 #        the warning (its not safe to just unset it).
+#
+#      o TCL_NOVALUES_H - Some systems do not support the <values.h>
+#      include file.  Define this to account for this fact.
+#
+#      o TCL_USEGETTOD - Use gettimeofday for handling timezone shifts
+#      from GMT.
 #
 #    o LIBS - The flags to specify when linking the tclshell.
 #
