@@ -1,3 +1,10 @@
+2002-10-15  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tclconfig/tcl.m4:
+	* configure:
+	* configure.in: move the CFLAGS definition into TEA_ENABLE_SHARED
+	and make it pick up the env CFLAGS at configure time.
+
 2002-10-15  Andreas Kupries  <andreask@pliers.activestate.com>
 
 	* configure.in: Changed to propagate an initial CFLAGS value to
