@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 1.2 1996/10/21 03:07:51 markd Exp $
+ * $Id: tkXAppInit.c,v 1.3 1996/10/25 04:55:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -107,23 +107,29 @@ int
 Tcl_AppInit (Tcl_Interp *interp)
 {
     if (Tcl_Init (interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
 
     if (Tclx_Init(interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
     Tcl_StaticPackage(interp, "Tclx", Tclx_Init, Tclx_SafeInit);
 
     if (Tk_Init(interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
     Tcl_StaticPackage(interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
 
     if (Tkx_Init(interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
     Tcl_StaticPackage(interp, "Tkx", Tkx_Init, (Tcl_PackageInitProc *) NULL);
+
+    /*
+     * Initialize the console for interactive applications.
+     */
+    if (TkX_ConsoleInit (interp) == TCL_ERROR)
+        goto errorExit;
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -138,4 +144,7 @@ Tcl_AppInit (Tcl_Interp *interp)
      */
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.wishxrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
+
+  errorExit:
+    TkX_Panic ("%s\n", interp->result);
 }

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.5 1996/10/19 18:24:07 markd Exp $
+# $Id: Makefile.in,v 7.6 1996/10/20 01:53:38 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -63,7 +63,7 @@ LIBTCLX = ../../tcl/unix/libtclx.a
 
 HELP_DIR = ${srcbasedir}/tk/help
 
-TEST_OBJS = tkTest.o tkSquare.o tkXtest.o
+TEST_OBJS = tkTest.o tkSquare.o tkXunixTest.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -106,6 +106,9 @@ tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
 
 tkXAppInit.o: ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
 	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
+
+tkXunixTest.o: ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
+	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
 
 tkXinit..o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
 	@SAVE@

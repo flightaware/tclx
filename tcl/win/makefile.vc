@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.11 1996/10/21 03:07:47 markd Exp $
+# $Id: makefile.vc,v 7.12 1996/10/25 04:55:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -31,6 +31,7 @@ TCLOBJS = \
 
 TCLXTESTOBJS = \
         $(TMP_DIR)\tclXTest.obj \
+        $(TMP_DIR)\tclXwinTest.obj \
         $(TMP_DIR)\tclTest.obj \
         $(TMP_DIR)\tclWinTest.obj
 
@@ -207,6 +208,10 @@ clean:
 #------------------------------------------------------------------------------
 # Special case object file targets
 #
+$(TMP_DIR)\tclXwinTest.obj: $(TCLX_WIN_DIR)\tclXwinTest.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
+                $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?
+
 $(TMP_DIR)\winDumpExts.obj: $(TCL_WIN_DIR)\winDumpExts.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
                 $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?

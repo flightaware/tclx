@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.2 1996/10/21 03:07:51 markd Exp $
+# $Id: makefile.vc,v 7.3 1996/10/25 04:55:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -39,6 +39,7 @@ TKXTESTOBJS = \
 TKXOBJS = \
         $(TMP_DIR)\tkXinit.obj \
         $(TMP_DIR)\tkXshell.obj \
+        $(TMP_DIR)\tkXwinUtil.obj \
         $(TMP_DIR)\tkConsole.obj
 
 WISHX = wishx.exe
@@ -109,7 +110,9 @@ runtest.bat: makefile.vc ..\..\win\common.vc
         echo echo off>>runtest.bat
         echo PATH $(TKX_WIN_DIR);$(TK_WIN_DIR);$(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
         echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
+        echo set TK_LIBRARY=$(TK_RUNTIME_DIR)>>runtest.bat
         echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
+        echo set TKX_LIBRARY=$(TKX_WIN_DIR)>>runtest.bat
         echo $(TKX_WIN_DIR)\tktest.exe %1 %2 %3 %4>>runtest.bat
 
 #------------------------------------------------------------------------------
@@ -117,7 +120,7 @@ runtest.bat: makefile.vc ..\..\win\common.vc
 #
 runtest.tcl: makefile.vc
         -del runtest.tcl
-	echo cd $(TK_TESTS_DIR)>>runtest.tcl
+	echo cd {$(TK_TESTS_DIR)}>>runtest.tcl
         echo source all>>runtest.tcl
         echo exit>>runtest.tcl
 

@@ -1,7 +1,7 @@
 /* 
  * tclXwinTest.c --
  *
- * Tcl_AppInit and main functions for the Extended Tcl test program on wIN32.
+ * Tcl_AppInit and main functions for the Extended Tcl test program on Win32.
  *
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 7.3 1996/09/28 16:22:38 markd Exp $
+ * $Id: tkXwinTest.c,v 7.1 1996/10/25 04:55:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -107,29 +107,35 @@ Tcl_AppInit (interp)
     Tcl_Interp *interp;
 {
     if (Tcl_Init (interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
 
     if (Tclx_Init (interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
     Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
 
     if (Tk_Init(interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
     Tcl_StaticPackage(interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
 
     if (Tkx_Init(interp) == TCL_ERROR) {
-        return TCL_ERROR;
+        goto errorExit;
     }
     Tcl_StaticPackage(interp, "Tkx", Tkx_Init, (Tcl_PackageInitProc *) NULL);
 
+    if (TkX_ConsoleInit (interp) == TCL_ERROR)
+        goto errorExit;
+
     if (Tktest_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
+	goto errorExit;
     }
     Tcl_StaticPackage (interp, "Tktest", Tktest_Init,
                       (Tcl_PackageInitProc *) NULL);
 
     return TCL_OK;
+
+  errorExit:
+    TkX_Panic ("%s\n", interp->result);
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 7.5 1996/09/09 22:22:00 markd Exp $
+ * $Id: tclExtend.h,v 7.6 1996/10/19 18:24:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -257,13 +257,7 @@ TclX_AsyncCommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
 
 /*
  * Tk with TclX initialization.
- *
- * The variables are Used to override the library and library environment
- * variable used to find the TkX startup file and runtime library.  The values
- * of these fields must be changed before Tkx_Init is called.
  */
-extern char *tkX_library;
-extern char *tkX_libraryEnv;
 
 EXTERN int
 Tkx_Init _ANSI_ARGS_((Tcl_Interp  *interp));
@@ -272,5 +266,14 @@ EXTERN void
 TkX_Main _ANSI_ARGS_((int               argc,
                       char            **argv,
                       Tcl_AppInitProc  *appInitProc));
+
+/*
+ * These are for Windows only.
+ */
+EXTERN int
+TkX_ConsoleInit _ANSI_ARGS_((Tcl_Interp *interp));
+
+EXTERN void
+TkX_Panic _ANSI_ARGS_(TCL_VARARGS_DEF(char *,fmt));
 
 #endif

@@ -12,13 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 1.2 1996/10/21 03:07:53 markd Exp $
+# $Id: common.vc,v 1.3 1996/10/25 04:55:42 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 #
-# IMPORTANT:  All paths in the file are relative to the TclX directories
-# tcl/win and tk/win, not the directory containing this file.
+# IMPORTANT:  Most paths in the file must be absolute paths.  This is normally
+# done my making them relative to $(ROOT).
 #
 
 #
@@ -29,17 +29,17 @@ PREFIX=C:/markd
 #
 # Project directories
 #
-# ROOT    = top of source tree
-# TMP_DIR = location where .obj files should be stored during build
-# TOOLS32 = location of VC++ 32-bit development tools, note that the
-#           VC++ 2.0 header files are broken, so you need to use the
-#           ones that come with the developer network CD's, or later
-#           versions of VC++.
-# TOOLS16 = location of VC++ 1.5 16-bit tools, needed to build thunking
-#           library
+# o ROOT- Absolute path to the top of source tree.
+# o TMP_DIR - Location where .obj files should be stored during build.
+#   This maybe absolute or relative to the win build directories.
+# o TOOLS32 - Location of VC++ 32-bit development tools. Note that the
+#   VC++ 2.0 header files are broken, so you need to use the ones that
+#   come with the developer network CD's, or later versions of VC++.
+# o TOOLS16 = location of VC++ 1.5 16-bit tools, needed to build thunking
+#   library. (not currently used).
 #
 
-ROOT     = ..\..
+ROOT     = $(MAKEDIR)\..\..
 TMP_DIR  = .
 TOOLS32  = c:\msdev
 TOOLS16  = c:\msdev
@@ -53,7 +53,7 @@ TOOLS16  = c:\msdev
 #
 # Tcl build directories and files.
 #
-TCL_DIR          = ..\..\..\tcl7.6
+TCL_DIR          = $(ROOT)\..\tcl7.6
 TCL_GENERIC_DIR  = $(TCL_DIR)\generic
 TCL_WIN_DIR      = $(TCL_DIR)\win
 TCL_RUNTIME_DIR  = $(TCL_DIR)\library
@@ -64,7 +64,7 @@ TCL_DLL          = $(TCL_WIN_DIR)\tcl76.dll
 #
 # TK build directories and files.
 #
-TK_DIR           = ..\..\..\tk4.2
+TK_DIR           = $(ROOT)\..\tk4.2
 TK_GENERIC_DIR   = $(TK_DIR)\generic
 TK_WIN_DIR       = $(TK_DIR)\win
 TK_XLIB_DIR      = $(TK_DIR)\xlib
