@@ -55,7 +55,8 @@ page man/TclX.man.
     o A shell, which provides an environment for developing and executing
       Tcl programs.  
 
-    o Advanced Tcl code library facility.
+    o Advanced Tcl code library facility that is compatible with standard
+      Tcl auto-loading.
 
     o General purpose commands which define new programming constructs,
       debugging and profiling facilities.
