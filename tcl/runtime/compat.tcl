@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 5.3 1996/02/18 22:10:26 markd Exp $
+# $Id: compat.tcl,v 5.4 1996/03/10 22:16:51 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -36,8 +36,8 @@ proc assign_fields {list args} {
 # Added TclX 7.4a
 proc cexpand str {subst -nocommands -novariables $str}
 
-#@package: TclX-ServerCompat assign_fields cexpand server_open server_connect \
-           server_send server_info server_cntl
+#@package: TclX-ServerCompat server_open server_connect server_send \
+                             server_info server_cntl
 
 # Added TclX 7.4a
 
