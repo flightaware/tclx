@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcreate.c,v 1.2 1992/09/21 05:08:03 markd Exp markd $
+ * $Id: tclXcreate.c,v 2.0 1992/10/16 04:50:33 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -208,6 +208,8 @@ Tcl_CreateExtendedInterp ()
     Tcl_CreateCommand(interp, "lvarpush", Tcl_LvarpushCmd, 
                      (ClientData)NULL, (void (*)())NULL);
     Tcl_CreateCommand(interp, "lempty", Tcl_LemptyCmd, 
+                     (ClientData)NULL, (void (*)())NULL);
+    Tcl_CreateCommand(interp, "lassign", Tcl_LassignCmd, 
                      (ClientData)NULL, (void (*)())NULL);
     /*
      * from tclXmath.c

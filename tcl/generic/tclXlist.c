@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXlist.c,v 2.0 1992/10/16 04:50:57 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -275,4 +275,52 @@ Tcl_LemptyCmd (clientData, interp, argc, argv)
     sprintf (interp->result, "%d", (*scanPtr == '\0'));
     return TCL_OK;
 
-} /* Tcl_LemptyCmd */
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_LassignCmd --
+ *     Implements the TCL assign_fields command:
+ *         lassign list varname [varname...]
+ *
+ * Results:
+ *      Standard TCL results.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_LassignCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    int        listArgc, listIdx, idx;
+    char     **listArgv;
+    char      *varValue;
+
+    if (argc < 3) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " list varname [varname..]", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (Tcl_SplitList (interp, argv[1], &listArgc, &listArgv) == TCL_ERROR)
+        return TCL_ERROR;
+
+    for (idx = 2, listIdx = 0; idx < argc; idx++, listIdx++) {
+
+        varValue = (listIdx < listArgc) ? listArgv[listIdx] : "" ;
+        if (Tcl_SetVar (interp, argv[idx], varValue,
+           TCL_LEAVE_ERR_MSG) == NULL) {
+            goto error_exit;
+        }
+    }
+    ckfree((char *) listArgv);
+    return TCL_OK;
+
+  error_exit:
+    ckfree((char *) listArgv);
+    return TCL_ERROR;
+}

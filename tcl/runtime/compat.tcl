@@ -13,12 +13,15 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 1.1 1992/09/20 23:30:27 markd Exp markd $
+# $Id: compat.tcl,v 2.0 1992/10/16 04:51:51 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
-#@package: TclX-Compatibility execvp
+#@package: TclX-Compatibility execvp assign_fields
 
 proc execvp {progname args} {
     execl $progname $args
+}
+proc assign_fields {list args} {
+    return [uplevel lassign [list $list] $args]
 }
