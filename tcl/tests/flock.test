@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 2.2 1993/04/07 06:50:44 markd Exp markd $
+# $Id: flock.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -79,18 +79,6 @@ Test flock-1.9 {flock argument checking} {
 } 1 {bad origin "bad": should be "start", "current", or "end"}
 
 Test flock-1.10 {flock argument checking} {
-    flock $readFH
-} 1 {file not open for writing}
-
-Test flock-1.11 {flock argument checking} {
-    flock -write $readFH 
-} 1 {file not open for writing}
-
-Test flock-1.12 {flock argument checking} {
-    flock -read $writeFH 
-} 1 {file not open for reading}
-
-Test flock-1.13 {flock argument checking} {
     flock -read -write $rdwrFH 
 } 1 {can not specify both "-read" and "-write"}
 
@@ -152,25 +140,41 @@ funlock $writeFH
 
 
 #
+# Check locking read/write access checking.
+#
+
+Test flock-3.1 {flock argument checking} {
+    flock $readFH
+} 1 {file not open for writing}
+
+Test flock-3.2 {flock argument checking} {
+    flock -write $readFH 
+} 1 {file not open for writing}
+
+Test flock-3.3 {flock argument checking} {
+    flock -read $writeFH 
+} 1 {file not open for reading}
+
+#
 # Check locking of a file that is not locked
 #
 
-Test flock-3.1 {flock/unlock of a file that is not locked} {
+Test flock-4.1 {flock/unlock of a file that is not locked} {
    flock $writeFH
    funlock $writeFH
 } 0 {}
 
-Test flock-3.2 {flock/unlock of a file that is not locked} {
+Test flock-4.2 {flock/unlock of a file that is not locked} {
    flock -write $writeFH
    funlock $writeFH
 } 0 {}
 
-Test flock-3.3 {flock/unlock of a file that is not locked} {
+Test flock-4.3 {flock/unlock of a file that is not locked} {
    flock -write $rdwrFH
    funlock $rdwrFH
 } 0 {}
 
-Test flock-3.2 {flock/unlock of a file that is not locked} {
+Test flock-4.2 {flock/unlock of a file that is not locked} {
    flock -read $readFH
    funlock $readFH
 } 0 {}
@@ -194,25 +198,25 @@ if {$lockerPid == 0} {
 if {([gets $fromChild line] < 0) || ([set line] != "*I am ready*")} {
    error "Unexpected response from flock test child: $line"}
 
-Test flock-4.1 {flock of file locked by child process} {
+Test flock-5.1 {flock of file locked by child process} {
    flock -nowait $writeFH
 } 0 0
 
-Test flock-4.2 {flock of file locked by child process} {
+Test flock-5.2 {flock of file locked by child process} {
    flock -nowait $rdwrFH 0 5
 } 0 0
 
-Test flock-4.3 {flock of file locked by child process} {
+Test flock-5.3 {flock of file locked by child process} {
    flock -nowait $rdwrFH 0 5 start
 } 0 0
 
 set rdwrSize [fstat $rdwrFH size]
 
-Test flock-4.4 {flock of file locked by child process} {
+Test flock-5.4 {flock of file locked by child process} {
    flock -nowait $rdwrFH -$rdwrSize 5 end
 } 0 0
 
-Test flock-4.4 {flock of file locked by child process} {
+Test flock-5.4 {flock of file locked by child process} {
    set stat [flock -nowait $rdwrFH 10 12 start]
    funlock $rdwrFH 10 12 start
    set stat
