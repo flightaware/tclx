@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 4.3 1995/07/01 17:50:09 markd Exp markd $
+# $Id: testlib.tcl,v 4.4 1995/07/01 17:54:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -57,23 +57,32 @@ if {[info command unknown] != ""} {
 }
 
 #
+# Convert a Tcl result code to a string.
+#
+proc TestResultCode code {
+    switch -- $code {
+        0 {return TCL_OK}
+        1 {return TCL_ERROR}
+        2 {return TCL_RETURN}
+        3 {return TCL_BREAK}
+        4 {return TCL_CONTINUE}
+        default {return "***Unknown error code $code***"}
+    }
+}
+
+#
 # Output a test error.
 #
 proc OutTestError {test_name test_description contents_of_test
                    passing_int_result passing_result int_result result} {
     global TEST_ERROR_INFO errorInfo errorCode
-    set int(0) TCL_OK
-    set int(1) TCL_ERROR
-    set int(2) TCL_RETURN
-    set int(3) TCL_BREAK
-    set int(4) TCL_CONTINUE
 
     puts stderr "==== $test_name $test_description"
     puts stderr "==== Contents of test case:"
     puts stderr "$contents_of_test"
-    puts stderr "==== Result was: $int($int_result)"
+    puts stderr "==== Result was: [TestResultCode $int_result]"
     puts stderr "$result"
-    puts stderr "---- Result should have been: $int($passing_int_result)"
+    puts stderr "---- Result should have been: [TestResultCode $passing_int_result]"
     puts stderr "$passing_result"
     puts stderr "---- $test_name FAILED" 
     if {[info exists TEST_ERROR_INFO] && [info exists errorInfo]} {
