@@ -14,7 +14,6 @@
 ./tcl/generic/tclExtend.h
 ./tcl/generic/tclXAppInit.c
 ./tcl/generic/tclXbsearch.c
-./tcl/generic/tclXchmod.c
 ./tcl/generic/tclXcmdInit.c
 ./tcl/generic/tclXcmdloop.c
 ./tcl/generic/tclXdebug.c
@@ -26,7 +25,6 @@
 ./tcl/generic/tclXfstat.c
 ./tcl/generic/tclXgeneral.c
 ./tcl/generic/tclXhandles.c
-./tcl/generic/tclXid.c
 ./tcl/generic/tclXinit.c
 ./tcl/generic/tclXkeylist.c
 ./tcl/generic/tclXlib.c
@@ -295,6 +293,8 @@
 ./tcl/tests/testlib.tcl
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
+./tcl/unix/tclXchmod.c
+./tcl/unix/tclXid.c
 ./tcl/unix/tclXunixCmds.c
 ./tcl/unix/tclXunixOS.c
 ./tcl/unix/tclXunixPort.h
