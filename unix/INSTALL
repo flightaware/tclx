@@ -107,7 +107,7 @@ directory.  This approach makes it easy to move a complete distrbution
 to other machines, store multiple versions of TclX on a system and remove
 all of the files associated with an outdated version. 
 
-The master directory model is specified by the --with-master option to the
+The master directory model is specified by the --enable-master option to the
 configure command.
 
 The resulting directory layout is:
@@ -193,7 +193,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           Directory under which the "bin" and "lib" directories are
           found for installation.  
 
-        o --with-master
+        o --enable-master
           Configure for the master installation model.
 
     o If you decide to change the --with-arch, --prefix or --execprefix,

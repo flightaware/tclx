@@ -15,8 +15,7 @@ ac_help="$ac_help
   --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
                           and lib directory names"
 ac_help="$ac_help
-  --with-master           architecture suffix, appended .ARCH to the bin
-                          and lib directory names"
+  --enable-master         enable master directory installation model"
 ac_help="$ac_help
   --disable-load          disallow dynamic loading and "load" command"
 ac_help="$ac_help
@@ -525,14 +524,15 @@ else
 fi
 
 
-# From configure.in Revision: 5.10 dnl
+# From configure.in Revision: 5.11 dnl
 
 
 
 # If `configure' is invoked (in)directly via `make', ensure that it
-# encounters no `make' conflicts.
+# encounters no `make' conflicts.  Ignore error if shell does not have
+# unset.
 #
-unset MFLAGS MAKEFLAGS
+unset MFLAGS MAKEFLAGS 2>/dev/null
 
 #------------------------------------------------------------------------------
 # If the --srcdir option has been used, make sure we are in a directory called
@@ -578,12 +578,12 @@ fi
 
 
 #------------------------------------------------------------------------------
-# Handle the --with-master option.
+# Handle the --enable-master option.
 #------------------------------------------------------------------------------
 
-# Check whether --with-master or --without-master was given.
-if test "${with_master+set}" = set; then
-  withval="$with_master"
+# Check whether --enable-master or --disable-master was given.
+if test "${enable_master+set}" = set; then
+  enableval="$enable_master"
   master="YES"
 else
   master="NO"

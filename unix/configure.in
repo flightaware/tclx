@@ -13,17 +13,18 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.10 1996/02/16 18:05:17 markd Exp $
+dnl $Id: configure.in,v 5.11 1996/02/17 08:44:19 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.10 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.11 $),)dnl
 
 AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
 
 # If `configure' is invoked (in)directly via `make', ensure that it
-# encounters no `make' conflicts.
+# encounters no `make' conflicts.  Ignore error if shell does not have
+# unset.
 #
-unset MFLAGS MAKEFLAGS
+unset MFLAGS MAKEFLAGS 2>/dev/null
 
 #------------------------------------------------------------------------------
 # If the --srcdir option has been used, make sure we are in a directory called
@@ -67,12 +68,11 @@ fi
 AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
-# Handle the --with-master option.
+# Handle the --enable-master option.
 #------------------------------------------------------------------------------
 
-AC_ARG_WITH(master,
-         [  --with-master           architecture suffix, appended .ARCH to the bin
-                          and lib directory names],
+AC_ARG_ENABLE(master,
+         [  --enable-master         enable master directory installation model],
          [master="YES"], [master="NO"])
 if test "X$master" = "XYES" ; then
     AC_MSG_RESULT("Master installation model")
