@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.2 1997/02/04 03:09:50 markd Exp $
+dnl $Id: configure.in,v 8.3 1997/02/06 18:15:27 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.2 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.3 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -427,11 +427,11 @@ AC_SUBST(SHARED_LIBS)
 
 if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
     LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib:$TCLX_INST_LIB"
-    TCLX_CC_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS` 
 fi
 if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
     LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
 fi
+eval "TCLX_CC_SEARCH_FLAGS=\"$TCL_LD_SEARCH_FLAGS\""
 TCLX_LD_SEARCH_FLAGS=`echo ${TCLX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
 AC_SUBST(TCLX_LD_SEARCH_FLAGS)
 AC_SUBST(TCLX_CC_SEARCH_FLAGS)
@@ -449,8 +449,8 @@ if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
     if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
 	LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
     fi
-    TKX_CC_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS` 
 fi
+eval "TKX_CC_SEARCH_FLAGS=\"$TCL_LD_SEARCH_FLAGS\""
 TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
 AC_SUBST(TKX_LD_SEARCH_FLAGS)
 AC_SUBST(TKX_CC_SEARCH_FLAGS)
