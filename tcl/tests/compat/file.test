@@ -12,14 +12,15 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: file.test,v 1.1 1996/10/04 15:30:30 markd Exp $
+# $Id: file.test,v 1.2 1996/10/19 18:47:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
 
-TestRemove MKDIR1.TMP MKDIR2.TMP MKDIR3.TMP FRENAME1.TMP FRENAME2.TMP
+TestRemove MKDIR1.TMP MKDIR2.TMP MKDIR3.TMP UNLINK1.TMP UNLINK2.TMP \
+        UNLINK3.TMP FRENAME1.TMP FRENAME2.TMP
 
 Test file-compat-1.1 {mkdir tests} {
     catch {rmdir {MKDIR1.TMP MKDIR2.TMP}}
@@ -91,24 +92,31 @@ Test file-compat-2.5 {rmdir tests} {
 } 0 {}
 
 Test file-compat-3.1 {unlink tests} {
-    set fh [open UNLINK.TMP w]
+    set fh [open UNLINK1.TMP w]
     puts $fh "Hello, world"
     close $fh
-    unlink UNLINK.TMP
-    file exists UNLINK.TMP
+    unlink UNLINK1.TMP
+    file exists UNLINK1.TMP
 } 0 0
 
 Test file-compat-3.2 {unlink tests} {
-    list [catch {unlink UNLINK.TMP} msg] [string tolower $msg]
-} 0 {1 {can't remove "unlink.tmp": no such file or directory}}
+    list [catch {unlink UNLINK1.TMP} msg] [string tolower $msg]
+} 0 {1 {can't remove "unlink1.tmp": no such file or directory}}
 
 Test file-compat-3.4 {unlink tests} {
-    set fh [open UNLINK.TMP w]
+    set fh [open UNLINK1.TMP w]
     puts $fh "Hello, world"
     close $fh
-    unlink -nocomplain {../src/FOOWAPFOO UNLINK.TMP}
-    file exists UNLINK.TMP
+    unlink -nocomplain {../src/FOOWAPFOO UNLINK1.TMP}
+    file exists UNLINK1.TMP
 } 0 0
+
+Test file-compat-3.4 {unlink tests} {
+    mkdir UNLINK2.TMP
+    link -sym UNLINK2.TMP UNLINK3.TMP
+    unlink UNLINK3.TMP
+    file exists UNLINK3.TMP
+} 0 0 {unixOnly}
 
 Test file-compat-4.1 {frename tests} {
     close [open FRENAME1.TMP w]
@@ -125,7 +133,8 @@ Test file-compat-4.4 {frename tests} {
     list [catch {frename FRENAME3.TMP FRENAME4.TMP} msg] [string tolower $msg]
 } 0 {1 {error renaming "frename3.tmp": no such file or directory}}
 
-TestRemove MKDIR1.TMP MKDIR2.TMP MKDIR3.TMP FRENAME1.TMP FRENAME2.TMP
+TestRemove MKDIR1.TMP MKDIR2.TMP MKDIR3.TMP UNLINK1.TMP UNLINK2.TMP \
+        UNLINK3.TMP FRENAME1.TMP FRENAME2.TMP
 
 rename unknown {}
  
