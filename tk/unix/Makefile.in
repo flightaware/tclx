@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.10 1996/02/17 08:44:08 markd Exp $
+# $Id: Makefile.in,v 5.11 1996/02/20 09:10:46 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -58,7 +58,7 @@ LIBTCLX = ../../tcl/unix/libtclx.a
 
 HELP_DIR = ${srcbasedir}/tk/help
 
-TEST_OBJS = tktest.o tkSquare.o tkXtest.o
+TEST_OBJS = tkTest.o tkSquare.o tkXtest.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -128,24 +128,14 @@ tktest: ${TEST_OBJS} libtkx.a ${LIBTCLX}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
 	    (rm -f tktest; exit 1)
 
-tktest.o: tktest.c
-	${CC} -c ${CC_SWITCHES} tktest.c
+tkTest.o: ${TK_SRC}/generic/tkTest.c
+	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkTest.c
 
-tkSquare.o: tkSquare.c
-	${CC} -c ${CC_SWITCHES} tkSquare.c
+tkSquare.o: ${TK_SRC}/generic/tkSquare.c
+	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkSquare.c
 
 tkXtest.o: ${TKX_GENERIC_DIR}/tkXtest.c
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXtest.c
-
-tktest.c: ${TK_SRC}/generic/tkTest.c
-	rm -f tktest.c	
-	echo '#include "../../tcl/unix/tclXconf.h"' >tktest.c
-	cat ${TK_SRC}/generic/tkTest.c >>tktest.c
-
-tkSquare.c: ${TK_SRC}/generic/tkSquare.c
-	rm -f tkSquare.c	
-	echo '#include "../../tcl/unix/tclXconf.h"'   >tkSquare.c
-	cat ${TK_SRC}/generic/tkSquare.c >>tkSquare.c
 
 #------------------------------------------------------------------------------
 
@@ -200,19 +190,19 @@ install-exec:
 	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
 	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TKX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/libtkx.a
-	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TKX_INST_LIB}
+	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
 	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
 
 #------------------------------------------------------------------------------
 clean:
 	-rm -f tkXAppInit.o ${OBJS} ${TEST_OBJS} wishx libtkx.a
-	-rm -f tktest.c tkSquare.c tclhelp help help.tmp
+	-rm -rf tclhelp help help.tmp
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
 
 distclean: clean
-	rm -f Makefile tkxlibs.mk runtest tktest
+	rm -f Makefile tkxConfig.sh runtest tktest
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:

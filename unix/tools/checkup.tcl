@@ -24,7 +24,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: checkup.tcl,v 5.1 1996/02/12 18:17:31 markd Exp $
+# $Id: checkup.tcl,v 5.2 1996/02/20 09:11:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -54,7 +54,7 @@ proc ReportError {chkfile cmd} {
 #  o cmd - The command that was used.
 #
 proc CheckDirList {dirlist cmd} {
-    foreach chkfile {Makefile tclXconf.h tcl} {
+    foreach chkfile {Makefile tclxConfig.sh tcl} {
         if {[lsearch $dirlist $chkfile] < 0} {
             ReportError $chkfile $cmd
         }
@@ -69,5 +69,5 @@ CheckDirList [readdir .] readdir
 # a header.
 #
 proc MissingMsg {msg} {
-    
+    # Not done yet.
 }

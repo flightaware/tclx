@@ -13,16 +13,29 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.12 1996/02/20 03:52:55 markd Exp $
+dnl $Id: configure.in,v 5.13 1996/02/20 09:11:01 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.12 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.13 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
 # unset.
 #
 unset MFLAGS MAKEFLAGS 2>/dev/null
+
+#------------------------------------------------------------------------------
+# System information and date for including in some files.
+#------------------------------------------------------------------------------
+if test -f /usr/lib/NextStep/software_version; then
+    UNAME_OUT=NEXTSTEP-`awk '/3/,/3/' /usr/lib/NextStep/software_version`
+else
+    UNAME_OUT=`uname -s`-`uname -r`
+fi
+AC_SUBST(UNAME_OUT)
+
+DATE_OUT=`date`
+AC_SUBST(DATE_OUT)
 
 #------------------------------------------------------------------------------
 # If the --srcdir option has been used, make sure we are in a directory called
@@ -438,5 +451,5 @@ AC_SUBST(TCLX_DEFS)
 AC_SUBST(prefix)
 AC_SUBST(execprefix)
 
-AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxlibs.mk ../tk/unix/tkxlibs.mk)
+AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxConfig.sh ../tk/unix/tkxConfig.sh)
 

@@ -298,7 +298,7 @@
 ./tcl/tests/testlib.tcl
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
-./tcl/unix/tclxlibs.mk.in
+./tcl/unix/tclxConfig.sh.in
 ./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
@@ -357,7 +357,7 @@
 ./tk/runtime/tkdemo.tcl
 ./tk/tests/signal.test
 ./tk/unix/Makefile.in
-./tk/unix/tkxlibs.mk.in
+./tk/unix/tkxConfig.sh.in
 ./unix/Common.mk.in
 ./unix/Config.mk
 ./unix/Makefile.in

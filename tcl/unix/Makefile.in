@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.11 1996/02/17 08:44:05 markd Exp $
+# $Id: Makefile.in,v 5.12 1996/02/20 09:10:38 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -262,13 +262,8 @@ tclXtest: ${TEST_OBJS} libtclx.a
 tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXtest.c
 
-tclTest.o: tclTest.c
-	${CC} -c ${CC_SWITCHES} tclTest.c
-
-tclTest.c: ${TCL_SRC}/generic/tclTest.c
-	rm -f tclTest.c	
-	echo '#include "tclXconf.h"'      >tclTest.c
-	cat ${TCL_SRC}/generic/tclTest.c >>tclTest.c
+tclTest.o: ${TCL_SRC}/generic/tclTest.c
+	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclTest.c
 
 #------------------------------------------------------------------------------
 
@@ -345,21 +340,20 @@ install-exec:
 	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
 	${INSTCOPY} libtclx.a ${INSTALL_ROOT}${TCLX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/libtclx.a
-	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${TCLX_INST_LIB}
+	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
 
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclXAppInit.o tclTest.c
-	-rm -f ${OBJS} libtclx.a tcl checkup.done
+	-rm -f tclXAppInit.o ${OBJS} libtclx.a tcl checkup.done
 	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl
-	-rm -f help help.tmp ${TEST_OBJS} tclXtest runtest
+	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
 
 distclean: clean
-	rm -f Makefile tclxlibs.mk
+	rm -f Makefile tclxConfig.sh
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:
