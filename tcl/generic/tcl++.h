@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 1.3 1992/10/12 16:44:15 markd Exp markd $
+ * $Id: tcl++.h,v 2.0 1992/10/16 04:51:25 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -397,9 +397,10 @@ public:
     }
 
     inline void
-    ErrorAbort (int  exitCode)
+    ErrorAbort (int  noStackDump,
+                int  exitCode)
     {
-        Tcl_ErrorAbort (interp, exitCode);
+        Tcl_ErrorAbort (interp, noStackDump, exitCode);
     }
 
     inline int
