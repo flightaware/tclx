@@ -1,16 +1,16 @@
 #-----------------------------------------------------------------------------
 # tclx.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: tclx.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+# $Id: tclx.tcl,v 1.2 2002/04/02 02:59:53 hobbs Exp $
 #-----------------------------------------------------------------------------
 
 namespace eval ::tclx {
     global auto_path auto_index tclx_library
-
     if {[info exists tclx_library] && [string compare {} $tclx_library]} {
 	set auto_index(buildpackageindex) \
 		{source [file join $tclx_library buildidx.tcl]}
-	if {![info exists auto_path] || ![lcontain $auto_path $tclx_library]} {
+	if {![info exists auto_path] || \
+		![lcontain $auto_path $tclx_library]} {
 	    lappend auto_path $tclx_library
 	}
     }
