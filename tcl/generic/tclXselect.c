@@ -12,16 +12,27 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXselect.c,v 2.6 1993/07/17 23:33:39 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+#ifdef HAVE_SELECT
+
+#ifdef HAVE_SYS_SELECT_H
+#   include <sys/select.h>
+#endif
+
 extern
 double floor ();
 
-#ifdef TCL_USE_BZERO_MACRO
+/*
+ * A couple of systems (Xenix and older SCO unix) have bzero hidden away
+ * in the X library that we don't use, but the select macros use bzero.
+ * Make them use memset with this magic.
+ */
+#ifndef HAVE_BZERO
 #    define bzero(to,length)    memset(to,'\0',length)
 #endif
 
@@ -43,11 +54,11 @@ double floor ();
 /*
  * A few systems (A/UX 2.0) have select but no macros, define em in this case.
  */
-#if !defined(TCL_NO_SELECT) && !defined(FD_SET)
-#   define FD_SET(fd,fdset)	(fdset)->fds_bits[0] |= (1<<(fd))
-#   define FD_CLR(fd,fdset)	(fdset)->fds_bits[0] &= ~(1<<(fd))
-#   define FD_ZERO(fdset)		(fdset)->fds_bits[0] = 0
-#   define FD_ISSET(fd,fdset)	(((fdset)->fds_bits[0]) & (1<<(fd)))
+#ifndef FD_SET
+#   define FD_SET(fd,fdset)     (fdset)->fds_bits[0] |= (1<<(fd))
+#   define FD_CLR(fd,fdset)     (fdset)->fds_bits[0] &= ~(1<<(fd))
+#   define FD_ZERO(fdset)       (fdset)->fds_bits[0] = 0
+#   define FD_ISSET(fd,fdset)   (((fdset)->fds_bits[0]) & (1<<(fd)))
 #endif
 
 /*
@@ -71,7 +82,6 @@ ReturnSelectedFileList _ANSI_ARGS_((fd_set     *fileDescSetPtr,
                                     int         fileDescCnt,
                                     FILE      **fileDescList));
 
-#ifndef TCL_NO_SELECT
 
 /*
  *-----------------------------------------------------------------------------
@@ -372,7 +382,7 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
      * Return the result, either a 3 element list, or leave the result
      * empty if the timeout occured.
      */
-    if (numSelected > 0) {
+    if (numSelected > 0 || pending) {
         retListArgv [0] = ReturnSelectedFileList (&readFdSet,
                                                   &readFdSet2,
                                                   readDescCnt,

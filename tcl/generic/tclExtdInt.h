@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.14 1993/07/23 06:42:57 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.15 1993/07/25 00:56:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,21 +20,25 @@
 #define TCLEXTDINT_H
 
 #include "tclExtend.h"
+#include "tclXconfig.h"
 #include "tclInt.h"
 #include "tclUnix.h"
+
 #include <sys/param.h>
-
-
-#ifdef TCL_NEED_SYS_SELECT_H
-#   include <sys/select.h>
-#endif
 
 /*
  * If tclUnix.h has already included time.h, don't include it again, some
  * systems don't #ifdef inside of the file.
  */
-#ifndef NO_SYS_TIME_H
-#   include <time.h>
+#ifdef TIME_WITH_SYS_TIME
+#    include <sys/time.h>
+#    include <time.h>
+#else
+#    ifdef HAVE_SYS_TIME_H
+#        include <sys/time.h>
+#    else
+#        include <time.h>
+#    endif
 #endif
 
 #include <sys/times.h>
@@ -54,25 +58,16 @@
 
 #define MS_PER_TICK ((1000 + CLK_TCK/2) / CLK_TCK)
 
-/*
- * If tclUnix.h did not bring times.h, bring it in here.
- */
-#if TCL_GETTOD
-#    include <sys/times.h>
-#endif 
-
-#ifdef TCL_NOVALUES_H
-#include <math.h>
-#include <limits.h>
-#define MAXDOUBLE HUGE_VAL
-#define DSIGNIF 52
+#ifdef HAVE_VALUES_H
+#    include <values.h>
 #else
-#include <values.h>
+#    include <math.h>
+#    include <limits.h>
+#    define MAXDOUBLE HUGE_VAL
 #endif
+
 #include <grp.h>
-/*
- * On some systems this is not included by tclUnix.h.
- */
+
 
 /*
  * These should be take from an include file, but it got to be such a mess
@@ -80,6 +75,33 @@
  */
 struct tm *gmtime ();
 struct tm *localtime ();
+
+/*
+ * Determine how a timezone is obtained from "struct tm".  If there is no
+ * time zone in this struct (very lame) then use the timezone variable.
+ * This is done in a way to make the timezone variable the method of
+ * second to last resort, as some systems have it in addition to a field in
+ * "struct tm".  The last resort is to use gettimeofday to determine the
+ * time zone (this is all a big drag).
+ */
+
+#if defined(HAVE_TM_TZADJ)
+#    define TCL_USE_TM_TZADJ
+#    define TCL_GOT_TIMEZONE
+#endif
+#if defined(HAVE_TM_GMTOFF) && !defined (TCL_GOT_TIMEZONE)
+#    define TCL_USE_TM_GMTOFF
+#    define TCL_GOT_TIMEZONE
+#endif
+#if defined(HAVE_TIMEZONE_VAR) && !defined (TCL_GOT_TIMEZONE)
+#    define TCL_USE_TIMEZONE_VAR
+#    define TCL_GOT_TIMEZONE
+#endif
+#if defined(HAVE_GETTIMEOFDAY) && !defined (TCL_GOT_TIMEZONE)
+#    define TCL_USE_GETTIMEOFDAY
+#    define TCL_GOT_TIMEZONE
+#endif
+
 
 #ifndef MAXINT
 #    define BITSPERBYTE   8

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.7 1993/07/20 08:20:26 markd Exp markd $
+ * $Id: tclXlib.c,v 2.8 1993/07/23 03:19:29 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -309,15 +309,15 @@ MakeAbsFile (interp, fileName, absNamePtr)
      * Otherwise its relative to the current directory, get the directory
      * and go from here.
      */
-#if TCL_GETWD
-    if (getwd (curDir) == NULL) {
-        Tcl_AppendResult (interp, "error getting working directory name: ",
-                          curDir, (char *) NULL);
-    }
-#else
+#ifdef HAVE_GETCWD
     if (getcwd (curDir, MAXPATHLEN) == NULL) {
         Tcl_AppendResult (interp, "error getting working directory name: ",
                           Tcl_PosixError (interp), (char *) NULL);
+    }
+#else
+    if (getwd (curDir) == NULL) {
+        Tcl_AppendResult (interp, "error getting working directory name: ",
+                          curDir, (char *) NULL);
     }
 #endif
     Tcl_DStringAppend (absNamePtr, curDir, -  1);

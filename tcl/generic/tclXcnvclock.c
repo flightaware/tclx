@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 2.7 1993/04/16 06:42:34 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 2.8 1993/06/02 04:07:49 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,20 +43,18 @@ static int
 GetTimeZone (currentTime)
     time_t  currentTime;
 {
-#ifdef TCL_USEGETTOD
-#define TCL_GOT_TZ
-    struct timeval  tv;
-    struct timezone tz;
-    int             timeZone;
+#ifdef TCL_USE_TM_TZADJ
+    struct tm  *timeDataPtr = localtime (&currentTime);
+    int         timeZone;
 
-    gettimeofday (&tv, &tz);
-    timeZone = tz.tz_minuteswest;
+    timeZone = timeDataPtr->tm_tzadj  / 60;
+    if (timeDataPtr->tm_isdst)
+        timeZone += 60;
 
     return timeZone;
 #endif
 
-#ifdef TCL_TM_GMTOFF
-#define TCL_GOT_TZ
+#ifdef TCL_USE_TM_GMTOFF
     struct tm *timeDataPtr = localtime (&currentTime);
     int        timeZone;
 
@@ -67,8 +65,7 @@ GetTimeZone (currentTime)
     return timeZone;
 #endif
 
-#ifdef TCL_TIMEZONE_VAR
-#define TCL_GOT_TZ
+#ifdef TCL_USE_TIMEZONE_VAR
     static int setTZ = FALSE;
     int        timeZone;
 
@@ -81,16 +78,25 @@ GetTimeZone (currentTime)
     return timeZone;
 #endif
 
-#ifndef TCL_GOT_TZ
-    struct tm  *timeDataPtr = localtime (&currentTime);
-    int         timeZone;
+#ifdef TCL_USE_GETTIMEOFDAY
+    struct timeval  tv;
+    struct timezone tz;
+    int             timeZone;
 
-    timeZone = timeDataPtr->tm_tzadj  / 60;
-    if (timeDataPtr->tm_isdst)
-        timeZone += 60;
+    gettimeofday (&tv, &tz);
+    timeZone = tz.tz_minuteswest;
 
     return timeZone;
 #endif
+
+#ifndef TCL_GOT_TIMEZONE
+   /*
+    * Cause compile error.  The defines are done in tclExtdInt.h based on
+    * what autoconf found.
+    */
+  error: autoconf did not figure out how to determine the timezone. 
+#endif
+
 }
 
 /*

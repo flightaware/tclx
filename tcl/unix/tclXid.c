@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 2.5 1993/07/18 15:33:29 markd Exp markd $
+ * $Id: tclXid.c,v 2.6 1993/07/27 07:42:35 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -83,9 +83,11 @@ UseridToUsernameResult (interp, userId)
 
     if ((pw == NULL) || ((int) uid != userId)) {
         sprintf (interp->result, "unknown user id: %d", userId);
+        endpwent ();
         return TCL_ERROR;
     }
     strcpy (interp->result, pw->pw_name);
+    endpwent ();
     return TCL_OK;
 }
 
@@ -99,9 +101,11 @@ UsernameToUseridResult (interp, userName)
     if (pw == NULL) {
         Tcl_AppendResult (interp, "unknown user id: ", userName, 
                           (char *) NULL);
+        endpwent ();
         return TCL_ERROR;
     }
     sprintf (interp->result, "%d", pw->pw_uid);
+    endpwent ();
     return TCL_OK;
 }
 
@@ -115,9 +119,11 @@ GroupidToGroupnameResult (interp, groupId)
 
     if ((grp == NULL) || ((int) gid != groupId)) {
         sprintf (interp->result, "unknown group id: %d", groupId);
+        endgrent ();
         return TCL_ERROR;
     }
     strcpy (interp->result, grp->gr_name);
+    endgrent ();
     return TCL_OK;
 }
 
@@ -240,7 +246,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
                                   " process group ?set?", (char *) NULL);
                 return TCL_ERROR;
             }
-#ifndef TCL_NO_SETPGID
+#ifdef HAVE_SETPGID
             pid = getpid ();
             setpgid (pid, pid);
 #else
@@ -269,6 +275,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
                 goto name_doesnt_exist;
             if (setuid (pw->pw_uid) < 0)
                 goto cannot_set_name;
+            endpwent ();
             return TCL_OK;
         }
     }
@@ -291,10 +298,11 @@ Tcl_IdCmd (clientData, interp, argc, argv)
             return GroupidToGroupnameResult (interp, getgid ());
         } else {
             grp = getgrnam (argv[2]);
-            if (grp == NULL) 
+            if (grp == NULL)
                 goto name_doesnt_exist;
             if (setgid (grp->gr_gid) < 0)
                 goto cannot_set_name;
+            endgrent ();
             return TCL_OK;
         }
     }
@@ -330,9 +338,13 @@ Tcl_IdCmd (clientData, interp, argc, argv)
   name_doesnt_exist:
     Tcl_AppendResult (interp, " \"", argv[2], "\" does not exists",
                       (char *) NULL);
+    endpwent ();
+    endgrent ();
     return TCL_ERROR;
 
   cannot_set_name:
     interp->result = Tcl_PosixError (interp);
+    endpwent ();
+    endgrent ();
     return TCL_ERROR;
 }

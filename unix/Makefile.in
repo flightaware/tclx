@@ -13,14 +13,20 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.10 1993/07/20 04:22:52 markd Exp markd $
+# $Id: Makefile.in,v 2.11 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
-
-include Config.mk
-include config/${TCL_CONFIG_FILE}
-
 SHELL=/bin/sh
+
+#------------------------------------------------------------------------------
+# Autoconfig defines that can be overridden in Config.mk
+
+RANLIB=@RANLIB@
+
+#------------------------------------------------------------------------------
+# Include user-editable defines.
+
+@MAKEINCLUDE@ @MAKEQUOTE@Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # The made.tmp files are used to indicate a makefile has successfully added
@@ -32,13 +38,7 @@ TKMADE.TMP  = tksrc/made.tmp tkucbsrc/made.tmp
 
 #------------------------------------------------------------------------------
 
-CFLAGS = ${OPTIMIZE_FLAG} ${XCFLAGS} -I${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} \
-         ${SYS_DEP_FLAGS}
-
-#------------------------------------------------------------------------------
-
 all: TCLX runtcl ${TK_BUILD}
-
 
 #------------------------------------------------------------------------------
 # Compile the Extended Tcl library and link the Tcl shell.
@@ -69,7 +69,7 @@ MKTCLDIRS:
 ${LIBTCLX.A}: ${TCL_UCB_DIR}/libtcl.a
 	rm -f ${LIBTCLX.A}
 	cp ${TCL_UCB_DIR}/libtcl.a ${LIBTCLX.A}
-	${RANLIB_CMD} ${LIBTCLX.A}
+	${RANLIB} ${LIBTCLX.A}
 	rm -f ${TCLMADE.TMP}
 
 ${TCL.H}: ${TCL_UCB_DIR}/tcl.h
@@ -103,7 +103,7 @@ MKTKDIRS:
 ${LIBTKX.A}: ${TK_UCB_DIR}/libtk.a
 	rm -f ${LIBTKX.A}
 	cp ${TK_UCB_DIR}/libtk.a ${LIBTKX.A}
-	${RANLIB_CMD} ${LIBTKX.A}
+	${RANLIB} ${LIBTKX.A}
 	rm -f ${TKMADE.TMP}
 
 ${TK.H}: ${TK_UCB_DIR}/tk.h
@@ -235,3 +235,17 @@ clean:
 	-rm -f runtcl runwishx
 	-rm -rf tclmaster/bin tclmaster/lib tclmaster/include
 	-rm -rf tkmaster/bin tkmaster/lib tkmaster/include
+
+#------------------------------------------------------------------------------
+# Restore to the distributed state.
+
+distclean: clean
+	cd tools;     ${MAKE} -${MAKEFLAGS} distclean
+	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} distclean
+	cd osSupport; ${MAKE} -${MAKEFLAGS} distclean
+	cd src;       ${MAKE} -${MAKEFLAGS} distclean
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} distclean
+	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} distclean
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} distclean
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} distclean
+	rm -f Makefile config.status

@@ -1,5 +1,5 @@
 #
-# Makefile  --
+# src/Makefile.in  --
 #
 # Makefile for Extended Tcl C sources.  This will compile all of Extended Tcl
 # and add it to the libtcl.a in the parent directory.  Generates a Tcl shell
@@ -15,22 +15,29 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.10 1993/07/18 22:38:14 markd Exp markd $
+# $Id: Makefile.in,v 2.11 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
+SHELL = /bin/sh
 
-include ../Config.mk
-include ../config/${TCL_CONFIG_FILE}
-SHELL=/bin/sh
+#------------------------------------------------------------------------------
+# Autoconfig defines that can be overridden in Config.mk
+
+RANLIB = @RANLIB@
+LIBS   = @LIBS@
+
+#------------------------------------------------------------------------------
+# Include user-editable defines.
+
+@MAKEINCLUDE@ @MAKEQUOTE@../Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
 TCL       = ../tclmaster/bin/tcl
 
-CFLAGS= ${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} \
-        ${SYS_DEP_FLAGS}
-LDLIBS= ${LIBTCLX.A} ${LIBS}
+CFLAGS = ${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR}
+LDLIBS = ${LIBTCLX.A} -lm ${LIBS}
 
 #------------------------------------------------------------------------------
 
@@ -49,14 +56,14 @@ OBJS= \
 all: made.tmp ${TCL}
 
 ${TCL}: main.o ${LIBTCLX.A} made.tmp 
-	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${LDLIBS} -o ${TCL}
+	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${XLDLIBS} ${LDLIBS} -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
 	    ${MCS_CMD} ${TCL}; fi
 
 made.tmp: ${OBJS} ${CPLUSOBJS}
 	${AR} cr ${LIBTCLX.A} ${OBJS} ${CPLUSOBJS}
-	${RANLIB_CMD} ${LIBTCLX.A}
+	${RANLIB} ${LIBTCLX.A}
 	touch made.tmp
 
 tclXstartup.o: patchlevel.h tclXstartup.c
@@ -75,12 +82,11 @@ tcl++.o: tcl++.C tcl++.h
 # This is just to test if it compiles.
 
 tcl++: main++.o made.tmp
-	${CCPLUS} ${CFLAGS} main++.o ${LDLIBS} ${LIBS} ${XLDFLAGS} \
-	   -o ../tcl++
+	${CCPLUS} ${CFLAGS} ${XLDFLAGS} main++.o ${XLDLIBS} ${LDLIBS} \
+        -o ../tcl++
 
 main++.o: tcl++.h main++.C
 	${CCPLUS} -c -I${CPLUSINCL} ${CFLAGS} main++.C
-
 
 #------------------------------------------------------------------------------
 
@@ -88,3 +94,8 @@ clean:
 	-rm -f made.tmp tclXgetdate.c
 	-rm -f *.o ${TCL} tcl++
 
+#------------------------------------------------------------------------------
+# Restore to the distributed state.
+
+distclean: clean
+	rm -f Makefile tclXconfig.h

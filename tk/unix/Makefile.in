@@ -1,5 +1,5 @@
 #
-# Makefile --
+# tksrc/Makefile.in --
 #
 # Makefile to build a wish with Extended Tcl (wishx).
 # 
@@ -13,13 +13,23 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.8 1993/07/19 06:30:03 markd Exp markd $
+# $Id: Makefile.in,v 2.9 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
+SHELL = /bin/sh
 
-include ../Config.mk
-include ../config/${TCL_CONFIG_FILE}
-SHELL=/bin/sh
+#------------------------------------------------------------------------------
+# Autoconfig defines that can be overridden in Config.mk
+
+XINCLUDES = @XINCLUDES@
+LIBS      = @LIBS@
+XLIBSW    = @XLIBSW@
+RANLIB    = @RANLIB@
+
+#------------------------------------------------------------------------------
+# Include user-editable defines.
+
+@MAKEINCLUDE@ @MAKEQUOTE@../Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
@@ -28,14 +38,18 @@ WISHX     = ../tkmaster/bin/wishx
 
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
 
-CFLAGS= ${OPTIMIZE_FLAG} ${XCFLAGS} -I../src -I../${TK_UCB_DIR} \
-        -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} ${SYS_DEP_FLAGS}
+CFLAGS = ${OPTIMIZE_FLAG} ${XCFLAGS} -I../src -I../${TK_UCB_DIR} \
+         -I../${TCL_UCB_DIR} ${XINCLUDES}
 
-LDLIBS= ${LIBTKX.A} ${LIBTCLX.A} ${TK_LIBS} ${LIBS}
+# The ordering of the libraries is important.  Some X libs on SysV include
+# "random" in a BSD module.  This would conflict with the one in the Tcl
+# library if it was brought in.
+
+LDLIBS = ${LIBTKX.A} ${XLIBSW} ${LIBTCLX.A} -lm ${LIBS}
 
 #------------------------------------------------------------------------------
 
-OBJS=tkXstartup.o tkXsignal.o
+OBJS = tkXstartup.o tkXsignal.o
 
 #------------------------------------------------------------------------------
 
@@ -49,7 +63,7 @@ ${WISHX}: tkMain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
 
 made.tmp: ${OBJS}
 	${AR} cr ${LIBTKX.A} ${OBJS}
-	${RANLIB_CMD} ${LIBTKX.A}
+	${RANLIB} ${LIBTKX.A}
 	touch made.tmp
 
 tkXstartup.o: tkXstartup.c
@@ -59,3 +73,9 @@ tkXstartup.o: tkXstartup.c
 
 clean:
 	-rm -f made.tmp ${WISHX} ${OBJS} tkMain.o
+
+#------------------------------------------------------------------------------
+# Restore to the distributed state.
+
+distclean: clean
+	rm -f Makefile

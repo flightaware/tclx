@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.22 1993/07/20 08:35:45 markd Exp markd $
+# $Id: Config.mk,v 2.23 1993/07/27 05:17:30 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -72,6 +72,7 @@ CC=cc
 AR=ar
 XCFLAGS=
 XLDFLAGS=
+XLDLIBS=
 YACC=yacc
 #YACC=bison -b y
 
@@ -205,94 +206,10 @@ TK_MAN_FUNC_SECTION=TK
 # configuration file (config/*)
 #
 
-# o TCL_MAN_SEPARATOR - The separator character used in the directory name
+# o MAN_DIR_SEPARATOR - The separator character used in the directory name
 #   of the cat* and man* manual directories.  This is usually empty or 
-#   a period. i.e "/usr/man/man1" or "/usr/man/man.1".
-#
-# o TCL_MAN_STYLE - The style of manual management the system has. It is
-#   a string with one of the following values:
-#      o SHORT - Short file name installation.
-#      o LONG - Long file name installation, a link will be made for each
-#        name the manual page is to be available under.
-#   This flag is optional, if omitted LONG is assumed.
+#   a period. i.e "/usr/man/man1" or "/usr/man/man.1".  Autoconf attempts to
+#   determine it but it can be overriden here.
 
-#==============================================================================
-# System specific configuration.  A system configuration file in the config
-# directory defines the following mactos required for your version of Unix.
-# In addition to the options defined in the Berkeley source the following
-# options can be defined here.  This information will help you build your own
-# system configuration if one is not supplied here.  The configuration file
-# name is specified an the end of this section.
-#
-#    o SYS_DEP_FLAGS - The system dependency flags.  The following options are
-#      available, these should be defined using -Dflag.
-#
-#      o TCL_HAVE_SETLINEBUF - Define if the `setlinebuf' is available as part
-#        of stdio.
-#
-#      o TCL_NO_SELECT - The select call is not available.
-#
-#      o TCL_NEED_SYS_SELECT_H - Define if <sys/select.h> is required. May not
-#        need it, even if it is there.
-#
-#      o TCL_USE_BZERO_MACRO - Use a macro to define bzero for the select
-#        FD_ZERO macro.
-#
-#      o TCL_POSIX_SIG - Set if posix signals are available (sigaction, etc).
-#
-#      o TCL_HAVE_CATGETS - Set if XPG/3 message catalogs are available
-#        (catopen, catgets, etc).
-#
-#      o TCL_TM_GMTOFF - Set if the seconds east of GMT field in struct tm is
-#        names 'tm_gmtoff'.  Not set if its is names 'tm_tzadj'.
-#
-#      o TCL_TIMEZONE_VAR - If the timezone varaible is used in place of 
-#        one of the fields from struct tm.
-#
-#      o TCL_NEED_TIME_H - Set if time.h is required.
-#
-#      o TCL_SIG_PROC_INT - Set if signal functions return int rather than
-#        void.
-#
-#      o TCL_NO_ITIMER - Set if setitimer is not available.
-#
-#      o TCL_NOVALUES_H - Some systems do not support the <values.h>
-#        include file.  Define this to account for this fact.
-#
-#      o TCL_USEGETTOD - Use gettimeofday for handling timezone shifts
-#        from GMT.
-#
-#      o TCL_NO_SOCKETS - Define if sockets are not available.
-#
-#      o TCL_NO_REAL_TIMES - If the "times" system call does not return the
-#        elasped real time.
-#
-#      o TCL_NO_SETPGID - Define if the system does not have setpgrp.
-#
-#    o LIBS - The flags to specify when linking the tclshell.
-#
-#    o TK_LIBS - The libraries to link the TK wish program.  This should
-#      also include libraries specified for LIBS, as both values may not be
-#      used together due to library ordering constraints.
-#
-#    o RANLIB_CMD - Either `ranlib' if ranlib is required or `true' if ranlib
-#      should not be used.
-#
-#    o MCS_CMD - Command to delete comments from the object file comment
-#      section, if available.  The command `true' if it's not available.  This
-#      makes the object file even smaller after its stipped.
-#
-#    o SUPPORT_FLAGS - The flags for SUPPORT_OBJS code.  The following options
-#      are available, these should be defined using -Dflag.
-#
-#      o TCL_HAS_TM_ZONE - If if 'struct tm' has the 'tm_zone' field.   Used
-#        by strftime.
-#
-#    o SUPPORT_OBJS - The object files to compile to implement library 
-#      functions that are not available on this particular version of Unix or 
-#      do not function correctly.  The following are available:
-#         o strftime.o
-#         o system.o
-#         o random.o
-#..............................................................................
 
+#MAN_DIR_SEPARATOR=.

@@ -559,3 +559,14 @@
 24 Jul 93:
   o Added ctoken string parsing command.
 -------------------------------------------------------------------------------
+27 Jul 93:
+  o Fixed signal handling in wishx.
+  o Fixed problems with owner/group not being validated if large number.
+-------------------------------------------------------------------------------
+29 Jul 93:
+  o Change the "yy" prefix in the code generated from tclXgetdate.y to be
+    "tclyy".  This is to allow apllications to include yacc code.
+  o Fixed bug in select that caused it to return an empty list when data is
+    pending in the stdio buffer.
+  o Added TclX autoconf configuration.
+-------------------------------------------------------------------------------

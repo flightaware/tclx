@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXgeneral.c,v 2.4 1993/07/13 03:04:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -93,7 +93,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("posix_signals", argv [1])) {
-#       ifdef TCL_POSIX_SIG
+#       ifdef HAVE_SIGACTION
         interp->result = "1";
 #       else
         interp->result = "0";

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXprofile.c,v 2.6 1993/06/24 04:40:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -134,7 +134,34 @@ static void
 CleanUpProfMon _ANSI_ARGS_((ClientData  clientData,
                             Tcl_Interp *interp));
 
-#ifdef TCL_NO_REAL_TIMES
+#ifdef TIMES_RETS_REAL_TIME
+
+/*
+ *-----------------------------------------------------------------------------
+ * GetTimes --
+ *
+ *   Get the current real and CPU time for the process.  This version of this
+ * function is used on systems where the times systems call returns the
+ * elasped real time.
+ *
+ * Parameters:
+ *   o cpuTimePtr (O) - The CPU time in milliseconds is returned here.
+ * Returns:
+ *   The current real time of the process, in milliseconds.
+ *-----------------------------------------------------------------------------
+ */
+static long
+GetTimes (cpuTimePtr)
+    long  *cpuTimePtr;
+{
+    struct tms cpuTimes;
+    long       realTime;
+
+    realTime = times (&cpuTimes) * MS_PER_TICK;
+    *cpuTimePtr = (cpuTimes.tms_utime + cpuTimes.tms_stime) * MS_PER_TICK;
+    return realTime;
+}
+#else
 
 /*
  *-----------------------------------------------------------------------------
@@ -175,34 +202,7 @@ GetTimes (cpuTimePtr)
     *cpuTimePtr = (cpuTimes.tms_utime + cpuTimes.tms_stime) * MS_PER_TICK;
     return realTime;
 }
-#else
-
-/*
- *-----------------------------------------------------------------------------
- * GetTimes --
- *
- *   Get the current real and CPU time for the process.  This version of this
- * function is used on systems where the times systems call returns the
- * elasped real time.
- *
- * Parameters:
- *   o cpuTimePtr (O) - The CPU time in milliseconds is returned here.
- * Returns:
- *   The current real time of the process, in milliseconds.
- *-----------------------------------------------------------------------------
- */
-static long
-GetTimes (cpuTimePtr)
-    long  *cpuTimePtr;
-{
-    struct tms cpuTimes;
-    long       realTime;
-
-    realTime = times (&cpuTimes) * MS_PER_TICK;
-    *cpuTimePtr = (cpuTimes.tms_utime + cpuTimes.tms_stime) * MS_PER_TICK;
-    return realTime;
-}
-#endif /* TCL_NO_REAL_TIMES */
+#endif /* TIMES_RETS_REAL_TIME */
 
 /*
  *-----------------------------------------------------------------------------

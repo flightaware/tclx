@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: installTcl.tcl,v 2.8 1993/06/06 15:05:35 markd Exp $
+# $Id: buildutil.tcl,v 1.1 1993/06/28 14:57:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -50,15 +50,6 @@ proc ParseConfigFile {configFile configVar} {
     upvar $configVar config
 
     ParseMakeMacros $configFile config
-    if ![info exists config(TCL_CONFIG_FILE)] {
-        error "TCL_CONFIG_FILE not defined in $configFile"
-    }
-    set sysConfig [file dirname $configFile]/config/$config(TCL_CONFIG_FILE)
-
-    if ![file exists $sysConfig] {
-        error "can't file $sysConfig, as defined by TCL_CONFIG_FILE in $configFile"
-    }
-    ParseMakeMacros $sysConfig config
 }
 
 #------------------------------------------------------------------------------

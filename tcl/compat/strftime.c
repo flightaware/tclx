@@ -17,7 +17,7 @@
  * Fixes from ado@elsie.nci.nih.gov
  * February 1991
  *-----------------------------------------------------------------------------
- * $Id: strftime.c,v 1.1 1992/09/20 23:12:01 markd Exp markd $
+ * $Id: strftime.c,v 2.0 1992/10/16 04:52:16 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,10 +37,12 @@
 
 #undef strftime
 
+#include "../src/tclXconfig.h"
+
 extern char *strchr();
 static int weeknumber();
 
-#ifndef TCL_HAS_TM_ZONE
+#ifndef HAVE_TM_ZONE
 extern char *tzname[2];
 extern int daylight;
 #endif
@@ -217,7 +219,7 @@ strftime(s, maxsize, format, timeptr)
 			break;
 
 		case 'Z':	/* time zone name or abbrevation */
-#ifdef TCL_HAS_TM_ZONE
+#ifdef HAVE_TM_ZONE
                         strcpy(tbuf, timeptr->tm_zone);
 #else
 			i = 0;

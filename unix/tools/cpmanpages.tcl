@@ -7,7 +7,7 @@
 #
 # It is run in the following manner:
 #
-#     tcl cpmanpages.tcl ?TCL|TK?
+#     tcl cpmanpages.tcl ?TCL|TK? man-separator-char
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 1.1 1993/06/28 14:57:16 markd Exp markd $
+# $Id: cpmanpages.tcl,v 1.2 1993/07/18 15:20:56 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -196,9 +196,9 @@ proc InstallLongMan {sourceFile targetDir extension} {
 #------------------------------------------------------------------------------
 
 proc InstallManPage {sourceFile manDir section} {
-    global config
+    global config manSeparator
 
-    set targetDir    "$manDir/man$config(TCL_MAN_SEPARATOR)"
+    set targetDir    "$manDir/man$manSeparator"
     append targetDir $section
 
     if {$config(TCL_MAN_STYLE) == "SHORT"} {
@@ -211,10 +211,12 @@ proc InstallManPage {sourceFile manDir section} {
 #------------------------------------------------------------------------------
 # main prorgam
 
-if {[llength $argv] != 1} {
-    puts stderr "wrong # args: cpmanpages ?TCL|TK?"
+if {[llength $argv] != 2} {
+    puts stderr "wrong # args: cpmanpages ?TCL|TK? manSeparator"
     exit 1
 }
+set manType [lindex $argv 0]
+set manSeparator [lindex $argv 1]
 
 source ../tools/buildutil.tcl
 
@@ -225,11 +227,7 @@ ParseConfigFile ../Config.mk config
 if ![info exists config(TCL_MAN_STYLE)] {
     set config(TCL_MAN_STYLE) LONG
 }
-if ![info exists config(TCL_MAN_SEPARATOR)] {
-    set config(TCL_MAN_STYLE) {}
-}
 
-set manType [lindex $argv 0]
 switch -- $manType {
     TCL {
         puts stdout "Copying Tcl manual pages to tclmaster/man"

@@ -13,13 +13,13 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXmsgcat.c,v 2.4 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-#ifdef TCL_HAVE_CATGETS
+#ifdef HAVE_CATGETS
 
 #include <nl_types.h>
 
@@ -27,7 +27,7 @@
 
 typedef int nl_catd;
 
-#endif /* TCL_HAVE_CATGETS */
+#endif /* HAVE_CATGETS */
 
 static int
 ParseFailOption _ANSI_ARGS_((Tcl_Interp *interp,
@@ -48,7 +48,7 @@ MsgCatCleanUp _ANSI_ARGS_((ClientData  clientData,
  */
 static void_pt msgCatTblPtr = NULL;
 
-#ifndef TCL_HAVE_CATGETS
+#ifndef HAVE_CATGETS
 
 /*
  *-----------------------------------------------------------------------------
@@ -95,7 +95,7 @@ catclose (catd)
 {
     return -1;
 }
-#endif /* TCL_HAVE_CATGETS */
+#endif /* HAVE_CATGETS */
 
 /*
  *-----------------------------------------------------------------------------
@@ -139,7 +139,7 @@ CatOpFailed (interp, errorMsg)
     Tcl_Interp *interp;
     CONST char *errorMsg;
 {
-#ifdef TCL_HAVE_CATGETS
+#ifdef HAVE_CATGETS
 
     Tcl_AppendResult (interp, errorMsg, (char *) NULL);
 
@@ -148,7 +148,7 @@ CatOpFailed (interp, errorMsg)
     Tcl_AppendResult (interp, "the message catalog facility is not available,",
                       " default string is always returned", (char *) NULL);
 
-#endif /* TCL_HAVE_CATGETS */
+#endif /* HAVE_CATGETS */
 
     return TCL_ERROR;
 }

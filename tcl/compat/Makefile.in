@@ -1,5 +1,5 @@
 #
-# Makefile  --
+# osSupport/Makefile.in --
 #
 # Makefile for Extended Tcl ossupport code.
 #------------------------------------------------------------------------------
@@ -12,29 +12,36 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.7 1993/07/19 06:25:21 markd Exp markd $
+# $Id: Makefile.in,v 2.8 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
+SHELL = /bin/sh
 
-include ../Config.mk
-include ../config/${TCL_CONFIG_FILE}
-SHELL=/bin/sh
+#------------------------------------------------------------------------------
+# Autoconfig defines that can be overridden in Config.mk
+
+RANLIB  = @RANLIB@
+LIBOBJS = @LIBOBJS@
+
+#------------------------------------------------------------------------------
+# Include user-editable defines.
+
+@MAKEINCLUDE@ @MAKEQUOTE@../Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
 
-CFLAGS=${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} \
-       ${SYS_DEP_FLAGS} ${SUPPORT_FLAGS}
+CFLAGS = ${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR}
 
 #------------------------------------------------------------------------------
 
 all: made.tmp
 
-made.tmp: ${SUPPORT_OBJS}
-	if [ "${SUPPORT_OBJS}" != "" ] ; then \
-	    ${AR} cvr ${LIBTCLX.A} ${SUPPORT_OBJS} ;\
-	    ${RANLIB_CMD} ${LIBTCLX.A} ;\
+made.tmp: ${LIBOBJS}
+	if [ "${LIBOBJS}" != "" ] ; then \
+	    ${AR} cvr ${LIBTCLX.A} ${LIBOBJS} ;\
+	    ${RANLIB} ${LIBTCLX.A} ;\
 	else \
 	    exit 0 ;\
 	fi
@@ -45,3 +52,9 @@ made.tmp: ${SUPPORT_OBJS}
 clean:
 	-rm -f made.tmp
 	-rm -f *.o
+
+#------------------------------------------------------------------------------
+# Restore to the distributed state.
+
+distclean: clean
+	rm -f Makefile

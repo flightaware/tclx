@@ -12,18 +12,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 2.5 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXfcntl.c,v 2.6 1993/07/17 23:29:13 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
- * Macro to enable line buffering mode on a file.  Macros assure that the
+ * Macro to enable line buffering mode on a file.  The macros assure that the
  * resulting expression returns zero if the function call does not return
  * a value.
  */
-#ifdef TCL_HAVE_SETLINEBUF
+#ifdef HAVE_SETLINEBUF
 #   define SET_LINE_BUF(fp)  (setlinebuf (fp),0)
 #else
 #   define SET_LINE_BUF(fp)  setvbuf (fp, NULL, _IOLBF, BUFSIZ)

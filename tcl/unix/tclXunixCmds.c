@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.4 1993/05/28 04:43:03 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,7 +48,7 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-#ifdef TCL_NO_ITIMER
+#ifndef HAVE_SETITIMER
     double            seconds;
     unsigned          useconds;
 
@@ -79,7 +79,7 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
     if (Tcl_GetDouble (interp, argv[1], &seconds) != TCL_OK)
         return TCL_ERROR;
 
-    secFloor =  floor (seconds);
+    secFloor = floor (seconds);
 
     timer.it_value.tv_sec     = secFloor;
     timer.it_value.tv_usec    = (long) ((seconds - secFloor) *

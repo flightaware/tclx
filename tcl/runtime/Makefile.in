@@ -14,13 +14,20 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.7 1993/07/18 15:21:42 markd Exp markd $
+# $Id: Makefile.in,v 2.8 1993/07/18 21:14:28 markd Exp markd $
 #------------------------------------------------------------------------------
 #
+SHELL = /bin/sh
 
-include ../Config.mk
-include ../config/${TCL_CONFIG_FILE}
-SHELL=/bin/sh
+#------------------------------------------------------------------------------
+# Autoconfig defines that can be overridden in Config.mk
+
+MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
+
+#------------------------------------------------------------------------------
+# Include user-editable defines.
+
+@MAKEINCLUDE@ @MAKEQUOTE@../Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
@@ -35,11 +42,11 @@ HELP           = ../tclmaster/help
 
 #------------------------------------------------------------------------------
 
-TCL_SRCS=arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
-         forfile.tcl      forrecur.tcl     globrecur.tcl    help.tcl        \
-         profrep.tcl      pushd.tcl        setfuncs.tcl     showproc.tcl    \
-         stringfile.tcl   tcllib.tcl       fmath.tcl        tclshell.tcl    \
-         parray.tcl       ../${TCL_UCB_DIR}/library/parray.tcl
+TCL_SRCS = arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
+           forfile.tcl      forrecur.tcl     globrecur.tcl    help.tcl        \
+           profrep.tcl      pushd.tcl        setfuncs.tcl     showproc.tcl    \
+           stringfile.tcl   tcllib.tcl       fmath.tcl        tclshell.tcl    \
+           parray.tcl       ../${TCL_UCB_DIR}/library/parray.tcl
 
 #------------------------------------------------------------------------------
 
@@ -69,7 +76,7 @@ ${TCL.TLIB}: ${TCL_SRCS} ${BUILDIDX.TCL} ${TCLINIT.TCL}
 
 ${MAN}: ${TCLINIT.TCL} ${TCL.TLIB}
 	if [ ! -d ${MAN} ] ; then \
-	    ../runtcl ../tools/cpmanpages.tcl TCL ;\
+	    ../runtcl ../tools/cpmanpages.tcl TCL '${MAN_DIR_SEPARATOR}' ;\
 	fi
 
 #------------------------------------------------------------------------------
@@ -88,3 +95,9 @@ clean:
 	-rm -f ${TCL.TLIB} ${TCL.TNDX} ${TCLINIT.TCL}
 	-rm -f ${BUILDHELP.TCL} ${BUILDIDX.TCL} ${LOADOUSTER.TCL}
 	-rm -rf ${MAN}
+
+#------------------------------------------------------------------------------
+# Restore to the distributed state.
+
+distclean: clean
+	rm -f Makefile

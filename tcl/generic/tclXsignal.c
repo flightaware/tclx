@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.10 1993/07/18 19:08:27 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.11 1993/07/27 05:17:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -94,13 +94,11 @@ static struct {char *name;
 #endif
     NULL,         -1};
 
-#ifdef TCL_SIG_PROC_INT
-#   define SIG_PROC_RET_TYPE int
-#else
-#   define SIG_PROC_RET_TYPE void
+#ifndef RETSIGTYPE
+#   define RETSIGTYPE void
 #endif
 
-typedef SIG_PROC_RET_TYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
+typedef RETSIGTYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
 
 /*
  * Class of actions that can be set by the signal command.
@@ -158,7 +156,7 @@ static int
 SetSignalAction _ANSI_ARGS_((int             signalNum,
                              signalProcPtr_t sigFunc));
 
-static SIG_PROC_RET_TYPE
+static RETSIGTYPE
 TclSignalTrap _ANSI_ARGS_((int signalNum));
 
 static int
@@ -323,7 +321,7 @@ GetSignalState (signalNum, sigProcPtr)
     int              signalNum;
     signalProcPtr_t *sigProcPtr;
 {
-#ifdef TCL_POSIX_SIG
+#ifdef HAVE_SIGACTION
     struct sigaction currentState;
 
     if (sigaction (signalNum, NULL, &currentState) < 0)
@@ -363,7 +361,7 @@ SetSignalAction (signalNum, sigFunc)
     int             signalNum;
     signalProcPtr_t sigFunc;
 {
-#ifdef TCL_POSIX_SIG
+#ifdef HAVE_SIGACTION
     struct sigaction newState;
     
     newState.sa_handler = sigFunc;
@@ -394,7 +392,7 @@ SetSignalAction (signalNum, sigFunc)
  *   o signalsReceived (O) - The count of each signal that was received.
  *-----------------------------------------------------------------------------
  */
-static SIG_PROC_RET_TYPE
+static RETSIGTYPE
 TclSignalTrap (signalNum)
     int signalNum;
 {
@@ -410,7 +408,7 @@ TclSignalTrap (signalNum)
     if (signalTrapCmds [signalNum] == NULL)
         tclGotErrorSignal = TRUE;
 
-#ifndef TCL_POSIX_SIG
+#ifndef HAVE_SIGACTION
     /*
      * For old-style Unix signals, the signal must be explictly re-enabled.
      * Not done for SIGCHLD, as we would continue to the signal until the
@@ -818,7 +816,7 @@ SignalBlocked (interp, signalNum)
     Tcl_Interp  *interp;
     int          signalNum;
 {
-#ifdef TCL_POSIX_SIG
+#ifdef HAVE_SIGACTION
     int      idx;
     sigset_t sigBlockSet;
 
@@ -985,7 +983,7 @@ BlockSignals (interp, action, signalListSize, signalList)
     int          signalListSize;
     int          signalList [MAXSIG];
 {
-#ifdef TCL_POSIX_SIG
+#ifdef HAVE_SIGACTION
     int      idx;
     sigset_t sigBlockSet;
 
