@@ -402,7 +402,7 @@ else
 fi
 
 
-# From configure.in Revision: 4.10 dnl
+# From configure.in Revision: 4.11 dnl
 
 
 
@@ -3218,15 +3218,14 @@ if eval "test \"`echo '$ac_cv_func_'catgets`\" = yes"; then
 #define HAVE_CATGETS 1
 EOF
 
-         echo "$ac_t""yes" 1>&6
          cat > conftest.$ac_ext <<EOF
-#line 3224 "configure"
+#line 3223 "configure"
 #include "confdefs.h"
 #include <nl_types.h>
 int main() { return 0; }
 int t() {
 
-                if (catclose ((nl_catd) 0) == 0) exit 0;
+                if (catclose ((nl_catd) 0) == 0) exit (0);
 ; return 0; }
 EOF
 if eval $ac_compile; then
@@ -3264,7 +3263,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lintl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3268 "configure"
+#line 3267 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -3295,7 +3294,7 @@ if eval "test \"`echo '$''{'ac_cv_func_strftime'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3299 "configure"
+#line 3298 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char strftime(); below.  */
@@ -3342,7 +3341,7 @@ if eval "test \"`echo '$''{'ac_cv_func_random'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3346 "configure"
+#line 3345 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char random(); below.  */
@@ -3391,7 +3390,7 @@ if eval "test \"`echo '$''{'ac_cv_func_rename'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3395 "configure"
+#line 3394 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char rename(); below.  */
@@ -3446,7 +3445,7 @@ esac
 #------------------------------------------------------------------------------
 
 cat > conftest.$ac_ext <<EOF
-#line 3450 "configure"
+#line 3449 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF

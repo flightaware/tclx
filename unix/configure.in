@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.10 1995/03/29 04:14:31 markd Exp markd $
+dnl $Id: configure.in,v 4.11 1995/03/29 05:19:57 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.10 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.11 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -505,9 +505,8 @@ AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync getpriority strcoll gethostname)
 
 AC_CHECK_FUNC(catgets,
         [AC_DEFINE(HAVE_CATGETS)
-         AC_MSG_RESULT(yes)
          AC_TRY_COMPILE([#include <nl_types.h>], [
-                if (catclose ((nl_catd) 0) == 0) exit 0;],
+                if (catclose ((nl_catd) 0) == 0) exit (0);],
                 AC_MSG_RESULT("catclose ok"), [
                 AC_MSG_RESULT("bad catclose return type")
                 AC_DEFINE(BAD_CATCLOSE)])])
