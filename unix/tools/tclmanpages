@@ -39,7 +39,6 @@ return {
     {lreplace.n     tcl/lists/lreplace}
     {lsearch.n      tcl/lists/lsearch}
     {lsort.n        tcl/lists/lsort}
-    {load.n         tcl/control/load}
     {open.n         tcl/files/open}
     {pid.n          tcl/processes/pid}
     {proc.n         tcl/control/proc}
@@ -67,4 +66,17 @@ return {
     {upvar.n        tcl/variables/upvar}
     {while.n        tcl/control/while}
     {tclvars.n      tcl/variables/stdvars}
+    {after.n        tcl/events/after}
+    {bgerror.n      tcl/events/background-error}
+    {clock.n        tcl/time/clock}
+    {fblocked.n     tcl/files/fblocked}
+    {fconfigure.n   tcl/files/fconfigure}
+    {fileevent.n    tcl/events/fileevent}
+    {filename.n     tcl/files/filename}
+    {load.n         tcl/libraries/load}
+    {package.n      tcl/libraries/package}
+    {pkgMkIndex.n   tcl/libraries/pkgMkIndex}
+    {socket.n       tcl/sockets/socket}
+    {update.n       tcl/events/update}
+    {vwait.n        tcl/events/vwait}
 }

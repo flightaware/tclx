@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.13 1995/07/03 06:35:43 markd Exp markd $
+# $Id: server.test,v 5.0 1995/07/25 05:42:05 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -69,7 +69,7 @@ Test server-2.1 {server_create argument checking} {
 
 Test server-2.2 {server_create argument checking} {
     server_create -myport 3 -buf
-} 1 {expected "-myip", "-myport", "-backlog", or "-reuseaddr", got "-buf"}
+} 1 {expected "-myip", "-myport", or "-backlog", got "-buf"}
 
 Test server-2.3 {server_create argument checking} {
     server_create -myip 
@@ -102,7 +102,7 @@ Test server-3.3 {server_accept argument checking} {
 
 Test server-3.4 {server_accept argument checking} {
     server_accept bad
-} 1 {bad file identifier "bad"}
+} 1 {can not find channel named "bad"}
 
 Test server-3.5 {server_accept argument checking} {
     server_accept bad good ugly
@@ -142,7 +142,7 @@ Test server-5.2 {server_send argument checking} {
 
 Test server-5.3 {server_send argument checking} {
     server_send x y
-} 1 {bad file identifier "x"}
+} 1 {can not find channel named "x"}
 
 Test server-5.4 {server_send argument checking} {
     server_send -bad x y

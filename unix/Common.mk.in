@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.1 1995/12/30 13:34:24 markd Exp $
+# $Id: Common.mk.in,v 5.2 1995/12/31 11:24:48 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -26,7 +26,6 @@ CFLAGS      = @CFLAGS@
 CXX         = @CXX@
 CXXFLAGS    = @CXXFLAGS@
 TCLXX       = @TCLXX@
-YACC        = @YACC@
 RANLIB      = @RANLIB@
 srcbasedir  = @srcbasedir@
 bldbasedir  = @bldbasedir@

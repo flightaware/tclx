@@ -1,5 +1,5 @@
 #
-# filecmds.test
+# flock.test
 #
 # Tests for the flock and funlock commands.
 #---------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 4.2 1995/01/01 19:47:38 markd Exp markd $
+# $Id: flock.test,v 5.0 1995/07/25 05:41:01 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -77,22 +77,22 @@ Test flock-1.4 {flock argument checking} {
 
 Test flock-1.5 {flock argument checking} {
     flock foofile
-} 1 {bad file identifier "foofile"}
+} 1 {can not find channel named "foofile"}
 
 Test flock-1.6 {flock argument checking} {
-    flock $readFH x
+    flock -read $readFH x
 } 1 {expected integer offset but got "x"}
 
 Test flock-1.7 {flock argument checking} {
-    flock $readFH 1 x
+    flock -read $readFH 1 x
 } 1 {expected integer offset but got "x"}
 
 Test flock-1.8 {flock argument checking} {
-    flock $readFH {} x
+    flock -read $readFH {} x
 } 1 {expected integer offset but got "x"}
 
 Test flock-1.9 {flock argument checking} {
-    flock $readFH {} 1 bad
+    flock -read $readFH {} 1 bad
 } 1 {bad origin "bad": should be "start", "current", or "end"}
 
 Test flock-1.10 {flock argument checking} {
@@ -116,11 +116,11 @@ Test flock-2.2 {funlock argument checking} {
 
 Test flock-2.3 {funlock argument checking} {
     funlock -write $readFH
-} 1  {bad file identifier "-write"}
+} 1  {can not find channel named "-write"}
 
 Test flock-2.4 {funlock argument checking} {
     funlock foofile
-} 1 {bad file identifier "foofile"}
+} 1 {can not find channel named "foofile"}
 
 Test flock-2.5 {funlock argument checking} {
     funlock $readFH x
@@ -171,15 +171,14 @@ funlock $writeFH
 
 Test flock-3.1 {flock argument checking} {
     flock $readFH
-} 1 {file not open for writing}
-
+} 1 "channel \"$readFH\" wasn't opened for writing"
 Test flock-3.2 {flock argument checking} {
     flock -write $readFH 
-} 1 {file not open for writing}
+} 1 "channel \"$readFH\" wasn't opened for writing"
 
 Test flock-3.3 {flock argument checking} {
     flock -read $writeFH 
-} 1 {file not open for reading}
+} 1 "channel \"$writeFH\" wasn't opened for reading"
 
 #
 # Check locking of a file that is not locked

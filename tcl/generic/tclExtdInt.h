@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.2 1995/08/08 15:47:07 markd Exp markd $
+ * $Id: tclExtdInt.h,v 5.3 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,20 +22,6 @@
 #include "tclExtend.h"
 #include "tclXconf.h"
 #include "tclInt.h"
-
-#if (TCL_MINOR_VERSION < 5)
-/*
- * Hack for dual support of TclX 7.4 & TclX 7.5.
- */
-#  define TCLX_7_4
-#  define TclOpenFile OpenFile
-#  define Tcl_AsyncReady() (tcl_AsyncReady)
-#  define TCL_VARARGS(type, name) ()
-#  define TCL_VARARGS_DEF(type, name) (va_alist)
-#  define TCL_VARARGS_START(type, name, list) \
-	(va_start(list), va_arg(list, type))
-#endif
-
 
 #include <sys/param.h>
 
@@ -54,14 +40,10 @@
 #include <grp.h>
 
 /*
- * Included the tcl file tclPort.h after other system files, as it checks
+ * Included the tcl file tclUnixPort.h after other system files, as it checks
  * if certain things are defined.
  */
-#ifdef TCLX_7_4
-#include "tclPort.h"
-#else
 #include "tclUnixPort.h"
-#endif
 
 /*
  * Use the real functions, not the Tcl interface that hides signals.
@@ -77,6 +59,17 @@
 #ifndef O_ACCMODE
 #    define O_ACCMODE  (O_RDONLY|O_WRONLY|O_RDWR)
 #endif
+
+/*
+ * Make sure we have both O_NONBLOCK and O_NDELAY defined.
+ */
+#ifndef O_NONBLOCK
+#   define O_NONBLOCK O_NDELAY
+#endif
+#ifndef O_NDELAY
+#   define O_NDELAY O_NONBLOCK
+#endif
+
 
 /*
  * If tclPort.h has already included time.h, don't include it again, some
@@ -214,6 +207,7 @@ extern char *tclXWrongArgs;
  */
 extern void
 Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
+                               Tcl_Channel channel,
                                int         fileNum));
 
 extern int
@@ -226,10 +220,6 @@ Tcl_StrToOffset _ANSI_ARGS_((CONST char *string,
                              off_t      *offsetPtr));
 
 extern int
-Tcl_DStringGets _ANSI_ARGS_((FILE         *filePtr,
-                             Tcl_DString  *dynStrPtr));
-
-extern int
 TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
                        unsigned     options,
                        char        *cmd));
@@ -237,9 +227,20 @@ TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
 extern int
 TclX_VarEval _ANSI_ARGS_(TCL_VARARGS(Tcl_Interp *, arg1));
 
-FILE *
-TclX_Stdfile _ANSI_ARGS_((Tcl_Interp  *interp,
-                          FILE        *stdfile));
+Tcl_Channel
+TclX_Stdin _ANSI_ARGS_((Tcl_Interp  *interp));
+
+Tcl_Channel
+TclX_Stdout _ANSI_ARGS_((Tcl_Interp  *interp));
+
+Tcl_Channel
+TclX_Stderr _ANSI_ARGS_((Tcl_Interp  *interp));
+
+int
+TclX_WriteStr _ANSI_ARGS_((Tcl_Channel  channel,
+                           char        *str));
+
+#define TclX_WriteNL(channel) (Tcl_Write (channel, "\n", 1))
 
 extern int
 Tcl_GetDate _ANSI_ARGS_((char   *p,
@@ -247,13 +248,25 @@ Tcl_GetDate _ANSI_ARGS_((char   *p,
                          long    zone,
                          time_t *timePtr));
 
-TclOpenFile *
+#if 0
+extern TclOpenFile *
 TclX_FNumToFileStruct _ANSI_ARGS_((Tcl_Interp  *interp,
                                    int          fnum));
+#endif
 
-extern TclOpenFile *
-TclX_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
-                                    char       *handle));
+extern int
+TclX_ChannelFnum _ANSI_ARGS_((Tcl_Channel channel,
+                              int         direction));
+
+extern Tcl_Channel
+TclX_GetOpenChannel _ANSI_ARGS_((Tcl_Interp *interp,
+                                 char       *handle,
+                                 int         accessMode));
+
+int
+TclX_GetOpenFnum _ANSI_ARGS_ ((Tcl_Interp *interp,
+                               char       *handle,
+                               int         accessMode));
 
 extern int
 Tcl_GetTime _ANSI_ARGS_((Tcl_Interp *interp,
@@ -296,16 +309,11 @@ Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
 extern void
 Tcl_ResetSignals ();
 
-extern FILE *
-Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                int         fileNum,
-                                int         permissions));
-
-extern FILE *
-Tcl_SetupFileEntry2  _ANSI_ARGS_((Tcl_Interp *interp,
-                                  int         readFileNum,
-                                  int         writeFileNum,
-                                  FILE      **writeFilePtrPtr));
+extern Tcl_Channel
+TclX_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
+                                 int         fileNum,
+                                 int         mode,
+                                 int         isSocket));
 
 extern clock_t
 Tcl_TicksToMS _ANSI_ARGS_((clock_t numTicks));
@@ -338,22 +346,6 @@ Tcl_ChownCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
 Tcl_ChgrpCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-/*
- * from tclXclock.c
- */
-extern int 
-Tcl_GetclockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_FmtclockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-/*
- * from tclXcnvclock.c
- */
-extern int 
-Tcl_ConvertclockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
 /*
  * from tclXcmdloop.c
  */

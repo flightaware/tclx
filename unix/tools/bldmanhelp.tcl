@@ -30,7 +30,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 4.2 1995/03/30 05:23:22 markd Exp markd $
+# $Id: bldmanhelp.tcl,v 5.0 1995/07/25 05:59:28 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -123,6 +123,7 @@ proc GenInputFile {docDir manInfoTbl tmpFile} {
        ProcessManFile $ent $tmpFH
    }
    cd $cwd
+   close $tmpFH
 }
 
 #-----------------------------------------------------------------------------

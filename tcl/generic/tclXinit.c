@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.4 1995/10/11 03:01:26 markd Exp $
+ * $Id: tclXinit.c,v 5.5 1995/12/28 23:37:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,7 +44,7 @@ InitSetup _ANSI_ARGS_((Tcl_Interp *interp));
  *
  * Display error information and abort when an error is returned in the
  * interp->result. It uses TCLXENV(noDump) to determine if the stack should be
- * dumped.  Attempts to use the "exit" command to exit, so cleanup can be done.
+ * dumped.
  *
  * Parameters:
  *   o interp - A pointer to the interpreter, should contain the
@@ -59,34 +59,35 @@ TclX_ErrorExit (interp, exitCode)
 {
     char *errorStack;
     char  numBuf [32];
-    FILE *stdoutPtr, *stderrPtr;
+    Tcl_Channel stdoutChan, stderrChan;
+    Tcl_DString savedResult;
 
-    stdoutPtr = TclX_Stdfile (interp, stdout);
-    stderrPtr = TclX_Stdfile (interp, stderr);
+    Tcl_DStringInit (&savedResult);
+    Tcl_DStringAppend (&savedResult, interp->result, -1);
 
-    fflush (stdoutPtr);
+    stdoutChan = TclX_Stdout (interp);
+    stderrChan = TclX_Stderr (interp);
 
-    if (Tcl_GetVar2 (interp, "TCLXENV", "noDump", TCL_GLOBAL_ONLY) == NULL) {
-        errorStack = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
-        if ((errorStack != NULL) && (errorStack [0] != '\0'))
-            fprintf (stderrPtr, "Error: %s\n", errorStack);
-        else
-            fprintf (stderrPtr, "Error: %s\n", interp->result);
-    } else {
-        fprintf (stderrPtr, "Error: %s\n", interp->result);
+    if (stdoutChan != NULL)
+        Tcl_Flush (stdoutChan);
+
+    if (stderrChan != NULL) {
+        TclX_WriteStr (stderrChan, "Error: ");
+        if (Tcl_GetVar2 (interp, "TCLXENV", "noDump",
+                         TCL_GLOBAL_ONLY) == NULL) {
+            errorStack = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
+            if ((errorStack != NULL) && (errorStack [0] != '\0'))
+                TclX_WriteStr (stderrChan, errorStack);
+            else
+                TclX_WriteStr (stderrChan, Tcl_DStringValue (&savedResult));
+        } else {
+                TclX_WriteStr (stderrChan, Tcl_DStringValue (&savedResult));
+        }
+        TclX_WriteNL (stderrChan);
+        Tcl_Flush (stderrChan);
     }
-    fflush (stderrPtr);
 
-    /*
-     * Use "exit" command to exit.
-     */
-    sprintf (numBuf, "%d", exitCode);
-    Tcl_VarEval (interp, "exit ", numBuf, (char *) NULL);
-    
-    /*
-     * If that failed, really exit.
-     */
-    exit (exitCode);
+    Tcl_Exit (exitCode);
 }
 
 /*
@@ -343,7 +344,7 @@ TclX_EvalRCFile (interp)
 
     Tcl_DStringInit (&buffer);
 
-    path = Tcl_TildeSubst (interp, path, &buffer);
+    path = Tcl_TranslateFileName (interp, path, &buffer);
     if (path == NULL)
         TclX_ErrorExit (interp, 1);
         

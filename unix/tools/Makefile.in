@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.3 1995/12/30 13:34:35 markd Exp $
+# $Id: Makefile.in,v 5.4 1995/12/31 11:25:05 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,7 +41,7 @@ tclxversion: getversion.c Makefile
 WISHX: tkxversion
 
 tkxversion: getversion.c Makefile
-	${CC} ${CC_SWITCHES} -DTK_GET_VERSION \
+	${CC} ${CC_SWITCHES} ${XINCLUDES} -DTK_GET_VERSION \
 	   ${srcdir}/getversion.c -o tkxversion ${LIBS}
 
 instcopy: instcopy.tcl buildutil.tcl

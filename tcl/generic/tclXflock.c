@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 5.0 1995/07/25 05:59:09 markd Rel markd $
+ * $Id: tclXflock.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,7 +26,7 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp    *interp,
                                  int            argc,
                                  char         **argv,
                                  int            argIdx,
-                                 TclOpenFile  **filePtrPtr,
+                                 int            access,
                                  struct flock  *lockInfoPtr));
 
 /*
@@ -34,9 +34,7 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp    *interp,
  */
 #ifdef F_SETLKW
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ParseLockUnlockArgs --
  *
  * Parse the positional arguments common to both the flock and funlock
@@ -48,44 +46,45 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp    *interp,
  *   o argc (I) - Count of arguments supplied to the comment.
  *   o argv (I) - Commant argument vector.
  *   o argIdx (I) - Index of the first common agument to parse.
- *   o filePtrPtr (O) - Pointer to the open file structure returned here.
+ *   o access (I) - Set of TCL_READABLE or TCL_WRITABLE or zero to
+ *     not do error checking.
  *   o lockInfoPtr (O) - Fcntl info structure, start, length and whence
  *     are initialized by this routine.
  * Returns:
- *   TCL_OK if all is OK,  TCL_ERROR and an error message is result.
- *
+ *   The file number or -1 if an error occurs.
  *-----------------------------------------------------------------------------
  */
 static int
-ParseLockUnlockArgs (interp, argc, argv, argIdx, filePtrPtr, lockInfoPtr)
+ParseLockUnlockArgs (interp, argc, argv, argIdx, access, lockInfoPtr)
     Tcl_Interp    *interp;
     int            argc;
     char         **argv;
     int            argIdx;
-    TclOpenFile  **filePtrPtr;
+    int            access;
     struct flock  *lockInfoPtr;
 {
+    int fnum;
 
     lockInfoPtr->l_start  = 0;
     lockInfoPtr->l_len    = 0;
     lockInfoPtr->l_whence = 0;
 
-    *filePtrPtr = TclX_GetOpenFileStruct (interp, argv [argIdx]);
-    if (*filePtrPtr == NULL)
-	return TCL_ERROR;
+    fnum = TclX_GetOpenFnum (interp, argv [argIdx], access);
+    if (fnum < 0)
+	return -1;
     argIdx++;
 
     if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
         if (Tcl_GetOffset (interp, argv [argIdx],
                            &lockInfoPtr->l_start) != TCL_OK)
-            return TCL_ERROR;
+            return -1;
     }
     argIdx++;
 
     if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
         if (Tcl_GetOffset (interp, argv [argIdx],
                            &lockInfoPtr->l_len) != TCL_OK)
-            return TCL_ERROR;
+            return -1;
     }
     argIdx++;
 
@@ -100,19 +99,16 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, filePtrPtr, lockInfoPtr)
             goto badOrgin;
     }
 
-    return TCL_OK;
+    return fnum;
 
   badOrgin:
     Tcl_AppendResult(interp, "bad origin \"", argv [argIdx],
                      "\": should be \"start\", \"current\", or \"end\"",
                      (char *) NULL);
-    return TCL_ERROR;
-   
+    return -1;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_FlockCmd --
  *
  * Implements the `flock' Tcl command:
@@ -130,9 +126,9 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    int           argIdx, stat;
-    int           readLock = FALSE, writeLock = FALSE, noWaitLock = FALSE;
-    TclOpenFile  *filePtr;
+    int argIdx, stat, fnum;
+    int readLock = FALSE, writeLock = FALSE, noWaitLock = FALSE;
+    int access = 0;
     struct flock  lockInfo;
 
     if (argc < 2)
@@ -141,14 +137,13 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
     /*
      * Parse off the options.
      */
-    
     for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
         if (STREQU (argv [argIdx], "-read")) {
-            readLock = TRUE;
+            access |= TCL_READABLE;
             continue;
         }
         if (STREQU (argv [argIdx], "-write")) {
-            writeLock = TRUE;
+            access |= TCL_WRITABLE;
             continue;
         }
         if (STREQU (argv [argIdx], "-nowait")) {
@@ -158,10 +153,10 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
         goto invalidOption;
     }
 
-    if (readLock && writeLock)
+    if (access == (TCL_READABLE | TCL_WRITABLE))
         goto bothReadAndWrite;
-    if (!(readLock || writeLock))
-        writeLock = TRUE;
+    if (access == 0)
+        access = TCL_WRITABLE;
 
     /*
      * Make sure there are enough arguments left and then parse the 
@@ -170,18 +165,13 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
     if ((argIdx > argc - 1) || (argIdx < argc - 4))
         goto invalidArgs;
 
-    if (ParseLockUnlockArgs (interp, argc, argv, argIdx, &filePtr,
-                             &lockInfo) != TCL_OK)
+    fnum = ParseLockUnlockArgs (interp, argc, argv, argIdx, access, &lockInfo);
+    if (fnum < 0)
         return TCL_ERROR;
 
-    if (readLock && ((filePtr->permissions & TCL_FILE_READABLE) == 0))
-        goto notReadable;
-    if (writeLock && ((filePtr->permissions & TCL_FILE_WRITABLE) == 0))
-        goto notWritable;
-
-    lockInfo.l_type = writeLock ? F_WRLCK : F_RDLCK;
+    lockInfo.l_type = (access == TCL_WRITABLE) ? F_WRLCK : F_RDLCK;
     
-    stat = fcntl (fileno (filePtr->f), noWaitLock ? F_SETLK : F_SETLKW, 
+    stat = fcntl (fnum, noWaitLock ? F_SETLK : F_SETLKW, 
                   &lockInfo);
 
     /*
@@ -220,19 +210,9 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
   bothReadAndWrite:
     interp->result = "can not specify both \"-read\" and \"-write\"";
     return TCL_ERROR;
-
-  notReadable:
-    interp->result = "file not open for reading";
-    return TCL_ERROR;
-
-  notWritable:
-    interp->result = "file not open for writing";
-    return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_FunlockCmd --
  *
  * Implements the `funlock' Tcl command:
@@ -250,36 +230,32 @@ Tcl_FunlockCmd (notUsed, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    TclOpenFile  *filePtr;
+    int fnum;
     struct flock  lockInfo;
 
     if ((argc < 2) || (argc > 5))
         goto invalidArgs;
 
-    if (ParseLockUnlockArgs (interp, argc, argv, 1, &filePtr,
-                             &lockInfo) != TCL_OK)
+    fnum = ParseLockUnlockArgs (interp, argc, argv, 1, 0, &lockInfo);
+    if (fnum < 0)
         return TCL_ERROR;
 
     lockInfo.l_type = F_UNLCK;
     
-    if (fcntl (fileno(filePtr->f), F_SETLK, &lockInfo) < 0) {
+    if (fcntl (fnum, F_SETLK, &lockInfo) < 0) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
-    
     return TCL_OK;
 
   invalidArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " fileId ?start? ?length? ?origin?", (char *) NULL);
     return TCL_ERROR;
-
 }
 #else
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_FlockCmd --
  * Tcl_FunlockCmd --
  *
@@ -309,4 +285,3 @@ Tcl_FunlockCmd (notUsed, interp, argc, argv)
     return Tcl_FlockCmd (notUsed, interp, argc, argv);
 }
 #endif
-

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 4.7 1995/07/04 18:01:38 markd Exp markd $
+ * $Id: tclXlib.c,v 5.0 1995/07/25 05:42:41 markd Rel $
  *-----------------------------------------------------------------------------
  */
 
@@ -181,7 +181,8 @@ EvalFilePart (interp, fileName, offset, length)
     Tcl_DStringInit (&tildeBuf);
     
     if (fileName [0] == '~') {
-        if ((fileName = Tcl_TildeSubst (interp, fileName, &tildeBuf)) == NULL)
+        if ((fileName = Tcl_TranslateFileName (interp, fileName,
+                                               &tildeBuf)) == NULL)
             return TCL_ERROR;
     }
 
@@ -290,7 +291,7 @@ MakeAbsFile (interp, fileName, absNamePtr)
      * absolute.
      */
     if (fileName [0] == '~') {
-        if (Tcl_TildeSubst (interp, fileName, absNamePtr) == NULL)
+        if (Tcl_TranslateFileName (interp, fileName, absNamePtr) == NULL)
             return NULL;
         return Tcl_DStringValue (absNamePtr);
     }
@@ -526,24 +527,25 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
      char       *tlibFilePath;
      char       *tndxFilePath;
 {
-    FILE        *indexFilePtr = NULL;
+    Tcl_Channel  indexChannel = NULL;
     Tcl_DString  lineBuffer;
-    int          lineArgc, idx, result, status;
+    int          lineArgc, idx, result;
     char       **lineArgv = NULL;
 
     Tcl_DStringInit (&lineBuffer);
 
-    indexFilePtr = fopen (tndxFilePath, "r");
-    if (indexFilePtr == NULL)
-        goto fileError;
+    indexChannel = Tcl_OpenFileChannel (interp, tndxFilePath, "r", 0);
+    if (indexChannel == NULL)
+        return TCL_ERROR;
     
     while (TRUE) {
         Tcl_DStringFree (&lineBuffer);
-        status = Tcl_DStringGets (indexFilePtr, &lineBuffer);
-        if (status == TCL_BREAK)
-            goto reachedEOF;
-        if (status == TCL_ERROR)
-            goto fileError;
+        if (Tcl_Gets (indexChannel, &lineBuffer) < 0) {
+            if (Tcl_Eof (indexChannel))
+                goto reachedEOF;
+            else
+                goto fileError;
+        }
 
         if ((Tcl_SplitList (interp, lineBuffer.string, &lineArgc,
                             &lineArgv) != TCL_OK) || (lineArgc < 4))
@@ -576,7 +578,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
     }
 
   reachedEOF:
-    fclose (indexFilePtr);
+    Tcl_Close (indexChannel);
     Tcl_DStringFree (&lineBuffer);
 
     return TCL_OK;
@@ -605,8 +607,8 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
     if (lineArgv != NULL)
         ckfree ((char *) lineArgv);
     Tcl_DStringFree (&lineBuffer);
-    if (indexFilePtr != NULL)
-        fclose (indexFilePtr);
+    if (indexChannel != NULL)
+        Tcl_Close (indexChannel);
     return TCL_ERROR;
 }
 

@@ -36,7 +36,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 5.0 1995/07/25 05:59:02 markd Rel $
+ * $Id: tcl++.h,v 5.1 1995/12/28 23:37:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -165,6 +165,7 @@ class TclInterp_cl
                             proc,  clientData);
     }
 
+#if 0
     inline int
     CreatePipeline (int    argc, 
                     char **argv, 
@@ -176,6 +177,7 @@ class TclInterp_cl
         return Tcl_CreatePipeline (interp, argc, argv, pidArrayPtr, inPipePtr, 
                                    outPipePtr, errFilePtr);
     }
+#endif
 
     inline Tcl_Trace 
     CreateTrace (int               level, 
@@ -208,13 +210,6 @@ class TclInterp_cl
                 int *pidPtr)
     {
         Tcl_DetachPids (numPids, pidPtr);
-    }
-
-    inline void
-    EnterFile (FILE  *file,
-               int    permissions)
-    {
-        Tcl_EnterFile (interp, file, permissions);
     }
 
     inline int 
@@ -282,16 +277,6 @@ class TclInterp_cl
             int        *intPtr)
     { 
         return Tcl_GetInt (interp, (char *) string, intPtr);
-    }
-
-    inline int
-    GetOpenFile (const char *string,
-                 int         write,
-                 int         checkUsage,
-                 FILE      **filePtr)
-    {
-        return Tcl_GetOpenFile (interp, (char *) string, write, checkUsage,
-                                filePtr);
     }
 
     inline const char *

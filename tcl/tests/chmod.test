@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 4.5 1995/07/17 20:34:29 markd Exp markd $
+# $Id: chmod.test,v 5.0 1995/07/25 05:40:45 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -502,7 +502,7 @@ Test chmod-4.2 {chmod error tests} {
 if [infox have_fchmod] {
     Test chmod-4.3 {chmod error tests} {
         chmod -fileid +w BAD
-    } 1 {bad file identifier "BAD"}
+    } 1 {can not find channel named "BAD"}
 
     Test chmod-4.4 {chmod error tests} {
         chmod -file -w CHMOD.TMP
@@ -651,7 +651,7 @@ Test chmod-6.5 {chown error tests} {
 if [infox have_fchown] {
     Test chmod-6.6 {chown error tests} {
         chown -fileid $myUID BAD
-    } 1 {bad file identifier "BAD"}
+    } 1 {can not find channel named "BAD"}
 
     Test chmod-6.6 {chown error tests} {
         chown -fid $myUID CHMOD.TMP
@@ -701,7 +701,7 @@ Test chmod-8.2 {chgrp error tests} {
 if [infox have_fchown] {
     Test chmod-8.3 {chown error tests} {
         chgrp -fileid $myGID BAD
-    } 1 {bad file identifier "BAD"}
+    } 1 {can not find channel named "BAD"}
 
     Test chmod-8.4 {chown error tests} {
         chgrp -fid $myGID CHMOD.TMP

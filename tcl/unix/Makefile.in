@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.4 1995/12/30 13:34:15 markd Exp $
+# $Id: Makefile.in,v 5.5 1995/12/31 11:24:38 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -48,10 +48,10 @@ LDXX_SWITCHES = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CXXFLAGS}
 # Source and target macros.
 #
 GENERIC_OBJS = \
-    tclXbsearch.o    tclXchmod.o      tclXclock.o      tclXcmdInit.o \
-    tclXcmdloop.o    tclXcnvclock.o   tclXdebug.o      tclXdup.o     \
+    tclXbsearch.o    tclXchmod.o      tclXcmdInit.o \
+    tclXcmdloop.o    tclXdebug.o      tclXdup.o     \
     tclXfcntl.o      tclXfilecmds.o   tclXfilescan.o   tclXflock.o   \
-    tclXfstat.o      tclXgeneral.o    tclXgetdate.o    tclXhandles.o \
+    tclXfstat.o      tclXgeneral.o    tclXhandles.o \
     tclXid.o         tclXinit.o       tclXkeylist.o    tclXlib.o     \
     tclXlist.o       tclXmath.o       tclXmsgcat.o     tclXlibInit.o \
     tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
@@ -117,11 +117,6 @@ tclXcmdInit.o: ${TCLX_GENERIC_DIR}/tclXcmdInit.c \
 	       ${TCLX_GENERIC_DIR}/tclXpatchl.h
 	${CC} -c ${CC_SWITCHES}  ${TCLX_GENERIC_DIR}/tclXcmdInit.c
 
-tclXgetdate.c: ${TCLX_GENERIC_DIR}/tclXgetdate.y
-	${YACC} $(TCLX_GENERIC_DIR)/tclXgetdate.y
-	sed 's/yy/TclXyy/g' <y.tab.c >tclXgetdate.c
-	rm y.tab.c
-
 tclXAppInit.o: ${TCLX_GENERIC_DIR}/tclXAppInit.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXAppInit.c
 
@@ -131,14 +126,8 @@ tclXbsearch.o: ${TCLX_GENERIC_DIR}/tclXbsearch.c
 tclXchmod.o: ${TCLX_GENERIC_DIR}/tclXchmod.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXchmod.c
 
-tclXclock.o: ${TCLX_GENERIC_DIR}/tclXclock.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXclock.c
-
 tclXcmdloop.o: ${TCLX_GENERIC_DIR}/tclXcmdloop.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXcmdloop.c
-
-tclXcnvclock.o: ${TCLX_GENERIC_DIR}/tclXcnvclock.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXcnvclock.c
 
 tclXdebug.o: ${TCLX_GENERIC_DIR}/tclXdebug.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXdebug.c
@@ -163,9 +152,6 @@ tclXfstat.o: ${TCLX_GENERIC_DIR}/tclXfstat.c
 
 tclXgeneral.o: ${TCLX_GENERIC_DIR}/tclXgeneral.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXgeneral.c
-
-tclXgetdate.o: tclXgetdate.c
-	${CC} -c ${CC_SWITCHES} tclXgetdate.c
 
 tclXhandles.o: ${TCLX_GENERIC_DIR}/tclXhandles.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXhandles.c
@@ -356,7 +342,7 @@ extdtests: all
 # Build help for Tcl & TclX.  These files are normally part of the
 # distribution and not rebuilt by users.
 #
-buildtclhelp: tcl tcl.tndx
+buildhelp: tcl tcl.tndx
 	rm -rf ${HELP_DIR} help
 	mkdir ${HELP_DIR}
 	${BLDMANHELP} ${TCL_SRC}/doc ${srcbasedir}/unix/tools/tclmanpages \
@@ -422,7 +408,7 @@ install-master-exec:
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclXgetdate.c tclXAppInit.o tclTest.c
+	-rm -f tclXAppInit.o tclTest.c
 	-rm -f ${OBJS} libtclx.a tcl tcl++ checkup.done
 	-rm -f tclXAppInit++.C TCLXX_O_YES TCLXX_O_NO tclXAppInit++.o tcl++.o
 	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help

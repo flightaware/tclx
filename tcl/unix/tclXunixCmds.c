@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 5.1 1995/08/04 05:56:17 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 5.2 1995/08/07 17:23:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -265,7 +265,8 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    FILE  *filePtr;
+    Tcl_Channel channel;
+    int fileNum;
 
     if ((argc < 1) || (argc > 2)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?filehandle?",
@@ -278,23 +279,27 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
 	return TCL_OK;
     }
 
-    if (Tcl_GetOpenFile (interp, argv[1], 
-			 TCL_FILE_WRITABLE,
-			 TRUE,   /* check access */
-			 &filePtr) != TCL_OK)
+    channel = TclX_GetOpenChannel (interp, argv[1], TCL_WRITABLE);
+    if (channel == NULL)
+	return TCL_ERROR;
+    fileNum = TclX_GetOpenFnum (interp, argv[1], TCL_WRITABLE);
+    if (fileNum < 0)
 	return TCL_ERROR;
 
-    fflush (filePtr);
+    if (Tcl_Flush (channel) < 0)
+        goto posixError;
 
 #ifdef HAVE_FSYNC
-    if (fsync (fileno (filePtr)) < 0) {
-        interp->result = Tcl_PosixError (interp);
-        return TCL_ERROR;
-    }
+    if (fsync (fileNum) < 0)
+        goto posixError;
 #else
     sync ();
 #endif
     return TCL_OK;
+
+  posixError:
+    interp->result = Tcl_PosixError (interp);
+    return TCL_ERROR;
 }
 
 /*
@@ -523,11 +528,11 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
 #endif
     }
 
-    srcPath = Tcl_TildeSubst (interp, argv [argc - 2], &srcPathBuf);
+    srcPath = Tcl_TranslateFileName (interp, argv [argc - 2], &srcPathBuf);
     if (srcPath == NULL)
         goto errorExit;
 
-    destPath = Tcl_TildeSubst (interp, argv [argc - 1], &destPathBuf);
+    destPath = Tcl_TranslateFileName (interp, argv [argc - 1], &destPathBuf);
     if (destPath == NULL)
         goto errorExit;
 
@@ -596,7 +601,7 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        fileName = Tcl_TildeSubst (interp, fileArgv [idx], &tildeBuf);
+        fileName = Tcl_TranslateFileName (interp, fileArgv [idx], &tildeBuf);
         if (fileName == NULL) {
             if (!noComplain)
                 goto errorExit;
@@ -664,7 +669,7 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
      */
 
     for (idx = 0; idx < dirArgc; idx++) {
-        dirName = Tcl_TildeSubst (interp, dirArgv [idx], &tildeBuf);
+        dirName = Tcl_TranslateFileName (interp, dirArgv [idx], &tildeBuf);
         if (dirName == NULL)
            goto errorExit;
 
@@ -754,7 +759,7 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < dirArgc; idx++) {
-        dirName = Tcl_TildeSubst (interp, dirArgv [idx], &tildeBuf);
+        dirName = Tcl_TranslateFileName (interp, dirArgv [idx], &tildeBuf);
         if (dirName == NULL) {
             if (!noComplain)
                 goto errorExit;

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.2 1995/12/30 13:34:26 markd Exp $
+# $Id: Makefile.in,v 5.3 1995/12/31 11:24:50 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -114,13 +114,9 @@ tktest: all
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
 # Tk versions have changed.
 #
-buildhelp: buildtclhelp buildtkhelp
-
-buildtclhelp:
-	cd ../tcl/unix; ${MAKE} buildtclhelp
-
-buildtkhelp:
-	cd ../tk/unix;  ${MAKE} buildtkhelp
+buildhelp:
+	cd ../tcl/unix; ${MAKE} buildhelp
+	cd ../tk/unix;  ${MAKE} buildhelp
 
 #------------------------------------------------------------------------------
 # Install Extended Tcl using the standard model.

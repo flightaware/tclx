@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 4.2 1995/07/02 20:00:53 markd Exp markd $
+# $Id: fcntl.test,v 5.0 1995/07/25 05:40:59 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -127,10 +127,6 @@ Test fcntl-3.2 {fcntl tests} {
     fcntl $testRWFH NObuf
 } 0 1
 
-Test fcntl-3.3 {fcntl tests} {
-    fcntl $testRWFH NOBUF 0
-} 1 {Attribute "NOBUF" may not be cleared once set}
-
 close $testRWFH
 close $testRFH
 close $testWFH
@@ -142,10 +138,6 @@ Test fcntl-4.1 {fcntl tests} {
     fcntl $testRWFH LINEBUF 1
     fcntl $testRWFH LINEBUF
 } 0 1
-
-Test fcntl-4.2 {fcntl tests} {
-    fcntl $testRWFH LINEBUF 0
-} 1 {Attribute "LINEBUF" may not be cleared once set}
 
 Test fcntl-5.1 {fcntl tests} {
     fcntl $testRWFH a b c
@@ -163,7 +155,7 @@ close $testRWFH
 
 Test fcntl-5.4 {fcntl tests} {
     fcntl $testRWFH RDONLY
-} 1 "file \"$testRWFH\" isn't open"
+} 1 "can not find channel named \"$testRWFH\""
 
 close $testRPH
 close $testWPH

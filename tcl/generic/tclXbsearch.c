@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 4.2 1995/01/01 19:49:26 markd Exp markd $
+ * $Id: tclXbsearch.c,v 5.0 1995/07/25 05:42:12 markd Rel $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,8 +26,8 @@ typedef struct binSearchCB_t {
     char         *fileHandle;     /* Handle of file.                         */
     char         *key;            /* The key to search for.                  */
 
-    FILE         *fileCBPtr;      /* Open file structure.                    */
-    Tcl_DString   dynBuf;         /* Dynamic buffer to hold a line of file.  */
+    Tcl_Channel   channel;        /* I/O channel.                            */
+    Tcl_DString   lineBuf;        /* Dynamic buffer to hold a line of file.  */
     off_t         lastRecOffset;  /* Offset of last record read.             */
     int           cmpResult;      /* -1, 0 or 1 result of string compare.    */
     char         *tclProc;        /* Name of Tcl comparsion proc, or NULL.   */
@@ -50,8 +50,7 @@ ReadAndCompare _ANSI_ARGS_((off_t          fileOffset,
 static int
 BinSearch _ANSI_ARGS_((binSearchCB_t *searchCBPtr));
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * StandardKeyCompare --
  *    Standard comparison routine for BinSearch, compares the key to the
@@ -85,8 +84,7 @@ StandardKeyCompare (key, line)
     return cmpResult;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * TclProcKeyCompare --
  *    Comparison routine for BinSearch that runs a Tcl procedure to, 
@@ -94,7 +92,7 @@ StandardKeyCompare (key, line)
  *
  * Parameters:
  *   o searchCBPtr (I/O) - The search control block, the line should be in
- *     dynBuf, the comparsion result is returned in cmpResult.
+ *     lineBuf, the comparsion result is returned in cmpResult.
  *
  * Results:
  *   TCL_OK or TCL_ERROR.
@@ -109,7 +107,7 @@ TclProcKeyCompare (searchCBPtr)
 
     cmdArgv [0] = searchCBPtr->tclProc;
     cmdArgv [1] = searchCBPtr->key;
-    cmdArgv [2] = searchCBPtr->dynBuf.string;
+    cmdArgv [2] = searchCBPtr->lineBuf.string;
     command = Tcl_Merge (3, cmdArgv);
 
     result = Tcl_Eval (searchCBPtr->interp, command);
@@ -133,8 +131,7 @@ TclProcKeyCompare (searchCBPtr)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * ReadAndCompare --
  *    Search for the next line in the file starting at the specified
@@ -164,20 +161,28 @@ ReadAndCompare (fileOffset, searchCBPtr)
 {
     int  recChar, status;
 
-    if (fseek (searchCBPtr->fileCBPtr, fileOffset, SEEK_SET) != 0)
+    if (Tcl_Seek (searchCBPtr->channel, fileOffset, SEEK_SET) < 0)
         goto unixError;
 
     /*
-     * Go to beginning of next line.
+     * Go to beginning of next line by reading the remainder of the current
+     * one.
      */
-    
     if (fileOffset != 0) {
-        while (((recChar = getc (searchCBPtr->fileCBPtr)) != EOF) &&
-                (recChar != '\n'))
-            fileOffset++;
-        if ((recChar == EOF) && ferror (searchCBPtr->fileCBPtr))
+        if (Tcl_Gets (searchCBPtr->channel, &searchCBPtr->lineBuf) < 0) {
+            if (Tcl_Eof (searchCBPtr->channel) ||
+                Tcl_InputBlocked (searchCBPtr->channel)) {
+                Tcl_AppendResult (searchCBPtr->interp,
+                                  "bsearch got unexpected EOF on \"",
+                                  searchCBPtr->fileHandle, "\"",
+                                  (char *) NULL);
+                return TCL_ERROR;
+            }
             goto unixError;
+        }
     }
+    fileOffset = Tcl_Tell (searchCBPtr->channel);  /* Offset of next line */
+
     /*
      * If this is the same line as before, then just leave the comparison
      * result unchanged.
@@ -187,25 +192,28 @@ ReadAndCompare (fileOffset, searchCBPtr)
 
     searchCBPtr->lastRecOffset = fileOffset;
 
-    Tcl_DStringFree (&searchCBPtr->dynBuf);
-
-    status = Tcl_DStringGets (searchCBPtr->fileCBPtr,
-                              &searchCBPtr->dynBuf);
-    if (status == TCL_ERROR)
-        goto unixError;
+    Tcl_DStringSetLength (&searchCBPtr->lineBuf, 0);
 
     /* 
-     * Only compare if EOF was not hit, otherwise, treat as if we went
-     * above the key we are looking for.
+     * Read the line. Only compare if EOF was not hit, otherwise, treat as if
+     * we went above the key we are looking for.
      */
-    if (status == TCL_BREAK) {
-        searchCBPtr->cmpResult = -1;
-        return TCL_OK;
+    if (Tcl_Gets (searchCBPtr->channel, &searchCBPtr->lineBuf) < 0) {
+        if (Tcl_Eof (searchCBPtr->channel) ||
+            Tcl_InputBlocked (searchCBPtr->channel)) {
+            searchCBPtr->cmpResult = -1;
+            return TCL_OK;
+        }
+        goto unixError;
     }
 
+    /*
+     * Compare the line.
+     */
     if (searchCBPtr->tclProc == NULL) {
-        searchCBPtr->cmpResult = StandardKeyCompare (searchCBPtr->key, 
-                                                     searchCBPtr->dynBuf.string);
+        searchCBPtr->cmpResult =
+            StandardKeyCompare (searchCBPtr->key, 
+                                searchCBPtr->lineBuf.string);
     } else {
         if (TclProcKeyCompare (searchCBPtr) != TCL_OK)
             return TCL_ERROR;
@@ -213,21 +221,20 @@ ReadAndCompare (fileOffset, searchCBPtr)
 
     return TCL_OK;
 
-unixError:
+  unixError:
    Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
                      Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * BinSearch --
  *      Binary search a sorted ASCII file.
  *
  * Parameters:
  *   o searchCBPtr (I/O) - The search control block, if the line is found,
- *     it is returned in dynBuf.
+ *     it is returned in lineBuf.
  * Results:
  *     TCL_OK - If the key was found.
  *     TCL_BREAK - If it was not found.
@@ -241,20 +248,11 @@ static int
 BinSearch (searchCBPtr)
     binSearchCB_t *searchCBPtr;
 {
-    FILE       *filePtr;
-    off_t       middle, high, low;
+    off_t middle, high, low;
     struct stat statBuf;
 
-    if (Tcl_GetOpenFile (searchCBPtr->interp, searchCBPtr->fileHandle,
-                         FALSE,  /* Read access  */
-                         TRUE,   /* Check access */
-                        &filePtr) != TCL_OK)
-        return TCL_ERROR;
-
-    searchCBPtr->fileCBPtr = filePtr;
-    searchCBPtr->lastRecOffset = -1;
-
-    if (fstat (fileno (searchCBPtr->fileCBPtr), &statBuf) < 0)
+    if (fstat (TclX_ChannelFnum (searchCBPtr->channel, TCL_READABLE),
+               &statBuf) < 0)
         goto unixError;
 
     low = 0;
@@ -287,14 +285,13 @@ BinSearch (searchCBPtr)
         }
     }
 
-unixError:
+  unixError:
    Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
                      Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * Tcl_BsearchCmd --
  *     Implements the TCL bsearch command:
@@ -312,43 +309,51 @@ Tcl_BsearchCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int           status;
+    int status;
     binSearchCB_t searchCB;
 
     if ((argc < 3) || (argc > 5)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " handle key ?retvar? ?compare_proc?"
-                          , (char *) NULL);
+                          " handle key ?retvar? ?compare_proc?",
+                          (char *) NULL);
         return TCL_ERROR;
     }
+
+    searchCB.channel = TclX_GetOpenChannel (interp,
+                                            argv [1],
+                                            TCL_READABLE);
+    if (searchCB.channel == NULL)
+        return TCL_ERROR;
 
     searchCB.interp = interp;
     searchCB.fileHandle = argv [1];
     searchCB.key = argv [2];
+    searchCB.lastRecOffset = -1;
     searchCB.tclProc = (argc == 5) ? argv [4] : NULL;
-    Tcl_DStringInit (&searchCB.dynBuf);
+
+    Tcl_DStringInit (&searchCB.lineBuf);
 
     status = BinSearch (&searchCB);
     if (status == TCL_ERROR) {
-        Tcl_DStringFree (&searchCB.dynBuf);
+        Tcl_DStringFree (&searchCB.lineBuf);
         return TCL_ERROR;
     }
 
     if (status == TCL_BREAK) {
-        Tcl_DStringFree (&searchCB.dynBuf);
+        Tcl_DStringFree (&searchCB.lineBuf);
         if ((argc >= 4) && (argv [3][0] != '\0'))
             interp->result = "0";
         return TCL_OK;
     }
 
     if ((argc == 3) || (argv [3][0] == '\0')) {
-        Tcl_DStringResult (interp, &searchCB.dynBuf);
+        Tcl_DStringResult (interp, &searchCB.lineBuf);
     } else {
         char *varPtr;
 
-        varPtr = Tcl_SetVar (interp, argv[3], searchCB.dynBuf.string,
+        varPtr = Tcl_SetVar (interp, argv[3], searchCB.lineBuf.string,
                              TCL_LEAVE_ERR_MSG);
-        Tcl_DStringFree (&searchCB.dynBuf);
+        Tcl_DStringFree (&searchCB.lineBuf);
         if (varPtr == NULL)
             return TCL_ERROR;
         interp->result = "1";

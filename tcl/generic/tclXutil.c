@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.0 1995/07/25 05:59:00 markd Rel markd $
+ * $Id: tclXutil.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,14 +32,15 @@ ReturnOverflow _ANSI_ARGS_((Tcl_Interp *interp));
 static int
 CallEvalErrorHandler _ANSI_ARGS_((Tcl_Interp  *interp));
 
+static Tcl_ChannelType *
+UnixFileChannelType _ANSI_ARGS_((Tcl_Interp *interp));
+
 /*
  * Used to return argument messages by most commands.
  */
 char *tclXWrongArgs = "wrong # args: ";
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ReturnOverflow --
  *    
  *   Return an error message about an numeric overflow.
@@ -60,9 +61,7 @@ ReturnOverflow (interp)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_StrToLong --
  *      Convert an Ascii string to an long number of the specified base.
  *
@@ -122,9 +121,7 @@ Tcl_StrToLong (string, base, longPtr)
     return TRUE;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_StrToInt --
  *      Convert an Ascii string to an number of the specified base.
  *
@@ -184,9 +181,7 @@ Tcl_StrToInt (string, base, intPtr)
     return TRUE;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_StrToUnsigned --
  *      Convert an Ascii string to an unsigned int of the specified base.
  *
@@ -232,9 +227,7 @@ Tcl_StrToUnsigned (string, base, unsignedPtr)
     return TRUE;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_StrToDouble --
  *   Convert a string to a double percision floating point number.
  *
@@ -265,9 +258,7 @@ Tcl_StrToDouble (string, doublePtr)
     return TRUE;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_StrToOffset --
  *      Convert an Ascii string to an off_t number of the specified base.
  *
@@ -327,9 +318,7 @@ Tcl_StrToOffset (string, base, offsetPtr)
     return TRUE;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_DownShift --
  *     Utility procedure to down-shift a string.  It is written in such
  *     a way as that the target string maybe the same as the source string.
@@ -365,9 +354,7 @@ Tcl_DownShift (targetStr, sourceStr)
     return targetStr;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_UpShift --
  *     Utility procedure to up-shift a string.
  *
@@ -402,67 +389,7 @@ Tcl_UpShift (targetStr, sourceStr)
     return targetStr;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_DStringGets --
- *
- *    Reads a line from a file into a dynamic string.  The string will be
- * expanded, if necessary and reads are done until EOL or EOF is reached.
- * The line is appended to any data already in the string.
- *
- * Parameter
- *   o filePtr (I) - File to read from.
- *   o dynStrPtr (I) - String to return the data in.
- * Returns:
- *    o TCL_BREAK - EOF
- *    o TCL_OK - If data was transfered.
- *    o TCL_ERROR - An error occured.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_DStringGets (filePtr, dynStrPtr)
-    FILE         *filePtr;
-    Tcl_DString  *dynStrPtr;
-{
-    char           buffer [128];
-    register char *bufPtr, *bufEnd;
-    register int   readVal;
-    int            startLength = dynStrPtr->length;
-
-    bufPtr = buffer;
-    bufEnd = buffer + sizeof (buffer) - 1;
-
-    clearerr (filePtr);  /* Clear previous error/EOF */
-
-    while (TRUE) {
-        readVal = getc (filePtr);
-        if (readVal == '\n')      /* Is it a new-line? */
-            break;
-        if (readVal == EOF)
-            break;
-        *bufPtr++ = readVal;
-        if (bufPtr > bufEnd) {
-            Tcl_DStringAppend (dynStrPtr, buffer, sizeof (buffer));
-            bufPtr = buffer;
-        }
-    }
-    if ((readVal == EOF) && ferror (filePtr))
-        return TCL_ERROR;   /* Error */
-
-    if (bufPtr != buffer) {
-        Tcl_DStringAppend (dynStrPtr, buffer, bufPtr - buffer);
-    }
-
-    if ((readVal == EOF) && dynStrPtr->length == startLength)
-        return TCL_BREAK;
-    else
-        return TCL_OK;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_GetLong --
  *
  *      Given a string, produce the corresponding long value.
@@ -475,7 +402,6 @@ Tcl_DStringGets (filePtr, dynStrPtr)
  *
  * Side effects:
  *      None.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -511,9 +437,7 @@ Tcl_GetLong(interp, string, longPtr)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_GetUnsigned --
  *
  *      Given a string, produce the corresponding unsigned integer value.
@@ -526,7 +450,6 @@ Tcl_GetLong(interp, string, longPtr)
  *
  * Side effects:
  *      None.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -574,9 +497,7 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_GetTime --
  *
  *      Given a string, produce the corresponding time_t value.
@@ -589,7 +510,6 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
  *
  * Side effects:
  *      None.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -639,9 +559,7 @@ Tcl_GetTime(interp, string, timePtr)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_GetOffset --
  *
  *      Given a string, produce the corresponding off_t value.
@@ -654,7 +572,6 @@ Tcl_GetTime(interp, string, timePtr)
  *
  * Side effects:
  *      None.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -694,9 +611,7 @@ Tcl_GetOffset(interp, string, offsetPtr)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_RelativeExpr --
  *
  *    Evaluate an expression that may start with the magic words "end" or
@@ -747,99 +662,126 @@ Tcl_RelativeExpr (interp, cstringExpr, stringLen, exprResultPtr)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * TclX_GetOpenChannel --
  *
- * TclX_FNumToFileStruct--
- *
- *   Given a file number, get a pointer to the TclOpenFile structure.
- *
- * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- *   o fnum (I) - File number.
- * Returns:
- *   A pointer to the file struct, or NULL if its not open.
- *-----------------------------------------------------------------------------
- */
-TclOpenFile *
-TclX_FNumToFileStruct (interp, fnum)
-    Tcl_Interp  *interp;
-    int          fnum;
-{
-#ifdef TCLX_7_4
-    return (((tclNumFiles <= fnum) || (tclOpenFiles [fnum] == NULL)) ? \
-            NULL : tclOpenFiles [fnum]);
-#else
-    char           buf [32], *handle;
-    TclOpenFile   *filePtr;
-    Tcl_HashTable *hTablePtr;
-    Tcl_HashEntry *hPtr;
-
-    switch (fnum) {
-      case 0:
-        handle = "stdin";
-        break;
-      case 1:
-        handle = "stdout";
-        break;
-      case 2:
-        handle = "stderr";
-        break;
-      default:
-        sprintf (buf, "file%d", fnum);
-        handle = buf;
-        break;
-    }
-
-    hTablePtr = (Tcl_HashTable *) Tcl_GetAssocData (interp, "tclFileTable",
-                                                    NULL);
-    if (hTablePtr != (Tcl_HashTable *) NULL) {
-        hPtr = Tcl_FindHashEntry (hTablePtr, handle);
-        if (hPtr != (Tcl_HashEntry *) NULL) {
-            filePtr = (TclOpenFile *) Tcl_GetHashValue (hPtr);
-            if (filePtr != (TclOpenFile *) NULL) {
-                return filePtr;
-            }
-        }
-    }
-    return NULL;
-#endif
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * TclX_GetOpenFileStruct --
- *
- *    Convert a file handle to a pointer to the internal Tcl file structure.
+ *    Convert a file handle to a channel with error checking.
  *
  * Parameters:
  *   o interp (I) - Current interpreter.
  *   o handle (I) - The file handle to convert.
+ *   o accessMode (I) - Set of TCL_READABLE or TCL_WRITABLE or zero to
+ *     not do error checking.
  * Returns:
- *   A pointer to the open file structure for the file, or NULL if an error
- * occured.
+ *   A the channel or NULL if an error occured.
  *-----------------------------------------------------------------------------
  */
-TclOpenFile *
-TclX_GetOpenFileStruct (interp, handle)
+Tcl_Channel
+TclX_GetOpenChannel (interp, handle, accessMode)
     Tcl_Interp *interp;
     char       *handle;
+    int         accessMode;
 {
-    FILE *filePtr;
+    Tcl_Channel chan;
+    int mode;
 
-    if (Tcl_GetOpenFile (interp, handle,
-                         FALSE, FALSE,  /* No checking */
-                         &filePtr) != TCL_OK)
+    chan = Tcl_GetChannel (interp,
+                           TclSubstChannelName (handle),
+                           &mode);
+    if (chan == (Tcl_Channel) NULL) {
+	return NULL;
+    }
+    if ((accessMode & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
+        Tcl_AppendResult(interp, "channel \"", handle,
+                "\" wasn't opened for reading", (char *) NULL);
         return NULL;
+    }
+    if ((accessMode & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
+        Tcl_AppendResult(interp, "channel \"", handle,
+                "\" wasn't opened for writing", (char *) NULL);
+        return NULL;
+    }
 
-    return TclX_FNumToFileStruct (interp, fileno (filePtr));
+    return chan;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * TclX_GetOpenFnum --
  *
- * Tcl_SetupFileEntry --
+ *    Convert a file handle to a file number with error checking.
+ *
+ * Parameters:
+ *   o interp (I) - Current interpreter.
+ *   o handle (I) - The file handle to convert.
+ *   o accessMode (I) - Set of TCL_READABLE or TCL_WRITABLE or zero to
+ *     not do error checking.
+ * Returns:
+ *   The file number of < 0 if an error occured.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_GetOpenFnum (interp, handle, accessMode)
+    Tcl_Interp *interp;
+    char       *handle;
+    int         accessMode;
+{
+    Tcl_Channel channel;
+    Tcl_File file;
+
+    channel = TclX_GetOpenChannel (interp, handle, accessMode);
+    if (channel == NULL)
+        return -1;
+
+    switch (accessMode) {
+      case 0:
+      case TCL_READABLE | TCL_WRITABLE:
+        file = Tcl_GetChannelFile (channel, TCL_READABLE);
+        if (file == NULL)
+            file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+        break;
+      case TCL_READABLE:
+        file = Tcl_GetChannelFile (channel, TCL_READABLE);
+        break;
+      case TCL_WRITABLE:
+        file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+        break;
+    }
+    if (file == NULL)
+        panic ("TclX_GetOpenFnum: file not available");
+
+    return (int) Tcl_GetFileInfo (file, NULL);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_ChannelFnum --
+ *
+ *    Convert a channel to a file number.
+ *
+ * Parameters:
+ *   o interp (I) - Current interpreter.
+ *   o handle (I) - The file handle to convert.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE.
+ * Returns:
+ *   The file number or -1 if a file number is not associated with this access
+ * direction.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_ChannelFnum (channel, direction)
+    Tcl_Channel channel;
+    int         direction;
+{
+    Tcl_File file;
+
+    file = Tcl_GetChannelFile (channel, direction);
+    if (file == NULL)
+        return -1;
+
+    return (int) Tcl_GetFileInfo (file, NULL);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_SetupFileEntry --
  *
  * Set up an entry in the Tcl file table for a file number, including the stdio
  * FILE structure.
@@ -849,175 +791,85 @@ TclX_GetOpenFileStruct (interp, handle)
  *     in result, it is cleared.  This is done because the file handles
  *     are often returned in different ways.
  *   o fileNum (I) - File number to set up the entry for.
- *   o permissions (I) - Flags consisting of TCL_FILE_READABLE,
- *     TCL_FILE_WRITABLE.
+ *   o mode (I) - Flags consisting of TCL_READABLE, TCL_WRITABLE.
+ *   o isSocket (I) - TRUE if its a socket, FALSE otherwise.
  * Returns:
- *   A pointer to the FILE structure for the file, or NULL if an error
- * occured.
- *
- * Notes:
- *   Use great care setting up an entry for both read and write access.
- * For non-seakable files like sockets, this can cause strange errors.
+ *   The channel or NULL if an error occured.
  *-----------------------------------------------------------------------------
  */
-FILE *
-Tcl_SetupFileEntry (interp, fileNum, permissions)
+Tcl_Channel
+TclX_SetupFileEntry (interp, fileNum, mode, isSocket)
     Tcl_Interp *interp;
     int         fileNum;
-    int         permissions;
+    int         mode;
+    int          isSocket;
 {
-    Interp   *iPtr = (Interp *) interp;
-    char     *mode;
-    FILE     *filePtr;
+    Tcl_File file;
+    Tcl_Channel channel;
+    char *stdName;
 
-    /*
-     * Set up a stdio FILE control block for the new file.
-     */
-    switch (permissions) {
-      case TCL_FILE_READABLE:
-        mode = "r";
+    switch (fileNum) {
+      case 0:
+        stdName = "stdin";
         break;
-      case TCL_FILE_WRITABLE:
-        mode = "w";
+      case 1:
+        stdName = "stdout";
         break;
-      case TCL_FILE_READABLE | TCL_FILE_WRITABLE:
-        mode = "r+";
+      case 2:
+        stdName = "stderr";
         break;
       default:
-        mode = NULL;  /* Cause a core dump on invalid mode */
+        stdName = NULL;
+        break;
     }
 
-    filePtr = fdopen (fileNum, mode);
-    if (filePtr == NULL) {
-        iPtr->result = Tcl_PosixError (interp);
+    file = Tcl_GetFile ((ClientData) fileNum, TCL_UNIX_FD);
+    if (isSocket) {
+        channel = Tcl_MakeTcpClientChannel (interp, file, stdName);
+    } else {
+        channel = Tcl_MakeFileChannel (interp, file, mode, stdName);
+    }
+    if (channel == NULL) {
+        Tcl_FreeFile (file);
         return NULL;
     }
-    
-    Tcl_EnterFile (interp, filePtr, permissions);
-    Tcl_ResetResult (interp);
-
-    return filePtr;
+        
+    Tcl_RegisterChannel (interp, channel);
+    return channel;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_SetupFileEntry2 --
- *
- * Set up an entrues in the Tcl file table for a pair of file numbers, one
- * for read, the other for write.
- *
- * Parameters:
- *   o interp (I) - Current interpreter.  The file handle is NOT returned
- *     in result, it is cleared.  This is done because the file handles
- *     are often returned in different ways.
- *   o readFileNum (I) - Read file number to set up the entry for.
- *   o writeFileNum (I) - Write file number to set up the entry for.
- *   o writeFilePtrPtr (O) - Write FILE structure ptr is returned here.
- *     If NULL, the pointer is not returned.
- * Returns:
- *   A pointer to the FILE structure for read file, or NULL if an error
- * occured.
- *-----------------------------------------------------------------------------
- */
-FILE *
-Tcl_SetupFileEntry2 (interp, readFileNum, writeFileNum, writeFilePtrPtr)
-    Tcl_Interp *interp;
-    int         readFileNum;
-    int         writeFileNum;
-    FILE      **writeFilePtrPtr;
-{
-    FILE        *readFilePtr, *writeFilePtr;
-    TclOpenFile *tclFilePtr;
-
-    /*
-     * Set up dual FILE structs.
-     */
-    readFilePtr = fdopen (readFileNum, "r");
-    if (readFilePtr == NULL) {
-        interp->result = Tcl_PosixError (interp);
-        return NULL;
-    }
-    
-    writeFilePtr = fdopen (writeFileNum, "w");
-    if (writeFilePtr == NULL) {
-        interp->result = Tcl_PosixError (interp);
-        fclose (readFilePtr);
-        return NULL;
-    }
-
-    /*
-     * Add these into the Tcl file table as a single file.
-     */
-    Tcl_EnterFile (interp, readFilePtr, TCL_FILE_READABLE);
-
-    tclFilePtr = TclX_FNumToFileStruct (interp, fileno (readFilePtr));
-    tclFilePtr->permissions |= TCL_FILE_WRITABLE;
-    tclFilePtr->f2 = writeFilePtr;
-
-    Tcl_ResetResult (interp);
-
-    if (writeFilePtrPtr != NULL)
-        *writeFilePtrPtr = writeFilePtr;
-    return readFilePtr;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_CloseForError --
  *
- *   Close a file number on error.  If the file is in the Tcl file table, clean
- * it up too. The variable errno, and interp->result and the errorCode variable
- * will be saved and not lost.
+ *   Close a file on error.  If the file is associated with a channel, close
+ * it too. The error number will be saved and not lost.
  *
  * Parameters:
  *   o interp (I) - Current interpreter.
- *   o fileNum (I) - File number to close.
+ *   o channel (I) - Channel to close if not NULL.
+ *   o fileNum (I) - File number to close if >= 0.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_CloseForError (interp, fileNum)
+Tcl_CloseForError (interp, channel, fileNum)
     Tcl_Interp *interp;
+    Tcl_Channel channel;
     int         fileNum;
 {
-    static char *ERROR_CODE = "errorCode";
-    int          saveErrNo = errno;
-    Interp      *iPtr = (Interp *) interp;
-    char        *saveResult, *errorCode, *saveErrorCode, *argv [2], buf [32];
+    int saveErrNo = Tcl_GetErrno ();
 
-    saveResult = ckstrdup (interp->result);
-
-    if (iPtr->flags & ERROR_CODE_SET) {
-        errorCode = Tcl_GetVar (interp, ERROR_CODE, TCL_GLOBAL_ONLY);
-        saveErrorCode = ckstrdup (errorCode);
-    } else {
-        saveErrorCode = NULL;
-    }
-
-    sprintf (buf, "file%d", fileNum);
-
-    argv [0] = "close";
-    argv [1] = buf;
-    Tcl_CloseCmd (NULL, interp, 2, argv);
-    Tcl_ResetResult (interp);
-
-    if (saveErrorCode != NULL) {
-        Tcl_SetVar (interp, ERROR_CODE, saveErrorCode, TCL_GLOBAL_ONLY);
-        iPtr->flags |= ERROR_CODE_SET;
-        free (saveErrorCode);
-    }
-    Tcl_SetResult (interp, saveResult, TCL_DYNAMIC);
-
-    close (fileNum);  /* In case Tcl didn't have it open */
-    
-    errno = saveErrNo;
+    /*
+     * Always close fileNum, even if channel close is done, as it doesn't
+     * close stdin, stdout or stderr numbers.
+     */
+    if (channel != NULL)
+        Tcl_UnregisterChannel (interp, channel);
+    if (fileNum >= 0)
+        close (fileNum);
+     Tcl_SetErrno (saveErrNo);
 }
-     
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_TicksToMS --
  *
  *   Convert clock ticks to milliseconds.
@@ -1057,9 +909,7 @@ Tcl_TicksToMS (numTicks)
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * CallEvalErrorHandler --
  *
  *   Call the error handler specified in tclx_errorHandler.
@@ -1114,9 +964,7 @@ CallEvalErrorHandler (interp)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TclX_Eval --
  *
  *   Evaluate a Tcl command string with various options.
@@ -1165,9 +1013,7 @@ TclX_Eval (interp, options, string)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TclX_VarEval --
  *
  *   Evaluate a Tcl command string with various options.
@@ -1209,43 +1055,79 @@ TclX_VarEval TCL_VARARGS_DEF(Tcl_Interp *, arg1)
 }
 
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * TclX_Stdin --
  *
- * TclX_StdFile --
- *
- *   Get a pointer to stdin, stdout or stderr.  Use the interpreter file table
- * if the handle is avaliable in it.  Otherwise, your the standard FILE *.
- * This is used so that I/O will be redirected if the Tcl file table is
- * changed.
+ *   Get a pointer to the stdin channel.  This is used so that I/O will be
+ * redirected if the Tcl file table is changed.
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter.
- *   o stdfile (I) - stdin, stdout or stderr.
  * Returns:
- *   A pointer to the FILE.
+ *   A pointer to the channel or NULL if its not open.
  *-----------------------------------------------------------------------------
  */
-FILE *
-TclX_Stdfile (interp, stdfile)
+Tcl_Channel
+TclX_Stdin (interp)
     Tcl_Interp  *interp;
-    FILE        *stdfile;
 {
-    int          fnum;
-    TclOpenFile *filePtr;
-
-    if (stdfile == stdin) {
-        fnum = 0;
-    } else if (stdfile == stdout) {
-        fnum = 1;
-    } else if (stdfile == stderr) {
-        fnum = 2;
-    }
-    
-    filePtr = TclX_FNumToFileStruct (interp, fnum);
-    if (filePtr == NULL)
-        return stdfile;
-    if ((fnum > 0) && (filePtr->f2 != NULL))
-        return filePtr->f2;
-    return filePtr->f;
+    return Tcl_GetChannel (interp, "stdin", NULL);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_Stdout --
+ *
+ *   Get a pointer to the stdout channel.  This is used so that I/O will be
+ * redirected if the Tcl file table is changed.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ * Returns:
+ *   A pointer to the channel or NULL if its not open.
+ *-----------------------------------------------------------------------------
+ */
+Tcl_Channel
+TclX_Stdout (interp)
+    Tcl_Interp  *interp;
+{
+    return Tcl_GetChannel (interp, "stdout", NULL);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_Stderr --
+ *
+ *   Get a pointer to the stderr channel.  This is used so that I/O will be
+ * redirected if the Tcl file table is changed.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ * Returns:
+ *   A pointer to the channel or NULL if its not open.
+ *-----------------------------------------------------------------------------
+ */
+Tcl_Channel
+TclX_Stderr (interp)
+    Tcl_Interp  *interp;
+{
+    return Tcl_GetChannel (interp, "stderr", NULL);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_WriteStr --
+ *
+ *   Write a string to a channel.
+ *
+ * Parameters:
+ *   o channel (I) - Channel to write to.
+ *   o str (I) - The string to write.
+ * Returns:
+ *   Same as for Tcl_Write, -1 is an error.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_WriteStr (channel, str)
+    Tcl_Channel  channel;
+    char        *str;
+{
+    return Tcl_Write (channel, str, strlen (str));
 }

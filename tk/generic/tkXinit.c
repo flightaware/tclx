@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 5.1 1995/08/04 05:54:06 markd Exp $
+ * $Id: tkXinit.c,v 5.2 1995/10/11 03:01:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -41,7 +41,7 @@ static char *tkInitProc = "tkScreenChanged";
  *
  *   Do Tk initialization for wishx.  This includes overriding the value
  * of the variable "tk_library" so it points to our library instead of 
- * the standard one.
+ * the standard one and then calls Tk_Init.
  *
  * Parameters:
  *   o interp - A pointer to the interpreter.
@@ -53,29 +53,8 @@ int
 TkX_Init (interp)
     Tcl_Interp  *interp;
 {
-    static char initCmd[] =
-	"if [file exists $tk_library/tk.tcl] {\n\
-	    source $tk_library/tk.tcl\n\
-	} else {\n\
-	    set msg \"can't find $tk_library/tk.tcl; perhaps you \"\n\
-	    append msg \"need to\\ninstall TkX (from TclX) or set your \"\n\
-	    append msg \"TKX_LIBRARY environment variable?\"\n\
-	    error $msg\n\
-	}";
-
     char        *interact, *libDir;
     Tcl_CmdInfo  cmdInfo;
-
-    /*
-     * Make sure main window exists, or Tk_Init will fail in a confusing
-     * way.
-     */
-    if (Tk_MainWindow (interp) == NULL) {
-        Tcl_AppendResult (interp,
-                          "TkX_Init called before calling Tk_CreateMainWindow",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
 
     tclAppName     = "Wishx";
     tclAppLongname = "Extended Tk Shell - Wishx";
@@ -107,12 +86,7 @@ TkX_Init (interp)
         return TCL_ERROR;
 
 
-    /*
-     * Find and run the Tk initialization file.
-     */
-    return TclX_Eval(interp,
-                     TCLX_EVAL_GLOBAL | TCLX_EVAL_ERR_HANDLER,
-                     initCmd);
+    return Tk_Init (interp);
 }
 
 /*

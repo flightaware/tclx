@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 4.2 1995/07/04 04:59:57 markd Exp markd $
+# $Id: cmdtrace.test,v 5.0 1995/07/25 05:40:58 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -154,7 +154,7 @@ Test cmdtrace-2.2 {command trace argument error checking} {
 Test cmdtrace-2.3 {command trace argument error checking} {
     catch {close file20}
     cmdtrace on file20
-} 1 {file "file20" isn't open}
+} 1 {can not find channel named "file20"}
 
 Test cmdtrace-2.5 {command trace argument error checking} {
     cmdtrace on command

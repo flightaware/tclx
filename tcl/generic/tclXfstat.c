@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 4.4 1995/03/31 18:28:27 markd Exp markd $
+ * $Id: tclXfstat.c,v 5.0 1995/07/25 05:59:10 markd Rel $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -32,7 +32,7 @@
  */
 static int
 GetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
-                         FILE       *filePtr,
+                         int         fileNum,
                          int         which));
 
 static char *
@@ -40,18 +40,18 @@ GetFileType _ANSI_ARGS_((struct stat  *statBufPtr));
 
 static void
 ReturnStatList _ANSI_ARGS_((Tcl_Interp   *interp,
-                            FILE         *filePtr,
+                            int           fileNum,
                             struct stat  *statBufPtr));
 
 static int
 ReturnStatArray _ANSI_ARGS_((Tcl_Interp   *interp,
-                             FILE         *filePtr,
+                             int           fileNum,
                              struct stat  *statBufPtr,
                              char         *arrayName));
 
 static int
 ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
-                            FILE         *filePtr,
+                            int           fileNum,
                             struct stat  *statBufPtr,
                             char         *itemName));
 
@@ -63,15 +63,13 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
 
 #ifndef NO_SYS_SOCKET_H
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * GetHostInfo --
  *     Return a host address, name (if it can be obtained) and port number.
  *     
  * Parameters:
  *   o interp (O) - List is returned in the result.
- *   o filePtr (I) - Pointer to file.  Should be a socket connection.
+ *   o fileNum (I) - File number.  Should be a socket connection.
  *   o which (I) -  GETHOSTINFO_LOCAL or GETHOSTINFO_REMOTE indicating if
  *     local or remote information should be returned.
  * Returns:
@@ -79,26 +77,25 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
  *-----------------------------------------------------------------------------
  */
 static int
-GetHostInfo (interp, filePtr, which)
+GetHostInfo (interp, fileNum, which)
     Tcl_Interp *interp;
-    FILE       *filePtr;
+    int         fileNum;
     int         which;
 {
-    int                 socketFD, nameLen;
+    int                 nameLen;
     struct sockaddr_in  sockaddr;
     struct hostent     *hostEntry;
     char               *hostName;
     char                portText [32];
 
-    socketFD = fileno (filePtr);
     nameLen = sizeof (sockaddr);
 
     if (which == GETHOSTINFO_REMOTE) {
-        if (getpeername (socketFD, (struct sockaddr *) &sockaddr,
+        if (getpeername (fileNum, (struct sockaddr *) &sockaddr,
                          &nameLen) < 0)
             goto unixError;
     } else {
-        if (getsockname (socketFD, (struct sockaddr *) &sockaddr,
+        if (getsockname (fileNum, (struct sockaddr *) &sockaddr,
                          &nameLen) < 0)
             goto unixError;
     }
@@ -127,27 +124,23 @@ GetHostInfo (interp, filePtr, which)
 }
 #else
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * GetHostInfo --
  *     Version of this functions that always returns an error on systems that
  * don't have sockets.
  *-----------------------------------------------------------------------------
  */
 static int
-GetHostInfo (interp, filePtr)
+GetHostInfo (interp, fileNum)
     Tcl_Interp *interp;
-    FILE       *filePtr;
+    int         fileNum;
 {
     interp->result = "sockets are not available on this system";
     return TCL_ERROR;
 }
 #endif /* NO_SYS_SOCKET_H */
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * GetFileType --
  *
  *   Looks at stat mode and returns a text string indicating what type of
@@ -189,23 +182,21 @@ GetFileType (statBufPtr)
     return typeStr;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ReturnStatList --
  *
  *   Return file stat infomation as a keyed list.
  *
  * Parameters:
  *   o interp (I) - The list is returned in result.
- *   o filePtr (I) - Pointer to the Tcl open file structure.
+ *   o fileNum (I) - File number.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
  *-----------------------------------------------------------------------------
  */
 static void
-ReturnStatList (interp, filePtr, statBufPtr)
+ReturnStatList (interp, fileNum, statBufPtr)
     Tcl_Interp   *interp;
-    FILE         *filePtr;
+    int           fileNum;
     struct stat  *statBufPtr;
 {
     char statList [200];
@@ -221,21 +212,19 @@ ReturnStatList (interp, filePtr, statBufPtr)
              "{mtime %ld} {nlink %ld} {size %ld} {uid %ld} {tty %d} {type %s}",
              (long) statBufPtr->st_mtime,  (long) statBufPtr->st_nlink,
              (long) statBufPtr->st_size,   (long) statBufPtr->st_uid,
-             (int) isatty (fileno (filePtr)), GetFileType (statBufPtr));
+             (int) isatty (fileNum), GetFileType (statBufPtr));
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ReturnStatArray --
  *
  *   Return file stat infomation in an array.
  *
  * Parameters:
  *   o interp (I) - Current interpreter, error return in result.
- *   o filePtr (I) - Pointer to the Tcl open file structure.
+ *   o fileNum (I) - File number.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
  *   o arrayName (I) - The name of the array to return the info in.
  * Returns:
@@ -243,9 +232,9 @@ ReturnStatList (interp, filePtr, statBufPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
+ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
     Tcl_Interp   *interp;
-    FILE         *filePtr;
+    int           fileNum;
     struct stat  *statBufPtr;
     char         *arrayName;
 {
@@ -302,7 +291,7 @@ ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
         return TCL_ERROR;
 
     if (Tcl_SetVar2 (interp, arrayName, "tty", 
-                     isatty (fileno (filePtr)) ? "1" : "0",
+                     isatty (fileNum) ? "1" : "0",
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
@@ -314,16 +303,14 @@ ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
 
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ReturnStatItem --
  *
  *   Return a single file status item.
  *
  * Parameters:
  *   o interp (I) - Item or error returned in result.
- *   o filePtr (I) - Pointer to the Tcl open file structure.
+ *   o fileNum (I) - File number.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
  *   o itemName (I) - The name of the desired item.
  * Returns:
@@ -331,9 +318,9 @@ ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatItem (interp, filePtr, statBufPtr, itemName)
+ReturnStatItem (interp, fileNum, statBufPtr, itemName)
     Tcl_Interp   *interp;
-    FILE         *filePtr;
+    int           fileNum;
     struct stat  *statBufPtr;
     char         *itemName;
 {
@@ -360,12 +347,12 @@ ReturnStatItem (interp, filePtr, statBufPtr, itemName)
     else if (STREQU (itemName, "type"))
         interp->result = GetFileType (statBufPtr);
     else if (STREQU (itemName, "tty"))
-        interp->result = isatty (fileno (filePtr)) ? "1" : "0";
+        interp->result = isatty (fileNum) ? "1" : "0";
     else if (STREQU (itemName, "remotehost")) {
-        if (GetHostInfo (interp, filePtr, GETHOSTINFO_REMOTE) != TCL_OK)
+        if (GetHostInfo (interp, fileNum, GETHOSTINFO_REMOTE) != TCL_OK)
             return TCL_ERROR;
     } else if (STREQU (itemName, "localhost")) {
-        if (GetHostInfo (interp, filePtr, GETHOSTINFO_LOCAL) != TCL_OK)
+        if (GetHostInfo (interp, fileNum, GETHOSTINFO_LOCAL) != TCL_OK)
             return TCL_ERROR;
     } else {
         Tcl_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
@@ -377,16 +364,12 @@ ReturnStatItem (interp, filePtr, statBufPtr, itemName)
     }
 
     return TCL_OK;
-
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_FstatCmd --
  *     Implements the fstat TCL command:
  *         fstat fileId ?item?|?stat arrayvar?
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -396,7 +379,7 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    FILE         *filePtr;
+    int fileNum;
     struct stat  statBuf;
 
     if ((argc < 2) || (argc > 4)) {
@@ -404,13 +387,12 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
                           " fileId ?item?|?stat arrayVar?", (char *) NULL);
         return TCL_ERROR;
     }
-
-    if (Tcl_GetOpenFile (interp, argv[1],
-                         FALSE, FALSE,  /* No checking */
-                         &filePtr) != TCL_OK)
+    
+    fileNum = TclX_GetOpenFnum (interp, argv [1], 0);
+    if (fileNum < 0)
         return TCL_ERROR;
     
-    if (fstat (fileno (filePtr), &statBuf)) {
+    if (fstat (fileNum, &statBuf)) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
@@ -424,12 +406,11 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
                               "using array name", (char *) NULL);
             return TCL_ERROR;
         }
-        return ReturnStatArray (interp, filePtr, &statBuf, argv [3]);
+        return ReturnStatArray (interp, fileNum, &statBuf, argv [3]);
     }
     if (argc == 3)
-        return ReturnStatItem (interp, filePtr, &statBuf, argv [2]);
+        return ReturnStatItem (interp, fileNum, &statBuf, argv [2]);
 
-    ReturnStatList (interp, filePtr, &statBuf);
+    ReturnStatList (interp, fileNum, &statBuf);
     return TCL_OK;
-
 }

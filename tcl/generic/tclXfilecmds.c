@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.0 1995/07/25 05:42:27 markd Rel markd $
+ * $Id: tclXfilecmds.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -54,12 +54,12 @@ static char *FILE_ID_NOT_AVAIL =
 static int
 CopyOpenFile _ANSI_ARGS_((Tcl_Interp *interp,
                           long        maxBytes,
-                          FILE       *inFilePtr,
-                          FILE       *outFilePtr));
+                          Tcl_Channel inChan,
+                          Tcl_Channel outChan));
 
 static int
 GetsListElement _ANSI_ARGS_((Tcl_Interp    *interp,
-                             FILE          *filePtr,
+                             Tcl_Channel    inChan,
                              Tcl_DString   *bufferPtr,
                              int           *idxPtr));
 
@@ -73,9 +73,7 @@ TruncateByHandle  _ANSI_ARGS_((Tcl_Interp  *interp,
                                char        *fileHandle,
                                off_t        newSize));
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_PipeCmd --
  *     Implements the pipe TCL command:
  *         pipe ?fileId_var_r fileId_var_w?
@@ -91,8 +89,9 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int   fileNums [2];
-    char  fileIds [12];
+    int fileNums [2];
+    Tcl_File file;
+    Tcl_Channel chans [2] = {NULL, NULL};
 
     if (!((argc == 1) || (argc == 3))) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
@@ -101,39 +100,52 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     }
 
     if (pipe (fileNums) < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, "pipe creation failed: ",
+                          Tcl_PosixError (interp));
         return TCL_ERROR;
     }
 
-    if (Tcl_SetupFileEntry (interp, fileNums [0], TCL_FILE_READABLE) == NULL)
+    chans [0] = TclX_SetupFileEntry (interp,  fileNums [0], TCL_READABLE,
+                                     FALSE);
+    if (chans [0] == NULL)
         goto errorExit;
-    if (Tcl_SetupFileEntry (interp, fileNums [1], TCL_FILE_WRITABLE) == NULL)
+    chans [1] = TclX_SetupFileEntry (interp,  fileNums [1], TCL_WRITABLE,
+                                     FALSE);
+    if (chans [1] == NULL)
         goto errorExit;
 
-    if (argc == 1)      
-        sprintf (interp->result, "file%d file%d", fileNums [0], fileNums [1]);
+    if (argc == 1)
+        Tcl_AppendResult (interp,
+                          Tcl_GetChannelName (chans [0]), " ",
+                          Tcl_GetChannelName (chans [1]),
+                          (char *) NULL);
     else {
-        sprintf (fileIds, "file%d", fileNums [0]);
-        if (Tcl_SetVar (interp, argv[1], fileIds, TCL_LEAVE_ERR_MSG) == NULL)
+        if (Tcl_SetVar (interp, argv[1], 
+                        Tcl_GetChannelName (chans [0]),
+                        TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
-        sprintf (fileIds, "file%d", fileNums [1]);
-        if (Tcl_SetVar (interp, argv[2], fileIds, TCL_LEAVE_ERR_MSG) == NULL)
+        if (Tcl_SetVar (interp, argv[2], 
+                        Tcl_GetChannelName (chans [1]),
+                        TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
-        Tcl_ResetResult (interp);
     }
         
     return TCL_OK;
 
   errorExit:
-    Tcl_CloseForError (interp, fileNums [0]);
-    Tcl_CloseForError (interp, fileNums [1]);
+    if (chans [0] != NULL) 
+        Tcl_Close (chans [0]);
+    else
+        close (fileNums [0]);
+    if (chans [1] != NULL) 
+        Tcl_Close (chans [1]);
+    else
+        close (fileNums [1]);
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * CopyOpenFile --
  * 
  *  Utility function to copy an open file to another open file.  Handles
@@ -143,18 +155,18 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
  * Parameters:
  *   o interp (I) - Error messages are returned in the interpreter.
  *   o maxBytes (I) - Maximum number of bytes to copy.
- *   o inFilePtr (I) - Input file.
- *   o outFilePtr (I) - Output file.
+ *   o inChan (I) - Input channel.
+ *   o outChan (I) - Output channel.
  * Returns:
  *    The number of bytes transfered or -1 on an error.
  *-----------------------------------------------------------------------------
  */
 static int
-CopyOpenFile (interp, maxBytes, inFilePtr, outFilePtr)
+CopyOpenFile (interp, maxBytes, inChan, outChan)
     Tcl_Interp *interp;
     long        maxBytes;
-    FILE       *inFilePtr;
-    FILE       *outFilePtr;
+    Tcl_Channel inChan;
+    Tcl_Channel outChan;
 {
     char   buffer [2048];
     long   bytesToRead, bytesRead, totalBytesRead, bytesLeft;
@@ -167,25 +179,21 @@ CopyOpenFile (interp, maxBytes, inFilePtr, outFilePtr)
         if (bytesToRead > bytesLeft)
             bytesToRead = bytesLeft;
 
-        bytesRead = fread (buffer, sizeof (char), bytesToRead, inFilePtr);
+        bytesRead = Tcl_Read (inChan, buffer, bytesToRead);
         if (bytesRead <= 0) {
-            if (feof (inFilePtr)) {
+            if (Tcl_Eof (inChan) || Tcl_InputBlocked (inChan)) {
                 break;
-            }
-            if (((errno == EWOULDBLOCK) || (errno == EAGAIN)) &&
-                (totalBytesRead > 0)) {
-                break;  /* Would blocking, but got some data. */
             }
             goto unixError;
         }
-        if (fwrite (buffer, sizeof (char), bytesRead, outFilePtr) != bytesRead)
+        if (Tcl_Write (outChan, buffer, bytesRead) != bytesRead)
             goto unixError;
 
         bytesLeft -= bytesRead;
         totalBytesRead += bytesRead;
     }
 
-    if (fflush (outFilePtr) != 0)
+    if (Tcl_Flush (outChan) == TCL_ERROR)
         goto unixError;
 
     return totalBytesRead;
@@ -195,16 +203,13 @@ CopyOpenFile (interp, maxBytes, inFilePtr, outFilePtr)
     return -1;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_CopyfileCmd --
  *     Implements the copyfile TCL command:
  *         copyfile ?-bytes num|-maxbytes num? fromFileId toFileId
  *
  * Results:
  *      The number of bytes transfered or an error.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -214,46 +219,43 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-#define TCL_COPY_ALL        0
-#define TCL_COPY_BYTES      1
-#define TCL_COPY_MAX_BYTES  2
+#define TCLX_COPY_ALL        0
+#define TCLX_COPY_BYTES      1
+#define TCLX_COPY_MAX_BYTES  2
 
-    FILE  *inFilePtr, *outFilePtr;
-    long   totalBytesToRead, totalBytesRead;
-    int    copyMode;
+    Tcl_Channel inChan, outChan;
+    long totalBytesToRead, totalBytesRead;
+    int copyMode;
 
     if (!(argc == 3 || argc == 5))
         goto wrongArgs;
 
     if (argc == 5) {
         if (STREQU (argv [1], "-bytes")) 
-            copyMode = TCL_COPY_BYTES;
+            copyMode = TCLX_COPY_BYTES;
         else if (STREQU (argv [1], "-maxbytes"))
-            copyMode = TCL_COPY_MAX_BYTES;
+            copyMode = TCLX_COPY_MAX_BYTES;
         else
             goto invalidOption;
 
         if (Tcl_GetLong (interp, argv [2], &totalBytesToRead) != TCL_OK)
             return TCL_ERROR;
     } else {
-        copyMode = TCL_COPY_ALL;
+        copyMode = TCLX_COPY_ALL;
         totalBytesToRead = MAXLONG;
     }
 
-    if (Tcl_GetOpenFile (interp, argv [argc - 2],
-                         FALSE,  /* Read access  */
-                         TRUE,   /* Check access */  
-                         &inFilePtr) != TCL_OK)
+    inChan = TclX_GetOpenChannel (interp, argv [argc - 2], TCL_READABLE);
+    if (inChan == NULL)
         return TCL_ERROR;
 
-    if (Tcl_GetOpenFile (interp, argv [argc - 1],
-                         TRUE,   /* Write access */
-                         TRUE,   /* Check access */
-                         &outFilePtr) != TCL_OK)
+    outChan = TclX_GetOpenChannel (interp, argv [argc - 1], TCL_WRITABLE);
+    if (outChan == NULL)
         return TCL_ERROR;
 
-    totalBytesRead = CopyOpenFile (interp, totalBytesToRead,
-                                   inFilePtr, outFilePtr);
+    totalBytesRead = CopyOpenFile (interp,
+                                   totalBytesToRead,
+                                   inChan, outChan);
     if (totalBytesRead < 0)
         return TCL_ERROR;
 
@@ -261,9 +263,9 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
      * Return an error if -bytes were specified and not that many were
      * available.
      */
-    if ((copyMode == TCL_COPY_BYTES) &&
-        (totalBytesToRead > 0) && (totalBytesRead != totalBytesToRead)) {
-
+    if ((copyMode == TCLX_COPY_BYTES) &&
+        (totalBytesToRead > 0) &&
+        (totalBytesRead != totalBytesToRead)) {
         sprintf (interp->result,
                  "premature EOF, %ld bytes expected, %ld bytes actually read",
                  totalBytesToRead, totalBytesRead);
@@ -283,12 +285,9 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     Tcl_AppendResult (interp, "expect \"-bytes\" or \"-maxbytes\", got \"",
                       argv [1], "\"", (char *) NULL);
     return TCL_ERROR;
-
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * GetsListElement --
  *
  *   Parse through a line read from a file for a list element.  If the end of
@@ -296,7 +295,7 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
  *
  * Paramaters:
  *   o interp (I) - Errors are returned in result.
- *   o filePtr (I) - The file to read from.
+ *   o inChan (I) - The channel to read from.
  *   o bufferPtr (I) - Buffer that file is read into.  The first line of the
  *     list should already have been read in.
  *   o idxPtr (I/O) - Pointer to the index of the next element in the buffer.
@@ -310,9 +309,9 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-GetsListElement (interp, filePtr, bufferPtr, idxPtr)
+GetsListElement (interp, inChan, bufferPtr, idxPtr)
     Tcl_Interp    *interp;
-    FILE          *filePtr;
+    Tcl_Channel    inChan;
     Tcl_DString   *bufferPtr;
     int           *idxPtr;
 {
@@ -453,13 +452,15 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
                 oldString = bufferPtr->string;
                 Tcl_DStringAppend (bufferPtr, "\n", -1);
 
-                stat = Tcl_DStringGets (filePtr, bufferPtr); 
-                if (stat == TCL_ERROR)
-                    goto fileError;
-                
+                stat = Tcl_Gets (inChan, bufferPtr);
                 p = bufferPtr->string + (p - oldString);
-                if (stat == TCL_OK)
+
+                if (stat >= 0)
                     break;  /* Got some data */
+
+                if (!(Tcl_Eof (inChan) || Tcl_InputBlocked (inChan)))
+                    goto fileError;
+
                 /*
                  * EOF in list error.
                  */
@@ -479,22 +480,20 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
         p++;
     }
 
-    done:
+  done:
     while (ISSPACE(*p)) {
         p++;
     }
     *idxPtr = p - bufferPtr->string;
     return (*p == '\0') ? TCL_BREAK : TCL_OK;
 
-    fileError:
+  fileError:
     Tcl_AppendResult (interp, "error reading list from file: ",
                       Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LgetsCmd --
  *
  * Implements the `lgets' Tcl command:
@@ -505,7 +504,6 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
  *
  * Side effects:
  *      See the user documentation.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -515,21 +513,18 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    FILE        *filePtr;
-    Tcl_DString  buffer;
-    int          stat, bufIdx = 0;
+    Tcl_Channel inChan;
+    Tcl_DString buffer;
+    int stat, bufIdx = 0;
 
     if ((argc != 2) && (argc != 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " fileId ?varName?", (char *) NULL);
         return TCL_ERROR;
     }
-    if (Tcl_GetOpenFile (interp, argv[1],
-                         FALSE,  /* Read access  */
-                         TRUE,   /* Check access */
-                         &filePtr) != TCL_OK) {
+    inChan = TclX_GetOpenChannel (interp, argv [1], TCL_READABLE);
+    if (inChan == NULL)
         return TCL_ERROR;
-    }
 
     /*
      * Read the list, parsing off each element until the list is read.
@@ -538,19 +533,22 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      */
     Tcl_DStringInit (&buffer);
 
-    stat = Tcl_DStringGets (filePtr, &buffer);
-    if (stat == TCL_ERROR)
+    if (Tcl_Gets (inChan, &buffer) < 0) {
+        if (Tcl_Eof (inChan) || Tcl_InputBlocked (inChan))
+            goto done;
         goto readError;
+    }
 
-    while (stat != TCL_BREAK) {
-        stat = GetsListElement (interp, filePtr, &buffer, &bufIdx);
+    do {
+        stat = GetsListElement (interp, inChan, &buffer, &bufIdx);
         if (stat == TCL_ERROR)
             goto errorExit;
-    }
+    } while (stat == TCL_OK);
 
     /*
      * Return the string as a result or in a variable.
      */
+  done:
     if (argc == 2) {
         Tcl_DStringResult (interp, &buffer);
     } else {
@@ -558,7 +556,8 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
                         TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
-        if (feof (filePtr) && (buffer.length == 0))
+        if ((Tcl_Eof (inChan) || Tcl_InputBlocked (inChan)) &&
+            (buffer.length == 0))
             interp->result = "-1";
         else
             sprintf (interp->result, "%d", buffer.length);
@@ -567,21 +566,17 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     }
     return TCL_OK;
 
-readError:
+  readError:
     Tcl_AppendResult (interp, "error reading list from file: ",
                       Tcl_PosixError (interp), (char *) NULL);
-    clearerr (filePtr);
 
-errorExit:
+  errorExit:
     Tcl_DStringFree (&buffer);
     return TCL_ERROR;
-
 }
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_FrenameCmd --
  *     Implements the frename TCL command:
  *         frename oldPath newPath
@@ -597,8 +592,8 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    Tcl_DString    tildeBuf1, tildeBuf2;
-    char          *oldPath, *newPath;
+    Tcl_DString tildeBuf1, tildeBuf2;
+    char *oldPath, *newPath;
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -611,14 +606,14 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
     
     oldPath = argv [1];
     if (oldPath [0] == '~') {
-        oldPath = Tcl_TildeSubst (interp, oldPath, &tildeBuf1);
+        oldPath = Tcl_TranslateFileName (interp, oldPath, &tildeBuf1);
         if (oldPath == NULL)
             goto errorExit;
     }
 
     newPath = argv [2];
     if (newPath [0] == '~') {
-        newPath = Tcl_TildeSubst (interp, newPath, &tildeBuf2);
+        newPath = Tcl_TranslateFileName (interp, newPath, &tildeBuf2);
         if (newPath == NULL)
             goto errorExit;
     }
@@ -641,9 +636,7 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
 }
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TruncateByPath --
  * 
  *  Truncate a file via path, if this is available on this system.
@@ -667,7 +660,7 @@ TruncateByPath (interp, filePath, newSize)
 
     Tcl_DStringInit (&tildeBuf);
 
-    filePath = Tcl_TildeSubst (interp, filePath, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, filePath, &tildeBuf);
     if (filePath == NULL) {
         Tcl_DStringFree (&tildeBuf);
         return TCL_ERROR;
@@ -687,12 +680,11 @@ TruncateByPath (interp, filePath, newSize)
 #endif
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TruncateByHandle --
  * 
- *  Truncate a file via a open file handle., if this is available on this system.
+ *  Truncate a file via a open file handle, if this is available on this
+ * system.
  *
  * Parameters:
  *   o interp (I) - Error messages are returned in the interpreter.
@@ -709,21 +701,20 @@ TruncateByHandle (interp, fileHandle, newSize)
     off_t        newSize;
 {
 #if defined(HAVE_FTRUNCATE) || defined(HAVE_CHSIZE)
-    int   stat;
-    FILE *filePtr;
+    int fileNum, stat;
 
-    if (Tcl_GetOpenFile (interp, fileHandle,
-                         TRUE, TRUE, /* Write access */
-                         &filePtr) != TCL_OK)
+    fileNum = TclX_GetOpenFnum (interp, fileHandle, TCL_WRITABLE);
+    if (fileNum < 0)
         return TCL_ERROR;
 
 #ifdef HAVE_FTRUNCATE
-    stat = ftruncate (fileno (filePtr), newSize);
+    stat = ftruncate (fileNum, newSize);
 #else
-    stat = chsize (fileno (filePtr), newSize);
+    stat = chsize (fileNum, newSize);
 #endif
     if (stat != 0) {
-        Tcl_AppendResult (interp, fileHandle, ": ", Tcl_PosixError (interp), (char *) NULL);
+        Tcl_AppendResult (interp, fileHandle, ": ", Tcl_PosixError (interp),
+                          (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -733,8 +724,7 @@ TruncateByHandle (interp, fileHandle, newSize)
 #endif
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * Tcl_FtruncateCmd --
  *     Implements the Tcl ftruncate command:
@@ -786,8 +776,7 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  *
  * Tcl_ReaddirCmd --
  *     Implements the rename TCL command:
@@ -819,7 +808,7 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
 
     dirPath = argv [1];
     if (dirPath [0] == '~') {
-        dirPath = Tcl_TildeSubst (interp, dirPath, &tildeBuf);
+        dirPath = Tcl_TranslateFileName (interp, dirPath, &tildeBuf);
         if (dirPath == NULL)
             goto errorExit;
     }

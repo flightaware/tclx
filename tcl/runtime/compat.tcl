@@ -13,17 +13,24 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 4.3 1995/07/20 02:31:23 markd Exp markd $
+# $Id: compat.tcl,v 5.0 1995/07/25 05:59:46 markd Rel $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-Compatibility assign_fields server_open cexpand
 
 proc assign_fields {list args} {
-    if [lempty $args] {
-        return
+    puts stderr {**** Your program is using an obsolete TclX proc, "assign_fields".}
+    puts stderr {**** Please use the command "lassign". Compatibility support will}
+    puts stderr {**** be removed in the next release.}
+
+    proc assign_fields {list args} {
+        if [lempty $args] {
+            return
+        }
+        return [uplevel lassign [list $list] $args]
     }
-    return [uplevel lassign [list $list] $args]
+    return [uplevel assign_fields [list $list] $args]
 }
 
 proc server_open args {
@@ -48,3 +55,31 @@ proc server_open args {
 }
 
 proc cexpand str {subst -nocommands -novariables $str}
+
+#@package: TclX-ClockCompat fmtclock convertclock getclock
+
+proc fmtclock {clockval {format {}} {zone {}}} {
+    lappend cmd clock format $clockval
+    if ![lempty $format] {
+        lappend cmd -format $format
+    }
+    if ![lempty $zone] {
+        lappend cmd -gmt 1
+    }
+    return [eval $cmd]
+}
+
+proc convertclock {dateString {zone {}} {baseClock {}}} {
+    lappend cmd clock scan $dateString
+    if ![lempty $zone] {
+        lappend cmd -gmt 1
+    }
+    if ![lempty $baseClock] {
+        lappend cmd -base $baseClock
+    }
+    return [eval $cmd]
+}
+
+proc getclock {} {
+    return [eval clock seconds]
+}

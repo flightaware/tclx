@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 5.0 1995/07/25 05:42:31 markd Rel markd $
+ * $Id: tclXgeneral.c,v 5.1 1995/08/10 04:12:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,16 +31,13 @@ char *tclAppVersion     = NULL;  /* Version number of the application       */
 int   tclAppPatchlevel  = 0;     /* Patch level of the application          */
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_EchoCmd --
  *    Implements the TCL echo command:
  *        echo ?str ...?
  *
  * Results:
  *      Always returns TCL_OK.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -51,30 +48,33 @@ Tcl_EchoCmd(clientData, interp, argc, argv)
     char      **argv;
 {
     int   idx;
-    FILE *stdoutPtr;
+    Tcl_Channel channel;
 
-    if (Tcl_GetOpenFile (interp, "stdout", 
-                         TRUE,   /* Write access */
-                         TRUE,   /* Check access */
-                         &stdoutPtr) != TCL_OK)
+    channel = TclX_GetOpenChannel (interp, "stdout", TCL_WRITABLE);
+    if (channel == NULL)
         return TCL_ERROR;
 
     for (idx = 1; idx < argc; idx++) {
-        fputs (argv [idx], stdoutPtr);
-        if (idx < (argc - 1))
-            fprintf (stdoutPtr, " ");
+        if (TclX_WriteStr (channel, argv [idx]) < 0)
+            goto posixError;
+        if (idx < (argc - 1)) {
+            if (Tcl_Write (channel, " ", 1) < 0)
+                goto posixError;
+        }
     }
-    fprintf (stdoutPtr, "\n");
+    if (TclX_WriteNL (channel) < 0)
+        goto posixError;
     return TCL_OK;
+
+  posixError:
+    interp->result = Tcl_PosixError (interp);
+    return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_InfoxCmd --
  *    Implements the TCL infox command:
  *        infox option
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -213,16 +213,13 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LoopCmd --
  *     Implements the TCL loop command:
  *         loop var start end ?increment? command
  *
  * Results:
  *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 int

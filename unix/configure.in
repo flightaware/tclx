@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.6 1995/12/30 13:34:32 markd Exp $
+dnl $Id: configure.in,v 5.7 1995/12/31 11:24:59 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.6 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.7 $),)dnl
 
 AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
 
@@ -71,18 +71,6 @@ AC_SUBST(TCLX_ARCH)
 #------------------------------------------------------------------------------
 
 AC_PROG_CC
-
-# Don't use bison if gcc is not being used, since it generates code that
-# requires alloca.
-if test "$CC" = "gcc"; then
-    AC_PROG_YACC
-else
-    if test "$YACC" = ""; then
-        YACC=yacc
-    fi
-    AC_SUBST(YACC)
-fi
-
 AC_PROG_RANLIB
 
 #------------------------------------------------------------------------------
@@ -215,71 +203,6 @@ else
      exit (1);
 }
 ], AC_DEFINE(TIMES_RETS_REAL_TIME), ,AC_DEFINE(TIMES_RETS_REAL_TIME))
-
-#------------------------------------------------------------------------------
-# Determine the name of the flags field
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([flag field name in stdio FILE struct])
-AC_TRY_COMPILE([#include <stdio.h>],
-        [FILE *fptr = stdin; fptr->_flags = 0;],
-        [AC_DEFINE(HAVE_STDIO_FLAGS)
-         AC_MSG_RESULT(_flags)])
-AC_TRY_COMPILE([#include <stdio.h>],
-        [FILE *fptr = stdin; fptr->__flags = 0;],
-        [AC_DEFINE(HAVE_STDIO__FLAGS)
-         AC_MSG_RESULT(__flags)])
-AC_TRY_COMPILE([#include <stdio.h>],
-        [FILE *fptr = stdin; fptr->_flag = 0;],
-        [AC_DEFINE(HAVE_STDIO_FLAG)
-         AC_MSG_RESULT(_flag)])
-AC_TRY_COMPILE([#include <stdio.h>],
-        [FILE *fptr = stdin; fptr->__flag = 0;],
-        [AC_DEFINE(HAVE_STDIO__FLAG)
-         AC_MSG_RESULT(__flag)])
-
-#------------------------------------------------------------------------------
-# Figure out how to find out whether a FILE structure contains buffered
-# readable data.  Some known names for the count field:
-#       _cnt:		Most UNIX systems
-#       __cnt:		HPUX
-#       _r:		BSD
-#       readCount:	Sprite
-# Or, in GNU libc there are two fields, _gptr and _egptr, which have to be
-# compared.  They are called _IO_read_ptr and _IO_read_end in some versions.
-# This code is stolen from the Tk configure script, but is greatly modified.
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([count field in FILE structures])
-AC_TRY_COMPILE([#include <stdio.h>],
-	[FILE *f = stdin; f->_cnt = 0;],
-        [AC_DEFINE(HAVE_STDIO_CNT)
-         AC_MSG_RESULT(_cnt)])
-
-AC_TRY_COMPILE([#include <stdio.h>],
-	[FILE *f = stdin; f->__cnt = 0;],
-        [AC_DEFINE(HAVE_STDIO__CNT)
-         AC_MSG_RESULT(__cnt)])
-
-AC_TRY_COMPILE([#include <stdio.h>],
-	[FILE *f = stdin; f->_r = 0;],
-        [AC_DEFINE(HAVE_STDIO_R)
-         AC_MSG_RESULT(_r)])
-
-AC_TRY_COMPILE([#include <stdio.h>],
-	[FILE *f = stdin; f->readCount = 0;],
-        [AC_DEFINE(HAVE_STDIO_READCOUNT)
-         AC_MSG_RESULT(readCount)])
-
-AC_TRY_COMPILE([#include <stdio.h>],
-	[FILE *f = stdin; f->_gptr = f->_egptr;],
-	[AC_DEFINE(HAVE_STDIO_GPTR)
-         AC_MSG_RESULT([_gptr/_egptr])])
-
-AC_TRY_COMPILE([#include <stdio.h>],
-	[FILE *f = stdin; f->_IO_read_ptr = f->_IO_read_end;],
-	[AC_DEFINE(HAVE_STDIO_IO_READ_PTR)
-         AC_MSG_RESULT([_IO_read_ptr/_IO_read_end])])
 
 #------------------------------------------------------------------------------
 # Determine various socket related options:
@@ -645,7 +568,7 @@ AC_CHECK_FUNC(truncate,
 #       These must be after the library checks.
 #------------------------------------------------------------------------------
 
-AC_HAVE_FUNCS(getcwd select setitimer setvbuf sigaction setpgid getgroups)
+AC_HAVE_FUNCS(getcwd select setitimer sigaction setpgid getgroups)
 AC_HAVE_FUNCS(bzero bcopy fsync getpriority strcoll tzset gettimeofday)
 AC_HAVE_FUNCS(fchown fchmod ftruncate waitpid)
 

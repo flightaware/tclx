@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 5.0 1995/07/25 05:41:10 markd Rel $
+# $Id: filecmds.test,v 5.1 1995/09/26 06:40:11 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -78,7 +78,7 @@ Test filecmds-3.3 {copyfile tests} {
 
 Test filecmds-3.4 {copyfile tests} {
     copyfile $testFH $testFH2
-} 1 "file \"$testFH\" isn't open"
+} 1 "can not find channel named \"$testFH\""
 
 Test filecmds-3.5 {copyfile tests} {
     copyfile
@@ -252,7 +252,7 @@ if [infox have_truncate] {
 if [infox have_ftruncate] {
     Test filecmds-7.8 {ftruncate tests} {
         ftruncate -fileid TRUNCATE.TMP 1000
-    } 1 {bad file identifier "TRUNCATE.TMP"}
+    } 1 {can not find channel named "TRUNCATE.TMP"}
 
     Test filecmds-7.9 {ftruncate tests} {
         CreateTmpFile TRUNCATE.TMP 1000

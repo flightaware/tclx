@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.3 1995/11/05 03:51:13 markd Exp $
+# $Id: Config.mk,v 5.4 1995/12/30 13:34:25 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -49,8 +49,8 @@
 # (libtcl.a),  Note, access is required to tclInt.h which is not installed
 # by Tcl.
 
-TCL_SRC=${srcbasedir}/../tcl7.5a2
-TCL_LIB=${bldbasedir}/../tcl7.5a2/unix/libtcl.a
+TCL_SRC=${srcbasedir}/../tcl7.5b1
+TCL_LIB=${bldbasedir}/../tcl7.5b1/unix/libtcl7.5.a
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -59,8 +59,8 @@ TCL_LIB=${bldbasedir}/../tcl7.5a2/unix/libtcl.a
 # library (libtk.a).
 
 TK_BUILD = WISHX
-TK_SRC=${srcbasedir}/../tk4.1a2
-TK_LIB=${bldbasedir}/../tk4.1a2/unix/libtk.a
+TK_SRC=${srcbasedir}/../tk4.1b1
+TK_LIB=${bldbasedir}/../tk4.1b1/unix/libtk4.1.a
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,
@@ -71,12 +71,10 @@ TK_LIB=${bldbasedir}/../tk4.1a2/unix/libtk.a
 #CFLAGS=-O
 
 #------------------------------------------------------------------------------
-# Definition of programs you wish to use. All but "ar" and "strip" are set by
-# configure in the Makefiles, but they can be overridden here.
+# Definition of programs you wish to use. RANLIB is set by configure in the
+# Makefiles, but they can be overridden here.
 #
 
-#YACC=yacc
-#YACC=bison -b y
 #RANLIB=ranlib
 
 AR=ar

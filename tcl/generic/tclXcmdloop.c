@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 5.0 1995/07/25 05:42:16 markd Rel markd $
+ * $Id: tclXcmdloop.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -71,7 +71,7 @@ IsSetVarCmd (command)
  *
  * TclX_PrintResult --
  *
- *   Print the result of a Tcl.  It can optionally not echo "set" commands
+ *   Print the result of a Tcl_Eval.  It can optionally not echo "set" commands
  * that successfully set a variable.
  *
  * Parameters:
@@ -89,7 +89,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
     int         intResult;
     char       *checkCmd;
 {
-    FILE *stdoutPtr;
+    Tcl_Channel stdoutChan;
 
     /*
      * If the command was supplied and it was a successful set of a variable,
@@ -98,24 +98,34 @@ TclX_PrintResult (interp, intResult, checkCmd)
     if ((checkCmd != NULL) && (intResult == TCL_OK) && IsSetVarCmd (checkCmd))
         return;
 
-    stdoutPtr = TclX_Stdfile (interp, stdout);
+    stdoutChan = TclX_Stdout (interp);
 
     if (intResult == TCL_OK) {
+        if (stdoutChan == NULL)
+            return;
         if (interp->result [0] != '\0') {
-            fputs (interp->result, stdoutPtr);
-            fputs ("\n", stdoutPtr);
+            TclX_WriteStr (stdoutChan, interp->result);
+            TclX_WriteNL (stdoutChan);
         }
     } else {
-        FILE *stderrPtr = TclX_Stdfile (interp, stderr);
+        Tcl_Channel stderrChan;
+        char        msg [64];
 
-        fflush (stdoutPtr);
-        if (intResult == TCL_ERROR)  
-            fputs ("Error: ", stderrPtr);
-        else
-            fprintf (stderr, "Bad return code (%d): ", intResult);
-        fputs (interp->result, stderrPtr);
-        fputs ("\n", stderrPtr);
-        fflush (stderrPtr);
+        stderrChan = TclX_Stderr (interp);
+        if (stderrChan == NULL)
+            return;
+       
+        if (stdoutChan != NULL)
+            Tcl_Flush (stdoutChan);
+        if (intResult == TCL_ERROR) {
+            strcpy (msg, "Error: ");
+        } else {
+            sprintf (msg, "Bad return code (%d): ", intResult);
+        }
+        TclX_WriteStr (stderrChan, msg);
+        TclX_WriteStr (stderrChan, interp->result);
+        TclX_WriteNL (stderrChan);
+        Tcl_Flush (stderrChan);
     }
 }
 
@@ -135,9 +145,9 @@ TclX_OutputPrompt (interp, topLevel)
 {
     char *hookName;
     char *promptHook;
-    int   result;
-    int   promptDone = FALSE;
-    FILE *stdoutPtr;
+    int result;
+    int promptDone = FALSE;
+    Tcl_Channel stdoutChan;
 
     /*
      * If a signal came in, process it.  This prevents signals that are queued
@@ -153,28 +163,28 @@ TclX_OutputPrompt (interp, topLevel)
     if (promptHook != NULL) {
         result = Tcl_Eval (interp, promptHook);
         if (result == TCL_ERROR) {
-            FILE *stderrPtr;
-
-            stderrPtr = TclX_Stdfile (interp, stderr);
-
-            fputs ("Error in prompt hook: ", stderrPtr);
-            fputs (interp->result, stderrPtr);
-            fputs ("\n", stderrPtr);
+            Tcl_Channel stderrChan = TclX_Stderr (interp);
+            if (stderrChan != NULL) {
+                TclX_WriteStr (stderrChan, "Error in prompt hook: ");
+                TclX_WriteStr (stderrChan, interp->result);
+                TclX_WriteNL (stderrChan);
+            }
             TclX_PrintResult (interp, result, NULL);
         } else {
             promptDone = TRUE;
         }
     } 
 
-    stdoutPtr = TclX_Stdfile (interp, stdout);
-
-    if (!promptDone) {
-        if (topLevel)
-            fputs ("%", stdoutPtr);
-        else
-            fputs (">", stdoutPtr);
+    stdoutChan = TclX_Stdout (interp);
+    if (stdoutChan != NULL) {
+        if (!promptDone) {
+            if (topLevel)
+                Tcl_Write (stdoutChan, "%", 1);
+            else
+                Tcl_Write (stdoutChan, ">", 1);
+        }
+        Tcl_Flush (stdoutChan);
     }
-    fflush (stdoutPtr);
     Tcl_ResetResult (interp);
 }
 
@@ -203,9 +213,8 @@ Tcl_CommandLoop (interp, interactive)
     int         interactive;
 {
     Tcl_DString cmdBuf;
-    int         topLevel = TRUE;
-    int         result;
-    FILE       *stdinPtr, *stdoutPtr;
+    int result, topLevel = TRUE;
+    Tcl_Channel stdinChan;
 
     Tcl_DStringInit (&cmdBuf);
 
@@ -227,22 +236,22 @@ Tcl_CommandLoop (interp, interactive)
         /*
          * Output a prompt and input a command.
          */
-        stdinPtr = TclX_Stdfile (interp, stdin);
-        stdoutPtr = TclX_Stdfile (interp, stdout);
-
-        clearerr (stdinPtr);
-        clearerr (stdoutPtr);
-        if (interactive)
-            TclX_OutputPrompt (interp, topLevel);
-        errno = 0;
-        result = Tcl_DStringGets (stdinPtr, &cmdBuf);
-
-        if (result == TCL_BREAK)
+        stdinChan = TclX_Stdin (interp);
+        if (stdinChan == NULL)
             goto endOfFile;
 
-        if (result == TCL_ERROR) {
-            if (errno == EINTR) {
-                putchar('\n');
+        if (interactive)
+            TclX_OutputPrompt (interp, topLevel);
+        Tcl_SetErrno (0);
+        result = Tcl_Gets (stdinChan, &cmdBuf);
+
+        if (result < 0) {
+            if (Tcl_Eof (stdinChan) || Tcl_InputBlocked (stdinChan))
+                goto endOfFile;
+            if (Tcl_GetErrno () == EINTR) {
+                Tcl_Channel stdoutChan = TclX_Stdout (interp);
+                if (stdoutChan != NULL)
+                    TclX_WriteNL (stdoutChan);
                 continue;  /* Next command */
             }
             Tcl_AppendResult (interp, "command input error on stdin: ",

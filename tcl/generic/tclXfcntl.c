@@ -12,30 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 5.0 1995/07/25 05:42:25 markd Rel markd $
+ * $Id: tclXfcntl.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * Macro to enable line buffering mode on a file.  The macros assure that the
- * resulting expression returns zero if the function call does not return
- * a value.  Try for setvbuf first, as setlinebuf seems to be a no-op on 
- * DEC Ultrix.
- */
-#if defined(HAVE_SETVBUF) && defined(_IOLBF)
-#   define SET_LINE_BUF(fp)  setvbuf (fp, NULL, _IOLBF, BUFSIZ)
-#else
-#   define SET_LINE_BUF(fp)  (setlinebuf (fp),0)
-#endif
-
-/*
- * If we don't have O_NONBLOCK, use O_NDELAY.
- */
-#ifndef O_NONBLOCK
-#   define O_NONBLOCK O_NDELAY
-#endif
 
 /*
  * Attributes sets used by fcntl command.  Also a structure to return parsed
@@ -116,23 +97,27 @@ XlateFcntlAttr  _ANSI_ARGS_((Tcl_Interp  *interp,
 
 static int
 GetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
-                          TclOpenFile *tclFilePtr,
+                          Tcl_Channel  channel,
+                          int          readFileNum,
+                          int          writeFileNum,
                           char        *attrName));
 
 static int
 SetAttrOnFile _ANSI_ARGS_((Tcl_Interp *interp,
-                           FILE       *filePtr,
+                           Tcl_Channel  channel,
+                           int          fileNum,
                            fcntlAttr_t attrib,
                            int         value));
 
 static int
 SetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
-                          TclOpenFile *tclFilePtr,
+                          Tcl_Channel  channel,
+                          int          readFileNum,
+                          int          writeFileNum,
                           char        *attrName,
                           char        *valueStr));
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * XlateFcntlAttr --
  *    Translate an fcntl attribute.
  *
@@ -215,14 +200,17 @@ XlateFcntlAttr (interp, attrName, attrPtr)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * GetFcntlAttr --
  *    Return the value of a specified fcntl attribute.
  *
  * Parameters:
  *   o interp (I) - Tcl interpreter, value is returned in the result
- *   o tclFilePtr (I) - Pointer to the Tcl file descriptor.
+ *   o channel (I) - The channel to check.
+ *   o readFileNum (I) - The read file number associated with the channel or
+ *     -1 if no channel.
+ *   o writeFileNum (I) - The read file number associated with the channel or
+ *     -1 if no channel.
  *   o attrName (I) - The attrbute name to translate, maybe upper or lower
  *     case.
  * Result:
@@ -230,63 +218,59 @@ XlateFcntlAttr (interp, attrName, attrPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-GetFcntlAttr (interp, tclFilePtr, attrName)
+GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
     Tcl_Interp  *interp;
-    TclOpenFile *tclFilePtr;
+    Tcl_Channel  channel;
+    int          readFileNum;
+    int          writeFileNum;
     char        *attrName;
 {
     fcntlAttr_t attrib;
-    int         current;
+    int aFileNum, current, value;
+    char *option;
 
     if (XlateFcntlAttr (interp, attrName, &attrib) != TCL_OK)
         return TCL_ERROR;
 
     /*
-     * Special handling for read/write check on files that have more than one
-     * FILE struct associated with them.  They are always read/write.
+     * If both file numbers are specified, pick one for the checking.  They
+     * will be in sync for most options if the attributes were set by us.
      */
-    if ((attrib.access != ATTR_NONE) && (tclFilePtr->f2 != NULL)) {
-        interp->result =
-            (attrib.access & (ATTR_READ | ATTR_WRITE)) ? "1" : "0";
-        return TCL_OK;
-    }
+    aFileNum = (readFileNum >= 0) ? readFileNum : writeFileNum;
 
     /*
-     * Access check on single FILE files.  We access fcntl just to make sure.
+     * Access check.  This assumes that the channel is actually configured
+     * correctly.
      */
     if (attrib.access != ATTR_NONE) {
-        current = fcntl (fileno (tclFilePtr->f), F_GETFL, 0);
-        if (current == -1)
-            goto unixError;
-        interp->result = "0";
-        switch (current & O_ACCMODE) {
-          case O_RDONLY:
-            if ((attrib.access == ATTR_RDONLY) ||
-                (attrib.access == ATTR_READ))
-                interp->result = "1";
+        switch (attrib.access) {
+          case ATTR_RDONLY:
+            value = (readFileNum >= 0) && (writeFileNum < 0);
             break;
-          case O_WRONLY:
-            if ((attrib.access == ATTR_WRONLY) ||
-                (attrib.access == ATTR_WRITE))
-                interp->result = "1";
+          case ATTR_WRONLY:
+            value = (readFileNum < 0) && (writeFileNum >= 0);
             break;
-          case O_RDWR:
-            if ((attrib.access == ATTR_RDWR) ||
-                (attrib.access == ATTR_READ) ||
-                (attrib.access == ATTR_WRITE))
-                interp->result = "1";
+          case ATTR_RDWR:
+            value = (readFileNum >= 0) && (writeFileNum >= 0);
             break;
+          case ATTR_READ:
+            value = (readFileNum >= 0);
+            break;
+          case ATTR_WRITE:
+            value = (writeFileNum >= 0);
+            break;
+        default:
+            panic ("fcntl bad attrib");
         }
+        interp->result =  value ? "1" : "0";
         return TCL_OK;
     }
 
     /*
-     * For fcntl attributes.  For dual FILE files, we assume the
-     * second file has the same attributes as the first.  This would be
-     * true if the attributes were set via this function.
+     * Get fcntl attributes.
      */
     if (attrib.fcntl != ATTR_NONE) {
-        current = fcntl (fileno (tclFilePtr->f), F_GETFL, 0);
+        current = fcntl (aFileNum, F_GETFL, 0);
         if (current == -1)
             goto unixError;
         interp->result = (current & attrib.fcntl) ? "1" : "0";
@@ -294,7 +278,7 @@ GetFcntlAttr (interp, tclFilePtr, attrName)
     }
 
     if (attrib.other == ATTR_CLOEXEC) {
-        current = fcntl (fileno (tclFilePtr->f), F_GETFD, 0);
+        current = fcntl (aFileNum, F_GETFD, 0);
         if (current == -1)
             goto unixError;
         interp->result = (current & 1) ? "1" : "0";
@@ -302,15 +286,14 @@ GetFcntlAttr (interp, tclFilePtr, attrName)
     }
 
     /*
-     * Poke the stdio FILE structure to determine the buffering status.
-     * Also assume both files are the same.
+     * Get attributes maintained by the channel.
      */
     if (attrib.other == ATTR_NOBUF) {
-        interp->result = (tclFilePtr->f->STDIO_FLAGS & STDIO_NBUF) ? "1" : "0";
+        interp->result = Tcl_GetChannelOption (channel, "-unbuffered");
         return TCL_OK;
     }
     if (attrib.other == ATTR_LINEBUF) {
-        interp->result = (tclFilePtr->f->STDIO_FLAGS & STDIO_LBUF) ? "1" : "0";
+        interp->result = Tcl_GetChannelOption (channel, "-linemode");
         return TCL_OK;
     }
 
@@ -319,15 +302,16 @@ GetFcntlAttr (interp, tclFilePtr, attrName)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * SetAttrOnFile --
- *    Set the the attributes on a file.  This is called twice for dual FILE
- * struct files.
+ *    Set the the attributes on a file.  This is called twice for dual file
+ * channel.
  *
  * Parameters:
  *   o interp (I) - Tcl interpreter, value is returned in the result
- *   o filePtr (I) - Pointer to the file descriptor.
+ *   o channel (I) - The channel to check.
+ *   o fileNum (I) - The file number associated with the channel direction.
+ *     -1 if no channel.
  *   o attrib (I) - Structure describing attribute to set.
  *   o value (I) - Boolean value to set the attributes to.
  * Result:
@@ -335,41 +319,43 @@ GetFcntlAttr (interp, tclFilePtr, attrName)
  *-----------------------------------------------------------------------------
  */
 static int
-SetAttrOnFile (interp, filePtr, attrib, value)
-    Tcl_Interp *interp;
-    FILE       *filePtr;
-    fcntlAttr_t attrib;
-    int         value;
+SetAttrOnFile (interp, channel, fileNum, attrib, value)
+    Tcl_Interp  *interp;
+    fcntlAttr_t  attrib;
+    Tcl_Channel  channel;
+    int          fileNum;
+    int          value;
 {
     int current;
  
     if (attrib.fcntl != ATTR_NONE) {
-        current = fcntl (fileno (filePtr), F_GETFL, 0);
+        current = fcntl (fileNum, F_GETFL, 0);
         if (current == -1)
             goto unixError;
         current &= ~attrib.fcntl;
         if (value)
             current |= attrib.fcntl;
-        if (fcntl (fileno (filePtr), F_SETFL, current) == -1)
+        if (fcntl (fileNum, F_SETFL, current) == -1)
             goto unixError;
 
         return TCL_OK;
     }
 
     if (attrib.other == ATTR_CLOEXEC) {
-        if (fcntl (fileno (filePtr), F_SETFD, value) == -1)
+        if (fcntl (fileNum, F_SETFD, value) == -1)
             goto unixError;
         return TCL_OK;
     }
 
     if (attrib.other == ATTR_NOBUF) {
-        setbuf (filePtr, NULL);
+        return Tcl_SetChannelOption (interp, channel, "-unbuffered",
+                                     value ? "1" : "0");
         return TCL_OK;
     }
 
     if (attrib.other == ATTR_LINEBUF) {
-        if (SET_LINE_BUF (filePtr) != 0)
-            goto unixError;
+        return Tcl_SetChannelOption (interp, channel, "-linemode",
+                                     value ? "1" : "0");
         return TCL_OK;
     }
 
@@ -379,25 +365,28 @@ SetAttrOnFile (interp, filePtr, attrib, value)
    
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * SetFcntlAttr --
  *    Set the specified fcntl attr to the given value.
  *
  * Parameters:
  *   o interp (I) - Tcl interpreter, value is returned in the result
- *   o tclFilePtr (I) - Pointer to the tcl file descriptor.
- *   o attrName (I) - The attrbute name to translate, maybe upper or lower
- *     case.
+ *   o channel (I) - The channel to check.
+ *   o readFileNum (I) - The read file number associated with the channel or
+ *     -1 if no channel.
+ *   o writeFileNum (I) - The read file number associated with the channel or
+ *     -1 if no channel.
  *   o valueStr (I) - The string value to set the attribiute to.
  * Result:
  *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
  *-----------------------------------------------------------------------------
  */
 static int
-SetFcntlAttr (interp, tclFilePtr, attrName, valueStr)
+SetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName, valueStr)
     Tcl_Interp  *interp;
-    TclOpenFile *tclFilePtr;
+    Tcl_Channel  channel;
+    int          readFileNum;
+    int          writeFileNum;
     char        *attrName;
     char        *valueStr;
 {
@@ -419,28 +408,21 @@ SetFcntlAttr (interp, tclFilePtr, attrName, valueStr)
                           "altered after open", (char *) NULL);
         return TCL_ERROR;
     }
-
-    if (!value) {
-        if ((attrib.other == ATTR_NOBUF) || (attrib.other == ATTR_LINEBUF)) {
-            Tcl_AppendResult (interp, "Attribute \"", attrName,
-                              "\" may not be cleared once set",
-                              (char *) NULL);
+    
+    if (readFileNum >= 0) {
+        if (SetAttrOnFile (interp, channel, readFileNum, attrib,
+                           value) == TCL_ERROR)
             return TCL_ERROR;
-        }
     }
-
-    if (SetAttrOnFile (interp, tclFilePtr->f, attrib, value) == TCL_ERROR)
-        return TCL_ERROR;
-
-    if (tclFilePtr->f2 != NULL) {
-        if (SetAttrOnFile (interp, tclFilePtr->f2, attrib, value) == TCL_ERROR)
+    if (writeFileNum >= 0) {
+        if (SetAttrOnFile (interp, channel, writeFileNum, attrib,
+                           value) == TCL_ERROR)
             return TCL_ERROR;
     }
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_FcntlCmd --
  *     Implements the fcntl TCL command:
  *         fcntl handle attribute ?value?
@@ -453,8 +435,8 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    TclOpenFile *tclFilePtr;
-    FILE        *filePtr;
+    Tcl_Channel channel;
+    int readFileNum, writeFileNum;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -462,19 +444,23 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    tclFilePtr = TclX_GetOpenFileStruct (interp, argv [1]);
-    if (tclFilePtr == NULL)
+    channel = TclX_GetOpenChannel (interp, argv [1], 0);
+    if (channel == NULL)
 	return TCL_ERROR;
 
+    readFileNum = TclX_ChannelFnum (channel, TCL_READABLE);
+    writeFileNum = TclX_ChannelFnum (channel, TCL_WRITABLE);
+
     /*
-     * Get or set attributes.  These functions handle more than
-     * one FILE struct in a single Tcl file.
+     * Get or set attributes.
      */
     if (argc == 3) {    
-        if (GetFcntlAttr (interp, tclFilePtr, argv [2]) != TCL_OK)
+        if (GetFcntlAttr (interp, channel, readFileNum, writeFileNum,
+                          argv [2]) != TCL_OK)
             return TCL_ERROR;
     } else {
-        if (SetFcntlAttr (interp, tclFilePtr, argv [2], argv [3]) != TCL_OK)
+        if (SetFcntlAttr (interp, channel, readFileNum, writeFileNum,
+                          argv [2], argv [3]) != TCL_OK)
             return TCL_ERROR;
     }
     return TCL_OK;

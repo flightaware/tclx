@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.1 1995/11/10 06:50:46 markd Exp $
+ * $Id: tclXcmdInit.c,v 5.2 1995/12/28 23:37:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -207,19 +207,6 @@ TclXCmd_SafeInit (interp)
      * from tclXbsearch.c
      */
     Tcl_CreateCommand (interp, "bsearch", Tcl_BsearchCmd, 
-                      (ClientData) NULL, (void (*)()) NULL);
-    /*
-     * from tclXclock.c
-     */
-    Tcl_CreateCommand (interp, "getclock", Tcl_GetclockCmd, 
-                      (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "fmtclock", Tcl_FmtclockCmd, 
-                      (ClientData) NULL, (void (*)()) NULL);
-
-    /*
-     * from tclXcnvdate.c
-     */
-    Tcl_CreateCommand (interp, "convertclock", Tcl_ConvertclockCmd,
                       (ClientData) NULL, (void (*)()) NULL);
 
     /*

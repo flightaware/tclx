@@ -12,23 +12,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.test,v 4.1 1995/01/01 19:47:38 markd Exp markd $
+# $Id: compat.test,v 5.0 1995/07/25 05:40:49 markd Rel $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 eval $SAVED_UNKNOWN
-
-Test assign_fields-1.1 {assign_fields command} {
-    assign_fields "a b {c d} e" alpha beta gamma delta epsilon
-    list $alpha $beta $gamma $delta $epsilon
-} 0 "a b {c d} e {}"
-
-Test assign_fields-1.2 {assign_fields command} {
-    set l {}
-    set v {}
-    eval assign_fields \$l $v
-} 0 {}
 
 rename unknown {}
 

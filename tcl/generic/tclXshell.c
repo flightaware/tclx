@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 5.0 1995/07/25 05:42:20 markd Rel markd $
+ * $Id: tclXshell.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -23,14 +23,12 @@ extern int   optind, opterr;
 
 /*
  * If this variable is non-zero, the TclX shell will delete the interpreter
- * at the end of a script instead of evaluating the "exit" command.  This is
- * for applications that want to track down memory leaks.
+ * at the end of a script instead of exiting immediately.  This is for
+ * applications that want to track down memory leaks.
  */
 int tclDeleteInterpAtEnd = FALSE;
 
-static char  exitCmd [] = "exit";
 static char *TCLXENV = "TCLXENV";
-
 
 /*
  * Prototypes of internal functions.
@@ -199,10 +197,17 @@ ParseCmdLine (interp, argc, argv)
     return;
 
   usageError:
-    fprintf (TclX_Stdfile (interp, stderr), "usage: %s %s\n", argv [0],
-             "?-qun? ?-f? ?script?|?-c command? ?args?");
-    exit (1);
-
+    {
+        Tcl_Channel stderrChan = TclX_Stderr (interp);
+        if (stderrChan != NULL) {
+            TclX_WriteStr (stderrChan, "usage: ");
+            TclX_WriteStr (stderrChan, argv [0]);
+            TclX_WriteStr (stderrChan,
+                           " ?-qun? ?-f? ?script?|?-c command? ?args?");
+            TclX_WriteNL (stderrChan);
+        }
+        Tcl_Exit (1);
+    }
   tclError:
     TclX_ErrorExit (interp, 255);
 }
@@ -234,6 +239,8 @@ TclX_Main (argc, argv, appInitProc)
 {
     Tcl_Interp *interp;
     char       *evalStr;
+
+    Tcl_FindExecutable (argv [0]);
 
     /* 
      * Create a basic Tcl interpreter.
@@ -297,7 +304,7 @@ TclX_Main (argc, argv, appInitProc)
     fprintf (stderr, " >>> Dumping active memory list to mem.lst <<<\n");
     if (Tcl_DumpActiveMemory ("mem.lst") != TCL_OK)
         panic ("error accessing `mem.lst': %s", strerror (errno));
-    exit (0);
+    Tcl_Exit (0);
 #endif
 
     /*
@@ -305,11 +312,11 @@ TclX_Main (argc, argv, appInitProc)
      * to be deleted.
      */
     if (!tclDeleteInterpAtEnd) {
-        Tcl_GlobalEval (interp, exitCmd);
+        Tcl_Exit (0);
     } else {
         Tcl_DeleteInterp (interp);
+        Tcl_Exit (0);
     }
-    exit (0);
 
   errorExit:
     TclX_ErrorExit (interp, 255);

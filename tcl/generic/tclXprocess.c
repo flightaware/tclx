@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 5.1 1995/08/04 05:56:17 markd Exp markd $
+ * $Id: tclXprocess.c,v 5.2 1995/08/10 03:31:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -94,7 +94,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
 
     path = argv [nextArg];
     if (path [0] == '~') {
-        path = Tcl_TildeSubst (interp, path, &tildeBuf);
+        path = Tcl_TranslateFileName (interp, path, &tildeBuf);
         if (path == NULL)
             goto errorExit;
     }

@@ -14,90 +14,95 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.1 1995/09/05 07:55:47 markd Exp $
+ * $Id: tkXshell.c,v 5.2 1995/10/03 04:58:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
-
 /* 
  * tkMain.c --
  *
- *	This file contains the main program for "wish", a windowing
- *	shell based on Tk and Tcl.  It also provides a template that
- *	can be used as the basis for main programs for other Tk
- *	applications.
+ *	This file contains a generic main program for Tk-based applications.
+ *	It can be used as-is for many applications, just by supplying a
+ *	different appInitProc procedure for each specific application.
+ *	Or, it can be used as a template for creating new main programs
+ *	for Tk applications.
  *
  * Copyright (c) 1990-1994 The Regents of the University of California.
  * Copyright (c) 1994-1995 Sun Microsystems, Inc.
- * All rights reserved.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 
-#include "tclExtdInt.h"
-#include "tk.h"
+static char sccsid[] = "@(#) tkMain.c 1.136 96/01/17 09:32:28";
+
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <tclExtdInt.h>
+#include <tk.h>
+#ifdef NO_STDLIB_H
+#   include "../compat/stdlib.h"
+#else
+#   include <stdlib.h>
+#endif
+
+/*
+ * Declarations for various library procedures and variables (don't want
+ * to include tkInt.h or tkPort.h here, because people might copy this
+ * file out of the Tk source directory to make their own modified versions).
+ * Note: don't declare "exit" here even though a declaration is really
+ * needed, because it will conflict with a declaration elsewhere on
+ * some systems.
+ */
+
+extern char *		strrchr _ANSI_ARGS_((CONST char *string, int c));
 
 /*
  * Global variables used by the main program:
  */
 
-static Tk_Window mainWindow;	/* The main window for the application.  If
-				 * NULL then the application no longer
-				 * exists. */
 static Tcl_Interp *interp;	/* Interpreter for this application. */
 static Tcl_DString command;	/* Used to assemble lines of terminal input
 				 * into Tcl commands. */
-static int gotPartial = 0;      /* Partial command in buffer. */
+static Tcl_DString line;	/* Used to read the next line from the
+                                 * terminal input. */
 static int tty;			/* Non-zero means standard input is a
 				 * terminal-like device.  Zero means it's
 				 * a file. */
-static char exitCmd[] = "exit";
-static char errorExitCmd[] = "exit 1";
+static char *argv0;		/* Holds the name of the script file we're
+				 * processing, if there was one.  Otherwise
+				 * holds argv[0] from the command line.  This
+				 * value is used as a default for the
+				 * application name. */
+static int gotPartial = 0;
 
 /*
- * Command-line options:
+ * Forward declarations for procedures defined later in this file.
+ * Note: TkDefaultAppName is declared here even though it's also
+ * in tkInt.h.  This is because we don't include tkInt.h here:
+ * people should be able to make a local copy of this file outside
+ * the Tk source area to build personal main programs.
  */
 
-static int synchronize = 0;
-static char *fileName = NULL;
-static char *name = NULL;
-static char *display = NULL;
-static char *geometry = NULL;
-
-static Tk_ArgvInfo argTable[] = {
-    {"-display", TK_ARGV_STRING, (char *) NULL, (char *) &display,
-	"Display to use"},
-    {"-geometry", TK_ARGV_STRING, (char *) NULL, (char *) &geometry,
-	"Initial geometry for window"},
-    {"-name", TK_ARGV_STRING, (char *) NULL, (char *) &name,
-	"Name to use for application"},
-    {"-sync", TK_ARGV_CONSTANT, (char *) 1, (char *) &synchronize,
-	"Use synchronous mode for display server"},
-    {(char *) NULL, TK_ARGV_END, (char *) NULL, (char *) NULL,
-	(char *) NULL}
-};
-
-/*
- * Forward declarations for procedures defined later in this file:
- */
-
+static void		Prompt _ANSI_ARGS_((Tcl_Interp *interp, int partial));
 static void		StdinProc _ANSI_ARGS_((ClientData clientData,
 			    int mask));
-static void		SignalProc _ANSI_ARGS_((int signalNum));
+static void		SignalProc _ANSI_ARGS_((int  signalNum));
+EXTERN char *		TkDefaultAppName _ANSI_ARGS_((void));
 
 /*
  *----------------------------------------------------------------------
  *
  * TkX_Main --
  *
- *	Main program for Wish.
+ *	Main program for Wish and most other Tk-based applications.
  *
  * Results:
  *	None. This procedure never returns (it exits the process when
- *	it's done
+ *	it's done.
  *
  * Side effects:
- *	This procedure initializes the wish world and then starts
+ *	This procedure initializes the Tk world and then starts
  *	interpreting commands;  almost anything could happen, depending
  *	on the script being interpreted.
  *
@@ -105,7 +110,7 @@ static void		SignalProc _ANSI_ARGS_((int signalNum));
  */
 
 void
-TkX_Main (argc, argv, appInitProc)
+TkX_Main(argc, argv, appInitProc)
     int argc;				/* Number of arguments. */
     char **argv;			/* Array of argument strings. */
     Tcl_AppInitProc *appInitProc;	/* Application-specific initialization
@@ -113,28 +118,31 @@ TkX_Main (argc, argv, appInitProc)
 					 * initialization but before starting
 					 * to execute commands. */
 {
-    char *args, *p, *msg, *argv0, *class;
+    char *args, *msg, *fileName;
     char buf[20];
     int code;
     size_t length;
-    FILE *stderrPtr;
+    Tcl_Channel inChannel, outChannel, errChannel, chan;
 
+    Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();
-    stderrPtr = TclX_Stdfile (interp, stderr);
 #ifdef TCL_MEM_DEBUG
     Tcl_InitMemory(interp);
 #endif
+
+    inChannel = Tcl_GetChannel(interp, "stdin", NULL);
+    outChannel = Tcl_GetChannel(interp, "stdout", NULL);
+    errChannel = Tcl_GetChannel(interp, "stderr", NULL);
 
     /*
      * Parse command-line arguments.  A leading "-file" argument is
      * ignored (a historical relic from the distant past).  If the
      * next argument doesn't start with a "-" then strip it off and
-     * use it as the name of a script file to process.  Also check
-     * for other standard arguments, such as "-geometry", anywhere
-     * in the argument list.
+     * use it as the name of a script file to process.
      */
 
     argv0 = argv[0];
+    fileName = NULL;
     if (argc > 1) {
 	length = strlen(argv[1]);
 	if ((length >= 2) && (strncmp(argv[1], "-file", length) == 0)) {
@@ -147,10 +155,8 @@ TkX_Main (argc, argv, appInitProc)
 	argc--;
 	argv++;
     }
-    if (Tk_ParseArgv(interp, (Tk_Window) NULL, &argc, argv, argTable, 0)
-	    != TCL_OK) {
-	fprintf(stderr, "%s\n", interp->result);
-	exit(1);
+    if (fileName != NULL) {
+	argv0 = fileName;
     }
 
     /*
@@ -163,78 +169,24 @@ TkX_Main (argc, argv, appInitProc)
     ckfree(args);
     sprintf(buf, "%d", argc-1);
     Tcl_SetVar(interp, "argc", buf, TCL_GLOBAL_ONLY);
-    Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv0,
-	    TCL_GLOBAL_ONLY);
+    Tcl_SetVar(interp, "argv0", argv0, TCL_GLOBAL_ONLY);
 
     /*
-     * If a display was specified, put it into the DISPLAY
-     * environment variable so that it will be available for
-     * any sub-processes created by us.
+     * Set the "tcl_interactive" variable.
      */
 
-    if (display != NULL) {
-	Tcl_SetVar2(interp, "env", "DISPLAY", display, TCL_GLOBAL_ONLY);
-    }
-
-    /*
-     * Initialize the Tk application.  If a -name option was provided,
-     * use it;  otherwise, if a file name was provided, use the last
-     * element of its path as the name of the application; otherwise
-     * use the last element of the program name.  For the application's
-     * class, capitalize the first letter of the name.
-     */
-
-    if (name == NULL) {
-	p = (fileName != NULL) ? fileName : argv0;
-	name = strrchr(p, '/');
-	if (name != NULL) {
-	    name++;
-	} else {
-	    name = p;
-	}
-    }
-    class = (char *) ckalloc((unsigned) (strlen(name) + 1));
-    strcpy(class, name);
-    class[0] = toupper((unsigned char) class[0]);
-    mainWindow = Tk_CreateMainWindow(interp, display, name, class);
-    ckfree(class);
-    if (mainWindow == NULL) {
-	fprintf(stderr, "%s\n", interp->result);
-	exit(1);
-    }
-    if (synchronize) {
-	XSynchronize(Tk_Display(mainWindow), True);
-    }
-
-    /*
-     * Set the "tcl_interactive" variable.  If we are going to be interactive,
-     * set up SIGINT handling.
-     */
     tty = isatty(0);
     Tcl_SetVar(interp, "tcl_interactive",
- 	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
     if ((fileName == NULL) && tty)
         Tcl_SetupSigInt ();
-
-    /*
-     * Set the geometry of the main window, if requested.  Put the
-     * requested geometry into the "geometry" variable.
-     */
-
-    if (geometry != NULL) {
-	Tcl_SetVar(interp, "geometry", geometry, TCL_GLOBAL_ONLY);
-	code = Tcl_VarEval(interp, "wm geometry . ", geometry, (char *) NULL);
-	if (code != TCL_OK) {
-	    fprintf(stderr, "%s\n", interp->result);
-	}
-    }
 
     /*
      * Invoke application-specific initialization.
      */
 
     if ((*appInitProc)(interp) != TCL_OK) {
-	TclX_ErrorExit (interp, 255);
+            TclX_ErrorExit (interp, 255);
     }
 
     /*
@@ -251,6 +203,7 @@ TkX_Main (argc, argv, appInitProc)
 	}
 	tty = 0;
     } else {
+
 	/*
 	 * Commands will come from standard input, so set up an event
 	 * handler for standard input.  Evaluate the .rc file, if one
@@ -259,33 +212,25 @@ TkX_Main (argc, argv, appInitProc)
 	 */
 
         TclX_EvalRCFile (interp);
+            
+
+	/*
+	 * Establish a channel handler for stdin.
+	 */
 
         tclErrorSignalProc = SignalProc;
-	Tk_CreateFileHandler(0, TK_READABLE, StdinProc, (ClientData) 0);
+        Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
+                (ClientData) inChannel);
 	if (tty) {
 	    TclX_OutputPrompt (interp, 1);
 	}
     }
+
     tclSignalBackgroundError = Tk_BackgroundError;
-
-    fflush (TclX_Stdfile (interp, stdout));
+    Tcl_Flush(outChannel);
     Tcl_DStringInit(&command);
-
-    /*
-     * Set the geometry of the main window, if requested.  If the "geometry"
-     * variable has gone away, this means that the application doesn't want
-     * us to set the geometry after all.
-     */
-
-    if (geometry != NULL) {
-	p = Tcl_GetVar(interp, "geometry", TCL_GLOBAL_ONLY);
-	if (p != NULL) {
-	    code = Tcl_VarEval(interp, "wm geometry . ", p, (char *) NULL);
-	    if (code != TCL_OK) {
-		fprintf(stderr, "%s\n", interp->result);
-	    }
-	}
-    }
+    Tcl_DStringInit(&line);
+    Tcl_ResetResult(interp);
 
     /*
      * Loop infinitely, waiting for commands to execute.  When there
@@ -293,35 +238,21 @@ TkX_Main (argc, argv, appInitProc)
      */
 
     Tk_MainLoop();
-
-    Tcl_DStringFree(&command);
-
-    /*
-     * Don't exit directly, but rather invoke the Tcl "exit" command.
-     * This gives the application the opportunity to redefine "exit"
-     * to do additional cleanup.
-     */
-
-    if (!tclDeleteInterpAtEnd) {
-        Tcl_GlobalEval(interp, exitCmd);
-    } else {
-        Tcl_DeleteInterp (interp);
-    }
-    exit(1);
+    Tcl_Exit(0);
 
 error:
     msg = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
     if (msg == NULL) {
 	msg = interp->result;
     }
-    fprintf(stderrPtr, "%s\n", msg);
-
+    Tcl_Write(errChannel, msg, -1);
+    Tcl_Write(errChannel, "\n", 1);
     if (!tclDeleteInterpAtEnd) {
-        Tcl_GlobalEval(interp, errorExitCmd);
+        Tcl_Exit(1);
     } else {
         Tcl_DeleteInterp (interp);
+        Tcl_Exit(1);
     }
-    exit (1);
 }
 
 /*
@@ -342,7 +273,7 @@ SignalProc (signalNum)
     Tcl_DStringFree (&command);
     gotPartial = 0;
     if (tty) {
-        fputc ('\n', TclX_Stdfile (interp, stdout));
+        Tcl_Write (TclX_Stdout (interp), "\n", 1);
         TclX_OutputPrompt (interp, !gotPartial);
     }
 }
@@ -367,59 +298,101 @@ SignalProc (signalNum)
  *----------------------------------------------------------------------
  */
 
+    /* ARGSUSED */
 static void
 StdinProc(clientData, mask)
     ClientData clientData;		/* Not used. */
     int mask;				/* Not used. */
 {
-#define BUFFER_SIZE 4000
-    char input[BUFFER_SIZE+1];
     char *cmd;
     int code, count;
+    Tcl_Channel chan = (Tcl_Channel) clientData;
 
-    count = read(0, input, BUFFER_SIZE);
-    if (count <= 0) {
+    count = Tcl_Gets(chan, &line);
+
+    if (count < 0) {
 	if (!gotPartial) {
 	    if (tty) {
-		Tcl_VarEval(interp, "exit", (char *) NULL);
-		exit(1);
+		Tcl_Exit(0);
 	    } else {
-		Tk_DeleteFileHandler(0);
+		Tcl_DeleteChannelHandler(chan, StdinProc, (ClientData) chan);
 	    }
 	    return;
 	} else {
 	    count = 0;
 	}
     }
-    cmd = Tcl_DStringAppend(&command, input, count);
+
+    (void) Tcl_DStringAppend(&command, Tcl_DStringValue(&line), -1);
+    cmd = Tcl_DStringAppend(&command, "\n", -1);
+    Tcl_DStringFree(&line);
+    
     if (count != 0) {
-	if ((input[count-1] != '\n') && (input[count-1] != ';')) {
-	    gotPartial = 1;
-	    goto exitPoint;
-	}
 	if (!Tcl_CommandComplete(cmd)) {
 	    gotPartial = 1;
-	    goto exitPoint;
+	    goto prompt;
 	}
     }
     gotPartial = 0;
 
     /*
-     * Disable the stdin file handler;  otherwise if the command
-     * re-enters the event loop we might process commands from
-     * stdin before the current command is finished.  Among other
-     * things, this will trash the text of the command being evaluated.
+     * Disable the stdin channel handler while evaluating the command;
+     * otherwise if the command re-enters the event loop we might
+     * process commands from stdin before the current command is
+     * finished.  Among other things, this will trash the text of the
+     * command being evaluated.
      */
 
-    Tk_CreateFileHandler(0, 0, StdinProc, (ClientData) 0);
+    Tcl_CreateChannelHandler(chan, 0, StdinProc, (ClientData) chan);
     code = Tcl_RecordAndEval(interp, cmd, TCL_EVAL_GLOBAL);
-    Tk_CreateFileHandler(0, TK_READABLE, StdinProc, (ClientData) 0);
-    if ((code != TCL_OK) || tty)
-        TclX_PrintResult (interp, code, cmd);
+    Tcl_CreateChannelHandler(chan, TCL_READABLE, StdinProc,
+	    (ClientData) chan);
     Tcl_DStringFree(&command);
+    if (*interp->result != 0) {
+	if ((code != TCL_OK) || (tty)) {
+            TclX_PrintResult (interp, code, cmd);
+	}
+    }
 
-  exitPoint:
+    /*
+     * Output a prompt.
+     */
+
+    prompt:
     if (tty) {
         TclX_OutputPrompt (interp, !gotPartial);
     }
+    Tcl_ResetResult(interp);
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * TkDefaultAppName --
+ *
+ *	This procedure provides a default application name to use
+ *	if one isn't specified explicitly for a Tk application.
+ *
+ * Results:
+ *	Returns a string that can be used as the default application
+ *	name.
+ *
+ * Side effects:
+ *	None.
+ *
+ *----------------------------------------------------------------------
+ */
+
+char *
+TkDefaultAppName()
+{
+    char *p;
+
+    p = strrchr(argv0, '/');
+    if (p != NULL) {
+	p++;
+    } else {
+	p = argv0;
+    }
+    return p;
 }

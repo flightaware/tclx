@@ -1045,4 +1045,7 @@
   o Added help page searching code provided by Jan Nijtmans
     <nijtmans@nici.kun.nl>.
 -------------------------------------------------------------------------------
+09 Feb 96:
+  o Integrated with Tcl 7.5 beta 1, which includes the new Tcl I/O system.
+-------------------------------------------------------------------------------
  

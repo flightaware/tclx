@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.5 1995/12/30 13:34:21 markd Exp $
+# $Id: Makefile.in,v 5.6 1995/12/31 11:24:46 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -221,7 +221,7 @@ test: all
 # Build help for Tk.  These files are normally part of the distribution and
 # not rebuilt by users.
 #
-buildtkhelp:
+buildhelp:
 	rm -rf ${HELP_DIR} help
 	mkdir ${HELP_DIR}
 	${BLDMANHELP} ${TK_SRC}/doc ${srcbasedir}/unix/tools/tkmanpages \

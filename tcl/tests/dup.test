@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 5.0 1995/07/25 05:40:56 markd Rel $
+# $Id: dup.test,v 5.1 1995/09/26 06:40:09 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -130,22 +130,12 @@ close $fromParent
 if ![fcntl $toChild RDWR] {
 
     Test dup-2.1 {dup tests} {
-        set msg [gets $fromChild]
-        if [regexp {^msg1: file "file.*" wasn't opened for writing} $msg] {
-            list OK
-        } else {
-            list $msg
-        }
-    } 0 {OK}
+        gets $toChild
+    } 1 "channel \"$toChild\" wasn't opened for reading"
 
     Test dup-2.2 {dup tests} {
-        set msg [gets $fromChild]
-        if [regexp {^msg2: file "file.*" wasn't opened for reading} $msg] {
-            list OK
-        } else {
-            list $msg
-        }
-    } 0 {OK}
+        puts $fromChild arf
+    } 1 "channel \"$fromChild\" wasn't opened for writing"
 }
 
 Test dup-2.2 {dup tests} {

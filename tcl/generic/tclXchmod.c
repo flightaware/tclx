@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 4.2 1995/05/15 00:04:20 markd Exp markd $
+ * $Id: tclXchmod.c,v 5.0 1995/07/25 05:42:13 markd Rel $
  *-----------------------------------------------------------------------------
  */
 
@@ -264,7 +264,7 @@ ChmodFileName (interp, modeInfo, fileName)
 
     Tcl_DStringInit (&tildeBuf);
 
-    filePath = Tcl_TildeSubst (interp, fileName, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, fileName, &tildeBuf);
     if (filePath == NULL) {
         Tcl_DStringFree (&tildeBuf);
         return TCL_ERROR;
@@ -316,17 +316,16 @@ ChmodFileId (interp, modeInfo, fileId)
     char        *fileId;
 {
 #ifdef HAVE_FCHMOD
-    FILE         *filePtr;
-    struct stat   fileStat;
-    int           newMode;
+    int fnum;
+    struct stat fileStat;
+    int newMode;
 
-    if (Tcl_GetOpenFile (interp, fileId,
-                         FALSE, FALSE, /* No access check */
-                         &filePtr) != TCL_OK)
+    fnum = TclX_GetOpenFnum (interp, fileId, 0);
+    if (fnum < 0)
         return TCL_ERROR;
 
     if (modeInfo.symMode != NULL) {
-        if (fstat (fileno (filePtr), &fileStat) != 0)
+        if (fstat (fnum, &fileStat) != 0)
             goto fileError;
         newMode = ConvSymMode (interp, modeInfo.symMode,
                                fileStat.st_mode & 07777);
@@ -335,9 +334,8 @@ ChmodFileId (interp, modeInfo, fileId)
     } else {
         newMode = modeInfo.absMode;
     }
-    if (fchmod (fileno (filePtr), (unsigned short) newMode) < 0)
+    if (fchmod (fnum, (unsigned short) newMode) < 0)
         goto fileError;
-
 
     return TCL_OK;
 
@@ -548,7 +546,7 @@ ChownFileName (interp, ownerInfo, fileName)
 
     Tcl_DStringInit (&tildeBuf);
 
-    filePath = Tcl_TildeSubst (interp, fileName, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, fileName, &tildeBuf);
     if (filePath == NULL) {
         Tcl_DStringFree (&tildeBuf);
         return TCL_ERROR;
@@ -597,21 +595,20 @@ ChownFileId (interp, ownerInfo, fileId)
     char        *fileId;
 {
 #ifdef HAVE_FCHOWN
-    FILE         *filePtr;
-    struct stat   fileStat;
+    int fnum;
+    struct stat fileStat;
 
-    if (Tcl_GetOpenFile (interp, fileId,
-                         FALSE, FALSE, /* No access check */
-                         &filePtr) != TCL_OK)
+    fnum = TclX_GetOpenFnum (interp, fileId, 0);
+    if (fnum < 0)
         return TCL_ERROR;
 
     if (!ownerInfo.changeGroup) {
-        if (fstat (fileno (filePtr), &fileStat) != 0)
+        if (fstat (fnum, &fileStat) != 0)
             goto fileError;
-        if (fchown (fileno (filePtr), ownerInfo.userId, fileStat.st_gid) < 0)
+        if (fchown (fnum, ownerInfo.userId, fileStat.st_gid) < 0)
             goto fileError;
     } else {
-        if (fchown (fileno (filePtr), ownerInfo.userId, ownerInfo.groupId) < 0)
+        if (fchown (fnum, ownerInfo.userId, ownerInfo.groupId) < 0)
             goto fileError;
     }
 
@@ -717,7 +714,7 @@ ChgrpFileName (interp, groupId, fileName)
 
     Tcl_DStringInit (&tildeBuf);
 
-    filePath = Tcl_TildeSubst (interp, fileName, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, fileName, &tildeBuf);
     if (filePath == NULL) {
         Tcl_DStringFree (&tildeBuf);
         return TCL_ERROR;
@@ -757,19 +754,18 @@ ChgrpFileId (interp, groupId, fileId)
     char        *fileId;
 {
 #ifdef HAVE_FCHOWN
-    FILE         *filePtr;
-    struct stat   fileStat;
+    int fnum;
+    struct stat fileStat;
 
-    if (Tcl_GetOpenFile (interp, fileId,
-                         FALSE, FALSE, /* No access check */
-                         &filePtr) != TCL_OK)
+    fnum = TclX_GetOpenFnum (interp, fileId, 0);
+    if (fnum < 0)
         return TCL_ERROR;
 
-    if ((fstat (fileno (filePtr), &fileStat) != 0) ||
-        (fchown (fileno (filePtr), fileStat.st_uid, groupId) < 0)) {
+    if ((fstat (fnum, &fileStat) != 0) ||
+        (fchown (fnum, fileStat.st_uid, groupId) < 0)) {
         Tcl_AppendResult (interp, fileId, ": ",
                           Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
+         return TCL_ERROR;
     }
     return TCL_OK;
 #else

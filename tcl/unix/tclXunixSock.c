@@ -82,7 +82,7 @@ InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 SendMessage _ANSI_ARGS_((Tcl_Interp *interp,
-                         FILE       *filePtr,
+                         int         fileNum,
                          int         flags,
                          int         nonewline,
                          char       *strmsg));
@@ -93,9 +93,7 @@ XlateCntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
                            int         *attrPtr));
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ReturnGetHostError --
  *
  *   Return an error message when gethostbyname or gethostbyaddr fails.
@@ -142,9 +140,7 @@ ReturnGetHostError (interp, host)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * InetAtoN --
  *
  *   Convert an internet address to an "struct in_addr" representation.
@@ -181,14 +177,12 @@ InetAtoN (interp, strAddress, inAddress)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * BindFileHandles --
  *
- *   Bind the file handles for a socket to one or two Tcl files and return
- * the files handles in the result.  If an error occurs, both file descriptors
- * will be closed and cleaned up.
+ *   Bind the file handles for a socket to one or two Tcl file channels.
+ * Binding to two handles is for compatibility with older interfaces.
+ * If an error occurs, both file descriptors will be closed and cleaned up.
  *
  * Parameters:
  *   o interp (O) - File handles or error messages are return in result.
@@ -200,11 +194,6 @@ InetAtoN (interp, strAddress, inAddress)
  *   o socketFD (I) - File number of the socket that was opened.
  * Returns:
  *   TCL_OK or TCL_ERROR.
- * Note:
- *   While it might seem that for nobuf access, a single FILE struct could
- * be used, this just isn't the case on all systems.  A varity of problems
- * can occur when doing a fdopen on a socket with r+ or other read/write
- * access.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -213,75 +202,60 @@ BindFileHandles (interp, options, socketFD)
     unsigned    options;
     int         socketFD;
 {
-    int       socketFD2 = -1;
-    FILE     *readFilePtr, *writeFilePtr;
+    int socketFD2 = -1;
+    Tcl_Channel channel = NULL, channel2 = NULL;
 
-    /*
-     * Dup the socket to get a second descriptor for write access.
-     */
-    socketFD2 = dup (socketFD);
-    if (socketFD2 < 0) {
-        interp->result = Tcl_PosixError (interp);
+    channel = TclX_SetupFileEntry (interp, socketFD, 
+                                   TCL_READABLE | TCL_WRITABLE, TRUE);
+    if (channel == NULL)
         goto errorExit;
+
+    if (options & SERVER_NOBUF) {
+        if (Tcl_SetChannelOption (interp, channel, "-unbuffered",
+                                  "1") == TCL_ERROR)
+            goto errorExit;
     }
 
     if (options & SERVER_TWOIDS) {
-        /*
-         * Setup two, independent file ids.
-         */
-        readFilePtr = Tcl_SetupFileEntry (interp, socketFD,
-                                          TCL_FILE_READABLE);
-        if (readFilePtr == NULL)
+        socketFD2 = dup (socketFD);
+        if (socketFD2 < 0) {
+            interp->result = Tcl_PosixError (interp);
             goto errorExit;
+        }
 
-        writeFilePtr = Tcl_SetupFileEntry (interp, socketFD2,
-                                           TCL_FILE_WRITABLE);
-        if (writeFilePtr == NULL)
+        channel2 = TclX_SetupFileEntry (interp, socketFD2,
+                                        TCL_READABLE | TCL_WRITABLE, TRUE);
+        if (channel2 == NULL)
             goto errorExit;
 
         if (options & SERVER_NOBUF) {
-            setbuf (readFilePtr, NULL);
-            setbuf (writeFilePtr, NULL);
+            if (Tcl_SetChannelOption (interp, channel2, "-unbuffered",
+                                      "1") == TCL_ERROR)
+                goto errorExit;
         }
-        sprintf (interp->result, "file%d file%d", socketFD, socketFD2);
+        Tcl_AppendElement (interp, Tcl_GetChannelName (channel));
+        Tcl_AppendElement (interp, Tcl_GetChannelName (channel2));
         return TCL_OK;
     } else {
-        /*
-         * Set up single handle access.  This requires creating two FILE
-         * objects, but binding them to a single handle.  This is something
-         * Tcl_GetOpenFile supports internally.
-         */
-        readFilePtr = Tcl_SetupFileEntry2 (interp, socketFD, socketFD2,
-                                           &writeFilePtr);
-        if (readFilePtr == NULL)
-            goto errorExit;
-        
-        if (options & SERVER_NOBUF) {
-            setbuf (readFilePtr, NULL);
-            setbuf (writeFilePtr, NULL);
-        }
-        sprintf (interp->result, "file%d", socketFD);
+        Tcl_AppendElement (interp, Tcl_GetChannelName (channel));
         return TCL_OK;
     }
 
   errorExit:
-    Tcl_CloseForError (interp, socketFD);
-    if (socketFD2 >= 0)
-        Tcl_CloseForError (interp, socketFD2);
+    Tcl_CloseForError (interp, channel, socketFD);
+    Tcl_CloseForError (interp, channel2, socketFD2);
     return TCL_ERROR;
 }
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerConnectCmd --
  *     Implements the TCL server_connect command:
  *
  *        server_connect ?options? host service
  *
  *  Opens a stream socket to the specified host (host name or IP address),
- *  service name or port number.  Options maybe -buf or -nobuf, -twoids, and
+ *  service name or port number.  Options maybe -buf, or -nobuf, -twoids, and
  *  -hostip hostname.
  *
  * Results:
@@ -456,9 +430,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerCreateCmd --
  *     Implements the TCL server_create command:
  *
@@ -468,8 +440,8 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
  * (optionally specified by the caller), and starts the port listening 
  * for connections by calling listen (2).
  *
- *  Options may be "-myip ip_address", "-myport port_number",
- * "-backlog backlog" and -reuseaddr
+ *  Options may be "-myip ip_address", "-myport port_number", and
+ * "-backlog backlog".
  *
  * Results:
  *   If successful, a Tcl fileid is returned.
@@ -483,11 +455,11 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int                 socketFD = -1, nextArg;
+    int socketFD = -1, nextArg;
     struct sockaddr_in  local;
-    int                 myPort, value;
-    int                 reuseAddr = FALSE;
-    int                 backlog = 5;
+    int myPort, value;
+    int backlog = 5;
+    Tcl_Channel channel = NULL;
 
     /*
      * Parse arguments.
@@ -519,12 +491,11 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
             if (Tcl_GetInt (interp, argv [nextArg], &backlog) != TCL_OK)
                 return TCL_ERROR;
         } else if (STREQU ("-reuseaddr", argv [nextArg])) {
-            reuseAddr = TRUE;
+            /* Ignore for compatibility */
         } else {
             Tcl_AppendResult (interp, "expected ",
-                              "\"-myip\", \"-myport\", \"-backlog\", or ",
-                              "\"-reuseaddr\", got \"", argv [nextArg],
-                              "\"", (char *) NULL);
+                              "\"-myip\", \"-myport\", or \"-backlog\", ",
+                              "got \"", argv [nextArg], "\"", (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
@@ -543,12 +514,10 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     if (socketFD < 0)
         goto unixError;
 
-    if (reuseAddr) {
-        value = 1;
-        if (setsockopt (socketFD, SOL_SOCKET, SO_REUSEADDR,
-                        &value, sizeof (value)) < 0) {
-            goto unixError;
-        }
+    value = 1;
+    if (setsockopt (socketFD, SOL_SOCKET, SO_REUSEADDR,
+                    &value, sizeof (value)) < 0) {
+        goto unixError;
     }
     if (bind (socketFD, (struct sockaddr *) &local, sizeof (local)) < 0) {
         goto unixError;
@@ -557,10 +526,11 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     if (listen (socketFD, backlog) < 0)
         goto unixError;
 
-    if (Tcl_SetupFileEntry (interp, socketFD, TCL_FILE_READABLE) == NULL)
+    channel = TclX_SetupFileEntry (interp, socketFD, TCL_READABLE, TRUE);
+    if (channel == NULL)
         goto errorExit;
 
-    sprintf (interp->result, "file%d", socketFD);
+    Tcl_AppendResult (interp, Tcl_GetChannelName (channel), (char *) NULL);
     return TCL_OK;
 
     /*
@@ -575,14 +545,11 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     interp->result = Tcl_PosixError (interp);
 
   errorExit:
-    if (socketFD >= 0)
-        Tcl_CloseForError (interp, socketFD);
+    Tcl_CloseForError (interp, channel, socketFD);
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerAcceptCmd --
  *     Implements the TCL server_accept command:
  *
@@ -603,11 +570,11 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    unsigned            options;
-    int                 acceptSocketFD, addrLen;
-    int                 socketFD = -1, nextArg;
-    struct sockaddr_in  connectSocket;
-    FILE               *acceptFilePtr;
+    unsigned options;
+    int acceptSocketFD, addrLen;
+    int socketFD = -1, nextArg;
+    struct sockaddr_in connectSocket;
+    Tcl_File acceptFile;
 
     /*
      * Parse arguments.
@@ -643,12 +610,10 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
      */
     bzero ((VOID *) &connectSocket, sizeof (connectSocket));
 
-    if (Tcl_GetOpenFile (interp, argv [nextArg], 
-                         FALSE, TRUE,  /* Read access */
-                         &acceptFilePtr) == TCL_ERROR) {
+    acceptSocketFD = TclX_GetOpenFnum (interp, argv [nextArg], 0);
+    if (acceptSocketFD < 0)
         return TCL_ERROR;
-    }
-    acceptSocketFD = fileno (acceptFilePtr);
+
     addrLen = sizeof (connectSocket);
     socketFD = accept (acceptSocketFD, 
                        (struct sockaddr *)&connectSocket, 
@@ -667,13 +632,11 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
   unixError:
     interp->result = Tcl_PosixError (interp);
     if (socketFD >= 0)
-        Tcl_CloseForError (interp, socketFD);
+        close (socketFD);
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * InfoGetHost --
  *
  *   Validate arguments and call gethostbyaddr for the server_info options
@@ -717,9 +680,7 @@ InfoGetHost (interp, argc, argv)
     return hostEntry;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerInfoCmd --
  *     Implements the TCL server_info command:
  *
@@ -802,9 +763,7 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SendMessage --
  *
  *   Send a message on a socket.  There are two versions of this function,
@@ -813,7 +772,7 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
  *
  * Parameters:
  *   o interp (O) - Error messages are returned in result.
- *   o filePtr (I) - FILE associated with socket.
+ *   o fileNum (I) - File number of the socket.
  *   o flags (I) - Flags to pass to sendmsg/send.
  *   o nonewline (I) - TRUE if a newline should not be sent.
  *   o strmsg (I) - String message to send.
@@ -821,19 +780,19 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-#ifdef HAVE_SENDMSG
 static int
-SendMessage (interp, filePtr, flags, nonewline, strmsg)
+SendMessage (interp, fileNum, flags, nonewline, strmsg)
     Tcl_Interp *interp;
-    FILE       *filePtr;
+    int         fileNum;
     int         flags;
     int         nonewline;
     char       *strmsg;
 {
+#ifdef HAVE_SENDMSG
     struct msghdr msgHeader;
-    struct iovec  dataVec [2];
-    int           bytesAttempted;
-    int           bytesSent;
+    struct iovec dataVec [2];
+    int bytesAttempted;
+    int bytesSent;
 
     /*
      * Fill in the message header and write vector.  If a newline is
@@ -862,7 +821,7 @@ SendMessage (interp, filePtr, flags, nonewline, strmsg)
         bytesAttempted++;
     }
    
-    bytesSent = sendmsg (fileno (filePtr), &msgHeader, flags);
+    bytesSent = sendmsg (fileNum, &msgHeader, flags);
     if (bytesSent < 0) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
@@ -873,20 +832,11 @@ SendMessage (interp, filePtr, flags, nonewline, strmsg)
                           (char *)NULL);
     }
     return TCL_OK;
-}
-#else
-static int
-SendMessage (interp, filePtr, flags, nonewline, strmsg)
-    Tcl_Interp *interp;
-    FILE       *filePtr;
-    int         flags;
-    int         nonewline;
-    char       *strmsg;
-{
+#else /* HAVE_SENDMSG */
     Tcl_DString  buffer;
-    char        *message;
-    int          bytesAttempted;
-    int          bytesSent;
+    char *message;
+    int bytesAttempted;
+    int bytesSent;
 
 
     if (nonewline) {
@@ -899,7 +849,7 @@ SendMessage (interp, filePtr, flags, nonewline, strmsg)
     }
     bytesAttempted = strlen (message);
 
-    bytesSent = send (fileno (filePtr), message, bytesAttempted, flags);
+    bytesSent = send (fileNum, message, bytesAttempted, flags);
     if (!nonewline) {
         Tcl_DStringFree (&buffer);
     }
@@ -913,12 +863,11 @@ SendMessage (interp, filePtr, flags, nonewline, strmsg)
                           (char *)NULL);
     }
     return TCL_OK;
-}
 #endif /* HAVE_SENDMSG */
+}
+
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerSendCmd --
  *     Implements the TCL server_send command:
  *
@@ -935,10 +884,7 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    FILE  *filePtr;
-    int    flags = 0;
-    int    nonewline = 0;
-    int    nextArg;
+    int flags = 0, nonewline = 0, nextArg, fileNum;
 
     nextArg = 1;
     while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
@@ -962,16 +908,14 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (Tcl_GetOpenFile (interp, argv [nextArg++],
-                         TRUE, TRUE, /* Write access */
-                         &filePtr) != TCL_OK)
+    fileNum = TclX_GetOpenFnum (interp, argv [nextArg++], TCL_WRITABLE);
+    if (fileNum < 0)
         return TCL_ERROR;
 
-    return SendMessage (interp, filePtr,  flags, nonewline, argv [nextArg]);
+    return SendMessage (interp, fileNum, flags, nonewline, argv [nextArg]);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * XlateCntlAttr --
  *    Translate a server_cntl  attribute.
  *
@@ -1011,9 +955,7 @@ XlateCntlAttr (interp, attrName, attrPtr)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerCntlCmd --
  *     Implements the TCL server_cntl command:
  *
@@ -1030,28 +972,24 @@ Tcl_ServerCntlCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    char  attrNameUp [MAX_ATTR_NAME_LEN];
-    FILE *filePtr;
-    int   attribute;
-    int   value, valueLen = sizeof (value);
+    char attrNameUp [MAX_ATTR_NAME_LEN];
+    int attribute, value, valueLen = sizeof (value), fileNum;
 
     if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                           " fileid attribute [value]", (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (Tcl_GetOpenFile (interp, argv [1],
-                         FALSE, FALSE,   /* No access checking */
-                         &filePtr) != TCL_OK)
+    fileNum = TclX_GetOpenFnum (interp, argv [1], 0);
+    if (fileNum < 0)
         return TCL_ERROR;
-
 
     if (XlateCntlAttr (interp, argv [2], &attribute) == TCL_ERROR)
         return TCL_ERROR;
 
     if (argc == 3) {
-        if (getsockopt (fileno (filePtr), SOL_SOCKET, attribute,
+        if (getsockopt (fileNum, SOL_SOCKET, attribute,
                         &value, &valueLen) != 0)
             goto socketError;
         if (valueLen != sizeof (value)) {
@@ -1063,7 +1001,7 @@ Tcl_ServerCntlCmd (clientData, interp, argc, argv)
     } else {
         if (Tcl_GetBoolean (interp, argv [3], &value) != TCL_OK)
             return TCL_ERROR;
-        if (setsockopt (fileno (filePtr), SOL_SOCKET, attribute,
+        if (setsockopt (fileNum, SOL_SOCKET, attribute,
                         &value, valueLen) != 0)
             goto socketError;
     }
@@ -1074,9 +1012,7 @@ Tcl_ServerCntlCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerInit --
  *     
  *   Initialize the server commands in the specified interpreter.
@@ -1101,9 +1037,7 @@ Tcl_ServerInit (interp)
 }
 #else
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ServerNotAvailable --
  *     Command stub that returns an error indicating the command is not 
  * available.
@@ -1121,9 +1055,7 @@ ServerNotAvailable (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ServerInit --
  *     
  *   Initialize the stub server commands in the specified interpreter.  These

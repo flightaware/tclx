@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 4.2 1995/04/24 06:38:31 markd Exp markd $
+ * $Id: tclXselect.c,v 5.0 1995/07/25 05:58:47 markd Rel $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,33 +44,6 @@ double floor ();
 #endif
 
 /*
- * Macro to probe the stdio buffer to see if any data is pending in the
- * buffer.  Different versions are provided for System V, BSD and GNU stdio.
- */
-
-#ifdef HAVE_STDIO_CNT
-#   define READ_DATA_PENDING(fp) (fp->_cnt != 0)
-#endif
-#ifdef HAVE_STDIO__CNT
-#   define READ_DATA_PENDING(fp) (fp->__cnt != 0)
-#endif
-#ifdef HAVE_STDIO_R
-#   define READ_DATA_PENDING(fp) (fp->_r > 0)
-#endif
-#ifdef HAVE_STDIO_READCOUNT
-#   define READ_DATA_PENDING(fp) (fp->readCount > 0)
-#endif
-#ifdef HAVE_STDIO_GPTR
-#   define READ_DATA_PENDING(fp) ((fp)->_gptr < (fp)->_egptr)
-#endif
-#ifdef HAVE_STDIO_IO_READ_PTR
-#   define READ_DATA_PENDING(fp) (fp->_IO_read_ptr != fp->_IO_read_end)
-#endif
-#ifndef READ_DATA_PENDING
-    Unable to determine stdio read count;
-#endif
-
-/*
  * A few systems (A/UX 2.0) have select but no macros, define em in this case.
  */
 #ifndef FD_SET
@@ -81,30 +54,37 @@ double floor ();
 #endif
 
 /*
+ * Data kept about a file channel.
+ */
+typedef struct {
+    Tcl_Channel channel;
+    int         readFd;
+    int         writeFd;
+} channelData_t;
+
+/*
  * Prototypes of internal functions.
  */
 static int
-ParseSelectFileList _ANSI_ARGS_((Tcl_Interp *interp,
-                                 char       *handleList,
-                                 fd_set     *fileDescSetPtr,
-                                 FILE     ***fileDescListPtr,
-                                 int        *maxFileIdPtr));
+ParseSelectFileList _ANSI_ARGS_((Tcl_Interp     *interp,
+                                 char           *handleList,
+                                 fd_set         *fileSetPtr,
+                                 channelData_t **channelListPtr,
+                                 int            *maxFileIdPtr));
 
 static int
-FindPendingData _ANSI_ARGS_((int         fileDescCnt,
-                             FILE      **fileDescList,
-                             fd_set     *fileDescSetPtr));
+FindPendingData _ANSI_ARGS_((int            fileDescCnt,
+                             channelData_t *channelList,
+                             fd_set        *fileDescSetPtr));
 
 static char *
-ReturnSelectedFileList _ANSI_ARGS_((fd_set     *fileDescSetPtr,
-                                    fd_set     *fileDescSet2Ptr,
-                                    int         fileDescCnt,
-                                    FILE      **fileDescList));
+ReturnSelectedFileList _ANSI_ARGS_((fd_set        *fileDescSetPtr,
+                                    fd_set        *fileDescSet2Ptr,
+                                    int            fileDescCnt,
+                                    channelData_t *channelListPtr));
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ParseSelectFileList --
  *
  *   Parse a list of file handles for select.
@@ -112,10 +92,10 @@ ReturnSelectedFileList _ANSI_ARGS_((fd_set     *fileDescSetPtr,
  * Parameters:
  *   o interp (O) - Error messages are returned in the result.
  *   o handleList (I) - The list of file handles to parse, may be empty.
- *   o fileDescSetPtr (O) - The select fd_set for the parsed handles is
- *     filled in.  Should be cleared before this procedure is called.
- *   o fileDescListPtr (O) - A pointer to a dynamically allocated list of
- *     the FILE ptrs that are in the set.  If the list is empty, NULL is
+ *   o fileSetPtr (O) - The select fd_set for the parsed handles is
+ *     filled in.
+ *   o channelListPtr (O) - A pointer to a dynamically allocated list of
+ *     the channels that are in the set.  If the list is empty, NULL is
  *     returned.
  *   o maxFileIdPtr (I/O) - If a file id greater than the current value is
  *     encountered, it will be set to that file id.
@@ -124,23 +104,23 @@ ReturnSelectedFileList _ANSI_ARGS_((fd_set     *fileDescSetPtr,
  *-----------------------------------------------------------------------------
  */
 static int
-ParseSelectFileList (interp, handleList, fileDescSetPtr, fileDescListPtr,
+ParseSelectFileList (interp, handleList, fileSetPtr, channelListPtr,
                      maxFileIdPtr)
-    Tcl_Interp *interp;
-    char       *handleList;
-    fd_set     *fileDescSetPtr;
-    FILE     ***fileDescListPtr;
-    int        *maxFileIdPtr;
+    Tcl_Interp    *interp;
+    char          *handleList;
+    fd_set        *fileSetPtr;
+    channelData_t **channelListPtr;
+    int           *maxFileIdPtr;
 {
-    int    handleCnt, idx;
+    int handleCnt, idx;
     char **handleArgv;
-    FILE **fileDescList;
+    channelData_t *channelList;
 
     /*
      * Optimize empty list handling.
      */
     if (handleList [0] == '\0') {
-        *fileDescListPtr = NULL;
+        *channelListPtr = NULL;
         return 0;
     }
 
@@ -151,49 +131,56 @@ ParseSelectFileList (interp, handleList, fileDescSetPtr, fileDescListPtr,
      * Handle case of an empty list.
      */
     if (handleCnt == 0) {
-        *fileDescListPtr = NULL;
+        *channelListPtr = NULL;
         ckfree ((char *) handleArgv);
         return 0;
     }
 
-    fileDescList = (FILE **) ckalloc (sizeof (FILE *) * handleCnt);
+    channelList =
+        (channelData_t*) ckalloc (sizeof (channelData_t) * handleCnt);
 
     for (idx = 0; idx < handleCnt; idx++) {
-        FILE *filePtr;
-        int   fileId;
-
-        if (Tcl_GetOpenFile (interp, handleArgv [idx],
-                             FALSE, FALSE,  /* No checking */
-                             &filePtr) != TCL_OK) {
+        channelList [idx].channel =
+            TclX_GetOpenChannel (interp,
+                                 handleArgv [idx],
+                                 0);
+        if (channelList [idx].channel == NULL) {
             ckfree ((char *) handleArgv);
-            ckfree ((char *) fileDescList);
+            ckfree ((char *) channelList);
             return -1;
         }
-        fileId = fileno (filePtr);
-        fileDescList [idx] = filePtr;
-
-        FD_SET (fileId, fileDescSetPtr);
-        if (fileId > *maxFileIdPtr)
-            *maxFileIdPtr = fileId;
+        
+        channelList [idx].readFd =
+            TclX_ChannelFnum (channelList [idx].channel, TCL_READABLE);
+        if (channelList [idx].readFd >= 0) {
+            FD_SET (channelList [idx].readFd, fileSetPtr);
+            if (channelList [idx].readFd > *maxFileIdPtr)
+                *maxFileIdPtr = channelList [idx].readFd;
+        }
+        channelList [idx].writeFd =
+            TclX_ChannelFnum (channelList [idx].channel, TCL_WRITABLE);
+        if (channelList [idx].writeFd >= 0) {
+            FD_SET (channelList [idx].writeFd, fileSetPtr);
+            if (channelList [idx].writeFd > *maxFileIdPtr)
+                *maxFileIdPtr = channelList [idx].writeFd;
+        }
     }
 
-    *fileDescListPtr = fileDescList;
+    *channelListPtr = channelList;
     ckfree ((char *) handleArgv);
     return handleCnt;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * FindPendingData --
  *
- *   Scan a list of read file descriptors to determine if any of them
- *   have data pending in their stdio buffers.
+ *   Scan a list of read files to determine if any of them have data pending
+ * in their buffers.
  *
  * Parameters:
  *   o fileDescCnt (I) - Number of descriptors in the list.
- *   o fileDescListPtr (I) - A pointer to a list of the FILE pointers for
- *     files that are in the set.
+ *   o channelListPtr (I) - A pointer to a list of the channel data for
+ *     the channels to check.
  *   o fileDescSetPtr (I) - A select fd_set with will have a bit set for
  *     every file that has data pending it its buffer.
  * Returns:
@@ -201,27 +188,26 @@ ParseSelectFileList (interp, handleList, fileDescSetPtr, fileDescListPtr,
  *-----------------------------------------------------------------------------
  */
 static int
-FindPendingData (fileDescCnt, fileDescList, fileDescSetPtr)
-    int         fileDescCnt;
-    FILE      **fileDescList;
-    fd_set     *fileDescSetPtr;
+FindPendingData (fileDescCnt, channelList, fileDescSetPtr)
+    int            fileDescCnt;
+    channelData_t *channelList;
+    fd_set        *fileDescSetPtr;
 {
     int idx, found = FALSE;
 
     FD_ZERO (fileDescSetPtr);
 
     for (idx = 0; idx < fileDescCnt; idx++) {
-        if (READ_DATA_PENDING (fileDescList [idx])) {
-            FD_SET (fileno (fileDescList [idx]), fileDescSetPtr);
+        if (Tcl_ChannelBufferedData (channelList [idx].channel,
+                                     TCL_READABLE)) {
+            FD_SET (channelList [idx].readFd, fileDescSetPtr);
             found = TRUE;
         }
     }
     return found;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ReturnSelectedFileList --
  *
  *   Take the resulting file descriptor sets from a select, and the
@@ -232,52 +218,52 @@ FindPendingData (fileDescCnt, fileDescList, fileDescSetPtr)
  *   o fileDescSet2Ptr (I) - Pointer to a second descriptor to also check
  *     (their may be overlap).  NULL if no second set.
  *   o fileDescCnt (I) - Number of descriptors in the list.
- *   o fileDescListPtr (I) - A pointer to a list of the FILE pointers for
- *     files that are in the set.  If the list is empty, NULL is returned.
+ *   o channelListPtr (I) - A pointer to a list of the FILE pointers for
+ *     files that are in the set.
  * Returns:
  *   A dynamicly allocated list of file handles.  If the handles are empty,
- *   it still returns a NULL list to make clean up easy.
+ *   it returns a constant empty string.  Do not free the empty string.
  *-----------------------------------------------------------------------------
  */
 static char *
 ReturnSelectedFileList (fileDescSetPtr, fileDescSet2Ptr, fileDescCnt,
-                        fileDescList) 
-    fd_set     *fileDescSetPtr;
-    fd_set     *fileDescSet2Ptr;
-    int         fileDescCnt;
-    FILE      **fileDescList;
+                        channelList) 
+    fd_set        *fileDescSetPtr;
+    fd_set        *fileDescSet2Ptr;
+    int            fileDescCnt;
+    channelData_t *channelList;
 {
-    int    idx, handleCnt, fileNum;
-    char  *fileHandleList;
-    char **fileHandleArgv, *nextByte;
+    int idx, handleCnt;
+    char *fileHandleList;
+    char **fileHandleArgv;
 
     /*
      * Special case the empty list.
      */
-    if (fileDescCnt == 0) {
-        fileHandleList = ckalloc (1);
-        fileHandleList [0] = '\0';
-        return fileHandleList;
-    }
+    if (fileDescCnt == 0)
+        return "";
 
     /*
-     * Allocate enough room to hold the argv plus all the `fileNNN' strings
+     * Allocate enough room to hold the argv.
      */
-    fileHandleArgv = (char **)
-        ckalloc ((fileDescCnt * sizeof (char *)) + (9 * fileDescCnt));
-    nextByte = ((char *) fileHandleArgv) + (fileDescCnt * sizeof (char *));
+    fileHandleArgv = (char **) ckalloc (fileDescCnt * sizeof (char *));
 
     handleCnt = 0;
     for (idx = 0; idx < fileDescCnt; idx++) {
-        fileNum = fileno (fileDescList [idx]);
-
-        if (FD_ISSET (fileNum, fileDescSetPtr) ||
-            (fileDescSet2Ptr != NULL &&
-             FD_ISSET (fileNum, fileDescSet2Ptr))) {
-
-            fileHandleArgv [handleCnt] = nextByte;  /* Allocate storage */
-            nextByte += 8;
-            sprintf (fileHandleArgv [handleCnt], "file%d", fileNum);
+        if (((channelList [idx].readFd >= 0) &&
+             FD_ISSET (channelList [idx].readFd, fileDescSetPtr)) ||
+            ((channelList [idx].writeFd >= 0) &&
+             FD_ISSET (channelList [idx].writeFd, fileDescSetPtr))) {
+            fileHandleArgv [handleCnt] =
+                Tcl_GetChannelName (channelList [idx].channel);
+            handleCnt++;
+        } else if ((fileDescSet2Ptr != NULL) &&
+                   (((channelList [idx].readFd >= 0) &&
+                    FD_ISSET (channelList [idx].readFd, fileDescSet2Ptr)) ||
+                   ((channelList [idx].writeFd >= 0) &&
+                    FD_ISSET (channelList [idx].writeFd, fileDescSet2Ptr)))) {
+            fileHandleArgv [handleCnt] =
+                Tcl_GetChannelName (channelList [idx].channel);
             handleCnt++;
         }
     }
@@ -288,9 +274,7 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescSet2Ptr, fileDescCnt,
     return fileHandleList;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_SelectCmd --
  *  Implements the select TCL command:
  *      select readhandles ?writehandles? ?excepthandles? ?timeout?
@@ -311,15 +295,13 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-
-    fd_set readFdSet,            writeFdSet,            exceptFdSet;
-    int    readDescCnt = 0,      writeDescCnt = 0,      exceptDescCnt = 0;
-    FILE **readDescList = NULL,**writeDescList = NULL,**exceptDescList = NULL;
-    fd_set readFdSet2;
-    char  *retListArgv [3];
-
-    int             numSelected, maxFileId = 0, pending;
-    int             result = TCL_ERROR;
+    int idx;
+    fd_set fdSets [3], readPendingFDSet;
+    int descCnts [3];
+    channelData_t *descLists [3];
+    char *retListArgv [3];
+    int numSelected, maxFileId = 0, pending;
+    int result = TCL_ERROR;
     struct timeval  timeoutRec;
     struct timeval *timeoutRecPtr;
 
@@ -330,30 +312,27 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
                           " ?timeout?", (char *) NULL);
         return TCL_ERROR;
     }
-    
+
+    /*
+     * Initialize. 0 == read, 1 == write and 2 == exception.
+     */
+    for (idx = 0; idx < 3; idx++) {
+        FD_ZERO (&fdSets [idx]);
+        descCnts [idx] = 0;
+        descLists [idx] = NULL;
+    }
+
     /*
      * Parse the file handles and set everything up for the select call.
      */
-    FD_ZERO (&readFdSet);
-    FD_ZERO (&writeFdSet);
-    FD_ZERO (&exceptFdSet);
-    readDescCnt = ParseSelectFileList (interp, argv [1], &readFdSet, 
-                                       &readDescList, &maxFileId);
-    if (readDescCnt < 0)
-        goto exitPoint;
-    if (argc > 2) {
-        writeDescCnt = ParseSelectFileList (interp, argv [2], &writeFdSet, 
-                                            &writeDescList, &maxFileId);
-        if (writeDescCnt < 0)
+    for (idx = 0; (idx < 3) && (idx < argc - 1); idx++) {
+        descCnts [idx] = ParseSelectFileList (interp, argv [idx + 1],
+                                              &fdSets [idx], &descLists [idx],
+                                              &maxFileId);
+        if (descCnts [idx] < 0)
             goto exitPoint;
     }
-    if (argc > 3) {
-        exceptDescCnt = ParseSelectFileList (interp, argv [3], &exceptFdSet, 
-                                             &exceptDescList, &maxFileId);
-        if (exceptDescCnt < 0)
-            goto exitPoint;
-    }
-    
+
     /*
      * Get the time out.  Zero is different that not specified.
      */
@@ -376,11 +355,10 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
     }
 
     /*
-     * Check if any data is pending in the read stdio buffers.  If there is,
+     * Check if any data is pending in the read buffers.  If there is,
      * then do the select, but don't block in it.
      */
-
-    pending = FindPendingData (readDescCnt, readDescList, &readFdSet2);
+    pending = FindPendingData (descCnts [0], descLists [0], &readPendingFDSet);
     if (pending) {
         timeoutRec.tv_sec = 0;
         timeoutRec.tv_usec = 0;
@@ -390,10 +368,12 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
     /*
      * All set, do the select.
      */
-    numSelected = select (maxFileId + 1, &readFdSet, &writeFdSet, &exceptFdSet,
+    numSelected = select (maxFileId + 1,
+                          &fdSets [0], &fdSets [1], &fdSets [2],
                           timeoutRecPtr);
     if (numSelected < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, "select error: ", Tcl_PosixError (interp),
+                          (char *) NULL);
         goto exitPoint;
     }
 
@@ -402,40 +382,33 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
      * empty if the timeout occured.
      */
     if (numSelected > 0 || pending) {
-        retListArgv [0] = ReturnSelectedFileList (&readFdSet,
-                                                  &readFdSet2,
-                                                  readDescCnt,
-                                                  readDescList);
-        retListArgv [1] = ReturnSelectedFileList (&writeFdSet,
-                                                  NULL,
-                                                  writeDescCnt, 
-                                                  writeDescList);
-        retListArgv [2] = ReturnSelectedFileList (&exceptFdSet,
-                                                  NULL,
-                                                  exceptDescCnt, 
-                                                  exceptDescList);
+        for (idx = 0; idx < 3; idx++) {
+            retListArgv [idx] =
+                ReturnSelectedFileList (&fdSets [idx],
+                                        (idx == 0) ? &readPendingFDSet : NULL,
+                                        descCnts [idx],
+                                        descLists [idx]);
+        }
+
         Tcl_SetResult (interp, Tcl_Merge (3, retListArgv), TCL_DYNAMIC); 
-        ckfree ((char *) retListArgv [0]);
-        ckfree ((char *) retListArgv [1]);
-        ckfree ((char *) retListArgv [2]);
+        
+        for (idx = 0; idx < 3; idx++) {
+            if (retListArgv [idx][0] != '\0')
+                ckfree ((char *) retListArgv [idx]);
+        }
     }
 
     result = TCL_OK;
 
-exitPoint:
-    if (readDescList != NULL)
-        ckfree ((char *) readDescList);
-    if (writeDescList != NULL)
-        ckfree ((char *) writeDescList);
-    if (exceptDescList != NULL)
-        ckfree ((char *) exceptDescList);
+  exitPoint:
+    for (idx = 0; idx < 3; idx++) {
+        if (descLists [idx] != NULL)
+            ckfree ((char *) descLists [idx]);
+    }
     return result;
-
 }
 #else
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_SelectCmd --
  *     Dummy select command that returns an error for systems that don't
  *     have select.

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 5.0 1995/07/25 05:42:22 markd Rel markd $
+ * $Id: tclXdebug.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,7 +33,7 @@ typedef struct traceInfo_t {
     int         procCalls;
     int         depth;
     char       *callback;
-    FILE       *filePtr;          /* File to output trace to. */
+    Tcl_Channel channel;
     } traceInfo_t, *traceInfo_pt;
 
 /*
@@ -44,14 +44,15 @@ TraceDelete _ANSI_ARGS_((Tcl_Interp   *interp,
                          traceInfo_pt  infoPtr));
 
 static void
-PrintStr _ANSI_ARGS_((FILE *filePtr,
-                      char *string,
-                      int   numChars));
+PrintStr _ANSI_ARGS_((Tcl_Channel  channel,
+                      char        *string,
+                      int          numChars,
+                      int          quoted));
 
 static void
-PrintArg _ANSI_ARGS_((FILE *filePtr,
-                      char *argStr,
-                      int   noTruncate));
+PrintArg _ANSI_ARGS_((Tcl_Channel  channel,
+                      char        *argStr,
+                      int          noTruncate));
 
 static void
 TraceCode  _ANSI_ARGS_((traceInfo_pt infoPtr,
@@ -115,22 +116,27 @@ TraceDelete (interp, infoPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-PrintStr (filePtr, string, numChars)
-    FILE *filePtr;
-    char *string;
-    int   numChars;
+PrintStr (channel, string, numChars, quoted)
+    Tcl_Channel  channel;
+    char        *string;
+    int          numChars;
+    int          quoted;
 {
     int idx;
 
+    if (quoted) 
+        Tcl_Write (channel, "{", 1);
     for (idx = 0; idx < numChars; idx++) {
         if (string [idx] == '\n') {
-           putc ('\\', filePtr);
-           putc ('n', filePtr);
-        } else
-           putc (string [idx], filePtr);
+            Tcl_Write (channel, "\\n", 2);
+        } else {
+            Tcl_Write (channel, &(string [idx]), 1);
+        }
     }
     if (numChars < strlen (string))
-        fprintf (filePtr, "...");
+        Tcl_Write (channel, "...", 3);
+    if (quoted) 
+        Tcl_Write (channel, "}", 1);
 }
 
 /*
@@ -143,32 +149,28 @@ PrintStr (filePtr, string, numChars)
  *-----------------------------------------------------------------------------
  */
 static void
-PrintArg (filePtr, argStr, noTruncate)
-    FILE *filePtr;
-    char *argStr;
-    int   noTruncate;
+PrintArg (channel, argStr, noTruncate)
+    Tcl_Channel  channel;
+    char        *argStr;
+    int          noTruncate;
 {
     int idx, argLen, printLen;
-    int quote_it;
+    int quoted;
 
     argLen = strlen (argStr);
     printLen = argLen;
     if ((!noTruncate) && (printLen > ARG_TRUNCATE_SIZE))
         printLen = ARG_TRUNCATE_SIZE;
 
-    quote_it = (printLen == 0);
+    quoted = (printLen == 0);
 
     for (idx = 0; idx < printLen; idx++)
         if (ISSPACE (argStr [idx])) {
-            quote_it = TRUE;
+            quoted = TRUE;
             break;
         }
 
-    if (quote_it) 
-        putc ('{', filePtr);
-    PrintStr (filePtr, argStr, printLen);
-    if (quote_it) 
-        putc ('}', filePtr);
+    PrintStr (channel, argStr, printLen, quoted);
 }
 
 /*
@@ -188,32 +190,34 @@ TraceCode (infoPtr, level, command, argc, argv)
     char       **argv;
 {
     int idx, cmdLen, printLen;
+    char buf [32];
 
-    fprintf (infoPtr->filePtr, "%2d:", level);
+    sprintf (buf, "%2d:", level);
+    TclX_WriteStr (infoPtr->channel, buf); 
 
     if (level > 20)
         level = 20;
     for (idx = 0; idx < level; idx++) 
-        fprintf (infoPtr->filePtr, "  ");
+        Tcl_Write (infoPtr->channel, "  ", 2);
 
     if (infoPtr->noEval) {
         cmdLen = printLen = strlen (command);
         if ((!infoPtr->noTruncate) && (printLen > CMD_TRUNCATE_SIZE))
             printLen = CMD_TRUNCATE_SIZE;
 
-        PrintStr (infoPtr->filePtr, command, printLen);
+        PrintStr (infoPtr->channel, command, printLen, FALSE);
       } else {
           for (idx = 0; idx < argc; idx++) {
               if (idx > 0)
-                  putc (' ', infoPtr->filePtr);
-              PrintArg (infoPtr->filePtr, argv[idx], 
+                  Tcl_Write (infoPtr->channel, " ", 1);
+              PrintArg (infoPtr->channel,
+                        argv [idx], 
                         infoPtr->noTruncate);
           }
     }
 
-    putc ('\n', infoPtr->filePtr);
-    fflush (infoPtr->filePtr);
-  
+    TclX_WriteNL (infoPtr->channel);
+    Tcl_Flush (infoPtr->channel);
 }
 
 /*
@@ -289,20 +293,26 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
 
     /*
      * Evaluate the command.  If an error occurs, dump something to stderr
-     * and delete the trace.  There is no way to return a error at this
+     * and delete the trace.  There is no way to return an error at this
      * point.
      */
     if (Tcl_Eval (interp, Tcl_DStringValue (&callback)) == TCL_ERROR) {
-        FILE *stderrPtr = TclX_Stdfile (interp, stderr);
+        Tcl_Channel stderrChan;
 
         Tcl_AddErrorInfo (interp, "\n    (\"cmdtrace\" callback command)");
-
-        fprintf (stderrPtr,
-                 "cmdtrace callback command error: errorCode = %s\n",
-                 Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY));
-        fprintf (stderrPtr, "%s\n",
-                 Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY));
-        fflush (stderrPtr);
+        
+        stderrChan = TclX_Stderr (interp);
+        if (stderrChan != NULL) {
+            TclX_WriteStr (stderrChan, 
+                           "cmdtrace callback command error: errorCode = ");
+            TclX_WriteStr (stderrChan,
+                           Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY));
+            TclX_WriteNL (stderrChan);
+            TclX_WriteStr (stderrChan,
+                           Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY));
+            TclX_WriteNL (stderrChan);
+            Tcl_Flush (stderrChan);
+        }
         TraceDelete (interp, infoPtr);
     }
 
@@ -421,7 +431,7 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
     infoPtr->noEval     = FALSE;
     infoPtr->noTruncate = FALSE;
     infoPtr->procCalls  = FALSE;
-    infoPtr->filePtr    = NULL;
+    infoPtr->channel    = NULL;
     fileHandle          = NULL;
     callback            = NULL;
 
@@ -478,12 +488,14 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
     } else {
         if (fileHandle == NULL)
             fileHandle = "stdout";
-        if (Tcl_GetOpenFile (interp, fileHandle, 
-                             TRUE, TRUE,  /* Write access, checked */
-                             &infoPtr->filePtr) != TCL_OK)
+        infoPtr->channel = TclX_GetOpenChannel (interp,
+                                                fileHandle,
+                                                TCL_WRITABLE);
+        if (infoPtr->channel == NULL)
             return TCL_ERROR;
     }
-    infoPtr->traceHolder = Tcl_CreateTrace (interp, infoPtr->depth,
+    infoPtr->traceHolder = Tcl_CreateTrace (interp,
+                                            infoPtr->depth,
                                             CmdTraceRoutine,
                                             (ClientData) infoPtr);
     return TCL_OK;
@@ -552,7 +564,7 @@ Tcl_InitDebug (interp)
     infoPtr->procCalls   = FALSE;
     infoPtr->depth       = 0;
     infoPtr->callback    = NULL;
-    infoPtr->filePtr     = NULL;
+    infoPtr->channel     = NULL;
 
     Tcl_CallWhenDeleted (interp, DebugCleanUp, (ClientData) infoPtr);
 

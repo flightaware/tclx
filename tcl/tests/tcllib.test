@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 4.3 1995/01/19 05:26:09 markd Exp markd $
+# $Id: tcllib.test,v 5.0 1995/07/25 05:41:29 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -99,19 +99,19 @@ Test tcllib-1.3 {command parameter checking} {
 #
 
 Test tcllib-2.1 {bogus path test} {
-    set auto_path [list /bogus/dir/path/no/work [pwd]/../tclmaster]
+    set auto_path [list /bogus/dir/path/no/work [pwd]/../unix]
     TclLibAAA
 } 1 {invalid command name "TclLibAAA"}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
 Test tcllib-2.2 {bogus path test} {
-    set auto_path [list ~bogususerman/tcllib [pwd]/../tclmaster]
+    set auto_path [list ~bogususerman/tcllib [pwd]/../unix]
     TclLibAAA
 } 1 {invalid command name "TclLibAAA"}
 
 Test tcllib-2.3 {bogus path test} {
-    set auto_path [pwd]/../tclmaster
+    set auto_path [pwd]/../unix
     set auto_path [list /bogus/dir/path/no/work]
     TclLibAAA
 } 1 {invalid command name "TclLibAAA"}
@@ -135,7 +135,7 @@ PutFile tcllib1.dir/test1.tndx {bogus
 data}
 
 TclLibReset
-set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/../unix]
 
 TestReg tcllib-3.1 {bogus package library index} {
     TclLibAAB
@@ -168,7 +168,7 @@ TestReg tcllib-3.4 {bogus package library index} {
 } 1 {^range to eval outside of file bounds "/}
 
 TclLibReset
-set auto_path [list [pwd]/tcllib2.dir [pwd]/../tclmaster]
+set auto_path [list [pwd]/tcllib2.dir [pwd]/../unix]
 
 if {[id user] != "root"} {
     Test tcllib-4.1 {bad rebuild package library index} {
@@ -183,7 +183,7 @@ if {[id user] != "root"} {
 }
 
 TclLibCleanUp
-set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/../unix]
 
 PutFile tcllib1.dir/tclIndex "#" "badline" "nukearray nukearray.tmp" \
     "baz baz.tmp"
@@ -217,7 +217,7 @@ if {[id user] != "root"} {
 TclLibCleanUp
 
 BuildTestLib  tcllib1.dir/test2.tlib TclLibAC
-set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/../unix]
 
 PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
         {set auto_index(parray)   " source $dir/parray.tcl"} \
@@ -241,7 +241,7 @@ Test tcllib-6.3 {successful library access} {
 # existing package definitions.  Test for both .tlib and tclIndex indexes.
 #
 TclLibCleanUp
-set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../unix]
 
 PutFile tcllib1.dir/test1.tlib \
     {#@package: test-pkg DupPkgTest} \
@@ -266,7 +266,7 @@ Test tcllib-7.2 {Duplicate package handling} {
 
 TclLibCleanUp
 
-set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../unix]
 
 PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
         {set auto_index(DupPkgTest)  " source $dir/test1.tcl"}
@@ -299,7 +299,7 @@ Test tcllib-7.4 {Duplicate package handling} {
 # Test backslash parsing in #@package: line.
 #
 TclLibCleanUp
-set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../unix]
 
 PutFile tcllib1.dir/test1.tlib \
     {#@package: test-pkg procAAA \\} \
