@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.9 1993/07/19 15:30:04 markd Exp markd $
+ * $Id: tclExtend.h,v 2.10 1993/07/27 05:17:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -70,12 +70,14 @@ extern int tclGotErrorSignal;
  * Exported Extended Tcl functions.
  */
 
-EXTERN int
-Tcl_ProcessSignals _ANSI_ARGS_((Tcl_Interp *interp,
-                                int         cmdResultCode));
-
 EXTERN Tcl_Interp * 
 Tcl_CreateExtendedInterp ();
+
+EXTERN void
+Tcl_AddExtendedCmds _ANSI_ARGS_((Tcl_Interp *interp));
+
+EXTERN void
+Tcl_AddExtendedLibCmds _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN char *
 Tcl_DeleteKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -116,7 +118,13 @@ Tcl_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
                              CONST char *string,
                              unsigned   *unsignedPtr));
 
-int
+EXTERN char *
+Tcl_SetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
+                                   CONST char  *fieldName,
+                                   CONST char  *fieldvalue,
+                                   CONST char  *keyedList));
+
+EXTERN int
 Tcl_ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *dirEnvVar,
                                  char       *dir,
@@ -124,11 +132,9 @@ Tcl_ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *version2,
                                  char       *initFile));
 
-EXTERN char *
-Tcl_SetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
-                                   CONST char  *fieldName,
-                                   CONST char  *fieldvalue,
-                                   CONST char  *keyedList));
+EXTERN int
+Tcl_ProcessSignals _ANSI_ARGS_((Tcl_Interp *interp,
+                                int         cmdResultCode));
 
 EXTERN int
 Tcl_StrToLong _ANSI_ARGS_((CONST char *string,

@@ -14,41 +14,26 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcreate.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXcreate.c,v 2.5 1993/07/25 00:56:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-int matherr ();
-
-/*
- * This is a little kludge to make sure matherr is brought in from the Tcl
- * library if it is not already defined.  This could be done on the link line,
- * but this makes sure it happens.  This is a global so optimizers don't thow
- * away the assignment to it.
- */
-static int (*bringInMathErr)() = matherr;
-
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_CreateExtendedInterp --
+ * Tcl_AddExtendedCmds --
  *
- *      Create a new TCL command interpreter and initialize all of the
- *      extended Tcl commands..
- *
- * Results:
- *      The return value is a token for the interpreter.
+ *   Add the Extended Tcl commands to the specified interpreter (except for
+ * the library commands that override that standard Tcl procedures).
  *-----------------------------------------------------------------------------
  */
-Tcl_Interp *
-Tcl_CreateExtendedInterp ()
-{
+void
+Tcl_AddExtendedCmds (interp)
     Tcl_Interp *interp;
-
-    interp = Tcl_CreateInterp ();
+{
 
     /*
      * from tclCkalloc.c (now part of the UCB Tcl).
@@ -241,11 +226,6 @@ Tcl_CreateExtendedInterp ()
                        (ClientData) NULL, (void (*)()) NULL);
 
     /*
-     * from tclXlib.c
-     */
-    Tcl_InitLibrary (interp);
-
-    /*
      * from tclXunixcmds.c
      */
     Tcl_CreateCommand (interp, "system", Tcl_SystemCmd,
@@ -272,5 +252,48 @@ Tcl_CreateExtendedInterp ()
      */
     Tcl_CreateCommand (interp, "server_open", Tcl_ServerOpenCmd,
                        (ClientData) NULL, (void (*)()) NULL);
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_AddExtendedLibCmds --
+ *
+ *   Add the Extended Tcl library management commands.  These override the
+ * standard Tcl procedures.
+ *-----------------------------------------------------------------------------
+ */
+void
+Tcl_AddExtendedLibCmds (interp)
+    Tcl_Interp *interp;
+{
+    /*
+     * from tclXlib.c
+     */
+    Tcl_InitLibrary (interp);
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_CreateExtendedInterp --
+ *
+ *      Create a new TCL command interpreter and initialize all of the
+ *      extended Tcl commands..
+ *
+ * Returns:
+ *      The return value is a token for the interpreter.
+ *-----------------------------------------------------------------------------
+ */
+Tcl_Interp *
+Tcl_CreateExtendedInterp ()
+{
+    Tcl_Interp *interp;
+
+    interp = Tcl_CreateInterp ();
+
+    Tcl_AddExtendedCmds (interp);
+    Tcl_AddExtendedLibCmds (interp);
+
     return interp;
 }
