@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 1.1 1992/09/20 23:09:47 markd Exp markd $
+.\" $Id: TclX.man,v 1.2 1992/09/21 05:08:39 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -631,13 +631,11 @@ If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@help: extended/wait
 '@brief: Wait for a child process to terminate.
 .TP
-.B wait \fIproclist\fR
+.B wait \fIpid\fR
 .br
-Waits for any of the immediate children of the currently executing
-Extended Tcl or embedded application, whose process ID's are specified
-in the list
-\fIproclist\fR, to terminate, either due to an untrapped signal or
-call to \fIexit\fR(2).  \fBWait\fR returns a list containing
+Waits for the process identified by process id \fIpid\fR to terminate,
+either due to an untrapped signal or
+call to \fIexit\fR system call.  \fBWait\fR returns a list containing
 three elements:  The first element is the process id of the process
 that terminated.
 If the process exited normally, the second element is `EXIT',
