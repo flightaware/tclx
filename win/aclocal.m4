@@ -293,7 +293,7 @@ AC_DEFUN(SC_ENABLE_GCC, [
 	CC=gcc
     else
 	case "`uname -s`" in
-	    *win32* | *WIN32* | *CYGWIN_NT*)
+	    *win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 		CC=cl
 	    ;;
 	    *)
@@ -426,7 +426,7 @@ AC_DEFUN(SC_ENABLE_THREADS, [
 
 AC_DEFUN(SC_ENABLE_SYMBOLS, [
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 	    tcl_dbgx=d
 	;;
 	*)
@@ -644,7 +644,7 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    LDFLAGS="-export-dynamic"
 	    LD_SEARCH_FLAGS=""
 	    ;;
-	*win32*|*WIN32*|CYGWIN_NT*|cygwin_nt*)
+	*win32*|*WIN32*|CYGWIN_NT*|cygwin_nt*|*CYGWIN_98*|*CYGWIN_95*)
 	    CFLAGS_DEBUG="-nologo -Z7 -Od -WX"
 	    CFLAGS_OPTIMIZE="-nologo -Oti -Gs -GD"
 	    LDFLAGS_CONSOLE="-subsystem:console"
@@ -1795,7 +1795,7 @@ AC_DEFUN(SC_TCL_LINK_LIBS, [
 
 AC_DEFUN(SC_MAKE_LIB, [
     case "`uname -s`" in
-	*win32* | *WIN32* | *CYGWIN_NT*)
+	*win32* | *WIN32* | *CYGWIN_NT*|*CYGWIN_98*|*CYGWIN_95*)
 	    if test "${CC-cc}" = "cl"; then
 		MAKE_STATIC_LIB="\${STLIB_LD} -out:\[$]@ \$(\[$]@_OBJECTS) "
 		MAKE_SHARED_LIB="\${SHLIB_LD} \${SHLIB_LDFLAGS} \${SHLIB_LD_LIBS} \$(LDFLAGS) -out:\[$]@ \$(\[$]@_OBJECTS) "
