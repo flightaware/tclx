@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.9 1996/02/16 08:10:07 markd Exp $
+# $Id: Makefile.in,v 5.10 1996/02/16 18:05:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -96,7 +96,7 @@ libtclx.a: ${OBJS}
 # Dependencies for generating objects.
 #
 tclXlibInit.o: ${TCLX_GENERIC_DIR}/tclXlibInit.c Makefile
-	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_MASTER}\" \
+	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
 	    ${TCLX_GENERIC_DIR}/tclXlibInit.c
 
 tclXcmdInit.o: ${TCLX_GENERIC_DIR}/tclXcmdInit.c \
@@ -269,10 +269,12 @@ tclTest.c: ${TCL_SRC}/generic/tclTest.c
 	echo '#include "tclXconf.h"'      >tclTest.c
 	cat ${TCL_SRC}/generic/tclTest.c >>tclTest.c
 
+#------------------------------------------------------------------------------
+
 runtest: Makefile
 	@echo '#!/bin/sh'                                           >runtest
 	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest
-	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
+	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tclXtest"          >>runtest
 	@echo "export TCLX_LIBRARY TCL_PROGRAM TCL_LIBRARY"        >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
@@ -326,47 +328,23 @@ shlink:
 
 install: install-runtime install-exec
 	${INSTCOPY} ${TCLX_GENERIC_DIR}/tclExtend.h \
-	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
+	    ${INSTALL_ROOT}${TCLX_INST_INCL}
 	${CPMANPAGES} -rmcat @${MAN_DIR_SEPARATOR}@ \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${srcbasedir}/man ${INSTALL_ROOT}${TCL_MAN_BASEDIR}
+	    ${TCLX_MAN_CMD_SECTION} ${TCLX_MAN_FUNC_SECTION} @@ \
+	    ${srcbasedir}/man ${INSTALL_ROOT}${TCLX_INST_MAN}
 
 install-runtime:
 	${INSTCOPY} ${srcdir}/TclInit.tcl tcl.tlib tcl.tndx \
 	    ${srcdir}/buildidx.tcl ${srcdir}/loadouster.tcl \
-	    ${INSTALL_ROOT}${TCLX_INST_MASTER}
-	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_MASTER}/help
+	    ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
+	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_RUNTIME}/help
 
 install-exec:
-	${INSTCOPY} tcl ${INSTALL_ROOT}${TCL_BINDIR}
-	${STRIP} ${INSTALL_ROOT}${TCL_BINDIR}/tcl
-	${INSTCOPY} libtclx.a ${INSTALL_ROOT}${TCL_LIBDIR}
-	${RANLIB} ${INSTALL_ROOT}${TCL_LIBDIR}/libtclx.a
-	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
-
-install-master: install-runtime install-master-exec
-	${INSTCOPY} ${TCL_SRC}/generic/tcl.h ${TCLX_GENERIC_DIR}/tclExtend.h \
-	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
-	${SYMLINKEXT} ${TCLX_INST_MASTER}/include/* \
-	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
-	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${TCL_UCB_SRC}/doc ${INSTALL_ROOT}${TCLX_INST_MASTER}/man
-	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${srcbasedir}/man ${INSTALL_ROOT}${TCLX_INST_MASTER}/man
-
-install-master-exec:
-	${INSTCOPY} tcl ${INSTALL_ROOT}${TCLX_INST_MASTER}/bin${ARCH}
-	${STRIP} ${INSTALL_ROOT}${TCLX_INST_MASTER}/bin${ARCH}/tcl
-	${INSTCOPY} ${TCL_LIB} libtclx.a \
-	    ${INSTALL_ROOT}${TCLX_INST_MASTER}/lib${ARCH}
-	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_MASTER}/lib${ARCH}/*.a
-	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${TCLX_INST_MASTER}/lib${ARCH}
-	${SYMLINKEXT} ${TCLX_INST_MASTER}/bin${ARCH}/* \
-	    ${INSTALL_ROOT}${TCL_BINDIR}
-	${SYMLINKEXT} ${TCLX_INST_MASTER}/lib${ARCH}/* \
-	    ${INSTALL_ROOT}${TCL_LIBDIR}
+	${INSTCOPY} tcl ${INSTALL_ROOT}${TCLX_INST_BIN}
+	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
+	${INSTCOPY} libtclx.a ${INSTALL_ROOT}${TCLX_INST_LIB}
+	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/libtclx.a
+	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${TCLX_INST_LIB}
 
 #------------------------------------------------------------------------------
 

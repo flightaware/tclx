@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.3 1996/02/12 07:21:22 markd Exp $
+ * $Id: tclXutil.c,v 5.4 1996/02/12 18:16:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -854,12 +854,6 @@ Tcl_TicksToMS (numTicks)
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter.
- *   o options (I) - Options controling the evaluation:
- *     o TCLX_EVAL_GLOBAL - Evaulate in the global context.
- *     o TCLX_EVAL_ERR_HANDLER - Call the user-specified error callback 
- *       specified in the global variable tclx_errorHandler if an error
- *       occurs.
- *   o cmd (I) - The command to evaluate.
  * Returns:
  *   The Tcl result code from the handler.  TCL_ERROR is returned and
  * result unchanged if not handler is available.

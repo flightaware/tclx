@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.8 1996/02/12 07:21:47 markd Exp $
+# $Id: Makefile.in,v 5.9 1996/02/16 07:51:43 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -78,7 +78,7 @@ libtkx.a: ${OBJS}
 # Dependencies for generating objects.
 #
 tkXinit.o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
-	${CC} -c ${CC_SWITCHES} -DTKX_LIBRARY=\"${TKX_INST_MASTER}\" \
+	${CC} -c ${CC_SWITCHES} -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" \
 	  ${TKX_GENERIC_DIR}/tkXinit.c
 
 tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
@@ -147,13 +147,11 @@ tkSquare.c: ${TK_SRC}/generic/tkSquare.c
 	cat ${TK_SRC}/generic/tkSquare.c >>tkSquare.c
 
 #------------------------------------------------------------------------------
-# Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
-# at the local master directories so tktest can be run.
 
 runtest: Makefile
-	@echo '#!/bin/sh'                                           >runtest
-	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
-	@echo "TKX_LIBRARY=${TKX_TMP_MASTER}"                      >>runtest
+	@echo '#!/bin/sh'                                          >runtest
+	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest
+	@echo "TKX_LIBRARY=${TKX_TMP_RUNTIME}"                     >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtest
 	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tktest"                >>runtest
 	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"        >>runtest
@@ -194,40 +192,15 @@ buildhelp:
 install: install-exec install-runtime
 
 install-runtime:
-	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_MASTER}/help
+	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
 
 install-exec:
-	${INSTCOPY} wishx ${INSTALL_ROOT}${TCL_BINDIR}
-	${STRIP} ${INSTALL_ROOT}${TCL_BINDIR}/wishx
-	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TCL_LIBDIR}
-	${RANLIB} ${INSTALL_ROOT}${TCL_LIBDIR}/libtkx.a
-	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
-	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TCL_BINDIR}
-
-install-master: install-runtime install-master-exec
-	${INSTCOPY} ${TK_SRC}/generic/tk.h \
-	    ${INSTALL_ROOT}${TKX_INST_MASTER}/include
-	${SYMLINKEXT} ${TKX_INST_MASTER}/include/* \
-	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
-	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
-	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
-	    ${TK_MAN_UNIXCMD_SECTION} \
-	    ${TK_SRC}/doc ${INSTALL_ROOT}${TKX_INST_MASTER}/man
-
-install-master-exec:
-	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_MASTER}/bin${ARCH}
-	${STRIP} ${INSTALL_ROOT}${TKX_INST_MASTER}/bin${ARCH}/wishx
-	${INSTCOPY} ${LIBTK} libtkx.a \
-	    ${INSTALL_ROOT}${TKX_INST_MASTER}/lib${ARCH}
-	${RANLIB} ${INSTALL_ROOT}${TKX_INST_MASTER}/lib${ARCH}/*.a
-	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TKX_INST_MASTER}/lib${ARCH}
-	${SYMLINKEXT} ${TKX_INST_MASTER}/bin${ARCH}/* \
-	    ${INSTALL_ROOT}${TCL_BINDIR}
-	${SYMLINKEXT} ${TKX_INST_MASTER}/lib${ARCH}/* \
-	    ${INSTALL_ROOT}${TCL_LIBDIR}
-	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_MASTER}/bin${ARCH}
-	${SYMLINKEXT} ${TKX_INST_MASTER}/bin${ARCH}/tclhelp \
-	    ${INSTALL_ROOT}${TCL_BINDIR}
+	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_BIN}
+	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
+	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TKX_INST_LIB}
+	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/libtkx.a
+	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TKX_INST_LIB}
+	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
 
 #------------------------------------------------------------------------------
 clean:

@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.9 1996/02/12 07:22:01 markd Exp $
+dnl $Id: configure.in,v 5.10 1996/02/16 18:05:17 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.9 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.10 $),)dnl
 
 AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
 
@@ -65,6 +65,44 @@ else
     AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
 fi
 AC_SUBST(TCLX_ARCH)
+
+#------------------------------------------------------------------------------
+# Handle the --with-master option.
+#------------------------------------------------------------------------------
+
+AC_ARG_WITH(master,
+         [  --with-master           architecture suffix, appended .ARCH to the bin
+                          and lib directory names],
+         [master="YES"], [master="NO"])
+if test "X$master" = "XYES" ; then
+    AC_MSG_RESULT("Master installation model")
+    TCLX_INST_BIN='${TCLX_INST_RUNTIME}/bin${ARCH}'
+    TCLX_INST_LIB='${TCLX_INST_RUNTIME}/lib${ARCH}'
+    TCLX_INST_INCL='${TCLX_INST_RUNTIME}/include'
+    TCLX_INST_MAN='${TCLX_INST_RUNTIME}/man'
+    TKX_INST_BIN='${TKX_INST_RUNTIME}/bin${ARCH}'
+    TKX_INST_LIB='${TKX_INST_RUNTIME}/lib${ARCH}'
+    TKX_INST_INCL='${TKX_INST_RUNTIME}/include'
+    TKX_INST_MAN='${TKX_INST_RUNTIME}/man'
+else
+    AC_MSG_RESULT("Standard installation model")
+    TCLX_INST_BIN='${TCLX_BIN}'
+    TCLX_INST_LIB='${TCLX_LIB}'
+    TCLX_INST_INCL='${TCLX_INCL}'
+    TCLX_INST_MAN='${TCLX_MAN}'
+    TKX_INST_BIN='${TCLX_BIN}'
+    TKX_INST_LIB='${TCLX_LIB}'
+    TKX_INST_INCL='${TCLX_INCL}'
+    TKX_INST_MAN='${TCLX_MAN}'
+fi
+AC_SUBST(TCLX_INST_BIN)
+AC_SUBST(TCLX_INST_LIB)
+AC_SUBST(TCLX_INST_INCL)
+AC_SUBST(TCLX_INST_MAN)
+AC_SUBST(TKX_INST_BIN)
+AC_SUBST(TKX_INST_LIB)
+AC_SUBST(TKX_INST_INCL)
+AC_SUBST(TKX_INST_MAN)
 
 #------------------------------------------------------------------------------
 # Check for various programs used during the build.

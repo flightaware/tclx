@@ -1,16 +1,44 @@
+QUICK START
+===========
+
+This section is a quick set of step by step instructions for building TclX
+in the manner that addresses the needs of most users.   If you:
+
+    o have built and installed both Tcl and Tk and the built trees are
+      in directories adjacent to the TclX source directory.  i.e.
+
+                            mybuilddir/
+                 tcl7.5/      tk4.1/      tclX7.5a/
+ 
+    o are installing under /usr/local.
+
+    o don't care about NFS sharing to multiple arcitectures.
+
+    o don't care about having multiple versions installed.
+
+then the following steps will build, test and installed TclX:
+
+    cd tclX7.5a/unix
+    configure
+    make
+    make test          # Run both standard and extended Tcl tests
+    make tktest        # Run Tk tests with wishx
+    make install
+    
+If you have a failure, check the "Porting Notes" section at the end of
+this file.  If you still have problems, try to debug it as much as
+possible and then contact us at tcl-project@neosoft.com.
+
+If you want to customize your installation, read on.
+
 EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 =======================================
 
 Building the Extended Tcl requires access to built Tcl and Tk source
 directories.  Their location relative to the tclX7.5a directory is
-configured by editing tclX7.5a/Config.mk.  The default is to place
-tclX7.5a in a directory parallel to the Tcl and Tk distributions:
+configured by editing tclX7.5a/unix/Config.mk.
 
-                   tcl7.5      tk4.1      tclX7.5a
-
-
-The following directories and subdirectories are included under the TclX
-directory:
+The following directories are included under the TclX directory:
 
   o unix - Build directory for Unix systems:
     o tools - Build tools.
@@ -31,25 +59,22 @@ directory:
 
   o doc - Unformatted manual pages for TclX.
 
-THE EXTENDED TCL INSTALLATION MODELS
-====================================
+HOW EXTENDED TCL IS INSTALLED 
+=============================
 
-Two installation models are supported by Extended Tcl.  You should decide which
-model you are going to use before building TclX.  We encourage use of the 
-"master directory" model, as it supports multiple versions of Extended Tcl and
-Tk being installed on the system at the same time and allows for easy copying
-to other systems.
+There are two models for installing TclX, the GNU standard and the master
+directory modes.
 
 Standard Installation Model
 ---------------------------
 
-The standard model follows the GNU standards.  Two variables are defined
-by configure, "prefix" and "exec_prefix".  The variable "prefix" is the
-path that will contain the directories containing hardware and system
-independent files:
+The basic approach to installing TclX follows the GNU standards.  Two
+variables are defined on the configure command line, "prefix" and
+"exec_prefix".  The variable "prefix" is the path that will contain the
+directories containing hardware and system independent files:
 
    o ${prefix}/tclX/7.5a - TclX runtime files.
-   o ${prefix}/tkX/4.0a - TkX runtime files.
+   o ${prefix}/tkX/4.1a - TkX runtime files.
    o ${prefix}/include - Include files for TclX.
    o ${prefix}/man - Manual pages for TclX.
 
@@ -63,17 +88,29 @@ Both "exec_prefix" and "prefix" default to "/usr/local".  All of these
 directories can be changed independently by editing "Config.mk".  To set
 the prefix directories:
 
-    ./configure --prefix=/usr/site  --exec_prefix=/usr/site.cray
+    ./configure --prefix=/usr/site --exec_prefix=/usr/site.cray
 
-With the standard model, only Extended Tcl files are installed.  Its is
-assumed that the Tcl & Tk standard libraries, include files and manual
-pages have been installed.
+If the --with-arch=ARCH option was specified to configure (see below), the bin
+and lib files are stored in architecture-dependent directories with the
+specified architecture as a suffix to the directory name:
+
+   o ${prefix}/tclX/7.5a/bin.ARCH
+   o ${prefix}/tclX/7.5a/lib.ARCH
+   o ${prefix}/tkX/4.1a/bin.ARCH
+   o ${prefix}/tkX/4.1a/lib.ARCH
 
 Master Directory Installation Model
 -----------------------------------
 
-The master directory model installs *all* files required by TclX (including
-files from the Tcl and Tk distributions) in master directories.  
+With the master directory model, all TclX files are stored in the runtime
+directory.  This approach makes it easy to move a complete distrbution
+to other machines, store multiple versions of TclX on a system and remove
+all of the files associated with an outdated version. 
+
+The master directory model is specified by the --with-master option to the
+configure command.
+
+The resulting directory layout is:
 
    o ${prefix}/tclX/7.5a - TclX runtime files.
    o ${prefix}/tclX/7.5a/include - Include files.
@@ -81,18 +118,21 @@ files from the Tcl and Tk distributions) in master directories.
    o ${prefix}/tclX/7.5a/bin - tcl program.
    o ${prefix}/tclX/7.5a/lib - libtclx.a and libtcl.a
 
-   o ${prefix}/tkX/4.0a - TkX runtime files.
-   o ${prefix}/tkX/4.0a/include - Include files.
-   o ${prefix}/tkX/4.0a/man - Manual pages.
-   o ${prefix}/tkX/4.0a/bin - wishx and tclhelp programs.
-   o ${prefix}/tkX/4.0a/lib - libtkx.a and libtk.a
+   o ${prefix}/tkX/4.1a - TkX runtime files.
+   o ${prefix}/tkX/4.1a/include - Include files.
+   o ${prefix}/tkX/4.1a/man - Manual pages.
+   o ${prefix}/tkX/4.1a/bin - wishx and tclhelp programs.
+   o ${prefix}/tkX/4.1a/lib - libtkx.a and libtk.a
 
 Symbolic links are then built for executables from the standard locations
 to the files in the master directory.
 
    /usr/local/bin/tcl   -> /usr/local/tclX/7.5a/bin/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/4.0a/bin/wishx
+   /usr/local/bin/wishx -> /usr/local/tkX/4.1a/bin/wishx
 
+NOTE: Symbolic linking must currently be done manually by the user (but this
+is easy with unix wildcards).   This was removed from the makefiles so that
+it doesn't happen automaticly.
 
 If the --with-arch=ARCH option was specified to configure (see below), the bin
 and lib files are stored in architecture-dependent directories with the
@@ -100,8 +140,8 @@ specified architecture as a suffix to the directory name:
 
    o ${prefix}/tclX/7.5a/bin.arch
    o ${prefix}/tclX/7.5a/lib.arch
-   o ${prefix}/tkX/4.0a/bin.arch
-   o ${prefix}/tkX/4.0a/lib.arch
+   o ${prefix}/tkX/4.1a/bin.arch
+   o ${prefix}/tkX/4.1a/lib.arch
 
 You may defined "arch" to be any string you like; it might include OS type or
 version as well as processor architecture.
@@ -110,20 +150,16 @@ Symbolic links are still build from the standard locations of the machines
 of specified architecture to the master directory:
 
    /usr/local/bin/tcl   -> /usr/local/tclX/7.5a/bin.sparc/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/4.0a/bin.sparc/wishx
+   /usr/local/bin/wishx -> /usr/local/tkX/4.1a/bin.sparc/wishx
 
-Symbolic links are also built for the include and library files in a similar
-manner.  Due to the difficulty in getting it right, manual pages must be linked
-by hand.
-        
 HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 ==========================================
 
-    o Configure and compile Tcl 7.5 following the instructions that come with
-      Tcl.  You do not need to install it.
+    o Configure, compile and install Tcl 7.5 following the instructions that
+      come with Tcl. 
 
     o If you are going to be using Tk and want to build an Extended Tcl wish
-      shell (wishx), configure and compile Tk 4.0.  You do not need to install
+      shell (wishx), configure, compile and install Tk 4.1.
       it.
 
     o cd to tclX7.5a/unix
@@ -157,10 +193,12 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           Directory under which the "bin" and "lib" directories are
           found for installation.  
 
+        o --with-master
+          Configure for the master installation model.
+
     o If you decide to change the --with-arch, --prefix or --execprefix,
-      just rerun configure and make. The configure script will purge the
-      minimum set of files that have to be rebuilt due to any of these
-      changing.
+      just rerun configure and make.  The dependencies will cause the
+      correct files to be built.
  
     o Edit Config.mk in the build directory following the instructions in the
       file.  You normally don't need to do this, only if special configuration
@@ -172,9 +210,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       installed in.
 
     o Note that the site specific installation options should be set in
-      Config.mk before compiling.  It is especially important to set the value
-      for TCL_MASTERDIR and TK_MASTERDIR in Config.mk before compiling TclX.
-      See the section on "Installing Extended Tcl" for more details.
+      Config.mk before compiling. 
 
     o Config.mk can be used to override several values that configure might
       have gotten wrong or that you desire to be change (like gcc vs cc).
@@ -195,7 +231,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       "runtcl" and "runwishx" scripts generated in the unix directory.
 
     o Extended Tcl comes with help pages that are built from the Tcl 7.5 and
-      Tk 4.0 manual pages as well as the TclX manual page.  If you are building
+      Tk 4.1 manual pages as well as the TclX manual page.  If you are building
       TclX with a later version of Tcl or Tk, you might want to rebuild these
       manual pages.  If new manual pages have been added, you can add them
       by editing the "unix/tools/tclmanpages" and "unix/tools/tkmanpages".
@@ -211,8 +247,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
    We have a limited number of systems available to test Extended Tcl on,
 we need your help in supporting TclX on a wide range of platforms.  The nature
 of the functionality TclX supports mean a great deal of system dependent code.
-Thanks to all of those who have submitted configuration files and changes to
-TclX.
+Thanks to all of those who have helped debug TclX!
 
 TESTING EXTENDED TCL
 ====================
@@ -222,8 +257,9 @@ Tk and the tests for Extended Tcl, which test both the new commands added by
 Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
-    o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.5a/unix directory.
+    o Run TclX tests by typing "make test" in the tclX7.5a/unix directory.
+      This runs both the TclX specific tests and an the Tcl tests though
+      a interpreter built with TclX.
 
     o To run the Tk tests with wishx, type "make tktest".
 
@@ -242,14 +278,13 @@ library.
       the extensions might be involved, you can build a special minimal
       version of Berkeley Tcl by cd'ing to the tcl7.5 directory and doing
       a "make test".  Similarly, you can do "make test" in the tk4.1 directory.
+      If the test works with standard Tcl or Tk and fails with TclX, contact
+      us.
 
 INSTALLING EXTENDED TCL
 =======================
 
-Standard Installation Model
----------------------------
-
-To install Extended Tcl (and Tk if built) using the standard installation
+To install Extended Tcl (and Tk if built) using the either installation
 model, enter:
 
    su user-to-own-files
@@ -260,20 +295,6 @@ a multi-architecture server that has the rest of TclX already installed):
 
    su user-to-own-files
    make install-exec
-
-Master Directory Installation Model
------------------------------------
-To install Extended Tcl (and Tk if built) using the master directory
-installation model, enter:
-
-   su user-to-own-files
-   make install-master
-
-to only install the executable and library files (useful for installing on
-a multi-architecture server that has the rest of TclX already installed):
-
-   su user-to-own-files
-   make install-master-exec
 
 SHARED LIBRARIES
 ================
@@ -368,16 +389,10 @@ SGI:
      If you see core dumps during the tests, recompile both Tcl and TclX
      without -O (make CFLAGS=).  This was seen on IRIX 4.0.5.
 
-   o The strftime function does not work correctly on SGI (tested on
-     IRIX 4.0.5).  This is a known bug and will be fixed in the next IRIX
-     release.  The %I format specifier is broken.  The configure script 
-     explictly checks for this version of IRIX and forces a functioning
-     (but not internationalized) strftime to be built and added to libtclx.a.
-
    o Systems upgraded to IRIX 5.2 may have old versions of libsocket.a and
      libnsl.a left on the system.  The configure  will pick these up and 
      attempt to use them.  This will prevent wishx from connecting to the
-     display.   Either remove the files from the system or edit tksrc/Makefile
+     display.   Either remove the files from the system or edit the makefiles
      to remove the use of "-lsocket -lnsl".
 
    o The fstat system call does does not return updated modification times on

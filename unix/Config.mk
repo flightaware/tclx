@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.6 1996/02/16 08:10:15 markd Exp $
+# $Id: Config.mk,v 5.7 1996/02/16 18:05:10 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -36,12 +36,16 @@
 # of the TclX source directory, things will probably work just fine.
 #
 # File paths MUST be one of:
-#
 #   o Absolute paths (starting with /), e.g.  /usr/local/lib/libtcl.a
 #   o Paths relative to the source directory make macro ${srcbasedir}, e.g.
 #     -I$(srcbasedir)/../tk4.0
 #   o Paths relative to the build directory make macro ${bldbasedir}, e.g.
 #     ${bldbasedir}/../tk4.0/libtk.a
+#
+# Other macros used in file paths:
+#   o TCLX_VERSION runs a program that returns the TclX version.
+#   o TKX_VERSION runs a program that returns the Tclx version.
+#   o ARCH is either ".arch", as specified to configure, or empty.
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -103,7 +107,7 @@ XLDLIBS=
 # This is used on the "make shlink" target.  Shared libraries must still be
 # built by hand, but this makes it easier to link the programs.  See
 # README.SHLIB for details.
-#
+
 TCLX_SHLIBS=-L${TCL_LIBDIR} -ltclx -ltcl
 TKX_SHLIBS=-L${TCL_LIBDIR} -ltkx -ltk
 
@@ -113,38 +117,38 @@ TKX_SHLIBS=-L${TCL_LIBDIR} -ltkx -ltk
 # to be different than those used for actually reference files at
 # run-time.  INSTALL_ROOT is prepended to $prefix and $exec_prefix
 # when installing files.
+
 INSTALL_ROOT =
 
 #------------------------------------------------------------------------------
-# The master Tcl directory that the Extended Tcl runtime files are installed
-# into.  All files are installed in this directory, then symbolic links are
-# built from the outside. A directory whose name is the TclX version number
-# will be built in this directory.
-#
-TCL_MASTERDIR=${prefix}/tclX
+# The TclX runtime directory that the Extended Tcl runtime files are installed
+# into.
+
+TCLX_INST_RUNTIME=${prefix}/tclX/${TCLX_VERSION}
 
 #------------------------------------------------------------------------------
-# The master Tk directory that the Tk runtime files are installed into.
-# All files are installed in this directory, then symbolic links are
-# built from the outside. A directory whose name is the TkX version number
-# will be built in this directory.
+# The TkX runtimes that the Tk runtime files are installed into.  A directory
+# whose name is the TkX version number will be built in this directory.
 
-TK_MASTERDIR=${prefix}/tkX
+TKX_INST_RUNTIME=${prefix}/tkX/${TKX_VERSION}
 
 #------------------------------------------------------------------------------
-# # The directory to install the tcl, wishx and tclhelp binaries into.
+# The directory to install the tcl, wishx and tclhelp binaries in when the
+# standard install model is used.
 
-TCL_BINDIR=${exec_prefix}/bin
-
-#------------------------------------------------------------------------------
-# The directory to install the libtcl.a and libtclx.a libraries into.
-
-TCL_LIBDIR=${exec_prefix}/lib
+TCLX_BIN=${exec_prefix}/bin${ARCH}
 
 #------------------------------------------------------------------------------
-# The directory the Tcl .h files go into.
+# The directory to install the libtclx.a library in when the standard install
+# model is used.
 
-TCL_INCLUDEDIR=${prefix}/include
+TCLX_LIB=${exec_prefix}/lib${ARCH}
+
+#------------------------------------------------------------------------------
+# The directory the TclX .h files go in when the standard install model is
+# used.
+
+TCLX_INCL=${prefix}/include
 
 #==============================================================================
 # These defines specify where and how the manual pages are to be installed.
@@ -154,31 +158,29 @@ TCL_INCLUDEDIR=${prefix}/include
 #..............................................................................
 
 #------------------------------------------------------------------------------
-# o TCL_MAN_BASEDIR - Base manual directory where all of the man* and cat*
+# o TCLX_MAN - Base manual directory where all of the man* and cat*
 #   directories live.
 
-TCL_MAN_BASEDIR=${prefix}/man
+TCLX_MAN_DIR=${prefix}/man
 
 #------------------------------------------------------------------------------
-# o TCL_MAN_CMD_SECTION - Section for Tcl command manual pages.
-#
-# o TCL_MAN_FUNC_SECTION - Section for Tcl C level function manual pages.
+# o TCLX_MAN_CMD_SECTION - Section for Tcl command manual pages.
+# o TCLX_MAN_FUNC_SECTION - Section for Tcl C level function manual pages.
 #
 
-TCL_MAN_CMD_SECTION=n
-TCL_MAN_FUNC_SECTION=3
+TCLX_MAN_CMD_SECTION=n
+TCLX_MAN_FUNC_SECTION=3
 
 #------------------------------------------------------------------------------
-# o TK_MAN_CMD_SECTION - Section for Tk command  manual pages.
-#
-# o TK_MAN_UNIXCMD_SECTION - Section for Tk Unix commands (the wish program)
+# o TKX_MAN_CMD_SECTION - Section for Tk command  manual pages.
+# o TKX_MAN_UNIXCMD_SECTION - Section for Tk Unix commands (the wish program)
 #   manual pages.
 #
 # o TK_MAN_FUNC_SECTION - Section for Tk C level function manual pages.
 #
-TK_MAN_CMD_SECTION=n
-TK_MAN_UNIXCMD_SECTION=1
-TK_MAN_FUNC_SECTION=3
+TKX_MAN_CMD_SECTION=n
+TKX_MAN_UNIXCMD_SECTION=1
+TKX_MAN_FUNC_SECTION=3
 
 
 #------------------------------------------------------------------------------

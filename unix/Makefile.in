@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.5 1996/02/16 08:10:17 markd Exp $
+# $Id: Makefile.in,v 5.6 1996/02/16 18:05:11 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -48,12 +48,12 @@ COMP_TOOLS:
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
-# at the local master directories so tcl & wishx can be run before installing.
+# at the local runtime directories so tcl & wishx can be run before installing.
 
 runtcl: Makefile
 	@echo '#!/bin/sh'                                           >runtcl
 	@echo '# script for testing Tcl before installation'       >>runtcl
-	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtcl
+	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtcl
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtcl
 	@echo "export TCLX_LIBRARY TCL_PROGRAM"                    >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
@@ -67,8 +67,8 @@ runtcl: Makefile
 runwishx: Makefile
 	@echo '#!/bin/sh'                                          >runwishx
 	@echo '# script for testing wishx before installation'    >>runwishx
-	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                   >>runwishx
-	@echo "TKX_LIBRARY=${TKX_TMP_MASTER}"                     >>runwishx
+	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                  >>runwishx
+	@echo "TKX_LIBRARY=${TKX_TMP_RUNTIME}"                    >>runwishx
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"              >>runwishx
 	@echo "WISHX=${TKX_UNIX_BLD_DIR}/wishx"                   >>runwishx
 	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"       >>runwishx
@@ -118,22 +118,16 @@ buildhelp:
 	cd ../tk/unix;  ${MAKE} buildhelp
 
 #------------------------------------------------------------------------------
-# Install Extended Tcl using the standard model.
+# Install Extended Tcl.
 #
 install: all TCLXINSTALL INST_${TK_BUILD}
 
 install-exec: all TCLXINSTALL_EXEC INST_EXEC_${TK_BUILD}
 
 TCLXINSTALL:
-	@echo ""
-	@echo "   Install Extended Tcl using standard model"
-	@echo ""
 	cd ../tcl/unix; ${MAKE} install
 
 TCLXINSTALL_EXEC:
-	@echo ""
-	@echo "   Install Extended Tcl executables using standard model"
-	@echo ""
 	cd ../tcl/unix; ${MAKE} install-exec
 
 TKXINSTALL:
@@ -149,48 +143,6 @@ INST_EXEC_WISHX: TKXINSTALL_EXEC
 
 INST_:
 INST_EXEC_:
-
-#------------------------------------------------------------------------------
-# Install Extended Tcl using the master directory model.
-#
-install-master: all MASTER-NOTE TCLXMINSTALL ${TK_BUILD}MMAYBE
-
-install-master-exec: all MASTER-NOTE TCLXMINSTALL-EXEC ${TK_BUILD}MMAYBE-EXEC
-
-MASTER-NOTE:
-	@echo ""
-	@echo "*************************************************************"
-	@echo "*** TclX currently does not build symbolic links to the   ***"
-	@echo "*** manual pages in the master directories.  If you need  ***"
-	@echo "*** these man page links you must build them by hand.     ***"
-	@echo "*************************************************************"
-	@echo ""
-
-TCLXMINSTALL:
-	@echo ""
-	@echo "   Install TclX using master directory model"
-	@echo ""
-	cd ../tcl/unix; ${MAKE} install-master
-
-TCLXMINSTALL-EXEC:
-	@echo ""
-	@echo "   Install TclX executables using master directory model"
-	@echo ""
-	cd ../tcl/unix; ${MAKE} install-master-exec
-
-TKXMINSTALL:
-	cd ../tk/unix; ${MAKE} install-master
-
-TKXMINSTALL-EXEC:
-	cd ../tk/unix; ${MAKE} install-master-exec
-
-# Fake targets to decide if we install wishx or not.
-
-MMAYBE:
-MMAYBE-EXEC:
-
-WISHXMMAYBE: TKXMINSTALL
-WISHXMMAYBE-EXEC: TKXMINSTALL-EXEC
 
 #------------------------------------------------------------------------------
 # Clean up all files that were built by make.

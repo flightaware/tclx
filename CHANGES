@@ -1067,4 +1067,7 @@
   o Dropped support for the C++ interfaces in tcl++.h.   This file
     was outdated, not documented and of limited usefulness.  It was often
     a source of portability problems.
+  o Cleaned-up the installation.  More parameterization is through macros.
+    The master installation model is not specified though the configure script,
+    but symbolic links must be built by hand.
 -------------------------------------------------------------------------------

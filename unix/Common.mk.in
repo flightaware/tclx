@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.4 1996/02/12 07:21:50 markd Exp $
+# $Id: Common.mk.in,v 5.5 1996/02/16 18:05:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -38,7 +38,7 @@ LD_FLAGS = @LD_FLAGS@
 DL_LIBS  = @DL_LIBS@
 
 #------------------------------------------------------------------------------
-# Other macros.
+# Location of directories.
 #
 TCL_GENERIC_DIR    = ${TCL_SRC}/generic
 TCL_UNIX_DIR       = ${TCL_SRC}/unix
@@ -54,14 +54,14 @@ TKX_UNIX_SRC_DIR   = ${srcbasedir}/tk/unix
 TKX_UNIX_BLD_DIR   = ${bldbasedir}/tk/unix
 COMPAT_DIR         = ${srcbasedir}/tcl/compat
 
-TCLXVERSION        = `${bldbasedir}/unix/tools/tclxversion`
-TKXVERSION         = `${bldbasedir}/unix/tools/tkxversion`
+#------------------------------------------------------------------------------
+# Programs run during the build.
+#
+TCLX_VERSION       = `${bldbasedir}/unix/tools/tclxversion`
+TKX_VERSION        = `${bldbasedir}/unix/tools/tkxversion`
 
-TCLX_TMP_MASTER    = ${bldbasedir}/tcl/unix
-TKX_TMP_MASTER     = ${bldbasedir}/tk/unix
-
-TCLX_INST_MASTER   = ${TCL_MASTERDIR}/${TCLXVERSION}
-TKX_INST_MASTER    = ${TK_MASTERDIR}/${TKXVERSION}
+TCLX_TMP_RUNTIME   = ${bldbasedir}/tcl/unix
+TKX_TMP_RUNTIME    = ${bldbasedir}/tk/unix
 
 RUNTCL             = ${bldbasedir}/unix/runtcl
 RUNWISHX           = ${bldbasedir}/unix/runwishx
@@ -72,3 +72,16 @@ INSTCOPY           = ${RUNTCL} ${srcbasedir}/unix/tools/instcopy
 SYMLINKEXT         = ${srcbasedir}/unix/tools/symlinkext
 CPMANPAGES         = ${RUNTCL} ${srcbasedir}/unix/tools/cpmanpages
 
+#------------------------------------------------------------------------------
+# Install directories for public files.  The value is determined by the
+# --with-master configure flag.
+
+TCLX_INST_BIN  = @TCLX_INST_BIN@
+TCLX_INST_LIB  = @TCLX_INST_LIB@
+TCLX_INST_INCL = @TCLX_INST_INCL@
+TCLX_INST_MAN  = @TCLX_INST_MAN@
+
+TKX_INST_BIN  = @TKX_INST_BIN@
+TKX_INST_LIB  = @TKX_INST_LIB@
+TKX_INST_INCL = @TKX_INST_INCL@
+TKX_INST_MAN  = @TKX_INST_MAN@
