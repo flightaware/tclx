@@ -33,7 +33,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tcllib.tcl,v 1.1 1993/06/21 05:58:43 markd Exp markd $
+# $Id: tcllib.tcl,v 1.2 1993/06/24 07:32:30 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -58,7 +58,7 @@ proc searchpath {pathlist file} {
 # Search auto_path for a file and source it.
 #
 proc auto_load_file {name} {
-    global TCLPATH errorCode
+    global auto_path errorCode
     if {[string first / $name] >= 0} {
         return  [uplevel 1 source $name]
     }
