@@ -301,3 +301,10 @@
   o Stored the "wrong # args: " string in a single global  variable to save
     memory rather than repeating in each command.
 -------------------------------------------------------------------------------
+ 5 Oct 92:
+  o Fixed bug in for_recursive_glob with continue and break not working as
+    expected.
+  o Delete chamge bar macros when installing manual pages.
+  o Changed startup so if no longer looks for a local TCLDEFAULT file.  Initial
+    tests are now run by setting the environment variable.
+-------------------------------------------------------------------------------
