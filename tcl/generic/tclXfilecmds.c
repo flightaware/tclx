@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.11 1993/10/24 18:56:27 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.12 1993/11/08 05:06:40 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -594,7 +594,7 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
             goto errorExit;
     }
 
-    newPath = argv [1];
+    newPath = argv [2];
     if (newPath [0] == '~') {
         newPath = Tcl_TildeSubst (interp, newPath, &tildeBuf2);
         if (newPath == NULL)

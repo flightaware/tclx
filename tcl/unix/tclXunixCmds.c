@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.8 1993/11/09 07:50:37 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.9 1993/11/09 15:57:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -139,7 +139,7 @@ Tcl_ChrootCmd (clientData, interp, argc, argv)
  *
  * Tcl_NiceCmd --
  *     Implements the TCL nice command:
- *         nice niceness
+ *         nice ?priorityincr?
  *
  * Results:
  *      Standard TCL results, may return the UNIX system error message.
@@ -153,23 +153,47 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int niceness, oldNiceness;
+    int priorityIncr, priority;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " niceness", 
+    if (argc > 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?priorityincr?",
                           (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (Tcl_GetInt (interp, argv[1], &niceness) != TCL_OK)
+    /*
+     * Return the current priority if an increment is not supplied.
+     */
+    if (argc == 1) {
+#ifdef HAVE_GETPRIORITY
+        priority = getpriority ();
+#else
+        priority = nice (0);
+#endif
+        sprintf (interp->result, "%d", priority);
+        return TCL_OK;
+    }
+
+    /*
+     * Increment the priority.  On BSD nice does not return the new priority.
+     * so getpriority must be used.
+     */
+    if (Tcl_GetInt (interp, argv[1], &priorityIncr) != TCL_OK)
         return TCL_ERROR;
 
-    oldNiceness = nice (niceness);
-    if ((oldNiceness == -1) && (errno != 0)) {
+    errno = 0;  /* In case old priority is -1 */
+
+    priority = nice (priorityIncr);
+    if ((priority  == -1) && (errno != 0)) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
-    sprintf (interp->result, "%d", oldNiceness);
+
+#ifdef HAVE_GETPRIORITY
+    priority = getpriority ();
+#endif
+
+    sprintf (interp->result, "%d", priority);
     return TCL_OK;
 }
 

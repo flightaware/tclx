@@ -1,5 +1,5 @@
 
-                     *** README file for Extended Tcl ***
+               *** README file for Extended Tcl 7.1a BETA 5 ***
 
 TclX7.1a BETA 5 RELEASE NOTES
 ============================
@@ -7,6 +7,9 @@ TclX7.1a BETA 5 RELEASE NOTES
    This is the TclX7.1a Beta-5 release.  This release is tested and
 compatible with tcl7.1 and tk3.4.  Please forward questions, bugs
 and suggestions to tcl-project@NeoSoft.com.
+
+   We plan to release an official release in the very near future,
+please report bugs ASAP.
 
 EXTENDED TCL
 ============

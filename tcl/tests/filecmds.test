@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 2.4 1993/08/18 05:23:56 markd Exp markd $
+# $Id: filecmds.test,v 2.5 1993/10/24 18:56:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -20,7 +20,7 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 
 # Create a test file
 
-unlink -nocomplain {IOTEST.TMP IOTEST2.TMP IOTEST3.TMP}
+unlink -nocomplain [glob IOTEST*.TMP]
 
 set testFH [open IOTEST.TMP w]
 set testFileSize 0
@@ -157,6 +157,7 @@ Test filecmds-5.2 {frename tests} {
 
 Test filecmds-5.3 {frename tests} {
     frename IOTEST.TMP IOTEST4.TMP
+    file exists IOTEST4.TMP
 } 0 {}
 
 Test filecmds-5.4 {frename tests} {
@@ -164,6 +165,6 @@ Test filecmds-5.4 {frename tests} {
     list [catch {frename IOTEST5.TMP IOTEST6.TMP} msg] [string tolower $msg]
 } 0 {1 {rename "iotest5.tmp" to "iotest6.tmp" failed: no such file or directory}}
 
-unlink -nocomplain {IOTEST.TMP IOTEST2.TMP IOTEST3.TMP IOTEST4.TMP}
+unlink -nocomplain [glob IOTEST*.TMP]
 
 

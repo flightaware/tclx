@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.16 1993/11/09 06:35:19 markd Exp markd $
+dnl $Id: configure.in,v 1.17 1993/11/09 07:50:37 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.16 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.17 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -28,7 +28,7 @@ changequote(,)dnl
 for arg in $configure_args
 do
   # Handle --arch with a space before the argument.
-  if test x$next_arch = xyes; then TCL_ARCH=$arg; next_arch=
+  if test x$next_arch = xyes; then TCL_ARCH=.$arg; next_arch=
   else
     case $arg in
      --arch=*)
@@ -108,7 +108,7 @@ AC_SUBST(MAKEQUOTE)
 #------------------------------------------------------------------------------
 
 AC_HAVE_FUNCS(catgets getcwd select setitimer setlinebuf sigaction setpgid)
-AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync)
+AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync getpriority)
 
 #------------------------------------------------------------------------------
 #       Check for missing functions that we need.  They will be

@@ -149,6 +149,9 @@
 /* Define if you have fsync.  */
 #undef HAVE_FSYNC
 
+/* Define if you have getpriority.  */
+#undef HAVE_GETPRIORITY
+
 /* Define if you have gettimeofday.  */
 #undef HAVE_GETTIMEOFDAY
 

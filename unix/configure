@@ -124,7 +124,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.16 
+# From configure.in Revision: 1.17 
 
 
 
@@ -135,7 +135,7 @@ configure_args="$*"
 for arg in $configure_args
 do
   # Handle --arch with a space before the argument.
-  if test x$next_arch = xyes; then TCL_ARCH=$arg; next_arch=
+  if test x$next_arch = xyes; then TCL_ARCH=.$arg; next_arch=
   else
     case $arg in
      --arch=*)
@@ -396,7 +396,7 @@ fi
 rm -f conftest*
 done
 
-for func in bzero bcopy gethostbyname fsync
+for func in bzero bcopy gethostbyname fsync getpriority
 do
 trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
 echo checking for ${func}

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.49 1993/11/09 07:50:37 markd Exp markd $
+.\" $Id: TclX.n,v 2.50 1993/11/09 15:57:52 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -847,17 +847,21 @@ created.
 '\"@endhelp
 '
 '\"@help: tcl/processes/nice
-'\"@brief: Change process priority.
+'\"@brief: Change or return the process priority.
 .TP
-.B nice \fIniceness\fR
+.B nice \fR?\fIpriorityincr\fR?
 .br
-If \fIniceness\fR is \fB0\fR, the current \fIniceness\fR is returned.  If
-\fIniceness\fR is positive, it is added to the current \fIniceness\fR level,
-up to a maximum of \fB19\fR, and the new value is returned.
+Change or return the process priority.
+If \fIpriorityincr\fR is omitted, the current priority is returned.  If
+\fIpriorityincr\fR is positive, it is added to the current \fIpriority\fR
+level, up to a system defined maximum (normally \fB19\fR),
 .sp
-Negative \fIniceness\fR values cumulatively increase the program's priority
-down to a minimum value of \fB-19\fR; increasing priority with negative 
-niceness values will only work for the superuser.
+Negative \fIpriorityincr\fR values cumulatively increase the program's priority
+down to a system defined minimum (normally \fB-19\fR);
+increasing priority with negative niceness values will only work for the
+superuser.
+.sp
+The new priority is returned.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1745,10 +1749,8 @@ Extended Tcl provides additional list manipulation commands and procedures.
 .TP
 .B intersect \fIlista listb\fR
 .br
-Return the logical intersection of two lists.  The returned list will be
-sorted.
-.sp
-(Note: This command is implemented as a procedure)
+Procedure to return the logical intersection of two lists.
+The returned list will be sorted.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
@@ -1758,7 +1760,7 @@ sorted.
 .TP
 .B intersect3 \fIlista listb\fR
 .br
-This procedure intersects two lists, returning a list containing
+Procedure to intersects two lists, returning a list containing
 three lists:  The first list returned is everything in \fIlista\fR
 that wasn't in \fIlistb\fR.  The second list contains the intersection
 of the two lists, and the third list contains all the elements that
@@ -1836,7 +1838,7 @@ If \fImode\fR is omitted then it defaults to \fB\-glob\fR.
 .TP
 .B lrmdups \fIlist\fR
 .br
-This procedure remove duplicate elements from a list.  The returned list
+Procedure to remove duplicate elements from a list.  The returned list
 will be sorted.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
@@ -1899,7 +1901,7 @@ before the last element.
 '\"@brief: Return the logical union of two lists.
 .TP
 .B union \fIlista listb\fR
-This procedure returns the logical union of the two specified lists.
+Procedure to return the logical union of the two specified lists.
 Any duplicate elements are removed.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
@@ -2409,7 +2411,6 @@ commands to run Unix commands.
 .PP
 The following variables are set and/or used by the Tcl shell.
 .TP
-.TP
 .B argv0
 Contains the name of the Tcl program specified on the command line or
 the name that the Tcl shell was invoked under if no program was specified.
@@ -2670,14 +2671,14 @@ have not been loaded for all package libraries in \fBauto_path\fR, they
 will be loaded.  Out-of-date library indexes will be rebuilt if they are
 writable.  The procedure returns \fB1\fR if the command was sucessfully
 loaded, or \fB0\fR if it was not.
-.PP
+.sp
 Duplicated package names are skipped, the first package of a given name
 found in the path is loaded.  If the \fBauto_path\fR has changed since
 the last load, indexes will be reloaded (duplicate packages will not be
 redefined).
-.PP
+.sp
 If \fIcommand\fR is not specified, the indexes will be loaded, if they
-have not alreay been loaded or if the \fBauto_pathfR variable has
+have not alreay been loaded or if the \fBauto_path\fR variable has
 changed, but no command will be loaded.
 .PP
 This command overrides the standard Tcl procedure of the same name.
@@ -2701,7 +2702,7 @@ in \fIlibfile.tlib\fR has already been loaded, its definition will be
 overridden by the new package.  However, if any procedure has actually
 been used from the previously defined package, the procedures from
 \fIlibfile.tlib\fR will not be loaded.
-.PP
+.sp
 This command will also load an index built by \fBmkindex.tcl\fR program
 supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 '\"@:

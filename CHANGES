@@ -690,4 +690,5 @@
      (*POTENTIAL INCOMPATIBILITY*) 
    o Added "infox have_sockets" and "infox have_msgcats".
    o chartype ord will not return an error on multi-char strings.
+   o Added chroot, nice and sync commands.
 -------------------------------------------------------------------------------

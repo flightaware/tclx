@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.21 1993/11/05 07:08:46 markd Exp markd $
+ * $Id: tclExtend.h,v 2.22 1993/11/09 05:42:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -119,11 +119,6 @@ EXTERN int
 Tcl_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
                              CONST char *string,
                              unsigned   *unsignedPtr));
-
-EXTERN int
-Tcl_ProcessSignals _ANSI_ARGS_((ClientData  clientData,
-                                Tcl_Interp *interp,
-                                int         cmdResultCode));
 
 EXTERN int
 Tcl_StrToLong _ANSI_ARGS_((CONST char *string,

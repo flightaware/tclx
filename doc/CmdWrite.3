@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: CmdWrite.3,v 2.1 1993/07/20 08:35:45 markd Exp $
+.\" $Id: CmdWrite.3,v 2.4 1993/11/09 06:59:01 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Command Writing" TCL "" "Tcl"
@@ -667,7 +667,7 @@ The C extension writer often needs to create, manipulate and decompose
 Tcl lists.  \fBTcl_SplitList\fR parses a list into an \fIargv\fR and
 \fIargc\fR like to the way command-line arguments are
 passed to a Tcl extension.  \fBTcl_Merge\fR, likewise, creates a single string
-(pointer to \fy a \fIchar *\fR) from an \fIargv\fR and \fIargc\fR.
+(pointer to a \fIchar *\fR) from an \fIargv\fR and \fIargc\fR.
 .PP
 Two routines, \fBTcl_ScanElement\fR and \fBTcl_ConvertElement\fR,
 do most of the work of \fBTcl_Merge\fR, and may also be of use
@@ -738,7 +738,7 @@ from files, variables or pipes.  To understand the meaning
 of the redirection symbols understood by this function,
 look at the \fBexec\fR(n) Tcl
 command.  For complete information on \fBTcl_CreatePipeline\fR,
-please examine \CrtPipelin\fR(3).
+please examine \fBCrtPipelin\fR(3).
 .PP
 .SH ACCESSING TCL FILEHANDLES FROM C
 

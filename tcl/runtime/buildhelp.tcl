@@ -16,7 +16,7 @@ cmdtrace on [open cmd.log w]
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.10 1993/08/31 23:44:51 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.11 1993/11/04 16:07:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -293,7 +293,16 @@ proc ExtractNroffHelp {manPageFH manLine} {
 
     set foundBrief 0
     scanfile $extractNroffHelpContext $manPageFH
-    close $nroffFH
+
+    # Close returns an error on if anything comes back on stderr, even if
+    # its a warning.  Output errors and continue.
+
+    set stat [catch {
+        close $nroffFH
+    } msg]
+    if $stat {
+        puts stderr "nroff: $msg"
+    }
 
     set tmpFH [open $tmpFile r]
     set helpFH [open $helpFile w]
