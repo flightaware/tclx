@@ -516,7 +516,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.4 dnl
+# From configure.in Revision: 8.5 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -557,7 +557,7 @@ DATE_OUT=`date`
 
 case `pwd` in
   */unix) ;;
-  *) echo '*** Error: Should be in a directory named "unix".  If your using'
+  *) echo '*** Error: Should be in a directory named "unix".  If you're using'
      echo 'the --srcdir option, create a directory called "unix" and run'
      echo 'configure from there.  Other build directories will be created'
      echo 'under the parent directory of "unix".'

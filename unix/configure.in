@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.4 1997/02/12 16:13:10 markd Exp $
+dnl $Id: configure.in,v 8.5 1997/03/18 05:08:43 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.4 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.5 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -57,7 +57,7 @@ AC_SUBST(DATE_OUT)
 
 case `pwd` in
   */unix) ;;
-  *) echo '*** Error: Should be in a directory named "unix".  If your using'
+  *) echo '*** Error: Should be in a directory named "unix".  If you're using'
      echo 'the --srcdir option, create a directory called "unix" and run'
      echo 'configure from there.  Other build directories will be created'
      echo 'under the parent directory of "unix".'
