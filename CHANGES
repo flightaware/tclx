@@ -749,7 +749,7 @@
      (*POTENTIAL INCOMPATIBILITY*)     
 -------------------------------------------------------------------------------
  4 Jan 94:
-   o Fixed potential memory corruption when loadlibindex cann't read a file.
+   o Fixed potential memory corruption when loadlibindex can't read a file.
    o Don't let keylset set an empty key name since keylget can't access it.
 -------------------------------------------------------------------------------
 10 Jan 94:
@@ -1356,5 +1356,11 @@
 22 Oct 97:
   o Fixed failure to run variable traces in lvarpush, lvarpop and loop
     commands.
+-------------------------------------------------------------------------------
+10 Nov 97:
+  o Changed TclX auto_loading to use a modified version of the Tcl proc
+    rather than defining its own command.  Done to track changes in the 8.0p1
+    release.  The loadlibindex commands can no longer handle tclIndex files.
+    (*POTENTIAL INCOMPATIBILITY*)     
 -------------------------------------------------------------------------------
   

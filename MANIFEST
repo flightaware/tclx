@@ -240,6 +240,7 @@
 ./tcl/help/tcl/variables/upvar
 ./tcl/help/tcl/variables/variable
 ./tcl/runtime/arrayprocs.tcl
+./tcl/runtime/autoload.tcl
 ./tcl/runtime/buildhelp.tcl
 ./tcl/runtime/buildidx.tcl
 ./tcl/runtime/compat.tcl

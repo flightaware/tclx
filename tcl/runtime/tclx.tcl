@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # tclx.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: tclx.tcl,v 8.0.4.1 1997/04/14 02:02:10 markd Exp $
+# $Id: tclx.tcl,v 8.1 1997/04/17 04:59:11 markd Exp $
 #-----------------------------------------------------------------------------
 
 if {[info exists tclx_library] && ![cequal $tclx_library {}]} {
@@ -10,7 +10,6 @@ if {[info exists tclx_library] && ![cequal $tclx_library {}]} {
 	lappend auto_path $tclx_library
     }
 }
-
 # == Put any code you want all Tcl programs to include here. ==
 
 if !$tcl_interactive return

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.16 1997/09/06 05:40:31 markd Exp $
+# $Id: Makefile.in,v 8.17 1997/10/01 02:35:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -104,14 +104,14 @@ STANDALONE_SRCS = \
     events.c         forfile.c        globrecur.c      help.c \
     profrep.c        pushd.c          setfuncs.c       showproc.c \
     stringfile.c     tcllib.c         fmath.c          buildhelp.c \
-    buildidx.c       loadouster.c     tclx.c
+    buildidx.c       autoload.c       tclx.c
 
 STANDALONE_OBJS = \
     arrayprocs.o     compat.o         convlib.o        edprocs.o \
     events.o         forfile.o        globrecur.o      help.o \
     profrep.o        pushd.o          setfuncs.o       showproc.o \
     stringfile.o     tcllib.o         fmath.o          buildhelp.o \
-    buildidx.o       loadouster.o     tclx.o
+    buildidx.o       autoload.o       tclx.o
 
 HELP_DIR = ${srcbasedir}/tcl/help
 
@@ -161,7 +161,7 @@ hello:	hello.c
 
 checkup: checkup.done
 
-checkup.done: tcl tcl.tlib tcl.tndx tclx.tcl buildidx.tcl
+checkup.done: tcl tcl.tlib tcl.tndx tclx.tcl buildidx.tcl autoload.tcl
 	${RUNTCL} -q ${srcbasedir}/unix/tools/checkup.tcl
 	touch checkup.done
 
@@ -172,7 +172,7 @@ checkup.done: tcl tcl.tlib tcl.tndx tclx.tcl buildidx.tcl
 # the help command will work before installation.  Normally just symlink,
 # unless we don't have them.
 #
-RUNTIME: tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl help.tmp \
+RUNTIME: tcl.tlib tcl.tndx tclx.tcl buildidx.tcl autoload.tcl help.tmp \
          dltest.tmp checkup
 
 tcl.tlib: ${TLIB_SRCS}
@@ -190,9 +190,9 @@ buildidx.tcl: ${RUNTIME_DIR}/buildidx.tcl
 	rm -f buildidx.tcl
 	cp ${RUNTIME_DIR}/buildidx.tcl buildidx.tcl
 
-loadouster.tcl: ${RUNTIME_DIR}/loadouster.tcl
-	rm -f loadouster.tcl
-	cp ${RUNTIME_DIR}/loadouster.tcl loadouster.tcl
+autoload.tcl: ${RUNTIME_DIR}/autoload.tcl
+	rm -f autoload.tcl
+	cp ${RUNTIME_DIR}/autoload.tcl autoload.tcl
 
 help.tmp:
 	if [ "@HAVE_SYML@" = "YES" ] ; then \
@@ -306,7 +306,7 @@ install: install-runtime install-exec
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_RUNTIME}/help
 
 install-runtime:
-	${INSTCOPY} tclx.tcl tcl.tlib tcl.tndx buildidx.tcl loadouster.tcl \
+	${INSTCOPY} tclx.tcl tcl.tlib tcl.tndx buildidx.tcl autoload.tcl \
 	    ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 
 install-exec:
@@ -334,7 +334,7 @@ clean:
 	-rm -f tclXtest tclXtest.static tclXtest.standalone
 	-rm -f ${TCLX_STLIB_NAME} ${TCLX_SHLIB_NAME}
 	-rm -f ${STANDALONE_SRCS} ${STANDALONE_OBJS} tclXAppInitSA.c
-	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
+	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl autoload.tcl
 	-rm -rf help help.tmp dltest dltest.tmp checkup.done
 	-rm -f hello hello.c
 
@@ -775,7 +775,7 @@ buildhelp.c: ${RUNTIME_DIR}/buildhelp.tcl
 	${TCL2C} -o $@ -a -n $@ $<
 buildidx.c: ${RUNTIME_DIR}/buildidx.tcl
 	${TCL2C} -o $@ -a -n $@ $<
-loadouster.c: ${RUNTIME_DIR}/loadouster.tcl
+autoload.c: ${RUNTIME_DIR}/autoload.tcl
 	${TCL2C} -o $@ -a -n $@ $<
 tclx.c: ${RUNTIME_DIR}/tclx.tcl
 	${TCL2C} -o $@ -a -n $@ $<

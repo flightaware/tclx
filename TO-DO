@@ -5,13 +5,19 @@ o Remove check for whitespace in keyedlist field names.
 
 o waitpid status not checked in tclXunixOS.c
 
+o for_file can exit with file still open, maybe others.
+
 *** Minor bugs and enhancements ***
+
+o Need to either document how namspaces are used in #@package or normalize
+  them as with auto_qualify.  
 
 o Added --with-tcl and --with-tk dir
   (requested by sstanton@ghostwheel.Eng.Sun.COM)
     >You might want to take a look at the configuration files for expect.  It does 
     >a great job of handling this case, including looking for internal Tcl header 
     >files, etc.
+o Allow configure to work from other directories.
 
 o Better doc on package require.
 

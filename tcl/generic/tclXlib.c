@@ -12,29 +12,22 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.17 1997/08/17 06:27:55 markd Exp $
+ * $Id: tclXlib.c,v 8.18 1997/08/30 22:29:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
-/* FIX: Really should use original auto_load instead load_ouster_index,
-   but this leads to search path problems.*/
-
 
 /*-----------------------------------------------------------------------------
- * The Extended Tcl library code is a super set of the standard Tcl libaries.
+ * The Extended Tcl library code is integrated with Tcl's by providing a
+ * modified version of the Tcl auto_load proc that calls tclx_load_tndxs.
  * 
  * The following data structures are kept as Tcl variables so they can be
  * accessed from Tcl:
  *
- *   o auto_path - The directory path to search for libraries.
- *   o auto_oldpath - The previous value of auto_path.  Use to check if 
- *     the path needs to be searched again. Maybe unset to force searching
- *     of auto_path.
  *   o auto_index - An array indexed by command name and contains code to
  *     execute to make the command available.  Normally contains either:
  *       "source file"
  *       "auto_pkg_load package"
  *   o auto_pkg_index - Indexed by package name.
- *  
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -43,50 +36,17 @@
  * Names of Tcl variables that are used.
  */
 static char *AUTO_INDEX     = "auto_index";
-static char *AUTO_PATH      = "auto_path";
-static char *AUTO_OLDPATH   = "auto_oldpath";
 static char *AUTO_PKG_INDEX = "auto_pkg_index";
-
-/*
- * Command to pass to Tcl_GlobalEval to load the file loadouster.tcl.
- * This is a global rather than a local so it will work with K&R compilers.
- * Its writable so it works with gcc.
- */
-#ifdef HAVE_STANDALONE
-static char loadOusterCmd [] =
-"if [catch {source -rsrc loadouster}] {\n\
-    source [file join $tclx_library loadouster.tcl]\n\
-}";
-#else
-static char loadOusterCmd [] =
-    "source [file join $tclx_library loadouster.tcl]";
-#endif
-
-/*
- * Command to pass to Tcl_GlobalEval to load all built-in index files
- * (for standalone executables).
- */
-static char searchBuiltIn [] =
-"foreach pkg \"[info loaded {}] {{} Tcl}\" {\n\
-    catch {source -rsrc [string tolower [lindex $pkg 1]]:tclIndex}\n\
-}";
+static char *TCLX_LIBRARY   = "tclx_library";
+static char *AUTO_LOAD_FILE = "autoload.tcl";
 
 /*
  * Indicates the type of library index.
  */
 typedef enum {
-    TCLLIB_TNDX,       /* *.tndx                   */
-    TCLLIB_TND,        /* *.tnd (.tndx in 8.3 land */
-    TCLLIB_OUSTER      /* tclIndex                 */
+    TCLLIB_TNDX,       /* *.tndx                    */
+    TCLLIB_TND,        /* *.tnd (.tndx in 8.3 land) */
 } indexNameClass_t;
-
-/*
- * Per-interpreter structure used for managing the library.
- */
-typedef struct libInfo_t {
-    Tcl_HashTable inProgressTbl;     /* List of cmds being loaded.       */
-    int           doingIdxSearch;    /* Loading indexes on a path now.   */
-} libInfo_t;
 
 /*
  * Prototypes of internal functions.
@@ -140,10 +100,6 @@ LoadPackageIndex _ANSI_ARGS_((Tcl_Interp       *interp,
                               indexNameClass_t  indexNameClass));
 
 static int
-LoadOusterIndex _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *dirPath));
-
-static int
 LoadDirIndexCallback _ANSI_ARGS_((Tcl_Interp  *interp,
                                   char        *dirPath,
                                   char        *fileName,
@@ -155,10 +111,11 @@ LoadDirIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
                             char        *dirName));
 
 static int
-LoadPackageIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
-                                libInfo_t   *infoPtr,
-                                Tcl_Obj     *pathPtr));
-
+TclX_load_tndxsObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                   Tcl_Interp *interp,
+                                   int         objc,
+                                   Tcl_Obj    *CONST objv[]));
+                                   
 static int
 TclX_Auto_load_pkgObjCmd _ANSI_ARGS_((ClientData clientData, 
                                       Tcl_Interp *interp,
@@ -166,48 +123,10 @@ TclX_Auto_load_pkgObjCmd _ANSI_ARGS_((ClientData clientData,
                                       Tcl_Obj *CONST objv[]));
 
 static int
-AddInProgress _ANSI_ARGS_((Tcl_Interp  *interp,
-                           libInfo_t   *infoPtr,
-                           char        *command));
-
-static void
-RemoveInProgress _ANSI_ARGS_((Tcl_Interp  *interp,
-                              libInfo_t   *infoPtr,
-                              char        *command));
-
-static int
-LoadChangedPathPackageIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
-                                           libInfo_t   *infoPtr,
-                                           Tcl_Obj     *oldPathPtr,
-                                           Tcl_Obj     *pathPtr));
-
-static int
-LoadAutoPath _ANSI_ARGS_((Tcl_Interp  *interp,
-                          libInfo_t   *infoPtr));
-
-static int
-LoadStdProc _ANSI_ARGS_((Tcl_Interp  *interp,
-                         char        *command));
-
-static int
-LoadCommand _ANSI_ARGS_((Tcl_Interp  *interp,
-                         char        *command));
-
-static int
 TclX_LoadlibindexObjCmd _ANSI_ARGS_((ClientData clientData, 
                                      Tcl_Interp *interp,
                                      int objc,
                                      Tcl_Obj *CONST objv[]));
-
-static int
-TclX_Auto_loadObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                  Tcl_Interp *interp,
-                                  int objc,
-                                  Tcl_Obj *CONST objv[]));
-
-static void
-TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
-                           Tcl_Interp *interp));
 
 
 /*-----------------------------------------------------------------------------
@@ -720,7 +639,7 @@ BuildPackageIndex (interp, tlibFilePath)
 /*-----------------------------------------------------------------------------
  * LoadPackageIndex --
  *
- * Load a package .tndx file.  Rebuild .tlib if non-existant or out of
+ * Load a package .tndx file.  Rebuild .tndx if non-existant or out of
  * date.
  *
  * Parameters
@@ -785,69 +704,6 @@ LoadPackageIndex (interp, tlibFilePath, indexNameClass)
 }
 
 /*-----------------------------------------------------------------------------
- * LoadOusterIndex --
- *
- * Load a standard Tcl index (tclIndex).  A proc is used to do the actual work.
- * This way, the "dir" variable can be set.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o dirPath - Absolute path name to the directory containing the tclIndex
- *     file.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- * Notes:
- *   The real work of loading an index is done by a procedure that is defined
- * in a seperate file.  Its not possible to put this file in the standard
- * tcl.tlib as a tclIndex might get loaded before the tcl.tndx file is found
- * on the search path.  The function sources $tclx_library/loadouster.tcl
- * if it has not been loaded before.
- *-----------------------------------------------------------------------------
- */
-static int
-LoadOusterIndex (interp, dirPath)
-     Tcl_Interp *interp;
-     char       *dirPath;
-{
-    Tcl_DString  command;
-    Tcl_CmdInfo  loadCmdInfo;
-    
-    Tcl_DStringInit (&command);
-
-    /*
-     * Check if "auto_load_ouster_index" is defined, if its not, source
-     * the file that defines it.
-     */
-    if (!Tcl_GetCommandInfo (interp,
-                             "::auto_load_ouster_index",
-                             &loadCmdInfo)) {
-        if (Tcl_GlobalEval (interp, loadOusterCmd) == TCL_ERROR)
-            goto errorExit;
-    }
-
-    /*
-     * Now, actually do the load.  Pass only the dir name, not the whole
-     * file path.
-     */
-    Tcl_DStringAppendElement (&command, "auto_load_ouster_index");
-    Tcl_DStringAppendElement (&command, dirPath);
-
-    if (Tcl_GlobalEval (interp, command.string) == TCL_ERROR)
-        goto errorExit;
-
-    Tcl_DStringFree (&command);
-    Tcl_ResetResult (interp);
-    return TCL_OK;
-
-  errorExit:
-    Tcl_DStringSetLength(&command, 0);  /* Use to hold file path */
-    AddLibIndexErrorInfo (interp,
-                          TclX_JoinPath (dirPath, "tclIndex", &command));
-    Tcl_DStringFree (&command);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
  * LoadDirIndexCallback --
  *
  *   Function called for every directory entry for LoadDirIndexes.
@@ -896,9 +752,6 @@ LoadDirIndexCallback (interp, dirPath, fileName, caseSensitive, clientData)
         indexNameClass = TCLLIB_TNDX;
     } else if ((nameLen > 4) && STREQU (chkName + nameLen - 4, ".tli")) {
         indexNameClass = TCLLIB_TND;
-    } else if ((caseSensitive && STREQU (chkName, "tclIndex")) ||
-               ((!caseSensitive) && STREQU (chkName, "tclindex"))) {
-        indexNameClass = TCLLIB_OUSTER;
     } else {
         Tcl_DStringFree (&chkNameBuf);
         return TCL_OK;  /* Not an index, skip */
@@ -920,14 +773,9 @@ LoadDirIndexCallback (interp, dirPath, fileName, caseSensitive, clientData)
     /*
      * Process the index according to its type.
      */
-    if (indexNameClass == TCLLIB_OUSTER) {
-        if (LoadOusterIndex (interp, dirPath) != TCL_OK)
-            goto errorExit;
-    } else {
-        if (LoadPackageIndex (interp, filePath.string,
-                              indexNameClass) != TCL_OK)
-            goto errorExit;
-    }
+    if (LoadPackageIndex (interp, filePath.string,
+                          indexNameClass) != TCL_OK)
+        goto errorExit;
 
   exitPoint:
     Tcl_DStringFree (&filePath);
@@ -978,68 +826,28 @@ LoadDirIndexes (interp, dirName)
 }
 
 /*-----------------------------------------------------------------------------
- * LoadPackageIndexes --
+ * TclX_load_tndxsObjCmd --
  *
- * Loads the all indexes for all package libraries (.tlib) or a Ousterhout
- * "tclIndex" files found in all directories in the path.  The path is search
- * backwards so that index entries first in the path will override those 
- * later on in the path.
+ *   Implements the command:
+ *      tclx_load_tndxs dir
+ *
+ * Which is called from auto_load to load a .tndx files in a directory.
  *-----------------------------------------------------------------------------
  */
 static int
-LoadPackageIndexes (interp, infoPtr, pathPtr)
-    Tcl_Interp  *interp;
-    libInfo_t   *infoPtr;
-    Tcl_Obj     *pathPtr;
+TclX_load_tndxsObjCmd (clientData, interp, objc, objv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
-    char        *dirName;
-    Tcl_DString  dirNameBuf;
-    int          idx, pathObjc;
-    Tcl_Obj     **pathObjv;
+    char *dirname;
 
-    if (infoPtr->doingIdxSearch) {
-        TclX_AppendObjResult (interp, "recursive load of indexes ",
-                              "(probable invalid command while loading index)",
-                              (char *) NULL);
-        return TCL_ERROR;
+    if (objc != 2) {
+        return TclX_WrongArgs (interp, objv [0], "dir");
     }
-    infoPtr->doingIdxSearch = TRUE;
-
-    if (Tcl_ListObjGetElements (interp, pathPtr,
-                                &pathObjc, &pathObjv) != TCL_OK) {
-        infoPtr->doingIdxSearch = FALSE;
-        return TCL_ERROR;
-    }
-
-    Tcl_DStringInit (&dirNameBuf);
-
-    for (idx = pathObjc - 1; idx >= 0; idx--) {
-        /*
-         * Get the absolute dir name.  if the conversion fails (most likely
-         * invalid "~") or the directory can't be read, skip it.
-         */
-        dirName = MakeAbsFile (interp,
-                               Tcl_GetStringFromObj (pathObjv [idx], NULL),
-                               &dirNameBuf);
-        if (dirName == NULL)
-            continue;
-        
-        if (access (dirName, X_OK) == 0) {
-            if (LoadDirIndexes (interp, dirName) == TCL_ERROR)
-                goto errorExit;
-        }
-
-        Tcl_DStringSetLength (&dirNameBuf, 0);
-    }
-
-    Tcl_DStringFree (&dirNameBuf);
-    infoPtr->doingIdxSearch = FALSE;
-    return TCL_OK;
-
-  errorExit:
-    Tcl_DStringFree (&dirNameBuf);
-    infoPtr->doingIdxSearch = FALSE;
-    return TCL_ERROR;
+    dirname = Tcl_GetStringFromObj (objv[1], NULL);
+    return LoadDirIndexes (interp, dirname);
 }
 
 /*-----------------------------------------------------------------------------
@@ -1074,282 +882,6 @@ TclX_Auto_load_pkgObjCmd (clientData, interp, objc, objv)
     result = EvalFilePart (interp, fileName, offset, length);
     ckfree (fileName);
 
-    return result;
-}
-
-/*-----------------------------------------------------------------------------
- * AddInProgress --
- *
- *   An a command to the table of in progress commands.  If the command is
- * already in the table, return an error.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o infoPtr - Interpreter specific library info.
- *   o command - The command to add.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-static int
-AddInProgress (interp, infoPtr, command)
-    Tcl_Interp  *interp;
-    libInfo_t   *infoPtr;
-    char        *command;
-{
-    int  newEntry;
-
-    Tcl_CreateHashEntry (&infoPtr->inProgressTbl, command, &newEntry);
-
-    if (!newEntry) {
-        TclX_AppendObjResult (interp, "recursive auto_load of \"",
-                              command, "\"", (char *) NULL);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * RemoveInProgress --
- *
- *   Remove a command from the in progress table.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o infoPtr - Interpreter specific library info.
- *   o command - The command to remove.
- *-----------------------------------------------------------------------------
- */
-static void
-RemoveInProgress (interp, infoPtr, command)
-    Tcl_Interp  *interp;
-    libInfo_t   *infoPtr;
-    char        *command;
-{
-    Tcl_HashEntry *entryPtr;
-
-    entryPtr = Tcl_FindHashEntry (&infoPtr->inProgressTbl, command);
-    if (entryPtr == NULL)
-        panic ("lost in-progress command");
-
-    Tcl_DeleteHashEntry (entryPtr);
-}
-
-/*-----------------------------------------------------------------------------
- * LoadChangedPathPackageIndexes --
- *
- *   Determine what part of the path has changed and load the package indexes
- * just for the appended direcories.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o infoPtr - Interpreter specific library info.
- *   o oldPathPtr - The previous value of auto_path.
- *   o pathPtr - The current value of auto_path.
- * Returns:
- *   TCL_OK or TCL_ERROR
- *-----------------------------------------------------------------------------
- */
-static int
-LoadChangedPathPackageIndexes (interp, infoPtr, oldPathPtr, pathPtr)
-    Tcl_Interp  *interp;
-    libInfo_t   *infoPtr;
-    Tcl_Obj     *oldPathPtr;
-    Tcl_Obj     *pathPtr;
-{
-    int pathObjc, oldpathObjc, idx;
-    Tcl_Obj **pathObjv, **oldpathObjv;
-    Tcl_Obj *changedPathPtr;
-
-    if (Tcl_ListObjGetElements (interp, oldPathPtr,
-                                &oldpathObjc, &oldpathObjv) != TCL_OK)
-        return TCL_ERROR;
-    if (Tcl_ListObjGetElements (interp, pathPtr,
-                                &pathObjc, &pathObjv) != TCL_OK)
-        return TCL_ERROR;
-
-    for (idx = 0; (idx < oldpathObjc) && (idx < pathObjc); idx++) {
-        if (strcmp (Tcl_GetStringFromObj (oldpathObjv [idx], NULL),
-                    Tcl_GetStringFromObj (pathObjv [idx], NULL)) != 0)
-            break;
-    }
-    changedPathPtr = Tcl_NewListObj (pathObjc - idx, &pathObjv [idx]);
-
-    if (LoadPackageIndexes (interp, infoPtr, changedPathPtr) != TCL_OK) {
-        Tcl_DecrRefCount (changedPathPtr);
-        return TCL_ERROR;
-    }
-    Tcl_DecrRefCount (changedPathPtr);
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * LoadAutoPath --
- *
- *   Load all indexs on the auto_path variable.  If auto_path has not changed
- * or has just been appended to, since the last time libraries were
- * successfully loaded, this is a no-op.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o infoPtr - Interpreter specific library info.
- * Returns:
- *   TCL_OK or TCL_ERROR
- *-----------------------------------------------------------------------------
- */
-static int
-LoadAutoPath (interp, infoPtr)
-    Tcl_Interp  *interp;
-    libInfo_t   *infoPtr;
-{
-    Tcl_Obj *pathPtr, *oldPathPtr;
-
-    pathPtr = TclX_ObjGetVar2S (interp, AUTO_PATH, NULL, TCL_GLOBAL_ONLY);
-    if (pathPtr == NULL)
-        return TCL_OK;
-
-    oldPathPtr = TclX_ObjGetVar2S (interp, AUTO_OLDPATH, NULL,
-                                   TCL_GLOBAL_ONLY);
-
-    /*
-     * Check if the path has not changed at all.  They are the same
-     * object if this is the case.
-     */
-    if ((oldPathPtr != NULL) && (pathPtr == oldPathPtr))
-        return TCL_OK;
-
-    /*
-     * If the old path exists, then load only the appended directories.
-     * Otherwise, load the entire path.
-     */
-    if (oldPathPtr != NULL) {
-        if (LoadChangedPathPackageIndexes (interp, infoPtr, oldPathPtr,
-                                           pathPtr) != TCL_OK)
-            return TCL_ERROR;
-    } else {
-        if (LoadPackageIndexes (interp, infoPtr, pathPtr) != TCL_OK)
-            return TCL_ERROR;
-    }
-
-    /*
-     * Set both variables to the same object.  We reget auto_path
-     * in case something changed.
-     */
-    pathPtr = TclX_ObjGetVar2S (interp, AUTO_PATH, NULL,
-                                TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
-    if (pathPtr == NULL)
-        return TCL_OK;
-
-
-    if (TclX_ObjSetVar2S (interp, AUTO_OLDPATH, NULL, pathPtr,
-                          TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
-
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * LoadStdProc --
- *
- *   Check the "auto_index" array for code to load a command and eval it.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o command - The command to load.
- * Returns:
- *   TCL_OK if the command was loaded.
- *   TCL_CONTINUE if the command is not in the index.
- *   TCL_ERROR if an error occured.
- *-----------------------------------------------------------------------------
- */
-static int
-LoadStdProc (interp, command)
-    Tcl_Interp  *interp;
-    char        *command;
-{
-    Tcl_Obj *loadCmd;
-
-    loadCmd = TclX_ObjGetVar2S (interp, AUTO_INDEX, command, TCL_GLOBAL_ONLY);
-    if (loadCmd == NULL)
-        return TCL_CONTINUE;   /* Not found */
-    
-    Tcl_IncrRefCount (loadCmd);
-    if (Tcl_GlobalEvalObj (interp, loadCmd) == TCL_ERROR) {
-        Tcl_DecrRefCount (loadCmd);
-        return TCL_ERROR;
-    }
-    Tcl_DecrRefCount (loadCmd);
-    return TCL_OK;
-}
-
-/*
- *-----------------------------------------------------------------------------
- * LoadCommand --
- *
- *   Check the "auto_index" array for code to load a command and eval it.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o command - The command to load.
- * Returns:
- *   TCL_OK if the command was loaded.
- *   TCL_CONTINUE if the command is not in the index.
- *   TCL_ERROR if an error occured.
- *-----------------------------------------------------------------------------
- */
-static int
-LoadCommand (interp, command)
-    Tcl_Interp  *interp;
-    char        *command;
-{
-    int result;
-    Tcl_DString nsCommand;
-    Tcl_CmdInfo cmdInfo;
-    
-    /*
-     * If it doesn't already start with a `::', create a command with one.
-     * We then need to try both.
-     */
-    Tcl_DStringInit (&nsCommand);
-    if (!STRNEQU (command, "::", 2)) {
-        Tcl_DStringAppend (&nsCommand, "::", -1);
-        Tcl_DStringAppend (&nsCommand, command, -1);
-    }
-
-    result = LoadStdProc (interp, command);
-    if ((result == TCL_CONTINUE) && (nsCommand.length > 0)) {
-        result = LoadStdProc (interp, nsCommand.string);
-    }
-
-    if (result == TCL_CONTINUE)
-        goto exitPoint;
-    if (result == TCL_ERROR)
-        goto exitPoint;
-
-    Tcl_ResetResult (interp);
-
-    result = TCL_OK;  /* Assume the best */
-    if (Tcl_GetCommandInfo (interp, command, &cmdInfo)) {
-        goto exitPoint;  /* Found and loaded */
-    }
-    if (Tcl_GetCommandInfo (interp, nsCommand.string, &cmdInfo)) {
-        goto exitPoint;  /* Found and loaded */
-    }
-
-    /*
-     * It was in the index but not loaded.
-     */
-    TclX_AppendObjResult (interp, "command \"", command,
-                          "\" was defined in a Tcl library index, ",
-                          "but not in a Tcl library", (char *) NULL);
-    result = TCL_ERROR;
-    goto exitPoint;
-
-    /*
-     * Variable `result' should contain return code.
-     */
-  exitPoint:
-    Tcl_DStringFree (&nsCommand);
     return result;
 }
 
@@ -1401,39 +933,12 @@ TclX_LoadlibindexObjCmd (clientData, interp, objc, objv)
         if (LoadPackageIndex (interp, pathName, TCLLIB_TND) != TCL_OK)
             goto errorExit;
     } else {
-        /*
-         * Need to split the file name to check the last component and to
-         * be able to pass in the dir name.
-         * FIX: Should we check for DOS before allowing lower case???
-         */
-        int pathArgc;
-        char **pathArgv;
-        Tcl_DString dirPath;
-
-        Tcl_SplitPath (pathName, &pathArgc, &pathArgv);
-        if ((pathArgc > 0) &&
-            (STREQU (pathArgv [pathArgc -1], "tclIndex") ||
-             STREQU (pathArgv [pathArgc -1], "tclindex"))) {
-            Tcl_DStringInit (&dirPath);
-            Tcl_JoinPath (pathArgc-1, pathArgv, &dirPath);
-            ckfree ((char *) pathArgv);
-
-            if (LoadOusterIndex (interp, dirPath.string) != TCL_OK) {
-                Tcl_DStringFree (&dirPath);
-                goto errorExit;
-            }
-            Tcl_DStringFree (&dirPath);
-        } else {
-            ckfree ((char *) pathArgv);
-            TclX_AppendObjResult (interp, "invalid library name, must have ",
-                                  "an extension of \".tlib\", \".tli\" or ",
-                                  "the name \"tclIndex\", got \"",
-                                  Tcl_GetStringFromObj (objv [1], NULL), "\"",
-                                  (char *) NULL);
-            goto errorExit;
-        }
+        TclX_AppendObjResult (interp, "invalid library name, must have ",
+                              "an extension of \".tlib\", or \".tli\", got \"",
+                              Tcl_GetStringFromObj (objv [1], NULL), "\"",
+                              (char *) NULL);
+        goto errorExit;
     }
-
 
     Tcl_DStringFree (&pathNameBuf);
     return TCL_OK;
@@ -1444,164 +949,51 @@ TclX_LoadlibindexObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_auto_loadObjCmd --
- *
- *   This procedure is invoked to process the "auto_load" Tcl command:
- *
- *         auto_load ?command?
- *
- * which searchs the auto_load tables for the specified procedure.  If it
- * is not found, an attempt is made to load unloaded library indexes by
- * searching auto_path.
- *-----------------------------------------------------------------------------
- */
-static int
-TclX_Auto_loadObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
-{
-    libInfo_t *infoPtr = (libInfo_t *) clientData;
-    int result;
-    char *msg, *command;
-
-    if (objc > 2) {
-        return TclX_WrongArgs (interp, objv [0], "?command?");
-    }
-
-    /*
-     * If no command is specified, just load the indexs.
-     */
-    if (objc == 1) {
-        return LoadAutoPath (interp, infoPtr);
-    }
-
-    /*
-     * Do checking for recursive auto_load of the same command.
-     */
-    command = Tcl_GetStringFromObj (objv [1], NULL);
-    if (AddInProgress (interp, infoPtr, command) != TCL_OK)
-        return TCL_ERROR;
-
-    /*
-     * First, attempt to load it from the indexes in memory.
-     */
-    result = LoadCommand (interp, command);
-    if (result == TCL_ERROR)
-        goto errorExit;
-    if (result == TCL_OK)
-        goto found;
-    
-    /*
-     * Slow path, load the libraries indices on auto_path.
-     */
-    if (LoadAutoPath (interp, infoPtr) != TCL_OK)
-        goto errorExit;
-
-    /*
-     * Try to load the command again.
-     */
-    result = LoadCommand (interp, command);
-    if (result == TCL_ERROR)
-        goto errorExit;
-    if (result == TCL_OK)
-        goto found;
-
-    /*
-     * Not in auto_path. The last chance is that it is built-in.
-     */
-    if (Tcl_GlobalEval(interp, searchBuiltIn) != TCL_OK)
-        goto errorExit;
-
-    /*
-     * Try to load the command again.
-     */
-    result = LoadCommand (interp, command);
-    if (result == TCL_ERROR)
-        goto errorExit;
-    if (result == TCL_CONTINUE)
-        goto notFound;
-
-  found:
-    RemoveInProgress (interp, infoPtr, command);
-    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
-    return TCL_OK;
-
-  notFound:
-    RemoveInProgress (interp, infoPtr, command);
-    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), FALSE);
-    return TCL_OK;
-
-  errorExit:
-    msg = ckalloc (strlen (command) + 35);
-    strcpy (msg, "\n    while auto loading \"");
-    strcat (msg, command);
-    strcat (msg, "\"");
-    Tcl_AddObjErrorInfo (interp, msg, -1);
-    ckfree (msg);
-
-    RemoveInProgress (interp, infoPtr, command);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * TclLibCleanUp --
- *
- *   Release the client data area when the interpreter is deleted.
- *-----------------------------------------------------------------------------
- */
-static void
-TclLibCleanUp (clientData, interp)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-{
-    libInfo_t      *infoPtr = (libInfo_t *) clientData;
-    Tcl_HashSearch  searchCookie;
-    Tcl_HashEntry  *entryPtr;
-
-    entryPtr = Tcl_FirstHashEntry (&infoPtr->inProgressTbl, &searchCookie);
-
-    while (entryPtr != NULL) {
-        Tcl_DeleteHashEntry (entryPtr);
-        entryPtr = Tcl_NextHashEntry (&searchCookie);
-    }
-
-    Tcl_DeleteHashTable (&infoPtr->inProgressTbl);
-    ckfree ((char *) infoPtr);
-}
-
-/*-----------------------------------------------------------------------------
  * TclX_LibraryInit --
  *
  *   Initialize the Extended Tcl library facility commands.
  *-----------------------------------------------------------------------------
  */
-void
+int
 TclX_LibraryInit (interp)
     Tcl_Interp *interp;
 {
-    libInfo_t *infoPtr;
+    Tcl_Obj *libDirObj;
+    Tcl_DString autoLoadSrc;
+    int result;
 
-    infoPtr = (libInfo_t *) ckalloc (sizeof (libInfo_t));
-
-    Tcl_InitHashTable (&infoPtr->inProgressTbl, TCL_STRING_KEYS);
-    infoPtr->doingIdxSearch = FALSE;
-
-    Tcl_CallWhenDeleted (interp, TclLibCleanUp, (ClientData) infoPtr);
-
+    /*
+     * Get path to autoload.tcl file that contains modified version of 
+     * the Tcl autoload proc and eval the file.
+     */
+    libDirObj = TclX_ObjGetVar2S (interp, TCLX_LIBRARY, NULL, 
+                                  TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
+    if (libDirObj == NULL) {
+        return TCL_ERROR;
+    }
+    Tcl_DStringInit (&autoLoadSrc);
+    TclX_JoinPath (Tcl_GetStringFromObj (libDirObj, NULL),
+                   AUTO_LOAD_FILE, &autoLoadSrc);
+    result = TclX_Eval (interp, TCLX_EVAL_GLOBAL|TCLX_EVAL_FILE,
+                        autoLoadSrc.string);
+    Tcl_DStringFree (&autoLoadSrc);
+    if (result == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+    
+    Tcl_CreateObjCommand (interp, "tclx_load_tndxs",
+                          TclX_load_tndxsObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateObjCommand (interp, "auto_load_pkg",
                           TclX_Auto_load_pkgObjCmd,
-                          (ClientData) infoPtr,
-                          (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "auto_load",
-                          TclX_Auto_loadObjCmd,
-                          (ClientData) infoPtr,
+                          (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateObjCommand (interp, "loadlibindex",
                           TclX_LoadlibindexObjCmd,
-                          (ClientData) infoPtr,
+                          (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
 
     Tcl_ResetResult (interp);
+    return TCL_OK;
 }

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlibInit.c,v 8.0.4.1 1997/04/14 02:01:49 markd Exp $
+ * $Id: tclXlibInit.c,v 8.1 1997/04/17 04:58:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,9 +31,7 @@ int
 Tclxlib_Init (interp)
     Tcl_Interp *interp;
 {
-    TclX_LibraryInit (interp);
-
-    return TCL_OK;
+    return TclX_LibraryInit (interp);
 }
 
 

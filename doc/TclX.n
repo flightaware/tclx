@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.10 1997/09/04 22:39:25 markd Exp $
+.\" $Id: TclX.n,v 8.11 1997/09/13 17:23:41 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2571,9 +2571,8 @@ command line, but merely load in and not execute if loaded during an
 interactive invocation of Tcl.
 .TP
 .B auto_path
-Path to search to locate Tcl scripts.  Used by the 
-\fBauto_load\fR command and the TclX unknown command handler.
-The path is a Tcl list of directory names.
+Path to search to locate Tcl autoload libraries.  Used by the both the
+Tcl and TclX library autoloading facility.
 .TP
 .B tclx_library
 Path to the TclX runtime library.  If your running the TclX shell or
@@ -2838,32 +2837,6 @@ listed in \fIignore\fR should just be the base file names, not full paths.
 '\"@endhelp
 '
 .TP
-'\"@help: tcl/libraries/auto_load
-'\"@brief: Force an autoload of a command.
-.B auto_load \fI?command?\fR
-.br
-Attempt to load the specified \fIcommand\fR from a loadable library.
-loading the package containing the procedure.  If the package indexes
-have not been loaded for all package libraries in \fBauto_path\fR, they
-will be loaded.  Out-of-date library indexes will be rebuilt if they are
-writable.  The procedure returns \fB1\fR if the command was successfully
-loaded, or \fB0\fR if it was not.
-.sp
-Duplicated package names are skipped, the first package of a given name
-found in the path is loaded.  If the \fBauto_path\fR has changed since
-the last load, indexes will be reloaded (duplicate packages will not be
-redefined).
-.sp
-If \fIcommand\fR is not specified, the indexes will be loaded, if they
-have not already been loaded or if the \fBauto_path\fR variable has
-changed, but no command will be loaded.
-.sp
-This command overrides the standard Tcl procedure of the same name.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-.TP
 '\"@help: tcl/libraries/loadlibindex
 '\"@brief: Load the index of a package library
 .B loadlibindex \fIlibfile.tlib\fR
@@ -2879,9 +2852,6 @@ in \fIlibfile.tlib\fR has already been loaded, its definition will be
 overridden by the new package.  However, if any procedure has actually
 been used from the previously defined package, the procedures from
 \fIlibfile.tlib\fR will not be loaded.
-.sp
-This command will also load an index built by \fBmkindex.tcl\fR program
-supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
