@@ -316,7 +316,6 @@
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h
 ./tcl/win/tclXwinTest.c
-./tcl/win/tclXwinUtil.c
 ./tcl/win/tclx.rc
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
@@ -381,6 +380,7 @@
 ./tk/win/makefile.vc
 ./tk/win/tkXAppInit.c
 ./tk/win/tkXwinTest.c
+./tk/win/tkXwinUtil.c
 ./tk/win/tkx.rc
 ./tk/win/wishx.rc
 ./unix/Common.mk.in
