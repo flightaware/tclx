@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXselect.c,v 1.2 2002/04/04 06:09:21 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,6 +27,9 @@
 #ifndef NO_SELECT
 
 #ifndef NO_SYS_SELECT_H
+#   ifdef __APPLE__
+#	undef panic
+#   endif
 #   include <sys/select.h>
 #endif
 
