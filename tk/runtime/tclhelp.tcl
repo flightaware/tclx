@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 1.2 1993/07/18 21:14:28 markd Exp markd $
+# $Id: tclhelp.tcl,v 1.3 1993/09/16 05:37:54 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -136,8 +136,8 @@ proc DisplayPage {page} {
     $w.frame.page insert 0.0 $contents
     $w.frame.page configure -state disabled
 
-    button $w.ok -text OK -command "destroy $w"
-    pack append $w $w.frame {top} $w.ok {bottom fill}
+    button $w.dismiss -text Dismiss -command "destroy $w"
+    pack append $w $w.frame {top} $w.dismiss {bottom fill}
 }
 
 #------------------------------------------------------------------------------
