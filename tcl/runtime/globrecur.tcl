@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.tcl,v 2.0 1992/10/16 04:52:04 markd Rel markd $
+# $Id: globrecur.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,7 +23,7 @@ proc recursive_glob {globlist} {
     foreach pattern $globlist {
         foreach file [glob -nocomplain $pattern] {
             lappend result $file
-            if [file isdirectory $file] {
+            if {[file type $file] == "directory"} {
                 set result [concat $result [recursive_glob $file/*]]
             }
         }
