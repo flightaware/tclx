@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.12 1995/03/31 06:57:38 markd Exp markd $
+dnl $Id: configure.in,v 4.13 1995/03/31 08:20:56 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.12 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.13 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -176,7 +176,6 @@ AC_TRY_COMPILE([#include <sys/socket.h>],
         [AC_DEFINE(HAVE_MSG_ACCRIGHTS)
          AC_MSG_RESULT(yes)],
         AC_MSG_RESULT(no))
-
 
 #------------------------------------------------------------------------------
 #     Determine if "." is used as separator for the manual directory
@@ -522,10 +521,11 @@ AC_HAVE_FUNCS(inet_aton)
 
 AC_CHECK_FUNC(catgets,
         [AC_DEFINE(HAVE_CATGETS)
+         AC_MSG_CHECKING([catclose return value])
          AC_TRY_COMPILE([#include <nl_types.h>], [
                 if (catclose ((nl_catd) 0) == 0) exit (0);],
-                AC_MSG_RESULT("catclose ok"), [
-                AC_MSG_RESULT("bad catclose return type")
+                AC_MSG_RESULT(ok), [
+                AC_MSG_RESULT([broken catclose return type])
                 AC_DEFINE(BAD_CATCLOSE)])])
 
 
