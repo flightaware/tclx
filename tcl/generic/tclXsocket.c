@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 8.5 1997/06/30 15:35:59 markd Exp $
+ * $Id: tclXsocket.c,v 8.6 1997/07/04 20:24:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -199,7 +199,7 @@ InfoGetHost (interp, objc, objv)
  *   For hostname, a list of address associated with the host.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_HostInfoObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;

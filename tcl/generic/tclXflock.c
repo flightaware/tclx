@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 8.4 1997/06/30 06:53:59 markd Exp $
+ * $Id: tclXflock.c,v 8.5 1997/07/04 20:23:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Need to add an interface to F_GETLK */
@@ -32,14 +32,14 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp     *interp,
 static int
 TclX_FlockObjCmd _ANSI_ARGS_((ClientData clientData, 
                               Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+                              int         objc,
+                              Tcl_Obj    *CONST objv[]));
 
 static int
 TclX_FunlockObjCmd _ANSI_ARGS_((ClientData clientData, 
                              Tcl_Interp *interp,
-                             int objc,
-                             Tcl_Obj *CONST objv[]));
+                             int         objc,
+                             Tcl_Obj    *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ ParseLockUnlockArgs (interp, objc, objv, argIdx, lockInfoPtr)
  *    flock ?-read|-write? ?-nowait? fileId ?start? ?length? ?origin?
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_FlockObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
@@ -206,7 +206,7 @@ TclX_FlockObjCmd (clientData, interp, objc, objv)
  *    funlock fileId ?start? ?length? ?origin?
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_FunlockObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;

@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.5 1997/07/03 20:08:43 markd Exp $
+ * $Id: tclXselect.c,v 8.6 1997/07/04 20:24:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -272,7 +272,7 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList)
  *     or {} it the timeout expired.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_SelectObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;

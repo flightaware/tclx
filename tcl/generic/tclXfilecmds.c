@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.11 1997/07/04 20:23:47 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.12 1997/07/04 21:17:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -36,18 +36,22 @@ ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
                              ClientData   clientData));
 
 static int 
-TclX_PipeObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+TclX_PipeObjCmd _ANSI_ARGS_((ClientData  clientData,
+                             Tcl_Interp *interp,
+                             int         objc,
+                             Tcl_Obj    *CONST objv[]));
 
 static int
-TclX_FtruncateObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                 Tcl_Interp   *interp, 
-				 int           objc,
-				 Tcl_Obj      *CONST objv[]));
+TclX_FtruncateObjCmd _ANSI_ARGS_((ClientData  clientData, 
+                                  Tcl_Interp *interp, 
+                                  int         objc,
+                                  Tcl_Obj    *CONST objv[]));
 
 static int
 TclX_ReaddirObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj    *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -59,7 +63,7 @@ TclX_ReaddirObjCmd _ANSI_ARGS_((ClientData clientData,
  *      Standard TCL result.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_PipeObjCmd (clientData, interp, objc, objv)
      ClientData  clientData;
      Tcl_Interp *interp;
@@ -157,7 +161,7 @@ TruncateByPath (interp, filePath, newSize)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_FtruncateObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
@@ -246,7 +250,7 @@ ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
  *      Standard TCL result.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_ReaddirObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlgets.c,v 8.2 1997/07/03 07:14:14 markd Exp $
+ * $Id: tclXlgets.c,v 8.3 1997/07/04 20:23:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -402,7 +402,7 @@ ReadListElement (interp, dataPtr, elemObjPtr)
  *      See the user documentation.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_LgetsObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
