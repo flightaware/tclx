@@ -191,9 +191,9 @@ Extended Tcl 7.4a can be downloaded by anonymous FTP from:
 
    ftp.neosoft.com:/pub/tcl/distrib/tclX7.4a.tar.gz
 or
-   harbor.ecn.purdue.edu:tcl/extensions/tclX7.4a.tar.gz
+   ftp.aud.alcatel.com:tcl/extensions/tclX7.4a.tar.gz
 
-A contributed sources archive resides on harbor.ecn.purdue.edu and
+A contributed sources archive resides on ftp.aud.alcatel.com and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently
 Asked Questions (FAQ) document exists in this archive.
 
