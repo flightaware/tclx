@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.13 1995/04/07 15:44:39 markd Exp markd $
+# $Id: Makefile.in,v 4.14 1995/04/21 21:07:47 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -85,8 +85,11 @@ tcl: tclXAppInit.o libtclx.a ${LIBTCL} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	      -o tcl || (rm -f tcl; exit 1)
 
-made.tmp libtclx.a: ${OBJS} ${UCBOBJS}
+made.tmp libtclx.a: ${OBJS} ${UCBOBJS} TCLXX_O_${TCLXX}
 	${AR} cr libtclx.a ${OBJS} ${UCBOBJS}
+	if [ "${TCLXX}" = "YES" ] ; then \
+	    ${AR} cr libtclx.a tcl++.o ;\
+	else exit 0 ; fi
 	${RANLIB} libtclx.a
 	touch made.tmp
 
@@ -111,15 +114,17 @@ tclXgetdate.c: ${srcdir}/tclXgetdate.y
 
 tcl++.o: ${srcdir}/tcl++.C ${srcdir}/tcl++.h
 	${CXX} -c ${CXX_FLAGS} ${srcdir}/tcl++.C
-	${AR} cr libtclx.a tcl++.o
-	${RANLIB} libtclx.a
-	touch made.tmp
 
 #------------------------------------------------------------------------------
 # Make sure we can link a C++ program (the result is not install).  Target
-# also forces tcl++.o to be compiled and added to the library.
+# also forces tcl++.o to be compiled.
 
-TCLXX_YES: tcl++.o tcl++
+TCLXX_O_YES:  tcl++.o
+	touch TCLXX_O_YES
+TCLXX_O_NO:
+	touch TCLXX_O_NO
+
+TCLXX_YES:  tcl++
 TCLXX_NO:
 
 tcl++: tclXAppInit++.o tcl++.o made.tmp
@@ -162,8 +167,9 @@ install-master-exec:
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp tclXgetdate.c tclXAppInit++.C tclXAppInit.o tclCmdIL.c
-	-rm -f ${OBJS} ${UCBOBJS} tclXAppInit++.o tcl++.o tcl tcl++ libtclx.a
+	-rm -f made.tmp tclXgetdate.c tclXAppInit.o tclCmdIL.c
+	-rm -f ${OBJS} ${UCBOBJS} libtclx.a tcl tcl++
+	-rm -f tclXAppInit++.C TCLXX_O_YES TCLXX_O_NO tclXAppInit++.o tcl++.o
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
