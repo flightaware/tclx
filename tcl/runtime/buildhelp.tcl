@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.8 1993/08/13 15:01:21 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.9 1993/08/31 23:03:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -81,6 +81,8 @@
 #   page is assumed.
 #
 #-----------------------------------------------------------------------------
+
+#@package: TclX-buildhelp buildhelp
 
 #-----------------------------------------------------------------------------
 # Truncate a file name of a help file if the system does not support long
