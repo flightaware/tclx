@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 2.1 1993/03/14 17:59:20 markd Exp markd $
+# $Id: help.test,v 2.2 1993/05/28 05:56:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -24,7 +24,7 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 #
 if {"[glob -nocomplain ../tcllib/help/*]" == ""} {
     echo "****"
-    echo "**** No help files in tcllib/help - help not available test not run"
+    echo "**** No help pages in tcllib/help - help not available test not run"
     echo "****"
     return
 }
@@ -142,13 +142,13 @@ Subjects available in /:
    status/          strings/         tclshell/        time/
    variables/       
 
-Help files available in /:
+Help pages available in /:
    help             
 }
 
 Test help-1.2 {help tests} {
     HelpSend "helppwd" promptCnt
-} 0 {Current help subject directory: /
+} 0 {Current help subject: /
 }
 
 Test help-1.3 {help tests} {
@@ -157,7 +157,7 @@ Test help-1.3 {help tests} {
 
 Test help-1.4 {help tests} {
     HelpSend "helppwd" promptCnt
-} 0 {Current help subject directory: /intro
+} 0 {Current help subject: /intro
 }
 
 Test help-1.5 {help tests} {
@@ -217,7 +217,7 @@ Test help-1.9 {help tests} {
 
 Test help-1.10 {help tests} {
     HelpSend "helppwd" promptCnt
-} 0 {Current help subject directory: /
+} 0 {Current help subject: /
 }
 
 
