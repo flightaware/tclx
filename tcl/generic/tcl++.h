@@ -22,7 +22,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.14 1993/11/17 15:16:25 markd Exp markd $
+ * $Id: tcl++.h,v 3.0 1993/11/19 06:59:30 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -516,12 +516,6 @@ class TclInterp_cl
     /*
      * Exported Extended Tcl initialization functions.
      */
-
-    inline int
-    XAppInit ()
-    {
-        return TclX_AppInit (interp);
-    }
 
     inline int
     XInit ()

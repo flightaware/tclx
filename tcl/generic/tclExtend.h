@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.26 1993/11/19 05:28:48 markd Exp markd $
+ * $Id: tclExtend.h,v 3.0 1993/11/19 06:59:21 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -64,9 +64,6 @@ extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
 /*
  * Exported Tcl initialization functions.
  */
-EXTERN int
-TclX_AppInit _ANSI_ARGS_((Tcl_Interp *interp));
-
 EXTERN int
 TclX_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
