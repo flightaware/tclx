@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.21 1997/12/14 20:25:57 markd Exp $
+# $Id: Makefile.in,v 8.21.2.1 1998/12/03 04:27:50 suresh Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -399,7 +399,7 @@ tclXhandles.o: ${TCLX_GENERIC_DIR}/tclXhandles.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXhandles.c
 
 tclXinit.o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
-	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
+	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_LIBRARY_PATH}\" \
 	    ${TCLX_GENERIC_DIR}/tclXinit.c
 
 tclXinitSA.o: ${TCLX_GENERIC_DIR}/tclXinitSA.c ${STANDALONE_SRCS}
@@ -579,7 +579,7 @@ tclXhandles..o: ${TCLX_GENERIC_DIR}/tclXhandles.c
 tclXinit..o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
-	    -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
+	    -DTCLX_LIBRARY=\"${TCLX_LIBRARY_PATH}\" \
 	    ${TCLX_GENERIC_DIR}/tclXinit.c
 	@OBJ_RESTORE@
 
