@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfil.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: stringfil.test,v 2.0 1992/10/16 04:50:18 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -30,21 +30,25 @@ g}
 
 unlink -nocomplain STRINGFIL.TEST
 
-test stringfile-1.1 {write_file command} {
+Test stringfile-1.1 {write_file command} {
     write_file STRINGFIL.TEST $stringfileTestVar
-} ""
+} 0 {}
 
-test stringfile-2.1 {read_file command} {
+Test stringfile-2.1 {read_file command} {
     read_file STRINGFIL.TEST
-} "$stringfileTestVar\n"
+} 0 "$stringfileTestVar\n"
 
-test stringfile-2.2 {read_file command} {
-    read_file STRINGFIL.TEST nonewline
-} "$stringfileTestVar"
+Test stringfile-2.2 {read_file command} {
+    read_file  -nonewline STRINGFIL.TEST
+} 0 $stringfileTestVar
 
-test stringfile-2.3 {read_file command} {
+Test stringfile-2.3 {read_file command} {
     read_file STRINGFIL.TEST 3
-} [crange $stringfileTestVar 0 2]
+} 0 [crange $stringfileTestVar 0 2]
+
+Test stringfile-2.4 {read_file command} {
+    read_file STRINGFIL.TEST nonewline
+} 0 $stringfileTestVar
 
 unlink STRINGFIL.TEST
 rename unknown SAVED_UNKNOWN

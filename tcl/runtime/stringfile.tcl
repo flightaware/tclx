@@ -12,28 +12,43 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfile.tcl,v 1.1 1992/09/20 23:30:27 markd Exp markd $
+# $Id: stringfile.tcl,v 2.0 1992/10/16 04:52:13 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-stringfile_functions read_file write_file
 
-proc read_file {fileName {numBytes {}}} {
-    set fp [open $fileName]
-    if {$numBytes != ""} {
-        set result [read $fp $numBytes]
+proc read_file {fileName args} {
+    if {$fileName == "-nonewline"} {
+        set flag $fileName
+        set fileName [lvarpop args]
     } else {
-        set result [read $fp]
+        set flag {}
     }
+    set fp [open $fileName]
+    set stat [catch {
+        eval read $flag $fp $args
+    } result]
     close $fp
+    if {$stat != 0} {
+        global errorInfo errorCode
+        error $result $errorInfo $errorCode
+    }
     return $result
 } 
 
 proc write_file {fileName args} {
     set fp [open $fileName w]
-    foreach string $args {
-        puts $fp $string
-    }
+    
+    set stat [catch {
+        foreach string $args {
+            puts $fp $string
+        }
+    } result]
     close $fp
+    if {$stat != 0} {
+        global errorInfo errorCode
+        error $result $errorInfo $errorCode
+    }
 }
 
