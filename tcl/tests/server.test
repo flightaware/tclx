@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.2 1995/03/30 19:14:04 markd Exp markd $
+# $Id: server.test,v 1.3 1995/03/31 21:39:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -229,6 +229,18 @@ if $safeHost {
     catch {
         set maybeIP [lindex [server_info addresses [id host]] 0]
     }
+}
+
+# If we can't connect to the echo server, then skip these tests.
+
+if [catch {
+    set fh [server_connect [id host] echo]
+    close $fh
+} msg] {
+    puts "*************************************************************"
+    puts "Unable to connect to the "echo" server ($msg).
+    puts "Some tests skipped"
+    puts "*************************************************************"
 }
 
 Test server-7.1 {simple client interaction} {
