@@ -6,7 +6,7 @@
 # Default system startup file for Tcl-based applications.  Defines
 # "unknown" procedure and auto-load facilities.
 #
-# SCCS: @(#) init.tcl 1.95 97/11/19 17:16:34
+# SCCS: @(#) init.tcl 1.5 98/07/06 14:56:32
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.
@@ -39,15 +39,15 @@
     # from older auto_mkindex versions
     lappend nameList $cmd
     foreach name $nameList {
-	if [info exists auto_index($name)] {
+	if {[info exists auto_index($name)]} {
 	    uplevel #0 $auto_index($name)
 	    return [expr {[info commands $name] != ""}]
 	}
     }
-    if ![info exists auto_path] {
+    if {![info exists auto_path]} {
 	return 0
     }
-    if [info exists auto_oldpath] {
+    if {[info exists auto_oldpath]} {
 	if {$auto_oldpath == $auto_path} {
 	    return 0
 	}
@@ -58,13 +58,13 @@
     # newer format tclIndex files.
 
     set issafe [interp issafe]
-    for {set i [expr [llength $auto_path] - 1]} {$i >= 0} {incr i -1} {
+    for {set i [expr {[llength $auto_path] - 1}]} {$i >= 0} {incr i -1} {
 	set dir [lindex $auto_path $i]
 	set f ""
         tclx_load_tndxs $dir
 	if {$issafe} {
 	    catch {source [file join $dir tclIndex]}
-	} elseif [catch {set f [open [file join $dir tclIndex]]}] {
+	} elseif {[catch {set f [open [file join $dir tclIndex]]}]} {
 	    continue
 	} else {
 	    set error [catch {
@@ -90,13 +90,13 @@
 	    if {$f != ""} {
 		close $f
 	    }
-	    if $error {
+	    if {$error} {
 		error $msg $errorInfo $errorCode
 	    }
 	}
     }
     foreach name $nameList {
-	if [info exists auto_index($name)] {
+	if {[info exists auto_index($name)]} {
 	    uplevel #0 $auto_index($name)
 	    if {[info commands $name] != ""} {
 		return 1
