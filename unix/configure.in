@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.24 1999/05/10 15:32:40 markd Exp $
+dnl $Id: configure.in,v 8.25 1999/06/16 02:41:01 wart Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.24 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.25 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -309,13 +309,17 @@ eval "TCL_STLIB_NAME=libtcl${TCL_UNSHARED_LIB_SUFFIX}"
 VERSION=$TK_VERSION
 eval "TK_STLIB_NAME=libtk${TCL_UNSHARED_LIB_SUFFIX}"
 
+DBGX=${TCLX_DBGX}
 VERSION=$TCLX_VERSION
 eval "TCLX_STLIB_NAME=libtclx${UNSHARED_LIB_SUFFIX}"
 eval "TCLX_SHLIB_NAME=libtclx${SHARED_LIB_SUFFIX}"
+eval "TCLX_SHLIB_NAME=${TCLX_SHLIB_NAME}"
 
+DBGX=${TKX_DBGX}
 VERSION=$TKX_VERSION
 eval "TKX_STLIB_NAME=libtkx${UNSHARED_LIB_SUFFIX}"
 eval "TKX_SHLIB_NAME=libtkx${SHARED_LIB_SUFFIX}"
+eval "TKX_SHLIB_NAME=${TKX_SHLIB_NAME}"
 
 #
 # Determine suffix to use for the object files for the shared library.
