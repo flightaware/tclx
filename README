@@ -1,6 +1,53 @@
                            Extended Tcl (TclX) 8.0.2
                            =========================
 
+
+PREFACE TO THE EIGHTH EDITION
+=============================
+
+When the first alpha release of Tcl 8.0 came out near the end of 1996, 
+we were excited by the possibilities that were present in the new system.  
+The on-the-fly bytecode compiler and internal object system promised major 
+performance improvements for Tcl.  Even though very few of the Tcl commands 
+had been converted to use the object system (which is still true in the 
+formal released version of Tcl 8.0), Tcl's performance was almost always at 
+least doubled, and many programs ran five, ten, and even hundreds of times
+faster than they did under Tcl 7.
+
+We made a commitment to embrace the object system and bytecode compiler
+in TclX, and the results of that effort sit before you now.
+
+TclX 8.0.1 has been extensively integrated with Tcl 8's new features.
+One metric is that 95% of TclX's commands have been converted to use the 
+new object model.
+
+TclX commands that evaluate code repeatedly have been recoded to use Tcl 
+objects to contain the code to be eval'ed  (as opposed to simple strings), 
+allowing the bytecode compiler to compile the code and then reuse the 
+compiled version on each subsequent iteration -- a major performance win.
+These changes principally speed up file scanning, and the "try_eval" and 
+"loop" commands.
+
+Beyond the recoding of the command interfaces and adoption of the practice
+of executing code in objects instead of strings, another of our goals was
+to adopt the object system's capabilities throughout the extensions, rather 
+than just in their interfaces.  As a result, keyed lists, for example, 
+are now contained in a new object type, added to Tcl through the
+C-level new-object-type-registration functions now standard in Tcl 8.
+The performance improvement for programs that make extensive use of large 
+keyed lists can be as much as a thousandfold.
+
+Use of the new Tcl list objects to contain lists speeds TclX's keyed lists, 
+readdir, scanmatch, fstat, and lgets routines, package handling code, list 
+extensions such as lvarpop, lvarpush, lempty, lassign, lmatch, and lcontain, 
+plus a host of other commands.
+
+Because TclX is one of few packages that make use of a number of Tcl's
+more arcane capabilities, such as getting C callbacks as Tcl commands are
+executed, we discovered over time a number of bugs in the bytecode compiler,
+and worked e-closely with Brian and others at Sun to get the issues resolved
+and to help move things forward.
+
 INTRODUCTION
 ============
 
@@ -45,8 +92,6 @@ CHANGES IN TCLX 8.0.2
 =====================
   o Compability with Tcl 8.0p2 and Tk 8.0p2.
 
-CHANGES IN TCLX 8.0.0
-=====================
   o Extensive internal use of Tcl 8.0's new object structures makes
     TclX execute very quickly.
 
@@ -173,8 +218,9 @@ THANKS
 
   A big thanks to all of the Extended Tcl users from all over the world
 who have helped us debug problems and given us valuable suggestions.
-A special thanks to John Ousterhout and his team at Sun for Tcl, Tk and
-all the support they have given us.
+A special thanks to John Ousterhout, his students at Berkeley, and (more
+recently) his team at Sun Microsystems, for Tcl, Tk and all the support 
+they have given us.
 
 Thanks to Michael E. Shorter <mike@globalware.com>, Christopher M. Sedore
 <cmsedore@zombie.maxwell.syr.edu>,  Philip Chow <pchow@isgtec.com>, and
@@ -184,15 +230,12 @@ to MS Windows.
 Thanks to Jan Nijtmans <nijtmans@worldaccess.nl> of Plus Patch fame for helping
 to get shared library support working for several system.
 
-
-NEOSOFT TCL CONSULTING
-======================
+NEOSOFT PROVIDES TCL SUPPORT, TRAINING, SOFTWARE, AND SERVICES
+==============================================================
 
   NeoSoft, home of Extended Tcl co-inventor Karl Lehenbauer, provides 
   commercial Tcl releases, support, training and consulting.  NeoSoft 
   can be reached by sending electronic mail to info@NeoSoft.com or by 
-  phoning +1 713 968-5800.
-
-
+  phoning +1 713 968 5800.
 
 
