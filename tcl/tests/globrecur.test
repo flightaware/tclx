@@ -13,13 +13,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: globrecur.test,v 2.0 1992/10/16 04:49:58 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
-
-rename SAVED_UNKNOWN unknown
+eval $SAVED_UNKNOWN
 
 proc tcltouch {file} {
     set fp [open $file w]
@@ -38,23 +37,26 @@ tcltouch GLOBTESTDIR/dir2/file1
 tcltouch GLOBTESTDIR/dir2/file2
 tcltouch GLOBTESTDIR/file2
 
-set expectedResult "GLOBTESTDIR GLOBTESTDIR/dir1 GLOBTESTDIR/dir1/file1 \
-GLOBTESTDIR/dir1/file2 GLOBTESTDIR/dir2 GLOBTESTDIR/dir2/file1 \
-GLOBTESTDIR/dir2/file2 GLOBTESTDIR/file1 GLOBTESTDIR/file2"
+set expectedResult [lsort [list GLOBTESTDIR GLOBTESTDIR/dir1 \
+                                GLOBTESTDIR/dir1/file1 \
+                                GLOBTESTDIR/dir1/file2 GLOBTESTDIR/dir2 \
+                                GLOBTESTDIR/dir2/file1 GLOBTESTDIR/dir2/file2 \
+                                GLOBTESTDIR/file1 GLOBTESTDIR/file2]]
 
-test recursive_glob-1.1 {recursive_glob command} {
+Test recursive_glob-1.1 {recursive_glob command} {
     lsort [recursive_glob GLOBTESTDIR]
-} $expectedResult
+} 0 $expectedResult
 
 set expectedResult [lrange $expectedResult 1 end]
 
-test recursive-1.2 {recursive_glob command with list of patterns} {
+Test recursive-1.2 {recursive_glob command with list of patterns} {
     lsort [recursive_glob {GLOBTEST*/dir* GLOBTEST*/file*}]
-} $expectedResult
+} 0 $expectedResult
 
 exec rm -rf GLOBTESTDIR
 
 unset expectedResult
 
 rename tcltouch ""
-rename unknown SAVED_UNKNOWN
+rename unknown {}
+

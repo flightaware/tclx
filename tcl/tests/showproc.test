@@ -12,13 +12,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showprocs.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: showprocs.test,v 2.0 1992/10/16 04:50:15 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
-
-rename SAVED_UNKNOWN unknown
+eval $SAVED_UNKNOWN
 
 set testProcVar {proc testproc {testVar} {
     return 1
@@ -26,24 +25,27 @@ set testProcVar {proc testproc {testVar} {
 
 eval $testProcVar
 
-test showproc-1.1 {showproc command} {
+Test showproc-1.1 {showproc command} {
     showproc testproc
-} "$testProcVar\n"
+} 0 "$testProcVar\n"
 
-test showprocs-1.1 {showprocs command} {
+Test showprocs-1.1 {showprocs command} {
     showprocs testproc
-} "$testProcVar\n\n"
+} 0 "$testProcVar\n\n"
 
-test showprocs-1.2 {showprocs command} {
+
+Test showprocs-1.2 {showprocs command} {
     set result ""
+
     foreach i [split [showprocs] "\n"] {
 	if {[lindex $i 0] == "proc"} {
 	    lappend result [lindex $i 1]
 	}
     }
     lsort $result
-} [lsort [info procs]]
+} 0 [lsort [info procs]]
 
 unset testProcVar
 rename testproc ""
-rename unknown SAVED_UNKNOWN
+rename unknown {}
+

@@ -12,130 +12,129 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: setfuncs.test,v 2.0 1992/10/16 04:50:14 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
+eval $SAVED_UNKNOWN
 
-rename SAVED_UNKNOWN unknown
-
-test setfuncs-1.1 {union command} {
+Test setfuncs-1.1 {union command} {
     union "" ""
-} ""
+} 0 ""
 
-test setfuncs-1.2 {union command} {
+Test setfuncs-1.2 {union command} {
     union a ""
-} "a"
+} 0 "a"
 
-test setfuncs-1.3 {union command} {
+Test setfuncs-1.3 {union command} {
     union "a b" "b c"
-} "a b c"
+} 0 "a b c"
 
-test setfuncs-1.4 {union command} {
+Test setfuncs-1.4 {union command} {
     union "a b c d" "a b c d"
-} "a b c d"
+} 0 "a b c d"
 
-test setfuncs-1.5 {union command} {
+Test setfuncs-1.5 {union command} {
     union "a d c d b" "b d c a a b d a b c d"
-} "a b c d"
+} 0 "a b c d"
 
-test setfuncs-1.6 {union command} {
+Test setfuncs-1.6 {union command} {
     union "d c b a e f" ""
-} "a b c d e f"
+} 0 "a b c d e f"
 
-test setfuncs-1.7 {union command} {
+Test setfuncs-1.7 {union command} {
     union "" "f e d c b a"
-} "a b c d e f"
+} 0 "a b c d e f"
 
-test setfuncs-1.8 {union command} {
+Test setfuncs-1.8 {union command} {
     union "{n p}" "f e d c b a"
-} "a b c d e f {n p}"
+} 0 "a b c d e f {n p}"
 
-test setfuncs-1.9 {union command} {
+Test setfuncs-1.9 {union command} {
     union "{n p}" "f e d c {n p} b a"
-} "a b c d e f {n p}"
+} 0 "a b c d e f {n p}"
 
-test setfuncs-1.10 {union command} {
+Test setfuncs-1.10 {union command} {
     union "{n p} z {n p} z" "f e d c {n p} b a"
-} "a b c d e f {n p} z"
+} 0 "a b c d e f {n p} z"
 
-
-test setfuncs-2.1 {intersect command} {
+Test setfuncs-2.1 {intersect command} {
     intersect "" ""
-} ""
+} 0 ""
 
-test setfuncs-2.2 {intersect command} {
+Test setfuncs-2.2 {intersect command} {
     intersect "a b c" ""
-} ""
+} 0 ""
 
-test setfuncs-2.3 {intersect command} {
+Test setfuncs-2.3 {intersect command} {
     intersect "" "a b c"
-} ""
+} 0 ""
 
-test setfuncs-2.4 {intersect command} {
+Test setfuncs-2.4 {intersect command} {
     intersect "d f b" "a b c"
-} "b"
+} 0 "b"
 
-test setfuncs-2.5 {intersect command} {
+Test setfuncs-2.5 {intersect command} {
     intersect "a p q d v m b n o z t d f b" "a b c"
-} "a b"
+} 0 "a b"
 
-test setfuncs-2.6 {intersect command} {
+Test setfuncs-2.6 {intersect command} {
     intersect "d c b a e f" "{n p}"
-} ""
+} 0 ""
 
-test setfuncs-2.7 {intersect command} {
+Test setfuncs-2.7 {intersect command} {
     intersect "d c" "f e d c b a"
-} "c d"
+} 0 "c d"
 
-test setfuncs-2.8 {intersect command} {
+Test setfuncs-2.8 {intersect command} {
     intersect "a f {n p} e" "f e d c b a"
-} "a e f"
+} 0 "a e f"
 
-test setfuncs-2.9 {intersect command} {
+Test setfuncs-2.9 {intersect command} {
     intersect "{n p} f d" "f e d c {n p} b a"
-} "d f {n p}"
+} 0 "d f {n p}"
 
-test setfuncs-2.10 {intersect command} {
+Test setfuncs-2.10 {intersect command} {
     intersect "{n p} z {n p} z" "f e d c {n p} b a"
-} "{n p}"
+} 0 "{n p}"
 
-test setfuncs-3.1 {intersect3 command} {
+Test setfuncs-3.1 {intersect3 command} {
     intersect3 "" ""
-} "{} {} {}"
+} 0 "{} {} {}"
 
-test setfuncs-3.2 {intersect3 command} {
+Test setfuncs-3.2 {intersect3 command} {
     intersect3 "a b c" ""
-} "{a b c} {} {}"
+} 0 "{a b c} {} {}"
 
-test setfuncs-3.3 {intersect3 command} {
+Test setfuncs-3.3 {intersect3 command} {
     intersect3 "" "a b c"
-} "{} {} {a b c}"
+} 0 "{} {} {a b c}"
 
-test setfuncs-3.4 {intersect3 command} {
+Test setfuncs-3.4 {intersect3 command} {
     intersect3 "d f b" "a b c"
-} "{d f} b {a c}"
+} 0 "{d f} b {a c}"
 
-test setfuncs-3.5 {intersect3 command} {
+Test setfuncs-3.5 {intersect3 command} {
     intersect3 "a p q d v m b n o z t d f b" "a b c"
-} "{d f m n o p q t v z} {a b} c"
+} 0 "{d f m n o p q t v z} {a b} c"
 
-test setfuncs-4.1 {lrmdups command} {
+Test setfuncs-4.1 {lrmdups command} {
     lrmdups {a d b c eee b d 1}
-} {1 a b c d eee}
+} 0 {1 a b c d eee}
 
-test setfuncs-4.2 {lrmdups command} {
+Test setfuncs-4.2 {lrmdups command} {
     lrmdups {aaa aaa aaaa aaa aaa }
-} {aaa aaaa}
+} 0 {aaa aaaa}
 
-test setfuncs-4.3 {lrmdups command} {
+Test setfuncs-4.3 {lrmdups command} {
     lrmdups {{} aaa {} aaa aaa }
-} {{} aaa}
+} 0 {{} aaa}
 
-test setfuncs-4.4 {lrmdups command} {
+Test setfuncs-4.4 {lrmdups command} {
     lrmdups {aaa}
-} {aaa}
+} 0 {aaa}
 
-rename unknown SAVED_UNKNOWN
+rename unknown {}
+
 

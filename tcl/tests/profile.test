@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 2.3 1993/05/16 16:24:02 markd Exp markd $
+# $Id: profile.test,v 2.4 1993/06/01 05:43:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -230,7 +230,7 @@ proc GetProfRep {fileName} {
     return $data
 }
 
-rename SAVED_UNKNOWN unknown
+eval $SAVED_UNKNOWN
 
 Test profile-5.1 {profrep tests} {
     profrep profData calls 1 prof.tmp "Profile Test 5.1"
@@ -327,5 +327,6 @@ EatTime                           4        800         10
 }
 
 unset foo
-rename unknown SAVED_UNKNOWN
+rename unknown {}
+
 

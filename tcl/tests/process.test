@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 1.2 1992/10/02 15:26:07 markd Exp markd $
+# $Id: process.test,v 2.0 1992/10/16 04:50:05 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -84,7 +84,11 @@ Test process-1.6 {fork, execl, wait tests} {
 # Test extended wait functionality, if available.
 
 catch {wait -nohang 1} result
-if {$result == "wrong # args: wait pid"} return
+if [string match "The \"-nohang\", \"-untraced\"*" $result] {
+    echo *** Extended wait functionallity not available on this system"
+    echo *** Skipping the remainder of the process tests"
+    return
+}
 
 Test process-2.1 {fork, execl, wait tests} {
     set testPid [ForkLoopingChild]

@@ -12,40 +12,45 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: convlib.test,v 2.0 1992/10/16 04:49:34 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
-rename SAVED_UNKNOWN unknown
+eval $SAVED_UNKNOWN
 
-# Create a temporary tclIndex file and the files it points to.
+catch {unlink -nocomplain [glob convlib.tmp/*]}
+catch {rmdir convlib.tmp}
+mkdir convlib.tmp
 
-set fh [open tclIndex w]
-loop num 0 5 {
-    puts $fh "LoadProc${num}A tmp${num}.tcl"
-    puts $fh "LoadProc${num}B tmp${num}.tcl"
-}
-puts $fh "foo init.tcl"  ;# Should not be used.
-close $fh
+# Create a temporary source files and generate an index.
 
 loop num 0 5 {
-    set fh [open tmp${num}.tcl w]
+    set fh [open convlib.tmp/tmp${num}.tcl w]
     puts $fh "proc LoadProc${num}A {} {return @LoadProc${num}A@}"
     puts $fh "proc LoadProc${num}B {} {return @LoadProc${num}B@}"
     close $fh
 }
 
+set fh [open convlib.tmp/init.tcl w]
+puts $fh "proc InitTcl {} {return @InitTcl@}"
+close $fh
+
+auto_mkindex convlib.tmp *.tcl
+
 # Proc that validates the library by executing procs out of it.
 
 proc LibValidate {testid testname} {
     loop num 0 5 {
-        test $testid $testname {
+        Test $testid.1 $testname {
             LoadProc${num}A
-        } "@LoadProc${num}A@"
-        test $testid $testname {
+        } 0 "@LoadProc${num}A@"
+        Test $testid.2 $testname {
             LoadProc${num}B
-        } "@LoadProc${num}B@"
+        } 0 "@LoadProc${num}B@"
+        Test $testid.3 $testname {
+            InitTcl
+        } 1 {invalid command name "InitTcl"}
     }
 }
 
@@ -53,21 +58,22 @@ proc LibValidate {testid testname} {
 # Now convert and load the library, see if we can actually use it.
 #
 
-test convlib-1.1 {Convert library tests} {
-    unlink -nocomplain {tmp.tlib tmp.tndx}
-    convert_lib [pwd]/tclIndex tmp  "init.tcl"
-    list [file exists tmp.tlib] [file exists tmp.tndx]
-} {1 1}
+Test convlib-1.1 {Convert library tests} {
+    unlink -nocomplain {convlib.tmp/tmp.tlib convlib.tmp/tmp.tndx}
+    convert_lib convlib.tmp/tclIndex convlib.tmp/tmp  "init.tcl"
+    list [file exists convlib.tmp/tmp.tlib] [file exists convlib.tmp/tmp.tndx]
+} 0 {1 1}
 
-test convlib-1.2 {Convert library tests} {
-    unlink -nocomplain {tmp.tlib tmp.tndx}
-    convert_lib [pwd]/tclIndex tmp.tlib "init.tcl"
-    loadlibindex tmp.tlib
-    list [file exists tmp.tlib] [file exists tmp.tndx]
-} {1 1}
+Test convlib-1.2 {Convert library tests} {
+    unlink -nocomplain {convlib.tmp/tmp.tlib convlib.tmp/tmp.tndx}
+    convert_lib convlib.tmp/tclIndex convlib.tmp/tmp.tlib "init.tcl"
+    list [file exists convlib.tmp/tmp.tlib] [file exists convlib.tmp/tmp.tndx]
+} 0 {1 1}
 
+loadlibindex convlib.tmp/tmp.tlib
 LibValidate convlib-1.3 {Convert library tests}
 
-unlink -nocomplain {tmp0.tcl tmp1.tcl tmp2.tcl tmp3.tcl tmp4.tcl
-                    tmp.tlib tmp.tndx tclIndex}
-rename unknown SAVED_UNKNOWN
+catch {unlink -nocomplain [glob convlib.tmp/*]}
+catch {rmdir convlib.tmp}
+rename unknown {}
+

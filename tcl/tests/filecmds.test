@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 2.0 1992/10/16 04:49:46 markd Rel markd $
+# $Id: filecmds.test,v 2.1 1993/04/07 06:50:44 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -40,20 +40,22 @@ Test filecmds-3.1 {copyfile tests} {
 Test filecmds-3.2 {copyfile tests} {
     set testFH [open IOTEST.TMP w]
     set testFH2 [open IOTEST2.TMP w]
-    set stat [list [catch {copyfile $testFH $testFH2} msg] $msg]
+    set stat [list [catch {copyfile $testFH $testFH2} msg] \
+                   [lrange $msg 1 end]]
     close $testFH
     close $testFH2
     set stat
-} 0 {1 {Source file is not open for read access}}
+} 0 {1 {wasn't opened for reading}}
 
 Test filecmds-3.3 {copyfile tests} {
     set testFH [open IOTEST.TMP r]
     set testFH2 [open IOTEST2.TMP r]
-    copyfile $testFH $testFH2
-} 1 {Target file is not open for write access}
-
-close $testFH
-close $testFH2
+    set stat [list [catch {copyfile $testFH $testFH2} msg] \
+                   [lrange $msg 1 end]]
+    close $testFH
+    close $testFH2
+    set stat
+} 0 {1 {wasn't opened for writing}}
 
 Test filecmds-3.4 {copyfile tests} {
     copyfile $testFH $testFH2
@@ -93,6 +95,6 @@ Test filecmds-4.2 {pipe tests} {
 close $readPF
 close $writePF
 
-unlink {IOTEST.TMP IOTEST2.TMP OUTPUT.TMP INCMDS.TMP}
+unlink -nocomplain {IOTEST.TMP IOTEST2.TMP}
 
 

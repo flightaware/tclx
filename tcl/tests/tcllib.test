@@ -13,16 +13,23 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 2.1 1993/05/04 02:57:06 markd Exp markd $
+# $Id: tcllib.test,v 2.2 1993/05/09 16:18:08 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
+eval $SAVED_UNKNOWN
 
-rename SAVED_UNKNOWN unknown
-set SAVE_TCLPATH $TCLPATH
-set TCLPATH {}
-global TCLENV
+# Load the slow-path part of the unknown command.  Otherwise the unknown
+# command will not work when the loadpath is changed.
+
+if ![auto_load tclx_unknown2] {
+    error "can't auto_load tclx_unknown2"
+}
+
+global save_auto_path auto_path
+set save_auto_path $auto_path
+set auto_path {}
 catch {unset auto_path}
 
 if {[id user] == "root"} {
@@ -34,19 +41,23 @@ if {[id user] == "root"} {
 
 #
 # Since we have libraries coming and going in this test, we need to
-# reset the environment.  The file id that is used by the tcllib code
-# is based on inode, so if a library is purged, it might be recycled.
+# reset the environment.  
 #
 proc TclLibReset {} {
-    global TCLENV
-    foreach idx [array names TCLENV] {
-        case $idx {
-            {PROC:*} {unset TCLENV($idx)}
-            {PKG:*}  {unset TCLENV($idx)}
-            {@*}     {unset TCLENV($idx)}
-        }
+    global auto_execs auto_index auto_pkg_index auto_path
+    catch {unset auto_execs}
+    catch {unset auto_index}
+    catch {unset auto_pkg_index}
+    
+    # This alters the internal knowledge of the last path that was loaded.
+    if [info exists auto_path] {
+        set save_auto_path $auto_path
+    } else {
+        set save_auto_path {}
     }
-    autoload buildidx.tcl buildpackageindex
+    set auto_path {}
+    auto_load
+    set auto_path $save_auto_path
 }
 
 proc TclLibCleanUp {} {
@@ -77,18 +88,14 @@ catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 #
 
 Test tcllib-1.1 {command parameter checking} {
-    demand_load
-} 1 {wrong # args: demand_load procedure}
+    auto_load a b c d
+} 1 {wrong # args: auto_load ?command?}
 
 Test tcllib-1.2 {command parameter checking} {
-    demand_load a b c d
-} 1 {wrong # args: demand_load procedure}
-
-Test tcllib-1.3 {command parameter checking} {
     loadlibindex
 } 1 {wrong # args: loadlibindex libFile}
 
-Test tcllib-1.4 {command parameter checking} {
+Test tcllib-1.3 {command parameter checking} {
     loadlibindex a b c d
 } 1 {wrong # args: loadlibindex libFile}
 
@@ -97,22 +104,22 @@ Test tcllib-1.4 {command parameter checking} {
 #
 
 Test tcllib-2.1 {bogus path test} {
-    set TCLPATH [list /bogus/dir/path/no/work [pwd]/../tcllib]
+    set auto_path [list /bogus/dir/path/no/work [pwd]/../tclmaster]
     TclLibAAA
-} 1 {invalid command name: "TclLibAAA"}
+} 1 {invalid command name "TclLibAAA"}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
 Test tcllib-2.2 {bogus path test} {
-    set TCLPATH [list ~bogususerman/tcllib [pwd]/../tcllib]
+    set auto_path [list ~bogususerman/tcllib [pwd]/../tclmaster]
     TclLibAAA
-} 1 {invalid command name: "TclLibAAA"}
+} 1 {invalid command name "TclLibAAA"}
 
 Test tcllib-2.3 {bogus path test} {
-    set TCLPATH [pwd]/../tcllib
+    set auto_path [pwd]/../tclmaster
     set auto_path [list /bogus/dir/path/no/work]
     TclLibAAA
-} 1 {invalid command name: "TclLibAAA"}
+} 1 {invalid command name "TclLibAAA"}
 
 
 #
@@ -132,7 +139,8 @@ BuildTestLib tcllib1.dir/test1.tlib
 PutFile tcllib1.dir/test1.tndx {bogus
 data}
 
-set TCLPATH [list [pwd]/tcllib1.dir [pwd]/../tcllib]
+TclLibReset
+set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
 
 TestReg tcllib-3.1 {bogus package library index} {
     TclLibAAB
@@ -146,6 +154,7 @@ PutFile tcllib1.dir/test1.tndx \
 TestReg tcllib-3.2 {bogus package library index} {
     TclLibAAB
 } 1 {^range to eval outside of file bounds "/.*test1.tlib"$}
+
 
 PutFile tcllib1.dir/test1.tndx \
     {test1-package -1 140 TclLibAAB TclLibAAC TclLibAAD}
@@ -163,7 +172,8 @@ TestReg tcllib-3.4 {bogus package library index} {
     TclLibAAB
 } 1 {^range to eval outside of file bounds "/}
 
-set TCLPATH [list [pwd]/tcllib2.dir [pwd]/../tcllib]
+TclLibReset
+set auto_path [list [pwd]/tcllib2.dir [pwd]/../tclmaster]
 
 if {[id user] != "root"} {
     Test tcllib-4.1 {bad rebuild package library index} {
@@ -171,30 +181,31 @@ if {[id user] != "root"} {
         mkdir tcllib2.dir
         BuildTestLib tcllib2.dir/test1.tlib TclLibAB
         chmod -w tcllib2.dir
-        list [catch {TclLibABB} msg] [crange $msg 0 25] $TCLENV(inUnknown) \
+        list [catch {TclLibABB} msg] [crange $msg 0 25] \
              [lrange $errorCode 0 1] \
-             [string match "*while loading Tcl package library*" $errorInfo] \
-             [string match "*while demand loading \"TclLibABB\"*" $errorInfo]
-    } 0 {1 {building package index for} 0 {UNIX EACCES} 1 1}
+             [string match "*while loading Tcl library index*" $errorInfo] \
+             [string match "*while auto loading \"TclLibABB\"*" $errorInfo]
+    } 0 {1 {building package index for} {POSIX EACCES} 1 1}
 }
 
 TclLibCleanUp
 mkdir tcllib1.dir
-
-set TCLPATH [list [pwd]/tcllib1.dir [pwd]/../tcllib]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
 
 PutFile tcllib1.dir/tclIndex "#" "badline" "nukearray nukearray.tmp" \
     "baz baz.tmp"
 
-TestReg tcllib-5.1 {bogus Ousterhout library index} {
+Test tcllib-5.1 {bogus Ousterhout library index} {
     nukearray
-} 1 {^format error in library index "/.*$}
+} 1 {recursive load of indexes (probable invalid command while loading index)}
 
-PutFile tcllib1.dir/tclIndex "#" "nukearray nukearray.tmp" "baz baz.tmp"
+PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
+        {set auto_index(parray)   " source $dir/parray.tcl"} \
+        {set auto_index(nukearray) "source $dir/spazzzzzzzz"} \
 
 TestReg tcllib-5.2 {missing file found with Ousterhout library index} {
     nukearray
-} 1 {couldn't read file}
+} 1 {^couldn't read file}
 
 PutFile tcllib1.dir/nukearray.tmp {proc nukearray {} {}}
 chmod 000 tcllib1.dir/nukearray.tmp
@@ -202,15 +213,18 @@ chmod 000 tcllib1.dir/nukearray.tmp
 if {[id user] != "root"} {
     TestReg tcllib-5.3 {missing file found with Ousterhout library index} {
         nukearray
-    } 1 {couldn't read file}
+    } 1 {^couldn't read file}
 }
 
 TclLibCleanUp
 mkdir tcllib1.dir
 
 BuildTestLib  tcllib1.dir/test2.tlib TclLibAC
+set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
 
-PutFile tcllib1.dir/tclIndex "#" "nukearray nukearray.tmp" "baz baz.tmp"
+PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
+        {set auto_index(parray)   " source $dir/parray.tcl"} \
+        {set auto_index(nukearray) "source $dir/nukearray.tmp"}
 PutFile tcllib1.dir/nukearray.tmp {proc nukearray {} {return "@nukearray@"}}
 
 Test tcllib-6.1 {successful library access} {
@@ -231,7 +245,7 @@ Test tcllib-6.3 {successful library access} {
 #
 TclLibCleanUp
 mkdir {tcllib1.dir tcllib2.dir}
-set TCLPATH [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tcllib]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
 
 PutFile tcllib1.dir/test1.tlib \
     {#@package: test-pkg DupPkgTest} \
@@ -260,7 +274,7 @@ Test tcllib-7.2 {Duplicate package handling} {
 #
 TclLibCleanUp
 mkdir {tcllib1.dir tcllib2.dir}
-set TCLPATH [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tcllib]
+set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
 
 PutFile tcllib1.dir/test1.tlib \
     {#@package: test-pkg procAAA \\} \
@@ -293,7 +307,5 @@ rename TclLibCleanUp {}
 rename PutFile {}
 rename TclLibReset {}
 
-set TCLPATH $SAVE_TCLPATH
-rename unknown SAVED_UNKNOWN
-
-
+set auto_path $save_auto_path
+rename unknown {}

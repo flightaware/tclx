@@ -13,13 +13,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.test,v 1.2 1992/10/01 14:43:03 markd Exp markd $
+# $Id: pushd.test,v 2.0 1992/10/16 04:50:08 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
-
-rename SAVED_UNKNOWN unknown
+eval $SAVED_UNKNOWN
 
 set CWD [pwd]
 
@@ -66,4 +65,5 @@ Test popd-1.4 {popd command} {
 } 0 {}
 
 cd $CWD
-rename unknown SAVED_UNKNOWN
+rename unknown {}
+

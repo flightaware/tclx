@@ -1,7 +1,7 @@
 #
 # lassign.test
 #
-# Tests for tcl.tlib field assignment routines.
+# Tests for lassign command.
 #---------------------------------------------------------------------------
 # Copyright 1992 Karl Lehenbauer and Mark Diekhans.
 #
@@ -12,12 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lassign.test,v 2.1 1993/02/17 03:00:50 markd Exp markd $
+# $Id: lassign.test,v 2.2 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
-rename SAVED_UNKNOWN unknown
 
 Test lassign-1.1 {lassign command} {
     lassign "a b {c d} e" alpha beta gamma delta epsilon
@@ -29,6 +28,6 @@ Test lassign-1.2 {lassign command} {
 } 1 {wrong # args: lassign list varname ?varname..?}
 
 catch {unset alpha beta gamma delta epsilon}
-rename unknown SAVED_UNKNOWN
+
 
 

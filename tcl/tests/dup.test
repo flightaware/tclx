@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 1.2 1992/10/03 23:32:48 markd Exp markd $
+# $Id: dup.test,v 2.0 1992/10/16 04:49:38 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -21,7 +21,7 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 
 # Create a test file
 
-catch {unlink {DUP.TMP}}
+unlink -nocomplain {DUP.TMP DUP2.TMP}
 
 set testFH [open DUP.TMP w]
 for {set cnt 0} {$cnt < 100} {incr cnt} {
@@ -29,14 +29,24 @@ for {set cnt 0} {$cnt < 100} {incr cnt} {
 }
 close $testFH
 
-test iocmds-2.1 {dup tests} {
+Test dup-1.1 {dup tests} {
     set testFH [open DUP.TMP]
     set testFH2 [dup $testFH]
     gets $testFH2 testRec
     close $testFH
     close $testFH2
     set testRec
-} [GenRec 0]
+} 0 [GenRec 0]
+
+Test dup-1.2 {dup tests} {
+    set testFH [open DUP.TMP]
+    set testFH2 [open DUP2.TMP w]
+    set testFH2 [dup $testFH $testFH2]
+    gets $testFH2 testRec
+    close $testFH
+    close $testFH2
+    set testRec
+} 0 [GenRec 0]
 
 set data {{now is the time}    {for all good programmers} 
           {to come to the aid} {of their software}}
@@ -56,11 +66,9 @@ if {[set childPid [fork]] == 0} {
     set inFH  [open INCMDS.TMP r]
     set outFH [open OUTPUT.TMP w]
 
-    close stdin
     dup $inFH stdin
     close $inFH
 
-    close stdout
     dup $outFH stdout
     close $outFH
         
@@ -68,17 +76,17 @@ if {[set childPid [fork]] == 0} {
     error "Should never make it here"
 }
 
-test iocmds-2.2 {dup tests} {
+Test dup-1.3 {dup tests} {
     wait $childPid
-} "$childPid EXIT 0"
+} 0 "$childPid EXIT 0"
 
 set outFH [open OUTPUT.TMP r]
 foreach line $data {
-    test iocmds-2.3 {dup tests} {
+    Test dup-1.4 {dup tests} {
         gets $outFH
-    } $line
+    } 0 $line
 }
 close $outFH
 
-catch {unlink {DUP.TMP}}
+unlink -nocomplain {DUP.TMP DUP2.TMP INCMDS.TMP OUTPUT.TMP}
 

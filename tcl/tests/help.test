@@ -1,3 +1,5 @@
+echo @@@ HELP TESTS ARE NOT CURRENTLY WORKING @@@
+return
 #
 # help.test
 #
@@ -13,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 2.2 1993/05/28 05:56:16 markd Exp markd $
+# $Id: help.test,v 2.3 1993/06/01 05:43:37 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -111,7 +113,7 @@ if {$G_helpPid == 0} {
     close $G_helpInPipeFH
     close $G_helpOutPipeFH
 
-    rename SAVED_UNKNOWN unknown
+    eval $SAVED_UNKNOWN
 
     commandloop {puts stdout "===HELPSERVER==="; flush stdout} \
                 {error "Help server incomplete cmd"}

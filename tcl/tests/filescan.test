@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 2.0 1992/10/16 04:49:47 markd Rel markd $
+# $Id: filescan.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -58,18 +58,22 @@ proc GenScanRec {Key LineNum} {
 proc ValMatch {scanInfo errId} {
     global testFH matchInfo
 
-    test filescan-${errId}.1 {filescan tests} {
+    Test filescan-${errId}.1 {filescan tests} {
          set matchInfo(line)
-    } [GenScanRec [lindex $scanInfo 0] [lindex $scanInfo 2]]
-    test filescan-${errId}.2 {filescan tests} {
+    } 0 [GenScanRec [lindex $scanInfo 0] [lindex $scanInfo 2]]
+
+    Test filescan-${errId}.2 {filescan tests} {
          set matchInfo(offset)
-    } [lindex $scanInfo 1]
-    test filescan-${errId}.3 {filescan tests} {
+    } 0 [lindex $scanInfo 1]
+
+    Test filescan-${errId}.3 {filescan tests} {
          set matchInfo(linenum)
-    } [lindex $scanInfo 2]
-    test filescan-${errId}.4 {filescan tests} {
+    } 0 [lindex $scanInfo 2]
+
+    Test filescan-${errId}.4 {filescan tests} {
          set matchInfo(handle)
-    } $testFH
+    } 0 $testFH
+
     set matchType [lindex $scanInfo 3] 
     global matchCnt.$matchType
     incr matchCnt.$matchType
@@ -142,29 +146,33 @@ scanmatch $testCH {
 
     incr defaultCnt
 
-    test filescan-1.2 {filescan tests} {
+    Test filescan-1.2 {filescan tests} {
         set matchInfo(handle)
-    } $testFH
+    } 0 $testFH
 }
 
 set testFH [open TEST.TMP r]
 scanfile $testCH $testFH
 
-test filescan-1.3 {filescan tests} {
+Test filescan-1.3 {filescan tests} {
     set {matchCnt.0}
-} ${chkMatchCnt.0}
-test filescan-1.4 {filescan tests} {
+} 0 ${chkMatchCnt.0}
+
+Test filescan-1.4 {filescan tests} {
     set {matchCnt.1}
-} ${chkMatchCnt.1}
-test filescan-1.5 {filescan tests} {
+} 0 ${chkMatchCnt.1}
+
+Test filescan-1.5 {filescan tests} {
     set {matchCnt.2}
-} ${chkMatchCnt.2}
-test filescan-1.6 {filescan tests} {
+} 0 ${chkMatchCnt.2}
+
+Test filescan-1.6 {filescan tests} {
    set {matchCnt.3}
-} ${chkMatchCnt.3}
-test filescan-1.7 {filescan tests} {
+} 0 ${chkMatchCnt.3}
+
+Test filescan-1.7 {filescan tests} {
     set defaultCnt
-} $chkDefaultCnt
+} 0 $chkDefaultCnt
 
 scancontext delete $testCH
 
@@ -189,37 +197,36 @@ scanmatch $testCH [IncrName $midKey] {
     return "FudPucker"
 }
 
-test filescan-2.2 {filescan tests} {
+Test filescan-2.2 {filescan tests} {
     scanfile $testCH $testFH
-} "FudPucker"
+} 0 "FudPucker"
 
 scancontext delete $testCH
 
 
 # Test argument checking and error handling.
 
-test filescan-3.1 {filescan tests} {
-    list [catch {scancontext foomuch} msg] $msg
-} {1 {invalid argument, expected one of: create or delete}}
+Test filescan-3.1 {filescan tests} {
+    scancontext foomuch
+} 1 {invalid argument, expected one of: create or delete}
 
-test filescan-3.2 {filescan tests} {
-    list [catch {scanmatch $testCH} msg] $msg
-} {1 {wrong # args: scanmatch ?-nocase? contexthandle ?regexp? command}}
+Test filescan-3.2 {filescan tests} {
+    scanmatch $testCH
+} 1 {wrong # args: scanmatch ?-nocase? contexthandle ?regexp? command}
 
-test filescan-3.3 {filescan tests} {
-    list [catch {scanmatch} msg] $msg
-} {1 {wrong # args: scanmatch ?-nocase? contexthandle ?regexp? command}}
+Test filescan-3.3 {filescan tests} {
+    scanmatch
+} 1 {wrong # args: scanmatch ?-nocase? contexthandle ?regexp? command}
 
-test filescan-3.4 {filescan tests} {
-    list [catch {scanfile} msg] $msg
-} {1 {wrong # args: scanfile contexthandle filehandle}}
+Test filescan-3.4 {filescan tests} {
+    scanfile
+} 1 {wrong # args: scanfile contexthandle filehandle}
 
-test filescan-3.5 {filescan tests} {
+Test filescan-3.5 {filescan tests} {
     set testCH [scancontext create]
-    set msg [list [catch {scanfile $testCH $testFH} msg] $msg]
-    scancontext delete $testCH
-    set msg
-} {1 {no patterns in current scan context}}
+    scanfile $testCH $testFH
+} 1 {no patterns in current scan context}
+catch {scancontext delete $testCH}
 
 close $testFH
 unlink TEST.TMP

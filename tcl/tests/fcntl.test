@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 2.1 1993/01/22 06:53:21 markd Exp markd $
+# $Id: fcntl.test,v 2.2 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,85 +23,85 @@ close $testFH
 
 set testFH [open FCNTL.TMP r+]
 
-test fcntl-1.1 {fcntl tests} {
+Test fcntl-1.1 {fcntl tests} {
     fcntl $testFH RDWR
-} {1}
+} 0 {1}
 
-test fcntl-1.2 {fcntl tests} {
+Test fcntl-1.2 {fcntl tests} {
     fcntl $testFH READ
-} {1}
+} 0 {1}
 
-test fcntl-1.3 {fcntl tests} {
+Test fcntl-1.3 {fcntl tests} {
     fcntl $testFH WRITE
-} {1}
+} 0 {1}
 
-test fcntl-1.4 {fcntl tests} {
+Test fcntl-1.4 {fcntl tests} {
     fcntl $testFH CLOEXEC 1
     fcntl $testFH CLOEXEC
-} {1}
+} 0 {1}
 
-test fcntl-1.5 {fcntl tests} {
+Test fcntl-1.5 {fcntl tests} {
     fcntl $testFH CLOEXEC 0
     fcntl $testFH CLOEXEC
-} {0}
+} 0 {0}
 
-test fcntl-1.6 {fcntl tests} {
+Test fcntl-1.6 {fcntl tests} {
     fcntl $testFH NONBLOCK 1
     fcntl $testFH NONBLOCK
-} {1}
+} 0 {1}
 
-test fcntl-1.7 {fcntl tests} {
+Test fcntl-1.7 {fcntl tests} {
     fcntl $testFH append 1
     list [fcntl $testFH append] [fcntl $testFH nonblock]
-} {1 1}
+} 0 {1 1}
 
-test fcntl-1.8 {fcntl tests} {
+Test fcntl-1.8 {fcntl tests} {
     fcntl $testFH APPEND 0
     list [fcntl $testFH append] [fcntl $testFH nonblock]
-} {0 1}
+} 0 {0 1}
 
-test fcntl-1.9 {fcntl tests} {
+Test fcntl-1.9 {fcntl tests} {
     fcntl $testFH NONBLOCK 0
     fcntl $testFH nonBlock
-} {0}
+} 0 {0}
 
-test fcntl-1.10 {fcntl tests} {
+Test fcntl-1.10 {fcntl tests} {
     fcntl $testFH NOBUF 1
     fcntl $testFH NObuf
-} {1}
+} 0 1
 
-test fcntl-1.11 {fcntl tests} {
-    list [catch "fcntl $testFH NOBUF 0" msg] $msg
-} {1 {Attribute "NOBUF" may not be cleared once set}}
+Test fcntl-1.11 {fcntl tests} {
+    fcntl $testFH NOBUF 0
+} 1 {Attribute "NOBUF" may not be cleared once set}
 
 close $testFH
 set testFH [open FCNTL.TMP w]  ;# Reopen, can not have both nobuf and linebuf
 
-test fcntl-1.12 {fcntl tests} {
+Test fcntl-1.12 {fcntl tests} {
     fcntl $testFH LINEBUF 1
     fcntl $testFH LINEBUF
-} {1}
+} 0 {1}
 
-test fcntl-1.13 {fcntl tests} {
-    list [catch "fcntl $testFH LINEBUF 0" msg] $msg
-} {1 {Attribute "LINEBUF" may not be cleared once set}}
+Test fcntl-1.13 {fcntl tests} {
+    fcntl $testFH LINEBUF 0
+} 1 {Attribute "LINEBUF" may not be cleared once set}
 
-test fcntl-1.14 {fcntl tests} {
-    list [catch "fcntl $testFH a b c" msg] $msg
-} {1 {wrong # args: fcntl handle attribute ?value?}}
+Test fcntl-1.14 {fcntl tests} {
+    fcntl $testFH a b c
+} 1 {wrong # args: fcntl handle attribute ?value?}
 
-test fcntl-1.15 {fcntl tests} {
-    list [catch "fcntl $testFH BAZ 1" msg] $msg
-} {1 {unknown attribute name "BAZ", expected one of APPEND, CLOEXEC, LINEBUF, NONBLOCK, NOBUF, READ, RDONLY, RDWR, WRITE, WRONLY}}
+Test fcntl-1.15 {fcntl tests} {
+    fcntl $testFH BAZ 1
+} 1 {unknown attribute name "BAZ", expected one of APPEND, CLOEXEC, LINEBUF, NONBLOCK, NOBUF, READ, RDONLY, RDWR, WRITE, WRONLY}
 
-test fcntl-1.16 {fcntl tests} {
-    list [catch "fcntl $testFH APPEND FOO" msg] $msg
-} {1 {expected boolean value but got "FOO"}}
+Test fcntl-1.16 {fcntl tests} {
+    fcntl $testFH APPEND FOO
+} 1 {expected boolean value but got "FOO"}
 
 close $testFH
 
-test fcntl-1.15 {fcntl tests} {
-    list [catch "fcntl $testFH RDONLY" msg] $msg
-} [list 1 "file \"$testFH\" isn't open"]
+Test fcntl-1.15 {fcntl tests} {
+    fcntl $testFH RDONLY
+} 1 "file \"$testFH\" isn't open"
 
 unlink FCNTL.TMP
