@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXfcntl.c,v 2.0 1992/10/16 04:50:38 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -198,9 +198,16 @@ GetFcntlAttr (interp, filePtr, attrName)
 
     /*
      * Poke the stdio FILE structure to determine the buffering status.
+     * This is nasty, _IONBF is the System V flag and _SNBF is the BSD
+     * flag.  However some systems using BSD also define _IONBF (yuk).
+     * Also some BSDs use __SNBF.
      */
+#if defined(__SNBF) && !defined (_SNBF)
+#    define _SNBF __SNBF
+#    define _SLBF __SLBF
+#endif
 
-#ifdef _IONBF
+#if defined(_IONBF) && !defined(_SNBF)
     if (otherAttr & ATTR_NOBUF) {
         interp->result = (filePtr->f->_flag & _IONBF) ? "1" : "0";
         return TCL_OK;
