@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 7.4 1996/10/19 19:04:35 markd Exp $
+# $Id: Config.mk,v 8.0 1996/11/21 00:25:44 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -129,8 +129,8 @@ TKX_EXEC_PREFIX="${exec_prefix}"
 # The TclX and TkX runtime directories.  This is where the shared runtime and
 # help files are installed.
 
-TCLX_INST_RUNTIME=${TCLX_PREFIX}/lib/tclX${TCLX_FULL_VERSION}
-TKX_INST_RUNTIME=${TKX_PREFIX}/lib/tkX${TKX_FULL_VERSION}
+TCLX_INST_RUNTIME=${TCLX_PREFIX}/lib/tclX${TCLX_VERSION}
+TKX_INST_RUNTIME=${TKX_PREFIX}/lib/tkX${TKX_VERSION}
 
 #------------------------------------------------------------------------------
 # The directories to install the executables in.
