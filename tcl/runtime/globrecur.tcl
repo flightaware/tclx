@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.tcl,v 5.0 1995/07/25 06:00:04 markd Rel $
+# $Id: globrecur.tcl,v 5.1 1996/02/12 18:16:51 markd Exp $
 #------------------------------------------------------------------------------
 #
 

@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 5.0 1995/07/25 05:40:43 markd Rel $
+# $Id: testlib.tcl,v 5.1 1996/02/12 18:17:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 

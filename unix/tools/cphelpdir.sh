@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cphelpdir.sh,v 5.0 1995/07/25 05:59:26 markd Rel $
+# $Id: cphelpdir.sh,v 5.1 1996/02/16 08:10:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 

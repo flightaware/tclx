@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.19 1996/05/03 05:56:55 markd Exp $
+# $Id: Common.mk.in,v 5.20 1996/05/09 07:10:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 

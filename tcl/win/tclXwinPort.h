@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 1.2 1996/03/19 07:53:10 markd Exp $
+ * $Id: tclXwinPort.h,v 1.3 1996/03/20 06:58:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 5.1 1996/03/18 08:49:59 markd Exp $
+ * $Id: tclXunixPort.h,v 5.2 1996/03/19 07:53:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 5.5 1996/02/24 23:09:08 markd Exp $
+# $Id: cmdloop.test,v 1.1 1996/03/17 08:18:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 

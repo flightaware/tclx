@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fmath.tcl,v 5.0 1995/07/25 06:00:15 markd Rel $
+# $Id: fmath.tcl,v 5.1 1996/02/12 18:16:48 markd Exp $
 #------------------------------------------------------------------------------
 
 #@package: TclX-fmath acos asin atan ceil cos cosh exp fabs floor log log10 \
