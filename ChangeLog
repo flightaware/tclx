@@ -1,3 +1,8 @@
+2002-02-07  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tcl/generic/tclXgeneral.c (TclX_EchoObjCmd): use encoding aware
+	functions in 8.1+. [Bug #514053]
+
 2002-01-16  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* win/Makefile.in:

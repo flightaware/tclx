@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.15 1999/03/31 06:37:44 markd Exp $
+ * $Id: tclXgeneral.c,v 8.16 2001/05/07 19:16:47 andreas_kupries Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -126,19 +126,29 @@ TclX_EchoObjCmd (dummy, interp, objc, objv)
 {
     int   idx;
     Tcl_Channel channel;
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION == 0)
     char *stringPtr;
     int stringPtrLen;
+#endif
 
     channel = TclX_GetOpenChannel (interp, "stdout", TCL_WRITABLE);
     if (channel == NULL)
         return TCL_ERROR;
 
     for (idx = 1; idx < objc; idx++) {
-        stringPtr = Tcl_GetStringFromObj (objv [idx], &stringPtrLen);
-        if (Tcl_Write (channel, stringPtr, stringPtrLen) < 0)
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION == 0)
+	stringPtr = Tcl_GetStringFromObj (objv [idx], &stringPtrLen);
+	if (Tcl_Write (channel, stringPtr, stringPtrLen) < 0)
+#else
+        if (Tcl_WriteObj(channel, objv[idx]) < 0)
+#endif
             goto posixError;
         if (idx < (objc - 1)) {
-            if (Tcl_Write (channel, " ", 1) < 0)
+#if (TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION == 0)
+	    if (Tcl_Write (channel, " ", 1) < 0)
+#else
+            if (Tcl_WriteChars(channel, " ", 1) < 0)
+#endif
                 goto posixError;
         }
     }
