@@ -12,18 +12,19 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 1.3 1993/07/13 03:04:02 markd Exp markd $
+ * $Id: tclXfstat.c,v 1.4 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
 
-#ifndef NO_SYS_SOCKETS_H
+#ifndef NO_SYS_SOCKET_H
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 #endif
 
 /*
@@ -53,7 +54,7 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
                             struct stat  *statBufPtr,
                             char         *itemName));
 
-#ifndef NO_SYS_SOCKETS_H
+#ifndef NO_SYS_SOCKET_H
 
 /*
  *-----------------------------------------------------------------------------
@@ -116,7 +117,7 @@ GetRemoteHost (interp, filePtr)
     interp->result = "sockets are not available on this system";
     return TCL_ERROR;
 }
-#endif /* NO_SYS_SOCKETS_H */
+#endif /* NO_SYS_SOCKET_H */
 
 /*
  *-----------------------------------------------------------------------------
