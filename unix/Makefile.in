@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 1.12 1992/10/13 03:51:14 markd Exp markd $
+# $Id: Makefile,v 2.0 1992/10/16 04:54:45 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -59,16 +59,15 @@ libtcl.a: $(TCL_UCB_DIR)/libtcl.a
 	rm -f  $(MADE.FILES)
 
 #------------------------------------------------------------------------------
-# Generate a libtk.a with extensions and a wish shell with Extended Tcl
+# Generate a libtk.a with extensions and a wish shell (wishx) with Extended Tcl
 # commands.
 #
 
-wish: TKX_MAKES runwish
+wishx: TKX_MAKES runwishx
 
 TKX_MAKES: libtk.a
 	cd tkucbsrc; $(MAKE) -$(MAKEFLAGS) all
 	cd tksrc;    $(MAKE) -$(MAKEFLAGS) all
-
 
 # Copy the UCB libtk.a file.  Force the other Makefiles to add their
 # .o files to the library by nuking their made.tmp file.
@@ -86,7 +85,7 @@ libtk.a: $(TCL_TK_DIR)/libtk.a
 TCLDEFAULT:
 	@echo "	-       Generating temporary TCLDEFAULT file.     -"
 	@echo "	- Use runtcl script to test Tcl before installing -"
-	@echo "	- Use runwish script to test Tk before installing -"
+	@echo "	- Use runwishx script to test Tk before installing -"
 	@echo '# Temporary TCLDEFAULT file for debugging'  >TCLDEFAULT
 	@echo "set TCLPATH `pwd`/tcllib"                  >>TCLDEFAULT
 	@echo "set TCLINIT `pwd`/tcllib/TclInit.tcl"      >>TCLDEFAULT
@@ -104,18 +103,20 @@ runtcl:
 	@echo "fi"                                            >>runtcl
 	chmod a+rx runtcl
 
-runwish:
-	@echo ':'                                              >runwish
-	@echo '# script for testing wish before installation' >>runwish
-	@echo "TCLDEFAULT=`pwd`/TCLDEFAULT"                   >>runwish
-	@echo "export TCLDEFAULT"                             >>runwish
-	@echo "if [ \$$# = 0 ]"                               >>runwish
-	@echo "then"                                          >>runwish
-	@echo "    exec `pwd`/wish"                           >>runwish
-	@echo "else"                                          >>runwish
-	@echo "    exec `pwd`/wish \"\$$@\""                  >>runwish
-	@echo "fi"                                            >>runwish
-	chmod a+rx runwish
+runwishx:
+	@echo ':'                                               >runwishx
+	@echo '# script for testing wishx before installation' >>runwishx
+	@echo "TCLDEFAULT=`pwd`/TCLDEFAULT"                    >>runwishx
+	@echo "export TCLDEFAULT"                              >>runwishx
+	@echo "TK_LIBRARY=`pwd`/$(TCL_TK_DIR)/library"         >>runwishx
+	@echo "export TK_LIBRARY"                              >>runwishx
+	@echo "if [ \$$# = 0 ]"                                >>runwishx
+	@echo "then"                                           >>runwishx
+	@echo "    exec `pwd`/wishx"                           >>runwishx
+	@echo "else"                                           >>runwishx
+	@echo "    exec `pwd`/wishx \"\$$@\""                  >>runwishx
+	@echo "fi"                                             >>runwishx
+	chmod a+rx runwishx
 
 #------------------------------------------------------------------------------
 #
@@ -158,4 +159,4 @@ clean:
 	cd tclsrc;    $(MAKE) -$(MAKEFLAGS) clean
 	cd tkucbsrc;  $(MAKE) -$(MAKEFLAGS) clean
 	cd tksrc;     $(MAKE) -$(MAKEFLAGS) clean
-	-rm -f libtcl.a TCLDEFAULT libtk.a runtcl runwish
+	-rm -f libtcl.a TCLDEFAULT libtk.a runtcl runwishx
