@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.4 1997/06/25 16:58:56 markd Exp $
+ * $Id: tclXstring.c,v 8.5 1997/06/30 07:57:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,8 +26,10 @@
  * Prototypes of internal functions.
  */
 static unsigned int
-ExpandString _ANSI_ARGS_((unsigned char *s,
-                          unsigned char  buf[]));
+ExpandString _ANSI_ARGS_((unsigned char *inStr,
+                          int            inLength,
+                          unsigned char  outStr [],
+                          int           *outLengthPtr));
 
 static int 
 TclX_CindexObjCmd _ANSI_ARGS_((ClientData clientData,
@@ -438,28 +440,35 @@ TclX_CequalObjCmd (dummy, interp, objc, objv)
  *  Build an expand version of a translit range specification.
  *
  * Results:
- *  TRUE it the expansion is ok, FALSE it its too long.
+ *  The number of characters in the expansion buffer or < 0 if the maximum
+ * expansion has been exceeded.
  *-----------------------------------------------------------------------------
  */
 #define MAX_EXPANSION 255
 
 static unsigned int
-ExpandString (s, buf)
-    unsigned char *s;
-    unsigned char  buf[];
+ExpandString (inStr, inLength, outStr, outLengthPtr)
+    unsigned char *inStr;
+    int            inLength;
+    unsigned char  outStr [];
+    int           *outLengthPtr;
 {
     int i, j;
+    unsigned char *s = inStr;
+    unsigned char *inStrLimit = inStr + inLength;
 
     i = 0;
-    while((*s !=0) && i < MAX_EXPANSION) {
-        if(s[1] == '-' && s[2] > s[0]) {
-            for(j = s[0]; j <= s[2]; j++)
-                buf[i++] = j;
+    while((s < inStrLimit) && (i < MAX_EXPANSION)) {
+        if ((s [1] == '-') && (s [2] > s [0])) {
+            for (j = s [0]; j <= s [2]; j++) {
+                outStr [i++] = j;
+            }
             s += 3;
-        } else
-            buf[i++] = *s++;
+        } else {
+            outStr [i++] = *s++;
+        }
     }
-    buf[i] = 0;
+    *outLengthPtr = i;
     return (i < MAX_EXPANSION);
 }
 
@@ -480,8 +489,10 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     Tcl_Obj    *CONST objv[];
 {
     unsigned char from [MAX_EXPANSION+1];
+    int           fromLen;
     unsigned char to   [MAX_EXPANSION+1];
-    unsigned char map  [MAX_EXPANSION+1];
+    int           toLen;
+    short         map [MAX_EXPANSION+1];
     unsigned char *s;
     char          *fromString;
     int            fromStringLen;
@@ -493,48 +504,55 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     int            idx;
     int            stringIndex;
 
-/*FIX: Not binary clean */
     if (objc != 4)
         return TclX_WrongArgs (interp, objv[0], "from to string");
 
+    /*
+     * Expand ranges into descrete values.
+     */
     fromString = Tcl_GetStringFromObj (objv[1], &fromStringLen);
-    if (!ExpandString ((unsigned char *) fromString, from)) {
+    if (!ExpandString ((unsigned char *) fromString, fromStringLen,
+                       from, &fromLen)) {
         TclX_AppendResult (interp, "inrange expansion too long",
                            (char *) NULL);
         return TCL_ERROR;
     }
 
-    toString = Tcl_GetStringFromObj (objv[2], &toStringLen);
-    if (!ExpandString ((unsigned char *) toString, to)) {
+    toString = Tcl_GetStringFromObj (objv [2], &toStringLen);
+    if (!ExpandString ((unsigned char *) toString, toStringLen,
+                       to, &toLen)) {
         TclX_AppendResult (interp, "outrange expansion too long",
                            (char *) NULL);
         return TCL_ERROR;
     }
 
-    for (idx = 0; idx <= MAX_EXPANSION; idx++)
-        map [idx] = idx;
-
-    for (idx = 0; to [idx] != '\0'; idx++) {
-        if (from [idx] != '\0')
-            map [from [idx]] = to [idx];
-        else
-            break;
-    }
-    if (to [idx] != '\0') {
+    if (fromLen > toLen) {
         TclX_AppendResult (interp, "inrange longer than outrange", 
                            (char *) NULL);
         return TCL_ERROR;
     }
 
-    for (; from [idx] != '\0'; idx++)
-        map [from [idx]] = 0;
+    /*
+     * Build map.  Entries of -1 discard the char.  All other values are
+     * positive (hence its a short).
+     */
+    for (idx = 0; idx <= MAX_EXPANSION; idx++) {
+        map [idx] = idx;
+    }
+    for (idx = 0; (idx < toLen) && (idx < fromLen); idx++) {
+        map [from [idx]] = to [idx];
+    }
+    for (; idx < fromLen; idx++)
+        map [from [idx]] = -1;
 
     transStringObj = Tcl_DuplicateObj (objv [3]);
     transString = Tcl_GetStringFromObj (transStringObj, &transStringLen);
+
     for (s = (unsigned char *) transString, stringIndex = 0; 
          stringIndex < transStringLen; stringIndex++) {
-        if (map[*s] != '\0')
+        if (map [*s] >= 0) {
             *s++ = map [*s];
+        }
     }
 
     Tcl_SetObjResult (interp, transStringObj);

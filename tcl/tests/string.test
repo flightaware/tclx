@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 8.4 1997/06/25 16:59:09 markd Exp $
+# $Id: string.test,v 8.5 1997/07/04 01:45:45 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -208,6 +208,11 @@ Test string-6.2 {translit tests} {
 } 0 {Captain Midnight Secret Decoder Ring}
 
 Test string-6.3 {translit tests} {
+    set str "abc\0\1\2ABC"
+    set str2 [translit "\0-\2ABCabc" "XYZdef\0\0\0"  $str]
+} 0 "\0\0\0XYZdef"
+
+Test string-6.4 {translit tests} {
     translit
 } 1 {wrong # args: translit from to string}
 
