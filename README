@@ -334,6 +334,9 @@ default file.  This is useful when converting applications to the new version.
     o The format of package library index files (.tndx) has changed.  These
       should be purged and rebuilt.
 
+    o Added an options argument to Tcl_Startup.  It is not currrently used.
+
+
 CAVEATS
 =======
 
