@@ -70,7 +70,7 @@ GENERIC_SOBJS = \
     tclXlib@SHOBJ_SUFFIX@        tclXlist@SHOBJ_SUFFIX@     \
     tclXmath@SHOBJ_SUFFIX@       tclXmsgcat@SHOBJ_SUFFIX@   \
     tclXlibInit@SHOBJ_SUFFIX@    tclXprocess@SHOBJ_SUFFIX@  \
-    tclXprofile@SHOBJ_SUFFIX@    tclXregexp@SHOBJ_SUFFIX@   \
+    tclXprofile@SHOBJ_SUFFIX@    \
     tclXselect@SHOBJ_SUFFIX@     tclXunixSock@SHOBJ_SUFFIX@ \
     tclXsignal@SHOBJ_SUFFIX@     tclXshell@SHOBJ_SUFFIX@    \
     tclXstring@SHOBJ_SUFFIX@     tclXsocket@SHOBJ_SUFFIX@   \
@@ -438,9 +438,6 @@ tclXprocess.o: ${TCLX_GENERIC_DIR}/tclXprocess.c
 tclXprofile.o: ${TCLX_GENERIC_DIR}/tclXprofile.c tclxConfig.sh
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXprofile.c
 
-tclXregexp.o: ${TCLX_GENERIC_DIR}/tclXregexp.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXregexp.c
-
 tclXselect.o: ${TCLX_GENERIC_DIR}/tclXselect.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXselect.c
 
@@ -635,12 +632,6 @@ tclXprofile..o: ${TCLX_GENERIC_DIR}/tclXprofile.c tclxConfig.sh
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
 	    ${TCLX_GENERIC_DIR}/tclXprofile.c
-	@OBJ_RESTORE@
-
-tclXregexp..o: ${TCLX_GENERIC_DIR}/tclXregexp.c
-	@OBJ_SAVE@
-	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
-	    ${TCLX_GENERIC_DIR}/tclXregexp.c
 	@OBJ_RESTORE@
 
 tclXselect..o: ${TCLX_GENERIC_DIR}/tclXselect.c
