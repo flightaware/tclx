@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.2 1996/07/22 17:10:04 markd Exp $
+ * $Id: tclXinit.c,v 7.3 1996/07/26 05:55:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -375,7 +375,6 @@ InitSetup (interp)
     if (Tcl_PkgProvide (interp, "Tclx", TCLX_VERSION) != TCL_OK) {
 	return TCL_ERROR;
     }
-    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
 
     /*
      * Make sure a certain set of variable exists.  If not, default them.
