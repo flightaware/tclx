@@ -9,7 +9,7 @@
 #   $1 - source help directory.
 #   $2 - build help directory.
 #------------------------------------------------------------------------------
-# Copyright 1993-1995 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1993-1996 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cphelpdir.sh,v 4.1 1995/01/01 19:49:46 markd Exp markd $
+# $Id: cphelpdir.sh,v 5.0 1995/07/25 05:59:26 markd Rel $
 #------------------------------------------------------------------------------
 #
 
