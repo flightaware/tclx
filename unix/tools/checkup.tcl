@@ -10,7 +10,7 @@
 # /usr/ucb/cc you get readdir entries that don't match the include file.  This
 # program *MUST* be run in the src directory where TclX was built.
 #------------------------------------------------------------------------------
-# Copyright 1995 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1995-1996 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -19,7 +19,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: checkup.tcl,v 1.2 1995/06/26 06:20:37 markd Exp markd $
+# $Id: checkup.tcl,v 5.0 1995/07/25 05:59:42 markd Rel $
 #------------------------------------------------------------------------------
 #
 

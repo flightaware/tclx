@@ -5,7 +5,7 @@
  * Tcl handles.  Provides a mechanism for managing expandable tables that are
  * addressed by textual handles.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 4.4 1995/01/19 07:05:38 markd Exp markd $
+ * $Id: tclXhandles.c,v 5.0 1995/07/25 05:42:33 markd Rel $
  *-----------------------------------------------------------------------------
  */
 

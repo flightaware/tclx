@@ -3,7 +3,7 @@
  *
  *    External declarations for the extended Tcl library.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.7 1996/02/09 18:42:35 markd Exp $
+ * $Id: tclExtend.h,v 5.8 1996/02/12 07:21:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

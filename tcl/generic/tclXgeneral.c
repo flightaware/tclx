@@ -3,7 +3,7 @@
  *
  *      Contains general extensions to the basic TCL command set.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 5.1 1995/08/10 04:12:29 markd Exp $
+ * $Id: tclXgeneral.c,v 5.2 1996/02/09 18:42:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

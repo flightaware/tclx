@@ -3,7 +3,7 @@
  *
  * Tcl Unix signal support routines and the signal and commands.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 5.0 1995/07/25 05:58:49 markd Rel markd $
+ * $Id: tclXsignal.c,v 5.1 1995/08/04 05:56:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

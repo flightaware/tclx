@@ -5,7 +5,7 @@
 # mechanism.  This helps if something is broken with auto-load so the
 # build at least completes.
 #------------------------------------------------------------------------------
-# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: genindex.tcl,v 4.2 1995/07/04 18:01:38 markd Exp markd $
+# $Id: genindex.tcl,v 5.0 1995/07/25 05:59:37 markd Rel $
 #------------------------------------------------------------------------------
 #
 

@@ -4,7 +4,7 @@
 # Various command dealing with auto-load libraries.  Some of this code is
 # taken directly from the UCB Tcl library/init.tcl file.
 #------------------------------------------------------------------------------
-# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -33,7 +33,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tcllib.tcl,v 5.0 1995/07/25 06:00:09 markd Rel markd $
+# $Id: tcllib.tcl,v 5.1 1995/08/09 15:06:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 

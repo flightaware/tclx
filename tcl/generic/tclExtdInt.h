@@ -3,7 +3,7 @@
  *
  * Standard internal include file for Extended Tcl library..
  *-----------------------------------------------------------------------------
- * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.4 1996/02/09 18:42:32 markd Exp $
+ * $Id: tclExtdInt.h,v 5.5 1996/02/12 07:21:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

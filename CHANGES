@@ -1035,7 +1035,7 @@
   o Allow min/max commands to take only one argument.
 ===============================================================================
 20 Oct 95: Released TclX 7.5a Alpha 2
--------------------------------------------------------------------------------
+===============================================================================
 30 Dec 95:
   o Added an interface to TclXCmd_Init that follows the new calling 
     convention for dynamic loading.
@@ -1049,5 +1049,6 @@
   o Integrated with Tcl 7.5 beta 1, which includes the new Tcl I/O system.
   o Replaced the fmtclock, convertclock and getclock commands with
     compatibility procedures that interface to the new Tcl clock command.
--------------------------------------------------------------------------------
- 
+===============================================================================
+12 Feb 96: Released TclX 7.5a Beta 1
+===============================================================================

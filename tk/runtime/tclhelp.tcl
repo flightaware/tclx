@@ -4,7 +4,7 @@
 # of TclX help command.
 # 
 #------------------------------------------------------------------------------
-# Copyright 1993-1995 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1993-1996 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 5.1 1996/01/10 22:12:53 markd Exp $
+# $Id: tclhelp.tcl,v 5.2 1996/01/27 16:10:15 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
  *      the UCB Tk file tkAppInit.c
  *
  *-----------------------------------------------------------------------------
- * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 5.1 1995/09/05 07:55:47 markd Exp $
+ * $Id: tkXAppInit.c,v 5.2 1996/02/12 07:21:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
