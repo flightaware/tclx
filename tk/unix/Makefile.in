@@ -13,40 +13,53 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.2 1992/12/19 08:03:35 markd Exp markd $
+# $Id: Makefile,v 2.3 1993/06/06 15:05:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 include ../Config.mk
-include ../config/$(TCL_CONFIG_FILE)
+include ../config/${TCL_CONFIG_FILE}
 SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
 
-CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I../src -I../$(TCL_TK_DIR) \
-        -I../$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) $(SYS_DEP_FLAGS)
+LIBTKX.A  = ../tkmaster/lib/libtkx.a
+LIBTK.A   = ../tkmaster/lib/libtk.a
+WISHX     = ../tkmaster/bin/wishx
+
+LIBTCLX.A = ../tclmaster/lib/libtclx.a
+LIBTCL.A  = ../tclmaster/lib/libtcl.a
+
+CFLAGS= ${OPTIMIZE_FLAG} ${XCFLAGS} -I../src -I../${TK_UCB_DIR} \
+        -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} ${SYS_DEP_FLAGS}
+
+LDLIBS= ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} ${TK_LIBS} ${LIBS}
 
 #------------------------------------------------------------------------------
 
-OBJS= main.o
+OBJS= tkMain.o tkXstartup.o
 
 #------------------------------------------------------------------------------
 
-all: ../wishx
+all: made.tmp
 
-../wishx: main.o ../libtk.a ../libtcl.a
-	$(RANLIB_CMD) ../libtk.a
-	$(CC) $(CFLAGS) main.o ../libtk.a ../libtcl.a \
-            $(XLDFLAGS) $(TCL_TK_LIBS) -o ../wishx
-	if $(DO_STRIPPING) ; then \
-	    strip ../wishx; \
-	    $(MCS_CMD) ../wishx; fi
+made.tmp: ${WISHX}
+	touch made.tmp
 
-main.o: main.c
-	$(CC) -c $(CFLAGS) -DTCL_MASTERDIR=\"$(TCL_MASTERDIR)\" \
-        -DTK_MASTERDIR=\"$(TK_MASTERDIR)\" main.c
+${WISHX}: ${LIBTKX.A} ${LIBTK.A}
+	${CC} ${CFLAGS} ${XLDFLAGS} tkMain.o -o ${WISHX} ${LDLIBS}
+	if ${DO_STRIPPING} ; then \
+	    strip ${WISHX}; \
+	    ${MCS_CMD} ${WISHX}; fi
+
+${LIBTKX.A}: ${OBJS} 
+	${RANLIB_CMD} ${LIBTKX.A}
+	${AR} cr ${LIBTKX.A} ${OBJS}
+
+tkXstartup.o: tkXstartup.c
+	${CC} -c ${CFLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXstartup.c
 
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f ../wishx $(OBJS)
+	-rm -f made.tmp ${WISHX} ${OBJS}

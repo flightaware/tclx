@@ -1,9 +1,7 @@
 #
 # Makefile --
 #
-# Makefile for Extended Tcl.  This requires Tcl 6.1 or Tcl 6.2 from Berkeley,
-# which should be compiled before running this makefile.  Its location is
-# configured below.
+# Top-level makefile for Extended Tcl.
 # 
 #------------------------------------------------------------------------------
 # Copyright 1992 Karl Lehenbauer and Mark Diekhans.
@@ -15,105 +13,121 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.4 1993/06/06 15:05:35 markd Exp markd $
+# $Id: Makefile,v 2.5 1993/06/21 06:15:01 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 include Config.mk
-include config/$(TCL_CONFIG_FILE)
+include config/${TCL_CONFIG_FILE}
+
 SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
 
-# List of files that are touched by secondary makefiles when something changes.
-
-MADE.FILES=osSupport/made.tmp src/made.tmp
-TKMADE.FILES=tkucbsrc/made.tmp
-
-CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) \
-        $(SYS_DEP_FLAGS)
+CFLAGS = ${OPTIMIZE_FLAG} ${XCFLAGS} -I${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} \
+         ${SYS_DEP_FLAGS}
 
 #------------------------------------------------------------------------------
 
-all: tcl runtcl $(TCL_TK_SHELL)
+all: TCLX runtcl ${TK_BUILD}
 
 
 #------------------------------------------------------------------------------
 # Compile the Extended Tcl library and link the Tcl shell.
 #
 
-tcl: TCLX_MAKES
-
-TCLX_MAKES: libtcl.a tclmaster runtcl
-#???	cd ucbsrc;    $(MAKE) -$(MAKEFLAGS) all
-	cd osSupport; $(MAKE) -$(MAKEFLAGS) all
-	cd src;       $(MAKE) -$(MAKEFLAGS) all
-	cd tclsrc;    $(MAKE) -$(MAKEFLAGS) all
-
-tclmaster:
-	mkdir tclmaster
-
-# Copy the UCB libtcl.a file from where it was built.  Force the other
-# Makefiles to add their .o files to the library by nuking their made.tmp file.
-
-libtcl.a: $(TCL_UCB_DIR)/libtcl.a
-	cp $(TCL_UCB_DIR)/libtcl.a libtcl.a
-	$(RANLIB_CMD) libtcl.a
-	rm -f $(MADE.FILES)
+TCLX: TCLCOPY runtcl
+#???	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} all
+	cd osSupport; ${MAKE} -${MAKEFLAGS} all
+	cd src;       ${MAKE} -${MAKEFLAGS} all
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} all
 
 #------------------------------------------------------------------------------
-# Generate a libtk.a with extensions and a wish shell (wishx) with Extended Tcl
-# commands.
+# Copy include and library files from the UCB Tcl distribution to the
+# tclmaster directory.
+#
+LIBTCL.A = tclmaster/lib/libtcl.a
+TCL.H    = tclmaster/include/tcl.h
+
+TCLCOPY: MKTCLDIRS ${LIBTCL.A} ${TCL.H}
+
+MKTCLDIRS:
+	-mkdir tclmaster         2>/dev/null; exit 0
+	-mkdir tclmaster/lib     2>/dev/null; exit 0
+	-mkdir tclmaster/include 2>/dev/null; exit 0
+	-mkdir tclmaster/bin     2>/dev/null; exit 0
+
+${LIBTCL.A}: ${TCL_UCB_DIR}/libtcl.a
+	rm -f ${LIBTCL.A}
+	cp ${TCL_UCB_DIR}/libtcl.a ${LIBTCL.A}
+	${RANLIB_CMD} ${LIBTCL.A}
+
+${TCL.H}: ${TCL_UCB_DIR}/tcl.h
+	rm -f ${TCL.H}
+	cp ${TCL_UCB_DIR}/tcl.h ${TCL.H}
+
+#------------------------------------------------------------------------------
+# Generate a wish shell {wishx} with Extended Tcl commands.
 #
 
-wishx: TKX_MAKES runwishx
-
-TKX_MAKES: libtk.a
-	cd tkucbsrc; $(MAKE) -$(MAKEFLAGS) all
-	cd tksrc;    $(MAKE) -$(MAKEFLAGS) all
-	cd tktclsrc; $(MAKE) -$(MAKEFLAGS) all
-
-# Copy the UCB libtk.a file.  Force the other Makefiles to add their
-# .o files to the library by nuking their made.tmp file.
-
-libtk.a: $(TCL_TK_DIR)/libtk.a
-	cp $(TCL_TK_DIR)/libtk.a libtk.a
-	$(RANLIB_CMD) libtk.a
-	rm -f $(TKMADE.FILES)
+WISHX: TKCOPY runwishx
+#????	cd tkucbsrc; ${MAKE} -${MAKEFLAGS} all
+	cd tksrc;    ${MAKE} -${MAKEFLAGS} all
+	cd tktclsrc; ${MAKE} -${MAKEFLAGS} all
 
 #------------------------------------------------------------------------------
-# Also scripts to point the TCLINIT/TKINIT environment variable at the local
-# directory so tcl * wishx can be run before installing.
+# Copy include and library files from the UCB Tk distribution to the
+# tkmaster directory.
+#
+LIBTK.A  = tkmaster/lib/libtk.a
+TK.H     = tclmaster/include/tk.h
+
+TKCOPY: MKTKDIRS ${LIBTK.A} ${TK.H}
+
+MKTKDIRS:
+	-mkdir tkmaster         2>/dev/null; exit 0
+	-mkdir tkmaster/lib     2>/dev/null; exit 0
+	-mkdir tkmaster/include 2>/dev/null; exit 0
+	-mkdir tkmaster/bin     2>/dev/null; exit 0
+
+${LIBTK.A}: ${TK_UCB_DIR}/libtk.a
+	rm -f ${LIBTK.A}
+	cp ${TK_UCB_DIR}/libtk.a ${LIBTK.A}
+	${RANLIB_CMD} ${LIBTK.A}
+
+${TK.H}: ${TK_UCB_DIR}/tk.h
+	rm -f ${TK.H}
+	cp ${TK_UCB_DIR}/tk.h ${TK.H}
+
+#------------------------------------------------------------------------------
+# Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
+# the local master directories so tcl & wishx can be run before installing.
 
 runtcl:
 	@echo ':'                                              >runtcl
 	@echo '# script for testing Tcl before installation'  >>runtcl
-	@echo "TCLINIT=`pwd`/tclmaster/TclInit.tcl"           >>runtcl
-	@echo "export TCLINIT"                                >>runtcl
 	@echo "TCL_LIBRARY=`pwd`/tclmaster"                   >>runtcl
 	@echo "export TCL_LIBRARY"                            >>runtcl
 	@echo "if [ \$$# = 0 ]"                               >>runtcl
 	@echo "then"                                          >>runtcl
-	@echo "    exec `pwd`/tcl"                            >>runtcl
+	@echo "    exec `pwd`/tclmaster/bin/tcl"              >>runtcl
 	@echo "else"                                          >>runtcl
-	@echo "    exec `pwd`/tcl \"\$$@\""                   >>runtcl
+	@echo "    exec `pwd`/tclmaster/bin/tcl \"\$$@\""     >>runtcl
 	@echo "fi"                                            >>runtcl
 	chmod a+rx runtcl
 
 runwishx:
 	@echo ':'                                               >runwishx
 	@echo '# script for testing wishx before installation' >>runwishx
-	@echo "TCLINIT=`pwd`/tclmaster/TclInit.tcl"            >>runwishx
-	@echo "export TCLINIT"                                 >>runwishx
-	@echo "TKINIT=`pwd`/tkmaster/wishx.tcl"                >>runwishx
-	@echo "export TKINIT"                                  >>runwishx
+	@echo "TCL_LIBRARY=`pwd`/tclmaster"                    >>runwishx
+	@echo "export TCL_LIBRARY"                             >>runwishx
 	@echo "TK_LIBRARY=`pwd`/tkmaster"                      >>runwishx
 	@echo "export TK_LIBRARY"                              >>runwishx
 	@echo "if [ \$$# = 0 ]"                                >>runwishx
 	@echo "then"                                           >>runwishx
-	@echo "    exec `pwd`/wishx"                           >>runwishx
+	@echo "    exec `pwd`/tkmaster/bin/wishx"              >>runwishx
 	@echo "else"                                           >>runwishx
-	@echo "    exec `pwd`/wishx \"\$$@\""                  >>runwishx
+	@echo "    exec `pwd`/tkmaster/bin/wishx \"\$$@\""     >>runwishx
 	@echo "fi"                                             >>runwishx
 	chmod a+rx runwishx
 
@@ -121,7 +135,7 @@ runwishx:
 # Test to see if the C++ include file compiles and links.
 
 tcl++:
-	cd src;$(MAKE) -$(MAKEFLAGS) TCL++
+	cd src;${MAKE} -${MAKEFLAGS} tcl++
 
 #------------------------------------------------------------------------------
 # Run the UCB and Extended Tcl tests.
@@ -129,16 +143,23 @@ tcl++:
 test: ucbtests extdtests
 
 ucbtests: all
-	./runtcl -c "cd $(TCL_UCB_DIR)/tests;source all"
+	./runtcl -c "cd ${TCL_UCB_DIR}/tests;source all"
 
 extdtests: all
 	./runtcl -c "cd tests;source all"	
 
+tktest: all
+	cd tests ; ../runwishx -f tktests.tcl -n wish ../${TK_UCB_DIR}
+
 #------------------------------------------------------------------------------
-# Build help for Tk.
+# Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
+# Tk versions have changed.
+
+buildtclhelp:
+	cd tclsrc;   ${MAKE} -${MAKEFLAGS} buildtclhelp
 
 buildtkhelp:
-	cd tktclsrc;  $(MAKE) -$(MAKEFLAGS) buildtkhelp
+	cd tktclsrc; ${MAKE} -${MAKEFLAGS} buildtkhelp
 
 #------------------------------------------------------------------------------
 # Install Tcl.
@@ -150,12 +171,13 @@ install: all
 # Clean up the mess we made.
 
 clean:
-	cd ucbsrc;    $(MAKE) -$(MAKEFLAGS) clean
-	cd osSupport; $(MAKE) -$(MAKEFLAGS) clean
-	cd src;       $(MAKE) -$(MAKEFLAGS) clean
-	cd tclsrc;    $(MAKE) -$(MAKEFLAGS) clean
-	cd tkucbsrc;  $(MAKE) -$(MAKEFLAGS) clean
-	cd tksrc;     $(MAKE) -$(MAKEFLAGS) clean
-	cd tktclsrc;  $(MAKE) -$(MAKEFLAGS) clean
-	-rm -f libtcl.a libtk.a runtcl runwishx tkhelp.tmp
-	-rm -rf tclmaster
+	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} clean
+	cd osSupport; ${MAKE} -${MAKEFLAGS} clean
+	cd src;       ${MAKE} -${MAKEFLAGS} clean
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} clean
+	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} clean
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} clean
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} clean
+	-rm -f runtcl runwishx
+	-rm -rf tclmaster/bin tclmaster/lib tclmaster/include
+	-rm -rf tkmaster/bin tkmaster/lib tkmaster/include

@@ -12,28 +12,28 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.3 1993/01/12 04:28:31 markd Exp markd $
+# $Id: Makefile,v 2.4 1993/06/24 07:33:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 include ../Config.mk
-include ../config/$(TCL_CONFIG_FILE)
+include ../config/${TCL_CONFIG_FILE}
 SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
 
-LIBTCLX = ../tclmaster/lib/libtclx.a
+LIBTCLX.A = ../tclmaster/lib/libtclx.a
 
-CFLAGS=$(OPTIMIZE_FLAG) $(XCFLAGS) -I../$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) \
-       $(SYS_DEP_FLAGS) $(SUPPORT_FLAGS)
+CFLAGS=${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR} ${MEM_DEBUG_FLAGS} \
+       ${SYS_DEP_FLAGS} ${SUPPORT_FLAGS}
 
 #------------------------------------------------------------------------------
 
 all: made.tmp
 
-made.tmp: $(SUPPORT_OBJS)
-	if test "$(SUPPORT_OBJS)" != "" ; then \
-	    $(AR) cvr $(LIBTCLX) $(SUPPORT_OBJS) ;\
+made.tmp: ${SUPPORT_OBJS}
+	if [ "${SUPPORT_OBJS}" != "" ] ; then \
+	    ${AR} cvr ${LIBTCLX.A} ${SUPPORT_OBJS} ;\
 	else \
 	    exit 0 ;\
 	fi

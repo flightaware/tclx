@@ -14,12 +14,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.5 1993/06/21 06:02:53 markd Exp markd $
+# $Id: Makefile,v 2.6 1993/06/24 07:32:30 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 include ../Config.mk
-include ../config/$(TCL_CONFIG_FILE)
+include ../config/${TCL_CONFIG_FILE}
 SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
@@ -30,6 +30,7 @@ TCLINIT.TCL    = ../tclmaster/TclInit.tcl
 BUILDHELP.TCL  = ../tclmaster/buildhelp.tcl
 BUILDIDX.TCL   = ../tclmaster/buildidx.tcl
 LOADOUSTER.TCL = ../tclmaster/loadouster.tcl
+MAN            = ../tclmaster/man
 HELP           = ../tclmaster/help
 
 #------------------------------------------------------------------------------
@@ -39,48 +40,52 @@ TCL_SRCS=arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
          profrep.tcl      pushd.tcl        setfuncs.tcl     showproc.tcl    \
          stringfile.tcl   tkdemo.tcl       tcllib.tcl       fmath.tcl       \
          tclshell.tcl \
-         parray.tcl       ../$(TCL_UCB_DIR)/library/parray.tcl
+         parray.tcl       ../${TCL_UCB_DIR}/library/parray.tcl
 
 #------------------------------------------------------------------------------
 
-all: made.tmp
+all: ${TCLINIT.TCL} ${BUILDHELP.TCL} ${BUILDIDX.TCL} ${LOADOUSTER.TCL} \
+     ${TCL.TLIB} ${MAN}
 
-made.tmp: $(TCLINIT.TCL) $(BUILDHELP.TCL) $(BUILDIDX.TCL) $(LOADOUSTER.TCL) \
-          $(TCL.TLIB) HELPDIR
-	touch made.tmp
+${TCLINIT.TCL}: TclInit.tcl
+	-rm -f ${TCLINIT.TCL} 
+	cp TclInit.tcl ${TCLINIT.TCL}
 
-$(TCLINIT.TCL): TclInit.tcl
-	-rm -f $(TCLINIT.TCL) 
-	cp TclInit.tcl $(TCLINIT.TCL)
+${BUILDHELP.TCL}: buildhelp.tcl
+	-rm -f ${BUILDHELP.TCL}
+	cp buildhelp.tcl ${BUILDHELP.TCL}
 
-$(BUILDHELP.TCL): buildhelp.tcl
-	-rm -f $(BUILDHELP.TCL)
-	cp buildhelp.tcl $(BUILDHELP.TCL)
+${BUILDIDX.TCL}: buildidx.tcl
+	-rm -f ${BUILDIDX.TCL}
+	cp buildidx.tcl ${BUILDIDX.TCL}
 
-$(BUILDIDX.TCL): buildidx.tcl
-	-rm -f $(BUILDIDX.TCL)
-	cp buildidx.tcl $(BUILDIDX.TCL)
+${LOADOUSTER.TCL}: loadouster.tcl
+	-rm -f ${LOADOUSTER.TCL}
+	cp loadouster.tcl ${LOADOUSTER.TCL}
 
-$(LOADOUSTER.TCL): loadouster.tcl
-	-rm -f $(LOADOUSTER.TCL)
-	cp loadouster.tcl $(LOADOUSTER.TCL)
+${TCL.TLIB}: ${TCL_SRCS} ${BUILDIDX.TCL} ${TCLINIT.TCL}
+	-rm -f ${TCL.TLIB} ${TCL.TNDX}
+	cat ${TCL_SRCS} | egrep -v '^#$$|^#  *|^#-|^#=|^  *#' > $@
+	../runtcl -c "buildpackageindex ${TCL.TLIB}"
 
-$(TCL.TLIB): $(TCL_SRCS) $(BUILDIDX.TCL) $(TCLINIT.TCL)
-	-rm -f $(TCL.TLIB) $(TCL.TNDX)
-	cat $(TCL_SRCS) | egrep -v '^#$$|^#  *|^#-|^#=|^  *#' > $@
-	../runtcl -c "buildpackageindex $(TCL.TLIB)"
+${MAN}: ${TCLINIT.TCL} ${TCL.TLIB}
+	if [ ! -d ${MAN} ] ; then \
+	    ../runtcl ../tools/cpmanpages.tcl TCL ;\
+	fi
 
-HELPDIR: $(HELP) $(TCLINIT.TCL) $(TCL.TLIB)
+#------------------------------------------------------------------------------
+# Build help for Tcl & TclX.
 
-$(HELP):
-	mkdir $(HELP)
-	../runtcl ../tools/bldmanhelp.tcl ../$(TCL_UCB_DIR)/doc \
-                  ../tools/tclmanpages $(HELP) Tcl.brf
-	../runtcl buildhelp.tcl -b TclX.brf $(HELP) ../man/TclX.man
-
+buildtclhelp: ${TCLINIT.TCL} ${TCL.TLIB}
+	rm -rf ${HELP}
+	mkdir ${HELP}
+	../runtcl ../tools/bldmanhelp.tcl ../${TCL_UCB_DIR}/doc \
+                  ../tools/tclmanpages ${HELP} Tcl.brf
+	../runtcl buildhelp.tcl -b TclX.brf ${HELP} ../man/TclX.man
 
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp $(TCL.TLIB) $(TCL.TNDX)
-	-rm -rf $(HELP)
+	-rm -f ${TCL.TLIB} ${TCL.TNDX} ${TCLINIT.TCL}
+	-rm -f ${BUILDHELP.TCL} ${BUILDIDX.TCL} ${LOADOUSTER.TCL}
+	-rm -rf ${MAN}
