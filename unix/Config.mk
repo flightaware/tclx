@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.8 1996/02/17 08:44:11 markd Exp $
+# $Id: Config.mk,v 5.9 1996/02/20 09:10:50 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -53,18 +53,18 @@
 # library (libtcl.a),  Note, access is required to tclInt.h which is not
 # installed by Tcl.
 
-TCL_SRC=${srcbasedir}/../tcl7.5b1
-TCL_CONFIG=${srcbasedir}/../tcl7.5b1/unix/tclConfig.sh
-TCL_LIB=${bldbasedir}/../tcl7.5b1/unix/libtcl7.5.a
+TCL_SRC=${srcbasedir}/../tcl7.5b2
+TCL_CONFIG=${srcbasedir}/../tcl7.5b2/unix/tclConfig.sh
+TCL_LIB=${bldbasedir}/../tcl7.5b2/unix/libtcl7.5.a
 
 #------------------------------------------------------------------------------
 # Unless configure is going to be run with --with-tk=NO, these defines must be
 # set.  They define the directory containing the Tk source distribution, the
 # path to tkCOnfig.sh, and the path to the Tk library (libtk.a).
 
-TK_SRC=${srcbasedir}/../tk4.1b1
-TK_CONFIG=${srcbasedir}/../tk4.1b1/unix/tkConfig.sh
-TK_LIB=${bldbasedir}/../tk4.1b1/unix/libtk4.1.a
+TK_SRC=${srcbasedir}/../tk4.1b2
+TK_CONFIG=${srcbasedir}/../tk4.1b2/unix/tkConfig.sh
+TK_LIB=${bldbasedir}/../tk4.1b2/unix/libtk4.1.a
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,
