@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: filecmds.test,v 2.0 1992/10/16 04:49:46 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -61,7 +61,7 @@ Test filecmds-3.4 {copyfile tests} {
 
 Test filecmds-3.5 {copyfile tests} {
     copyfile
-} 1 {wrong # args: copyfile fromfilehandle tofilehandle}
+} 1 {wrong # args: copyfile fromFileId toFileId}
 
 pipe readPF writePF
 

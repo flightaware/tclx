@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 2.0 1992/10/16 04:49:43 markd Rel markd $
+# $Id: flock.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -40,7 +40,7 @@ set rdwrFH  [open FLOCKRW.TMP r+]
 # Check flock argument checking
 #
 
-set flockWrongArgs {wrong # args: flock ?-read|-write? ?-nowait? handle ?start? ?length? ?origin?}
+set flockWrongArgs {wrong # args: flock ?-read|-write? ?-nowait? fileId ?start? ?length? ?origin?}
 
 Test flock-1.1 {flock argument checking} {
     flock
@@ -99,7 +99,7 @@ Test flock-1.13 {flock argument checking} {
 # Check funlock argument checking
 #
 
-set funlockWrongArgs {wrong # args: funlock handle ?start? ?length? ?origin?}
+set funlockWrongArgs {wrong # args: funlock fileId ?start? ?length? ?origin?}
 
 Test flock-2.1 {funlock argument checking} {
     funlock

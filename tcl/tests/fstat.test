@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 2.1 1992/12/19 05:37:53 markd Exp markd $
+# $Id: fstat.test,v 2.2 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -113,7 +113,7 @@ Test fstat-4.3 {type return} {
 
 Test fstat-5.1 {error handling} {
     fstat
-} 1 {wrong # args: fstat handle ?item?|?stat arrayVar?}
+} 1 {wrong # args: fstat fileId ?item?|?stat arrayVar?}
 
 Test fstat-5.2 {error handling} {
     fstat foo
@@ -121,7 +121,7 @@ Test fstat-5.2 {error handling} {
 
 Test fstat-5.3 {error handling} {
     fstat $gorpFH foo
-} 1 {Got "foo", expected one of "atime", "ctime", "dev", "gid", "ino", "mode", "mtime", "nlink", "size", "tty", "type", "uid"}
+} 1 {Got "foo", expected one of "atime", "ctime", "dev", "gid", "ino", "mode", "mtime", "nlink", "size", "tty", "type", "uid", or "remotehost"}
 
 Test fstat-5.4 {error handling} {
     catch {unset foo}
@@ -131,7 +131,7 @@ Test fstat-5.4 {error handling} {
 Test fstat-5.5 {error handling} {
     catch {unset foo}
     fstat $gorpFH stat foo baz
-} 1 {wrong # args: fstat handle ?item?|?stat arrayVar?}
+} 1 {wrong # args: fstat fileId ?item?|?stat arrayVar?}
 
 
 catch {close $gorpFH}
