@@ -1,3 +1,4 @@
+cmdtrace on [open log w]
 #
 # tcllib.test
 #
@@ -13,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 3.1 1993/11/28 23:24:45 markd Exp markd $
+# $Id: tcllib.test,v 3.2 1993/12/13 04:36:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -61,12 +62,8 @@ proc TclLibReset {} {
 }
 
 proc TclLibCleanUp {} {
-    catch {chmod +rwx tcllib1.dir}
-    catch {chmod +rwx tcllib2.dir}
-    unlink -nocomplain [glob -nocomplain tcllib1.dir/*]
-    unlink -nocomplain [glob -nocomplain tcllib2.dir/*]
-    catch {rmdir tcllib1.dir}
-    catch {rmdir tcllib2.dir}
+    catch {chmod u=wrx {tcllib1.dir tcllib2.dir}}
+    exec rm -rf tcllib1.dir tcllib2.dir
     TclLibReset
 }
 
