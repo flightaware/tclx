@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.2 1997/06/12 21:08:30 markd Exp $
+ * $Id: tclXselect.c,v 8.3 1997/06/30 03:56:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,9 +44,10 @@
  * Data kept about a file channel.
  */
 typedef struct {
-    Tcl_Channel channel;
-    int         readFd;
-    int         writeFd;
+    Tcl_Obj     *channelIdObj;
+    Tcl_Channel  channel;
+    int          readFd;
+    int          writeFd;
 } channelData_t;
 
 /*
@@ -54,7 +55,8 @@ typedef struct {
  */
 static int
 ParseSelectFileList _ANSI_ARGS_((Tcl_Interp     *interp,
-                                 char           *handleList,
+                                 int             chanAccess,
+                                 Tcl_Obj        *handleList,
                                  fd_set         *fileSetPtr,
                                  channelData_t **channelListPtr,
                                  int            *maxFileIdPtr));
@@ -64,13 +66,16 @@ FindPendingData _ANSI_ARGS_((int            fileDescCnt,
                              channelData_t *channelList,
                              fd_set        *fileDescSetPtr));
 
-static char *
+static Tcl_Obj *
 ReturnSelectedFileList _ANSI_ARGS_((fd_set        *fileDescSetPtr,
                                     int            fileDescCnt,
                                     channelData_t *channelListPtr));
 
 static int 
-TclX_SelectCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+TclX_SelectObjCmd _ANSI_ARGS_((ClientData clientData, 
+                               Tcl_Interp *interp,
+                               int objc,
+                               Tcl_Obj *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -79,49 +84,55 @@ TclX_SelectCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  *   Parse a list of file handles for select.
  *
  * Parameters:
- *   o interp (O) - Error messages are returned in the result.
+ *   o interp - Error messages are returned in the result.
+ *   o chanAccess - TCL_READABLE for read direction, TCL_WRITABLE for write
+ *     direction or both for both files.
  *   o handleList (I) - The list of file handles to parse, may be empty.
- *   o fileSetPtr (O) - The select fd_set for the parsed handles is
+ *   o fileSetPtr - The select fd_set for the parsed handles is
  *     filled in.
- *   o channelListPtr (O) - A pointer to a dynamically allocated list of
+ *   o channelListPtr - A pointer to a dynamically allocated list of
  *     the channels that are in the set.  If the list is empty, NULL is
  *     returned.
  *   o maxFileIdPtr (I/O) - If a file id greater than the current value is
  *     encountered, it will be set to that file id.
  * Returns:
  *   The number of files in the list, or -1 if an error occured.
+ * FIX: Should really pass in access and only get channels that are 
+ * requested.
  *-----------------------------------------------------------------------------
  */
 static int
-ParseSelectFileList (interp, handleList, fileSetPtr, channelListPtr,
-                     maxFileIdPtr)
+ParseSelectFileList (interp, chanAccess, handleList, fileSetPtr,
+                     channelListPtr, maxFileIdPtr)
     Tcl_Interp    *interp;
-    char          *handleList;
+    int            chanAccess;
+    Tcl_Obj       *handleList;
     fd_set        *fileSetPtr;
     channelData_t **channelListPtr;
     int           *maxFileIdPtr;
 {
     int handleCnt, idx;
-    char **handleArgv;
+    Tcl_Obj **handleObjv;
     channelData_t *channelList;
 
     /*
      * Optimize empty list handling.
      */
-    if (handleList [0] == '\0') {
+    if (TclX_IsNullObj (handleList)) {
         *channelListPtr = NULL;
         return 0;
     }
 
-    if (Tcl_SplitList (interp, handleList, &handleCnt, &handleArgv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, handleList, &handleCnt,
+                                &handleObjv) != TCL_OK) {
         return -1;
+    }
 
     /*
      * Handle case of an empty list.
      */
     if (handleCnt == 0) {
         *channelListPtr = NULL;
-        ckfree ((char *) handleArgv);
         return 0;
     }
 
@@ -129,37 +140,45 @@ ParseSelectFileList (interp, handleList, fileSetPtr, channelListPtr,
         (channelData_t*) ckalloc (sizeof (channelData_t) * handleCnt);
 
     for (idx = 0; idx < handleCnt; idx++) {
+        channelList [idx].channelIdObj = handleObjv [idx];
         channelList [idx].channel =
-            TclX_GetOpenChannel (interp,
-                                 handleArgv [idx],
-                                 0);
+            TclX_GetOpenChannelObj (interp,
+                                    handleObjv [idx],
+                                    chanAccess);
         if (channelList [idx].channel == NULL)
             goto errorExit;
-        
-        if (TclXOSGetSelectFnum (interp, 
-                                 channelList [idx].channel,
-                                 &channelList [idx].readFd,
-                                 &channelList [idx].writeFd) != TCL_OK)
-            goto errorExit;
 
-        if (channelList [idx].readFd >= 0) {
+        if (chanAccess & TCL_READABLE) {
+            if (TclXOSGetSelectFnum (interp, 
+                                     channelList [idx].channel,
+                                     TCL_READABLE,
+                                     &channelList [idx].readFd) != TCL_OK)
+                goto errorExit;
             FD_SET (channelList [idx].readFd, fileSetPtr);
             if (channelList [idx].readFd > *maxFileIdPtr)
                 *maxFileIdPtr = channelList [idx].readFd;
+        } else {
+            channelList [idx].readFd = -1;
         }
-        if (channelList [idx].writeFd >= 0) {
+
+        if (chanAccess & TCL_WRITABLE) {
+            if (TclXOSGetSelectFnum (interp, 
+                                     channelList [idx].channel,
+                                     TCL_WRITABLE,
+                                     &channelList [idx].writeFd) != TCL_OK)
+                goto errorExit;
             FD_SET (channelList [idx].writeFd, fileSetPtr);
             if (channelList [idx].writeFd > *maxFileIdPtr)
                 *maxFileIdPtr = channelList [idx].writeFd;
+        } else {
+            channelList [idx].writeFd = -1;
         }
     }
 
     *channelListPtr = channelList;
-    ckfree ((char *) handleArgv);
     return handleCnt;
 
   errorExit:
-    ckfree ((char *) handleArgv);
     ckfree ((char *) channelList);
     return -1;
 
@@ -212,30 +231,17 @@ FindPendingData (fileDescCnt, channelList, fileDescSetPtr)
  *   o channelListPtr (I) - A pointer to a list of the FILE pointers for
  *     files that are in the set.
  * Returns:
- *   A dynamicly allocated list of file handles.  If the handles are empty,
- *   it returns a constant empty string.  Do not free the empty string.
+ *   List of file handles.
  *-----------------------------------------------------------------------------
  */
-static char *
+static Tcl_Obj *
 ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList) 
     fd_set        *fileDescSetPtr;
     int            fileDescCnt;
     channelData_t *channelList;
 {
     int idx, handleCnt;
-    char *fileHandleList;
-    char **fileHandleArgv;
-
-    /*
-     * Special case the empty list.
-     */
-    if (fileDescCnt == 0)
-        return "";
-
-    /*
-     * Allocate enough room to hold the argv.
-     */
-    fileHandleArgv = (char **) ckalloc (fileDescCnt * sizeof (char *));
+    Tcl_Obj *fileHandleList = Tcl_NewListObj (0, NULL);
 
     handleCnt = 0;
     for (idx = 0; idx < fileDescCnt; idx++) {
@@ -243,20 +249,17 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList)
              FD_ISSET (channelList [idx].readFd, fileDescSetPtr)) ||
             ((channelList [idx].writeFd >= 0) &&
              FD_ISSET (channelList [idx].writeFd, fileDescSetPtr))) {
-            fileHandleArgv [handleCnt] =
-                Tcl_GetChannelName (channelList [idx].channel);
+            Tcl_ListObjAppendElement (NULL, fileHandleList,
+                                      channelList [idx].channelIdObj);
             handleCnt++;
         }
     }
-
-    fileHandleList = Tcl_Merge (handleCnt, fileHandleArgv);
-    ckfree ((char *) fileHandleArgv);
 
     return fileHandleList;
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_SelectCmd --
+ * TclX_SelectObjCmd --
  *  Implements the select TCL command:
  *      select readhandles ?writehandles? ?excepthandles? ?timeout?
  *
@@ -270,27 +273,26 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_SelectCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+TclX_SelectObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj     *CONST objv[];
 {
+    static int chanAccess [] = {TCL_READABLE, TCL_WRITABLE, 0};
     int idx;
     fd_set fdSets [3], readPendingFDSet;
     int descCnts [3];
     channelData_t *descLists [3];
-    char *retListArgv [3];
+    Tcl_Obj *handleSetList [3];
     int numSelected, maxFileId = 0, pending;
     int result = TCL_ERROR;
     struct timeval  timeoutRec;
     struct timeval *timeoutRecPtr;
 
-
-    if (argc < 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " readFileIds ?writeFileIds? ?exceptFileIds?",
-                          " ?timeout?", (char *) NULL);
+    if (objc < 2) {
+        return TclX_WrongArgs (interp, objv [0], 
+                      " readFileIds ?writeFileIds? ?exceptFileIds? ?timeout?");
         return TCL_ERROR;
     }
 
@@ -306,9 +308,12 @@ TclX_SelectCmd (clientData, interp, argc, argv)
     /*
      * Parse the file handles and set everything up for the select call.
      */
-    for (idx = 0; (idx < 3) && (idx < argc - 1); idx++) {
-        descCnts [idx] = ParseSelectFileList (interp, argv [idx + 1],
-                                              &fdSets [idx], &descLists [idx],
+    for (idx = 0; (idx < 3) && (idx < objc - 1); idx++) {
+        descCnts [idx] = ParseSelectFileList (interp, 
+                                              chanAccess [idx],
+                                              objv [idx + 1],
+                                              &fdSets [idx],
+                                              &descLists [idx],
                                               &maxFileId);
         if (descCnts [idx] < 0)
             goto exitPoint;
@@ -318,12 +323,12 @@ TclX_SelectCmd (clientData, interp, argc, argv)
      * Get the time out.  Zero is different that not specified.
      */
     timeoutRecPtr = NULL;
-    if ((argc > 4) && (argv [4][0] != '\0')) {
+    if ((objc > 4) && !TclX_IsNullObj (objv [4])) {
         double  timeout, seconds, microseconds;
 
-        if (Tcl_GetDouble (interp, argv [4], &timeout) != TCL_OK)
+        if (Tcl_GetDoubleFromObj (interp, objv [4], &timeout) != TCL_OK)
             goto exitPoint;
-        if (timeout < 0) {
+        if (timeout < 0.0) {
             Tcl_AppendResult (interp, "timeout must be greater than or equal",
                               " to zero", (char *) NULL);
             goto exitPoint;
@@ -375,26 +380,19 @@ TclX_SelectCmd (clientData, interp, argc, argv)
      */
     if (numSelected > 0 || pending) {
         for (idx = 0; idx < 3; idx++) {
-            retListArgv [idx] =
+            handleSetList [idx] =
                 ReturnSelectedFileList (&fdSets [idx],
                                         descCnts [idx],
                                         descLists [idx]);
         }
-
-        Tcl_SetResult (interp, Tcl_Merge (3, retListArgv), TCL_DYNAMIC); 
-        
-        for (idx = 0; idx < 3; idx++) {
-            if (retListArgv [idx][0] != '\0')
-                ckfree ((char *) retListArgv [idx]);
-        }
+        Tcl_SetObjResult (interp, Tcl_NewListObj (3, handleSetList)); 
     }
 
     result = TCL_OK;
 
   exitPoint:
     for (idx = 0; idx < 3; idx++) {
-        if (descLists [idx] != NULL)
-            ckfree ((char *) descLists [idx]);
+        ckfree ((char *) descLists [idx]);
     }
     return result;
 }
@@ -406,11 +404,11 @@ TclX_SelectCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_SelectCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+TclX_SelectObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj     *CONST objv[];
 {
     Tcl_AppendResult (interp, 
                       "select is not available on this version of Unix",
@@ -429,10 +427,10 @@ void
 TclX_SelectInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateCommand (interp, 
-		       "select",
-		       TclX_SelectCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, 
+                          "select",
+                          TclX_SelectObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
 }
 

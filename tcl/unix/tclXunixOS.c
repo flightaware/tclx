@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.1 1997/04/17 04:59:49 markd Exp $
+ * $Id: tclXunixOS.c,v 8.2 1997/06/12 21:08:45 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1454,39 +1454,33 @@ TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSGetSelectFnum --
- *   Convert a channel its read and write file numbers for use in select.
+ *   Convert a channel its read or write file numbers for use in select.
  *
  * Parameters:
  *   o interp - Pointer to the current interpreter, error messages will be
  *     returned in the result.
  *   o channel - Channel to get the numbers for.
- *   o readFnumPtr - The read file number is returned here.  -1 is returned if
- *     the file is not open for reading.
- *   o writeFnumPtr - The write file number is returned here.  -1 is returned
- *     if the file is not open for writing.
+ *   o direction - TCL_READABLE or TCL_WRITABLE.
+ *   o fnumPtr - The file number for the direction is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetSelectFnum (interp, channel, readFnumPtr, writeFnumPtr)
+TclXOSGetSelectFnum (interp, channel, direction, fnumPtr)
     Tcl_Interp *interp;
     Tcl_Channel channel;
-    int        *readFnumPtr;
-    int        *writeFnumPtr;
+    int         direction;
+    int        *fnumPtr;
 {
     ClientData handle;
 
-    if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_OK) {
-        *readFnumPtr = (int) handle;
-    } else {
-        *readFnumPtr = -1;
+    if (Tcl_GetChannelHandle (channel, direction, &handle) != TCL_OK) {
+        Tcl_AppendResult (interp,  "channel ", Tcl_GetChannelName (channel),
+                          " was not open for requested access", (char *) NULL);
+        return TCL_ERROR;
     }
-    if (Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle) == TCL_OK) {
-        *writeFnumPtr = (int) handle;
-    } else {
-        *writeFnumPtr = -1;
-    }
+    *fnumPtr = (int) handle;
     return TCL_OK;
 }
 

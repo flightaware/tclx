@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.6 1997/06/30 01:29:00 markd Exp $
+ * $Id: tclExtdInt.h,v 8.7 1997/06/30 03:55:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -249,12 +249,12 @@ TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
 extern Tcl_Channel
 TclX_GetOpenChannel _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *handle,
-                                 int         direction));
+                                 int         chanAccess));
 
 extern Tcl_Channel
 TclX_GetOpenChannelObj _ANSI_ARGS_((Tcl_Interp *interp,
                                     Tcl_Obj    *handle,
-                                    int         direction));
+                                    int         chanAccess));
 
 extern int
 TclX_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
@@ -586,8 +586,9 @@ TclXOSFChangeOwnGrpObj _ANSI_ARGS_((Tcl_Interp *interp,
 int
 TclXOSGetSelectFnum _ANSI_ARGS_((Tcl_Interp *interp,
                                  Tcl_Channel channel,
-                                 int        *readFnumPtr,
-                                 int        *writeFnumPtr));
+                                 int         direction,
+                                 int        *fnumPtr));
+
 int
 TclXOSHaveFlock _ANSI_ARGS_((void));
 

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 8.2 1997/04/17 05:00:00 markd Exp $
+ * $Id: tclXwinOS.c,v 8.3 1997/06/12 21:08:48 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -1298,10 +1298,8 @@ TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
  *   o interp - Pointer to the current interpreter, error messages will be
  *     returned in the result.
  *   o channel - Channel to get the numbers for.
- *   o readFnumPtr - The read file number is returned here.  -1 is returned if
- *     the file is not open for reading.
- *   o writeFnumPtr - The write file number is returned here.  -1 is returned
- *     if the file is not open for writing.
+ *   o direction - TCL_READABLE or TCL_WRITABLE.
+ *   o fnumPtr - The file number for the direction is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -1309,35 +1307,27 @@ TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
 int
 TclXOSGetSelectFnum (Tcl_Interp *interp,
                      Tcl_Channel channel,
-                     int        *readFnumPtr,
-                     int        *writeFnumPtr)
+                     int         direction,
+                     int        *fnumPtr)
 {
-    Tcl_File file;
-    int type;
+    Tcl_ChannelType *chanType;
 
-    file = Tcl_GetChannelFile (channel, TCL_READABLE);
-    if (file != NULL) {
-        *readFnumPtr = (int) ((SOCKET) Tcl_GetFileInfo (file, &type));
-        if (type != TCL_WIN_SOCKET)
-            goto badFileType;
-    } else {
-        *readFnumPtr = -1;
+    chanType = Tcl_GetChannelType (channel);
+    if (!STREQU (chanType->typeName, "tcp")) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
+                          " is not a socket; select only works on sockets on ",
+                          "Windows", (char *) NULL);
+        return TCL_ERROR;
     }
-    file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
-    if (file != NULL) {
-        *writeFnumPtr = (int) ((SOCKET) Tcl_GetFileInfo (file, &type));
-        if (type != TCL_WIN_SOCKET)
-            goto badFileType;
-    } else {
-        *writeFnumPtr = -1;
+
+    if (Tcl_GetChannelHandle (channel, direction, &handle) != TCL_OK) {
+        Tcl_AppendResult (interp,  "channel ", Tcl_GetChannelName (channel),
+                          " was not open for requested access", (char *) NULL);
+        return TCL_ERROR;
     }
+    *fnumPtr = (int) handle;
     return TCL_OK;
     
-  badFileType:
-    Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
-                      " is not a socket; select only works on sockets on ",
-                      "Windows", (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
