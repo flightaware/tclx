@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 8.2 1997/08/19 09:33:40 markd Exp $
+# $Id: tclhelp.tcl,v 8.3 1997/08/23 18:56:13 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ proc DisplayPage {page} {
     pack $w.frame.page -side top -expand 1 -fill both
 
     if [catch {
-            set contents [read_file [TclXHelp:ConvertPath $page]]
+            set contents [read_file [TclXHelp::ConvertPath $page]]
         } msg] {
         set contents $msg
     }
