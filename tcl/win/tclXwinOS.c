@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 8.0 1996/11/21 00:25:25 markd Exp $
+ * $Id: tclXwinOS.c,v 8.1 1997/02/04 03:22:51 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -331,7 +331,7 @@ TclXOSsetitimer (Tcl_Interp *interp,
 void
 TclXOSsleep (unsigned seconds)
 {
-    Sleep (seconds*100);
+    Sleep (seconds*1000);
 }
 
 /*-----------------------------------------------------------------------------
