@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 7.1 1996/07/18 19:36:36 markd Exp $
+ * $Id: tclXwinPort.h,v 7.2 1996/07/26 05:56:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,6 +28,13 @@
 #include "tclWinPort.h"
 
 #include <direct.h>
+
+/*
+ * Types needed for fstat.
+ */
+#define S_IFIFO  11  /*FIX: Real values from real OS */
+#define S_IFSOCK 12
+
 
 /*
  * OS feature definitons.

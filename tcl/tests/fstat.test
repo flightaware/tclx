@@ -12,22 +12,19 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 7.0 1996/06/16 05:32:18 markd Exp $
+# $Id: fstat.test,v 7.1 1996/07/26 05:56:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
-if [cequal $tcl_platform(platform) windows] {
-    echo "    * The fstat tests have not been ported to Win32"
-    return
-}
-
 unlink -nocomplain gorp.file
 set gorpFH [open gorp.file w]
 puts $gorpFH "Test string"
 close $gorpFH
+if ![cequal $tcl_platform(platform) windows] { ;# WIN32???
 chmod 0765 gorp.file
+}
 
 set gorpFH [open gorp.file r+]
 
@@ -96,7 +93,7 @@ Test fstat-4.1 {type return} {
     set type [fstat $fh type]
     close $fh
     set type
-} 0 directory
+} 0 directory {unixOnly}
 
 Test fstat-4.2 {type return} {
     fstat $gorpFH type

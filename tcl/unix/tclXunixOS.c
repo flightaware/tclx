@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.1 1996/07/18 19:36:33 markd Exp $
+ * $Id: tclXunixOS.c,v 7.2 1996/07/22 17:10:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -652,6 +652,43 @@ TclXOSGetOpenFileMode (fileNum, mode, nonBlocking)
         *nonBlocking = TRUE;
     else
         *nonBlocking = FALSE;
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFstat --
+ *   Portability interface to get status information on an open file.
+ *
+ * Parameters:
+ *   o interp (I) - Errors are returned in result.
+ *   o channel (I) - Channel to get file number for.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
+ *   o statBuf (O) - Status information, made to look as much like Unix as
+ *     possible.
+ *   o ttyDev (O) - If not NULL, a boolean indicating if the device is
+ *     associated with a tty.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFstat (interp, channel, direction, statBuf, ttyDev)
+    Tcl_Interp  *interp;
+    Tcl_Channel  channel;
+    int          direction;
+    struct stat *statBuf;
+    int         *ttyDev;
+{
+    int fileNum;
+    
+    fileNum = ChannelToFnum (channel, direction);
+    if (fstat (fileNum, statBuf) < 0) {
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (ttyDev != NULL)
+        *ttyDev = isatty (fileNum);
     return TCL_OK;
 }
 

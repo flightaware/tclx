@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.2 1996/07/22 17:09:58 markd Exp $
+ * $Id: tclExtdInt.h,v 7.3 1996/07/26 05:55:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,13 +20,18 @@
 #define TCLEXTDINT_H
 
 #include "tclExtend.h"
-#include "tclInt.h"
 
 #if defined(__WIN32__) || defined(_WIN32)
 #   include "tclXwinPort.h"
 #else
 #   include "tclXunixPort.h"
 #endif
+
+/*
+ * After above, since some of our port definitions affect what gets defined
+ * tclInt.h and the Tcl port file.
+ */
+#include "tclInt.h"
 
 /*
  * Get ranges of integers and longs.
@@ -647,6 +652,13 @@ TclXOSGetOpenFileMode _ANSI_ARGS_((int  fileNum,
                                    int *mode,
                                    int *nonBlocking));
 
+extern int
+TclXOSFstat _ANSI_ARGS_((Tcl_Interp  *interp,
+                         Tcl_Channel  channel,
+                         int          direction,
+                         struct stat *statBuf,
+                         int         *ttyDev));
+    
 extern int
 TclXOSWalkDir _ANSI_ARGS_((Tcl_Interp       *interp,
                            char             *path,

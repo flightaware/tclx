@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 7.1 1996/07/18 19:36:18 markd Exp $
+ * $Id: tclXfstat.c,v 7.2 1996/07/22 17:10:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -25,19 +25,19 @@ StrFileType _ANSI_ARGS_((struct stat  *statBufPtr));
 
 static void
 ReturnStatList _ANSI_ARGS_((Tcl_Interp   *interp,
-                            int           fileNum,
+                            int           ttyDev,
                             struct stat  *statBufPtr));
 
 static int
 ReturnStatArray _ANSI_ARGS_((Tcl_Interp   *interp,
-                             int           fileNum,
+                             int           ttyDev,
                              struct stat  *statBufPtr,
                              char         *arrayName));
 
 static int
 ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
                             Tcl_Channel   channel,
-                            int           fileNum,
+                            int           ttyDev,
                             struct stat  *statBufPtr,
                             char         *itemName));
 
@@ -91,14 +91,15 @@ StrFileType (statBufPtr)
  *
  * Parameters:
  *   o interp (I) - The list is returned in result.
- *   o fileNum (I) - File number.
+ *   o ttyDev (O) - A boolean indicating if the device is associated with a
+ *     tty.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
  *-----------------------------------------------------------------------------
  */
 static void
-ReturnStatList (interp, fileNum, statBufPtr)
+ReturnStatList (interp,ttyDev, statBufPtr)
     Tcl_Interp   *interp;
-    int           fileNum;
+    int           ttyDev;
     struct stat  *statBufPtr;
 {
     char statList [200];
@@ -114,7 +115,7 @@ ReturnStatList (interp, fileNum, statBufPtr)
              "{mtime %ld} {nlink %ld} {size %ld} {uid %ld} {tty %d} {type %s}",
              (long) statBufPtr->st_mtime,  (long) statBufPtr->st_nlink,
              (long) statBufPtr->st_size,   (long) statBufPtr->st_uid,
-             (int) isatty (fileNum), StrFileType (statBufPtr));
+             (int) ttyDev, StrFileType (statBufPtr));
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
 }
@@ -126,7 +127,8 @@ ReturnStatList (interp, fileNum, statBufPtr)
  *
  * Parameters:
  *   o interp (I) - Current interpreter, error return in result.
- *   o fileNum (I) - File number.
+ *   o ttyDev (O) - A boolean indicating if the device is associated with a
+ *     tty.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
  *   o arrayName (I) - The name of the array to return the info in.
  * Returns:
@@ -134,9 +136,9 @@ ReturnStatList (interp, fileNum, statBufPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
+ReturnStatArray (interp, ttyDev, statBufPtr, arrayName)
     Tcl_Interp   *interp;
-    int           fileNum;
+    int           ttyDev;
     struct stat  *statBufPtr;
     char         *arrayName;
 {
@@ -193,7 +195,7 @@ ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
         return TCL_ERROR;
 
     if (Tcl_SetVar2 (interp, arrayName, "tty", 
-                     isatty (fileNum) ? "1" : "0",
+                     ttyDev ? "1" : "0",
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
@@ -213,7 +215,8 @@ ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
  * Parameters:
  *   o interp (I) - Item or error returned in result.
  *   o channel (I) - Channel the file is assoicated with.
- *   o fileNum (I) - File number.
+ *   o ttyDev (O) - A boolean indicating if the device is associated with a
+ *     tty.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
  *   o itemName (I) - The name of the desired item.
  * Returns:
@@ -221,37 +224,40 @@ ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatItem (interp, channel, fileNum, statBufPtr, itemName)
+ReturnStatItem (interp, channel, ttyDev, statBufPtr, itemName)
     Tcl_Interp   *interp;
     Tcl_Channel   channel;
-    int           fileNum;
+    int           ttyDev;
     struct stat  *statBufPtr;
     char         *itemName;
 {
+    char numBuf [32];
+
+    numBuf [0] = '\0';
     if (STREQU (itemName, "dev"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_dev);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_dev);
     else if (STREQU (itemName, "ino"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_ino);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_ino);
     else if (STREQU (itemName, "mode"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_mode);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_mode);
     else if (STREQU (itemName, "nlink"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_nlink);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_nlink);
     else if (STREQU (itemName, "uid"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_uid);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_uid);
     else if (STREQU (itemName, "gid"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_gid);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_gid);
     else if (STREQU (itemName, "size"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_size);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_size);
     else if (STREQU (itemName, "atime"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_atime);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_atime);
     else if (STREQU (itemName, "mtime"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_mtime);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_mtime);
     else if (STREQU (itemName, "ctime"))
-        sprintf (interp->result, "%ld", (long) statBufPtr->st_ctime);
+        sprintf (numBuf, "%ld", (long) statBufPtr->st_ctime);
     else if (STREQU (itemName, "type"))
-        interp->result = StrFileType (statBufPtr);
+        strcpy (numBuf, StrFileType (statBufPtr));
     else if (STREQU (itemName, "tty"))
-        interp->result = isatty (fileNum) ? "1" : "0";
+        strcpy (numBuf, ttyDev ? "1" : "0");
     else if (STREQU (itemName, "remotehost")) {
         if (TclXGetHostInfo (interp, channel, TRUE) != TCL_OK)
             return TCL_ERROR;
@@ -266,6 +272,9 @@ ReturnStatItem (interp, channel, fileNum, statBufPtr, itemName)
                           "\"localhost\"", (char *) NULL);
         return TCL_ERROR;
     }
+
+    if (numBuf [0] != '\0')
+        Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
 
     return TCL_OK;
 }
@@ -283,9 +292,9 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int fileNum;
     Tcl_Channel channel;
     struct stat statBuf;
+    int ttyDev;
 
     /* FIX: modify to use channel and pass to OS routines. */
     if ((argc < 2) || (argc > 4)) {
@@ -297,12 +306,8 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     channel = TclX_GetOpenChannel (interp, argv [1], 0);
     if (channel == NULL)
         return TCL_ERROR;
-    fileNum = TclX_GetOpenFnum (interp, argv [1], 0);
-    if (fileNum < 0)
-        return TCL_ERROR;
     
-    if (fstat (fileNum, &statBuf)) {
-        interp->result = Tcl_PosixError (interp);
+    if (TclXOSFstat (interp, channel, 0, &statBuf, &ttyDev)) {
         return TCL_ERROR;
     }
 
@@ -315,11 +320,11 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
                               "using array name", (char *) NULL);
             return TCL_ERROR;
         }
-        return ReturnStatArray (interp, fileNum, &statBuf, argv [3]);
+        return ReturnStatArray (interp, ttyDev, &statBuf, argv [3]);
     }
     if (argc == 3)
-        return ReturnStatItem (interp, channel, fileNum, &statBuf, argv [2]);
+        return ReturnStatItem (interp, channel, ttyDev, &statBuf, argv [2]);
 
-    ReturnStatList (interp, fileNum, &statBuf);
+    ReturnStatList (interp, ttyDev, &statBuf);
     return TCL_OK;
 }

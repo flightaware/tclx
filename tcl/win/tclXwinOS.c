@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.2 1996/07/22 17:10:20 markd Exp $
+ * $Id: tclXwinOS.c,v 7.3 1996/07/26 05:56:31 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -31,8 +31,11 @@
  * Prototypes of internal functions.
  */
 static HANDLE
-ChannelToHandle _ANSI_ARGS_((Tcl_Channel channel,
-                             int         direction));
+ChannelToHandle(Tcl_Channel channel,
+                int         direction,
+                int        *type);
+static time_t
+ConvertToUnixTime (FILETIME fileTime);
 
 
 /*-----------------------------------------------------------------------------
@@ -47,9 +50,8 @@ ChannelToHandle _ANSI_ARGS_((Tcl_Channel channel,
  *-----------------------------------------------------------------------------
  */
 int
-TclXNotAvailableError (interp, funcName)
-    Tcl_Interp *interp;
-    char       *funcName;
+TclXNotAvailableError (Tcl_Interp *interp,
+                       char       *funcName)
 {
     Tcl_AppendResult (interp, funcName, " is not available on MS Windows",
                       (char *) NULL);
@@ -69,9 +71,8 @@ TclXNotAvailableError (interp, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SplitWinCmdLine (argcPtr, argvPtr)
-    int    *argcPtr;
-    char ***argvPtr;
+TclX_SplitWinCmdLine (int    *argcPtr,
+                      char ***argvPtr)
 {
     char *args = GetCommandLine();
     char **argvlist, *p;
@@ -138,28 +139,52 @@ TclX_SplitWinCmdLine (argcPtr, argvPtr)
  *   o channel (I) - Channel to get file number for.
  *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
  *     return the first of the read and write numbers.
+ *   o type (O) - The type of the file. TCL_WIN_FILE if an error occurs
+ *     (so something is in the value).  Maybe NULL.
  * Returns:
  *   The file number or NULL if a file number is not associated with this
- * access direction.
+ * access direction.  Just go ahead and pass this to a system call to
+ * get a useful error message, they should never happen.
  *-----------------------------------------------------------------------------
  */
 HANDLE
-ChannelToHandle (channel, direction)
-    Tcl_Channel channel;
-    int         direction;
+ChannelToHandle (Tcl_Channel channel,
+                 int         direction,
+                 int        *type)
 {
     Tcl_File file;
-
+    
     if (direction == 0) {
         file = Tcl_GetChannelFile (channel, TCL_READABLE);
         if (file == NULL)
             file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
     } else {
         file = Tcl_GetChannelFile (channel, direction);
-        if (file == NULL)
+        if (file == NULL) {
+            if (type != NULL)
+                *type = TCL_WIN_FILE;
             return NULL;
+        }
     }
-    return (HANDLE) Tcl_GetFileInfo (file, NULL);
+    return (HANDLE) Tcl_GetFileInfo (file, type);
+}
+
+/*-----------------------------------------------------------------------------
+ * ConvertToUnixTime --
+ *
+ *    Convert a FILETIME structure to Unix style time.
+ *
+ * Parameters:
+ *   o fileTime (I) - Time to convert.
+ * Returns:
+ *   Unix time: seconds since Jan 1, 1970.
+ *-----------------------------------------------------------------------------
+ */
+static time_t
+ConvertToUnixTime (FILETIME fileTime)
+{
+    /* FIX: Write me */
+    return 0;
 }
 
 /*-----------------------------------------------------------------------------
@@ -176,10 +201,9 @@ ChannelToHandle (channel, direction)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetpriority (interp, priority, funcName)
-    Tcl_Interp *interp;
-    int        *priority;
-    char       *funcName;
+TclXOSgetpriority (Tcl_Interp *interp,
+                   int        *priority,
+                   char       *funcName)
 {
     /*FIX: this should work */
     return TclXNotAvailableError (interp, funcName);
@@ -200,11 +224,10 @@ TclXOSgetpriority (interp, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSincrpriority (interp, priorityIncr, priority, funcName)
-    Tcl_Interp *interp;
-    int         priorityIncr;
-    int        *priority;
-    char       *funcName;
+TclXOSincrpriority (Tcl_Interp *interp,
+                    int         priorityIncr,
+                    int        *priority,
+                    char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -221,9 +244,8 @@ TclXOSincrpriority (interp, priorityIncr, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSpipe (interp, fildes)
-    Tcl_Interp *interp;
-    int        *fildes;
+TclXOSpipe (Tcl_Interp *interp,
+            int        *fildes)
 {
     if (_pipe (fildes, 16384, 0) < 0) {
         Tcl_AppendResult (interp, "pipe creation failed: ",
@@ -249,10 +271,9 @@ TclXOSpipe (interp, fildes)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSsetitimer (interp, seconds, funcName)
-    Tcl_Interp *interp;
-    double      *seconds;
-    char       *funcName;
+TclXOSsetitimer (Tcl_Interp *interp,
+                 double      *seconds,
+                 char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -266,8 +287,7 @@ TclXOSsetitimer (interp, seconds, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclXOSsleep (seconds)
-    unsigned seconds;
+TclXOSsleep (unsigned seconds)
 {
     Sleep (seconds*100);
 }
@@ -296,9 +316,8 @@ TclXOSsync ()
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSfsync (interp, channelName)
-    Tcl_Interp *interp;
-    char       *channelName;
+TclXOSfsync (Tcl_Interp *interp,
+             char       *channelName)
 {
     Tcl_Channel channel;
     int fileNum;
@@ -337,10 +356,9 @@ TclXOSfsync (interp, channelName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSsystem (interp, command, exitCode)
-    Tcl_Interp *interp;
-    char       *command;
-    int        *exitCode;
+TclXOSsystem (Tcl_Interp *interp,
+              char       *command,
+              int        *exitCode)
 {
     PROCESS_INFORMATION pi;
     STARTUPINFO si;
@@ -378,9 +396,8 @@ TclXOSsystem (interp, command, exitCode)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSmkdir (interp, path)
-    Tcl_Interp *interp;
-    char       *path;
+TclXOSmkdir (Tcl_Interp *interp,
+             char       *path)
 {
     if (mkdir (path) < 0) {
         Tcl_AppendResult (interp, "creating directory \"", path,
@@ -406,11 +423,10 @@ TclXOSmkdir (interp, path)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSlink (interp, srcPath, targetPath, funcName)
-    Tcl_Interp *interp;
-    char       *srcPath;
-    char       *targetPath;
-    char       *funcName;
+TclX_OSlink (Tcl_Interp *interp,
+             char       *srcPath,
+             char       *targetPath,
+             char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -430,11 +446,10 @@ TclX_OSlink (interp, srcPath, targetPath, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSsymlink (interp, srcPath, targetPath, funcName)
-    Tcl_Interp *interp;
-    char       *srcPath;
-    char       *targetPath;
-    char       *funcName;
+TclX_OSsymlink (Tcl_Interp *interp,
+                char       *srcPath,
+                char       *targetPath,
+                char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -450,9 +465,8 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclXOSElapsedTime (realTime, cpuTime)
-    clock_t *realTime;
-    clock_t *cpuTime;
+TclXOSElapsedTime (clock_t *realTime,
+                   clock_t *cpuTime)
 {
 #if 0
 ???
@@ -492,11 +506,10 @@ TclXOSElapsedTime (realTime, cpuTime)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSkill (interp, pid, signal, funcName)
-    Tcl_Interp *interp;
-    pid_t       pid;
-    int         signal;
-    char       *funcName;
+TclXOSkill (Tcl_Interp *interp,
+            pid_t       pid,
+            int         signal,
+            char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -514,13 +527,14 @@ TclXOSkill (interp, pid, signal, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetOpenFileMode (fileNum, mode, nonBlocking)
-    int  fileNum;
-    int *mode;
-    int *nonBlocking;
+TclXOSGetOpenFileMode (int  fileNum,
+                       int *mode,
+                       int *nonBlocking)
 {
     struct stat fileStat;
 
+    /* FIX: Probably not correct, how does one determine if a file is open
+       for read/write.  also, might want to determine if its a socket here.*/
     if (fstat (fileNum, &fileStat) < 0)
         return TCL_ERROR;
     *mode = 0;
@@ -530,6 +544,98 @@ TclXOSGetOpenFileMode (fileNum, mode, nonBlocking)
         *mode |= TCL_WRITABLE;
     *nonBlocking = FALSE;
     return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFstat --
+ *   Portability interface to get status information on an open file.
+ *
+ * Parameters:
+ *   o interp (I) - Errors are returned in result.
+ *   o channel (I) - Channel to get file number for.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
+ *   o statBuf (O) - Status information, made to look as much like Unix as
+ *     possible.
+ *   o ttyDev (O) - If not NULL, a boolean indicating if the device is
+ *     associated with a tty. (Always FALSE on windows).
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFstat (Tcl_Interp  *interp,
+             Tcl_Channel  channel,
+             int          direction,
+             struct stat *statBuf,
+             int         *ttyDev)
+{
+    HANDLE handle;
+    int type;
+    FILETIME creation, access, modify;
+    
+    handle = ChannelToHandle (channel, direction, &type);
+
+    /*
+     * These don't translate to windows.
+     */
+    statBuf->st_dev = 0;
+    statBuf->st_ino = 0;
+    statBuf->st_rdev = 0;
+
+    statBuf->st_mode = 0;
+    switch (type) {
+      case TCL_WIN_PIPE:
+        statBuf->st_mode |= S_IFIFO;
+        break;
+      case TCL_WIN_FILE:
+        statBuf->st_mode |= S_IFREG;
+        break;
+      case TCL_WIN_SOCKET:
+        statBuf->st_mode |= S_IFSOCK;
+        break;
+      case TCL_WIN_CONSOLE:
+        statBuf->st_mode |= S_IFCHR;
+        break;
+    }        
+
+    statBuf->st_nlink = (type == TCL_WIN_FILE) ? 1 : 0;
+    statBuf->st_uid = 0;   /* FIX??? */
+    statBuf->st_gid = 0;
+
+    switch (type) {
+      case TCL_WIN_FILE:
+      case TCL_WIN_PIPE:
+        statBuf->st_size = GetFileSize (handle, NULL);
+        if (statBuf->st_size < 0)
+            goto winError;
+
+        if (!GetFileTime (handle, &creation, &access, &modify)) {
+            goto winError;
+        }
+        statBuf->st_atime = ConvertToUnixTime (creation);
+        statBuf->st_mtime = ConvertToUnixTime (access);
+        statBuf->st_ctime = ConvertToUnixTime (modify);
+        break;
+
+      case TCL_WIN_SOCKET:
+      case TCL_WIN_CONSOLE:
+        statBuf->st_size = 0;
+        statBuf->st_atime = 0;
+        statBuf->st_mtime = 0;
+        statBuf->st_ctime = 0;
+        break;
+    }        
+
+    if (ttyDev != NULL)
+        *ttyDev = (type == TCL_WIN_CONSOLE) ? 1 : 0;
+    return TCL_OK;
+
+  winError:
+    TclWinConvertError (GetLastError ());
+    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
+
 }
 
 /*-----------------------------------------------------------------------------
@@ -557,12 +663,11 @@ TclXOSGetOpenFileMode (fileNum, mode, nonBlocking)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSWalkDir (interp, path, hidden, callback, clientData)
-    Tcl_Interp       *interp;
-    char             *path;
-    int               hidden;
-    TclX_WalkDirProc *callback;
-    ClientData        clientData;
+TclXOSWalkDir (Tcl_Interp       *interp,
+               char             *path,
+               int               hidden,
+               TclX_WalkDirProc *callback,
+               ClientData        clientData)
 {
     char drivePattern[4] = "?:\\";
     char *p, *dir, *root, c;
@@ -718,15 +823,27 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetFileSize (channel, direction, fileSize)
-    Tcl_Channel  channel;
-    int          direction;
-    off_t       *fileSize;
+TclXOSGetFileSize (Tcl_Channel  channel,
+                   int          direction,
+                   off_t       *fileSize)
 {
-    *fileSize = GetFileSize (ChannelToHandle (channel, direction), NULL);
-    if (*fileSize < 0) {
-        TclWinConvertError (GetLastError ());
-        return TCL_ERROR;
+    HANDLE handle; 
+    int type;
+
+    handle = ChannelToHandle (channel, direction, &type);
+    
+    switch (type) {
+      case TCL_WIN_PIPE:
+      case TCL_WIN_FILE:
+        *fileSize = GetFileSize (handle, NULL);
+        if (*fileSize < 0) {
+            TclWinConvertError (GetLastError ());
+            return TCL_ERROR;
+        }
+        break;
+      case TCL_WIN_SOCKET:
+      case TCL_WIN_CONSOLE:
+        *fileSize = 0;
     }
     return TCL_OK;
 }
@@ -745,10 +862,9 @@ TclXOSGetFileSize (channel, direction, fileSize)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSftruncate (interp, fileHandle, newSize)
-    Tcl_Interp  *interp;
-    char        *fileHandle;
-    off_t        newSize;
+TclXOSftruncate (Tcl_Interp  *interp,
+                 char        *fileHandle,
+                 off_t        newSize)
 {
     Tcl_AppendResult (interp,
                       "the -fileid option is not available on MS Windows",
@@ -768,9 +884,8 @@ TclXOSftruncate (interp, fileHandle, newSize)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSfork (interp, funcName)
-    Tcl_Interp *interp;
-    char       *funcName;
+TclXOSfork (Tcl_Interp *interp,
+            char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -789,10 +904,9 @@ TclXOSfork (interp, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSexecl (interp, path, argList)
-    Tcl_Interp *interp;
-    char       *path;
-    char      **argList;
+TclXOSexecl (Tcl_Interp *interp,
+             char       *path,
+             char      **argList)
 {
     int pid;
     char numBuf [32];
@@ -824,10 +938,9 @@ TclXOSexecl (interp, path, argList)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSInetAtoN (interp, strAddress, inAddress)
-    Tcl_Interp     *interp;
-    char           *strAddress;
-    struct in_addr *inAddress;
+TclXOSInetAtoN (Tcl_Interp     *interp,
+                char           *strAddress,
+                struct in_addr *inAddress)
 {
     inAddress->s_addr = inet_addr (strAddress);
     if (inAddress->s_addr != INADDR_NONE)
@@ -852,10 +965,9 @@ TclXOSInetAtoN (interp, strAddress, inAddress)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetpeername (channel, sockaddr, sockaddrSize)
-    Tcl_Channel channel;
-    void       *sockaddr;
-    int         sockaddrSize;
+TclXOSgetpeername (Tcl_Channel channel,
+                   void       *sockaddr,
+                   int         sockaddrSize)
 {
     int fnum;
 
@@ -878,10 +990,9 @@ TclXOSgetpeername (channel, sockaddr, sockaddrSize)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetsockname (channel, sockaddr, sockaddrSize)
-    Tcl_Channel channel;
-    void       *sockaddr;
-    int         sockaddrSize;
+TclXOSgetsockname (Tcl_Channel channel,
+                   void       *sockaddr,
+                   int         sockaddrSize)
 {
     int fnum;
 
