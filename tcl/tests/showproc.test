@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showproc.test,v 4.0 1994/07/16 05:26:17 markd Rel markd $
+# $Id: showproc.test,v 4.1 1995/01/01 19:49:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 if {[info procs test] == ""} then {source testlib.tcl}

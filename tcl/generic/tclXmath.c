@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 4.3 1995/03/30 05:42:41 markd Exp markd $
+ * $Id: tclXmath.c,v 4.4 1995/04/02 16:38:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

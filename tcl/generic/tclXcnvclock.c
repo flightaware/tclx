@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 4.6 1995/07/02 17:43:08 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 4.7 1995/07/02 18:23:42 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
