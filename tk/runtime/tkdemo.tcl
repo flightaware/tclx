@@ -4,7 +4,7 @@
 # Run the Tk demo at anytime after Extended Tcl is installed.
 # 
 #------------------------------------------------------------------------------
-# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkdemo.tcl,v 1.1 1992/12/19 07:50:39 markd Exp markd $
+# $Id: tkdemo.tcl,v 1.2 1992/12/19 07:57:51 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

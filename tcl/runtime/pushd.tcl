@@ -4,7 +4,7 @@
 # C-shell style directory stack procs.
 #
 #------------------------------------------------------------------------------
-# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.tcl,v 1.1 1992/09/20 23:30:27 markd Exp markd $
+# $Id: pushd.tcl,v 2.0 1992/10/16 04:52:06 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
