@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.4 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.5 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,12 +48,18 @@ static struct {char *name;
 #ifdef SIGABRT
     "ABRT",    SIGABRT,
 #endif
+#ifdef SIGEMT
     "EMT",     SIGEMT,
+#endif
     "FPE",     SIGFPE,
     "KILL",    SIGKILL,
+#ifdef SIGBUS
     "BUS",     SIGBUS,
+#endif
     "SEGV",    SIGSEGV,
+#ifdef SIGSYS
     "SYS",     SIGSYS,
+#endif
     "PIPE",    SIGPIPE,
     "ALRM",    SIGALRM,
     "TERM",    SIGTERM,

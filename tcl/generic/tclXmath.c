@@ -12,13 +12,15 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 2.1 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXmath.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+#ifndef rand
 extern int rand();
+#endif
 
 /*
  * Prototypes of internal functions.

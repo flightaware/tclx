@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 2.2 1993/03/06 21:42:30 markd Exp markd $
+ * $Id: tclXfcntl.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -207,7 +207,16 @@ GetFcntlAttr (interp, filePtr, attrName)
 #    define _SLBF __SLBF
 #endif
 
-#if defined(_IONBF) && !defined(_SNBF)
+#if defined (linux)
+    if (otherAttr & ATTR_NOBUF) {
+        interp->result = (filePtr->f->_flags & _IONBF) ? "1" : "0";
+        return TCL_OK;
+    }
+    if (otherAttr & ATTR_LINEBUF) {
+        interp->result = (filePtr->f->_flags & _IOLBF) ? "1" : "0";
+        return TCL_OK;
+    }
+#elif (defined(_IONBF) && !defined(_SNBF))
     if (otherAttr & ATTR_NOBUF) {
         interp->result = (filePtr->f->_flag & _IONBF) ? "1" : "0";
         return TCL_OK;
@@ -226,7 +235,6 @@ GetFcntlAttr (interp, filePtr, attrName)
         return TCL_OK;
     }
 #endif
-
 
 unixError:
     interp->result = Tcl_UnixError (interp);

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.1 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXselect.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -30,7 +30,9 @@ double floor ();
  * buffer.  Different versions are provided for System V and BSD stdio.
  */
 
-#ifdef __SLBF
+#ifdef linux
+#   define READ_DATA_PENDING(fp) (fp->_egptr != fp->_gptr)
+#elif defined __SLBF
 #   define READ_DATA_PENDING(fp) (fp->_r > 0)
 #else
 #   define READ_DATA_PENDING(fp) (fp->_cnt != 0)
