@@ -1,4 +1,4 @@
-                           Extended Tcl (TclX) 7.3a
+                           Extended Tcl (TclX) 7.3b
                            ========================
 
 INTRODUCTION
@@ -87,7 +87,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX7.3a*/man.  Start with the
+the extensions in the directory tclX7.3b/man.  Start with the
 TclX.man manual.
 
 EXTENDED TCL VERSION NAMING
@@ -97,7 +97,7 @@ EXTENDED TCL VERSION NAMING
 version of Berkeley (Ousterhout) Tcl upon which it is based, with
 the addition of a trailing letter in case there are multiple
 releases of Extended Tcl within a single release of Berkeley Tcl.
-This release is TclX 7.3a.
+This release is TclX 7.3b.
 
 INTERFACING TCL AND C++
 =======================
@@ -178,11 +178,11 @@ or
 or
    ftp.uu.net:languages/tcl/[tcl7.3.tar.Z tk3.6.tar.Z]
 
-Extended Tcl 7.3a can be downloaded by anonymous FTP from:
+Extended Tcl 7.3b can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/distrib/tclX7.3a.tar.gz
+   ftp.neosoft.com:/pub/tcl/distrib/tclX7.3b.tar.gz
 or
-   harbor.ecn.purdue.edu:tcl/extensions/tclX7.3a.tar.gz
+   harbor.ecn.purdue.edu:tcl/extensions/tclX7.3b.tar.gz
 
 A contributed sources archive resides on harbor.ecn.purdue.edu and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently

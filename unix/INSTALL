@@ -2,14 +2,14 @@ EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 =======================================
 
 Building the Extended Tcl requires access to built Tcl and Tk source
-directories.  Their location relative to the tclX7.3a directory must be
-configured by editing tclX7.3a/Config.mk.  The default is to place tclX7.3a
+directories.  Their location relative to the tclX7.3b directory must be
+configured by editing tclX7.3b/Config.mk.  The default is to place tclX7.3b
 in a directory parallel to the Tcl and Tk distributions:
 
-                   tcl7.3      tk3.6      tclX7.3a
+                   tcl7.3      tk3.6      tclX7.3b
 
 
-The following directories are included under the tclX7.3a directory:
+The following directories are included under the tclX7.3b directory:
 
     o man - Unformatted manual pages for TclX.
 
@@ -41,12 +41,13 @@ The following directories are included under the tclX7.3a directory:
 
     o tclmaster - Tcl master directory.  All files required to run TclX are
       built or copied into this directory.  The entire contents of this
-      directory are installed.  This directory is created by the build.
+      directory are installed.  This directory is created by the build, it is
+      not part of the distribution.
 
     o tkmaster - Tk master directory.  All files required to run Tk
       are built or copied into this directory.  The entire contents of
-      this directory are installed.  This directory is created by the build.
-
+      this directory are installed.  This directory is created by the build,
+      it is not part of the distribution.
 
 THE EXTENDED TCL INSTALLATION MODELS
 ====================================
@@ -65,8 +66,8 @@ by configure, "prefix" and "exec_prefix".  The variable "prefix" is the
 path that will contain the directories containing hardware and system
 independent files:
 
-   o ${prefix}/tclX/7.3a - TclX runtime files.
-   o ${prefix}/tkX/3.6a - TkX runtime files.
+   o ${prefix}/tclX/7.3b - TclX runtime files.
+   o ${prefix}/tkX/3.6b - TkX runtime files.
    o ${prefix}/include - Include files for TclX.
    o ${prefix}/man - Manual pages for TclX.
 
@@ -92,33 +93,33 @@ Master Directory Installation Model
 The master directory model installs *all* files required by TclX (including
 files from the Tcl and Tk distributions) in master directories.  
 
-   o ${prefix}/tclX/7.3a - TclX runtime files.
-   o ${prefix}/tclX/7.3a/include - Include files.
-   o ${prefix}/tclX/7.3a/man - Manual pages.
-   o ${prefix}/tclX/7.3a/bin - tcl program.
-   o ${prefix}/tclX/7.3a/lib - libtclx.a and libtcl.a
+   o ${prefix}/tclX/7.3b - TclX runtime files.
+   o ${prefix}/tclX/7.3b/include - Include files.
+   o ${prefix}/tclX/7.3b/man - Manual pages.
+   o ${prefix}/tclX/7.3b/bin - tcl program.
+   o ${prefix}/tclX/7.3b/lib - libtclx.a and libtcl.a
 
-   o ${prefix}/tkX/3.6a - TkX runtime files.
-   o ${prefix}/tkX/3.6a/include - Include files.
-   o ${prefix}/tkX/3.6a/man - Manual pages.
-   o ${prefix}/tkX/3.6a/bin - wishx and tclhelp programs.
-   o ${prefix}/tkX/3.6a/lib - libtkx.a and libtk.a
+   o ${prefix}/tkX/3.6b - TkX runtime files.
+   o ${prefix}/tkX/3.6b/include - Include files.
+   o ${prefix}/tkX/3.6b/man - Manual pages.
+   o ${prefix}/tkX/3.6b/bin - wishx and tclhelp programs.
+   o ${prefix}/tkX/3.6b/lib - libtkx.a and libtk.a
 
 Symbolic links are then built for executables from the standard locations
 to the files in the master directory.
 
-   /usr/local/bin/tcl   -> /usr/local/tclX/7.3a/bin/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/3.6a/bin/wishx
+   /usr/local/bin/tcl   -> /usr/local/tclX/7.3b/bin/tcl
+   /usr/local/bin/wishx -> /usr/local/tkX/3.6b/bin/wishx
 
 
 If the --with-arch=ARCH option was specified to configure (see below), the bin
 and lib files are stored in architecture-dependent directories with the
 specified architecture as a suffix to the directory name:
 
-   o ${prefix}/tclX/7.3a/bin.arch
-   o ${prefix}/tclX/7.3a/lib.arch
-   o ${prefix}/tkX/3.6a/bin.arch
-   o ${prefix}/tkX/3.6a/lib.arch
+   o ${prefix}/tclX/7.3b/bin.arch
+   o ${prefix}/tclX/7.3b/lib.arch
+   o ${prefix}/tkX/3.6b/bin.arch
+   o ${prefix}/tkX/3.6b/lib.arch
 
 You may defined "arch" to be any string you like; it might include OS type or
 version as well as processor architecture.
@@ -126,8 +127,8 @@ version as well as processor architecture.
 Symbolic links are still build from the standard locations of the machines
 of specified architecture to the master directory:
 
-   /usr/local/bin/tcl   -> /usr/local/tclX/7.3a/bin.sparc/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/3.6a/bin.sparc/wishx
+   /usr/local/bin/tcl   -> /usr/local/tclX/7.3b/bin.sparc/tcl
+   /usr/local/bin/wishx -> /usr/local/tkX/3.6b/bin.sparc/wishx
         
 HOW TO BUILD EXTENDED TCL
 =========================
@@ -218,7 +219,7 @@ Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
     o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.3a directory.  The some of the UCB tests require a tcl shell with
+      tclX7.3b directory.  The some of the UCB tests require a tcl shell with
       added commands (tcltest in the tcl7.3 distribution).  Because the
       Extended TCL shell (tcl) does not have these commands, the you will
       receive warnings about not having the following commands:
