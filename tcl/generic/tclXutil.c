@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXutil.c,v 2.3 1993/04/07 05:55:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -646,57 +646,6 @@ Tcl_CloseForError (interp, fileNum)
         close (fileNum);
     }
     errno = saveErrNo;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_System --
- *     Does the equivalent of the Unix "system" library call, but uses waitpid
- * to wait on the correct process, rather than waiting on all processes and
- * throwing the exit statii away for the processes it isn't interested in,
- * plus does it with a Tcl flavor.
- *
- * Results:
- *  Standard TCL results, may return the UNIX system error message.
- *
- *-----------------------------------------------------------------------------
- */
-int 
-Tcl_System (interp, command)
-    Tcl_Interp *interp;
-    char       *command;
-{
-    int processID, waitStatus, processStatus;
-
-    if ((processID = Tcl_Fork()) < 0) {
-        interp->result = Tcl_UnixError (interp);
-        return -1;
-    }
-    if (processID == 0) {
-        if (execl ("/bin/sh", "sh", "-c", command, (char *) NULL) < 0) {
-            interp->result = Tcl_UnixError (interp);
-            return -1;
-        }
-        _exit (256);
-    }
-
-    /*
-     * Parent process.
-     */
-#ifndef TCL_HAVE_WAITPID
-    if (Tcl_WaitPids(1, &processID, &processStatus) == -1) {
-        interp->result = Tcl_UnixError (interp);
-        return -1;
-    }
-#else
-    if (waitpid (processID, &processStatus, 0) == -1) {
-        interp->result = Tcl_UnixError (interp);
-        return -1;
-    }
-#endif
-    return (WEXITSTATUS(processStatus));
-
 }
 
 /*

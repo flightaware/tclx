@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.1 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -164,9 +164,11 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    exitCode = Tcl_System (interp, argv[1]);
-    if (exitCode == -1)
+    exitCode = system (argv [1]);
+    if (exitCode == -1) {
+        interp->result = Tcl_UnixError (interp);
         return TCL_ERROR;
+    }
     sprintf (interp->result, "%d", exitCode);
     return TCL_OK;
 }
