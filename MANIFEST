@@ -56,6 +56,7 @@
 ./tcl/help/tcl/control/catch
 ./tcl/help/tcl/control/commandloop
 ./tcl/help/tcl/control/continue
+./tcl/help/tcl/control/dde
 ./tcl/help/tcl/control/error
 ./tcl/help/tcl/control/eval
 ./tcl/help/tcl/control/exit
@@ -345,7 +346,6 @@
 ./tk/generic/tkXinitSA.c
 ./tk/generic/tkXshell.c
 ./tk/help/Tk.brf
-./tk/help/tcl/control/dde
 ./tk/help/tk/control/bell
 ./tk/help/tk/control/bind
 ./tk/help/tk/control/bindtags
