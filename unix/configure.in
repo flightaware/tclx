@@ -243,9 +243,6 @@ if test "$TKX_BUILD" = "YES"; then
    . $TK_CONFIG
 fi
 
-# Tk doesn't provide its own search flags, but should.
-TK_LD_SEARCH_FLAGS=$TK_LD_SEARCH_FLAGS
-
 AC_SUBST(TK_VERSION)
 AC_SUBST(TK_DEFS)
 AC_SUBST(TK_LIBS)
