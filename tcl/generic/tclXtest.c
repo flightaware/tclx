@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 8.5 1997/08/08 10:04:26 markd Exp $
+ * $Id: tclXtest.c,v 8.6 1997/08/10 22:18:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -178,7 +178,7 @@ Tclxtest_Init (interp)
      * memory leaks.
      */
     TclX_ObjSetVar2S (interp,  "TCLXENV", "deleteInterpAtShellExit",
-                      Tcl_NewBooleanObj (true), TCL_GLOBAL_ONLY);
+                      Tcl_NewBooleanObj (TRUE), TCL_GLOBAL_ONLY);
 
     Tcl_CreateCommand (interp, "tclx_test_eval", TclxTestEvalCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);

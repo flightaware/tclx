@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.2 1997/06/12 21:08:49 markd Exp $
+ * $Id: tkXshell.c,v 8.3 1997/08/10 22:18:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -231,7 +231,7 @@ error:
         Tcl_Write(errChannel, "\n", 1);
     }
 
-    TclX_ExitShell (interp, 1);
+    TclX_ShellExit (interp, 1);
 }
 
 
