@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 5.6 1996/02/20 01:13:05 markd Exp $
+.\" $Id: TclXInit.3,v 5.7 1996/03/04 23:11:47 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -164,16 +164,16 @@ The main aspects to integrating TclX with into an application is to
 decide if the application is based on the standard Tcl/Tk shells or the
 TclX shells.  If the standard shells are desired, then all that is
 necessary is to call \fBTclx_Init\fR after \fBTcl_Init\fR and 
- \fBTkx_Init\fR after \fBTk_Init\fR.  This functionallity may also be 
+ \fBTkx_Init\fR after \fBTk_Init\fR.  This functionality may also be 
 dynamically loaded.
 .PP
 To get the TclX shell in a Tcl only application, with the \fBtcl\fR command
-functionallity, call \fBTclX_Main\fR from the \fBmain\fR function instead of
+functionality, call \fBTclX_Main\fR from the \fBmain\fR function instead of
 \fBTcl_Main\fR.
 This shell has arguments conforming to other Unix shells and SIGINT signal
 handling when interactive,.
 .PP
 To get the Tclx shell in a Tk application, with the \fBwishx\fR command
-functionallity, call \fBTkX_Main\fR from the \fBmain\fR function instead of
+functionality, call \fBTkX_Main\fR from the \fBmain\fR function instead of
 \fBTk_Main\fR.
 This shell has SIGINT signal handling when interactive,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 5.0 1995/07/25 05:42:36 markd Rel $
+ * $Id: tclXkeylist.c,v 5.1 1996/02/12 18:15:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -205,7 +205,7 @@ errorExit:
  *-----------------------------------------------------------------------------
  *
  * Tcl_GetKeyedListKeys --
- *   Retrieve a list of keyes from a keyed list.  The list is walked rather
+ *   Retrieve a list of keys from a keyed list.  The list is walked rather
  * than converted to a argv for increased performance.
  *
  * Parameters:
@@ -215,9 +215,9 @@ errorExit:
  *     the top level of the list.  If specified, it is name of the field who's
  *     subfield keys are to be retrieve.
  *   o keyedList (I) - The list to search for the field.
- *   o keyesArgcPtr (O) - The number of keys in the keyed list is returned
+ *   o keysArgcPtr (O) - The number of keys in the keyed list is returned
  *     here.
- *   o keyesArgvPtr (O) - An argv containing the key names.  It is dynamically
+ *   o keysArgvPtr (O) - An argv containing the key names.  It is dynamically
  *     allocated, containing both the array and the strings. A single call
  *     to ckfree will release it.
  * Returns:
@@ -227,13 +227,13 @@ errorExit:
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_GetKeyedListKeys (interp, subFieldName, keyedList, keyesArgcPtr,
-                      keyesArgvPtr)
+Tcl_GetKeyedListKeys (interp, subFieldName, keyedList, keysArgcPtr,
+                      keysArgvPtr)
     Tcl_Interp  *interp;
     CONST char  *subFieldName;
     CONST char  *keyedList;
-    int         *keyesArgcPtr;
-    char      ***keyesArgvPtr;
+    int         *keysArgcPtr;
+    char      ***keysArgvPtr;
 {
     char  *scanPtr, *subFieldList;
     int    result, keyCount, totalKeySize, idx;
@@ -309,8 +309,8 @@ Tcl_GetKeyedListKeys (interp, subFieldName, keyedList, keyesArgcPtr,
         nextByte [keySize] = '\0';
         nextByte += keySize + 1; 
     }
-    *keyesArgcPtr = keyCount;
-    *keyesArgvPtr = keyArgv;
+    *keysArgcPtr = keyCount;
+    *keysArgvPtr = keyArgv;
     
     if (subFieldList != NULL)
         ckfree (subFieldList);
@@ -798,8 +798,8 @@ Tcl_KeylkeysCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    char   *keyedList, **keyesArgv;
-    int    result, keyesArgc;
+    char   *keyedList, **keysArgv;
+    int    result, keysArgc;
 
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
@@ -814,8 +814,8 @@ Tcl_KeylkeysCmd (clientData, interp, argc, argv)
      * If key argument is not specified, then argv [2] is NULL, meaning get
      * top level keys.
      */
-    result = Tcl_GetKeyedListKeys (interp, argv [2], keyedList, &keyesArgc,
-                                   &keyesArgv);
+    result = Tcl_GetKeyedListKeys (interp, argv [2], keyedList, &keysArgc,
+                                   &keysArgv);
     if (result == TCL_ERROR)
         return TCL_ERROR;
     if (result  == TCL_BREAK) {
@@ -824,8 +824,8 @@ Tcl_KeylkeysCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    Tcl_SetResult (interp, Tcl_Merge (keyesArgc, keyesArgv), TCL_DYNAMIC);
-    ckfree ((char *) keyesArgv);
+    Tcl_SetResult (interp, Tcl_Merge (keysArgc, keysArgv), TCL_DYNAMIC);
+    ckfree ((char *) keysArgv);
     return TCL_OK;
 }
 

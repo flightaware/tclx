@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.18 1996/03/21 06:35:45 markd Exp $
+ * $Id: tclExtend.h,v 5.19 1996/03/21 06:46:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -189,8 +189,8 @@ EXTERN int
 Tcl_GetKeyedListKeys _ANSI_ARGS_((Tcl_Interp  *interp,
                                   CONST char  *subFieldName,
                                   CONST char  *keyedList,
-                                  int         *keyesArgcPtr,
-                                  char      ***keyesArgvPtr));
+                                  int         *keysArgcPtr,
+                                  char      ***keysArgvPtr));
 
 EXTERN char *
 Tcl_SetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,

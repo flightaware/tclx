@@ -132,7 +132,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX7.5.0/man.  Start with the
+the extensions in the directory tclX7.5.0/doc.  Start with the
 TclX.n manual.
 
 EXTENDED TCL VERSION NAMING

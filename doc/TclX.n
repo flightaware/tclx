@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.14 1996/03/20 06:57:42 markd Exp $
+.\" $Id: TclX.n,v 5.15 1996/03/22 05:40:03 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -51,7 +51,7 @@ o File Scanning Commands
 .TP
 o Math Commands
 .TP
-o List Maninipulation Commands
+o List Manipulation Commands
 .TP
 o Keyed Lists
 .TP
@@ -280,7 +280,7 @@ zero and \fIincrement\fR was not specified or was non-negative, \fIbody\fR is
 not executed at all and \fBloop\fR returns.
 .sp
 The \fIfirst\fR, \fIlimit\fR and \fIincrement\fR are integer expressions.
-They are only evaulated once at the beginning of the loop.
+They are only evaluated once at the beginning of the loop.
 .sp
 If a \fBcontinue\fR command is invoked within \fIbody\fR then
 any remaining commands in the current execution of \fIbody\fR are skipped,
@@ -344,7 +344,7 @@ the definitions of all currently loaded procedures are returned.
 '
 .TP
 .SH "DEBUGGING AND DEVELOPMENT COMMANDS"
-This section contains information on commands and procdures that are
+This section contains information on commands and procedures that are
 useful for developing and debugging Tcl scripts.
 
 '\"@help: tcl/debug/cmdtrace
@@ -469,7 +469,7 @@ the procedure call stack, this allows determination of how much time is spent
 in a particular procedure in each of it's calling contexts.
 .sp
 The \fBon\fR option enables profile data collection. If the \fB-commands\fR
-option is specifed, data on all commands within a procedure is collected
+option is specified, data on all commands within a procedure is collected
 as well a procedures.  Multiple occurrences of a command within a procedure
 are not distinguished, but this data may still be useful for analysis.
 .sp
@@ -507,7 +507,7 @@ output.
 .TP
 .B saveprocs \fIfileName\fR ?\fIproc\fR...?
 .br
-This prodcure saves the definition of the named procedure, or all
+This procedure saves the definition of the named procedure, or all
 currently defined procedures if none is specified, to the named file.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
@@ -806,7 +806,7 @@ do an \fBexit\fR.
 .IP
 \fBget\fR - Retrieve the current settings of the specified signals.  A keyed
 list will be returned were the keys are one of the specified signals and the
-values are a list cosisting of the action associated with the signal, a
+values are a list consisting of the action associated with the signal, a
 \fB0\fR if the signal may be delivered (not block) and a \fB1\fR if it is
 blocked. The actions maybe one of `\fBdefault\fR',`\fBignore\fR',
 `\fBerror\fR' or `\fBtrap\fR.  If the action is trap, the third element is the
@@ -941,7 +941,7 @@ terminate.  If no process is immediately available, return an empty list.
 If \fB-untraced\fR is specified then the status of child processes
 that are stopped, and whose status has not yet been reported since they
 stopped, are also returned.
-If \fB-pgroup\fR is specfied and \fIpid\fR is not specified, then wait
+If \fB-pgroup\fR is specified and \fIpid\fR is not specified, then wait
 on any child process whose process groupd ID is they same as the
 calling process. If \fIpid\fR is specified with \fB-pgroup\fR, then
 it is take as a process group ID, waiting on any process in that process group
@@ -1011,7 +1011,7 @@ and a line extracted from the file.  The compare routine should return a
 number less than zero if the key is less than the line, zero if the key
 matches the line, or greater than zero if the key is greater than the line.
 The file must be sorted in ascending order according to the same criteria
-\fIcompare_proc\fR uses to compare the key with the line, or errouenous
+\fIcompare_proc\fR uses to compare the key with the line, or erroneous
 results will occur.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -1057,7 +1057,7 @@ prefixed with a "0" (e.g. 0622).
 If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchmod\fR command
-to determine if this functionallity is available.
+to determine if this functionality is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1078,7 +1078,7 @@ group of the specified user.
 If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchown\fR command
-to determine if this functionallity is available.
+to determine if this functionality is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1096,7 +1096,7 @@ group name or a numeric group id.
 If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchown\fR command
-to determine if this functionallity is available.
+to determine if this functionality is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1288,7 +1288,7 @@ If one of these keys is specified as \fIitem\fR, then that data item is
 returned.
 .sp
 If \fBstat \fIarrayvar\fR is specified, then the information is returned in
-the array \fIarrrayvar\fR.  Each of the above keys indexes an element of the
+the array \fIarrayvar\fR.  Each of the above keys indexes an element of the
 array containing the data.
 .sp
 If only \fIfileId\fR is specified, the command returns the data as a keyed
@@ -1338,7 +1338,7 @@ the terminating newline character.  This command differs from the \fBgets\fR
 command, in that it reads Tcl lists rather than lines.  If the list
 contains a newline, then that newline will be returned as part of the result.
 Only a newline not quoted as part of the list indicates the end of the list.
-There is no corresponding command for outputing lists, as \fBputs\fR will
+There is no corresponding command for outputting lists, as \fBputs\fR will
 do this correctly.
 .sp
 If \fIvarName\fR is specified, then the line is placed in the variable
@@ -1360,7 +1360,7 @@ what really happened.
 .sp
 If \fBlgets\fR is used on a non-blocking file, blocking will be temporarily
 enabled for the duration of the \fBlgets\fR command.  This is required by
-the current implemention of the underlying Tcl I/O system.  In most
+the current implementation of the underlying Tcl I/O system.  In most
 cases, this will not cause any problems, as the process writing the
 file should be writing entire lists in one write operation.   The only
 difficulty that might arise is if non-blocking I/O was being used to
@@ -1438,7 +1438,7 @@ reading. The \fIwriteFileIds\fR are checked if the specified
 files are clear for writing.
 The
 \fIexceptFileIds\fR are checked to see if an exceptional condition has
-occured (typically, an error).
+occurred (typically, an error).
 The write and exception checking is most useful on devices, however,
 the read checking is very useful when communicating with multiple
 processes through pipes.  Select considers data pending in the stdio
@@ -1450,7 +1450,7 @@ list is supplied (or the parameter is omitted), then no timeout is set.  If
 the value is zero, then the \fBselect\fR command functions as a poll of the
 files, returning immediately even if none are ready.
 .sp
-If the \fItimeout\fR period expires with none of the files becomming ready,
+If the \fItimeout\fR period expires with none of the files becoming ready,
 then the command returns an empty list.  Otherwise the command returns a 
 list of three elements, each of those elements is a list of the fileIds
 that are ready in the read, write and exception classes.  If none are ready in
@@ -1487,7 +1487,7 @@ This procedure writes the specified strings to the named file.
 TclX provides functionality to complement the Tcl \fBsocket\fR command.
 The \fBhost_info\fR command is used to get information about a host by
 name or IP address.  In addition, the \fBfstat\fR and \fBfcntl\fR commands
-provide options of querying and controling connected sockets.
+provide options of querying and controlling connected sockets.
 To obtain the host name of the system the local system, use the
 \fBid host\fR command.
 '
@@ -1500,7 +1500,7 @@ To obtain the host name of the system the local system, use the
 .br
 .B host_info \fBaliases\fR \fIhost\fR
 .br
-Optain information about a internet host. The argument \fBhost\fR can be either
+Obtain information about a internet host. The argument \fBhost\fR can be either
 a host name or an IP address.
 .sp
 The following subcommands are recognized:
@@ -1605,7 +1605,7 @@ line of the file does not match any of the regular expressions
 in the current scancontext.
 .sp
 The array \fBmatchInfo\fR is available to the Tcl code that is executed
-when an expression matches (or defaults).  It contans information about
+when an expression matches (or defaults).  It contains information about
 the file being scanned and where within it the expression was matched.
 .sp
 \fBmatchInfo\fR is local to the top
@@ -1743,7 +1743,7 @@ ever-changing seed.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-.SH "LIST MANINIPULATION COMMANDS"
+.SH "LIST MANIPULATION COMMANDS"
 .PP
 Extended Tcl provides additional list manipulation commands and procedures.
 '
@@ -1922,7 +1922,7 @@ programming language.
 A keyed list is a list in which each element contains a key and value pair.
 These element pairs are stored as lists themselves, where the key is the first
 element of the list, and the value is the second.  The key-value pairs are
-refered to as \fIfields\fR.
+referred to as \fIfields\fR.
 This is an example of a keyed list:
 .IP
     {{NAME {Frank Zappa}} {JOB {musician and composer}}}
@@ -1938,7 +1938,7 @@ would make \fBperson\fR contain
 .IP
     {{ID 106} {NAME {Frank Zappa}} {JOB {musician and composer}}
 .PP
-Fields may contain subfields; `.' is the seperator character.  Subfields
+Fields may contain subfields; `.' is the separator character.  Subfields
 are actually fields where the value is another keyed list.  Thus 
 the following list has the top level fields \fIID\fR and \fINAME\fR, and
 subfields \fINAME.FIRST\fR and  \fINAME.LAST\fR:
@@ -1954,7 +1954,7 @@ the keyed list
 as an argument (i.e. passed by reference), rather than passing the
 list directly.
 '\"@:
-'\"@:This functionallity is provided by Extended Tcl.
+'\"@:This functionality is provided by Extended Tcl.
 '\"@endhelp
 '
 '\"@help: tcl/keyedlists/keyldel
@@ -2000,7 +2000,7 @@ the keyed list is returned.
 .TP
 .B keylkeys \fIlistvar\fR ?\fIkey\fR?
 .br
-Return the a list of the keyes in the keyed list in the
+Return the a list of the keys in the keyed list in the
 variable \fIlistvar\fR.  If \fIkeys\fR is specified, then it is the
 name of a key field  who's subfield keys are to be retrieve.
 '\"@:
@@ -2238,7 +2238,7 @@ expression \fIcountExpr\fR.
 .B translit \fIinrange outrange string\fR
 .br
 Translate characters in \fIstring\fR, changing characters
-occuring
+occurring
 in \fIinrange\fR
 to the corresponding character in \fIoutrange\fR. \fIInrange\fR and 
 \fIoutrange\fR may be list of characters or a range in the form `A-M'.
@@ -2432,7 +2432,7 @@ or in procedures, to reduce confusion and mistakes while programming
 in Tcl.  Scripts should use the Tcl \fBexec\fR or \fBsystem\fR 
 commands to run Unix commands.
 '\"@:
-'\"@:This functionallity is provided by Extended Tcl.
+'\"@:This functionality is provided by Extended Tcl.
 '\"@endhelp
 '
 '\"@help: tcl/tclshell/variables
@@ -2464,7 +2464,7 @@ The path is a Tcl list of directory names.
 .TP
 .B tclx_library
 Path to the TclX runtime library.  If your running the TclX shell or
-an appilcation based on it (like wishx).  The TclX initilization file normally
+an application based on it (like wishx).  The TclX initialization file normally
 adds this to the \fBauto_path\fR.
 .TP
 .B tclx_library_env
@@ -2475,7 +2475,7 @@ an empty string, no environment override will be allowed.  This value must be
 set before \fBTclx_Init\fR is called.
 .TP
 .B tclx_init
-Path to the initalization file that \fBTclx_Init\fR will evaluate.  This value
+Path to the initialization file that \fBTclx_Init\fR will evaluate.  This value
 is normally not set, resulting in the standard init file being evaluated.
 If the path starts with a "\fB/\fR", its is taken as an absolute path.  If
 it does not start with a "\fB/\fR", its is taken as a path relative to 
@@ -2483,7 +2483,7 @@ it does not start with a "\fB/\fR", its is taken as a path relative to
 .TP
 .B tkx_library
 Path to the TkX runtime library.  This is set only if your application has
-called \fBTkx_InitfR.  The TkX initilization file normally adds this to the
+called \fBTkx_InitfR.  The TkX initialization file normally adds this to the
 auto_path.
 .TP
 .B tkx_library_env
@@ -2494,7 +2494,7 @@ string, no environment override will be allowed.  This value must be set
 before \fBTkx_Init\fR is called.
 .TP
 .B tkx_init
-Path to the initalization file that \fBTkx_Init\fR will evaluate.  This value
+Path to the initialization file that \fBTkx_Init\fR will evaluate.  This value
 is normally not set, resulting in the standard init file being evaluated.
 If the path starts with a "\fB/\fR", its is taken as an absolute path.  If
 it does not start with a "\fB/\fR", its is taken as a path relative to 
@@ -2698,7 +2698,7 @@ to the next \fIpackage\fR line or the end of the file is a package named
 \fIpopd\fR or \fIdirs\fR when the routine is not already defined will cause 
 the \fBdirectory_stack\fR portion of the package file to be loaded.
 '\"@:
-'\"@:This functionallity is provided by Extended Tcl.
+'\"@:This functionality is provided by Extended Tcl.
 '\"@endhelp
 '
 .SH "PACKAGE LIBRARY MANAGEMENT COMMANDS"
@@ -2756,7 +2756,7 @@ Attempt to load the specified \fIcommand\fR from a loadable library.
 loading the package containing the procedure.  If the package indexes
 have not been loaded for all package libraries in \fBauto_path\fR, they
 will be loaded.  Out-of-date library indexes will be rebuilt if they are
-writable.  The procedure returns \fB1\fR if the command was sucessfully
+writable.  The procedure returns \fB1\fR if the command was successfully
 loaded, or \fB0\fR if it was not.
 .sp
 Duplicated package names are skipped, the first package of a given name
@@ -2765,7 +2765,7 @@ the last load, indexes will be reloaded (duplicate packages will not be
 redefined).
 .sp
 If \fIcommand\fR is not specified, the indexes will be loaded, if they
-have not alreay been loaded or if the \fBauto_path\fR variable has
+have not already been loaded or if the \fBauto_path\fR variable has
 changed, but no command will be loaded.
 .PP
 This command overrides the standard Tcl procedure of the same name.

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Memory.n,v 5.0 1995/07/25 05:40:37 markd Rel $
+.\" $Id: Memory.n,v 5.1 1996/02/16 08:08:47 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Memory" TCL "" "Tcl"
@@ -111,7 +111,7 @@ that memory allocated by a C library routine requiring freeing should still be
 freed with \fBfree\fR, since it calls \fBmalloc\fR rather than \fBckalloc\fR
 to do the allocation.
 .PP
-Parmaters:
+Parmeters:
 .RS 2
 \fBo \fIptr\fR - The address of a block to free, as returned by ckalloc.
 .RE
@@ -120,7 +120,7 @@ Parmaters:
 .SS Tcl_DumpActiveMemory
 .PP 
 This function will output a list of all currently allocated memory to the
-specified file.  The following information is outputed for each allocated
+specified file.  The following information is outputted for each allocated
 block of memory: starting and ending addresses (excluding guard zone), size,
 source file where \fBckalloc\fR was called to allocate the block and line
 number in that file.  It is especially useful to call
@@ -134,7 +134,7 @@ Parameters:
 .SS Tcl_ValidateAllMemory
 .PP
 Forces a validation of the guard zones of all currently allocated blocks
-of memory.  Normally validation of a block occures when its freed, unless
+of memory.  Normally validation of a block occurs when its freed, unless
 full validation is enabled, in which case validation of all blocks
 occurs when \fBckalloc\fR and \fBckfree\fR are called.  This function forces
 the validation to occur at any point.
@@ -219,7 +219,7 @@ word \fIckalloc\fR is replaced by the word \fIckfree\fR.
 .TP
 .B memory \fBvalidate\fR [\fBon|off\fR]
 .br
-Turns memory vaidation on or off.
+Turns memory validation on or off.
 When memory validation is enabled, on every call to
 \fBckalloc\fR or \fBckfree\fR, the guard zones are checked for every
 piece of memory currently in existence that was allocated by \fBckalloc\fR.
@@ -241,7 +241,7 @@ of memory activity before a problem occurs, judicious use of this option
 can reduce the slowdown caused by tracing (and the amount of trace information
 produced), if you can identify a number of allocations that occur before
 the problem sets in.  The current number of memory allocations that have 
-occured since Tcl started is printed on a guard zone failure.
+occurred since Tcl started is printed on a guard zone failure.
 .TP
 .B memory \fBbreak_on_malloc\fR \fInnn\fR
 .br

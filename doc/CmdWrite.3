@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: CmdWrite.3,v 5.0 1995/07/25 05:40:35 markd Rel $
+.\" $Id: CmdWrite.3,v 5.1 1996/02/16 08:08:42 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Command Writing" TCL "" "Tcl"
@@ -481,7 +481,7 @@ the \fBTcl_Eval\fR, \fBTcl_VarEval\fR, \fBTcl_EvalFile\fR and
 \fBTcl_GlobalEval\fR functions for the purpose of executing Tcl code
 from within a C extension.  The results of the call will be in
 \fBinterp->result\fR.  For more information please consult the
-\fBEval\fR(3) manual page within the Berkely Tcl distribution.
+\fBEval\fR(3) manual page within the Tcl distribution.
 .PP
 .SH ACCESSING TCL VARIABLES AND ARRAYS FROM YOUR C EXTENSIONS
 
@@ -588,7 +588,7 @@ array elements, file handles and so forth.  Tcl makes the hash table
 functions accessible to C extension writers as well.
 .PP
 Hash tables grow automatically to maintain efficiency, rather than exposing
-the table size to the programmer at allocation time, which would needlessy 
+the table size to the programmer at allocation time, which would needlessly 
 add complexity to Tcl and would be prone to inefficiency due 
 to the need to guess the number of items that will go into the table,
 and the seemingly inevitable growth in amount of data processed
