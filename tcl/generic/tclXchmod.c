@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXchmod.c,v 1.1 1992/09/20 23:15:21 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -195,7 +195,7 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
     struct stat   fileStat;
 
     if (argc != 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " mode filelist", (char *) NULL);
         return TCL_ERROR;
     }
@@ -218,7 +218,7 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
             if (modeVal < 0)
                 goto errorExit;
         }
-        if (chmod (fileArgv [idx], modeVal) < 0)
+        if (chmod (fileArgv [idx], (unsigned short) modeVal) < 0)
             goto fileError;
     }
 
@@ -267,7 +267,7 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
     int            result = TCL_ERROR;
 
     if (argc != 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " owner|{owner group} filelist", (char *) NULL);
         return TCL_ERROR;
     }
@@ -379,7 +379,7 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
     struct group  *groupPtr;
 
     if (argc < 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " group filelist", (char *) NULL);
         return TCL_ERROR;
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 1.2 1992/10/04 20:15:55 markd Exp markd $
+ * $Id: tclXsignal.c,v 1.3 1992/10/04 23:28:42 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -240,7 +240,7 @@ Tcl_KillCmd (clientData, interp, argc, argv)
     char **procArgv;
 
     if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " [signal] processlist", (char *) NULL);
         return TCL_ERROR;
     }
@@ -894,7 +894,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
     char                *command = NULL;
 
     if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " action signalList [commands]", (char *) NULL);
         return TCL_ERROR;
     }

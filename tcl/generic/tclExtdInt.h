@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 1.3 1992/09/21 07:11:03 markd Exp markd $
+ * $Id: tclExtdInt.h,v 1.4 1992/10/03 05:22:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -129,6 +129,11 @@ typedef struct dynamicBuf_t {
     } dynamicBuf_t;
 
 /*
+ * Used to return argument messages by most commands.
+ */
+extern char *tclXWrongArgs;
+
+/*
  * Macros to do string compares.  They pre-check the first character before
  * checking of the strings are equal.
  */
@@ -138,6 +143,9 @@ typedef struct dynamicBuf_t {
 #define STRNEQU(str1, str2, cnt) \
         (((str1) [0] == (str2) [0]) && (strncmp (str1, str2, cnt) == 0))
 
+/*
+ * Prototypes for utility procedures.
+ */
 void
 Tcl_DynBufInit _ANSI_ARGS_((dynamicBuf_t *dynBufPtr));
 

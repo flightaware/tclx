@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXgeneral.c,v 1.1 1992/09/20 23:18:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -77,7 +77,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " option", (char *) NULL);
         return TCL_ERROR;
     }
@@ -131,7 +131,7 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
     char  itxt [12];
 
     if ((argc < 5) || (argc > 6)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " var first limit [incr] command", (char *) NULL);
         return TCL_ERROR;
     }

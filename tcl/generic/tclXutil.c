@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 1.1 1992/09/20 23:22:38 markd Exp markd $
+ * $Id: tclXutil.c,v 1.2 1992/10/03 05:22:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,6 +22,11 @@
 #  define _tolower tolower
 #  define _toupper toupper
 #endif
+
+/*
+ * Used to return argument messages by most commands.
+ */
+char *tclXWrongArgs = "wrong # args: ";
 
 extern double pow ();
 

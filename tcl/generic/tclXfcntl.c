@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXfcntl.c,v 1.1 1992/09/20 23:17:39 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -331,7 +331,7 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     OpenFile    *filePtr;
 
     if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " handle attribute [value]", (char *) NULL);
         return TCL_ERROR;
     }

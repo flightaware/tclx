@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXfilescan.c,v 1.1 1992/09/20 23:18:01 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -197,7 +197,7 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
     scanGlob_pt  scanGlobPtr = (scanGlob_pt) clientData;
 
     if (argc < 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " option",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " option",
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -206,7 +206,7 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
      */
     if (STREQU (argv [1], "create")) {
         if (argc != 2) {
-            Tcl_AppendResult (interp, "wrong # args: ", argv [0], " create",
+            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " create",
                               (char *) NULL);
             return TCL_ERROR;
         }
@@ -218,7 +218,7 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
      */
     if (STREQU (argv [1], "delete")) {
         if (argc != 3) {
-            Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+            Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                               "delete contexthandle", (char *) NULL);
             return TCL_ERROR;
         }
@@ -324,7 +324,7 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
 argError:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                       " [-nocase] contexthandle [regexp] command",
                       (char *) NULL);
     return TCL_ERROR;
@@ -406,7 +406,7 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
     char           *fileHandle;
 
     if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " contexthandle filehandle", (char *) NULL);
         return TCL_ERROR;
     }

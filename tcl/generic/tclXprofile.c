@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 1.1 1992/09/20 23:21:04 markd Exp markd $
+ * $Id: tclXprofile.c,v 1.2 1992/10/04 23:07:32 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -646,7 +646,7 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 
   wrongArgs:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                       " [-commands] on|off arrayVar", (char *) NULL);
     return TCL_ERROR;
 }

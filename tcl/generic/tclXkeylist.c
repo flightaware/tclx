@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.1 1992/09/20 23:19:18 markd Exp markd $
+ * $Id: tclXkeylist.c,v 1.2 1992/10/03 17:57:34 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -629,7 +629,7 @@ Tcl_KeyldelCmd (clientData, interp, argc, argv)
     char  *varPtr;
 
     if (argc != 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                           " listvar key", (char *) NULL);
         return TCL_ERROR;
     }
@@ -673,7 +673,7 @@ Tcl_KeylgetCmd (clientData, interp, argc, argv)
     int     result;
 
     if ((argc < 2) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                           " listvar [key] [retvar | {}]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -769,7 +769,7 @@ Tcl_KeylkeysCmd (clientData, interp, argc, argv)
     int    result, keyesArgc;
 
     if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                           " listvar [key]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -820,7 +820,7 @@ Tcl_KeylsetCmd (clientData, interp, argc, argv)
     int   idx;
 
     if ((argc < 4) || ((argc % 2) != 0)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                           " listvar key value [key value...]", (char *) NULL);
         return TCL_ERROR;
     }

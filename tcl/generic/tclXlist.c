@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 1.1 1992/09/20 23:19:41 markd Exp markd $
+ * $Id: tclXlist.c,v 1.2 1992/09/21 05:07:16 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,7 +44,7 @@ Tcl_LvarcatCmd (clientData, interp, argc, argv)
     char      *varContents, *newStr, *result;
 
     if (argc < 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " var string [string...]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -113,7 +113,7 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
     char      *varContents, *resultList, *returnElement;
 
     if ((argc < 2) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " var [index [string]]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -189,7 +189,7 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
     char      *varContents, *resultList;
 
     if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " var string [index]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -264,7 +264,7 @@ Tcl_LemptyCmd (clientData, interp, argc, argv)
     char *scanPtr;
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " list",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " list",
                           (char *) NULL);
         return TCL_ERROR;
     }

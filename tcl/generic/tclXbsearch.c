@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXbsearch.c,v 1.1 1992/09/20 23:15:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -314,7 +314,7 @@ Tcl_BsearchCmd (clientData, interp, argc, argv)
     binSearchCB_t searchCB;
 
     if ((argc < 3) || (argc > 5)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " handle key [retvar] [compare_proc]"
                           , (char *) NULL);
         return TCL_ERROR;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 1.1 1992/09/20 23:20:52 markd Exp markd $
+ * $Id: tclXprocess.c,v 1.2 1992/10/02 15:26:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -55,7 +55,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     int    argInCnt, idx;
 
     if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " prog [argList]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -115,7 +115,7 @@ Tcl_ForkCmd (clientData, interp, argc, argv)
     int pid;
 
     if (argc != 1) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], (char *) NULL);
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -156,7 +156,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
 
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " pid",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " pid",
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -288,7 +288,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
 usage:
-    Tcl_AppendResult (interp, "wrong args: ", argv [0], " ", 
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", 
                       "[-nohang] [-untraced] [-pgroup] [pid]",
                       (char *) NULL);
     return TCL_ERROR;

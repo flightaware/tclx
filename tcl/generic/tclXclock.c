@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXclock.c,v 1.1 1992/09/20 23:15:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -39,8 +39,7 @@ Tcl_GetclockCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     if (argc != 1) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv[0], 
-                          (char *) NULL);
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], (char *) NULL);
         return TCL_ERROR;
     }
     sprintf (interp->result, "%ld", time ((long *) NULL));
@@ -73,7 +72,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     int              fmtError;
 
     if ((argc < 2) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " clockval [format] [GMT|{}]", (char *) NULL);
         return TCL_ERROR;
     }

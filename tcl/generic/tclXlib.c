@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 1.3 1992/10/03 21:35:59 markd Exp markd $
+ * $Id: tclXlib.c,v 1.4 1992/10/04 20:15:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -1367,7 +1367,7 @@ Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
     int   pathLen, dirLen;
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " libFile",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " libFile",
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -1445,7 +1445,7 @@ Tcl_Demand_loadCmd (dummy, interp, argc, argv)
     char *path, *msg;
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " procedure",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " procedure",
                           (char *) NULL);
         return TCL_ERROR;
     }

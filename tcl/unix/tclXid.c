@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXid.c,v 1.1 1992/09/20 23:19:11 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -156,7 +156,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
      */
     if (STREQU (argv[1], "convert")) {
         if (argc != 4) {
-            Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                               " convert arg arg", (char *) NULL);
             return TCL_ERROR;
         }
@@ -187,7 +187,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
      */
     if (STREQU (argv[1], "effective")) {
         if (argc != 3) {
-            Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                               " effective arg", (char *) NULL);
             return TCL_ERROR;
         }
@@ -222,7 +222,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
 
         if (STREQU (argv[2], "parent")) {
             if (argc != 3) {
-                Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+                Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                                   " process parent", (char *) NULL);
                 return TCL_ERROR;
             }
@@ -235,14 +235,14 @@ Tcl_IdCmd (clientData, interp, argc, argv)
                 return TCL_OK;
             }
             if ((argc != 4) || !STREQU (argv[3], "set")) {
-                Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+                Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                                   " process group [set]", (char *) NULL);
                 return TCL_ERROR;
             }
             setpgrp ();
             return TCL_OK;
         }
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " process [parent|group|group set]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -316,7 +316,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
                       (char *) NULL);
     return TCL_ERROR;
   bad_args:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], " arg [arg..]",
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " arg [arg..]",
                       (char *) NULL);
     return TCL_ERROR;
 

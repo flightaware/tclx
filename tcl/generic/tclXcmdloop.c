@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 1.1 1992/09/20 23:15:51 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 1.2 1992/10/05 01:15:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -356,7 +356,7 @@ Tcl_CommandloopCmd(clientData, interp, argc, argv)
     int   result = TCL_ERROR;
 
     if (argc > 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv[0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " [prompt] [prompt2]", (char *) NULL);
         return TCL_ERROR;
     }

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXcnvclock.c,v 1.1 1992/09/20 23:16:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,7 +46,7 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
     long        zone;
 
     if ((argc < 2) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " dateString [GMT|{}] [baseclock]", (char *) NULL);
 	return TCL_ERROR;
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 1.1 1992/09/20 23:17:02 markd Exp markd $
+ * $Id: tclXdebug.c,v 1.2 1992/09/21 07:08:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -342,7 +342,7 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
 argumentError:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " level | on [noeval] [notruncate] [flush] [procs]",
                       "[handle] | off | depth", (char *) NULL);
     return TCL_ERROR;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 1.1 1992/09/20 23:17:46 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 1.2 1992/10/03 18:00:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -77,7 +77,7 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     char       fHandle [12];
 
     if (!((argc == 1) || (argc == 3))) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv[0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
                           " [handle_var_r handle_var_w]", (char*) NULL);
         return TCL_ERROR;
     }
@@ -136,7 +136,7 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     int        bytesRead;
 
     if (argc != 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " fromfilehandle tofilehandle", (char *) NULL);
         return TCL_ERROR;
     }
@@ -424,7 +424,7 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     struct stat  statBuf;
 
     if ((argc < 2) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " handle [item]|[stat arrayVar]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -485,7 +485,7 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     OpenFile     *filePtr;
 
     if ((argc != 2) && (argc != 3)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv[0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " fileId [varName]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -739,7 +739,7 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
      */
 
   invalidArgs:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], " [-read|-write] ",
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " [-read|-write] ",
                       "[-nowait] handle [start] [length] [origin]",
                       (char *) NULL);
     return TCL_ERROR;
@@ -806,7 +806,7 @@ Tcl_FunlockCmd (notUsed, interp, argc, argv)
     return TCL_OK;
 
   invalidArgs:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " handle [start] [length] [origin]", (char *) NULL);
     return TCL_ERROR;
 

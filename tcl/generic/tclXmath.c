@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXmath.c,v 1.1 1992/09/20 23:19:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -51,7 +51,7 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
 
 
     if (argc < 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " num1 num2 [..numN]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -91,7 +91,7 @@ Tcl_MinCmd (clientData, interp, argc, argv)
     int    idx,   minIdx   = 1;
 
     if (argc < 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " num1 num2 [..numN]", (char *) NULL);
         return TCL_ERROR;
     }
@@ -185,7 +185,7 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
 invalidArgs:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " limit | seed [seedval]", (char *) NULL);
     return TCL_ERROR;
 outOfRange:

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXstring.c,v 1.1 1992/09/20 23:22:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -49,7 +49,7 @@ Tcl_CindexCmd (clientData, interp, argc, argv)
     long index;
 
     if (argc != 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0],
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                           " string indexExpr", (char *) NULL);
         return TCL_ERROR;
     }
@@ -86,7 +86,7 @@ Tcl_ClengthCmd (clientData, interp, argc, argv)
 {
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " string", 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " string", 
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -122,7 +122,7 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
     int       isRange = (argv [0][1] == 'r');  /* csubstr or crange */
 
     if (argc != 4) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " string firstExpr ", 
                           (isRange) ? "lastExpr" : "lengthExpr",
                           (char *) NULL);
@@ -191,7 +191,7 @@ Tcl_ReplicateCmd (clientData, interp, argc, argv)
     register long  newLen, cnt;
 
     if (argc != 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " string countExpr", (char *) NULL);
         return TCL_ERROR;
     }
@@ -274,7 +274,7 @@ Tcl_TranslitCmd (clientData, interp, argc, argv)
     int idx;
 
     if (argc != 4) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " from to string", (char *) NULL);
         return TCL_ERROR;
     }
@@ -347,7 +347,7 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
     register char *scanPtr = argv [2];
 
     if (argc != 3) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " class string",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " class string",
                           (char *) NULL);
         return TCL_ERROR;
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 1.1 1992/09/20 23:22:28 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 1.2 1992/10/05 01:37:16 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -53,7 +53,7 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
     unsigned          useconds;
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " seconds", 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " seconds", 
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -71,7 +71,7 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
     struct itimerval  timer, oldTimer;
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " seconds", 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " seconds", 
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -124,7 +124,7 @@ Tcl_SleepCmd (clientData, interp, argc, argv)
     unsigned time;
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " seconds", 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " seconds", 
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -159,7 +159,7 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
     int exitCode;
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " command",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " command",
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -193,7 +193,7 @@ Tcl_TimesCmd (clientData, interp, argc, argv)
     struct tms tm;
 
     if (argc != 1) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv[0], (char *) NULL);
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -229,7 +229,7 @@ Tcl_UmaskCmd (clientData, interp, argc, argv)
     int mask;
 
     if ((argc < 1) || (argc > 2)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], " octalmask",
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " octalmask",
                           (char *) NULL);
         return TCL_ERROR;
     }
@@ -273,7 +273,7 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
     char *tmppath, *srcpath, *destpath;
 
     if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " [-sym] srcpath destpath", (char *) NULL);
         return TCL_ERROR;
     }
@@ -380,7 +380,7 @@ errorExit:
     return TCL_ERROR;
 
 badArgs:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " [-nocomplain] filelist", (char *) NULL);
     return TCL_ERROR;
 }
@@ -456,7 +456,7 @@ mkdirError:
     return TCL_ERROR;
 
 usageError:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " [-path] dirlist", (char *) NULL);
     return TCL_ERROR;
 }
@@ -520,7 +520,7 @@ errorExit:
     return TCL_ERROR;;
 
 badArgs:
-    Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                       " [-nocomplain] dirlist", (char *) NULL);
     return TCL_ERROR;
 }
