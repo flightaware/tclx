@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.32 2000/07/14 18:07:50 welch Exp $
+dnl $Id: configure.in,v 8.33 2000/08/10 02:07:10 wart Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.32 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.33 $),)dnl
 
 #------------------------------------------------------------------------------
 # Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
@@ -761,7 +761,7 @@ AC_ARG_WITH(help, [  --with-help              directory containing generated hel
 if test x"${with_help}" != x ; then
     HELP_DIR=${with_help}
 else
-    HELP_DIR=${srcdir}/tcl/help
+    HELP_DIR=${srcbasedir}/tcl/help
 fi
 AC_SUBST(HELP_DIR)
 

@@ -4,6 +4,8 @@
 
 	* cleanup for 8.3.5
 
+	* got "make buildhelp" working
+
 2002-02-07  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tcl/generic/tclXgeneral.c (TclX_EchoObjCmd): use encoding aware
