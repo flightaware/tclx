@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 2.5 1993/09/26 19:17:20 markd Exp markd $
+# $Id: setfuncs.tcl,v 3.0 1993/11/19 07:00:26 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,15 +23,7 @@
 # return the logical union of two lists, removing any duplicates
 #
 proc union {lista listb} {
-    set full_list [lsort [concat $lista $listb]]
-    set check_element [lindex $full_list 0]
-    set outlist $check_element
-    foreach element [lrange $full_list 1 end] {
-	if {$check_element == $element} continue
-	lappend outlist $element
-	set check_element $element
-    }
-    return $outlist
+    return [lrmdups [concat $lista $listb]]
 }
 
 #
