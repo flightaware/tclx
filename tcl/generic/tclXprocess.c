@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 8.2 1997/06/12 21:08:25 markd Exp $
+ * $Id: tclXprocess.c,v 8.3 1997/06/29 19:30:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,26 +29,28 @@
 #endif
 
 static int 
-TclX_ExeclCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+TclX_ExeclObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
 
 static int 
 TclX_ForkObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+                             Tcl_Interp *interp,
+                             int objc,
+                             Tcl_Obj *CONST objv[]));
 
 static int 
-TclX_WaitCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+TclX_WaitObjCmd _ANSI_ARGS_((ClientData clientData,
+                             Tcl_Interp *interp,
+                             int objc,
+                             Tcl_Obj *CONST objv[]));
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TclX_ForkObjCmd --
- *     Implements the TCL fork command:
+ *   Implements the TclX fork command:
  *     fork
- *
- * Results:
- *  Standard TCL results, may return the UNIX system error message.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -64,75 +66,75 @@ TclX_ForkObjCmd (clientData, interp, objc, objv)
     return TclXOSfork (interp, objv [0]);
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TclX_ExeclObjCmd --
- *     Implements the TCL execl command:
+ *   Implements the TCL execl command:
  *     execl ?-argv0 ? prog ?argList?
- *
- * Results:
- *   Standard TCL results, may return the UNIX system error message.  On Win32,
- * a process id is returned.
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ExeclCmd (clientData, interp, argc, argv)
+TclX_ExeclObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   *CONST objv[];
 {
 #define STATIC_ARG_SIZE   12
-    char          *staticArgv [STATIC_ARG_SIZE];
-    char         **argInList   = NULL;
-    char         **argList     = staticArgv;
-    char          *path;
-    char          *argv0       = NULL;
-    int            nextArg     = 1;
-    int            argInCnt, idx, status;
-    Tcl_DString    pathBuf;
-
+    char  *staticArgv [STATIC_ARG_SIZE];
+    char **argList = staticArgv;
+    int nextArg = 1;
+    char *argStr;
+    int argObjc;
+    Tcl_Obj **argObjv;
+    char *path, *argv0 = NULL;
+    int idx, status;
+    Tcl_DString pathBuf;
 
     status = TCL_ERROR;  /* assume the worst */
 
-    if (argc < 2)
+    if (objc < 2)
         goto wrongArgs;
 
-    if (STREQU ("-argv0", argv [1])) {
-        if (argc < 4)
+    argStr = Tcl_GetStringFromObj (objv [nextArg], NULL);
+    if (STREQU (argStr, "-argv0")) {
+        nextArg++;
+        if (nextArg == objc)
             goto wrongArgs;
-        argv0 = argv [2];
-        nextArg = 3;
+        argv0 = Tcl_GetStringFromObj (objv [nextArg++], NULL);
     }
-    if ((argc - nextArg) > 2)
+    if ((nextArg == objc) || (nextArg < objc - 2))
         goto wrongArgs;
 
+    /*
+     * Get path or command name.
+     */
     Tcl_DStringInit (&pathBuf);
+    path = Tcl_TranslateFileName (interp,
+                                  Tcl_GetStringFromObj (objv [nextArg++],
+                                                        NULL),
+                                  &pathBuf);
+    if (path == NULL)
+        goto exitPoint;
 
     /*
      * If arg list is supplied, split it and build up the arguments to pass.
      * otherwise, just supply argv[0].  Must be NULL terminated.
      */
-    if (argc - 1 > nextArg) {
-        if (Tcl_SplitList (interp, argv [nextArg + 1],
-                           &argInCnt, &argInList) != TCL_OK)
+    if (nextArg == objc) {
+        argList [1] = NULL;
+    } else {
+        if (Tcl_ListObjGetElements (interp, objv [nextArg++],
+                                    &argObjc, &argObjv) != TCL_OK)
             goto exitPoint;
 
-        if (argInCnt > STATIC_ARG_SIZE - 2)
-            argList = (char **) ckalloc ((argInCnt + 1) * sizeof (char **));
+        if (argObjc > STATIC_ARG_SIZE - 2)
+            argList = (char **) ckalloc ((argObjc + 1) * sizeof (char **));
             
-        for (idx = 0; idx < argInCnt; idx++)
-            argList [idx + 1] = argInList [idx];
-
-        argList [argInCnt + 1] = NULL;
-    } else {
-        argList [1] = NULL;
+        for (idx = 0; idx < argObjc; idx++) {
+            argList [idx + 1] = Tcl_GetStringFromObj (argObjv [idx], NULL);
+        }
+        argList [argObjc + 1] = NULL;
     }
-
-    path = Tcl_TranslateFileName (interp, argv [nextArg], &pathBuf);
-    if (path == NULL)
-        goto exitPoint;
 
     if (argv0 != NULL) {
         argList [0] = argv0;
@@ -143,59 +145,51 @@ TclX_ExeclCmd (clientData, interp, argc, argv)
     status = TclXOSexecl (interp, path, argList);
 
   exitPoint:
-    if (argInList != NULL)
-        ckfree ((char *) argInList);
     if (argList != staticArgv)
         ckfree ((char *) argList);
     Tcl_DStringFree (&pathBuf);
     return status;
 
   wrongArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " ?-argv0 argv0? prog ?argList?",
-                      (char *) NULL);
+    TclX_WrongArgs (interp, objv [0], "?-argv0 argv0? prog ?argList?");
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
- * TclX_WaitCmd --
+/*-----------------------------------------------------------------------------
+ * TclX_WaitObjCmd --
  *   Implements the TCL wait command:
  *     wait ?-nohang? ?-untraced? ?-pgroup? ?pid?
- *
- * Results:
- *   Standard TCL results, may return the UNIX system error message.
- *
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_WaitCmd (clientData, interp, argc, argv)
+TclX_WaitObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   *CONST objv[];
 {
     int idx, options = 0, pgroup = FALSE;
-    pid_t returnedPid, tmpPid, pid;
-    int status;    
+    char *argStr;
+    pid_t returnedPid, pid;
+    int tmpPid, status;    
 
-    for (idx = 1; idx < argc; idx++) {
-        if (argv [idx][0] != '-')
+    for (idx = 1; idx < objc; idx++) {
+        argStr = Tcl_GetStringFromObj (objv [idx], NULL);
+        if (argStr [0] != '-')
             break;
-        if (STREQU ("-nohang", argv [idx])) {
+        if (STREQU (argStr, "-nohang")) {
             if (options & WNOHANG)
                 goto usage;
             options |= WNOHANG;
             continue;
         }
-        if (STREQU ("-untraced", argv [idx])) {
+        if (STREQU (argStr, "-untraced")) {
             if (options & WUNTRACED)
                 goto usage;
             options |= WUNTRACED;
             continue;
         }
-        if (STREQU ("-pgroup", argv [idx])) {
+        if (STREQU (argStr, "-pgroup")) {
             if (pgroup)
                 goto usage;
             pgroup = TRUE;
@@ -207,12 +201,14 @@ TclX_WaitCmd (clientData, interp, argc, argv)
      * Check for more than one non-minus argument.  If ok, convert pid,
      * if supplied.
      */
-    if (idx < argc - 1)
+    if (idx < objc - 1)
         goto usage;  
-    if (idx < argc) {
-        if (!TclX_StrToInt (argv [idx], 10, (int *)&tmpPid))
+    if (idx < objc) {
+        if (Tcl_GetIntFromObj (interp, objv [idx], &tmpPid) != TCL_OK) {
+            Tcl_ResetResult (interp);
             goto invalidPid;
-        if ((int)tmpPid <= 0)
+        }
+        if (tmpPid <= 0)
             goto negativePid;
         pid = tmpPid;
         if (pid != tmpPid)
@@ -226,9 +222,10 @@ TclX_WaitCmd (clientData, interp, argc, argv)
      */
 #ifdef NO_WAITPID
     if ((options != 0) || pgroup) {
-        Tcl_AppendResult (interp, "The \"-nohang\", \"-untraced\" and ",
-                          "\"-pgroup\" options are not available on this ",
-                          "system", (char *) NULL);
+        TclX_StringAppendObjResult (interp,
+                             "The \"-nohang\", \"-untraced\" and ",
+                              "\"-pgroup\" options are not available on this ",
+                              "system", (char *) NULL);
         return TCL_ERROR;
     }
 #endif
@@ -243,8 +240,9 @@ TclX_WaitCmd (clientData, interp, argc, argv)
     returnedPid = TCLX_WAITPID (pid, (int *) (&status), options);
 
     if (returnedPid < 0) {
-        Tcl_AppendResult (interp, "wait for process failed: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp,
+                                    "wait for process failed: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -268,25 +266,25 @@ TclX_WaitCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
   usage:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", 
-                      "?-nohang? ?-untraced? ?-pgroup? ?pid?",
-                      (char *) NULL);
+    TclX_WrongArgs (interp, objv [0], "?-nohang? ?-untraced? ?-pgroup? ?pid?");
     return TCL_ERROR;
 
   invalidPid:
-    Tcl_AppendResult (interp, "invalid pid or process group id \"",
-                      argv [idx], "\"", (char *) NULL);
+    TclX_StringAppendObjResult (interp,
+                                "invalid pid or process group id \"",
+                                Tcl_GetStringFromObj (objv [idx], NULL),
+                                "\"", (char *) NULL);
     return TCL_ERROR;
 
   negativePid:
-    Tcl_AppendResult (interp, "pid or process group id must be greater ",
-                      "than zero", (char *) NULL);
+    TclX_StringAppendObjResult (interp,
+                                "pid or process group id must be greater ",
+                                "than zero", (char *) NULL);
     return TCL_ERROR;
 }
 
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TclX_InitProcess --
  *   Initialize process commands.
  *-----------------------------------------------------------------------------
@@ -295,11 +293,11 @@ void
 TclX_InitProcess (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateCommand (interp,
-		       "execl",
-		       TclX_ExeclCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+                          "execl",
+                          TclX_ExeclObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
 
     Tcl_CreateObjCommand (interp,
                           "fork",
@@ -307,9 +305,9 @@ TclX_InitProcess (interp)
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateCommand (interp,
-		       "wait",
-		       TclX_WaitCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+                          "wait",
+                          TclX_WaitObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
 }
