@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.7 1993/08/05 06:41:55 markd Exp markd $
+ * $Id: tclXstring.c,v 2.8 1993/08/31 23:24:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -370,7 +370,7 @@ Tcl_TranslitCmd (clientData, interp, argc, argv)
  * Tcl_CtypeCmd --
  *
  *      This function implements the 'ctype' command:
- *      ctype class string
+ *      ctype ?-failindex? class string ?failIndexVar?
  *
  *      Where class is one of the following:
  *        digit, xdigit, lower, upper, alpha, alnum,
@@ -390,16 +390,37 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    register char *class;
-    register char *scanPtr = argv [2];
+    int             failIndex = FALSE;
+    char           *failVar;
+    register char  *class;
+    char           *string;
+    register char  *scanPtr;
 
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " class string",
-                          (char *) NULL);
-        return TCL_ERROR;
+    if (argc < 3)
+	goto wrongNumArgs;
+
+    if (argv [1][0] == '-') {
+	if (STREQU (argv [1], "-failindex")) {
+	    failIndex = TRUE;
+	} else {
+	    Tcl_AppendResult(interp, "invalid option \"", argv [1],
+		"\", must be -failindex", (char *) NULL);
+	    return TCL_ERROR;
+	}
     }
-
-    class = argv [1];
+    if (failIndex) {
+        if (argc != 5) 
+            goto wrongNumArgs;
+        failVar = argv [2];
+        class = argv [3];
+        string = argv [4];
+    } else {
+        if (argc != 3) 
+            goto wrongNumArgs;
+        class = argv [1];
+        string = argv [2];
+    }
+    scanPtr = string;
 
     /*
      * Handle conversion requests.
@@ -407,7 +428,9 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
     if (STREQU (class, "char")) {
         int number;
 
-        if (Tcl_GetInt (interp, argv [2], &number) != TCL_OK)
+        if (failIndex) 
+          goto failInvalid;
+        if (Tcl_GetInt (interp, scanPtr, &number) != TCL_OK)
             return TCL_ERROR;
         if ((number < 0) || (number > 255)) {
             Tcl_AppendResult (interp, "number must be in the range 0..255",
@@ -423,38 +446,34 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
     if (STREQU (class, "ord")) {
         int value;
 
-        if ((argv [2][0] == '\0') || (argv [2][1] != '\0')) {
+        if (failIndex) 
+          goto failInvalid;
+        if ((scanPtr[0] == '\0') || (scanPtr[1] != '\0')) {
             Tcl_AppendResult (interp, "string to convert must be only one",
                               " character", (char *) NULL);
             return TCL_ERROR;
         }
         
-        value = 0xff & argv [2][0];  /* Prevent sign extension */
+        value = 0xff & scanPtr[0];  /* Prevent sign extension */
         sprintf (interp->result, "%u", value);
         return TCL_OK;
     }
 
-    /*
-     * Select based on the first letter of the 'class' argument to chose the 
-     * macro to test characters with.  In some cases another character must be
-     * switched on to determine which macro to use.  This is gross, but better
-     * we only have to do a string compare once to test if class is correct.
-     */
-    if ((class [2] == 'n') && STREQU (class, "alnum")) {
+    if (STREQU (class, "alnum")) {
         for (; *scanPtr != 0; scanPtr++) {
             if (!isalnum (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
-    if ((class [2] == 'p') && STREQU (class, "alpha")) {
+    if (STREQU (class, "alpha")) {
         for (; *scanPtr != 0; scanPtr++) {
             if (!isalpha (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
-    if ((class [1] == 's') && STREQU (class, "ascii")) {
+    if (STREQU (class, "ascii")) {
         for (; *scanPtr != 0; scanPtr++) {
             if (!isascii (UCHAR (*scanPtr)))
                 break;
@@ -489,14 +508,14 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
         }
         goto returnResult;
     }
-    if ((class [1] == 'r') && STREQU (class, "print")) {
+    if (STREQU (class, "print")) {
         for (; *scanPtr != 0; scanPtr++) {
             if (!isprint (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
-    if ((class [1] == 'u') && STREQU (class, "punct")) {
+    if (STREQU (class, "punct")) {
         for (; *scanPtr != 0; scanPtr++) {
             if (!ispunct (UCHAR (*scanPtr)))
                 break;
@@ -525,7 +544,7 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
         goto returnResult;
     }
     /*
-     * No match on subcommand.
+     * No match on class.
      */
     Tcl_AppendResult (interp, "unrecognized class specification: \"", class,
                       "\", expected one of: alnum, alpha, ascii, char, ",
@@ -535,14 +554,36 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
 
     /*
      * Return true or false, depending if the end was reached.  Always return 
-     * false for a null string.
+     * false for a null string.  Optionally return the failed index if there
+     * is no match.
      */
-returnResult:
-    if ((*scanPtr == 0) && (scanPtr != argv [2]))
+  returnResult:
+    if ((*scanPtr == 0) && (scanPtr != string))
         interp->result = "1";
-    else
+    else {
+        /*
+         * If the fail index was requested, set the variable here.
+         */
+        if (failIndex) {
+            char indexStr [50];
+
+            sprintf (indexStr, "%d", scanPtr - string);
+            if (Tcl_SetVar(interp, failVar, indexStr,
+                           TCL_LEAVE_ERR_MSG) == NULL)
+                return TCL_ERROR;
+        }
         interp->result = "0";
+    }
     return TCL_OK;
 
+  wrongNumArgs:
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                      " ?-failindex var? class string",
+                      (char *) NULL);
+    return TCL_ERROR;
+    
+  failInvalid:
+    Tcl_AppendResult (interp, "-failindex option is invalid for class \"",
+                      class, "\"", (char *) NULL);
+    return TCL_ERROR;
 }
-

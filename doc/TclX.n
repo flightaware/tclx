@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.36 1993/09/25 16:06:44 markd Exp markd $
+.\" $Id: TclX.man,v 2.37 1993/09/25 17:03:12 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2005,7 +2005,7 @@ the string following the token.
 '@help: tcl/strings/ctype
 '@brief: Determine if a string has various characteristics.
 .TP
-.B ctype \fIclass string\fR 
+.B ctype \fI?-failindex var? class string\fR 
 .br
 \fBctype\fR
 determines whether all characters in \fIstring\fR are of the specified
@@ -2017,15 +2017,15 @@ character and its numeric value.  The following \fBctype\fR commands are
 available:
 .RS 5
 .TP
-.B ctype alnum \fIstring\fR
+.B ctype \fI?-failindex var? alnum \fIstring\fR
 Tests that all characters are alphabetic or numeric characters as defined by
 the character set.
 .TP
-.B ctype alpha \fIstring\fR
+.B ctype \fI?-failindex var? alpha \fIstring\fR
 Tests that all characters are alphabetic characters as defined by the
 character set.
 .TP
-.B ctype ascii \fIstring\fR
+.B ctype \fI?-failindex var? ascii \fIstring\fR
 Tests that all characters are an ASCII character (a non-negative number less
 than 0200).
 .TP
@@ -2033,18 +2033,18 @@ than 0200).
 Converts the numeric value, \fIstring\fR, to an ASCII character.  Number must
 be in the range 0 through 255.
 .TP
-.B ctype cntrl \fIstring\fR
+.B ctype \fI?-failindex var? cntrl \fIstring\fR
 Tests that all characters are ``control characters'' as defined by the
 character set.
 .TP
-.B ctype digit \fIstring\fR
+.B ctype \fI?-failindex var? digit \fIstring\fR
 Tests that all characters are valid decimal digits, i.e. 0 through 9.
 .TP
-.B ctype graph \fIstring\fR
+.B ctype \fI?-failindex var? graph \fIstring\fR
 Tests that all characters within are any character for which \fIctype print\fR
 is true, except for space characters.
 .TP
-.B ctype lower \fIstring\fR
+.B ctype \fI?-failindex var? lower \fIstring\fR
 Tests that all characters are lowercase letters as defined by the character
 set.
 .TP
@@ -2052,27 +2052,30 @@ set.
 Convert a character into its decimal numeric value.  The string must be one
 character long.
 .TP
-.B ctype space \fIstring\fR
+.B ctype \fI?-failindex var? space \fIstring\fR
 Tests that all characters are either a space, horizontal-tab, carriage
 return, newline, vertical-tab, or form-feed.
 .TP
-.B ctype print \fIstring\fR
+.B ctype \fI?-failindex var? print \fIstring\fR
 Tests that all characters are a space or any character for which \fIctype
 alnum\fR or \fIctype punct\fR is true or other ``printing character'' as
 defined by the character set.
 .TP
-.B ctype punct \fIstring\fR
+.B ctype \fI?-failindex var? punct \fIstring\fR
 Tests that all characters are made up of any of the characters
 other than the ones for which
 \fBalnum\fR, \fBcntrl\fR, or \fBspace\fR is true.
 .TP
-.B ctype upper \fIstring\fR
+.B ctype \fI?-failindex var? upper \fIstring\fR
 Tests that all characters are uppercase letters as defined by the character
 set.
 .TP
-.B ctype xdigit \fIstring\fR
+.B ctype \fI?-failindex var? xdigit \fIstring\fR
 Tests that all characters are valid hexadecimal digits, that is \fI0\fR
 through \fI9\fR, a through \fIf\fR or \fIA\fR through \fIF\fR.
+.PP
+If \fI-failindex\fR is specified, then the index into \fIstring\fR of the
+first character that did not match the class is returned in \fIvar\fR.
 .RE
 '@:
 '@:This command is provided by Extended Tcl.
