@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.6 1996/02/17 08:44:10 markd Exp $
+# $Id: Common.mk.in,v 5.7 1996/02/20 09:10:49 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -47,15 +47,16 @@ TCLX_LIBS    = @TCLX_LIBS@
 #------------------------------------------------------------------------------
 # Configuration information from tclConfig.sh and tkConfig.sh.
 #
-TCL_DEFS     = @TCL_DEFS@
-TCL_LIBS     = @TCL_LIBS@
-TCL_LD_FLAGS = @TCL_LD_FLAGS@
-TCL_DL_LIBS  = @TCL_DL_LIBS@
+TCL_DEFS         = @TCL_DEFS@
+TCL_LIBS         = @TCL_LIBS@
+TCL_SHLIB_CFLAGS = @TCL_SHLIB_CFLAGS@
+TCL_LD_FLAGS     = @TCL_LD_FLAGS@
+TCL_DL_LIBS      = @TCL_DL_LIBS@
 
-TK_DEFS      = @TK_DEFS@
-TK_LIBS      = @TK_LIBS@
-TK_XINCLUDES = @TK_XINCLUDES@
-TK_XLIBSW    = @TK_XLIBSW@
+TK_DEFS          = @TK_DEFS@
+TK_LIBS          = @TK_LIBS@
+TK_XINCLUDES     = @TK_XINCLUDES@
+TK_XLIBSW        = @TK_XLIBSW@
 
 
 #------------------------------------------------------------------------------

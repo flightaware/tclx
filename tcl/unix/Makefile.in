@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.12 1996/02/20 09:10:38 markd Exp $
+# $Id: Makefile.in,v 5.13 1996/02/21 06:09:05 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -30,9 +30,7 @@ srcdir = @srcdir@
 LDLIBS = libtclx.a ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
          ${XLDLIBS}
 
-SHLDLIBS = ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
-
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} \
 	      ${TCL_DEFS} ${TCLX_DEFS} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
 	      -I${TCLX_UNIX_BLD_DIR} \
@@ -311,14 +309,6 @@ buildhelp: tcl tcl.tndx
 	    ${HELP_DIR} Tcl.brf
 	${RUNTCL} -c "buildhelp ${HELP_DIR} TclX.brf ${srcbasedir}/doc/TclX.n"
 
-
-#------------------------------------------------------------------------------
-# Relink using shared libraries.  The libraries must be built and installed
-# by hand.
-
-shlink:
-	${CC} ${LD_SWITCHES} tclXAppInit.o ${SHLDLIBS} -o tcl || \
-	    (rm -f tcl; exit 1)
 
 #------------------------------------------------------------------------------
 
