@@ -139,7 +139,7 @@ Do the following:
 
    (10) build a version of tclsh using shared libraries
 
-	    % gcc -O tclsh.shared tclAppInit.o -L./ -ltcl -lm
+	    % gcc -O -o tclsh.shared tclAppInit.o -L./ -ltcl -lm
 
         check out dynamic dependencies
 
