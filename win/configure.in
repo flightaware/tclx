@@ -2,7 +2,7 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.8 2000/07/11 04:42:10 welch Exp $
+# RCS: @(#) $Id: configure.in,v 1.9 2000/07/13 00:23:08 welch Exp $
 
 AC_INIT(../tcl/generic/tclExtend.h)
 
@@ -118,6 +118,17 @@ eval "TKX_LIB_FILE=tkx$VER${LIBSUFFIX}"
 eval "TKX_DLL_FILE=tkx$VER${DLLSUFFIX}"
 eval "TKX_STUB_LIB_FILE="
 
+#-----
+# dummy --with-help for compatibility with Unix configure
+#-----
+
+AC_ARG_WITH(help, [  --with-help              directory containing generated help files], with_help=${withval})
+if test x"${with_tclconfig}" != x ; then
+    HELP_DIR=${with_tclconfig}
+else
+    HELP_DIR=${srcdir}/tcl/help
+fi
+AC_SUBST(HELP_DIR)
 
 AC_SUBST(TCLX_VERSION)
 AC_SUBST(TCLX_FULL_VERSION)
