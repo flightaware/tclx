@@ -372,6 +372,7 @@
 ./tk/runtime/tkx.tcl
 ./tk/tests/signal.test
 ./tk/unix/Makefile.in
+./tk/unix/tkXAppInit.c
 ./tk/unix/tkxConfig.sh.in
 ./tk/win/makefile.vc
 ./tk/win/tkXAppInit.c
