@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 3.1 1994/01/11 06:31:35 markd Exp markd $
+# $Id: TclInit.tcl,v 4.0 1994/07/16 05:29:51 markd Rel markd $
 #-----------------------------------------------------------------------------
 
 #
@@ -14,7 +14,7 @@ proc unknown args {
     if {([info proc tclx_unknown2] == "") && ![auto_load tclx_unknown2]} {
         error "can't find tclx_unknown2 on auto_path"
     }
-    return [tclx_unknown2 $args]
+    return [uplevel 1 [tclx_unknown2 $args]]
 }
 
 set auto_index(buildpackageindex) {source [info library]/buildidx.tcl}

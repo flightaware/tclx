@@ -34,7 +34,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tclshell.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: tclshell.tcl,v 4.0 1994/07/16 05:30:00 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -44,8 +44,9 @@
 # tclx_unknown:
 # This implements the slow path of the TclX unknown command.  It must be called
 # directly from the unknown command.  This handles exec-ing of Unix programs
-# and interactive csh style redo.  Returns the result of the executed command.
-#
+# and interactive csh style redo.  The returns a command to evaluate. If an
+# error occured, the command returns is an "error" command to return the
+# appropriate error message.
 
 proc tclx_unknown2 cmd {
     global tcl_interactive auto_noexec
@@ -54,45 +55,43 @@ proc tclx_unknown2 cmd {
 
     if ![info exists auto_noexec] {
         if [auto_execok $name] {
-            if {!$tcl_interactive || ([info level] > 2) ||
-                [info script] != ""} {
-                error "Auto execution of Unix commands only supported as interactive commands.\nUse \"exec\" to execute \"$name\""
+            if {!$tcl_interactive || [info level] > 2 || [info script] != ""} {
+                return [list return -code error "Auto execution of Unix commands only supported as interactive commands.\nUse \"exec\" to execute \"$name\""]
             }
-            uplevel 2 system [list $cmd]
-            return
+            return [list eval [list system $cmd] {;} concat]
         }
     }
 
     if {!$tcl_interactive || ([info level] > 2) || [info script] != ""} {
-        error "invalid command name \"$name\""
+        return [list  return -code error "invalid command name \"$name\""]
     }
 
     # csh-style redo.
 
     if {([info level] == 2) && ([info script] == "")} {
         if {$name == "!!"} {
-            return [uplevel 2 {history redo}]
+            return {history redo}
         }
         if [regexp {^!(.+)$} $name dummy event] {
-            return [uplevel 2 [list history redo $event]]
+            return [list history redo $event]
         }
         if [regexp {^\^([^^]*)\^([^^]*)\^?$} $name dummy old new] {
-            return [uplevel 2 [list history substitute $old $new]]
+            return [list history substitute $old $new]
         }
         set cmds [info commands $name*]
         if {[llength $cmds] == 1} {
-            return [uplevel 2 [lreplace $cmd 0 0 $cmds]]
+            return [lreplace $cmd 0 0 $cmds]
         }
         if {[llength $cmds] != 0} {
             if {$name == ""} {
-                return -code error "empty command name \"\""
+                return [list return -code error "empty command name \"\""]
             } else {
-                return -code error \
-                        "ambiguous command name \"$name\": [lsort $cmds]"
+                return [list return -code error \
+                        "ambiguous command name \"$name\": [lsort $cmds]"]
             }
         }
     }
-    error "invalid command name \"$name\""
+    return [list return -code error "invalid command name \"$name\""]
 }
 
 
