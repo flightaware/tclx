@@ -216,18 +216,21 @@ Install the Extended Tcl master directories by typing the command:
 PORTING NOTES
 =============
 
+
 General:
-   o On some systems, a failed link will leave an executable target in the
-     *master/bin directories.  In certain cases, you might 
+   o Flock tests hanging: Many problems have been encountered on some Sun
+     systems with the flock tests.  This might occur on other systems as
+     well.  These are probably due to an incorrectly configured NFS lockd.
+     The tests have been modified to try and report problems rather than
+     hang.  It might hang anyway, in this case, rename tests/flock.test to
+     tests/flock.bad to prevent them from being run.  If anyone can gives
+     any clues into what is going on, we would love to detect this.
 
 DEC Ultrix:
    o Several tests fail when Tcl is run on an NFS mounted file system.
 
-Sun:
-   o Many problems have been encountered on some Sun systems with the flock
-     tests.  These are probably due to an incorrectly configured NFS lockd.
-     The tests have been modified to try and report problems rather than
-     hang.
+SUN:
+   o Seen not on flock tests hanging under the "general" section.
 
 SCO:
    o SCO Unix systems have a "ranlib" command that is used for Xenix cross-
