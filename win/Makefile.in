@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.13 2000/07/11 04:42:10 welch Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.14 2000/07/31 04:18:03 welch Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -147,7 +147,7 @@ TK_XLIB_DIR_NATIVE	= $(shell cygpath $(PATHTYPE) '$(TK_XLIB_DIR)')
 # makefile to look into these paths when resolving .c to .obj
 # dependencies.
 
-VPATH = $(TCLX_GENERIC_DIR);$(TCLX_WIN_DIR);$(TKX_GENERIC_DIR);$(TKX_WIN_DIR);$(TCLX_COMPAT_DIR);$(TCL_GENERIC_DIR);$(TCL_WIN_DIR);$(TK_GENERIC_DIR);$(TK_WIN_DIR)
+VPATH = $(TCLX_GENERIC_DIR);$(TCLX_WIN_DIR);$(TKX_GENERIC_DIR);$(TKX_WIN_DIR);$(TCLX_COMPAT_DIR);$(TCL_GENERIC_DIR);$(TCL_WIN_DIR);$(TK_GENERIC_DIR);$(TK_WIN_DIR) # :
 
 # warning flags
 CFLAGS_WARNING	= @CFLAGS_WARNING@
