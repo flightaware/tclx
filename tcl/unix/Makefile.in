@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.14 1997/08/30 22:30:01 markd Exp $
+# $Id: Makefile.in,v 8.15 1997/09/01 03:21:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -128,7 +128,7 @@ all: tcl checkup RUNTIME tclXtest
 
 static:	tcl.static tclXtest.static
 
-standalone: tcl.standalone tclXtest.standalone
+standalone: tcl.standalone tclXtest.standalone hello
 
 tcl: tclXAppInit.o ${TCLX_SHLIB_BUILD} ${TCLX_STLIB_BUILD} Makefile
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${ALL_LIBS} \
@@ -154,9 +154,7 @@ ${TCLX_SHLIB_NAME}: ${SOBJS}
 	${TCL_SHLIB_LD} -o ${TCLX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
 
 hello:	hello.c
-	${CC} ${LD_SWITCHES} -o $@ hello.c ${TCLX_STLIB_NAME} \
-	    ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} ${TCL_LIBS} \
-	    ${TCLX_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
+	${CC} ${LD_SWITCHES} -o $@ hello.c ${STATIC_LIBS}
 
 #------------------------------------------------------------------------------
 # Do some special checks to make sure TclX is built ok.
@@ -338,6 +336,7 @@ clean:
 	-rm -f ${STANDALONE_SRCS} ${STANDALONE_OBJS} tclXAppInitSA.c
 	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
 	-rm -rf help help.tmp dltest dltest.tmp checkup.done
+	-rm -f hello hello.c
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
@@ -780,6 +779,8 @@ loadouster.c: ${RUNTIME_DIR}/loadouster.tcl
 	${TCL2C} -o $@ -a -n $@ $<
 tclx.c: ${RUNTIME_DIR}/tclx.tcl
 	${TCL2C} -o $@ -a -n $@ $<
+hello.c: ${TCLX_GENERIC_DIR}/hello.tcl
+	${TCL2C} -o $@ -tclx $<
 .c.o:
 	${CC} -c ${CC_SWITCHES} $<
 

@@ -516,7 +516,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.16 dnl
+# From configure.in Revision: 8.17 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -1224,7 +1224,7 @@ fi
 
 
 echo $ac_n "checking standalone support of Tk (Plus patch)""... $ac_c" 1>&6
-if test "${TKX_BUILD}" = "YES" -a -f "${TK_BUILD}/unix/${TCL_STLIB_NAME}"; then
+if test "${TKX_BUILD}" = "YES" -a -f "${TK_BUILD}/unix/${TK_STLIB_NAME}"; then
     x=`nm -p "${TK_BUILD}/unix/${TK_STLIB_NAME}" |grep 'Tk_InitStandAlone'`
     if test "x$x" != "x"; then
         # Build variables already set

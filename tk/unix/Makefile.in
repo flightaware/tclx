@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.14 1997/09/01 00:59:01 markd Exp $
+# $Id: Makefile.in,v 8.15 1997/09/01 03:21:27 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -112,6 +112,9 @@ ${TKX_SHLIB_NAME}: ${SOBJS}
 	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} \
 	    ${TK_BUILD_LIB_SPEC} ${TCLX_BUILD_LIB_SPEC} \
 	    ${TCL_BUILD_LIB_SPEC} ${TCL_SHLIB_LD_LIBS}
+
+hello:	hello.c
+	${CC} ${LD_SWITCHES} -o $@ hello.c ${STATIC_LIBS}
 
 #------------------------------------------------------------------------------
 # We need the "help" directory here so that the help command will work before
@@ -305,7 +308,7 @@ tkXinit..o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
 tkXinitDSA..o: ${TKX_GENERIC_DIR}/tkXinitDSA.c Makefile
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
-	   "${TKX_INST_RUNTIME}\" ${TKX_GENERIC_DIR}/tkXinitDSA.c
+	    ${TKX_GENERIC_DIR}/tkXinitDSA.c
 	@OBJ_RESTORE@
 
 tkXshell..o: ${TKX_GENERIC_DIR}/tkXshell.c
@@ -320,5 +323,7 @@ tkXshell..o: ${TKX_GENERIC_DIR}/tkXshell.c
 
 tkx.c: ${RUNTIME_DIR}/tkx.tcl
 	${TCL2C} -o $@ -a -n $@ $<
+hello.c: ${TKX_GENERIC_DIR}/hello.tcl
+	${TCL2C} -o $@ -tkx $<
 .c.o:
 	${CC} -c ${CC_SWITCHES} $<

@@ -13,6 +13,7 @@
 ./tcl/compat/getopt.c
 ./tcl/compat/random.c
 ./tcl/compat/rename.c
+./tcl/generic/hello.tcl
 ./tcl/generic/tclExtdInt.h
 ./tcl/generic/tclExtend.h
 ./tcl/generic/tclXbsearch.c
