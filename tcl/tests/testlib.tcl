@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.6 1993/09/23 04:55:14 markd Exp markd $
+# $Id: testlib.tcl,v 2.7 1993/10/31 16:55:57 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -32,7 +32,10 @@ global SAVED_UNKNOWN TCL_PROGRAM env
 if [info exists env(TCL_PROGRAM)] {
    set TCL_PROGRAM $env(TCL_PROGRAM)
 } else {
-   puts stderr {No environment variable TCL_PROGRAM, assuming "tcl" as test program}
+   puts stderr ""
+   puts stderr {WARNING: No environment variable TCL_PROGRAM,}
+   puts stderr {         assuming "tcl" as program under test.}
+   puts stderr ""
    set TCL_PROGRAM tcl
 }
 
