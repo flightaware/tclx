@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 2.2 1993/06/21 05:43:53 markd Exp markd $
+# $Id: filecmds.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -20,13 +20,20 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 
 # Create a test file
 
-catch {unlink {IOTEST.TMP IOTEST2.TMP}}
+unlink -nocomplain {IOTEST.TMP IOTEST2.TMP IOTEST3.TMP}
 
 set testFH [open IOTEST.TMP w]
+set testFileSize 0
 for {set cnt 0} {$cnt < 100} {incr cnt} {
-     puts $testFH [GenRec $cnt]
+     set rec [GenRec $cnt]
+     puts $testFH $rec
+     incr testFileSize [expr [clength $rec]+1]
 }
 close $testFH
+
+if {$testFileSize != [file size IOTEST.TMP]} {
+     error "Wrong file size calculated for IOTEST.TMP"
+}
 
 Test filecmds-3.1 {copyfile tests} {
     set testFH [open IOTEST.TMP r]
@@ -38,7 +45,7 @@ Test filecmds-3.1 {copyfile tests} {
 } 0 0
 
 Test filecmds-3.2 {copyfile tests} {
-    set testFH [open IOTEST.TMP w]
+    set testFH [open IOTEST3.TMP w]
     set testFH2 [open IOTEST2.TMP w]
     set stat [list [catch {copyfile $testFH $testFH2} msg] \
                    [lrange $msg 1 end]]
@@ -63,7 +70,52 @@ Test filecmds-3.4 {copyfile tests} {
 
 Test filecmds-3.5 {copyfile tests} {
     copyfile
-} 1 {wrong # args: copyfile fromFileId toFileId}
+} 1 {wrong # args: copyfile ?-bytes num|-maxbytes num? fromFileId toFileId}
+
+foreach flag {-bytes -maxbytes} {
+    Test filecmds-3.6.$flag {copyfile tests} {
+        set copySize [expr ($testFileSize*2)/3]
+        set testFH [open IOTEST.TMP r]
+        set testFH2 [open IOTEST2.TMP w]
+        copyfile $flag $copySize $testFH $testFH2
+        close $testFH
+        close $testFH2
+
+        set testFH [open IOTEST.TMP r]
+        set testData [read $testFH $copySize]
+        close $testFH
+
+        set testFH2 [open IOTEST2.TMP r]
+        set testData2 [read $testFH2]
+        close $testFH2
+
+        list [expr [file size IOTEST2.TMP] == $copySize] \
+             [string compare $testData $testData2]
+    } 0 {1 0}
+
+    catch {unset testData testData2}
+}
+
+set copySize [expr $testFileSize*2]
+
+Test filecmds-3.7 {copyfile tests} {
+    set testFH [open IOTEST.TMP r]
+    set testFH2 [open IOTEST2.TMP w]
+    set stat [catch {copyfile -bytes $copySize $testFH $testFH2} msg]
+    close $testFH
+    close $testFH2
+    list $stat $msg
+} 0 [list 1 \
+          "premature EOF, $copySize bytes expected, $testFileSize bytes actually read"]
+
+Test filecmds-3.7 {copyfile tests} {
+    set testFH [open IOTEST.TMP r]
+    set testFH2 [open IOTEST2.TMP w]
+    set stat [catch {copyfile -maxbytes $copySize $testFH $testFH2} msg]
+    close $testFH
+    close $testFH2
+    list $stat $msg
+} 0 [list 0 $testFileSize]
 
 pipe readPF writePF
 
@@ -95,6 +147,6 @@ Test filecmds-4.2 {pipe tests} {
 close $readPF
 close $writePF
 
-unlink -nocomplain {IOTEST.TMP IOTEST2.TMP}
+unlink -nocomplain {IOTEST.TMP IOTEST2.TMP IOTEST3.TMP}
 
 

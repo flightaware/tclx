@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.5 1993/07/20 08:20:26 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.6 1993/07/21 04:00:58 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -119,10 +119,10 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
  *
  * Tcl_CopyfileCmd --
  *     Implements the copyfile TCL command:
- *         copyfile fromFileId1 fromFileId
+ *         copyfile ?-bytes num|-maxbytes num? fromFileId toFileId
  *
  * Results:
- *      Nothing if it worked, else an error.
+ *      The number of bytes transfered or an error.
  *
  *-----------------------------------------------------------------------------
  */
@@ -133,46 +133,97 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
+#define TCL_COPY_ALL        0
+#define TCL_COPY_BYTES      1
+#define TCL_COPY_MAX_BYTES  2
+
     FILE  *fromFilePtr, *toFilePtr;
-    char   transferBuffer [2048];
-    int    bytesRead;
+    char   buffer [2048];
+    long   bytesToRead, bytesRead, totalBytesToRead, totalBytesRead, bytesLeft;
+    int    copyMode;
 
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " fromFileId toFileId", (char *) NULL);
-        return TCL_ERROR;
+    if (!(argc == 3 || argc == 5))
+        goto wrongArgs;
+
+    if (argc == 5) {
+        if (STREQU (argv [1], "-bytes")) 
+            copyMode = TCL_COPY_BYTES;
+        else if (STREQU (argv [1], "-maxbytes"))
+            copyMode = TCL_COPY_MAX_BYTES;
+        else
+            goto invalidOption;
+
+        if (Tcl_GetLong (interp, argv [2], &totalBytesToRead) != TCL_OK)
+            return TCL_ERROR;
+        bytesLeft = totalBytesToRead;
+    } else {
+        copyMode = TCL_COPY_ALL;
+        bytesLeft = MAXLONG;
     }
+    totalBytesRead = 0;
 
-    if (Tcl_GetOpenFile (interp, argv[1],
+    if (Tcl_GetOpenFile (interp, argv [argc - 2],
                          FALSE,  /* Read access  */
                          TRUE,   /* Check access */  
                          &fromFilePtr) != TCL_OK)
         return TCL_ERROR;
-    if (Tcl_GetOpenFile (interp, argv[2],
+
+    if (Tcl_GetOpenFile (interp, argv [argc - 1],
                          TRUE,   /* Write access */
                          TRUE,   /* Check access */
                          &toFilePtr) != TCL_OK)
         return TCL_ERROR;
 
-    while (TRUE) {
-        bytesRead = fread (transferBuffer, sizeof (char), 
-                           sizeof (transferBuffer), fromFilePtr);
+    while (bytesLeft > 0) {
+        bytesToRead = sizeof (buffer);
+        if (bytesToRead > bytesLeft)
+            bytesToRead = bytesLeft;
+
+        bytesRead = fread (buffer, sizeof (char), bytesToRead, fromFilePtr);
         if (bytesRead <= 0) {
             if (feof (fromFilePtr))
                 break;
             else
                 goto unixError;
         }
-        if (fwrite (transferBuffer, sizeof (char), bytesRead, toFilePtr) != 
-                    bytesRead)
+        if (fwrite (buffer, sizeof (char), bytesRead, toFilePtr) != bytesRead)
             goto unixError;
+
+        bytesLeft -= bytesRead;
+        totalBytesRead += bytesRead;
+    }
+    
+    /*
+     * Return an error if -bytes were specified and not that many were
+     * available.
+     */
+    if ((copyMode == TCL_COPY_BYTES) &&
+        (totalBytesToRead > 0) && (totalBytesRead != totalBytesToRead)) {
+
+        sprintf (interp->result,
+                 "premature EOF, %d bytes expected, %d bytes actually read",
+                 totalBytesToRead, totalBytesRead);
+        return TCL_ERROR;
     }
 
+    sprintf (interp->result, "%d", totalBytesRead);
     return TCL_OK;
 
-unixError:
+  unixError:
     interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
+
+  wrongArgs:
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                      " ?-bytes num|-maxbytes num? fromFileId toFileId",
+                      (char *) NULL);
+    return TCL_ERROR;
+
+  invalidOption:
+    Tcl_AppendResult (interp, "expect \"-bytes\" or \"-maxbytes\", got \"",
+                      argv [1], "\"", (char *) NULL);
+    return TCL_ERROR;
+
 }
 
 /*

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.23 1993/08/03 06:13:44 markd Exp markd $
+.\" $Id: TclX.man,v 2.24 1993/08/04 15:20:50 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -940,15 +940,25 @@ results will occur.
 '@help: tcl/files/copyfile
 '@brief: Copy the remainder of one open file into another.
 .TP
-.B copyfile \fIfromFileId toFileId\fR
+.B copyfile \fR?\fB-bytes \fInum\fR|\fB-maxbytes \fInum\fR? \fIfromFileId toFileId\fR
 .br
 Copies the rest of the file specified by \fIfromFileId\fR, starting
 from its current position,
 to the file specified by \fItoFileId\fR, starting from its current
 position.
+.sp
+If \fB-bytes\fR is specified, then \fBInum\fR bytes are copied.  If less than
+\fInum\fR bytes are available, an error is returned.  If \fB-maxbytes\fR is
+specified, then \fBInum\fR bytes are copied but no error is returned if less
+are available.
+.sp
+The command returns the number of bytes that were copied.
+.sp
+The \fB-bytes\fR option is particularly useful for mixing binary data
+in with ASCII commands or data in a data stream.
 '@endhelp
 '
-'@help: tcl/files/dup
+ '@help: tcl/files/dup
 '@brief: Duplicate an open file
 .TP
 .B dup \fIfileId\fR ?\fItargetFileId\fR?
