@@ -125,7 +125,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.1 
+# From configure.in Revision: 1.3 
 
 
 
@@ -1268,23 +1268,24 @@ rm -f conftest*
 
 
 
-echo checking for "times" returning elapsed real time
+echo "checking to see if 'times' returns the elapsed real time"
 cat > conftest.c <<EOF
 
 #include <sys/types.h>
 #include <sys/times.h>
-int main() { exit(0); }
-int t() { 
+main() {
 struct tms cpu;
 times (&cpu);
 sleep (2);
 if (times (&cpu) > 0)
      exit (0);
 else 
-     exit (255);
- }
+     exit (1);
+}
+
 EOF
-if eval $compile; then
+eval $compile
+if test -s conftest && (./conftest; exit) 2>/dev/null; then
   
 {
 test -n "$verbose" && \
@@ -1296,12 +1297,8 @@ SEDDEFS="${SEDDEFS}\${SEDdA}TIMES_RETS_REAL_TIME\${SEDdB}TIMES_RETS_REAL_TIME\${
 "
 }
 
-else
-  
-echo "times" does not appear to return the elasped real time
 fi
 rm -f conftest*
-
 
 
 echo "checking man directory/section separator (man/man.1 vs man/man1)"

@@ -30,7 +30,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldtkhelp.tcl,v 1.3 1993/06/17 05:25:41 markd Exp markd $
+# $Id: bldmanhelp.tcl,v 1.1 1993/06/24 15:02:49 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -122,8 +122,8 @@ proc GenInputFile {docDir manInfoTbl tmpFile} {
 }
 
 #-----------------------------------------------------------------------------
-# Main program for building help from manual files.  Sets up a fake command
-# line and sources buildhelp.tcl once a tmp input file has been constructed.
+# Main program for building help from manual files.  Constructs tmp input
+# file for the buildhelp command.
 
 if {[llength $argv] != 4} {
     error "wrong # args: bldmanhelp docdir maninfo helpdir brief"
@@ -139,7 +139,6 @@ set brief [lindex $argv 3]
 puts stdout "Begin preprocessing UCB manual files"
 GenInputFile $docDir $manInfoTbl $tmpFile
 
-set argv "-b $brief $helpDir $tmpFile"
-source ../tclsrc/buildhelp.tcl
+buildhelp $helpDir $brief [list $tmpFile]
 
 unlink $tmpFile

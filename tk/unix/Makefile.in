@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.11 1993/08/01 18:30:07 markd Exp markd $
+# $Id: Makefile.in,v 2.12 1993/08/02 04:41:49 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -21,6 +21,8 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
+srcdir    = @srcdir@
+VPATH     = @srcdir@
 XINCLUDES = @XINCLUDES@
 LIBS      = @LIBS@
 XLIBSW    = @XLIBSW@
@@ -29,7 +31,7 @@ RANLIB    = @RANLIB@
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@../Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@$(srcdir)/../Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
@@ -38,14 +40,18 @@ WISHX     = ../tkmaster/bin/wishx
 
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
 
-CFLAGS = ${OPTIMIZE_FLAG} ${XCFLAGS} -I../src -I../${TK_UCB_DIR} \
-         -I../${TCL_UCB_DIR} ${XINCLUDES}
-
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the Tcl
 # library if it was brought in.
 
 LDLIBS = ${LIBTKX.A} ${XLIBSW} ${LIBTCLX.A} -lm ${LIBS}
+
+CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+           -I../$(srcdir)/src  -I../$(srcdir)/tksrc -I../${TK_UCB_SRC} \
+           -I../${TCL_UCB_SRC} ${XINCLUDES}
+ 
+.c.o:
+	${CC} ${CC_FLAGS} -c $<
 
 #------------------------------------------------------------------------------
 
@@ -56,7 +62,7 @@ OBJS = tkXstartup.o tkXsignal.o
 all: made.tmp ${WISHX}
 
 ${WISHX}: tkMain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
-	${CC} ${CFLAGS} ${XLDFLAGS} tkMain.o ${LDLIBS} ${XLDLIBS} -o ${WISHX}
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tkMain.o ${LDLIBS} ${XLDLIBS} -o ${WISHX}
 	if ${DO_STRIPPING} ; then \
 	    strip ${WISHX}  ;\
 	    ${MCS_CMD} ${WISHX} ;\
@@ -70,7 +76,7 @@ made.tmp: ${OBJS}
 	touch made.tmp
 
 tkXstartup.o: tkXstartup.c
-	${CC} -c ${CFLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXstartup.c
+	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXstartup.c
 
 #------------------------------------------------------------------------------
 

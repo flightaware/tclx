@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.15 1993/08/05 05:03:36 markd Exp markd $
+# $Id: Makefile.in,v 2.16 1993/08/07 23:46:23 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -24,20 +24,27 @@ SHELL = /bin/sh
 # Autoconfig defines that can be overridden in Config.mk
 
 RANLIB = @RANLIB@
+srcdir = @srcdir@
+VPATH  = @srcdir@
 LIBS   = @LIBS@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@../Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@$(srcdir)/../Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
 TCL       = ../tclmaster/bin/tcl
 
-CFLAGS = ${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR}
 LDLIBS = ${LIBTCLX.A} -lm ${LIBS}
+
+CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+           -I$(srcdir)/../src -I../${TCL_UCB_SRC}
+ 
+.c.o:
+	${CC} ${CC_FLAGS} -c $<
 
 #------------------------------------------------------------------------------
 
@@ -56,7 +63,7 @@ OBJS= \
 all: made.tmp ${TCL}
 
 ${TCL}: main.o ${LIBTCLX.A} made.tmp 
-	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${LDLIBS} ${XLDLIBS} -o ${TCL}
+	${CC} ${CC_FLAGS} ${XLDFLAGS} main.o ${LDLIBS} ${XLDLIBS} -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
 	    ${MCS_CMD} ${TCL}; \
@@ -70,27 +77,27 @@ made.tmp: ${OBJS} ${CPLUSOBJS}
 	touch made.tmp
 
 tclXstartup.o: patchlevel.h tclXstartup.c
-	${CC} -c ${CFLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" tclXstartup.c
+	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" tclXstartup.c
 
 main.o: patchlevel.h main.c
 
 tclXgetdate.c: tclXgetdate.y
-	${YACC} tclXgetdate.y
+	${YACC} $(srcdir)/tclXgetdate.y
 	sed 's/yy/TclXyy/g' <y.tab.c >tclXgetdate.c
 	rm y.tab.c
 
 tcl++.o: tcl++.C tcl++.h
-	${CCPLUS} -c ${CFLAGS} tcl++.C
+	${CCPLUS} -c ${CC_FLAGS} $(srcdir)/tcl++.C
 
 #------------------------------------------------------------------------------
 # This is just to test if it compiles.
 
 tcl++: main++.o made.tmp
-	${CCPLUS} ${CFLAGS} ${XLDFLAGS} main++.o ${LDLIBS} ${XLDLIBS} \
+	${CCPLUS} ${CC_FLAGS} ${XLDFLAGS} main++.o ${LDLIBS} ${XLDLIBS} \
         -o ../tcl++
 
 main++.o: tcl++.h main++.C
-	${CCPLUS} -c -I${CPLUSINCL} ${CFLAGS} main++.C
+	${CCPLUS} -c -I${CPLUSINCL} ${CC_FLAGS} $(srcdir)/main++.C
 
 #------------------------------------------------------------------------------
 

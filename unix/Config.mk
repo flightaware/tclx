@@ -3,8 +3,15 @@
 #
 #   Master configuration file for Extended Tcl.  This should be the only
 # file you have to modify to get Extended Tcl to work.  It is used to
-# set attributes that configure can't figure out and t override certain 
+# set attributes that configure can't figure out and to override certain 
 # attributes set by configure.
+# 
+#   All the values in this directory are set to reasonable defaults.  You might
+# want to tune them to your taste.  You may set the value of "CC" and "CFLAGS"
+# in the file or on the make command line or set them.  For example:
+#
+#       make -k CC=gcc CFLAGS=-O
+#
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -15,24 +22,28 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.24 1993/07/30 15:05:15 markd Exp markd $
+# $Id: Config.mk,v 2.25 1993/08/01 05:43:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #------------------------------------------------------------------------------
-# Location of the UCB Tcl distribution relative to this directory (not an
-# absolute path).
+# The directory containing the UCB Tcl library (libtcl.a) and the UCB Tcl 
+# source distribution directory relative to this directory (not an absolute
+# path).
 
-TCL_UCB_DIR=../tcl7.0b2
+TCL_UCB_LIB=../tcl7.0b2
+TCL_UCB_SRC=$(srcdir)/../tcl7.0b2
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
-# that includes the TclX command set, define TK_BUILD=WISHX and the
-# location of your Tk directory in TK_UCB_DIR relative to this directory. If
-# you do not want a "wishx" compiled, don't define TK_BUILD.
+# that includes the TclX command set, define TK_BUILD=WISHX.  Also define the
+# the directory containing the UCB Tk library (libtk.a) and the UCB Tk source
+# distribution directory relative to this directory (not an absolute path).
+# If you do not want a "wishx" compiled, don't define TK_BUILD.
 
 TK_BUILD=WISHX
-TK_UCB_DIR=../tk3.3b2
+TK_UCB_LIB=../tk3.3b2
+TK_UCB_SRC=$(srcdir)/../tk3.3b2
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Also a macro that
@@ -41,14 +52,15 @@ TK_UCB_DIR=../tk3.3b2
 # stripped (debugging case).  Note that if debugging or profiling is enabled,
 # the DO_STRIPPING option must be disabled.
 
-OPTIMIZE_FLAG=-g
+#CFLAGS=
 DO_STRIPPING=false
 #DO_STRIPPING=true
 
 #------------------------------------------------------------------------------
 # Definition of the compiler ar and yacc program you wish to use.
 #
-CC=cc
+
+#CC=cc
 AR=ar
 YACC=yacc
 #YACC=bison -b y

@@ -14,11 +14,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: getversion.c,v 1.1 1993/07/19 06:27:46 markd Exp markd $
+ * $Id: getversion.c,v 1.2 1993/07/19 15:30:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
-#include "../src/tclExtend.h"
+#include "tclExtend.h"
 
 #ifdef TK_GET_VERSION
 #include "tk.h"

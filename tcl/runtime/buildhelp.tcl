@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.6 1993/06/24 07:31:01 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.7 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -66,17 +66,17 @@
 #
 #-----------------------------------------------------------------------------
 # 
-# To run this program:
+# To generate help:
 #
-#   tcl buildhelp.tcl -b brief.brf helpDir file-1 file-2 ...
+#   buildhelp helpDir brief.brf filelist
 #
-# o -b specified the name of the brief file to create form the @brief entries.
-#   It must have an extension of ".brf".  It will be created in helpDir.
 # o helpDir is the help tree root directory.  helpDir should  exists, but any
 #   subdirectories that don't exists will be created.  helpDir should be
 #   cleaned up before the start of manual page generation, as this program
 #   will not overwrite existing files.
-# o file-n are the nroff manual pages, or .tcl, .tlib files to extract
+# o brief.brf  is the name of the brief file to create form the @brief entries.
+#   It must have an extension of ".brf".  It will be created in helpDir.
+# o filelist are the nroff manual pages, or .tcl, .tlib files to extract
 #   the help files from. If the suffix is not .tcl or .tlib, a nroff manual
 #   page is assumed.
 #
@@ -276,12 +276,12 @@ proc ProcessTclScript {pathName} {
 }
 
 #-----------------------------------------------------------------------------
-# GenerateHelp: main procedure.  Generates help from specified files.
+# build: main procedure.  Generates help from specified files.
 #    helpDirPath - Directory were the help files go.
 #    briefFile - The name of the brief file to create.
 #    sourceFiles - List of files to extract help files from.
 
-proc GenerateHelp {helpDirPath briefFile sourceFiles} {
+proc buildhelp {helpDirPath briefFile sourceFiles} {
     global G_helpDir G_truncFileNames G_nroffScanCT
     global G_scriptScanCT G_briefHelpFH G_colArgs
 
@@ -372,35 +372,3 @@ proc GenerateHelp {helpDirPath briefFile sourceFiles} {
     echo "Completed extraction of help files"
 }
 
-#-----------------------------------------------------------------------------
-# Print a usage message and exit the program
-proc Usage {} {
-    puts stderr {Wrong args: -b briefFile helpdir manfile1 [manfile2..]}
-    exit 1
-}
-
-#-----------------------------------------------------------------------------
-# Main program body, process command line unless sourced interactively
-
-if {$interactiveSession} {
-    echo "To extract help, use the command:"
-    echo {GenerateHelp helpDirPath briefFile sourceFiles}
-} else {
-    set briefFile {}
-    while {[string match "-*" [lindex $argv 0]]} {
-        set flag [lvarpop argv 0]
-        case $flag in {
-            "-b" {set briefFile [lvarpop argv]}
-            default Usage
-        }
-    }
-    if {[llength $argv] < 2} {
-        Usage
-    }
-    if [lempty $briefFile] {
-       puts stderr {must specify -b argument}
-       Usage 
-    }
-    GenerateHelp [lindex $argv 0] $briefFile [lrange $argv 1 end]
-   
-}

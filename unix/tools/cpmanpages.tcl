@@ -7,7 +7,7 @@
 #
 # It is run in the following manner:
 #
-#     tcl cpmanpages.tcl TCL|TK ?man-separator-char?
+#     tcl cpmanpages.tcl TCL|TCLX|TK sourceDir ?man-separator-char?
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 1.3 1993/07/30 15:05:15 markd Exp markd $
+# $Id: cpmanpages.tcl,v 1.4 1993/07/31 04:43:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -211,12 +211,13 @@ proc InstallManPage {sourceFile manDir section} {
 #------------------------------------------------------------------------------
 # main prorgam
 
-if {[llength $argv] < 1 || [llength $argv] > 2} {
-    puts stderr "wrong # args: cpmanpages TCL|TK ?manSeparator?"
+if {[llength $argv] < 2 || [llength $argv] > 3} {
+    puts stderr "wrong # args: cpmanpages TCL|TCLX|TK sourceDir ?manSeparator?"
     exit 1
 }
 set manType [lindex $argv 0]
-set manSeparator [lindex $argv 1]
+set sourceDir [lindex $argv 1]
+set manSeparator [lindex $argv 2]
 
 source ../tools/buildutil.tcl
 
@@ -228,11 +229,18 @@ if ![info exists config(TCL_MAN_STYLE)] {
     set config(TCL_MAN_STYLE) LONG
 }
 
+set sourceFiles [glob -nocomplain -- $sourceDir/*.man $sourceDir/*.n \
+                      $sourceDir/*.1 $sourceDir/*.3]
+
 switch -- $manType {
     TCL {
         puts stdout "Copying Tcl manual pages to tclmaster/man"
-        set sourceFiles [glob ../$config(TCL_UCB_DIR)/doc/*]
-        set sourceFiles [concat $sourceFiles [glob ../man/*]]
+        set destDir   ../tclmaster/man
+        set sectionXRef(.n)   $config(TCL_MAN_CMD_SECTION)
+        set sectionXRef(.3)   $config(TCL_MAN_FUNC_SECTION)
+    }
+    TCLX {
+        puts stdout "Copying Extended Tcl manual pages to tclmaster/man"
         set destDir   ../tclmaster/man
         set sectionXRef(.n)   $config(TCL_MAN_CMD_SECTION)
         set sectionXRef(.man) $config(TCL_MAN_CMD_SECTION)
@@ -240,18 +248,16 @@ switch -- $manType {
     }
     TK {
         puts stdout "Copying Tk manual pages to tkmaster/man"
-        set sourceFiles [glob ../$config(TK_UCB_DIR)/doc/*]
         set destDir ../tkmaster/man
         set sectionXRef(.n)   $config(TK_MAN_CMD_SECTION)
-        set sectionXRef(.man) $config(TK_MAN_CMD_SECTION)
         set sectionXRef(.3)   $config(TK_MAN_FUNC_SECTION)
     }
     default {
-        puts stderr "Expected on of \"TCL\" or \"TK\", got \"$manType\""
+        puts stderr "Expected on of TCL, TCLX or TK, got \"$manType\""
     }
 }
 
-set ignoreFiles {man.macros RCS RCSOLD tclsh.1}
+set ignoreFiles {tclsh.1}
 
 # Actually install the files.
 

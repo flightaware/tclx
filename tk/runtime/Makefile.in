@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.7 1993/07/30 15:05:15 markd Exp markd $
+# $Id: Makefile.in,v 1.8 1993/07/31 04:43:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -20,23 +20,29 @@ SHELL=/bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
+srcdir = @srcdir@
+VPATH  = @srcdir@
+
 MAN_DIR_SEPARATOR=@MAN_DIR_SEPARATOR@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@../Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@$(srcdir)/../Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
-TK.TCL    = ../tkmaster/tk.tcl
-TK.TLIB   = ../tkmaster/tk.tlib
-TK.TNDX   = ../tkmaster/tk.tndx
-PROLOG.PS = ../tkmaster/prolog.ps
-TCLHELP   = ../tkmaster/bin/tclhelp
-DEMOS     = ../tkmaster/demos
-MAN       = ../tkmaster/man
-HELP      = ../tkmaster/help
+TK.TCL      = ../tkmaster/tk.tcl
+TK.TLIB     = ../tkmaster/tk.tlib
+TK.TNDX     = ../tkmaster/tk.tndx
+PROLOG.PS   = ../tkmaster/prolog.ps
+TCLHELP     = ../tkmaster/bin/tclhelp
+DEMOS       = ../tkmaster/demos
+MAN         = ../tkmaster/man
+HELP        = ../tkmaster/help
+CPMANPAGES  = $(srcdir)/../tools/cpmanpages.tcl
+BLDMANHELP  = $(srcdir)/../tools/bldmanhelp.tcl
+TKMANPAGES  = $(srcdir)/../tools/tkmanpages
 
 #------------------------------------------------------------------------------
 # Copy all files.  Note, tk.tcl must be edited to not nuke the auto_path.
@@ -45,17 +51,17 @@ HELP      = ../tkmaster/help
 all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} ${MAN}
 
 
-${TK.TCL}: ../${TK_UCB_DIR}/library/tk.tcl
+${TK.TCL}: ../${TK_UCB_SRC}/library/tk.tcl
 	rm -f ${TK.TCL}
-	fgrep -v "set auto_path" ../${TK_UCB_DIR}/library/tk.tcl > ${TK.TCL}
+	fgrep -v "set auto_path" ../${TK_UCB_SRC}/library/tk.tcl > ${TK.TCL}
 
-${TK.TLIB} ${TK.TNDX}: ../${TK_UCB_DIR}/library/tclIndex tkdemo.tcl
-	../runtcl "-c convert_lib ../${TK_UCB_DIR}/library/tclIndex ${TK.TLIB}"
+${TK.TLIB} ${TK.TNDX}: ../${TK_UCB_SRC}/library/tclIndex tkdemo.tcl
+	../runtcl "-c convert_lib ../${TK_UCB_SRC}/library/tclIndex ${TK.TLIB}"
 	cat tkdemo.tcl >>${TK.TLIB}
 	../runtcl "-c buildpackageindex ${TK.TLIB}"
 	
-${PROLOG.PS}: ../${TK_UCB_DIR}/library/prolog.ps
-	cp ../${TK_UCB_DIR}/library/prolog.ps ${PROLOG.PS}
+${PROLOG.PS}: ../${TK_UCB_SRC}/library/prolog.ps
+	cp ../${TK_UCB_SRC}/library/prolog.ps ${PROLOG.PS}
 
 ${TCLHELP}: tclhelp.tcl
 	echo "#!${TCL_BINDIR}/wishx -f" >  ${TCLHELP}
@@ -64,11 +70,12 @@ ${TCLHELP}: tclhelp.tcl
 
 ${DEMOS}:
 	mkdir ${DEMOS}
-	(cd ../${TK_UCB_DIR}/library/demos;tar -cf - .) | \
+	(cd ../${TK_UCB_SRC}/library/demos;tar -cf - .) | \
 	    (cd ${DEMOS}; tar -xf -)
 
 ${MAN}:
-	../runtcl ../tools/cpmanpages.tcl TK ${MAN_DIR_SEPARATOR}
+	../runtcl ${CPMANPAGES} TK ../${TK_UCB_SRC}/doc \
+                  ${MAN_DIR_SEPARATOR}
 
 #------------------------------------------------------------------------------
 # Build help for Tk.
@@ -76,8 +83,8 @@ ${MAN}:
 buildtkhelp:
 	rm -rf ${HELP}
 	mkdir ${HELP}
-	../runtcl ../tools/bldmanhelp.tcl ../${TK_UCB_DIR}/doc \
-                  ../tools/tkmanpages ${HELP} Tk.brf
+	../runtcl ${BLDMANHELP} ../${TK_UCB_SRC}/doc ${TKMANPAGES} \
+                  ${HELP} Tk.brf
 
 #------------------------------------------------------------------------------
 

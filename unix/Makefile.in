@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.11 1993/07/20 08:35:45 markd Exp markd $
+# $Id: Makefile.in,v 2.12 1993/07/30 15:05:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -21,12 +21,20 @@ SHELL=/bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-RANLIB=@RANLIB@
+RANLIB = @RANLIB@
+srcdir = @srcdir@
+VPATH  = @srcdir@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@$(srcdir)/Config.mk@MAKEQUOTE@
+
+#------------------------------------------------------------------------------
+# Flags that were passed on the command line that are to be passed on to
+# second level makes.
+
+PASS_FLAGS = "CC=$(CC)" "CFLAGS=$(CFLAGS)"
 
 #------------------------------------------------------------------------------
 # The made.tmp files are used to indicate a makefile has successfully added
@@ -45,11 +53,11 @@ all: TCLX runtcl ${TK_BUILD}
 #
 
 TCLX: TCLCOPY runtcl
-	cd tools;     ${MAKE} -${MAKEFLAGS} all
-	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} all
-	cd osSupport; ${MAKE} -${MAKEFLAGS} all
-	cd src;       ${MAKE} -${MAKEFLAGS} all
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} all
+	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
 # Copy include and library files from the UCB Tcl distribution to the
@@ -66,24 +74,24 @@ MKTCLDIRS:
 	-mkdir tclmaster/include 2>/dev/null; exit 0
 	-mkdir tclmaster/bin     2>/dev/null; exit 0
 
-${LIBTCLX.A}: ${TCL_UCB_DIR}/libtcl.a
+${LIBTCLX.A}: ${TCL_UCB_LIB}/libtcl.a
 	rm -f ${LIBTCLX.A}
-	cp ${TCL_UCB_DIR}/libtcl.a ${LIBTCLX.A}
+	cp ${TCL_UCB_LIB}/libtcl.a ${LIBTCLX.A}
 	${RANLIB} ${LIBTCLX.A}
 	rm -f ${TCLMADE.TMP}
 
-${TCL.H}: ${TCL_UCB_DIR}/tcl.h
+${TCL.H}: ${TCL_UCB_LIB}/tcl.h
 	rm -f ${TCL.H}
-	cp ${TCL_UCB_DIR}/tcl.h ${TCL.H}
+	cp ${TCL_UCB_LIB}/tcl.h ${TCL.H}
 
 #------------------------------------------------------------------------------
 # Generate a wish shell {wishx} with Extended Tcl commands.
 #
 
 WISHX: TKCOPY runwishx
-	cd tkucbsrc; ${MAKE} -${MAKEFLAGS} all
-	cd tksrc;    ${MAKE} -${MAKEFLAGS} all
-	cd tktclsrc; ${MAKE} -${MAKEFLAGS} all
+	cd tkucbsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd tksrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd tktclsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
 # Copy include and library files from the UCB Tk distribution to the
@@ -100,15 +108,15 @@ MKTKDIRS:
 	-mkdir tkmaster/include 2>/dev/null; exit 0
 	-mkdir tkmaster/bin     2>/dev/null; exit 0
 
-${LIBTKX.A}: ${TK_UCB_DIR}/libtk.a
+${LIBTKX.A}: ${TK_UCB_LIB}/libtk.a
 	rm -f ${LIBTKX.A}
-	cp ${TK_UCB_DIR}/libtk.a ${LIBTKX.A}
+	cp ${TK_UCB_LIB}/libtk.a ${LIBTKX.A}
 	${RANLIB} ${LIBTKX.A}
 	rm -f ${TKMADE.TMP}
 
-${TK.H}: ${TK_UCB_DIR}/tk.h
+${TK.H}: ${TK_UCB_LIB}/tk.h
 	rm -f ${TK.H}
-	cp ${TK_UCB_DIR}/tk.h ${TK.H}
+	cp ${TK_UCB_LIB}/tk.h ${TK.H}
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
@@ -154,13 +162,17 @@ tcl++:
 test: ucbtests extdtests
 
 ucbtests: all
-	./runtcl -c "cd ${TCL_UCB_DIR}/tests;source all"
+	@echo "***"
+	@echo "*** Expect warnings about not having the following commands:"
+	@echo "***     testcmdinfo, testdcall & testlink"
+	@echo "***"
+	./runtcl -c "cd ${TCL_UCB_LIB}/tests;source all"
 
 extdtests: all
 	./runtcl -c "cd tests;source all"	
 
 tktest: all
-	cd tktests ; ../runwishx -f tktests.tcl -n wish ../${TK_UCB_DIR}
+	cd tktests ; ../runwishx -f tktests.tcl -n wish ../${TK_UCB_LIB}
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
@@ -224,14 +236,14 @@ WISHXMAYBE: TKXINSTALL
 # Clean up the mess we made.
 
 clean:
-	cd tools;     ${MAKE} -${MAKEFLAGS} clean
-	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} clean
-	cd osSupport; ${MAKE} -${MAKEFLAGS} clean
-	cd src;       ${MAKE} -${MAKEFLAGS} clean
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} clean
-	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} clean
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} clean
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} clean
+	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	-rm -f runtcl runwishx
 	-rm -rf tclmaster/bin tclmaster/lib tclmaster/include
 	-rm -rf tkmaster/bin tkmaster/lib tkmaster/include
@@ -240,12 +252,13 @@ clean:
 # Restore to the distributed state.
 
 distclean: clean
-	cd tools;     ${MAKE} -${MAKEFLAGS} distclean
-	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} distclean
-	cd osSupport; ${MAKE} -${MAKEFLAGS} distclean
-	cd src;       ${MAKE} -${MAKEFLAGS} distclean
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} distclean
-	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} distclean
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} distclean
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} distclean
+	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	rm -f Makefile config.status
+
