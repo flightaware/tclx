@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.7 1996/03/04 23:11:42 markd Exp $
+.\" $Id: TclX.n,v 5.8 1996/03/10 22:16:34 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2319,10 +2319,10 @@ specified in the call to \fBcatopen\fR.
 '\"@brief: Introduction to the tcl shell.
 .B tcl ?-qn? ?-f? \fIscript\fB?|?-c \fIcommand\fB? ?\fIargs\fR?
 .PP
-\fBTcl\fR starts the interactive Tcl command interpreter.  The Tcl shell
+The \fBtcl\fR starts the interactive TclX command interpreter.  The TclX shell
 provides an environment for writing, debugging and executing Tcl scripts.  The
-functionality of the Tcl shell can be easily obtained by any application
-that includes Tcl.
+functionality of the TclX shell can be easily obtained by any application
+that includes TclX.
 .PP
 The \fBtcl\fR command, issued without any arguments,
 invokes an interactive Tcl shell, allowing the user to interact
@@ -2337,13 +2337,15 @@ variable `\fBargv\fR'.  If
 series of commands) is executed, with `\fBargv\fR' containing
 any \fIargs\fR.
 .PP
-The Tcl shell is intended as an environment for Tcl program development and
+The TclX shell is intended as an environment for Tcl program development and
 execution.  While it is not a full-featured interactive shell, it provides a
-comfortable environment for the interactive development of Tcl code.  Note
-that the package library code described here overrides the \fBunknown\fR
-command provided as part of the standard Berkeley Tcl library facility,
-although Tcl source libraries coded to that standard can be loaded and used by
-Extended Tcl.
+comfortable environment for the interactive development of Tcl code. 
+.PP
+The TclX shell also supports event oriented programming.  If any event sources
+are created the shell will enter an event loop at the end of the top level
+script instead of exiting.   The loop will continue until all event sources
+are removed.  The most notable methods of create event loops in a Tcl-only
+application are with the \fBfileevent\fR and \fBsocket -server\fR commands.
 .PP
 The following command line flags are recognized by the Tcl shell command
 line parser:

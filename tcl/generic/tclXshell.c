@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 5.2 1996/02/09 18:43:09 markd Exp $
+ * $Id: tclXshell.c,v 5.3 1996/02/12 18:16:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -270,7 +270,7 @@ TclX_Main (argc, argv, appInitProc)
                        TCLX_EVAL_GLOBAL | TCLX_EVAL_ERR_HANDLER,
                        evalStr) == TCL_ERROR)
             goto errorExit;
-        goto okExit;
+        goto evalComplete;
     }
 
     evalStr = Tcl_GetVar2 (interp, TCLXENV, "evalFile", TCL_GLOBAL_ONLY);
@@ -280,7 +280,7 @@ TclX_Main (argc, argv, appInitProc)
                        TCLX_EVAL_ERR_HANDLER,
                        evalStr) == TCL_ERROR)
             goto errorExit;
-        goto okExit;
+        goto evalComplete;
     }
     
     /*
@@ -293,7 +293,15 @@ TclX_Main (argc, argv, appInitProc)
     if (Tcl_CommandLoop (interp, isatty (0)) == TCL_ERROR)
         goto errorExit;
 
-  okExit:
+  evalComplete:
+
+    /*
+     * If any event sources have been set up, process events until no more
+     * sources remain.
+     */
+    while (Tcl_DoOneEvent (0))
+        continue;
+
     /* 
      * Delete the interpreter if memory debugging or explictly requested.
      * Useful for finding memory leaks.

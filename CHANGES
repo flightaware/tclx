@@ -1106,4 +1106,8 @@
     is still supported for old scripts.
   o Since sockets are now required to build base Tcl, they are no longer
     optional with TclX.
+  o Added event loop support for the TclX shell.  If any event sources are
+    created the shell will enter an event loop at the end of the top level
+    script instead of exiting.  Suggested by Jan Nijtmans
+    <nijtmans@nici.kun.nl>.
 -------------------------------------------------------------------------------
