@@ -192,8 +192,11 @@ will all of the functions defined by both Berkeley and Extended Tcl, and
 create an executable version of tcl in the "extended" directory called, simply
 enough, "tcl".  A "wish" executable will be also built if it was requested.
 
-    Next fire up "tcl" and, if everything worked, you should be greeted
-by a tcl prompt:
+    Until the Extended Tcl runtime files are installed, "tcl" and "wish" can't
+be run directly.  To run them before installation, use "runtcl" or "runwish".
+
+    Next enter the command "runtcl" and, if everything worked, you should be
+greeted by a tcl prompt:
 
 tcl>
 
