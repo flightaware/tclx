@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: getversion.c,v 3.0 1993/11/19 07:00:06 markd Rel markd $
+ * $Id: getversion.c,v 3.1 1994/01/23 03:36:36 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,7 +37,7 @@ main (argc, argv)
 #endif
 #ifdef TCLX_PATCHLEVEL
     if (TCLX_PATCHLEVEL != 0) 
-        printf ("p%d", TCLX_PATCHLEVEL);
+        printf ("-p%d", TCLX_PATCHLEVEL);
 #endif    
     printf ("\n");
     exit (0);
