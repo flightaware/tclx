@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.12.2.2 1998/07/08 05:21:20 markd Exp $
+ * $Id: tclExtend.h,v 8.12.2.3 1998/07/10 01:29:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,10 +42,10 @@
 #define TCLX_PATCHLEVEL      0
 
 #define TCLX_VERSION        "8.0.3"
-#define TCLX_FULL_VERSION   "8.0.3b1"
+#define TCLX_FULL_VERSION   "8.0.3"
 
 #define TKX_VERSION         "8.0.3"
-#define TKX_FULL_VERSION    "8.0.3b1"
+#define TKX_FULL_VERSION    "8.0.3"
 
 #define TCLX_DEBUG
 
