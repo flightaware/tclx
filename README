@@ -1,0 +1,442 @@
+
+              *** README.EXTD - README file for Extended Tcl ***
+
+
+EXTENDED TCL
+============
+
+Extended Tcl, also known as NeoSoft Tcl or simply TclX, defines a set of
+extensions to Tcl 6.4, the Tool Command Language invented by Dr. John
+Ousterhout of the University of California at Berkeley.  Tcl is a powerful,
+yet simple embeddable programming language.  Extended Tcl is oriented towards
+system programming tasks, with many additional interfaces to the Unix
+operating system, It is upwardly compatible with Tcl 6.4.  You take the
+Extended Tcl package, add it to Tcl 6.4, and from that you get Extended Tcl.
+(Berkeley Tcl is not included in this distribution, obtain it from
+sprite.berkeley.edu).
+
+Support is also included for building a Tk wish shell with the Extended Tcl
+command set.
+
+Extended Tcl was designed and implemented by Karl Lehenbauer
+(karl@NeoSoft.com) and Mark Diekhans (markd@Grizzly.com), with help in the
+early stages from Peter da Silva (peter@NeoSoft.com).
+
+As with Berkeley Tcl, all of Extended Tcl is freely redistributable, including
+for commercial use and resale.
+
+
+NEW FEATURES IN EXTENDED TCL 6.4c
+=================================
+
+
+FEATURES ADDED BY EXTENDED TCL
+==============================
+
+o A shell, which provides an environment for developing and executing
+  Tcl programs.  A Tcl code library facility is provided.
+
+o General Commands
+
+    commandloop - Create and enter an interactive command environment.
+
+    cmdtrace - Debugging tool for tracing Tcl command execution.
+
+    infox - Find out additional information about extended Tcl,
+            such as the version, patchlevel, name, version and
+            long name of any embedded application.
+
+    loop - a higher-performance for-style loop.
+
+o Unix Access Commands
+
+    chgrp, chmod, chown, execvp, fork, kill, sleep, system, umask,
+    unlink, wait
+
+    fmtclock - Format a long integer time value into human-readable form.
+
+    getclock - Return current date and time as a long integer.
+
+    id - Get and set user, group, process and process group id's.
+
+    signal - Specify action to be taken when a signal occurs.
+
+    times - Get process and child execution times.
+
+
+o File I/O Commands
+
+    bsearch - Binary search a sorted file.
+
+    copyfile - Copy remainder of one open file into another.
+
+    dup - Duplicate an open filehandle.
+
+    fcntl - Get or set open file access options.
+
+    fstat - Obtain status information about an open file.
+
+    lgets - Read a list from a file, included embedded newlines.
+
+    pipe - Create a pipe.
+
+    select - Synchronous I/O multiplexing (on systems that support it).
+
+o File Scanning Commands
+
+    scancontext - Manage file scan contexts.
+
+    scanfile - Scan specified file against selected scan context.
+
+    scanmatch - Specify Tcl code to execute when scan pattern matches.
+
+o Math Commands
+
+    acos, asin, atan, ceil, cos, cosh, exp, fabs, floor, mod, max,
+    min, log, log10, pow, sin, sinh, sqrt, tan, tah
+
+    random - Return a pseudorandom integer or seed the random number generator.
+
+o List Manipulation Commands
+
+    lempty - Determine if a list is empty.
+
+    lvarpop - Pop or replace the specified element from a list.
+
+o Keyed Lists - support for struct-like lists
+
+    keyldel - Delete a field of a keyed list.
+
+    keylget - Get the value of a field in a keyed list.
+
+    keylset - Set the value of a field of a keyed list.
+
+o String and Character Manipulation Commands
+
+    cindex - Return the indexed character from the specified string.
+
+    clength - Return the length of the specified string.
+
+    crange - Return a range of characters from a string specifying start and
+             end.
+
+    csubstr - Return a range of character from a string specifying start and
+              length.
+
+    ctype - Determine if string has various characteristics.
+
+    replicate - Replicate string a number of times.
+
+    translit - Translate characters in a string like the "tr" command.
+
+o Procedures in the Tcl Library
+
+    assign_fields - Assign successive elements in lists to variables.
+
+    edprocs - Call editor on named, or all, procedures.
+
+    for_array_keys - Do a foreach-style loop on each key in an array.
+
+    for_file - Do a foreach-style loop on each line in a file.
+
+    for_recursive_glob - Perform a foreach-style loop on each file
+                         and directory that matches one or more patterns.
+
+    intersect - Return the logical intersection of two lists.
+
+    intersect3 - Return the intersection of two lists, with remainders.
+
+    pushd/popd/dirs - Cshell-style directory stack routines.
+
+    read_file - Read in a file to a string.
+
+    recursive_glob - Do filename globbing, recursively descending
+                     all matched directories.
+
+    lrmdups - Sort a list and remove duplicate elements.
+
+    saveprocs - Save the definitions of named, or all, procedures.
+
+    showproc - Lists the definition of the named procedure.
+
+    showprocs - List the definition of the named procedures, or all.
+
+    union - Return the logical union of two lists.
+
+    write_file - Write the specified string to the specified file.
+
+ON-LINE HELP
+============
+
+There is a help system included with Extended Tcl.  It contains some
+documentation on every command in Berkeley Tcl, and Extended Tcl.  You can
+invoke it interactively from within Extended Tcl by typing "help".
+
+Once you bring Tcl up and have gotten it to pass all the tests, try typing
+"help help" to learn how to use help.
+
+MANUAL PAGES
+============
+
+Man pages in nroff/troff format are provided for all of Tcl and the extensions
+in the directory extended/man.  Start with the TclX.man manual
+
+EXTENDED TCL VERSION NAMING
+===========================
+
+Extended Tcl takes its version number from the corresponding version of
+Berkeley (Ousterhout) Tcl upon which it is based, with the addition of a
+trailing letter in case there are multiple releases of Extended Tcl within a
+single release of Berkeley Tcl.  This release is TclX 6.3c.
+
+INTERFACING TCL AND C++
+=======================
+
+C++ programmers can include the file "tcl++.h" to define C++ classes
+that can be used to access a Tcl interpreter.  This is based on Tcl
+C++ classes originally developed by Parag Patel.  There is a problem with
+the file tcl.h that causes it to define the prototypes incorrectly on some
+cfront C++ compilers that define NO_PROTOTYPE.  If you have problems,
+delete the `&& !defined(NO_PROTOTYPE)' from the code in tcl.h that defines
+_ANSI_ARGS_.
+
+TCL DIRECTORY HIERARCHY ????Redo....
+=======================
+
+Here is an overview of the directory hierarchy:
+
+                top_level_directory
+
+tcl6.3                      extended
+
+           man ossupport src tcllib tclsrc tests ucbsrc tkSupport experimental
+
+                              help
+
+The tcl6.2 directory contains Berkeley Tcl, unmodified.  This location is only
+suggested, it my be changed by editing extended/Config.mk. You may also use
+tcl6.1.
+
+Within the "extended" directory, the "man" directory contains all of
+the manpages for Extended Tcl, "ossupport" contains routines that
+Extended Tcl needs that may not be present on all systems, and "src"
+contains all of the C source and include files comprising the
+Tcl extensions.  The directory tkSupport contains a modified version of
+tk1.4/main.c that builds a `wish' shell with the Extended Tcl command set
+and procedure libraries.
+
+The "tcllib" directory contains several demo programs for Extended
+Tcl, and the Tcl procedure library and index are built here.  Also
+the "help" subdirectory contains all of the help files.
+
+The "tclsrc" directory contains the Tcl source files that are
+concatenated to create the Tcl procedure library, and the "tests"
+directory contains the tests for Extended Tcl.
+
+The "experimental" directory contains new code that's undergoing development
+but perhaps enough experience hasn't been gained with it or code, documentation
+or tests are not yet up to production quality.  Check it out and let us know
+what you think.
+
+Finally, the "ucbsrc" directory contains a replacement for the
+Berkeley version of tclBasic.c.  This was necessary because a
+couple of small changes needed to be made to tclBasic.c to support
+the signal processing of Extended Tcl.
+
+
+HOW TO BUILD IT
+===============
+
+Please read TclX.man in the extended/man directory before starting the engine
+or working under the hood.
+
+Configure and build Berkeley Tcl as described in that distribution.  Don't
+forget to do a "csh config" before running make for the first time.
+
+Cd to the "extended" directory, which contains this distribution.  Edit the file
+"Config.mk" to configure Extended Tcl for your Unix version.  The first part 
+of this file contains user preference options, including the location of the
+Berkeley Tcl source and, optionally, the Tk 1.4 source.  The second section
+contains configuration information specific to various Unix versions.  Remove
+the comment character (#) from the macro definitions for your Unix version.
+If you have a problem with the configuration section or develop a new one,
+please mail your changes to us.
+
+Then do a "make".  If all goes well, this will augment the tcl.a library will
+all of the functions defined by both Berkeley and Extended Tcl, and create an
+executable version of tcl in the "extended" directory called, simply enough,
+"tcl".  A "wish" executable will be also built if it was requested.
+
+Next fire up "tcl" and, if everything worked, you should be greeted
+by a tcl prompt:
+
+tcl>
+
+RUN TESTS TO INSURE THAT TCL IS WORKING PROPERLY
+================================================
+
+Tcl comes with over 1400 tests that you can run to insure that it is working
+properly.  These tests have greatly helped us while working on Tcl by
+detecting bugs that get introduced accidentally as side-effects of changes.
+Consequently, we have found Tcl to be very reliable, and have had very few
+cases where a new release has regressed by introducing new bugs in old
+functions, or reintroducing old bugs in old functions.
+
+There are two sets of tests: the tests from Berkeley Tcl, and tests for
+Extended Tcl, which test both the new commands added by Extended Tcl and the
+procedures defined in the Tcl procedure library.
+
+Run both the Berkeley and TclX tests by typing "make test" in the Extended
+directory.
+
+If a test fails, please dig into the test and the C source for the function
+being tested, fix the bug and mail us the change.  If you're not inclined to
+do this, please report the problem, including the output of the test, to
+tcl-project@neosoft.com.  Sometimes tests fail due to problems in the system
+environment or bugs in that test rather than problems with TclX.  Even if a few
+of the tests fail, you may still have a working TclX.
+
+If you're having trouble with the Berkeley tests, and you suspect that the
+extensions might be involved, you can build a special minimal version of
+Berkeley Tcl by cd'ing to the tcl6.3 directory and doing a "make tclTest".
+You can then invoke "tclTest", where you should be greeted by a "%" prompt.
+Next, cd to the tests directory and do a "source all".
+
+Note that the Berkeley tests turn off tcl's ability to autoload procedures
+from the Tcl source library, so after running the tests, you should usually
+exit Tcl and restart it.
+
+INSTALLING EXTENDED TCL
+=======================
+
+To install Extended Tcl, edit the extended/Config.mk installation
+configuration section to match your preferences. Read the information in the
+Makefile carefully before configuring it. Cd to the extended directory and do
+a "make install".  This will install include files and manual pages for Berkeley
+Tcl and TclX, as well as the TclX binary and library.
+
+If you have Tcl6.1 installed, you might want to remove the old manual pages
+before installing, as several manual pages were combined and the old copies
+are not automatically purged.
+
+MAKING EXECUTABLE TCL SCRIPTS
+=============================
+
+It is common to want to write Tcl scripts, put them in a directory along your
+search path, and execute them just like you do with shell scripts.
+
+On systems that support the "#!" convention, you can put a
+
+#!/usr/local/bin/tcl
+
+as the first line of your script, and executing the script will
+automatically invoke tcl to process it.  Of course if you install
+Tcl somewhere else, you'll use a different path.
+
+For systems that don't support this convention (most System V
+systems, for example), it is probably best to create a shell
+script that does something like:
+
+        exec tcl commandfile.tcl
+
+
+PACKAGE LIBRARIES
+=================
+
+Package Libraries are a Tcl source code management tool included in
+this release.  Package libraries allow you to group Tcl procedures into
+logical bundles and create single files, libraries, that contain multiple
+packages.  The package code provides a low-overhead means of automatically
+demand-loading a package on the first attempt to execute one of the procedures
+defined within it.  As such, package libraries provide a mechanism to
+accommodate the creation of Tcl applications and libraries of a substantial
+size.
+
+SUPPORT FOR EXTENDED TCL
+========================
+
+We are committed to providing continuing support for Extended Tcl.  Please
+send questions, bug reports, and bug fixes to:
+
+         tcl-project@NeoSoft.com (uupsi!sugar!tcl-project).
+
+If you are unable to send electronic mail, please send surface mail to:
+
+        NeoSoft
+        Attention: TCL Project
+        3918 Panorama
+        Missouri City, TX  77459
+        USA
+
+Or leave a note on our BBS at (713) 684-5900
+
+SEND US YOUR LIBRARY ROUTINES
+=============================
+
+If you write a useful Tcl procedure and would like to share it with
+everyone, send us a copy and we'll consider it in the Tcl library!
+
+COMPATIBILITY WITH TCLX 6.1a
+============================
+
+The "execvp" command has been changed to "execl".  With "execl" the arguments
+are all in one list, rather than being separate arguments, which often
+required playing games with "eval" to get it to do what you wanted.  A
+compatible "execvp" proc, which calls the new "execl", will be autoloaded if
+you're running the standard Extended Tcl.
+
+Other than that, Extended Tcl 6.3c should be entirely backward-compatible with
+TclX 6.1a.  If you like Extended Tcl 6.3 against the baseline Tcl 6.1, "infox
+version" of the resulting Tcl executable will report a version of "6.1b".
+
+If you have any demand-loaded Tcl source libraries (.tlib) of your own, delete
+the corresponding .tndx files so the index will be rebuilt in a new, improved
+format.  Old Tcl source libraries will not work until this is done.  To force
+the rebuilding of these indexes, either go into Tcl and explicitly do a
+"build_package_index", or execute a command that you know isn't there.  Of
+course you'll have to have write access to any directories the .tlib files
+reside in.
+
+
+CAVEATS
+=======
+
+Although Extended Tcl compiles and executes the tests properly on SCO Unix
+System V/3.2.2, Xenix System V/386, and SunOS, it has not had much use under
+Xenix System V/386.
+
+Previous versions of Extended Tcl have also run under Berkeley BSD, HP-UX and
+Xenix/286.  This release, however, has not been tested on these machines,
+although there is configuration information in the makefile for BSD and HP-UX,
+and Extended Tcl should come up fairly easily on these machines.
+
+Do not create any set-user-id versions of Tcl yet.  There are holes in
+the startup sequence involving shell variables and default files that need
+to be plugged first.
+
+MAILING LISTS AND NEWSGROUPS FOR TCL
+====================================
+
+A Usenet newsgroup, comp.lang.tcl, has been in place since mid-December
+of 1991, and is dedicated to discussing Tcl and the applications that
+embed it.
+
+WHERE TO GET IT
+===============
+
+Tcl 6.3 is available via anonymous ftp from:
+
+   sprite.berkeley.edu:tcl/tcl6.3.tar.Z
+or
+   ftp.uu.net:languages/tcl/tcl6.3.tar.Z
+
+Extended Tcl 6.2b can be downloaded by anonymous FTP from:
+
+   sprite.berkeley.edu:tcl/tclX6.3c.tar.Z
+or
+   barkley.berkeley.edu:tcl/extensions/tclX6.3c.tar.Z
+or
+   ftp.uu.net:languages/tcl/tclX6.3c.tar.Z
+
+A contributed sources archive resides on barkley.berkeley.edu.
+
