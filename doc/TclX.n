@@ -1,7 +1,7 @@
 .\"
 .\" TclX.man
 .\"
-.\" Extended Tcl binary file search command.
+.\" Extended command set and environment for Tcl.
 .\"----------------------------------------------------------------------------
 .\" Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
 .\"
@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.2 1994/08/30 05:16:50 markd Exp markd $
+.\" $Id: TclX.n,v 4.3 1994/11/29 06:53:48 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
