@@ -1139,7 +1139,11 @@
   o Added guidelines for creating a pkgIndex.tcl file for use with TclX.  Build
     a prototype file, pkgIndex.proto, that can be merged with other
     pkgIndex.tcl files.
+-------------------------------------------------------------------------------
+24 Apr 96:
+  o Chanced 'mkdir -path' to not return an error if the full path already
+    exists.
 ===============================================================================
-23 Apr 96: Released TclX 7.5.0
+25 Apr 96: Released TclX 7.5.0
 ===============================================================================
 

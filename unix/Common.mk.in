@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.14 1996/04/07 20:06:47 markd Exp $
+# $Id: Common.mk.in,v 5.15 1996/04/24 06:37:14 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -60,12 +60,6 @@ TKX_SHLIB_BASE_NAME  = @TKX_SHLIB_BASE_NAME@
 TKX_SHLIB_NAME       = @TKX_SHLIB_NAME@
 
 #------------------------------------------------------------------------------
-# Tcl/Tk libraries to use.  References macros defined in Config.mk.
-#
-TCL_USE_LIB = ${@TCL_USE_LIB@}
-TK_USE_LIB  = ${@TK_USE_LIB@}
-
-#------------------------------------------------------------------------------
 # Configuration information from tclConfig.sh and tkConfig.sh. The
 # TCL_USE_SHLIBS_CFLAGS is defined to be either the value of TCL_SHLIB_CFLAGS
 # of a non-existant macro to be empty.  We don't want to compile with the
@@ -79,11 +73,15 @@ TCL_USE_SHLIB_CFLAGS = ${@TCL_USE_SHLIB_CFLAGS@}
 TCL_LD_FLAGS         = @TCL_LD_FLAGS@
 TCL_DL_LIBS          = @TCL_DL_LIBS@
 TCL_SHLIB_LD         = @TCL_SHLIB_LD@
+TCL_BUILD_LIB_SPEC   = @TCL_BUILD_LIB_SPEC@
+TCL_LIB_SPEC         = @TCL_LIB_SPEC@
 
 TK_DEFS              = @TK_DEFS@
 TK_LIBS              = @TK_LIBS@
 TK_XINCLUDES         = @TK_XINCLUDES@
 TK_XLIBSW            = @TK_XLIBSW@
+TK_BUILD_LIB_SPEC    = @TK_BUILD_LIB_SPEC@
+TK_LIB_SPEC          = @TK_LIB_SPEC@
 
 #------------------------------------------------------------------------------
 # Location of directories.

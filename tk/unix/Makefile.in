@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.28 1996/04/07 20:06:44 markd Exp $
+# $Id: Makefile.in,v 5.29 1996/04/24 06:37:11 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,10 +41,10 @@ LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LDLIBS = libtkx.a ${TK_USE_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_USE_LIB} \
+LDLIBS = libtkx.a ${TK_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_LIB} \
          ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
 
-SHLIBLIBS = ${TK_USE_LIB} ${TK_XLIBSW} -L../../tcl/unix -ltclx ${TCL_USE_LIB} \
+SHLIBLIBS = ${TK_LIB} ${TK_XLIBSW} -L../../tcl/unix -ltclx ${TCL_LIB} \
 	    ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
             ${XLDLIBS}
 

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.16 1996/03/26 03:19:19 markd Exp $
+.\" $Id: TclX.n,v 5.17 1996/04/24 06:37:01 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -718,8 +718,7 @@ on systems that support symbolic links.)
 .br
 Create each of the directories in the list \fIdirList\fR.  The mode on the
 new directories is 777, modified by the umask.  If \fB-path\fR is specified,
-then any non-existent parent directories in the specified path(s) are also
-created.
+then any non-existent directories in the specified path(s) are created.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
