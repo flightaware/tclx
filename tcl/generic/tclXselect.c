@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.7 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXselect.c,v 2.8 1993/11/17 15:16:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,12 +26,10 @@
 
 /*
  * Cheat a little to avoid configure checking for floor being prototyped.
- * These prototypes will conflict with the __CONSTVALUE return type attributed
- * used by GNU libc, so if its defined, we assume math.h defined these
- * functions.
+ * This breaks with GNU libc headers...really should check with autoconf.
  */
 
-#ifndef __CONSTVALUE
+#ifndef __GNU_LIBRARY__
 extern
 double floor ();
 #endif

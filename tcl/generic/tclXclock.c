@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 2.7 1993/08/25 03:15:47 markd Exp markd $
+ * $Id: tclXclock.c,v 2.8 1993/09/21 05:11:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -138,8 +138,13 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     }
 #endif
 
-    if (stat <= 0) {
-        Tcl_AppendResult (interp, "error formatting time", (char *) NULL);
+    if (stat < 0) {
+        char numStr [32];
+
+        sprintf (numStr, "%d", TCL_RESULT_SIZE - 1);
+        Tcl_AppendResult (interp, "invalid format string or formatted time ",
+                          "buffer overflow (max = ", numStr, " characters)",
+                          (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;

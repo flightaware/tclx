@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 2.5 1993/10/07 06:35:45 markd Exp markd $
+ * $Id: tclXmath.c,v 2.6 1993/11/08 05:06:40 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,11 +20,13 @@
 
 /*
  * Prototypes of random functions, since we may be using one out of osSupport.
+ * This breaks with GNU libc headers...really should check with autoconf.
  */
+
+#ifndef __GNU_LIBRARY__
 void srandom ();
 long random ();
-
-
+#endif
 
 /*
  * Prototypes of internal functions.

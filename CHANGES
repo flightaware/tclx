@@ -700,3 +700,16 @@
 ===============================================================================
 10 Nov 93: Released TclX7.1a Beta 5.
 ===============================================================================
+13 Nov 93:
+   o Renamed TclX_AppInit function to Tcl_AppInit.  This caused major problem
+     building shared libraries on Suns.  Also added a reference to "matherr"
+     to get the Tcl matherr function brought in on Suns.  Thanks to
+     Dr. Joseph E. Sacco <jsacco@ssl.com>.
+-------------------------------------------------------------------------------
+17 Nov 93:
+   o Added #ifndef checks around internal math function declarations to 
+     prevent conflicts with GNU libc header files. (Should really check in
+     autoconf).
+   o Added "cexpand" command.
+   o Added various changes to support Linux.
+-------------------------------------------------------------------------------
