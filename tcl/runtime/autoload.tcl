@@ -5,7 +5,7 @@
 # Default system startup file for Tcl-based applications.  Defines
 # "unknown" procedure and auto-load facilities.
 #
-# SCCS: @(#) init.tcl 1.88 97/11/06 12:30:46
+# SCCS: @(#) init.tcl 1.92 97/11/17 18:52:22
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.
@@ -13,16 +13,34 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
+
+# auto_load --
+# Checks a collection of library directories to see if a procedure
+# is defined in one of them.  If so, it sources the appropriate
+# library file to create the procedure.  Returns 1 if it successfully
+# loaded the procedure, 0 otherwise.
+#
+# Arguments: 
+# cmd -			Name of the command to find and load.
+# namespace (optional)  The namespace where the command is being used - must be
+#                       a canonical namespace as returned [namespace current]
+#                       for instance. If not given, namespace current is used.
+
 proc auto_load {cmd {namespace {}}} {
     global auto_index auto_oldpath auto_path env errorInfo errorCode
 
     if {[string length $namespace] == 0} {
 	set namespace [uplevel {namespace current}]
     }
-    set name [auto_qualify $cmd $namespace]
-    if [info exists auto_index($name)] {
-	uplevel #0 $auto_index($name)
-	return [expr {[info commands $name] != ""}]
+    set nameList [auto_qualify $cmd $namespace]
+    # workaround non canonical auto_index entries that might be around
+    # from older auto_mkindex versions
+    lappend nameList $cmd
+    foreach name $nameList {
+	if [info exists auto_index($name)] {
+	    uplevel #0 $auto_index($name)
+	    return [expr {[info commands $name] != ""}]
+	}
     }
     if ![info exists auto_path] {
 	return 0
@@ -33,6 +51,11 @@ proc auto_load {cmd {namespace {}}} {
 	}
     }
     set auto_oldpath $auto_path
+
+    # Load all available index resources.
+    foreach pkg "{{} Tcl} [info loaded {}]" {
+	catch {source -rsrc [string tolower [lindex $pkg 1]]:tclIndex}
+    }
 
     # Check if we are a safe interpreter. In that case, we support only
     # newer format tclIndex files.
@@ -75,12 +98,13 @@ proc auto_load {cmd {namespace {}}} {
 	    }
 	}
     }
-    if [info exists auto_index($name)] {
-	uplevel #0 $auto_index($name)
-	if {[info commands $name] != ""} {
-	    return 1
+    foreach name $nameList {
+	if [info exists auto_index($name)] {
+	    uplevel #0 $auto_index($name)
+	    if {[info commands $name] != ""} {
+		return 1
+	    }
 	}
     }
     return 0
 }
-
