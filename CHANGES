@@ -583,7 +583,7 @@
   o Change the "yy" prefix in the code generated from tclXgetdate.y to be
     "TclXyy".  This is to allow apllications to include yacc code.
   o Call isascii before isspace to handle non-ASCII character sets.
--------------------------------------------------------------------------------
+===============================================================================
  5 Aug 93: Released TclX7.0c Beta 3.
 ===============================================================================
 17 Aug 93:
@@ -607,4 +607,6 @@
     prompts from "TCLENV" array to "tcl_prompt1" and "tcl_prompt2".  These
     changes were done for compatibility with UCB Tcl.
     (*POTENTIAL INCOMPATIBILITY*)
--------------------------------------------------------------------------------
+===============================================================================
+ 1 Sep 93: Released TclX7.0c Beta 4.
+===============================================================================
