@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.5 1996/08/19 07:40:41 markd Exp $
+ * $Id: tclXfilecmds.c,v 7.6 1996/10/04 15:30:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -45,6 +45,8 @@
 #include "tclExtdInt.h"
 
 static char *FILE_ID_OPT = "-fileid";
+static char *TCL_TRANSLATION_OPT = "-translation";
+static char *TCL_EOFCHAR_OPT = "-eofchar";
 
 /*
  * Prototypes of internal functions.
@@ -202,9 +204,10 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
 #define TCLX_COPY_MAX_BYTES  2
 
     Tcl_Channel inChan, outChan;
-    int inTrans, outTrans;
     long totalBytesToRead, totalBytesRead;
     int argIdx, copyMode, translate, saveErrno;
+    Tcl_DString inChanTrans, outChanTrans;
+    Tcl_DString inChanEOF, outChanEOF;
 
     /*
      * Parse arguments.
@@ -226,7 +229,7 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
             if (Tcl_GetLong (interp, argv [argIdx],
                              &totalBytesToRead) != TCL_OK)
                 return TCL_ERROR;
-        } else if (STREQU (argv [1], "-maxbytes")) {
+        } else if (STREQU (argv [argIdx], "-maxbytes")) {
             copyMode = TCLX_COPY_MAX_BYTES;
             argIdx++;
             if (argIdx >= argc) {
@@ -238,7 +241,7 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
             if (Tcl_GetLong (interp, argv [argIdx],
                              &totalBytesToRead) != TCL_OK)
                 return TCL_ERROR;
-        } else if (STREQU (argv [1], "-translate")) {
+        } else if (STREQU (argv [argIdx], "-translate")) {
             translate = TRUE;
         } else {
             Tcl_AppendResult (interp, "invalid argument \"", argv [argIdx],
@@ -255,28 +258,41 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
+    Tcl_DStringInit (&inChanTrans);
+    Tcl_DStringInit (&outChanTrans);
+    Tcl_DStringInit (&inChanEOF);
+    Tcl_DStringInit (&outChanEOF);
 
     /*
      * Get the channels.  Unless translation is enabled, save the current
-     * translation mode and put the files in binary mode.
+     * translation mode and put the files in binary mode and clear the
+     * EOF character.
      */
     inChan = TclX_GetOpenChannel (interp, argv [argIdx], TCL_READABLE);
     if (inChan == NULL)
-        return TCL_ERROR;
+        goto errorExit;
     outChan = TclX_GetOpenChannel (interp, argv [argIdx + 1], TCL_WRITABLE);
     if (outChan == NULL)
-        return TCL_ERROR;
+        goto errorExit;
 
     if (!translate) {
-        inTrans = TclX_GetChannelOption (inChan, TCLX_COPT_TRANSLATION);
-        if (TclX_SetChannelOption (interp, inChan, TCLX_COPT_TRANSLATION,
-                                   TCLX_TRANSLATE_BINARY) != TCL_OK)
-            return TCL_ERROR;
-
-        outTrans = TclX_GetChannelOption (outChan, TCLX_COPT_TRANSLATION);
-        if (TclX_SetChannelOption (interp, outChan, TCLX_COPT_TRANSLATION,
-                                   TCLX_TRANSLATE_BINARY) != TCL_OK)
-            return TCL_ERROR;
+        Tcl_GetChannelOption (inChan, TCL_TRANSLATION_OPT, &inChanTrans);
+        Tcl_GetChannelOption (outChan, TCL_TRANSLATION_OPT, &outChanTrans);
+        Tcl_GetChannelOption (inChan, TCL_EOFCHAR_OPT, &inChanEOF);
+        Tcl_GetChannelOption (outChan, TCL_EOFCHAR_OPT, &outChanEOF);
+        
+        if (Tcl_SetChannelOption (interp, inChan, TCL_TRANSLATION_OPT,
+                                  "binary") != TCL_OK)
+            goto errorExit;
+        if (Tcl_SetChannelOption (interp, outChan, TCL_TRANSLATION_OPT,
+                                  "binary") != TCL_OK)
+            goto errorExit;
+        if (Tcl_SetChannelOption (interp, inChan, TCL_EOFCHAR_OPT,
+                                  "") != TCL_OK)
+            goto errorExit;
+        if (Tcl_SetChannelOption (interp, outChan, TCL_EOFCHAR_OPT,
+                                  "") != TCL_OK)
+            goto errorExit;
     }
 
     /*
@@ -290,20 +306,25 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
         saveErrno = Tcl_GetErrno ();
 
     if (!translate) {
-        if (TclX_SetChannelOption (interp, inChan, TCLX_COPT_TRANSLATION,
-                                   inTrans) != TCL_OK)
-            return TCL_ERROR;
-
-        if (TclX_SetChannelOption (interp, outChan, TCLX_COPT_TRANSLATION,
-                                   outTrans) != TCL_OK)
-            return TCL_ERROR;
+        if (Tcl_SetChannelOption (interp, inChan, TCL_TRANSLATION_OPT,
+                                  inChanTrans.string) != TCL_OK)
+            goto errorExit;
+        if (Tcl_SetChannelOption (interp, outChan, TCL_TRANSLATION_OPT,
+                                  inChanTrans.string) != TCL_OK)
+            goto errorExit;
+        if (Tcl_SetChannelOption (interp, inChan, TCL_EOFCHAR_OPT,
+                                  inChanEOF.string) != TCL_OK)
+            goto errorExit;
+        if (Tcl_SetChannelOption (interp, outChan, TCL_EOFCHAR_OPT,
+                                  outChanEOF.string) != TCL_OK)
+            goto errorExit;
     }
 
     if (totalBytesRead < 0) {
         Tcl_SetErrno (saveErrno);
         Tcl_AppendResult (interp, "copyfile failed: ", Tcl_PosixError (interp),
                           (char *) NULL);
-        return TCL_ERROR;
+        goto errorExit;
     }
 
     /*
@@ -316,11 +337,23 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
         sprintf (interp->result,
                  "premature EOF, %ld bytes expected, %ld bytes actually read",
                  totalBytesToRead, totalBytesRead);
-        return TCL_ERROR;
+        goto errorExit;
     }
 
     sprintf (interp->result, "%ld", totalBytesRead);
+    Tcl_DStringFree (&inChanTrans);
+    Tcl_DStringFree (&outChanTrans);
+    Tcl_DStringFree (&inChanEOF);
+    Tcl_DStringFree (&outChanEOF);
     return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&inChanTrans);
+    Tcl_DStringFree (&outChanTrans);
+    Tcl_DStringFree (&inChanEOF);
+    Tcl_DStringFree (&outChanEOF);
+
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
