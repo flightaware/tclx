@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 2.1 1992/11/07 20:36:55 markd Exp markd $
+# $Id: clock.test,v 2.2 1992/12/30 06:50:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -46,15 +46,15 @@ test clock-3.1 {convertclock tests} {
 } {1 {wrong # args: convertclock dateString [GMT|{}] [baseclock]}}
 
 test clock-3.2 {convertclock tests} {
-    fmtclock [convertclock "14 Feb 92" GMT] {%D %r} GMT
+    fmtclock [convertclock "14 Feb 92" GMT] {%m/%d/%y %I:%M:%S %p} GMT
 } {02/14/92 12:00:00 AM}
 
 test clock-3.3 {convertclock tests} {
-    fmtclock [convertclock "Feb 14, 1992 12:20 PM" GMT] {%D %r} GMT
+    fmtclock [convertclock "Feb 14, 1992 12:20 PM" GMT] {%m/%d/%y %I:%M:%S %p} GMT
 } {02/14/92 12:20:00 PM}
 
 test clock-3.5 {convertclock tests} {
-    fmtclock [convertclock "Feb 14, 1992 12:20 PM" {GMT} 319363200] {%D %r} GMT
+    fmtclock [convertclock "Feb 14, 1992 12:20 PM" {GMT} 319363200] {%m/%d/%y %I:%M:%S %p} GMT
 } {02/14/92 12:20:00 PM}
 
 test clock-3.6 {convertclock tests} {
