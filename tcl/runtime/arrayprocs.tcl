@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayprocs.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: arrayprocs.tcl,v 4.0 1994/07/16 05:29:31 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -26,10 +26,22 @@ proc for_array_keys {varName arrayName codeFragment} {
 	error "\"$arrayName\" isn't an array"
     }
 
+    set code 0
+    set result {}
     set searchId [array startsearch enumArray]
     while {[array anymore enumArray $searchId]} {
 	set enumVar [array nextelement enumArray $searchId]
-	uplevel $codeFragment
+        set code [catch {uplevel #1 $codeFragment} result]
+        if {$code != 0 && $code != 4} break
     }
     array donesearch enumArray $searchId
+
+    if {$code == 0 || $code == 3 || $code == 4} {
+        return $result
+    }
+    if {$code == 1} {
+        global errorCode errorInfo
+        return -code $code -errorcode $errorCode -errorinfo $errorInfo $result
+    }
+    return -code $code $result
 }

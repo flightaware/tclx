@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayproc.test,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: arrayproc.test,v 4.0 1994/07/16 05:24:31 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -26,15 +26,53 @@ set testArray(0) zero
 set testArray(william) dafoe
 
 Test for_array_keys-1.1 {for_array_keys command} {
-    for_array_keys key testArray {lappend result $key}
+    for_array_keys key testArray {
+        lappend result $key
+    }
     lsort $result
 } 0 "0 foo snap william"
 
-unset result
-
 Test for_array_keys-1.2 {errors in for_array_keys command} {
-    for_array_keys key _non_existent_ {lappend result $key}
-} 1 {"_non_existent_" isn't an array}
+    list [catch {
+        for_array_keys key testArray {
+            error fakeResult fakeInfo fakeCode
+        }
+    } msg] $msg [crange $errorInfo 0 7] $errorCode
+} 0 {}
+
+Test for_array_keys-1.3 {break in for_array_keys command} {
+    set cnt 0
+    list [catch {
+        for_array_keys key testArray {
+            incr cnt
+            break
+        }
+    } msg] $msg $cnt
+} 0 {}
+
+Test for_array_keys-1.4 {break in for_array_keys command} {
+    set cnt 0
+    list [catch {
+        for_array_keys key testArray {
+            incr cnt
+            continue
+            incr cnt 20
+        }
+    } msg] $msg $cnt
+} 0 {}
+
+Test for_array_keys-1.5 {return in for_array_keys command} {
+    proc for_array_keys_test {testArrayVar cntVar} {
+        upvar $testArrayVar testArray $cntVar cnt
+        for_array_keys key testArray {
+            incr cnt
+            return abcd
+        }
+    }
+    set cnt 0
+    list [catch {for_array_keys_test cnt} msg] $msg $cnt
+} 0 {0 abcd 1}
+rename for_array_keys_test {}
 
 unset testArray
 rename unknown {}
