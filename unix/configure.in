@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.27 1996/03/28 07:07:56 markd Exp $
+dnl $Id: configure.in,v 5.28 1996/04/07 20:06:53 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.27 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.28 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -195,6 +195,16 @@ AC_SUBST(TCLX_SHLIB_VERSION)
 AC_SUBST(TKX_VERSION)
 AC_SUBST(TKX_FULL_VERSION)
 AC_SUBST(TKX_SHLIB_VERSION)
+
+#------------------------------------------------------------------------------
+# If Config.mk is not in the build directory, copy it local.
+#------------------------------------------------------------------------------
+
+if test ! -r Config.mk
+then
+    echo "Copying $srcdir/Config.mk to build directory"
+    cp $srcdir/Config.mk  Config.mk || exit 1
+fi
 
 #------------------------------------------------------------------------------
 # Generate tmp makefile that outputs macro values in Config.mk as shell
@@ -513,16 +523,6 @@ AC_HEADER_EGREP("random", math.h, [found_random=YES])
 
 if test "$found_random" = "NO"; then
     AC_DEFINE(NO_RANDOM_PROTO)
-fi
-
-#------------------------------------------------------------------------------
-# If Config.mk is not in the build directory, copy it local.
-#------------------------------------------------------------------------------
-
-if test ! -r Config.mk
-then
-    echo "Copying $srcdir/Config.mk to build directory"
-    cp $srcdir/Config.mk  Config.mk || exit 1
 fi
 
 #------------------------------------------------------------------------------

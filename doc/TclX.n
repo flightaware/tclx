@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.15 1996/03/22 05:40:03 markd Exp $
+.\" $Id: TclX.n,v 5.16 1996/03/26 03:19:19 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2552,7 +2552,7 @@ It is not possible to continue executing the code in which the error occurred.
 This is useful for logging \fBerrorInfo\fR or e-mailing it to the maintainer.
 '\"@endhelp
 '
-'\"@help: tcl/variables/mainloop
+'\"@help: tcl/events/mainloop
 '\"@brief: Setup a top-level event loop.
 .TP
 .B mainloop

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.13 1996/03/28 07:07:49 markd Exp $
+# $Id: Common.mk.in,v 5.14 1996/04/07 20:06:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -111,11 +111,10 @@ TKX_TMP_RUNTIME    = ${bldbasedir}/tk/unix
 RUNTCL             = ${bldbasedir}/unix/runtcl
 RUNWISHX           = ${bldbasedir}/unix/runwishx
 GENTNDX            = ${RUNTCL} ${srcbasedir}/unix/tools/genindex.tcl
-BLDMANHELP         = ${RUNTCL} ${srcbasedir}/unix/tools/bldmanhelp
+BLDMANHELP         = ${RUNTCL} ${bldbasedir}/unix/tools/bldmanhelp
 CONVERTLIB         = ${RUNTCL} ${srcbasedir}/unix/tools/libconvert.tcl
-INSTCOPY           = ${RUNTCL} ${srcbasedir}/unix/tools/instcopy
-SYMLINKEXT         = ${srcbasedir}/unix/tools/symlinkext
-CPMANPAGES         = ${RUNTCL} ${srcbasedir}/unix/tools/cpmanpages
+INSTCOPY           = ${RUNTCL} ${bldbasedir}/unix/tools/instcopy
+CPMANPAGES         = ${RUNTCL} ${bldbasedir}/unix/tools/cpmanpages
 
 #------------------------------------------------------------------------------
 # Install directories for public files.  The value is determined by the

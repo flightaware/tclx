@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.31 1996/03/29 22:55:52 markd Exp $
+# $Id: Makefile.in,v 5.32 1996/04/07 20:06:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -383,8 +383,7 @@ install: install-runtime install-exec
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_RUNTIME}/help
 
 install-runtime: inst_pkgindex_@BUILD_SHARED@
-	${INSTCOPY} tclx.tcl tcl.tlib tcl.tndx \
-	    ${srcdir}/buildidx.tcl ${srcdir}/loadouster.tcl \
+	${INSTCOPY} tclx.tcl tcl.tlib tcl.tndx buildidx.tcl loadouster.tcl \
 	    ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 
 install-exec:
@@ -419,7 +418,7 @@ clean:
 # Restore to the distributed state.
 
 distclean: clean
-	rm -f Makefile tclxConfig.sh
+	rm -f Makefile tclxConfig.sh pkgIndex.proto
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:
