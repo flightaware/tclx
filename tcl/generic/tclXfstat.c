@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 1.4 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXfstat.c,v 1.5 1993/09/29 03:11:56 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -185,16 +185,17 @@ ReturnStatList (interp, filePtr, statBufPtr)
     char statList [200];
 
     sprintf (statList, 
-             "{atime %d} {ctime %d} {dev %d} {gid %d} {ino %d} {mode %d} ",
-              statBufPtr->st_atime, statBufPtr->st_ctime, statBufPtr->st_dev,
-              statBufPtr->st_gid,   statBufPtr->st_ino,   statBufPtr->st_mode);
+             "{atime %ld} {ctime %ld} {dev %ld} {gid %ld} {ino %ld} {mode %ld} ",
+              (long) statBufPtr->st_atime, (long) statBufPtr->st_ctime,
+	      (long) statBufPtr->st_dev,   (long) statBufPtr->st_gid,
+	      (long) statBufPtr->st_ino,   (long) statBufPtr->st_mode);
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
     sprintf (statList, 
-             "{mtime %d} {nlink %d} {size %d} {uid %d} {tty %d} {type %s}",
-             statBufPtr->st_mtime,  statBufPtr->st_nlink, statBufPtr->st_size,
-             statBufPtr->st_uid,    isatty (fileno (filePtr)),
-             GetFileType (statBufPtr));
+             "{mtime %ld} {nlink %ld} {size %ld} {uid %ld} {tty %d} {type %s}",
+             (long) statBufPtr->st_mtime,  (long) statBufPtr->st_nlink,
+	     (long) statBufPtr->st_size,   (long) statBufPtr->st_uid,
+	     (int) isatty (fileno (filePtr)), GetFileType (statBufPtr));
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
 }
@@ -224,52 +225,52 @@ ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
 {
     char numBuf [30];
 
-    sprintf (numBuf, "%d", statBufPtr->st_dev);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_dev);
     if  (Tcl_SetVar2 (interp, arrayName, "dev", numBuf, 
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_ino);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_ino);
     if  (Tcl_SetVar2 (interp, arrayName, "ino", numBuf,
                          TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_mode);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_mode);
     if  (Tcl_SetVar2 (interp, arrayName, "mode", numBuf, 
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_nlink);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_nlink);
     if  (Tcl_SetVar2 (interp, arrayName, "nlink", numBuf,
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_uid);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_uid);
     if  (Tcl_SetVar2 (interp, arrayName, "uid", numBuf,
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_gid);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_gid);
     if  (Tcl_SetVar2 (interp, arrayName, "gid", numBuf,
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_size);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_size);
     if  (Tcl_SetVar2 (interp, arrayName, "size", numBuf,
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_atime);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_atime);
     if  (Tcl_SetVar2 (interp, arrayName, "atime", numBuf,
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_mtime);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_mtime);
     if  (Tcl_SetVar2 (interp, arrayName, "mtime", numBuf,
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (numBuf, "%d", statBufPtr->st_ctime);
+    sprintf (numBuf, "%ld", (long) statBufPtr->st_ctime);
     if  (Tcl_SetVar2 (interp, arrayName, "ctime", numBuf,
                       TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
@@ -311,25 +312,25 @@ ReturnStatItem (interp, filePtr, statBufPtr, itemName)
     char         *itemName;
 {
     if (STREQU (itemName, "dev"))
-        sprintf (interp->result, "%d", statBufPtr->st_dev);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_dev);
     else if (STREQU (itemName, "ino"))
-        sprintf (interp->result, "%d", statBufPtr->st_ino);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_ino);
     else if (STREQU (itemName, "mode"))
-        sprintf (interp->result, "%d", statBufPtr->st_mode);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_mode);
     else if (STREQU (itemName, "nlink"))
-        sprintf (interp->result, "%d", statBufPtr->st_nlink);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_nlink);
     else if (STREQU (itemName, "uid"))
-        sprintf (interp->result, "%d", statBufPtr->st_uid);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_uid);
     else if (STREQU (itemName, "gid"))
-        sprintf (interp->result, "%d", statBufPtr->st_gid);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_gid);
     else if (STREQU (itemName, "size"))
-        sprintf (interp->result, "%d", statBufPtr->st_size);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_size);
     else if (STREQU (itemName, "atime"))
-        sprintf (interp->result, "%d", statBufPtr->st_atime);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_atime);
     else if (STREQU (itemName, "mtime"))
-        sprintf (interp->result, "%d", statBufPtr->st_mtime);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_mtime);
     else if (STREQU (itemName, "ctime"))
-        sprintf (interp->result, "%d", statBufPtr->st_ctime);
+        sprintf (interp->result, "%ld", (long) statBufPtr->st_ctime);
     else if (STREQU (itemName, "type"))
         interp->result = GetFileType (statBufPtr);
     else if (STREQU (itemName, "tty"))

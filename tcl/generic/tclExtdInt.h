@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.28 1993/09/21 05:11:18 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.29 1993/09/25 05:09:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -116,21 +116,33 @@ struct tm *localtime ();
 
 
 #ifndef MAXINT
-#    define BITSPERBYTE   8
-#    define BITS(type)    (BITSPERBYTE * (int)sizeof(type))
-#    define HIBITI        (1 << BITS(int) - 1)
-#    define MAXINT        (~HIBITI)
+#    ifdef INT_MAX	/* POSIX */
+#        define MAXINT INT_MAX
+#    else
+#        define BITSPERBYTE   8
+#        define BITS(type)    (BITSPERBYTE * (int)sizeof(type))
+#        define HIBITI        (1 << BITS(int) - 1)
+#        define MAXINT        (~HIBITI)
+#    endif
 #endif
 
 #ifndef MININT
-#    define MININT (-MAXINT)-1
+#    ifdef INT_MIN		/* POSIX */
+#        define MININT INT_MIN
+#    else
+#        define MININT (-MAXINT)-1
+#    endif
 #endif
 
 /*
  * If no MAXLONG, assume sizeof (long) == sizeof (int).
  */
 #ifndef MAXLONG
-#    define MAXLONG MAXINT  
+#    ifdef LONG_MAX /* POSIX */
+#        define MAXLONG LONG_MAX
+#    else
+#        define MAXLONG MAXINT  
+#    endif
 #endif
 
 #ifndef TRUE

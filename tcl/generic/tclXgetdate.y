@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.10 1993/08/26 15:02:51 markd Exp markd $
+ * $Id: tclXgetdate.y,v 2.11 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -821,7 +821,7 @@ yylex()
 }
 
 /*
- * Specify zone is of -1 to force GMT.  (This allows BST to work).
+ * Specify zone is of -5000 to force GMT.  (This allows BST to work).
  */
 
 int
@@ -842,7 +842,7 @@ Tcl_GetDate(p, now, zone, timePtr)
     yyMonth = tm->tm_mon + 1;
     yyDay = tm->tm_mday;
     yyTimezone = zone;
-    if (zone < 0) {
+    if (zone == -5000) {
         yyDSTmode = DSToff;  /* assume GMT */
         yyTimezone = 0;
     } else {

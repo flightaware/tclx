@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 2.3 1993/04/06 05:58:20 markd Exp markd $
+ * $Id: tclXmath.c,v 2.4 1993/07/11 19:25:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,8 +29,8 @@ long random ();
 /*
  * Prototypes of internal functions.
  */
-int 
-really_random _ANSI_ARGS_((int my_range));
+long 
+ReallyRandom _ANSI_ARGS_((long my_range));
 
 
 /*
@@ -123,14 +123,13 @@ Tcl_MinCmd (clientData, interp, argc, argv)
  *
  *-----------------------------------------------------------------------------
  */
-#define RANDOM_RANGE 0x7fffffff
+#define RANDOM_RANGE 0x7fffffffL
 
-static int 
-
+static long 
 ReallyRandom (myRange)
-    int myRange;
+    long myRange;
 {
-    int maxMultiple, rnum;
+    long maxMultiple, rnum;
 
     maxMultiple = RANDOM_RANGE / myRange;
     maxMultiple *= myRange;
@@ -158,7 +157,7 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    unsigned range;
+    unsigned long range;
 
     if ((argc < 2) || (argc > 3))
         goto invalidArgs;
@@ -177,12 +176,12 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
     } else {
         if (argc != 2)
             goto invalidArgs;
-        if (Tcl_GetUnsigned (interp, argv[1], &range) != TCL_OK)
+        if (Tcl_GetLong (interp, argv[1], &range) != TCL_OK)
             return TCL_ERROR;
         if ((range == 0) || (range > RANDOM_RANGE))
             goto outOfRange;
 
-        sprintf (interp->result, "%d", ReallyRandom (range));
+        sprintf (interp->result, "%ld", ReallyRandom (range));
     }
     return TCL_OK;
 
@@ -194,7 +193,7 @@ outOfRange:
     {
         char buf [18];
 
-        sprintf (buf, "%d", RANDOM_RANGE);
+        sprintf (buf, "%ld", RANDOM_RANGE);
         Tcl_AppendResult (interp, "range must be > 0 and <= ",
                           buf, (char *) NULL);
         return TCL_ERROR;

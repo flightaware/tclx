@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.10 1993/09/21 05:41:28 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.11 1993/10/01 03:47:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -53,7 +53,7 @@ typedef struct {
 /*
  * Prototypes of internal functions.
  */
-static int
+static void
 CleanUpContext _ANSI_ARGS_((scanGlob_t     *scanGlobPtr,
                             scanContext_t  *contextPtr));
 
@@ -96,7 +96,7 @@ FileScanCleanUp _ANSI_ARGS_((ClientData  clientData,
  *  entry itself is not released.
  *-----------------------------------------------------------------------------
  */
-static int
+static void
 CleanUpContext (scanGlobPtr, contextPtr)
     scanGlob_t    *scanGlobPtr;
     scanContext_t *contextPtr;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.8 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.9 1993/09/03 08:05:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -202,12 +202,12 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
         (totalBytesToRead > 0) && (totalBytesRead != totalBytesToRead)) {
 
         sprintf (interp->result,
-                 "premature EOF, %d bytes expected, %d bytes actually read",
+                 "premature EOF, %ld bytes expected, %ld bytes actually read",
                  totalBytesToRead, totalBytesRead);
         return TCL_ERROR;
     }
 
-    sprintf (interp->result, "%d", totalBytesRead);
+    sprintf (interp->result, "%ld", totalBytesRead);
     return TCL_OK;
 
   unixError:

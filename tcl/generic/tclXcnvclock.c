@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 2.10 1993/08/19 16:02:09 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 2.11 1993/09/21 05:11:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -120,7 +120,7 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
 {
     long        clockVal;
     time_t      baseClock;
-    int         zone;
+    long        zone;
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -140,7 +140,7 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
                               "got : `", argv [2], "'", (char *) NULL);
             return TCL_ERROR;
         }
-        zone = -1; /* Force GMT */
+        zone = -5000; /* Force GMT */
     } else {
         zone = GetTimeZone (baseClock);
     }
