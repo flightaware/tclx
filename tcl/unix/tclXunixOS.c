@@ -8,7 +8,7 @@
  * is not available on that platform.  This results in code with minimal
  * number of #ifdefs.
  *-----------------------------------------------------------------------------
- * Copyright 1996-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1996-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.15 1996/10/04 15:30:31 markd Exp $
+ * $Id: tclXunixOS.c,v 1.7 1997/01/26 19:48:36 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -71,8 +71,10 @@ TclXNotAvailableError (interp, funcName)
     Tcl_Interp *interp;
     char       *funcName;
 {
-    Tcl_AppendResult (interp, funcName, " is not available on this system",
-                      (char *) NULL);
+    TclX_StringAppendObjResult (interp, funcName, 
+				" is not available on this system",
+                                (char *) NULL);
+    TclSetObjResultFromStrResult (interp);  /* FIX: remove */
     return TCL_ERROR;
 }
 
@@ -207,8 +209,8 @@ TclXOSincrpriority (interp, priorityIncr, priority, funcName)
     *priority = nice (priorityIncr);
 #endif
     if (errno != 0) {
-        Tcl_AppendResult (interp, "failed to increment priority: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, "failed to increment priority: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -233,8 +235,8 @@ TclXOSpipe (interp, channels)
     int fileNums [2];
 
     if (pipe (fileNums) < 0) {
-        Tcl_AppendResult (interp, "pipe creation failed: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, "pipe creation failed: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     channels [0] = Tcl_MakeFileChannel ((ClientData) fileNums [0],
@@ -288,8 +290,8 @@ TclXOSsetitimer (interp, seconds, funcName)
     timer.it_interval.tv_usec = 0;  
 
     if (setitimer (ITIMER_REAL, &timer, &oldTimer) < 0) {
-        Tcl_AppendResult (interp, "unable to obtain timer: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, "unable to obtain timer: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     *seconds  = oldTimer.it_value.tv_sec;
@@ -362,8 +364,8 @@ TclXOSfsync (interp, channel)
     return TCL_OK;
 
   posixError:
-    Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -397,20 +399,21 @@ TclXOSsystem (interp, command, exitCode)
      * the exec fails.
      */
     if (pipe (errPipes) != 0) {
-        Tcl_AppendResult (interp, "couldn't create pipe: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, "couldn't create pipe: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
     if (fcntl (errPipes [1], F_SETFD, FD_CLOEXEC) != 0) {
-        Tcl_AppendResult (interp, "couldn't set close on exec for pipe: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "couldn't set close on exec for pipe: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
 
     pid = fork ();
     if (pid == -1) {
-        Tcl_AppendResult (interp, "couldn't fork child process: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, "couldn't fork child process: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
     if (pid == 0) {
@@ -423,8 +426,8 @@ TclXOSsystem (interp, command, exitCode)
     close (errPipes [1]);
     if (read (errPipes [0], &childErrno, sizeof (childErrno)) > 0) {
         errno = childErrno;
-        Tcl_AppendResult (interp, "couldn't execing /bin/sh: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, "couldn't execing /bin/sh: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         waitpid (pid, (int *) &waitStatus, 0);
         goto errorExit;
     }
@@ -443,8 +446,10 @@ TclXOSsystem (interp, command, exitCode)
     if (WIFSIGNALED (waitStatus)) {
         Tcl_SetErrorCode (interp, "SYSTEM", "SIG",
                           Tcl_SignalId (WTERMSIG (waitStatus)), (char *) NULL);
-        Tcl_AppendResult (interp, "system command terminate with signal ",
-                          Tcl_SignalId (WTERMSIG (waitStatus)), (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "system command terminate with signal ",
+                                    Tcl_SignalId (WTERMSIG (waitStatus)),
+				    (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -453,8 +458,8 @@ TclXOSsystem (interp, command, exitCode)
      * really brain-damaged.
      */
     if (WIFSTOPPED (waitStatus)) {
-        Tcl_AppendResult (interp, "system command child stopped",
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, "system command child stopped",
+                                    (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -485,9 +490,9 @@ TclX_OSlink (interp, srcPath, targetPath, funcName)
     char       *funcName;
 {
     if (link (srcPath, targetPath) != 0) {
-        Tcl_AppendResult (interp, "linking \"", srcPath, "\" to \"",
-                          targetPath, "\" failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, "linking \"", srcPath, "\" to \"",
+                                    targetPath, "\" failed: ", 
+				    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -515,15 +520,16 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
 {
 #ifdef S_IFLNK
     if (symlink (srcPath, targetPath) != 0) {
-        Tcl_AppendResult (interp, "creating symbolic link \"",
-                          targetPath, "\" failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, "creating symbolic link \"",
+                                    targetPath, "\" failed: ",
+			            Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
 #else
-    Tcl_AppendResult (interp, "symbolic links are not supported on this",
-                          " Unix system", (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"symbolic links are not supported on this",
+                                " Unix system", (char *) NULL);
     return TCL_ERROR;
 #endif
 }
@@ -594,25 +600,27 @@ TclXOSkill (interp, pid, signal, funcName)
     if (kill (pid, signal) < 0) {
         char pidStr [32];
 
-        Tcl_AppendResult (interp, "sending signal ",
-                          (signal == 0) ? 0 : Tcl_SignalId (signal),
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, "sending signal ",
+                                    (signal == 0) ? 0 : Tcl_SignalId (signal),
+                                    (char *) NULL);
         if (pid > 0) {
             sprintf (pidStr, "%d", pid);
-            Tcl_AppendResult (interp, " to process ", pidStr, (char *) NULL);
+            TclX_StringAppendObjResult (interp, " to process ", 
+					pidStr, (char *) NULL);
         } else if (pid == 0) {
             sprintf (pidStr, "%d", getpgrp ());
-            Tcl_AppendResult (interp, " to current process group (", 
-                              pidStr, ")", (char *) NULL);
+            TclX_StringAppendObjResult (interp, " to current process group (", 
+                                        pidStr, ")", (char *) NULL);
         } else if (pid == -1) {
-            Tcl_AppendResult (interp, " to all processess ", (char *) NULL);
+            TclX_StringAppendObjResult (interp, " to all processess ", 
+					(char *) NULL);
         } else if (pid < -1) {
             sprintf (pidStr, "%d", -pid);
-            Tcl_AppendResult (interp, " to process group ", 
-                              pidStr, (char *) NULL);
+            TclX_StringAppendObjResult (interp, " to process group ", 
+                                        pidStr, (char *) NULL);
         }
-        Tcl_AppendResult (interp, " failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, " failed: ", 
+				    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -646,8 +654,8 @@ TclXOSFstat (interp, channel, direction, statBuf, ttyDev)
     int fileNum = ChannelToFnum (channel, direction);
 
     if (fstat (fileNum, statBuf) < 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     if (ttyDev != NULL)
@@ -682,8 +690,8 @@ TclXOSSeekable (interp, channel, seekablePtr)
     }
 
     if (fstat (fileNum, &statBuf) < 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     if (S_ISREG (statBuf.st_mode)) {
@@ -734,9 +742,9 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
     handle = opendir (path);
     if (handle == NULL)  {
         if (interp != NULL)
-            Tcl_AppendResult (interp, "open of directory \"", path,
-                              "\" failed: ", Tcl_PosixError (interp),
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp, "open of directory \"", path,
+                                        "\" failed: ", Tcl_PosixError (interp),
+                                        (char *) NULL);
         return TCL_ERROR;
     }
    
@@ -763,8 +771,9 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
     }
     if (closedir (handle) < 0) {
         if (interp != NULL)
-            Tcl_AppendResult (interp, "close of directory failed: ",
-                              Tcl_PosixError (interp), (char *) NULL);
+            TclX_StringAppendObjResult (interp, "close of directory failed: ",
+                                        Tcl_PosixError (interp),
+					(char *) NULL);
         return TCL_ERROR;
     }
     return result;
@@ -827,8 +836,8 @@ TclXOSftruncate (interp, channel, newSize, funcName)
     stat = chsize (ChannelToFnum (channel, 0), newSize);
 #endif
     if (stat != 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -849,22 +858,20 @@ TclXOSftruncate (interp, channel, newSize, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSfork (interp, funcName)
+TclXOSfork (interp, funcNameObj)
     Tcl_Interp *interp;
-    char       *funcName;
+    Tcl_Obj    *funcNameObj;
 {
     pid_t pid;
-    char numBuf [32];
     
     pid = fork ();
     if (pid < 0) {
-        Tcl_AppendResult (interp, "fork failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, "fork failed: ", 
+				    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
-    sprintf (numBuf, "%d", pid);
-    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+    Tcl_SetIntObj (Tcl_GetObjResult (interp), (int)pid);
     return TCL_OK;
 }
 
@@ -891,8 +898,8 @@ TclXOSexecl (interp, path, argList)
     /*
      * Can only make it here on an error.
      */
-    Tcl_AppendResult (interp, "exec of \"", path, "\" failed: ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp, "exec of \"", path, "\" failed: ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -925,8 +932,8 @@ TclXOSInetAtoN (interp, strAddress, inAddress)
         return TCL_OK;
 #endif
     if (interp != NULL) {
-        Tcl_AppendResult (interp, "malformed address: \"",
-                          strAddress, "\"", (char *) NULL);
+        TclX_StringAppendObjResult (interp, "malformed address: \"",
+                                    strAddress, "\"", (char *) NULL);
     }
     return TCL_ERROR;
 }
@@ -954,8 +961,8 @@ TclXOSgetpeername (interp, channel, sockaddr, sockaddrSize)
 
     if (getpeername (ChannelToFnum (channel, 0),
                      (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -983,8 +990,8 @@ TclXOSgetsockname (interp, channel, sockaddr, sockaddrSize)
 {
     if (getsockname (ChannelToFnum (channel, 0),
                      (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -1014,8 +1021,8 @@ TclXOSgetsockopt (interp, channel, option, valuePtr)
 
     if (getsockopt (ChannelToFnum (channel, 0), SOL_SOCKET, option, 
                     (void*) valuePtr, &valueLen) != 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -1045,8 +1052,8 @@ TclXOSsetsockopt (interp, channel, option, value)
 
     if (setsockopt (ChannelToFnum (channel, 0), SOL_SOCKET, option,
                     (void*) &value, valueLen) != 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -1071,8 +1078,8 @@ TclXOSchmod (interp, fileName, mode)
     int         mode;
 {
     if (chmod (fileName, mode) < 0) {
-        Tcl_AppendResult (interp, fileName, ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, fileName, ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -1100,8 +1107,8 @@ TclXOSfchmod (interp, channel, mode, funcName)
 {
 #ifndef NO_FCHMOD
     if (fchmod (ChannelToFnum (channel, 0), mode) < 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -1189,16 +1196,18 @@ ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
     return TCL_OK;
 
   unknownUser:
-    Tcl_AppendResult (interp, "unknown user id: ", ownerStr, (char *) NULL);
+    TclX_StringAppendObjResult (interp, "unknown user id: ", 
+	ownerStr, (char *) NULL);
     goto errorExit;
 
   noGroupForUser:
-    Tcl_AppendResult (interp, "can't find group for user id: ", ownerStr,
-                      (char *) NULL);
+    TclX_StringAppendObjResult (interp, "can't find group for user id: ", 
+	ownerStr, (char *) NULL);
     goto errorExit;
 
   unknownGroup:
-    Tcl_AppendResult (interp, "unknown group id: ", groupStr, (char *) NULL);
+    TclX_StringAppendObjResult (interp, "unknown group id: ", groupStr, 
+	(char *) NULL);
     goto errorExit;
 
   errorExit:
@@ -1207,7 +1216,7 @@ ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
 }
 
 /*-----------------------------------------------------------------------------
- * TclXOSChangeOwnGrp --
+ * TclXOSChangeOwnGrpObj --
  *   Change the owner and/or group of a file by file name.
  *
  * Parameters:
@@ -1228,29 +1237,37 @@ ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSChangeOwnGrp (interp, options, ownerStr, groupStr, files, funcName)
+TclXOSChangeOwnGrpObj (interp, options, ownerStr, groupStr, fileListObj, funcName)
     Tcl_Interp  *interp;
     unsigned     options;
     char        *ownerStr;
     char        *groupStr;
-    char       **files;
-    char       *funcName;
+    Tcl_Obj     *fileListObj;
+    char        *funcName;
 {
-    int idx;
-    struct stat fileStat;
-    uid_t ownerId;
-    gid_t groupId;
-    char *filePath;
-    Tcl_DString pathBuf;
+    int          idx;
+    struct stat  fileStat;
+    uid_t        ownerId;
+    gid_t        groupId;
+    char        *filePath;
+    Tcl_DString  pathBuf;
+    char        *fileNameString;
+    Tcl_Obj    **filesObjv;
+    int          fileCount;
 
     if (ConvertOwnerGroup (interp, options, ownerStr, groupStr,
                            &ownerId, &groupId) != TCL_OK)
         return TCL_ERROR;
 
+    if (Tcl_ListObjGetElements (interp, fileListObj, &fileCount, &filesObjv)
+	    != TCL_OK)
+	return TCL_ERROR;
+
     Tcl_DStringInit (&pathBuf);
 
-    for (idx = 0; files [idx] != NULL; idx++) {
-        filePath = Tcl_TranslateFileName (interp, files [idx], &pathBuf);
+    for (idx = 0; idx < fileCount; idx++) {
+	fileNameString = Tcl_GetStringFromObj (filesObjv [idx], NULL);
+        filePath = Tcl_TranslateFileName (interp, fileNameString, &pathBuf);
         if (filePath == NULL) {
             Tcl_DStringFree (&pathBuf);
             return TCL_ERROR;
@@ -1275,10 +1292,93 @@ TclXOSChangeOwnGrp (interp, options, ownerStr, groupStr, files, funcName)
     return TCL_OK;
 
   fileError:
-    Tcl_AppendResult (interp, filePath, ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp, filePath, ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
     Tcl_DStringFree (&pathBuf);
     return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFChangeOwnGrpObj --
+ *   Change the owner and/or group of a file by open channel.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o options - Option flags are:
+ *     o TCLX_CHOWN - Change file's owner.
+ *     o TCLX_CHGRP - Change file's group.
+ *   o ownerStr - String containing owner name or id.  NULL if TCLX_CHOWN
+ *     not specified.
+ *   o groupStr - String containing owner name or id.  NULL if TCLX_CHOWN
+ *     not specified.  If NULL and TCLX_CHOWN is specified, the user's group
+ *     is used.
+ *   o channelIds - NULL terminated list of channel ids.
+ *   o funcName - Command or other name to use in not available error.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFChangeOwnGrpObj (interp, options, ownerStr, groupStr, channelIdsObj,
+                        funcName)
+    Tcl_Interp *interp;
+    unsigned    options;
+    char       *ownerStr;
+    char       *groupStr;
+    Tcl_Obj    *channelIdsObj;
+    char       *funcName;
+{
+#ifndef NO_FCHOWN
+    int          idx, fnum;
+    struct stat  fileStat;
+    uid_t        ownerId;
+    gid_t        groupId;
+    Tcl_Channel  channel;
+    Tcl_Obj    **channelIdsListObj;
+    int          channelCount;
+
+    if (ConvertOwnerGroup (interp, options, ownerStr, groupStr,
+                           &ownerId, &groupId) != TCL_OK)
+        return TCL_ERROR;
+
+    if (Tcl_ListObjGetElements (interp, channelIdsObj,
+	    &channelCount, &channelIdsListObj) != TCL_OK)
+	return TCL_ERROR;
+
+    for (idx = 0; idx < channelCount; idx++) {
+        channel = TclX_GetOpenChannelObj (interp, channelIdsListObj [idx], 0);
+        if (channel == NULL) {
+	    TclSetObjResultFromStrResult (interp);
+            return TCL_ERROR;
+	}
+        fnum = ChannelToFnum (channel, 0);
+        
+        /*
+         * If we are not changing both owner and group, we need to get the
+         * old ids.
+         */
+        if ((options & (TCLX_CHOWN | TCLX_CHGRP)) !=
+            (TCLX_CHOWN | TCLX_CHGRP)) {
+            if (fstat (fnum, &fileStat) != 0)
+                goto fileError;
+            if ((options & TCLX_CHOWN) == 0)
+                ownerId = fileStat.st_uid;
+            if ((options & TCLX_CHGRP) == 0)
+                groupId = fileStat.st_gid;
+        }
+        if (fchown (fnum, ownerId, groupId) < 0)
+            goto fileError;
+    }
+    return TCL_OK;
+
+  fileError:
+    TclX_StringAppendObjResult (interp, channelIdsListObj [idx], ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
+#else
+    return TclXNotAvailableError (interp, funcName);
+#endif
 }
 
 /*-----------------------------------------------------------------------------
@@ -1347,8 +1447,8 @@ TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
     return TCL_OK;
 
   fileError:
-    Tcl_AppendResult (interp, channelIds [idx], ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp, channelIds [idx], ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 #else
     return TclXNotAvailableError (interp, funcName);
@@ -1453,9 +1553,9 @@ TclXOSFlock (interp, lockInfoPtr)
     
     if (stat < 0) {
         lockInfoPtr->gotLock = FALSE;
-        Tcl_AppendResult (interp, "lock of \"",
-                          Tcl_GetChannelName (lockInfoPtr->channel),
-                          "\" failed: ", Tcl_PosixError (interp));
+        TclX_StringAppendObjResult (interp, "lock of \"",
+                                    Tcl_GetChannelName (lockInfoPtr->channel),
+                                    "\" failed: ", Tcl_PosixError (interp));
         return TCL_ERROR;
     }
 
@@ -1497,9 +1597,9 @@ TclXOSFunlock (interp, lockInfoPtr)
 
     stat = fcntl (fnum, F_SETLK, &flockInfo);
     if (stat < 0) {
-        Tcl_AppendResult (interp, "lock of \"",
-                          Tcl_GetChannelName (lockInfoPtr->channel),
-                          "\" failed: ", Tcl_PosixError (interp));
+        TclX_StringAppendObjResult (interp, "lock of \"",
+                                    Tcl_GetChannelName (lockInfoPtr->channel),
+                                    "\" failed: ", Tcl_PosixError (interp));
         return TCL_ERROR;
     }
 
@@ -1533,8 +1633,9 @@ TclXOSGetAppend (interp, channel, valuePtr)
 
     fnum = ChannelToFnum (channel, TCL_WRITABLE);
     if (fnum < 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
-                          " is not open for write access", (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel),
+                                    " is not open for write access",
+				    (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -1546,8 +1647,8 @@ TclXOSGetAppend (interp, channel, valuePtr)
     return TCL_OK;
 
   posixError:
-    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp,  Tcl_GetChannelName (channel), ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -1574,8 +1675,9 @@ TclXOSSetAppend (interp, channel, value)
 
     fnum = ChannelToFnum (channel, TCL_WRITABLE);
     if (fnum < 0) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
-                          " is not open for write access", (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel),
+                                    " is not open for write access",
+				    (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -1591,8 +1693,8 @@ TclXOSSetAppend (interp, channel, value)
     return TCL_OK;
 
   posixError:
-    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp,  Tcl_GetChannelName (channel), ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -1638,13 +1740,13 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
      */
     if ((readFnum >= 0) && (writeFnum >= 0) &&
         ((readMode & 1) != (writeMode & 1))) {
-        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), 
-                          ": read file of channel has close-on-exec ",
-                          (readMode & 1) ? "on" : "off",
-                          " and write file has it ",
-                          (writeMode & 1) ? "on" : "off",
-                          "; don't know how to get attribute for a channel ",
-                          "configure this way", (char *) NULL);
+        TclX_StringAppendObjResult (interp, Tcl_GetChannelName (channel), 
+                           ": read file of channel has close-on-exec ",
+                           (readMode & 1) ? "on" : "off",
+                           " and write file has it ",
+                           (writeMode & 1) ? "on" : "off",
+                           "; don't know how to get attribute for a channel ",
+                           "configure this way", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -1652,8 +1754,8 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
     return TCL_OK;
 
   posixError:
-    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp,  Tcl_GetChannelName (channel), ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -1692,7 +1794,7 @@ TclXOSSetCloseOnExec (interp, channel, value)
     return TCL_OK;
 
   posixError:
-    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp,  Tcl_GetChannelName (channel), ": ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 }

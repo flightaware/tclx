@@ -3,7 +3,7 @@
  *
  * Extended Tcl initialzation and initialization utilitied.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.6 1996/10/21 03:07:09 markd Exp $
+ * $Id: tclXinit.c,v 1.3 1997/01/02 05:44:49 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -62,7 +62,6 @@ static char tclx_fileinit [] =
 }";
 
 static char tclx_fileinitProc [] = "tclx_findinit";
-
 
 /*
  * Prototypes of internal functions.
@@ -258,6 +257,8 @@ static int
 InitSetup (interp)
     Tcl_Interp *interp;
 {
+    tclXWrongArgsObj = Tcl_NewStringObj (tclXWrongArgs, -1);
+    
     if (Tcl_PkgRequire (interp, "Tcl", TCL_VERSION, 1) == NULL) {
 	return TCL_ERROR;
     }

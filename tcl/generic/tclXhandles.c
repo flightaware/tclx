@@ -5,7 +5,7 @@
  * Tcl handles.  Provides a mechanism for managing expandable tables that are
  * addressed by textual handles.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 7.0 1996/06/16 05:30:27 markd Exp $
+ * $Id: tclXhandles.c,v 1.5 1997/01/26 19:48:35 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -396,6 +396,46 @@ Tcl_HandleXlate (interp, headerPtr, handle)
             (entryHdrPtr->freeLink != ALLOCATED_IDX)) {
         Tcl_AppendResult (interp, tblHdrPtr->handleBase, " is not open",
                           (char *) NULL);
+        return NULL;
+    }     
+
+    return USER_AREA (entryHdrPtr);
+ 
+}
+
+/*=============================================================================
+ * Tcl_HandleXlateObj --
+ *   Translate an object containing a handle name to a entry pointer.
+ *
+ * Parameters:
+ *   o interp (I) - A error message may be returned in result.
+ *   o headerPtr (I) - A pointer to the table header.
+ *   o handleObj (I) - The object containing the handle assigned to the entry.
+ * Returns:
+ *   A pointer to the entry, or NULL if an error occured.
+ *-----------------------------------------------------------------------------
+ */
+void_pt
+Tcl_HandleXlateObj (interp, headerPtr, handleObj)
+    Tcl_Interp *interp;
+    void_pt     headerPtr;
+    Tcl_Obj *handleObj;
+{
+    tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
+    entryHeader_pt entryHdrPtr;
+    int            entryIdx;
+    char          *handle;
+
+    handle = Tcl_GetStringFromObj (handleObj, NULL);
+    
+    if ((entryIdx = HandleDecode (interp, tblHdrPtr, handle)) < 0)
+        return NULL;
+    entryHdrPtr = TBL_INDEX (tblHdrPtr, entryIdx);
+
+    if ((entryIdx >= tblHdrPtr->tableSize) ||
+            (entryHdrPtr->freeLink != ALLOCATED_IDX)) {
+        TclX_StringAppendObjResult (interp, tblHdrPtr->handleBase, 
+				    " is not open", (char *) NULL);
         return NULL;
     }     
 

@@ -12,9 +12,21 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 7.4 1996/10/04 15:30:17 markd Exp $
+# $Id: cmdtrace.test,v 1.5 1997/03/11 07:49:25 markd Exp $
 #------------------------------------------------------------------------------
 #
+
+# FIX:
+echo ***
+echo *** Some cmdtrace tests disabled due bugs in Tcl 8.0a2 that break noeval.
+echo ***
+if 0 {
+    echo
+    echo ***
+    echo *** cmdtrace tests disabled due to core dumps Tcl 8.0a2.
+    echo ***
+    return
+}
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
@@ -22,6 +34,7 @@ if [cequal [info procs Test] {}] {source testlib.tcl}
 # Proc to do something to trace.
 #
 proc DoStuff {} {
+    echo Enter DoStuff
     set foo [replicate "-TheString-" 10]
     set baz $foo
     set wap 1
@@ -83,6 +96,7 @@ Test cmdtrace-1.1 {command trace: evaluated, truncated} {
 cmdtrace off
 }
 
+if 0 { ;# FIX:
 Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
     set cmdtraceFH [open CMDTRACE.OUT w+]
     cmdtrace on $cmdtraceFH noeval
@@ -102,6 +116,8 @@ Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
             set wap 0
 cmdtrace off
 "
+}
+}
 
 Test cmdtrace-1.3 {command trace: evaluated, not truncated} {
     set cmdtraceFH [open CMDTRACE.OUT w+]
@@ -123,6 +139,7 @@ Test cmdtrace-1.3 {command trace: evaluated, not truncated} {
 cmdtrace off
 }
 
+if 0 { ;# FIX:
 Test cmdtrace-1.4 {command trace: not evaluated, not truncated} {
     set cmdtraceFH [open CMDTRACE.OUT w+]
     cmdtrace on $cmdtraceFH notruncate noeval
@@ -141,6 +158,7 @@ Test cmdtrace-1.4 {command trace: not evaluated, not truncated} {
           if {$wap} {\n        set wap 0\n    } else {\n        set wap 1\n    }
             set wap 0
 cmdtrace off
+}
 }
 
 Test cmdtrace-2.1 {command trace argument error checking} {

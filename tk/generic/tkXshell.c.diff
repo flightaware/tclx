@@ -18,7 +18,7 @@
 +  * software for any purpose.  It is provided "as is" without express or
 +  * implied warranty.
 +  *-----------------------------------------------------------------------------
-+  * $Id: tkXshell.c.diff,v 7.0 1996/06/16 05:33:47 markd Exp $
++  * $Id: tkXshell.c.diff,v 1.1.1.1 1996/12/20 05:39:21 karl Exp $
 +  *-----------------------------------------------------------------------------
 +  */
   /* 

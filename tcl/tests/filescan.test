@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 7.6 1996/10/04 15:30:20 markd Exp $
+# $Id: filescan.test,v 1.3 1997/02/03 02:51:49 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -373,7 +373,7 @@ scanmatch $testCH {([H-Z]+)? : ([a-z]+) (X)?([0-9]+)} {
 }
 
 set testFH [open TEST.TMP r]
-Test 6.1 {filescan tests} {
+Test filescan-6.1 {filescan tests} {
     set matches {}
     scanfile $testCH $testFH
     set matches
@@ -399,11 +399,11 @@ scancontext delete $testCH
 
 set testCH [scancontext create]
 
-Test 7.1 {filescan tests} {
+Test filescan-7.1 {filescan tests} {
     scanmatch $testCH {a(} {}
 } 1 {error in regular expression: unmatched ()}
 
-Test 7.2 {filescan tests} {
+Test filescan-7.2 {filescan tests} {
     scanmatch $testCH (x)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.) {}
 } 1 {error in regular expression: too many ()}
 
@@ -426,7 +426,7 @@ set testChk2FH [open TESTCHK2.TMP w]
 set testCH [scancontext create]
 scancontext copyfile $testCH $testChkFH
 
-Test 8.1 {filescan tests} {
+Test filescan-8.1 {filescan tests} {
     scancontext copyfile $testCH
 } 0 $testChkFH
 
@@ -436,7 +436,7 @@ scanmatch $testCH {^Match me$} {
     } elseif [cequal [scancontext copyfile $matchInfo(context)] $testChk2FH] {
         scancontext copyfile $matchInfo(context) $testChkFH
     } else {
-        Test 8.2 {filescan tests} {
+        Test filescan-8.2 {filescan tests} {
             scancontext copyfile $matchInfo(context)
         } 0 "should have been $testChkFH or $testChk2FH"
     }
@@ -452,19 +452,43 @@ scancontext delete $testCH
 set testChkFH [open TESTCHK.TMP r]
 set testChk2FH [open TESTCHK2.TMP r]
 loop cnt 0 101 2 {
-    Test 8.3 {filescan tests} {
+    Test filescan-8.3 {filescan tests} {
         gets $testChkFH
     } 0 "Line $cnt"
 }
 
 loop cnt 1 101 2 {
-    Test 8.4 {filescan tests} {
+    Test filescan-8.4 {filescan tests} {
         gets $testChk2FH
     } 0 "Line $cnt"
 }
 
 close $testChkFH
 close $testChk2FH
+
+
+#
+# Test for the problem De Clarke found with Boyer-Moore.
+#
+
+Test filescan-9.1 {filescan tests} {
+    set testFH [open TEST.TMP w]
+    puts $testFH \
+            {Sun Dec 01 14:56:08 1996 mask1a.ps kelson bigdog.ucolick.org 1}
+    close $testFH
+
+    set linesMatched {}
+    set testCH [scancontext create]
+    scanmatch $testCH {[A-z] Dec [0-9]* [0123456789:]* 1996 } {
+        lappend linesMatched $matchInfo(line)
+    }
+    set testFH [open TEST.TMP]
+    scanfile $testCH $testFH
+    close $testFH
+    set linesMatched
+} 0 {{Sun Dec 01 14:56:08 1996 mask1a.ps kelson bigdog.ucolick.org 1}}
+
+
 
 TestRemove TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP
 

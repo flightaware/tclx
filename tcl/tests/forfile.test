@@ -12,12 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.test,v 7.2 1996/10/04 15:30:21 markd Exp $
+# $Id: forfile.test,v 1.3 1997/02/14 22:53:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
 
 set outfp [open FORFILE.TMP w]
 puts $outfp line1
@@ -87,4 +88,5 @@ TestRemove FORFILE.TMP
 
 unset result
 rename unknown {}
+
 

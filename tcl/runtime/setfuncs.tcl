@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 7.0 1996/06/16 05:31:33 markd Exp $
+# $Id: setfuncs.tcl,v 1.1.1.1 1996/12/20 05:39:20 karl Exp $
 #------------------------------------------------------------------------------
 #
 

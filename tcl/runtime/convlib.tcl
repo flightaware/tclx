@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.tcl,v 7.1 1996/07/17 09:06:24 markd Exp $
+# $Id: convlib.tcl,v 1.1.1.1 1996/12/20 05:39:20 karl Exp $
 #------------------------------------------------------------------------------
 #
 

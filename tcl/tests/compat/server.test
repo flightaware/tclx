@@ -14,12 +14,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.2 1996/10/04 15:30:31 markd Exp $
+# $Id: server.test,v 1.3 1997/02/14 22:53:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
 
 if [cequal $tcl_platform(platform) windows] {
     echo "    * The server tests have not been ported to Win32" 
@@ -338,3 +339,4 @@ Test server-9.3 {Tcl server} {
 } 0 {EXIT 0}
 
 rename unknown {}
+

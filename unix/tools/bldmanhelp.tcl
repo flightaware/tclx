@@ -30,7 +30,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 7.3 1996/10/20 01:52:43 markd Exp $
+# $Id: bldmanhelp.tcl,v 1.1.1.1 1996/12/20 05:39:22 karl Exp $
 #------------------------------------------------------------------------------
 #
 

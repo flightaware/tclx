@@ -12,12 +12,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.test,v 7.1 1996/10/04 05:02:46 markd Exp $
+# $Id: setfuncs.test,v 1.3 1997/02/14 22:53:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
+
 
 Test setfuncs-1.1 {union command} {
     union "" ""
@@ -140,5 +142,6 @@ Test setfuncs-4.5 {lrmdups command} {
 } 0 {{ma mb} {mc md}}
 
 rename unknown {}
+
 
 

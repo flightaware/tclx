@@ -12,12 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfil.test,v 7.2 1996/10/04 15:30:26 markd Exp $
+# $Id: stringfil.test,v 1.3 1997/02/14 22:53:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
 
 set stringfileTestVar {a
 b
@@ -51,4 +52,5 @@ Test stringfile-2.4 {read_file command} {
 
 TestRemove STRINGFIL.TEST
 rename unknown {}
+
 

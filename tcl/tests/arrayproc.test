@@ -12,12 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayproc.test,v 7.1 1996/10/04 05:02:24 markd Exp $
+# $Id: arrayproc.test,v 1.4 1997/02/14 22:53:14 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
 
 set testArray(foo) bar
 set testArray(snap) frammistan
@@ -74,6 +75,6 @@ Test for_array_keys-1.5 {return in for_array_keys command} {
 rename for_array_keys_test {}
 
 unset testArray
+unset result
 rename unknown {}
-
 

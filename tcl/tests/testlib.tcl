@@ -16,12 +16,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 7.5 1996/11/07 01:09:46 markd Exp $
+# $Id: testlib.tcl,v 1.5 1997/03/11 07:49:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 # Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
-# that variable.  Don't do this more than once.
+# that variable.
 
 global SAVED_UNKNOWN TCL_PROGRAM env TEST_ERROR_INFO tcl_platform testXConfig
 
@@ -83,6 +83,7 @@ if {[info command unknown] != ""} {
     append SAVED_UNKNOWN "\{[info body unknown]\}"
     rename unknown {}
 }
+
 
 #
 # Convert a Tcl result code to a string.

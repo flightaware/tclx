@@ -3,7 +3,7 @@
  *
  * Extended Tcl dup command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 7.4 1996/08/19 07:43:34 markd Exp $
+ * $Id: tclXdup.c,v 1.6 1997/01/25 05:38:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -29,6 +29,12 @@ static Tcl_Channel
 DupFileChannel _ANSI_ARGS_((Tcl_Interp *interp,
                             char       *srcFileId,
                             char       *targetFileId));
+
+static int
+TclX_DupObjCmd _ANSI_ARGS_((ClientData   clientData,
+                            Tcl_Interp  *interp,
+                            int          objc,
+                            Tcl_Obj    **objv));
 
 
 /*-----------------------------------------------------------------------------
@@ -68,13 +74,13 @@ DupChannelOptions (interp, srcChannel, targetChannel)
     scanPtr = strValues.string;
 
     while (*scanPtr != '\0') {
-        result = TclFindElement (interp, scanPtr, &option, &scanPtr, &size,
-                                 NULL);
+        result = TclFindElement (interp, scanPtr, strlen (scanPtr), &option, 
+                                 &scanPtr, &size, NULL);
         if ((result != TCL_OK) || (*scanPtr == '\0'))
             goto fatalError;
         option [size] = '\0';
-        result = TclFindElement (interp, scanPtr, &value, &scanPtr, &size,
-                                 NULL);
+        result = TclFindElement (interp, scanPtr, strlen (scanPtr), &value,
+                                 &scanPtr, &size, NULL);
         if (result != TCL_OK)
             goto fatalError;
         value [size] = '\0';
@@ -124,14 +130,16 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
     int mode, seekable;
 
     srcChannel = Tcl_GetChannel (interp, srcChannelId, &mode);
-    if (srcChannel == NULL)
+    if (srcChannel == NULL) {
+        TclSetObjResultFromStrResult (interp);  /* FIX: remove */
         return NULL;
-
+    }
     channelType = Tcl_GetChannelType (srcChannel);
     if (STREQU (channelType->typeName, "pipe")) {
-        Tcl_AppendResult (interp, "can not \"dup\" a Tcl command pipeline ",
-                          " created with the \"open\" command",
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp,
+                                    "can not \"dup\" a Tcl command pipeline ",
+                                    " created with the \"open\" command",
+                                    (char *) NULL);
         return NULL;
     }
     
@@ -171,9 +179,10 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
     return newChannel;
 
   posixError:
-    Tcl_ResetResult (interp);
-    Tcl_AppendResult (interp, "dup of \"", srcChannelId, " failed: ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    Tcl_ResetObjResult (interp);
+    TclX_StringAppendObjResult (interp, "dup of \"", srcChannelId,
+                                " failed: ",
+                                Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
     if (newChannel != NULL) {
@@ -183,52 +192,96 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_DupCmd --
- *     Implements the dup TCL command:
- *         dup channelId ?targetChannelId?
- *
- * Results:
- *      Returns TCL_OK and interp->result containing a filehandle
- *      if the requested file or pipe was successfully duplicated.
- *
- *      Return TCL_ERROR and interp->result containing an
- *      explanation of what went wrong if an error occured.
+ * TclX_DupObjCmd --
+ *    Implements the dup TCL command:
+ *        dup channelId ?targetChannelId?
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_DupCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+static int
+TclX_DupObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
 {
     Tcl_Channel newChannel;
+    int bindFnum, strLen;
+    char *srcChannelId, *targetChannelId;
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
-                          " channelId ?targetChannelId?", (char *) NULL);
-        return TCL_ERROR;
+    if ((objc < 2) || (objc > 3)) {
+        return TclX_WrongArgs (interp, objv [0],
+                               "channelId ?targetChannelId?");
     }
 
     /*
      * If a number is supplied, bind it to a file handle rather than doing
      * a dup.
      */
-    if (ISDIGIT (argv [1][0])) {
-        if (argc != 2) {
-            Tcl_AppendResult (interp, "the second argument, targetChannelId, ",
-                              "is not allow when binding a file number to ",
-                              "a Tcl channel", (char *) NULL);
-            return TCL_ERROR;
-        }
-        newChannel = TclXOSBindOpenFile (interp, argv [1]);
+    if (objv [1]->typePtr == Tcl_GetObjType ("int")) {
+        bindFnum = TRUE;
     } else {
-        newChannel = DupFileChannel (interp, argv [1], argv [2]);
+        srcChannelId = Tcl_GetStringFromObj (objv [1], &strLen);
+        if (ISDIGIT (srcChannelId [0])) {
+            if (Tcl_ConvertToType (interp, objv [1],
+                                   Tcl_GetObjType ("int")) != TCL_OK)
+                goto badFnum;
+            bindFnum = TRUE;
+        } else {
+            bindFnum = FALSE;
+        }
+    }
+    if (bindFnum) {
+        if (objc != 2)
+            goto bind2ndArg;
+        newChannel = TclXOSBindOpenFile (interp, 
+                                         objv [1]->internalRep.intValue);
+    } else {
+        if (objc > 2) {
+            targetChannelId = Tcl_GetStringFromObj (objv [2], &strLen);
+        } else {
+            targetChannelId = NULL;
+        }
+        newChannel = DupFileChannel (interp,
+                                     srcChannelId,
+                                     targetChannelId);
     }
     if (newChannel == NULL)
         return TCL_ERROR;
 
     Tcl_RegisterChannel (interp, newChannel);
-    Tcl_SetResult (interp, Tcl_GetChannelName (newChannel), TCL_STATIC);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                      Tcl_GetChannelName (newChannel), -1);
     return TCL_OK;
+
+  badFnum:
+    Tcl_ResetObjResult (interp);
+    TclX_StringAppendObjResult (interp,
+                                "invalid integer file number \"",
+                                Tcl_GetStringFromObj (objv [1], &strLen),
+                                "\", expected unsigned integer ",
+                                "or Tcl file id", (char *) NULL);
+    return TCL_ERROR;
+
+  bind2ndArg:
+    TclX_StringAppendObjResult (interp,
+                                "the second argument, targetChannelId, ",
+                                "is not allow when binding a file number to ",
+                                "a Tcl channel", (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_DupInit --
+ *   Initialize the dip command in an interpreter.
+ *
+ * Parameters:
+ *   o interp - Interpreter to add commandsto.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_DupInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp, "dup", -1, TclX_DupObjCmd, 
+                          (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 }

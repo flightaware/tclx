@@ -3,7 +3,7 @@
  *
  * Extended Tcl pipe, copyfile and lgets commands.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.7 1996/11/19 21:41:05 markd Exp $
+ * $Id: tclXfilecmds.c,v 1.9 1997/01/26 19:48:34 karl Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -77,7 +77,7 @@ ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_PipeCmd --
+ * Tcl_PipeObjCmd --
  *     Implements the pipe TCL command:
  *         pipe ?fileId_var_r fileId_var_w?
  *
@@ -86,40 +86,42 @@ ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_PipeCmd (clientData, interp, argc, argv)
+Tcl_PipeObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    Tcl_Channel channels [2];
+    Tcl_Channel  channels [2];
+    char        *channelNames [2];
 
-    if (!((argc == 1) || (argc == 3))) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
-                          " ?fileId_var_r fileId_var_w?", (char*) NULL);
-        return TCL_ERROR;
-    }
+    if (!((objc == 1) || (objc == 3)))
+	return TclX_WrongArgs (interp, objv [0], "?fileId_var_r fileId_var_w?");
 
     if (TclXOSpipe (interp, channels) != TCL_OK)
         return TCL_ERROR;
 
-    if (argc == 1)
-        Tcl_AppendResult (interp,
-                          Tcl_GetChannelName (channels [0]), " ",
-                          Tcl_GetChannelName (channels [1]),
-                          (char *) NULL);
-    else {
-        if (Tcl_SetVar (interp, argv[1], 
-                        Tcl_GetChannelName (channels [0]),
-                        TCL_LEAVE_ERR_MSG) == NULL)
+
+    channelNames [0] = Tcl_GetChannelName (channels [0]);
+    channelNames [1] = Tcl_GetChannelName (channels [1]);
+    
+    if (objc == 1) {
+        TclX_StringAppendObjResult (interp,
+                                    channelNames [0], " ",
+                                    channelNames [1],
+                                    (char *) NULL);
+    } else {
+        if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
+                            Tcl_NewStringObj (channelNames [0], -1),
+                            TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL)
             goto errorExit;
 
-        if (Tcl_SetVar (interp, argv[2], 
-                        Tcl_GetChannelName (channels [1]),
-                        TCL_LEAVE_ERR_MSG) == NULL)
+        if (Tcl_ObjSetVar2 (interp, objv [2], (Tcl_Obj *) NULL,
+                            Tcl_NewStringObj (channelNames [1], -1),
+                            TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL)
             goto errorExit;
     }
-        
+
     return TCL_OK;
 
   errorExit:
@@ -184,7 +186,7 @@ CopyOpenFile (interp, maxBytes, inChan, outChan)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CopyfileCmd --
+ * Tcl_CopyfileObjCmd --
  *     Implements the copyfile TCL command:
  *         copyfile ?-bytes num|-maxbytes num? -translate fromFileId toFileId
  *
@@ -193,21 +195,22 @@ CopyOpenFile (interp, maxBytes, inChan, outChan)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_CopyfileCmd (clientData, interp, argc, argv)
+Tcl_CopyfileObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
 #define TCLX_COPY_ALL        0
 #define TCLX_COPY_BYTES      1
 #define TCLX_COPY_MAX_BYTES  2
 
-    Tcl_Channel inChan, outChan;
-    long totalBytesToRead, totalBytesRead;
-    int argIdx, copyMode, translate, saveErrno;
-    Tcl_DString inChanTrans, outChanTrans;
-    Tcl_DString inChanEOF, outChanEOF;
+    Tcl_Channel    inChan, outChan;
+    long           totalBytesToRead, totalBytesRead;
+    int            objIdx, copyMode, translate, saveErrno;
+    Tcl_DString    inChanTrans, outChanTrans;
+    Tcl_DString    inChanEOF, outChanEOF;
+    char          *switchString;
 
     /*
      * Parse arguments.
@@ -216,45 +219,47 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     totalBytesToRead = MAXLONG;
     translate = FALSE;
 
-    for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
-        if (STREQU (argv [argIdx], "-bytes")) {
+    for (objIdx = 1; objIdx < objc; objIdx++) {
+	switchString = Tcl_GetStringFromObj (objv [objIdx], NULL);
+	if (*switchString != '-') break;
+        if (STREQU (switchString, "-bytes")) {
             copyMode = TCLX_COPY_BYTES;
-            argIdx++;
-            if (argIdx >= argc) {
-                Tcl_AppendResult (interp,
-                                  "argument required for -bytes option",
-                                  (char *) NULL);
+            objIdx++;
+            if (objIdx >= objc) {
+                TclX_StringAppendObjResult (interp,
+                                       "argument required for -bytes option",
+                                        (char *) NULL);
                 return TCL_ERROR;
             }
-            if (Tcl_GetLong (interp, argv [argIdx],
-                             &totalBytesToRead) != TCL_OK)
-                return TCL_ERROR;
-        } else if (STREQU (argv [argIdx], "-maxbytes")) {
+	    if (Tcl_GetIntFromObj (interp, objv [objIdx], &totalBytesToRead)
+		!= TCL_OK) 
+		    return TCL_ERROR;
+        } else if (STREQU (switchString, "-maxbytes")) {
             copyMode = TCLX_COPY_MAX_BYTES;
-            argIdx++;
-            if (argIdx >= argc) {
-                Tcl_AppendResult (interp,
+            objIdx++;
+            if (objIdx >= objc) {
+                TclX_StringAppendObjResult (interp,
                                   "argument required for -maxbytes option",
                                   (char *) NULL);
                 return TCL_ERROR;
             }
-            if (Tcl_GetLong (interp, argv [argIdx],
-                             &totalBytesToRead) != TCL_OK)
+	    if (Tcl_GetIntFromObj (interp, objv [objIdx], &totalBytesToRead)
+		!= TCL_OK)
                 return TCL_ERROR;
-        } else if (STREQU (argv [argIdx], "-translate")) {
+        } else if (STREQU (switchString, "-translate")) {
             translate = TRUE;
         } else {
-            Tcl_AppendResult (interp, "invalid argument \"", argv [argIdx],
+            TclX_StringAppendObjResult (interp, 
+			      "invalid argument \"", objv [objIdx],
                               "\", expected \"-bytes\", \"-maxbytes\", or ",
                               "\"-translate\"", (char *) NULL);
             return TCL_ERROR;
         }
     }
     
-    if (argIdx != argc - 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " ?-bytes num|-maxbytes num? ?-translate? ",
-                          "fromFileId toFileId", (char *) NULL);
+    if (objIdx != objc - 2) {
+        TclX_WrongArgs (interp, objv [0], 
+	    "?-bytes num|-maxbytes num? ?-translate? fromFileId toFileId");
         return TCL_ERROR;
     }
 
@@ -268,10 +273,10 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
      * translation mode and put the files in binary mode and clear the
      * EOF character.
      */
-    inChan = TclX_GetOpenChannel (interp, argv [argIdx], TCL_READABLE);
+    inChan = TclX_GetOpenChannelObj (interp, objv [objIdx], TCL_READABLE);
     if (inChan == NULL)
         goto errorExit;
-    outChan = TclX_GetOpenChannel (interp, argv [argIdx + 1], TCL_WRITABLE);
+    outChan = TclX_GetOpenChannelObj (interp, objv [objIdx + 1], TCL_WRITABLE);
     if (outChan == NULL)
         goto errorExit;
 
@@ -334,13 +339,26 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     if ((copyMode == TCLX_COPY_BYTES) &&
         (totalBytesToRead > 0) &&
         (totalBytesRead != totalBytesToRead)) {
-        sprintf (interp->result,
-                 "premature EOF, %ld bytes expected, %ld bytes actually read",
-                 totalBytesToRead, totalBytesRead);
+
+	/* FIX: if there is ever a printf-style object text appender,
+	 * convert this code to use it.
+	 */
+
+	char bytesToReadString[16];
+	char totalBytesReadString[16];
+
+	sprintf (bytesToReadString, "%ld", totalBytesToRead);
+	sprintf (totalBytesReadString, "%ld", totalBytesRead);
+
+	TclX_StringAppendObjResult (interp, "premature EOF, ",
+	    bytesToReadString, " bytes expected, ",
+	    totalBytesReadString, " bytes actually read",
+	    (char *)NULL);
+
         goto errorExit;
     }
 
-    sprintf (interp->result, "%ld", totalBytesRead);
+    Tcl_SetIntObj (Tcl_GetObjResult (interp), totalBytesRead);
     Tcl_DStringFree (&inChanTrans);
     Tcl_DStringFree (&outChanTrans);
     Tcl_DStringFree (&inChanEOF);
@@ -697,10 +715,13 @@ TruncateByPath (interp, filePath, newSize)
     filePath = Tcl_TranslateFileName (interp, filePath, &pathBuf);
     if (filePath == NULL) {
         Tcl_DStringFree (&pathBuf);
+	TclSetObjResultFromStrResult (interp);  /* FIX: remove */
         return TCL_ERROR;
     }
     if (truncate (filePath, newSize) != 0) {
-        Tcl_AppendResult (interp, filePath, ": ", Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, filePath, ": ", 
+				    Tcl_PosixError (interp),
+				    (char *) NULL);
         Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
@@ -715,7 +736,7 @@ TruncateByPath (interp, filePath, newSize)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_FtruncateCmd --
+ * Tcl_FtruncateObjCmd --
  *     Implements the Tcl ftruncate command:
  *     ftruncate [-fileid] file newsize
  *
@@ -725,48 +746,52 @@ TruncateByPath (interp, filePath, newSize)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_FtruncateCmd (clientData, interp, argc, argv)
+Tcl_FtruncateObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    int argIdx, fileIds;
-    off_t newSize;
-    Tcl_Channel channel;
+    int           objIdx, fileIds;
+    off_t         newSize;
+    long          convSize;
+    Tcl_Channel   channel;
+    char         *switchString;
+    char         *pathString;
 
     fileIds = FALSE;
-    for (argIdx = 1; (argIdx < argc) && (argv [argIdx] [0] == '-'); argIdx++) {
-        if (STREQU (argv [argIdx], FILE_ID_OPT)) {
+    for (objIdx = 1; objIdx < objc ; objIdx++) {
+        switchString = Tcl_GetStringFromObj (objv [objIdx], NULL);
+	if (*switchString != '-') break;
+        if (STREQU (switchString, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
-            Tcl_AppendResult (interp, "Invalid option \"", argv [argIdx],
-                              "\", expected \"", FILE_ID_OPT, "\"",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp, 
+					"Invalid option \"", switchString,
+					"\", expected \"", FILE_ID_OPT, "\"",
+					(char *) NULL);
             return TCL_ERROR;
         }
     }
 
-    if (argIdx != argc - 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " [-fileid] file newsize", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objIdx != objc - 2)
+        return TclX_WrongArgs (interp, objv [0], "[-fileid] file newsize");
 
-    if (Tcl_GetOffset (interp,
-                       argv [argIdx + 1],
-                       &newSize) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp,
+                           objv [objIdx + 1],
+                           &convSize) != TCL_OK)
         return TCL_ERROR;
 
-
+    newSize = convSize;
     if (fileIds) {
-        channel = TclX_GetOpenChannel (interp, argv [argIdx], 0);
+        channel = TclX_GetOpenChannelObj (interp, objv [objIdx], 0);
         if (channel == NULL)
             return TCL_ERROR;
         return TclXOSftruncate (interp, channel, newSize,
                                 "-fileid option");
     } else {
-        return TruncateByPath (interp, argv [argIdx], newSize);
+	pathString = Tcl_GetStringFromObj (objv [objIdx], NULL);
+        return TruncateByPath (interp, pathString, newSize);
     }
 }
 
@@ -793,14 +818,18 @@ ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
     int          caseSensitive;
     ClientData   clientData;
 {
-    Tcl_DString *fileList = (Tcl_DString *) clientData;
+    Tcl_Obj *fileListObj = (Tcl_Obj *) clientData;
+    Tcl_Obj *fileNameObj;
+    int      result;
 
-    Tcl_DStringAppendElement (fileList, fileName);
-    return TCL_OK;
+    fileNameObj = Tcl_NewStringObj (fileName, -1);
+    result = Tcl_ListObjAppendElement (interp, fileListObj, fileNameObj);
+    Tcl_DecrRefCount (fileNameObj);
+    return result;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ReaddirCmd --
+ * Tcl_ReaddirObjCmd --
  *     Implements the rename TCL command:
  *         readdir ?-hidden? dirPath
  *
@@ -809,57 +838,62 @@ ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ReaddirCmd (clientData, interp, argc, argv)
+Tcl_ReaddirObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    Tcl_DString pathBuf;
-    char *dirPath;
-    int hidden, status;
-    Tcl_DString fileList;
+    Tcl_DString  pathBuf;
+    char        *dirPath;
+    int          hidden, status;
+    Tcl_Obj     *fileListObj;
+    char        *switchString;
+    int          dirPathLen;
     
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " ?-hidden? dirPath", (char *) NULL);
-        return TCL_ERROR;
-    }
-    if (argc == 2) {
-        dirPath = argv [1];
+    if ((objc < 2) || (objc > 3))
+        return TclX_WrongArgs (interp, objv [0], "?-hidden? dirPath");
+
+    if (objc == 2) {
+        dirPath = Tcl_GetStringFromObj (objv [1], &dirPathLen);
         hidden = FALSE;
     } else {
-        if (!STREQU (argv [1], "-hidden")) {
-            Tcl_AppendResult (interp, "expected option of \"-hidden\", got \"",
-                              argv [1], "\"", (char *) NULL);
+        switchString = Tcl_GetStringFromObj (objv [1], NULL);
+        if (!STREQU (switchString, "-hidden")) {
+            TclX_StringAppendObjResult (interp, 
+		"expected option of \"-hidden\", got \"",
+                              switchString, "\"", (char *) NULL);
             return TCL_ERROR;
         }
-        dirPath = argv [2];
+        dirPath = Tcl_GetStringFromObj (objv [2], &dirPathLen);
         hidden = TRUE;
     }
 
     Tcl_DStringInit (&pathBuf);
-    Tcl_DStringInit (&fileList);
+
+    fileListObj = Tcl_NewObj ();
 
     dirPath = Tcl_TranslateFileName (interp, dirPath, &pathBuf);
-    if (dirPath == NULL)
+    if (dirPath == NULL) {
+	TclSetObjResultFromStrResult (interp);  /* FIX: remove */
         goto errorExit;
+    }
 
     status = TclXOSWalkDir (interp,
                             dirPath,
                             hidden,
                             ReadDirCallback,
-                            (ClientData) &fileList);
+                            (ClientData) fileListObj);
     if (status == TCL_ERROR)
         goto errorExit;
 
     Tcl_DStringFree (&pathBuf);
-    Tcl_DStringResult (interp, &fileList);
+    Tcl_SetObjResult (interp, fileListObj);
+    Tcl_DecrRefCount (fileListObj);
     return TCL_OK;
 
   errorExit:
     Tcl_DStringFree (&pathBuf);
-    Tcl_DStringFree (&fileList);
+    Tcl_DecrRefCount (fileListObj);
     return TCL_ERROR;
 }
-

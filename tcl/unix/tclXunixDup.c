@@ -3,7 +3,7 @@
  *
  * Support for the dup command on Unix.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixDup.c,v 7.2 1996/08/20 03:49:58 markd Exp $
+ * $Id: tclXunixDup.c,v 1.3 1997/01/03 08:43:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,7 +31,7 @@ ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
  * Convert a file handle to its file number. The file handle maybe one 
  * of "stdin", "stdout" or "stderr" or "fileNNN", were NNN is the file
  * number.  If the handle is invalid, -1 is returned and a error message
- * will be returned in interp->result.  This is used when the file may
+ * will be returned in result.  This is used when the file may
  * not be currently open.
  *
  *-----------------------------------------------------------------------------
@@ -57,8 +57,8 @@ ConvertFileHandle (interp, handle)
            Tcl_StrToInt (&handle [4], 10, &fileId);
     }
     if (fileId < 0)
-        Tcl_AppendResult (interp, "invalid channel id: ", handle,
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, "invalid channel id: ", handle,
+                                    (char *) NULL);
     return fileId;
 }
 
@@ -121,9 +121,9 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
         if (chkFileNum < 0)
             goto posixError;
         if (chkFileNum != newFileNum) {
-            Tcl_AppendResult (interp,
-                              "dup: desired file number not returned",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp,
+                                        "dup: desired file number not ",
+                                        "returned", (char *) NULL);
             close (newFileNum);
             return NULL;
         }
@@ -143,9 +143,11 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
     return newChannel;
 
   posixError:
-    Tcl_ResetResult (interp);
-    Tcl_AppendResult (interp, "dup of \"", Tcl_GetChannelName (srcChannel),
-                      " failed: ", Tcl_PosixError (interp), (char *) NULL);
+    Tcl_ResetObjResult (interp);
+    TclX_StringAppendObjResult (interp, "dup of \"",
+                                Tcl_GetChannelName (srcChannel),
+                                " failed: ",
+                                Tcl_PosixError (interp), (char *) NULL);
     return NULL;
 }
 
@@ -155,28 +157,20 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
  *
  * Parameters:
  *   o interp (I) - If an error occures, the error message is in result.
- *   o fileNumStr (I) - The string number of the open file.
+ *   o fileNum (I) - The file number of the open file.
  * Returns:
  *   The unregistered channel or NULL if an error occurs.
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclXOSBindOpenFile (interp, fileNumStr)
+TclXOSBindOpenFile (interp, fileNum)
     Tcl_Interp *interp;
-    char       *fileNumStr;
+    int         fileNum;
 {
-    unsigned fileNum;
     int fcntlMode, mode, nonBlocking, isSocket;
     struct stat fileStat;
     char channelName[20];
     Tcl_Channel channel = NULL;
-
-    if (!Tcl_StrToUnsigned (fileNumStr, 0, &fileNum)) {
-        Tcl_AppendResult (interp, "invalid integer file number \"", fileNumStr,
-                          "\", expected unsigned integer or Tcl file id",
-                          (char *) NULL);
-        return NULL;
-    }
 
     /*
      * Make sure file is open and determine the access mode and file type.
@@ -225,13 +219,16 @@ TclXOSBindOpenFile (interp, fileNumStr)
         sprintf (channelName, "file%d", fileNum);
 
     if (Tcl_GetChannel (interp, channelName, NULL) != NULL) {
-        Tcl_ResetResult (interp);
-        Tcl_AppendResult (interp, "file number \"", fileNumStr,
-                          "\" is already bound to a Tcl file channel",
-                          (char *) NULL);
+        char numBuf [32];
+        Tcl_ResetObjResult (interp);
+
+        sprintf (numBuf, "%d", fileNum);
+        TclX_StringAppendObjResult (interp, "file number \"", numBuf,
+                                    "\" is already bound to a Tcl file ",
+                                    "channel", (char *) NULL);
         return NULL;
     }
-    Tcl_ResetResult (interp);
+    Tcl_ResetObjResult (interp);
 
     if (isSocket) {
         channel = Tcl_MakeTcpClientChannel ((ClientData) fileNum);
@@ -263,10 +260,18 @@ TclXOSBindOpenFile (interp, fileNumStr)
     return channel;
 
   posixError:
-    Tcl_AppendResult (interp, "binding open file ", fileNumStr,
-                      " to Tcl channel failed: ", Tcl_PosixError (interp),
-                      (char *) NULL);
+    {
+        char numBuf [32];
 
+        Tcl_ResetObjResult (interp);
+        sprintf (numBuf, "%d", fileNum);
+
+        TclX_StringAppendObjResult (interp, "binding open file ", numBuf,
+                                    " to Tcl channel failed: ",
+                                    Tcl_PosixError (interp),
+                                    (char *) NULL);
+    }
+        
   errorExit:
     if (channel != NULL) {
         Tcl_UnregisterChannel (interp, channel);

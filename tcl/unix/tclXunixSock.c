@@ -6,7 +6,7 @@
  * functionallity, however they can't be implemented as backwards
  * compatibility procs.
  *---------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 7.4 1996/08/20 03:50:00 markd Exp $
+ * $Id: tclXunixSock.c,v 1.2 1997/01/02 05:44:57 karl Exp $
  *-----------------------------------------------------------------------------
  */
 

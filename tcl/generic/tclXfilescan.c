@@ -4,7 +4,7 @@
  * Tcl file scanning: regular expression matching on lines of a file.  
  * Implements awk.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 7.3 1996/08/03 01:50:29 markd Exp $
+ * $Id: tclXfilescan.c,v 1.7 1997/01/26 19:48:34 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,7 +29,7 @@
 
 typedef struct matchDef_t {
     TclX_regexp         regExpInfo;
-    char               *command;
+    Tcl_Obj            *command;
     struct matchDef_t  *nextMatchDefPtr;
     short               matchflags;
 } matchDef_t;
@@ -37,7 +37,7 @@ typedef struct matchDef_t {
 typedef struct scanContext_t {
     matchDef_t  *matchListHead;
     matchDef_t  *matchListTail;
-    char        *defaultAction;
+    Tcl_Obj     *defaultAction;
     short        flags;
     char         contextHandle [16];
     Tcl_Channel  copyFileChannel;
@@ -77,33 +77,33 @@ ScanContextCreate _ANSI_ARGS_((Tcl_Interp  *interp,
 static int
 ScanContextDelete _ANSI_ARGS_((Tcl_Interp  *interp,
                                void_pt      scanTablePtr,
-                               char        *contextHandle));
+                               Tcl_Obj     *contextHandleObj));
 
 static int
 ScanContextCopyFile _ANSI_ARGS_((Tcl_Interp  *interp,
                                  void_pt      scanTablePtr,
-                                 char        *contextHandle,
-                                 char        *fileHandle));
+                                 Tcl_Obj     *contextHandleObj,
+                                 Tcl_Obj     *fileHandleObj));
 
 static int
-Tcl_ScancontextCmd _ANSI_ARGS_((ClientData  clientData,
-                                Tcl_Interp *interp,
-                                int         argc,
-                                char      **argv));
+Tcl_ScancontextObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                   Tcl_Interp *interp,
+                                   int         objc,
+                                   Tcl_Obj   **objv));
 
 static int
-Tcl_ScanmatchCmd _ANSI_ARGS_((ClientData  clientData,
-                              Tcl_Interp *interp,
-                              int         argc,
-                              char      **argv));
+Tcl_ScanmatchObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                 Tcl_Interp *interp,
+                                 int         objc,
+                                 Tcl_Obj   **argv));
 
 static void
 CopyFileCloseHandler _ANSI_ARGS_((ClientData clientData));
 
 static int
-SetCopyFile _ANSI_ARGS_((Tcl_Interp    *interp,
-                         scanContext_t *contextPtr,
-                         char          *fileHandle));
+SetCopyFileObj _ANSI_ARGS_((Tcl_Interp    *interp,
+                            scanContext_t *contextPtr,
+                            Tcl_Obj       *fileHandleObj));
 
 static void
 ClearCopyFile _ANSI_ARGS_((scanContext_t *contextPtr));
@@ -121,10 +121,10 @@ static void
 ScanFileCloseHandler _ANSI_ARGS_((ClientData clientData));
 
 static int
-Tcl_ScanfileCmd _ANSI_ARGS_((ClientData  clientData,
-                             Tcl_Interp *interp,
-                             int         argc,
-                             char      **argv));
+Tcl_ScanfileObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   **objv));
 
 static void
 FileScanCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -148,13 +148,13 @@ CleanUpContext (scanTablePtr, contextPtr)
     for (matchPtr = contextPtr->matchListHead; matchPtr != NULL;) {
         TclX_RegExpClean (&matchPtr->regExpInfo);
         if (matchPtr->command != NULL)
-            ckfree (matchPtr->command);
+            Tcl_DecrRefCount (matchPtr->command);
         oldMatchPtr = matchPtr;
         matchPtr = matchPtr->nextMatchDefPtr;
         ckfree ((char *) oldMatchPtr);
         }
     if (contextPtr->defaultAction != NULL) {
-        ckfree (contextPtr->defaultAction);
+        Tcl_DecrRefCount (contextPtr->defaultAction);
     }
     ClearCopyFile (contextPtr);
     ckfree ((char *) contextPtr);
@@ -186,7 +186,8 @@ ScanContextCreate (interp, scanTablePtr)
                          contextPtr->contextHandle);
     *tableEntryPtr = contextPtr;
 
-    Tcl_SetResult (interp, contextPtr->contextHandle, TCL_STATIC);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp), contextPtr->contextHandle,
+	-1);
     return TCL_OK;
 }
 
@@ -198,12 +199,15 @@ ScanContextCreate (interp, scanTablePtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ScanContextDelete (interp, scanTablePtr, contextHandle)
+ScanContextDelete (interp, scanTablePtr, contextHandleObj)
     Tcl_Interp  *interp;
     void_pt      scanTablePtr;
-    char        *contextHandle;
+    Tcl_Obj     *contextHandleObj;
 {
     scanContext_t **tableEntryPtr;
+    char           *contextHandle;
+
+    contextHandle = Tcl_GetStringFromObj (contextHandleObj, NULL);
 
     tableEntryPtr = (scanContext_t **) Tcl_HandleXlate (interp,
                                                         scanTablePtr,
@@ -232,26 +236,26 @@ CopyFileCloseHandler (clientData)
 }
 
 /*-----------------------------------------------------------------------------
- * SetCopyFile --
+ * SetCopyFileObj --
  *   Set the copy file handle for a context.
  * Parameters:
- *   o interp (O) - The Tcl interpreter, errors are returned in result.
- *   o contextPtr (I) - Pointer to the scan context.
- *   o fileHandle (I) - File handle of the copy file.
+ *   o interp  n     (O) - The Tcl interpreter, errors are returned in result.
+ *   o contextPtr    (I) - Pointer to the scan context.
+ *   o fileHandleObj (I) - Object containing file handle of the copy file.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-SetCopyFile (interp, contextPtr, fileHandle)
+SetCopyFileObj (interp, contextPtr, fileHandleObj)
     Tcl_Interp    *interp;
     scanContext_t *contextPtr;
-    char          *fileHandle;
+    Tcl_Obj       *fileHandleObj;
 {
     Tcl_Channel copyFileChannel;
 
-    copyFileChannel = TclX_GetOpenChannel (interp, fileHandle,
-                                           TCL_WRITABLE);
+    copyFileChannel = TclX_GetOpenChannelObj (interp, fileHandleObj,
+                                              TCL_WRITABLE);
     if (copyFileChannel == NULL)
         return TCL_ERROR;
 
@@ -298,13 +302,16 @@ ClearCopyFile (contextPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ScanContextCopyFile (interp, scanTablePtr, contextHandle, fileHandle)
+ScanContextCopyFile (interp, scanTablePtr, contextHandleObj, fileHandleObj)
     Tcl_Interp  *interp;
     void_pt      scanTablePtr;
-    char        *contextHandle;
-    char        *fileHandle;
+    Tcl_Obj     *contextHandleObj;
+    Tcl_Obj     *fileHandleObj;
 {
     scanContext_t *contextPtr, **tableEntryPtr;
+    char         *contextHandle;
+
+    contextHandle = Tcl_GetStringFromObj (contextHandleObj, NULL);
 
     tableEntryPtr = (scanContext_t **) Tcl_HandleXlate (interp,
                                                         scanTablePtr,
@@ -316,18 +323,19 @@ ScanContextCopyFile (interp, scanTablePtr, contextHandle, fileHandle)
     /*
      * Return the copy file handle if not specified.
      */
-    if (fileHandle == NULL) {
-        Tcl_SetResult (interp,
-                       Tcl_GetChannelName (contextPtr->copyFileChannel),
-                       TCL_STATIC);
+    if (fileHandleObj == NULL) {
+	Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                          Tcl_GetChannelName (contextPtr->copyFileChannel),
+			  -1);
         return TCL_OK;
-    } else {
-        return SetCopyFile (interp, contextPtr, fileHandle);
     }
+
+    return SetCopyFileObj (interp, contextPtr, fileHandleObj);
 }
+
 
 /*-----------------------------------------------------------------------------
- * Tcl_ScancontextCmd --
+ * Tcl_ScancontextObjCmd --
  *
  *   Implements the TCL scancontext Tcl command, which has the following forms:
  *         scancontext create
@@ -335,26 +343,28 @@ ScanContextCopyFile (interp, scanTablePtr, contextHandle, fileHandle)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ScancontextCmd (clientData, interp, argc, argv)
+Tcl_ScancontextObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    if (argc < 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " option ...",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    char *command;
+    char *subCommand;
+
+    if (objc < 2)
+	return TclX_WrongArgs (interp, objv [0], "option ...");
+
+    command = Tcl_GetStringFromObj (objv [0], NULL);
+    subCommand = Tcl_GetStringFromObj (objv [1], NULL);
+
     /*
      * Create a new scan context.
      */
-    if (STREQU (argv [1], "create")) {
-        if (argc != 2) {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " create",
-                              (char *) NULL);
-            return TCL_ERROR;
-        }
+    if (STREQU (subCommand, "create")) {
+        if (objc != 2)
+	    return TclX_WrongArgs (interp, objv [0], "create");
+
         return ScanContextCreate (interp,
                                   (void_pt) clientData);
     }
@@ -362,41 +372,37 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
     /*
      * Delete a scan context.
      */
-    if (STREQU (argv [1], "delete")) {
-        if (argc != 3) {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                              " delete contexthandle", (char *) NULL);
-            return TCL_ERROR;
-        }
+    if (STREQU (subCommand, "delete")) {
+        if (objc != 3)
+	    return TclX_WrongArgs (interp, objv [0], "delete contexthandle");
+
         return ScanContextDelete (interp,
                                   (void_pt) clientData,
-                                  argv [2]);
+                                  objv [2]);
     }
 
     /*
      * Access or set the copyfile.
      */
-    if (STREQU (argv [1], "copyfile")) {
-        if ((argc < 3) || (argc > 4)) {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                              " copyfile contexthandle ?filehandle?",
-                              (char *) NULL);
-            return TCL_ERROR;
-        }
+    if (STREQU (subCommand, "copyfile")) {
+        if ((objc < 3) || (objc > 4))
+	    return TclX_WrongArgs (interp, objv [0],
+                              "copyfile contexthandle ?filehandle?");
+
         return ScanContextCopyFile (interp,
                                     (void_pt) clientData,
-                                    argv [2],
-                                    (argc == 4) ? argv [3] : NULL);
+                                    objv [2],
+                                    (objc == 4) ? objv [3] : NULL);
     }
 
-    Tcl_AppendResult (interp, "invalid argument, expected one of: ",
+    TclX_StringAppendObjResult (interp, "invalid argument, expected one of: ",
                       "\"create\", \"delete\", or \"copyfile\"",
                       (char *) NULL);
     return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ScanmatchCmd --
+ * Tcl_ScanmatchObjCmd --
  *
  *   Implements the TCL command:
  *         scanmatch ?-nocase? contexthandle ?regexp? command
@@ -405,20 +411,21 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ScanmatchCmd (clientData, interp, argc, argv)
+Tcl_ScanmatchObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     scanContext_t  *contextPtr, **tableEntryPtr;
     matchDef_t     *newmatch;
     int             compFlags = TCLX_REXP_BOTH_ALGORITHMS;
     int             firstArg = 1;
 
-    if (argc < 3)
+    if (objc < 3)
         goto argError;
-    if (STREQU (argv[1], "-nocase")) {
+
+    if (STREQU (Tcl_GetStringFromObj (objv[1], NULL), "-nocase")) {
         compFlags |= TCLX_REXP_NO_CASE;
         firstArg = 2;
     }
@@ -427,13 +434,13 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
      * If firstArg == 2 (-nocase), the both a regular expression and a command
      * string must be specified, otherwise the regular expression is optional.
      */
-    if (((firstArg == 2) && (argc != 5)) || ((firstArg == 1) && (argc > 4)))
+    if (((firstArg == 2) && (objc != 5)) || ((firstArg == 1) && (objc > 4)))
         goto argError;
 
     tableEntryPtr = (scanContext_t **)
-        Tcl_HandleXlate (interp,
-                         (void_pt) clientData, 
-                         argv [firstArg]);
+        Tcl_HandleXlateObj (interp,
+                            (void_pt) clientData, 
+                            objv [firstArg]);
     if (tableEntryPtr == NULL)
         return TCL_ERROR;
     contextPtr = *tableEntryPtr;
@@ -441,13 +448,16 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     /*
      * Handle the default case (no regular expression).
      */
-    if (argc == 3) {
+    if (objc == 3) {
         if (contextPtr->defaultAction) {
-            Tcl_AppendResult (interp, argv [0], ": default match already ",
-                              "specified in this scan context", (char *) NULL);
+	    Tcl_StringObjAppendObj (Tcl_GetObjResult (interp), objv [0]);
+            TclX_StringAppendObjResult (interp,
+		": default match already specified in this scan context", 
+		(char *) NULL);
             return TCL_ERROR;
         }
-        contextPtr->defaultAction = ckstrdup (argv [2]);
+	Tcl_IncrRefCount (objv [2]);
+        contextPtr->defaultAction = objv [2];
 
         return TCL_OK;
     }
@@ -464,15 +474,14 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
         contextPtr->flags |= CONTEXT_A_CASE_INSENSITIVE_FLAG;
     }
 
-    if (TclX_RegExpCompile (interp,
-                            &newmatch->regExpInfo,
-                            argv [firstArg + 1], 
-                           compFlags) != TCL_OK) {
+    if (TclX_RegExpCompileObj (interp, &newmatch->regExpInfo,
+              objv [firstArg + 1], compFlags) != TCL_OK) {
         ckfree ((char *) newmatch);
         return (TCL_ERROR);
     }
 
-    newmatch->command = ckstrdup (argv [firstArg + 2]);
+    Tcl_IncrRefCount (objv [firstArg + 2]);
+    newmatch->command = objv [firstArg + 2];
 
     /*
      * Link in the new match.
@@ -487,10 +496,8 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
 argError:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                      " ?-nocase? contexthandle ?regexp? command",
-                      (char *) NULL);
-    return TCL_ERROR;
+    return TclX_WrongArgs (interp, objv [0],
+                           "?-nocase? contexthandle ?regexp? command");
 }
 
 /*-----------------------------------------------------------------------------
@@ -528,7 +535,7 @@ SetMatchInfoVar (interp, scanData)
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
-        sprintf (buf, "%ld", scanData->offset);
+        sprintf (buf, "%ld", (long) scanData->offset);
         if (Tcl_SetVar2 (interp, MATCHINFO, "offset", buf,
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
@@ -619,8 +626,9 @@ ScanFile (interp, contextPtr, channel)
     scanData_t data;
     
     if (contextPtr->matchListHead == NULL) {
-        Tcl_AppendResult (interp, "no patterns in current scan context",
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "no patterns in current scan context",
+                                    (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -677,10 +685,10 @@ ScanFile (interp, contextPtr, channel)
             if (result != TCL_OK)
                 goto scanExit;
 
-            result = Tcl_Eval(interp, data.matchPtr->command);
+            result = Tcl_EvalObj (interp, data.matchPtr->command);
             if (result == TCL_ERROR) {
-                Tcl_AddErrorInfo (interp, 
-                    "\n    while executing a match command");
+                Tcl_AddObjErrorInfo (interp, 
+                    "\n    while executing a match command", -1);
                 goto scanExit;
             }
             if (result == TCL_CONTINUE) {
@@ -709,10 +717,10 @@ ScanFile (interp, contextPtr, channel)
             if (result != TCL_OK)
                 goto scanExit;
 
-            result = Tcl_Eval (interp, contextPtr->defaultAction);
+            result = Tcl_EvalObj (interp, contextPtr->defaultAction);
             if (result == TCL_ERROR) {
-                Tcl_AddErrorInfo (interp, 
-                    "\n    while executing a match default command");
+                Tcl_AddObjErrorInfo (interp, 
+                    "\n    while executing a match default command", -1);
                 goto scanExit;
             }
             if ((result == TCL_BREAK) || (result == TCL_RETURN)) {
@@ -757,53 +765,53 @@ ScanFileCloseHandler (clientData)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ScanfileCmd --
+ * Tcl_ScanfileObjCmd --
  *
  *   Implements the TCL command:
  *        scanfile ?-copyfile copyhandle? contexthandle filehandle
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ScanfileCmd (clientData, interp, argc, argv)
+Tcl_ScanfileObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     scanContext_t *contextPtr, **tableEntryPtr;
-    char *contextHandle, *fileHandle, *copyFileHandle;
-    Tcl_Channel channel;
-    int status;
+    Tcl_Obj       *contextHandleObj, *fileHandleObj, *copyFileHandleObj;
+    Tcl_Channel    channel;
+    int            status;
 
-    if ((argc != 3) && (argc != 5))
+    if ((objc != 3) && (objc != 5))
         goto argError;
 
-    if (argc == 3) {
-	contextHandle = argv [1];
-	fileHandle = argv [2];
-	copyFileHandle = NULL;
+    if (objc == 3) {
+	contextHandleObj = objv [1];
+	fileHandleObj = objv [2];
+	copyFileHandleObj = NULL;
     } else {
-	if (!STREQU (argv[1], "-copyfile"))
+	if (!STREQU (Tcl_GetStringFromObj (objv[1], NULL), "-copyfile"))
             goto argError;
-	copyFileHandle = argv [2];
-	contextHandle = argv [3];
-	fileHandle = argv [4];
+	copyFileHandleObj = objv [2];
+	contextHandleObj = objv [3];
+	fileHandleObj = objv [4];
     }
 
     tableEntryPtr = (scanContext_t **)
-        Tcl_HandleXlate (interp,
-                         (void_pt) clientData, 
-                         contextHandle);
+        Tcl_HandleXlateObj (interp,
+                            (void_pt) clientData, 
+                            contextHandleObj);
     if (tableEntryPtr == NULL)
         return TCL_ERROR;
     contextPtr = *tableEntryPtr;
 
-    channel = TclX_GetOpenChannel (interp, fileHandle, TCL_READABLE);
+    channel = TclX_GetOpenChannelObj (interp, fileHandleObj, TCL_READABLE);
     if (channel == NULL)
         return TCL_ERROR;
 
-    if (copyFileHandle != NULL) {
-        if (SetCopyFile (interp, contextPtr, copyFileHandle) == TCL_ERROR)
+    if (copyFileHandleObj != NULL) {
+        if (SetCopyFileObj (interp, contextPtr, copyFileHandleObj) == TCL_ERROR)
             return TCL_ERROR;
     }
 
@@ -824,16 +832,14 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
     /*
      * If we set the copyfile, disassociate it from the context.
      */
-    if (copyFileHandle != NULL) {
+    if (copyFileHandleObj != NULL) {
         ClearCopyFile (contextPtr);
     }
     return status;
 
   argError:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-		      " ?-copyfile filehandle? contexthandle filehandle", 
-		      (char *) NULL);
-    return TCL_ERROR;
+    return TclX_WrongArgs (interp, objv [0],
+		           "?-copyfile filehandle? contexthandle filehandle");
 }
 
 /*-----------------------------------------------------------------------------
@@ -884,11 +890,16 @@ Tcl_InitFilescan (interp)
     /*
      * Initialize the commands.
      */
-    Tcl_CreateCommand (interp, "scanfile", Tcl_ScanfileCmd, 
-                       (ClientData) scanTablePtr, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "scanmatch", Tcl_ScanmatchCmd, 
-                       (ClientData) scanTablePtr, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "scancontext", Tcl_ScancontextCmd,
-                       (ClientData) scanTablePtr, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "scanfile", -1,
+		          Tcl_ScanfileObjCmd, (ClientData) scanTablePtr,
+		          (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp, "scanmatch", -1,
+			  Tcl_ScanmatchObjCmd, (ClientData) scanTablePtr, 
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp, "scancontext", -1,
+			  Tcl_ScancontextObjCmd, (ClientData) scanTablePtr,
+			  (Tcl_CmdDeleteProc*) NULL);
 }
 

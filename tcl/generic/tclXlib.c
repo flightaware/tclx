@@ -3,7 +3,7 @@
  *
  * Tcl commands to load libraries of Tcl code.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.7 1996/10/04 04:25:18 markd Exp $
+ * $Id: tclXlib.c,v 1.6 1997/01/25 05:38:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1267,7 +1267,7 @@ LoadITclImportProc (interp, command)
 {
     static char importCmd [] = "import all";
     Tcl_DString tmpResult, fullName;
-    char **nsSearchPathv;
+    char **nsSearchPathv = NULL;
     int nsSearchPathc, idx, nameSpaceLen;
     char *nameSpace, *nextPtr, *loadCmd;
 
@@ -1293,11 +1293,13 @@ LoadITclImportProc (interp, command)
         Tcl_DStringSetLength (&fullName, 0);
         if (TclFindElement (interp,
                             nsSearchPathv [idx],
+                            strlen (nsSearchPathv [idx]),
                             &nameSpace,
                             &nextPtr,
                             &nameSpaceLen,
                             NULL))
             goto errorExit;
+
         nameSpace [nameSpaceLen] = '\0';
         if (!STREQU (nameSpace, "::")) {
             Tcl_DStringAppend (&fullName, nameSpace, -1);
@@ -1319,12 +1321,15 @@ LoadITclImportProc (interp, command)
     if (Tcl_GlobalEval (interp, loadCmd) == TCL_ERROR)
         goto errorExit;
 
+    ckfree ((char *) nsSearchPathv);
     Tcl_DStringFree (&tmpResult);
     Tcl_DStringFree (&fullName);
     return TCL_OK;
 
     
   errorExit:
+    if (nsSearchPathv != NULL)
+        ckfree ((char *) nsSearchPathv);
     Tcl_DStringFree (&tmpResult);
     Tcl_DStringFree (&fullName);
     return TCL_ERROR;

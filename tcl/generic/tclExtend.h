@@ -3,7 +3,7 @@
  *
  *    External declarations for the extended Tcl library.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 7.9 1996/11/17 08:52:58 markd Exp $
+ * $Id: tclExtend.h,v 1.7 1997/01/25 05:38:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,10 @@
  * that TclX was released against.  Its possible that TclX maybe running with
  * a different version of Tcl or Tk.  The basic versions are used for package
  * provide, the full versions as used for file names and include beta release
- * information and patch information.OB
+ * information and patch information.  The TCLX_DEBUG flag turns on assertsm
+ * etc.  Its an internal flag, however its normally true for alpha and beta
+ * release and false for final releases, so we put the flag right by the 
+ * version numbers in hopes that we will remember to change it.
  *
  * Examples:
  *   Release        _VERSION  _FULL_VERSION
@@ -38,11 +41,15 @@
 
 #define TCLX_PATCHLEVEL      0
 
-#define TCLX_VERSION        "7.6.0"
-#define TCLX_FULL_VERSION   "7.6.0"
+#define TCLX_VERSION        "8.0.0"
+#define TCLX_FULL_VERSION   "8.0.0a2"
 
-#define TKX_VERSION         "4.2.0"
-#define TKX_FULL_VERSION    "4.2.0"
+#define TKX_VERSION         "8.0.0"
+#define TKX_FULL_VERSION    "8.0.0a2"
+
+#ifndef TCLX_DEBUG
+#   define TCLX_DEBUG          1
+#endif
 
 /*
  * Generic void pointer.
@@ -172,30 +179,33 @@ Tcl_UpShift _ANSI_ARGS_((char       *targetStr,
                          CONST char *sourceStr));
 
 /*
- * Exported keyed list manipulation functions.
+ * Exported keyed list object manipulation functions.
  */
-EXTERN char *
-Tcl_DeleteKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
-                                      CONST char  *fieldName,
-                                      CONST char  *keyedList));
-EXTERN int
-Tcl_GetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
-                                   CONST char  *fieldName,
-                                   CONST char  *keyedList,
-                                   char       **fieldValuePtr));
+EXTERN Tcl_Obj *
+TclX_NewKeyedListObj _ANSI_ARGS_((void));
 
 EXTERN int
-Tcl_GetKeyedListKeys _ANSI_ARGS_((Tcl_Interp  *interp,
-                                  CONST char  *subFieldName,
-                                  CONST char  *keyedList,
-                                  int         *keysArgcPtr,
-                                  char      ***keysArgvPtr));
+TclX_KeyedListGet _ANSI_ARGS_((Tcl_Interp *interp,
+                               Tcl_Obj    *keylPtr,
+                               char       *key,
+                               Tcl_Obj   **valuePtrPtr));
 
-EXTERN char *
-Tcl_SetKeyedListField _ANSI_ARGS_((Tcl_Interp  *interp,
-                                   CONST char  *fieldName,
-                                   CONST char  *fieldvalue,
-                                   CONST char  *keyedList));
+EXTERN int
+TclX_KeyedListSet _ANSI_ARGS_((Tcl_Interp *interp,
+                               Tcl_Obj    *keylPtr,
+                               char       *key,
+                               Tcl_Obj    *valuePtr));
+
+EXTERN int
+TclX_KeyedListDelete _ANSI_ARGS_((Tcl_Interp *interp,
+                                  Tcl_Obj    *keylPtr,
+                                  char       *key));
+
+EXTERN int
+TclX_KeyedListGetKeys _ANSI_ARGS_((Tcl_Interp *interp,
+                                   Tcl_Obj    *keylPtr,
+                                   char       *key,
+                                   Tcl_Obj   **listObjPtrPtr));
 
 /*
  * Exported handle table manipulation functions.
@@ -233,6 +243,11 @@ EXTERN void_pt
 Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              void_pt      headerPtr,
                              CONST  char *handle));
+
+EXTERN void_pt
+Tcl_HandleXlateObj _ANSI_ARGS_((Tcl_Interp    *interp,
+                                void_pt        headerPtr,
+                                Tcl_Obj       *handleObj));
 /*
  * Command loop functions.
  */

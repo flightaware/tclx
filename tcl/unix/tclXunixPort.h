@@ -3,7 +3,7 @@
  *
  * Portability include file for Unix systems.
  *-----------------------------------------------------------------------------
- * Copyright 1996-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1996-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 7.5 1996/10/17 15:45:16 markd Exp $
+ * $Id: tclXunixPort.h,v 1.3 1997/01/02 05:44:56 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,6 +35,7 @@
 
 #include <sys/times.h>
 #include <grp.h>
+#include <assert.h>
 
 extern int h_errno;
 

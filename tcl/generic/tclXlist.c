@@ -3,7 +3,7 @@
  *
  *  Extended Tcl list commands.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,434 +12,539 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 7.2 1996/10/21 03:07:10 markd Exp $
+ * $Id: tclXlist.c,v 1.6 1997/01/25 05:38:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+static int
+TclX_LvarcatObjCmd _ANSI_ARGS_((ClientData   clientData,
+                                Tcl_Interp  *interp,
+                                int          objc,
+                                Tcl_Obj    **objv));
+
+static int
+TclX_LvarpopObjCmd _ANSI_ARGS_((ClientData   clientData,
+                                Tcl_Interp  *interp,
+                                int          objc,
+                                Tcl_Obj    **objv));
+
+static int
+TclX_LvarpushObjCmd _ANSI_ARGS_((ClientData   clientData,
+                                 Tcl_Interp  *interp,
+                                 int          objc,
+                                 Tcl_Obj    **objv));
+
+static int
+TclX_LemptyObjCmd _ANSI_ARGS_((ClientData   clientData,
+                               Tcl_Interp  *interp,
+                               int          objc,
+                               Tcl_Obj    **objv));
+
+static int
+TclX_LassignObjCmd _ANSI_ARGS_((ClientData   clientData,
+                                Tcl_Interp  *interp,
+                                int          objc,
+                                Tcl_Obj    **objv));
+
+static int
+TclX_LmatchObjCmd _ANSI_ARGS_((ClientData   clientData,
+                               Tcl_Interp  *interp,
+                               int          objc,
+                               Tcl_Obj    **objv));
+
+static int
+TclX_LcontainObjCmd _ANSI_ARGS_((ClientData   clientData,
+                                 Tcl_Interp  *interp,
+                                 int          objc,
+                                 Tcl_Obj    **objv));
+
 
 /*-----------------------------------------------------------------------------
- * Tcl_LvarcatCmd --
- *     Implements the TCL lvarcat command:
- *         lvarcat var string ?string...?
- *
- * Results:
- *      Standard TCL results.
+ * TclX_LvarcatObjCmd --
+ *   Implements the TclX lvarcat command:
+ *      lvarcat var string ?string...?
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_LvarcatCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    int        listArgc, idx, listIdx;
-    char     **listArgv;
-    char      *staticArgv [12];
-    char      *varContents, *newStr, *result;
-
-    if (argc < 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var string ?string...?", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    varContents = Tcl_GetVar (interp, argv[1], 0);
-
-    if (varContents != NULL)
-        listArgc = argc - 1;
-    else
-        listArgc = argc - 2;
-
-    if (listArgc < (sizeof (staticArgv) / sizeof (char *))) {
-        listArgv = staticArgv;
-    } else {
-        listArgv = (char **) ckalloc (listArgc * sizeof (char *));
-    }
-    
-    if (varContents != NULL) {
-        listArgv [0] = varContents;
-        listIdx = 1;
-    } else {
-        listIdx = 0;
-    }
-    for (idx = 2; idx < argc; idx++, listIdx++)
-        listArgv [listIdx] = argv [idx];
-
-    newStr = Tcl_Concat (listArgc, listArgv);
-    result = Tcl_SetVar (interp, argv [1], newStr, TCL_LEAVE_ERR_MSG);
-
-    ckfree (newStr);
-    if (listArgv != staticArgv)
-        ckfree ((char *) listArgv);
-
-    /*
-     * If all is ok, return the variable contents as a "static" result.
-     */
-    if (result != NULL) {
-        interp->result = result;
-        return TCL_OK;
-    } else {
-        return TCL_ERROR;
-    }
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_LvarpopCmd --
- *     Implements the TCL lvarpop command:
- *         lvarpop var ?indexExpr? ?string?
- *
- * Results:
- *      Standard TCL results.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_LvarpopCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    int        listArgc, idx;
-    long       listIdx;
-    char     **listArgv;
-    char      *varContents, *resultList, *returnElement;
-
-    if ((argc < 2) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var ?indexExpr? ?string?", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    varContents = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
-    if (varContents == NULL)
-        return TCL_ERROR;
-
-    if (Tcl_SplitList (interp, varContents, &listArgc, &listArgv) == TCL_ERROR)
-        return TCL_ERROR;
-
-    if (argc == 2) {
-        listIdx = 0;
-    } else if (Tcl_RelativeExpr (interp, argv[2], listArgc, &listIdx)
-               != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    /*
-     * Just ignore out-of bounds requests, like standard Tcl.
-     */
-    if ((listIdx < 0) || (listIdx >= listArgc)) {
-        goto okExit;
-    }
-    returnElement = listArgv [listIdx];
-
-    if (argc == 4)
-        listArgv [listIdx] = argv [3];
-    else {
-        listArgc--;
-        for (idx = listIdx; idx < listArgc; idx++)
-            listArgv [idx] = listArgv [idx+1];
-    }
-
-    resultList = Tcl_Merge (listArgc, listArgv);
-    if (Tcl_SetVar (interp, argv [1], resultList, TCL_LEAVE_ERR_MSG) == NULL) {
-        ckfree (resultList);
-        goto errorExit;
-    }
-    ckfree (resultList);
-
-    Tcl_SetResult (interp, returnElement, TCL_VOLATILE);
-  okExit:
-    ckfree((char *) listArgv);
-    return TCL_OK;
-
-  errorExit:
-    ckfree((char *) listArgv);
-    return TCL_ERROR;;
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_LvarpushCmd --
- *     Implements the TCL lvarpush command:
- *         lvarpush var string ?indexExpr?
- *
- * Results:
- *      Standard TCL results.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_LvarpushCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    int        listArgc, idx;
-    long       listIdx;
-    char     **listArgv;
-    char      *varContents, *resultList;
-
-    if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var string ?indexExpr?", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    varContents = Tcl_GetVar (interp, argv[1], 0);
-    if (varContents == NULL)
-        varContents = "";
-
-    if (Tcl_SplitList (interp, varContents, &listArgc, &listArgv) == TCL_ERROR)
-        return TCL_ERROR;
-
-    if (argc == 3) {
-        listIdx = 0;
-    } else if (Tcl_RelativeExpr (interp, argv[3], listArgc, &listIdx)
-               != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    /*
-     * Out-of-bounds request go to the start or end, as with most of Tcl.
-     */
-    if (listIdx < 0)
-        listIdx = 0;
-    else
-        if (listIdx > listArgc)
-            listIdx = listArgc;
-
-    /*
-     * This code takes advantage of the fact that a NULL entry is always
-     * returned by Tcl_SplitList, but not required by Tcl_Merge.
-     */
-    for (idx = listArgc; idx > listIdx; idx--)
-        listArgv [idx] = listArgv [idx - 1];
-
-    listArgv [listIdx] = argv [2];
-
-    resultList = Tcl_Merge (listArgc + 1, listArgv);
-
-    if (Tcl_SetVar (interp, argv [1], resultList, TCL_LEAVE_ERR_MSG) == NULL) {
-        ckfree (resultList);
-        goto errorExit;
-    }
-
-    ckfree (resultList);
-    ckfree((char *) listArgv);
-    return TCL_OK;
-
-  errorExit:
-    ckfree((char *) listArgv);
-    return TCL_ERROR;;
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_LemptyCmd --
- *     Implements the lempty TCL command:
- *         lempty list
- *
- * Results:
- *     Standard TCL result.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_LemptyCmd (clientData, interp, argc, argv)
+static int
+TclX_LvarcatObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    char *scanPtr;
+    Tcl_Obj *strVarPtr, *strPtr;
+    int strArgc, idx, argIdx, strLen;
+    char **strArgv, *staticArgv [32], *newStr;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " list",
-                          (char *) NULL);
-        return TCL_ERROR;
+    if (objc < 3) {
+        return TclX_WrongArgs (interp, objv [0], "var string ?string...?");
+    }
+    strArgv = staticArgv;
+
+    /*
+     * Get the variable that we are going to update.  If the var doesn't exist,
+     * create it.  If it is shared by more than being a variable, duplicated
+     * it.
+     */
+    strVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, 0);
+    if (strVarPtr == NULL) {
+        strPtr = Tcl_NewListObj (0, NULL);
+    } else if (strVarPtr->refCount > 1) {
+        strPtr = Tcl_DuplicateObj (strVarPtr);
+    } else {
+        strPtr = strVarPtr;
+        Tcl_IncrRefCount (strPtr);
+    }
+    if (strPtr != strVarPtr) {
+        if (Tcl_ObjSetVar2 (interp, objv [1], NULL, strPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL)
+            goto errorExit;
     }
 
-    scanPtr = argv [1];
-    while ((*scanPtr != '\0') && (ISSPACE (*scanPtr)))
-        scanPtr++;
-    sprintf (interp->result, "%d", (*scanPtr == '\0'));
+    /*
+     * FIX: Figure out how to do this without converting to strings, or if
+     * that would even be compatible.
+     */
+    if (strVarPtr != NULL) {
+        strArgc = objc - 1;
+    } else {
+        strArgc = objc - 2;
+    }
+
+    if (strArgc >= (sizeof (staticArgv) / sizeof (char *))) {
+        strArgv = (char **) ckalloc (strArgc * sizeof (char *));
+    }
+    
+    if (strVarPtr != NULL) {
+        strArgv [0] = Tcl_GetStringFromObj (strPtr, &strLen);
+        argIdx = 1;
+    } else {
+        argIdx = 0;
+    }
+    for (idx = 2; idx < objc; idx++, argIdx++) {
+        strArgv [argIdx] = Tcl_GetStringFromObj (objv [idx], &strLen);
+    }
+
+    newStr = Tcl_Concat (strArgc, strArgv);
+    Tcl_SetStringObj (strPtr, newStr, -1);
+    ckfree (newStr);
+
+    if (strArgv != staticArgv)
+        ckfree ((char *) strArgv);
+    Tcl_DecrRefCount (strPtr);
+    Tcl_SetObjResult (interp, strPtr);
     return TCL_OK;
 
+  errorExit:
+    if (strArgv != staticArgv)
+        ckfree ((char *) strArgv);
+    Tcl_DecrRefCount (strPtr);
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_LassignCmd --
- *     Implements the TCL assign_fields command:
- *         lassign list varname ?varname...?
- *
- * Results:
- *      Standard TCL results.
+ * TclX_LvarpopObjCmd --
+ *   Implements the TclX lvarpop command:
+ *      lvarpop var ?indexExpr? ?string?
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_LassignCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+static int
+TclX_LvarpopObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    int        listArgc, listIdx, idx, remaining;
-    char     **listArgv;
-    char      *varValue;
+    Tcl_Obj *listVarPtr, *listPtr, *returnElemPtr = NULL;
+    int listLen;
+    long listIdx;
 
-    if (argc < 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " list varname ?varname..?", (char *) NULL);
-        return TCL_ERROR;
+    if ((objc < 2) || (objc > 4)) {
+        return TclX_WrongArgs (interp, objv [0], "var ?indexExpr? ?string?");
     }
 
-    if (Tcl_SplitList (interp, argv[1], &listArgc, &listArgv) == TCL_ERROR)
+    listVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_LEAVE_ERR_MSG);
+    if (listVarPtr == NULL) {
+        return TCL_ERROR;
+    }
+    if (listVarPtr->refCount > 1) {
+        listPtr = Tcl_DuplicateObj (listVarPtr);
+        if (Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL)
+            goto errorExit;
+    } else {
+        listPtr = listVarPtr;
+        Tcl_IncrRefCount (listPtr);
+    }
+
+    /*
+     * Get the index of the entry in the list we are doing to replace/delete.
+     * Just ignore out-of bounds requests, like standard Tcl.
+     */
+    if (Tcl_ListObjLength (interp, listPtr, &listLen) != TCL_OK)
+        goto errorExit;
+
+    if (objc == 2) {
+        listIdx = 0;
+    } else if (TclX_RelativeExpr (interp, objv [2],
+                                  listLen, &listIdx) != TCL_OK) {
+        goto errorExit;
+    }
+    if ((listIdx < 0) || (listIdx >= listLen)) {
+        goto okExit;
+    }
+
+    /*
+     * Get the element that is doing to be deleted/replaced.
+     */
+    if (Tcl_ListObjIndex (interp, listPtr, listIdx, &returnElemPtr) != TCL_OK)
+        goto errorExit;
+    Tcl_IncrRefCount (returnElemPtr);
+
+    /*
+     * Either replace or delete the element.
+     */
+    if (objc == 4) {
+        if (Tcl_ListObjReplace (interp, listPtr, listIdx, 1,
+                                1, &(objv [3])) != TCL_OK)
+            goto errorExit;
+    } else {
+        if (Tcl_ListObjReplace (interp, listPtr, listIdx, 1,
+                                0, NULL) != TCL_OK)
+            goto errorExit;
+    }
+
+    Tcl_SetObjResult (interp, returnElemPtr);
+
+  okExit:
+    if (returnElemPtr != NULL)
+        Tcl_DecrRefCount (returnElemPtr);
+    Tcl_DecrRefCount (listPtr);
+    return TCL_OK;
+
+  errorExit:
+    if (returnElemPtr != NULL)
+        Tcl_DecrRefCount (returnElemPtr);
+    Tcl_DecrRefCount (listPtr);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_LvarpushObjCmd --
+ *   Implements the TclX lvarpush command:
+ *      lvarpush var string ?indexExpr?
+ *-----------------------------------------------------------------------------
+ */
+static int
+TclX_LvarpushObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
+{
+    Tcl_Obj *listVarPtr, *listPtr;
+    int listLen;
+    long listIdx;
+
+    if ((objc < 3) || (objc > 4)) {
+        return TclX_WrongArgs (interp, objv [0], "var string ?indexExpr?");
+    }
+
+    listVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, 0);
+    if (listVarPtr == NULL) {
+        listPtr = Tcl_NewListObj (0, NULL);
+    } else if (listVarPtr->refCount > 1) {
+        listPtr = Tcl_DuplicateObj (listVarPtr);
+    } else {
+        listPtr = listVarPtr;
+        Tcl_IncrRefCount (listPtr);
+    }
+    if (listPtr != listVarPtr) {
+        if (Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL)
+            goto errorExit;
+    }
+
+    /*
+     * Get the index of the entry in the list we are doing to replace/delete.
+     * Out-of-bounds request go to the start or end, as with most of Tcl
+     * commands.
+     */
+    if (Tcl_ListObjLength (interp, listPtr, &listLen) != TCL_OK)
+        goto errorExit;
+
+    if (objc == 3) {
+        listIdx = 0;
+    } else if (TclX_RelativeExpr (interp, objv [3],
+                                  listLen, &listIdx) != TCL_OK) {
+        goto errorExit;
+    }
+    if (listIdx < 0) {
+        listIdx = 0;
+    } else {
+        if (listIdx > listLen)
+            listIdx = listLen;
+    }
+
+    if (Tcl_ListObjReplace (interp, listPtr, listIdx, 0,
+                            1, &(objv [2])) != TCL_OK)
+        goto errorExit;
+
+    Tcl_DecrRefCount (listPtr);
+    return TCL_OK;
+
+  errorExit:
+    Tcl_DecrRefCount (listPtr);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_LemptyObjCmd --
+ *    Implements the TclX lempty command:
+ *        lempty list
+ *-----------------------------------------------------------------------------
+ */
+static int
+TclX_LemptyObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
+{
+    int isEmpty, strLen;
+    char *scanPtr;
+
+    if (objc != 2) {
+        return TclX_WrongArgs (interp, objv [0], "list");
+    }
+
+    /*
+     * This is a little tricky, because the pre-object lempty never check
+     * for a valid list, it just checked for a string of all white spaces.
+     * If the object is already a list, go off of the length, otherwise scan
+     * the string for while space.
+     */
+    if (objv [1]->typePtr == Tcl_GetObjType ("list")) {
+        if (Tcl_ListObjLength (interp, objv [1], &isEmpty) != TCL_OK)
+            return TCL_ERROR;
+    } else {
+        scanPtr = Tcl_GetStringFromObj (objv [1], &strLen);
+        while ((*scanPtr != '\0') && (ISSPACE (*scanPtr)))
+            scanPtr++;
+        isEmpty = (*scanPtr == '\0');
+    }
+    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), isEmpty);
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_LassignObjCmd --
+ *    Implements the TclX assign_fields command:
+ *       lassign list varname ?varname...?
+ *-----------------------------------------------------------------------------
+ */
+static int
+TclX_LassignObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
+{
+    int listObjc, listIdx, idx, remaining;
+    Tcl_Obj **listObjv, *elemPtr, *remainingObjPtr;
+    Tcl_Obj *nullObjPtr = NULL;
+
+    if (objc < 3) {
+        return TclX_WrongArgs (interp, objv [0],
+                               "list varname ?varname..?");
+    }
+    if (Tcl_ListObjGetElements (interp, objv [1],
+                                &listObjc, &listObjv) != TCL_OK)
         return TCL_ERROR;
 
-    for (idx = 2, listIdx = 0; idx < argc; idx++, listIdx++) {
-        varValue = (listIdx < listArgc) ? listArgv[listIdx] : "" ;
-        if (Tcl_SetVar (interp, argv[idx], varValue,
-                        TCL_LEAVE_ERR_MSG) == NULL) {
-            goto error_exit;
+    /*
+     * Assign elements to specified variables.  If there are not enough
+     * elements, set the variables to a NULL object.
+     */
+    for (idx = 2, listIdx = 0; idx < objc; idx++, listIdx++) {
+        if (listIdx < listObjc) {
+            elemPtr = listObjv [listIdx];
+        } else {
+            if (nullObjPtr == NULL)
+                nullObjPtr = Tcl_NewObj ();
+            elemPtr = nullObjPtr;
         }
+        if (Tcl_ObjSetVar2 (interp, objv [idx], NULL, elemPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL)
+            goto error_exit;
     }
-    remaining = listArgc - argc + 2;
+
+    /*
+     * Return remaining elements as a list.
+     */
+    remaining = listObjc - objc + 2;
     if (remaining > 0) {
-        Tcl_SetResult (interp,
-                       Tcl_Merge (remaining, listArgv + argc - 2),
-                       TCL_DYNAMIC);
+        remainingObjPtr = Tcl_NewListObj (remaining, &(listObjv [objc - 2]));
+        Tcl_SetObjResult (interp, remainingObjPtr);
+        Tcl_DecrRefCount (remainingObjPtr);
     }
-    ckfree((char *) listArgv);
+
+    if (nullObjPtr != NULL)
+        Tcl_DecrRefCount (nullObjPtr);
     return TCL_OK;
 
   error_exit:
-    ckfree((char *) listArgv);
+    if (nullObjPtr != NULL)
+        Tcl_DecrRefCount (nullObjPtr);
     return TCL_ERROR;
 }
 
 /*----------------------------------------------------------------------
- * Tcl_LmatchCmd --
- *
- *      This procedure is invoked to process the "lmatch" Tcl command.
- *      See the user documentation for details on what it does.
- *
- * Results:
- *      A standard Tcl result.
- *
- * Side effects:
- *      See the user documentation.
+ * TclX_LmatchObjCmd --
+ *   Implements the TclX lmatch command:
+ *       lmatch ?-exact|-glob|-regexp? list pattern
  *----------------------------------------------------------------------
  */
-int
-Tcl_LmatchCmd (notUsed, interp, argc, argv)
-    ClientData notUsed;
-    Tcl_Interp *interp;
-    int argc;
-    char **argv;
+static int
+TclX_LmatchObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
 {
 #define EXACT   0
 #define GLOB    1
 #define REGEXP  2
-    int listArgc, idx, match, mode;
-    char **listArgv;
-    Tcl_DString resultList;
-
+    int listObjc, idx, match, mode, strLen;
+    char *modeStr, *patternStr, *valueStr;
+    Tcl_Obj **listObjv, *matchedListPtr = NULL;
 
     mode = GLOB;
-    if (argc == 4) {
-        if (STREQU (argv [1], "-exact")) {
+    if (objc == 4) {
+        modeStr = Tcl_GetStringFromObj (objv [1], &strLen);
+        if (STREQU (modeStr, "-exact")) {
             mode = EXACT;
-        } else if (STREQU (argv [1], "-glob")) {
+        } else if (STREQU (modeStr, "-glob")) {
             mode = GLOB;
-        } else if (STREQU (argv [1], "-regexp")) {
+        } else if (STREQU (modeStr, "-regexp")) {
             mode = REGEXP;
         } else {
-            Tcl_AppendResult (interp, "bad search mode \"", argv [1],
-                              "\": must be -exact, -glob, or -regexp",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp,
+                                        "bad search mode \"", modeStr,
+                                        "\": must be -exact, -glob, or ",
+                                        "-regexp", (char *) NULL);
             return TCL_ERROR;
         }
-    } else if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                         " ?mode? list pattern", (char *) NULL);
+    } else if (objc != 3) {
+        return TclX_WrongArgs (interp, objv [0], "?mode? list pattern");
+    }
+
+    if (Tcl_ListObjGetElements (interp, objv [1],
+                                &listObjc, &listObjv) != TCL_OK)
         return TCL_ERROR;
-    }
-    if (Tcl_SplitList (interp, argv [argc-2],
-                       &listArgc, &listArgv) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    if (listArgc == 0) {
-        ckfree ((char *) listArgv);
-        return TCL_OK;
-    }
-    
-    Tcl_DStringInit (&resultList);
-    for (idx = 0; idx < listArgc; idx++) {
+
+    patternStr = Tcl_GetStringFromObj (objv [objc - 1], &strLen);
+
+    for (idx = 0; idx < listObjc; idx++) {
         match = 0;
+        valueStr = Tcl_GetStringFromObj (listObjv [idx], &strLen);
         switch (mode) {
             case EXACT:
-                match = (STREQU (listArgv [idx], argv [argc-1]));
+                match = STREQU (valueStr, patternStr);
                 break;
             case GLOB:
-                match = Tcl_StringMatch (listArgv [idx], argv [argc-1]);
+                match = Tcl_StringMatch (valueStr, patternStr);
                 break;
             case REGEXP:
-                match = Tcl_RegExpMatch (interp, listArgv [idx],
-                                         argv [argc-1]);
+                match = Tcl_RegExpMatch (interp, valueStr, patternStr);
                 if (match < 0) {
-                    ckfree ((char *) listArgv);
-                    Tcl_DStringFree (&resultList);
-                    return TCL_ERROR;
+                    goto errorExit;
                 }
                 break;
         }
         if (match) {
-            Tcl_DStringAppendElement (&resultList, listArgv [idx]);
+            if (matchedListPtr == NULL)
+                matchedListPtr = Tcl_NewListObj (0, NULL);
+            if (Tcl_ListObjAppendElement (interp, matchedListPtr,
+                                          listObjv [idx]) != TCL_OK)
+                goto errorExit;
         }
     }
-    ckfree ((char *) listArgv);
-    Tcl_DStringResult (interp, &resultList);
+    if (matchedListPtr != NULL) {
+        Tcl_DecrRefCount (matchedListPtr);
+    }
     return TCL_OK;
+    
+  errorExit:
+    if (matchedListPtr != NULL)
+        Tcl_DecrRefCount (matchedListPtr);
+    return TCL_ERROR;
 }
 
 /*----------------------------------------------------------------------
- * Tcl_LcontainCmd --
- *
- *      This procedure is invoked to process the "lcontain" Tcl command.
- *      See the user documentation for details on what it does.
- *
- * Results:
- *      A standard Tcl result.
- *
- * Side effects:
- *      See the user documentation.
+ * TclX_LcontainObjCmd --
+ *   Implements the TclX lcontain command:
+ *       lcontain list element
  *----------------------------------------------------------------------
  */
-int
-Tcl_LcontainCmd (notUsed, interp, argc, argv)
-    ClientData notUsed;
-    Tcl_Interp *interp;
-    int argc;
-    char **argv;
+static int
+TclX_LcontainObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    int listArgc, idx;
-    char **listArgv;
+    int listObjc, idx, strLen;
+    Tcl_Obj **listObjv;
+    char *elementStr, *checkStr;
 
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " list element", (char *) NULL);
-        return TCL_ERROR;
+    if (objc != 3) {
+        return TclX_WrongArgs (interp, objv [0], 
+                               "list element");
     }
-    if (Tcl_SplitList (interp, argv [1],
-                       &listArgc, &listArgv) != TCL_OK) {
+
+    if (Tcl_ListObjGetElements (interp, objv [1],
+                                &listObjc, &listObjv) != TCL_OK)
         return TCL_ERROR;
-    }
+
+    checkStr = Tcl_GetStringFromObj (objv [2], &strLen);
     
-    for (idx = 0; idx < listArgc; idx++) {
-        if (STREQU (listArgv [idx], argv [2]))
+    for (idx = 0; idx < listObjc; idx++) {
+        elementStr = Tcl_GetStringFromObj (listObjv [idx], &strLen);
+        if (STREQU (elementStr, checkStr))
             break;
     }
-    ckfree ((char *) listArgv);
-    Tcl_SetResult (interp, (idx < listArgc) ? "1" : "0", TCL_STATIC);
+    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), (idx < listObjc));
     return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_ListInit --
+ *   Initialize the list commands in an interpreter.
+ *
+ * Parameters:
+ *   o interp - Interpreter to add commands to.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_ListInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand(interp, "lvarcat", -1, TclX_LvarcatObjCmd, 
+                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, "lvarpop", -1, TclX_LvarpopObjCmd, 
+                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, "lvarpush", -1, TclX_LvarpushObjCmd, 
+                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, "lempty", -1, TclX_LemptyObjCmd, 
+                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, "lassign", -1, TclX_LassignObjCmd, 
+                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, "lmatch", -1, TclX_LmatchObjCmd, 
+                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, "lcontain", -1, TclX_LcontainObjCmd, 
+                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+
 }

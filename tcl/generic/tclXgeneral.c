@@ -3,7 +3,7 @@
  *
  * A collection of general commands: echo, infox and loop.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 7.3 1996/09/09 22:13:43 markd Exp $
+ * $Id: tclXgeneral.c,v 1.9 1997/01/25 05:38:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -77,7 +77,7 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_EchoCmd --
+ * Tcl_EchoObjCmd --
  *    Implements the TCL echo command:
  *        echo ?str ...?
  *
@@ -86,23 +86,26 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_EchoCmd(clientData, interp, argc, argv)
-    ClientData  clientData;
+Tcl_EchoObjCmd (dummy, interp, objc, objv)
+    ClientData  dummy;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     int   idx;
     Tcl_Channel channel;
+    char *stringPtr;
+    int stringPtrLen;
 
     channel = TclX_GetOpenChannel (interp, "stdout", TCL_WRITABLE);
     if (channel == NULL)
         return TCL_ERROR;
 
-    for (idx = 1; idx < argc; idx++) {
-        if (TclX_WriteStr (channel, argv [idx]) < 0)
+    for (idx = 1; idx < objc; idx++) {
+	stringPtr = Tcl_GetStringFromObj (objv [idx], &stringPtrLen);
+        if (Tcl_Write (channel, stringPtr, stringPtrLen) < 0)
             goto posixError;
-        if (idx < (argc - 1)) {
+        if (idx < (objc - 1)) {
             if (Tcl_Write (channel, " ", 1) < 0)
                 goto posixError;
         }
@@ -112,153 +115,163 @@ Tcl_EchoCmd(clientData, interp, argc, argv)
     return TCL_OK;
 
   posixError:
-    interp->result = Tcl_PosixError (interp);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp), Tcl_PosixError (interp), -1);
     return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_InfoxCmd --
+ * Tcl_InfoxObjCmd --
  *    Implements the TCL infox command:
  *        infox option
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_InfoxCmd (clientData, interp, argc, argv)
+Tcl_InfoxObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    char numBuf [32];
+    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
+    char *optionPtr;
+    int optionLen;
 
-    /* FIX: Need a way to get the have_ functionallity from the OS dependent
-       code */
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " option", (char *) NULL);
-        return TCL_ERROR;
-    }
+    /*
+     * FIX: Need a way to get the have_ functionality from the OS-dependent
+     * code.
+     */
+    if (objc != 2)
+	return TclX_WrongArgs (interp, objv[0], "option");
 
-    if (STREQU ("version", argv [1])) {
-        if (tclxVersion != NULL)
-            Tcl_SetResult (interp, tclxVersion, TCL_STATIC);
+    optionPtr = Tcl_GetStringFromObj (objv[1], &optionLen);
+
+    if (STREQU ("version", optionPtr)) {
+        if (tclxVersion != NULL) {
+            Tcl_SetStringObj (resultPtr, tclxVersion, -1);
+        }
         return TCL_OK;
     }
-    if (STREQU ("patchlevel", argv [1])) {
-        sprintf (numBuf, "%d", tclxPatchlevel);
-        Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+    if (STREQU ("patchlevel", optionPtr)) {
+	Tcl_SetIntObj (resultPtr, tclxPatchlevel);
         return TCL_OK;
     }
-    if (STREQU ("have_fchown", argv [1])) {
+    if (STREQU ("have_fchown", optionPtr)) {
 #       ifndef NO_FCHOWN
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_fchmod", argv [1])) {
+    if (STREQU ("have_fchmod", optionPtr)) {
 #       ifndef NO_FCHMOD
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_flock", argv [1])) {
-        interp->result = TclXOSHaveFlock () ? "1" : "0";
+    if (STREQU ("have_flock", optionPtr)) {
+	if (TclXOSHaveFlock ())
+	    Tcl_SetBooleanObj (resultPtr, TRUE);
+	else
+	    Tcl_SetBooleanObj (resultPtr, FALSE);
         return TCL_OK;
     }
-    if (STREQU ("have_fsync", argv [1])) {
+    if (STREQU ("have_fsync", optionPtr)) {
 #       ifndef NO_FSYNC
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_ftruncate", argv [1])) {
+    if (STREQU ("have_ftruncate", optionPtr)) {
 #       if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE)
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_msgcats", argv [1])) {
+    if (STREQU ("have_msgcats", optionPtr)) {
 #       ifndef NO_CATGETS
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_posix_signals", argv [1])) {
+    if (STREQU ("have_posix_signals", optionPtr)) {
 #       ifndef NO_SIGACTION
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_truncate", argv [1])) {
+    if (STREQU ("have_truncate", optionPtr)) {
 #       ifndef NO_TRUNCATE
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_symlink", argv [1])) {
+    if (STREQU ("have_symlink", optionPtr)) {
 #       ifdef S_IFLNK
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("have_waitpid", argv [1])) {
+    if (STREQU ("have_waitpid", optionPtr)) {
 #       ifndef NO_WAITPID
-        interp->result = "1";
+        Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
-        interp->result = "0";
+        Tcl_SetBooleanObj (resultPtr, FALSE);
 #       endif        
         return TCL_OK;
     }
-    if (STREQU ("appname", argv [1])) {
-        if (tclAppName != NULL)
-            Tcl_SetResult (interp, tclAppName, TCL_STATIC);
+    if (STREQU ("appname", optionPtr)) {
+        if (tclAppName != NULL) {
+            Tcl_SetStringObj (resultPtr, tclAppName, -1);
+        }
         return TCL_OK;
     }
-    if (STREQU ("applongname", argv [1])) {
+    if (STREQU ("applongname", optionPtr)) {
         if (tclAppLongName != NULL)
-            Tcl_SetResult (interp, tclAppLongName, TCL_STATIC);
+            Tcl_SetStringObj (resultPtr, tclAppLongName, -1);
         return TCL_OK;
     }
-    if (STREQU ("appversion", argv [1])) {
+    if (STREQU ("appversion", optionPtr)) {
         if (tclAppVersion != NULL)
-            Tcl_SetResult (interp, tclAppVersion, TCL_STATIC);
+            Tcl_SetStringObj (resultPtr, tclAppVersion, -1);
         return TCL_OK;
     }
-    if (STREQU ("apppatchlevel", argv [1])) {
-        sprintf (numBuf, "%d", (tclAppPatchlevel >= 0) ? tclAppPatchlevel : 0);
-        Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+    if (STREQU ("apppatchlevel", optionPtr)) {
+	if (tclAppPatchlevel >= 0)
+	    Tcl_SetIntObj (resultPtr, tclAppPatchlevel);
+	else
+	    Tcl_SetIntObj (resultPtr, 0);
         return TCL_OK;
     }
-
-    Tcl_AppendResult (interp, "illegal option \"", argv [1], 
-                      "\" expect one of: version, patchlevel, ",
-                      "have_fchown, have_fchmod, have_flock, ",
-                      "have_fsync, have_ftruncate, have_msgcats, ",
-                      "have_symlink, have_truncate, have_posix_signals, ",
-                      "have_waitpid, ",
-                      "appname, applongname, appversion, or apppatchlevel",
-                      (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+                                "illegal option \"",
+                                optionPtr,
+                                "\", expect one of: version, patchlevel, ",
+                                "have_fchown, have_fchmod, have_flock, ",
+                                "have_fsync, have_ftruncate, have_msgcats, ",
+                                "have_symlink, have_truncate, ",
+                                "have_posix_signals, have_waitpid, appname, ",
+                                "applongname, appversion, or apppatchlevel",
+                                (char *) NULL);
     return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_LoopCmd --
+ * Tcl_LoopObjCmd --
  *     Implements the TCL loop command:
  *         loop var start end ?increment? command
  *
@@ -267,44 +280,53 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_LoopCmd (dummy, interp, argc, argv)
+Tcl_LoopObjCmd (dummy, interp, objc, objv)
     ClientData  dummy;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    int   result = TCL_OK;
-    long  i, first, limit, incr = 1;
-    char *command;
-    char  itxt [32];
+    int       result = TCL_OK;
+    long      i, first, limit, incr = 1;
+    Tcl_Obj  *command, *iObj;
 
-    if ((argc < 5) || (argc > 6)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " var first limit ?incr? command", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if ((objc < 5) || (objc > 6))
+	return TclX_WrongArgs (interp, objv [0], 
+                               "var first limit ?incr? command");
 
-    if (Tcl_ExprLong (interp, argv[2], &first) != TCL_OK)
+    if (Tcl_ExprStringObj (interp, objv [2]) != TCL_OK)
         return TCL_ERROR;
-    if (Tcl_ExprLong (interp, argv[3], &limit) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp), &first) != TCL_OK)
+	return TCL_ERROR;
+
+    if (Tcl_ExprStringObj (interp, objv [3]) != TCL_OK)
         return TCL_ERROR;
-    if (argc == 5) {
-        command = argv[4];
+    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp), &limit) != TCL_OK)
+	return TCL_ERROR;
+
+    if (objc == 5) {
+        command = objv [4];
     } else {
-        if (Tcl_ExprLong (interp, argv[4], &incr) != TCL_OK)
-            return TCL_ERROR;
-        command = argv[5];
+	if (Tcl_ExprStringObj (interp, objv [4]) != TCL_OK)
+	    return TCL_ERROR;
+	if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp), 
+			       &incr) != TCL_OK)
+	    return TCL_ERROR;
+        command = objv [5];
     }
+
+    iObj = Tcl_NewIntObj (first);
 
     for (i = first;
              (((i < limit) && (incr >= 0)) || ((i > limit) && (incr < 0)));
              i += incr) {
 
-        sprintf (itxt,"%ld",i);
-        if (Tcl_SetVar (interp, argv [1], itxt, TCL_LEAVE_ERR_MSG) == NULL)
-            return TCL_ERROR;
+        Tcl_SetIntObj (iObj, i);
+	if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *)NULL, iObj,
+			    TCL_LEAVE_ERR_MSG|TCL_PART1_NOT_PARSED) == NULL)
+	    return TCL_ERROR;
 
-        result = Tcl_Eval (interp, command);
+        result = Tcl_EvalObj (interp, command);
         if (result == TCL_CONTINUE) {
             result = TCL_OK;
         } else if (result != TCL_OK) {
@@ -315,7 +337,7 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
                 
                 sprintf (buf, "\n    (\"loop\" body line %d)", 
                          interp->errorLine);
-                Tcl_AddErrorInfo (interp, buf);
+		Tcl_StringObjAppend (Tcl_GetObjResult (interp), buf, -1);
             }
             break;
         }
@@ -324,9 +346,7 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
     /*
      * Set variable to its final value.
      */
-    sprintf (itxt, "%ld" ,i);
-    if (Tcl_SetVar (interp, argv [1], itxt, TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
-
+    Tcl_SetIntObj (iObj, i);
+    Tcl_DecrRefCount (iObj);
     return result;
 }

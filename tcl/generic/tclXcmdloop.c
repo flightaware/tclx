@@ -3,7 +3,7 @@
  *
  *   Interactive command loop, C and Tcl callable.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 7.4 1996/11/20 00:50:15 markd Exp $
+ * $Id: tclXcmdloop.c,v 1.3 1997/01/02 05:44:46 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -84,8 +84,8 @@ static int
 IsSetVarCmd (command)
     char  *command;
 {
-    CONST char  *nextPtr;
-    int    wordCnt;
+    char *nextPtr;
+    int wordCnt;
 
     if ((!STRNEQU (command, "set", 3)) || (!ISSPACE (command [3])))
         return FALSE;  /* Quick check */

@@ -3,7 +3,7 @@
  *
  * Support for the dup command on Windows.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinDup.c,v 7.1 1996/09/03 23:39:10 markd Exp $
+ * $Id: tclXwinDup.c,v 1.3 1997/01/03 08:43:45 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,12 +47,13 @@ ConvertChannelName (Tcl_Interp *interp,
             *handleIdPtr = STD_ERROR_HANDLE;
     } else if (STRNEQU (channelName, "file", 4) ||
                STRNEQU (channelName, "sock", 4)) {
-        Tcl_AppendResult (interp, "on MS Windows, only stdin, stdout or ",
-                          "stderr maybe the dup target", (char *) NULL);
+        TclX_StringAppendObjResult (interp, "on MS Windows, only stdin, ",
+                                    "stdout, or stderr maybe the dup target",
+                                    (char *) NULL);
         return TCL_ERROR;
     } else {
-        Tcl_AppendResult (interp, "invalid channel id: ", channelName,
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, "invalid channel id: ",
+                                    channelName, (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -111,8 +112,8 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
                           0, FALSE,
                           DUPLICATE_SAME_ACCESS)) {
 	TclWinConvertError (GetLastError ());
-        Tcl_AppendResult (interp, "dup failed: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, "dup failed: ",
+                                    Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
 
@@ -152,15 +153,15 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
  *
  * Parameters:
  *   o interp (I) - If an error occures, the error message is in result.
- *   o fileNumStr (I) - The string number of the open file.
+ *   o fileNum (I) - The file number of the open file.
  * Returns:
  *   The unregistered channel or NULL if an error occurs.
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclXOSBindOpenFile (interp, fileNumStr)
+TclXOSBindOpenFile (interp, fileNum)
     Tcl_Interp *interp;
-    char       *fileNumStr;
+    int         fileNum;
 {
     /* FIX: Can probably make something work */
     TclXNotAvailableError (interp,

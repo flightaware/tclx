@@ -1,9 +1,9 @@
 .\"
 .\" Memory.man
 .\"
-.\" Extended Tcl binary file search command.
+.\" Extended Tcl memory leak locator.
 .\"----------------------------------------------------------------------------
-.\" Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
+.\" Copyright 1992-1997 Karl Lehenbauer and Mark Diekhans.
 .\"
 .\" Permission to use, copy, modify, and distribute this software and its
 .\" documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Memory.n,v 7.0 1996/06/16 05:29:43 markd Exp $
+.\" $Id: Memory.n,v 1.2 1997/01/02 05:44:43 karl Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Memory" TCL "" "Tcl"

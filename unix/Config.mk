@@ -13,7 +13,7 @@
 #       make -k CC=gcc CFLAGS=-O
 #
 #------------------------------------------------------------------------------
-# Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1997 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 7.4 1996/10/19 19:04:35 markd Exp $
+# $Id: Config.mk,v 1.8 1997/01/25 05:38:30 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -50,26 +50,26 @@
 
 #------------------------------------------------------------------------------
 # The Tcl source distribution directory, the path to tclConfig.sh, the Tcl
-# library (libtcl7.6.a) and the flags neccessary to link with the Tcl shared
-# library (libtcl7.6.so).  Note, access is required to tclInt.h which is not
+# library (libtcl8.0.a) and the flags neccessary to link with the Tcl shared
+# library (libtcl8.0.so).  Note, access is required to tclInt.h which is not
 # installed by Tcl.  If you want to use the installed Tcl library, set TCL_LIB
 # to ${TCL_LIB_SPEC}.
 # 
 
-TCL_SRC=${srcbasedir}/../tcl7.6
-TCL_BUILD=${bldbasedir}/../tcl7.6
+TCL_SRC=${srcbasedir}/../tcl8.0a2
+TCL_BUILD=${bldbasedir}/../tcl8.0a2
 TCL_CONFIG=${TCL_BUILD}/unix/tclConfig.sh
 TCL_LIB=${TCL_BUILD_LIB_SPEC}
 
 #------------------------------------------------------------------------------
 # Unless configure is going to be run with --with-tk=NO, these defines must be
 # set.  They define the directory containing the Tk source distribution, the
-# path to tkConfig.sh, the path to the Tk library (libtk4.2.a) and the flags
-# neccessary to link with the Tk shared library (libtk4.2.so).  If you want to
+# path to tkConfig.sh, the path to the Tk library (libtk8.0.a) and the flags
+# neccessary to link with the Tk shared library (libtk8.0.so).  If you want to
 # use the installed Tk library, set TK_LIB to ${TK_LIB_SPEC}.
 
-TK_SRC=${srcbasedir}/../tk4.2
-TK_BUILD=${bldbasedir}/../tk4.2
+TK_SRC=${srcbasedir}/../tk8.0a2
+TK_BUILD=${bldbasedir}/../tk8.0a2
 TK_CONFIG=${TK_BUILD}/unix/tkConfig.sh
 TK_LIB=${TK_BUILD_LIB_SPEC}
 
@@ -80,6 +80,7 @@ TK_LIB=${TK_BUILD_LIB_SPEC}
 
 #CC=cc
 #CFLAGS=-O
+CFLAGS=-g -DTCL_MEM_DEBUG -Wall
 
 #------------------------------------------------------------------------------
 # Definition of programs you wish to use. RANLIB is set by configure in the
@@ -105,7 +106,7 @@ STRIP=strip
 #   o XLDLIBS - Extra libraries to use at link time.
 
 XCFLAGS=
-XLDFLAGS=
+XLDFLAGS=-g
 XLDLIBS=
 
 #------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
  *
  * Tcl commands to access getuid, setuid, getgid, setgid and friends on Unix.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixId.c,v 1.2 1996/07/22 17:01:11 markd Exp $
+ * $Id: tclXunixId.c,v 1.3 1997/01/25 05:38:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -383,7 +383,7 @@ IdGroupids (interp, argc, argv, symbolic)
     nGroups = getgroups (confNGroups, groups);
     if (nGroups < 0) {
         interp->result = Tcl_PosixError (interp);
-        ckfree (groups);
+        ckfree ((char *) groups);
         return TCL_ERROR;
     }
 
@@ -404,7 +404,7 @@ IdGroupids (interp, argc, argv, symbolic)
     }
     if (symbolic)
         endgrent ();
-    ckfree (groups);
+    ckfree ((char *) groups);
     return TCL_OK;
 #else
     Tcl_AppendResult (interp, "group id lists unavailable on this system ",

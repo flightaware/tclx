@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXwinUtil.c,v 7.1 1996/11/07 01:09:51 markd Exp $
+ * $Id: tkXwinUtil.c,v 1.1.1.1 1996/12/20 05:39:22 karl Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"

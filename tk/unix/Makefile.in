@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.14 1996/11/20 04:13:16 markd Exp $
+# $Id: Makefile.in,v 1.6 1997/04/14 00:55:49 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,9 +27,9 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${SYSCFLAGS} \
               ${TK_DEFS} \
-	      -I${TKX_GENERIC_DIR} \
+	      -I${TKX_GENERIC_DIR} -I${TKX_UNIX_SRC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
 	      -I${TCLX_UNIX_BLD_DIR} \
@@ -57,7 +57,8 @@ STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_LIB} ${TK_XLIBSW} \
 #
 GENERIC_OBJS = tkXinit.o tkXshell.o
 
-GENERIC_SOBJS = tkXinit@SHOBJ_SUFFIX@ tkXshell@SHOBJ_SUFFIX@
+GENERIC_SOBJS = tkXinit@SHOBJ_SUFFIX@ tkXshell@SHOBJ_SUFFIX@ \
+	tkXreparent@SHOBJ_SUFFIX@ tkXunixSys@SHOBJ_SUFFIX@
 
 OBJS = ${GENERIC_OBJS}
 
@@ -81,7 +82,7 @@ all: ${TKX_STLIB_NAME} wishx RUNTIME tktest runtest \
 
 static: wishx.static
 
-wishx: tkXAppInit.o SHLIB_@BUILD_SHARED@ ${LIBTCLX}
+wishx: tkXAppInit.o SHLIB_@BUILD_SHARED@ ${TKX_STLIB_NAME} ${LIBTCLX}
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -113,8 +114,14 @@ tkXinit.o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
 tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXshell.c
 
+tkXreparent.o: ${TKX_GENERIC_DIR}/tkXreparent.c
+	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXreparent.c
+
 tkXAppInit.o: ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
 	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
+
+tkXunixSys.o: ${TKX_UNIX_SRC_DIR}/tkXunixSys.c
+	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXunixSys.c
 
 tkXunixTest.o: ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
 	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
@@ -132,6 +139,18 @@ tkXshell..o: ${TKX_GENERIC_DIR}/tkXshell.c
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
 	    ${TKX_GENERIC_DIR}/tkXshell.c
+	@OBJ_RESTORE@
+
+tkXreparent..o: ${TKX_GENERIC_DIR}/tkXreparent.c
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" \
+	    ${TKX_GENERIC_DIR}/tkXreparent.c @OBJ_RESTORE@
+
+tkXunixSys..o: ${TKX_UNIX_SRC_DIR}/tkXunixSys.c
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TKX_UNIX_SRC_DIR}/tkXunixSys.c
 	@OBJ_RESTORE@
 
 #------------------------------------------------------------------------------
@@ -166,7 +185,7 @@ help:
 # Generate the test program.
 #
 
-tktest: ${TEST_OBJS} SHLIB_@BUILD_SHARED@  ${LIBTCLX}
+tktest: ${TEST_OBJS} SHLIB_@BUILD_SHARED@ ${TKX_STLIB_NAME} ${LIBTCLX}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 

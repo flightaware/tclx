@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loop.test,v 7.1 1996/10/04 05:02:41 markd Exp $
+# $Id: loop.test,v 1.2 1996/12/24 10:23:43 karl Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -124,7 +124,7 @@ Test loop-1.13 {loop tests} {
     set j
 } 0 10
 
-Test loop-1.13 {loop tests} {
+Test loop-1.14 {loop tests} {
     set j 0
     loop i 655360 0 -65536 {
         incr j 1
@@ -132,7 +132,7 @@ Test loop-1.13 {loop tests} {
     set j
 } 0 10
 
-Test loop-1.9 {loop tests} {
+Test loop-1.15 {loop tests} {
     set a {}
     set i 1
     loop i 3*2 0+1 10-11 {

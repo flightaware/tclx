@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 7.2 1996/10/25 04:55:34 markd Exp $
+ * $Id: tkXshell.c,v 1.1.1.1 1996/12/20 05:39:21 karl Exp $
  *-----------------------------------------------------------------------------
  */
 /* 

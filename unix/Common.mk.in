@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 7.7 1996/11/20 00:51:04 markd Exp $
+# $Id: Common.mk.in,v 1.2 1996/12/29 04:10:42 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -32,6 +32,7 @@ TKX_FULL_VERSION   = @TKX_FULL_VERSION@
 #
 CC           = @CC@
 CFLAGS       = @CFLAGS@
+SYSCFLAGS    = @SYSCFLAGS@
 RANLIB       = @RANLIB@
 LN_S         = ln -s
 srcbasedir   = @srcbasedir@

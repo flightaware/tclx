@@ -4,7 +4,7 @@
  * Tcl Unix signal support routines and the signal and commands.  The #ifdefs
  * around several common Unix signals existing are for Windows.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 7.4 1996/09/17 22:28:56 markd Exp $
+ * $Id: tclXsignal.c,v 1.2 1997/01/02 05:44:53 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
