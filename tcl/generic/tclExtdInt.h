@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.16 1995/07/20 02:31:23 markd Exp markd $
+ * $Id: tclExtdInt.h,v 5.0 1995/07/25 05:42:46 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -69,10 +69,17 @@
 #include <grp.h>
 
 /*
- * Included the tcl file tclUnix.h after other system files, as it checks
+ * Included the tcl file tclPort.h after other system files, as it checks
  * if certain things are defined.
  */
 #include "tclPort.h"
+
+/*
+ * Define O_ACCMODE if <fcntl.h> does not define it.
+ */
+#ifndef O_ACCMODE
+#    define O_ACCMODE  (O_RDONLY|O_WRONLY|O_RDWR)
+#endif
 
 /*
  * These should be take from an include file, but it got to be such a mess
@@ -84,7 +91,7 @@ struct tm *localtime ();
 
 /*
  * Get ranges of integers and longs.
- *  If no MAXLONG, assume sizeof (long) == sizeof (int).
+ * If no MAXLONG, assume sizeof (long) == sizeof (int).
  */
 
 #ifndef MAXINT

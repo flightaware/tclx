@@ -33,8 +33,13 @@
 #ifndef HAVE_BCOPY
 #    define bcopy(from, to, length)    memmove((to), (from), (length))
 #endif
+
 #ifndef HAVE_BZERO
 #    define bzero(to, length)          memset((to), '\0', (length))
+#endif
+
+#ifndef NO_DATA
+#   define NO_DATA NO_ADDRESS
 #endif
 
 extern int h_errno;

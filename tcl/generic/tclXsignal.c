@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 4.4 1995/03/17 00:09:41 markd Exp markd $
+ * $Id: tclXsignal.c,v 5.0 1995/07/25 05:58:49 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,6 +32,13 @@
 #  else
 #    define MAXSIG 32
 #  endif
+#endif
+
+/*
+ * Encore UMAX doesn't define SIG_ERR!.
+ */
+#ifndef SIG_ERR
+#   define SIG_ERR  (void (*)())-1
 #endif
 
 /*
