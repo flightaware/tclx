@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 4.3 1995/04/25 04:01:12 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 4.4 1995/05/24 05:27:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -737,7 +737,6 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
     Tcl_Interp  *interp;
     int          argc;
     char       **argv;
-{
 {
     Tcl_AppendResult (interp, 
                       "the ftruncate command is not available on this ",

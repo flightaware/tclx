@@ -217,5 +217,11 @@
 /* Define if stdio FILE has the _IO_read_ptr/_IO_read_end fields */
 #undef HAVE_STDIO_IO_READ_PTR
 
-/* Define if have th function BSDgettimeofday (SGI) */
+/* Define if have the function BSDgettimeofday (SGI) */
 #undef HAVE_BSDGETTIMEOFDAY
+
+/* Define if have the function truncate */
+#undef HAVE_TRUNCATE
+
+/* Define if have the function SCO function truncate in chsize */
+#undef HAVE_CHSIZE
