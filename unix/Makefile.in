@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.15 1996/05/06 15:29:47 markd Exp $
+# $Id: Makefile.in,v 6.0 1996/05/10 16:19:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -36,7 +36,7 @@ PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}" "LDFLAGS=${LDFLAGS}"
 all: TCLX TKX_${TKX_BUILD}
 
 TCLX: TOOLS runtcl
-	cd ../tcl/unix; ${MAKE} all
+	cd ../tcl/unix; ${MAKE} ${PASS_FLAGS} all
 
 TKX_YES: TOOLS runwishx
 	cd ../tk/unix; ${MAKE} ${PASS_FLAGS} all
