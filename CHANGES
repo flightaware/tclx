@@ -291,3 +291,8 @@
   o Patch the UCB tclExpr.c file to return doubles without lose of precision.
     This is temporary until a fix is povided in the UCB code.
 -------------------------------------------------------------------------------
+ 4 Oct 92:
+  o Fixed behavior of Posix signals and SIGCHLD.
+  o Added block and unblock options.
+  o Added return of block state in the get option.
+-------------------------------------------------------------------------------
