@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 4.1 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclXgetdate.y,v 4.2 1995/01/01 19:49:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 4.1 $
+ * $Revision: 4.2 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -42,6 +42,8 @@
 #include <ctype.h>
 #include <time.h>
 #include "tcl.h"
+
+extern struct tm  *localtime();
 
 #define EPOCH           1970
 #define START_OF_TIME   1902
@@ -103,7 +105,47 @@ static time_t   yyRelMonth;
 static time_t   yyRelSeconds;
 
 
-extern struct tm  *localtime();
+/*
+ * Prototypes of internal functions.
+ */
+static void
+yyerror _ANSI_ARGS_((char *s));
+
+static time_t
+ToSeconds _ANSI_ARGS_((time_t      Hours,
+                       time_t      Minutes,
+                       time_t      Seconds,
+                       MERIDIAN    Meridian));
+
+static int
+Convert _ANSI_ARGS_((time_t      Month,
+                     time_t      Day,
+                     time_t      Year,
+                     time_t      Hours,
+                     time_t      Minutes,
+                     time_t      Seconds,
+                     MERIDIAN    Meridia,
+                     DSTMODE     DSTmode,
+                     time_t     *TimePtr));
+
+static time_t
+DSTcorrect _ANSI_ARGS_((time_t      Start,
+                        time_t      Future));
+
+static time_t
+RelativeDate _ANSI_ARGS_((time_t      Start,
+                          time_t      DayOrdinal,
+                          time_t      DayNumber));
+
+static int
+RelativeMonth _ANSI_ARGS_((time_t      Start,
+                           time_t      RelMonth,
+                           time_t     *TimePtr));
+static int
+LookupWord _ANSI_ARGS_((char  *buff));
+
+static int
+yylex ();
 %}
 
 %union {
@@ -484,48 +526,6 @@ static TABLE    MilitaryTable[] = {
     { "z",      tZONE,  HOUR(  0) },
     { NULL }
 };
-
-/*
- * Prototypes of internal functions.
- */
-static void
-yyerror _ANSI_ARGS_((char *s));
-
-static time_t
-ToSeconds _ANSI_ARGS_((time_t      Hours,
-                       time_t      Minutes,
-                       time_t      Seconds,
-                       MERIDIAN    Meridian));
-
-static int
-Convert _ANSI_ARGS_((time_t      Month,
-                     time_t      Day,
-                     time_t      Year,
-                     time_t      Hours,
-                     time_t      Minutes,
-                     time_t      Seconds,
-                     MERIDIAN    Meridia,
-                     DSTMODE     DSTmode,
-                     time_t     *TimePtr));
-
-static time_t
-DSTcorrect _ANSI_ARGS_((time_t      Start,
-                        time_t      Future));
-
-static time_t
-RelativeDate _ANSI_ARGS_((time_t      Start,
-                          time_t      DayOrdinal,
-                          time_t      DayNumber));
-
-static int
-RelativeMonth _ANSI_ARGS_((time_t      Start,
-                           time_t      RelMonth,
-                           time_t     *TimePtr));
-static int
-LookupWord _ANSI_ARGS_((char  *buff));
-
-static int
-yylex ();
 
 
 /*
