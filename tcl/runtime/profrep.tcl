@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profrep.tcl,v 8.0.4.1 1997/04/14 02:02:07 markd Exp $
+# $Id: profrep.tcl,v 8.1 1997/04/17 04:59:07 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -114,15 +114,18 @@ proc profrep:print {profDataVar sortedProcList outFile userTitle} {
     puts $outFH $hdr
     puts $outFH [replicate - [clength $hdr]]
 
-    # Output the data in sorted order.
+    # Output the data in sorted order.  Trim leading ::.
 
     foreach procStack $sortedProcList {
         set data $profData($procStack)
+        set cmd [lvarpop procStack]
+        regsub {^::} $cmd {} cmd
         puts $outFH [format "%-${maxNameLen}s %10d %10d %10d" \
-                            [lvarpop procStack] \
-                            [lindex $data 0] [lindex $data 1] [lindex $data 2]]
+                            $cmd [lindex $data 0] [lindex $data 1] \
+                            [lindex $data 2]]
         foreach procName $procStack {
             if {$procName == "<global>"} break
+            regsub {^::} $procName {} procName
             puts $outFH "    $procName"
         }
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.9 1997/07/04 20:23:59 markd Exp $
+ * $Id: tclXprofile.c,v 8.10 1997/07/08 16:39:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -118,7 +118,6 @@ UpdateTOSTimes _ANSI_ARGS_((profInfo_t *infoPtr));
 
 static Command *
 ProfCommandEvalSetup _ANSI_ARGS_((profInfo_t *infoPtr,
-                                  char       *cmdName,
                                   int        *isProcPtr));
     
 static void
@@ -246,7 +245,7 @@ PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
          * Only global level can be NULL.
          */
         if (scanPtr == NULL)
-            panic (PROF_PANIC, 3);
+            panic (PROF_PANIC, 1);
     }
     entryPtr->prevScopePtr = scanPtr;
     infoPtr->scopeChainPtr = entryPtr;
@@ -402,15 +401,16 @@ UpdateTOSTimes (infoPtr)
  *-----------------------------------------------------------------------------
  */
 static Command *
-ProfCommandEvalSetup (infoPtr, cmdName, isProcPtr)
+ProfCommandEvalSetup (infoPtr, isProcPtr)
     profInfo_t *infoPtr;
-    char       *cmdName;
     int        *isProcPtr;
 {
     Interp *iPtr = (Interp *) infoPtr->interp;
     Command *currentCmdPtr;
     CallFrame *framePtr;
     int procLevel, scopeLevel, isProc;
+    Tcl_Obj *fullCmdNamePtr;
+    char *fullCmdName;
 
     /*
      * Restore the command table entry.  If the command has modified it, don't
@@ -431,6 +431,11 @@ ProfCommandEvalSetup (infoPtr, cmdName, isProcPtr)
     infoPtr->savedObjCmdProc = NULL;
     infoPtr->savedObjCmdClientData = NULL;
 
+    fullCmdNamePtr = Tcl_NewObj ();
+    Tcl_GetCommandFullName (infoPtr->interp, (Tcl_Command) currentCmdPtr, 
+                            fullCmdNamePtr);
+    fullCmdName = Tcl_GetStringFromObj (fullCmdNamePtr, NULL);
+
     /*
      * Determine current proc and var levels.
      */
@@ -450,7 +455,7 @@ ProfCommandEvalSetup (infoPtr, cmdName, isProcPtr)
         UpdateTOSTimes (infoPtr);
     while (infoPtr->stackPtr->procLevel > procLevel) {
         if (infoPtr->stackPtr->evalLevel != UNKNOWN_LEVEL) 
-            panic (PROF_PANIC, 4);  /* Not an initial entry */
+            panic (PROF_PANIC, 2);  /* Not an initial entry */
         PopEntry (infoPtr);
     }
 
@@ -458,50 +463,26 @@ ProfCommandEvalSetup (infoPtr, cmdName, isProcPtr)
      * If this command is a procedure or if all commands are being traced,
      * handle the entry.
      */
-     isProc = (TclFindProc (iPtr, cmdName) != NULL);
-#ifdef ITCL_NAMESPACES      
-    if (infoPtr->commandMode || isProc) {
-        char *commandNamesp;
-        Tcl_DString commandWithNs;
-
-        /*
-         * Append the namespace of the command.
-         */
-        Tcl_DStringInit (&commandWithNs);
-        commandNamesp = Itcl_GetNamespPath (Itcl_GetActiveNamesp (interp));
-	if ((commandNamesp != NULL) && !STREQU (commandNamesp, "::")) {
-            Tcl_DStringAppend (&commandWithNs, commandNamesp, -1);
-	}
-	Tcl_DStringAppend (&commandWithNs, argv[0], -1); 
-
-        UpdateTOSTimes (infoPtr);
-        if (isProc) {
-            PushEntry (infoPtr, Tcl_DStringValue (&commandWithNs), TRUE,
-                       procLevel + 1, scopeLevel + 1, infoPtr->evalLevel);
-        } else {
-            PushEntry (infoPtr, Tcl_DStringValue (&commandWithNs), FALSE,
-                       procLevel, scopeLevel, infoPtr->evalLevel);
-        }
-	Tcl_DStringFree (&commandWithNs);
-    }
-#else
+    isProc = (TclFindProc (iPtr, fullCmdName) != NULL);
     if (infoPtr->commandMode || isProc) {
         UpdateTOSTimes (infoPtr);
         if (isProc) {
-            PushEntry (infoPtr, cmdName, TRUE,
+            PushEntry (infoPtr, fullCmdName, TRUE,
                        procLevel + 1, scopeLevel + 1, infoPtr->evalLevel);
         } else {
-            PushEntry (infoPtr, cmdName, FALSE,
+            PushEntry (infoPtr, fullCmdName, FALSE,
                        procLevel, scopeLevel, infoPtr->evalLevel);
         }
     }
-#endif
+
     /*
      * Leaving profiler, must get time again when we reenter.
      */
     infoPtr->updatedTimes = FALSE;
 
     *isProcPtr = isProc;
+
+    Tcl_DecrRefCount (fullCmdNamePtr);
     return currentCmdPtr;
 }
 
@@ -554,7 +535,7 @@ ProfStrCommandEval (clientData, interp, argc, argv)
     Command *currentCmdPtr;
     int isProc, result;
 
-    currentCmdPtr = ProfCommandEvalSetup (infoPtr, argv [0], &isProc);
+    currentCmdPtr = ProfCommandEvalSetup (infoPtr, &isProc);
 
     result = (*currentCmdPtr->proc) (currentCmdPtr->clientData, interp,
                                      argc, argv);
@@ -584,12 +565,9 @@ ProfObjCommandEval (clientData, interp, objc, objv)
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     Command *currentCmdPtr;
-    int isProc, result, strLen;
+    int isProc, result;
 
-    /* FIX: Need version of ProfCommandEvalSetup that takes an object */
-    currentCmdPtr = ProfCommandEvalSetup (infoPtr, 
-                                          Tcl_GetStringFromObj (objv [0],
-                                                                &strLen),
+    currentCmdPtr = ProfCommandEvalSetup (infoPtr,
                                           &isProc);
 
     result = (*currentCmdPtr->objProc) (currentCmdPtr->objClientData, interp,
@@ -617,29 +595,20 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     int           argc;
     char        **argv;
 {
-    Interp *iPtr = (Interp *) interp;
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     Command *cmdPtr;
-#ifdef ITCL_NAMESPACES      
     Tcl_Command cmd;
-#else
-    Tcl_HashEntry *hPtr;
-#endif    
 
     if (infoPtr->currentCmdPtr != NULL)
-        panic (PROF_PANIC, 5);
+        panic (PROF_PANIC, 3);
 
-#ifdef ITCL_NAMESPACES      
-    if (Itcl_FindCommand((Tcl_Interp*)iPtr, argv [0], 0, &cmd) != TCL_OK)
-        panic (PROF_PANIC, 56);
-    cmdPtr = (Command*)cmd;
-#else
-    hPtr = Tcl_FindHashEntry (&iPtr->globalNsPtr->cmdTable, argv [0]);
-    cmdPtr = (Command *) Tcl_GetHashValue (hPtr);
-#endif
+    cmd = Tcl_FindCommand (interp, argv [0], NULL, 0);
+    if (cmd == NULL)
+        panic (PROF_PANIC, 4);
+    cmdPtr = (Command *) cmd;
 
     if ((cmdPtr->proc != cmdProc) || (cmdPtr->clientData != cmdClientData))
-        panic (PROF_PANIC, 6);
+        panic (PROF_PANIC, 5);
 
     /*
      * If command is to be compiled, we can't profile it.
@@ -776,7 +745,7 @@ TurnOnProfiling (infoPtr, commandMode, evalMode)
          * Only global level can be NULL.
          */
         if (scanPtr == NULL)
-            panic (PROF_PANIC, 4);
+            panic (PROF_PANIC, 6);
     }
     infoPtr->scopeChainPtr = scanPtr;
 
