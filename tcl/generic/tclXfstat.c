@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 4.2 1995/03/30 05:26:13 markd Exp markd $
+ * $Id: tclXfstat.c,v 4.3 1995/03/31 08:19:58 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -371,7 +371,7 @@ ReturnStatItem (interp, filePtr, statBufPtr, itemName)
         Tcl_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
                           "\"atime\", \"ctime\", \"dev\", \"gid\", \"ino\", ",
                           "\"mode\", \"mtime\", \"nlink\", \"size\", ",
-                          "\"tty\", \"type\", \"uid\", \"remotehost\" or ",
+                          "\"tty\", \"type\", \"uid\", \"remotehost\", or ",
                           "\"localhost\"", (char *) NULL);
         return TCL_ERROR;
     }
