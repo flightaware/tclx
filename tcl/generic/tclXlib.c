@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.13 1993/11/09 05:42:59 markd Exp markd $
+ * $Id: tclXlib.c,v 3.0 1993/11/19 06:58:56 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -70,8 +70,7 @@ SetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                   char       *packageName,
                                   char       *fileName,
                                   char       *offset,
-                                  char       *length,
-                                  int         overwrite));
+                                  char       *length));
 
 static int
 GetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
@@ -92,8 +91,7 @@ AddLibIndexErrorInfo _ANSI_ARGS_((Tcl_Interp *interp,
 static int
 ProcessIndexFile _ANSI_ARGS_((Tcl_Interp *interp,
                               char       *tlibFilePath,
-                              char       *tndxFilePath,
-                              int         overwrite));
+                              char       *tndxFilePath));
 
 static int
 BuildPackageIndex  _ANSI_ARGS_((Tcl_Interp *interp,
@@ -101,8 +99,7 @@ BuildPackageIndex  _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 LoadPackageIndex _ANSI_ARGS_((Tcl_Interp *interp,
-                              char       *tlibFilePath,
-                              int         overwrite));
+                              char       *tlibFilePath));
 
 static int
 LoadOusterIndex _ANSI_ARGS_((Tcl_Interp *interp,
@@ -335,7 +332,7 @@ MakeAbsFile (interp, fileName, absNamePtr)
  *
  *     auto_pkg_index($packageName) [list $filename $offset $length]
  *
- * Duplicate package names are rejected unless overwrite is TRUE.
+ * Duplicate package entries are overwritten.
  *
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
@@ -343,30 +340,19 @@ MakeAbsFile (interp, fileName, absNamePtr)
  *   o fileName (I) - Absolute file name of the file containing the package.
  *   o offset (I) - String containing the numeric start of the package.
  *   o length (I) - String containing the numeric length of the package.
- *   o overwrite (I) - If TRUE, then overwrite existing definitions of the
- *     package, if FALSE, reject this package if its a duplicate.
  * Returns:
- *   TCL_OK, TCL_ERROR or TCL_CONTINUE if the package name is already defined
- * and is not to be overwritten.
+ *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-SetPackageIndexEntry (interp, packageName, fileName, offset, length, overwrite)
+SetPackageIndexEntry (interp, packageName, fileName, offset, length)
      Tcl_Interp *interp;
      char       *packageName;
      char       *fileName;
      char       *offset;
      char       *length;
-     int         overwrite;
 {
     char *pkgDataArgv [3], *dataStr, *setResult;
-
-    /*
-     * If overwrite is not specified, check if the package alreay is defined.
-     */
-    if ((!overwrite) && (Tcl_GetVar2 (interp, AUTO_PKG_INDEX, packageName,
-                                      TCL_GLOBAL_ONLY) != NULL))
-        return TCL_CONTINUE;
 
     /*
      * Build up the list of values to save.
@@ -530,25 +516,22 @@ AddLibIndexErrorInfo (interp, indexName)
  * ProcessIndexFile --
  *
  * Open and process a package library index file (.tndx).  Creates entries
- * in the auto_index and auto_pkg_index arrays.   If the package is already
- * defined it skipped unless overwrite is TRUE.
+ * in the auto_index and auto_pkg_index arrays.  Existing entries are over
+ * written.
  *
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o tlibFilePath (I) - Absolute path name to the library file.
  *   o tndxFilePath (I) - Absolute path name to the library file index.
- *   o overwrite (I) - If TRUE, then overwrite existing definitions of
- *     packages, if FALSE, skip packages that are duplicate.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessIndexFile (interp, tlibFilePath, tndxFilePath, overwrite)
+ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
      Tcl_Interp *interp;
      char       *tlibFilePath;
      char       *tndxFilePath;
-     int         overwrite;
 {
     FILE        *indexFilePtr = NULL;
     Tcl_DString  lineBuffer;
@@ -580,7 +563,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath, overwrite)
          * lineArgv [3-n] are the entry procedures for the package.
          */
         result = SetPackageIndexEntry (interp, lineArgv [0], tlibFilePath,
-                                       lineArgv [1], lineArgv [2], overwrite);
+                                       lineArgv [1], lineArgv [2]);
         if (result == TCL_ERROR)
             goto errorExit;
 
@@ -684,17 +667,14 @@ BuildPackageIndex (interp, tlibFilePath)
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o tlibFilePath (I) - Absolute path name to the library file.
- *   o overwrite (I) - If TRUE, then overwrite existing definitions of
- *     packages, if FALSE, skip packages that are duplicate.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-LoadPackageIndex (interp, tlibFilePath, overwrite)
-     Tcl_Interp *interp;
-     char       *tlibFilePath;
-     int         overwrite;
+LoadPackageIndex (interp, tlibFilePath)
+    Tcl_Interp *interp;
+    char       *tlibFilePath;
 {
     Tcl_DString  tndxFilePath;
     struct stat  tlibStat;
@@ -725,8 +705,7 @@ LoadPackageIndex (interp, tlibFilePath, overwrite)
             goto errorExit;
     }
 
-    if (ProcessIndexFile (interp, tlibFilePath, tndxFilePath.string,
-                          overwrite) != TCL_OK)
+    if (ProcessIndexFile (interp, tlibFilePath, tndxFilePath.string) != TCL_OK)
         goto errorExit;
     Tcl_DStringFree (&tndxFilePath);
     return TCL_OK;
@@ -868,11 +847,10 @@ LoadDirIndexes (interp, dirName)
  *-----------------------------------------------------------------------------
  * LoadPackageIndexes --
  *
- * Loads the all indexes for all package libraries (.tlib) or a
- * Ousterhout "tclIndex" files found in all directories in the path.
- * If an index has already been loaded, it will not be reloaded.
- * Non-existent or unreadable directories are skipped.
- * The Tcl array variables auto_index and auto_PKG_INDEX are updated.
+ * Loads the all indexes for all package libraries (.tlib) or a Ousterhout
+ * "tclIndex" files found in all directories in the path.  The path is search
+ * backwards so that index entries first in the path will override those 
+ * later on in the path.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -901,7 +879,7 @@ LoadPackageIndexes (interp, infoPtr, path)
         return TCL_ERROR;
     }
 
-    for (idx = 0; idx < pathArgc; idx++) {
+    for (idx = pathArgc - 1; idx >= 0; idx--) {
         /*
          * Get the absolute dir name.  if the conversion fails (most likely
          * invalid "~") or the directory can't be read, skip it.
@@ -1150,7 +1128,7 @@ Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
     if ((pathLen > 5) && (pathName [pathLen - 5] == '.')) {
         if (!STREQU (pathName + pathLen - 5, ".tlib"))
             goto invalidName;
-        if (LoadPackageIndex (interp, pathName, TRUE) != TCL_OK)
+        if (LoadPackageIndex (interp, pathName) != TCL_OK)
             goto errorExit;
     } else {
         if (!STREQU (pathName + pathLen - 9, "/tclIndex"))

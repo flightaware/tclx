@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 3.0 1993/11/19 06:57:41 markd Rel markd $
+# $Id: tcllib.test,v 3.1 1993/11/28 23:24:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -247,7 +247,7 @@ Test tcllib-6.3 {successful library access} {
 
 #
 # Test skipping of duplicate packages.  Also make sure loadlibindex overrides
-# existing package definitions.
+# existing package definitions.  Test for both .tlib and tclIndex indexes.
 #
 TclLibCleanUp
 mkdir {tcllib1.dir tcllib2.dir}
@@ -274,6 +274,39 @@ Test tcllib-7.2 {Duplicate package handling} {
     loadlibindex tcllib2.dir/test2.tlib
     DupPkgTest
 } 0 {Version-2}
+
+TclLibCleanUp
+rename DupPkgTest {}
+mkdir {tcllib1.dir tcllib2.dir}
+set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
+
+PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
+        {set auto_index(DupPkgTest)  " source $dir/test1.tcl"}
+
+PutFile tcllib1.dir/test1.tcl \
+    {proc DupPkgTest {} {return {Version-1}}
+}
+
+PutFile tcllib2.dir/tclIndex "# Tcl autoload index file, version 2.0" \
+        {set auto_index(DupPkgTest)  " source $dir/test1.tcl"}
+
+PutFile tcllib2.dir/test1.tcl \
+    {proc DupPkgTest {} {return {Version-2}}
+}
+
+Test tcllib-7.3 {Duplicate package handling} {
+    DupPkgTest
+} 0 {Version-1}
+
+TclLibReset
+rename DupPkgTest {}
+
+Test tcllib-7.4 {Duplicate package handling} {
+    lrmdups {a b c}  ;# Force load of indices.
+    loadlibindex tcllib2.dir/tclIndex
+    DupPkgTest
+} 0 {Version-2}
+
 
 #
 # Test backslash parsing in #@package: line.
