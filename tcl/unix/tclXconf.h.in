@@ -164,6 +164,9 @@
 /* Define if you have sigaction.  */
 #undef HAVE_SIGACTION
 
+/* Define if you have strcoll.  */
+#undef HAVE_STRCOLL
+
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
@@ -178,9 +181,6 @@
 
 /* Define if you have the Xwindow library (-lXwindow).  */
 #undef HAVE_LIBXWINDOW
-
-/* Define if you have the bsd library (-lbsd).  */
-#undef HAVE_LIBBSD
 
 /* Define if you have the c_s library (-lc_s).  */
 #undef HAVE_LIBC_S

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.13 1994/07/15 04:38:29 markd Exp markd $
+.\" $Id: TclX.n,v 4.0 1994/07/16 05:23:52 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2050,13 +2050,29 @@ determine the length of a string, extract a range of character from a string,
 replicate a string a number of times, and transliterate a string (similar to
 the Unix \fItr\fR program).
 '
+'\"@help: tcl/strings/ccollate
+'\"@brief: String comparison command (include localized collation).
+.TP
+.B ccollate ?-local? \fIstring1 string2\fR
+.br
+This command compares two strings.  
+If returns \fB-1\fR if \fIstring1\fR is less than \fIstring2\fR, \fB0\fR if
+they are equal amd \fB1\fR if \fIstring1\fR is greater than \fIstring2\fR.
+.sp
+If \fB-local\fR is specified, the strings are compared according to the
+collation environment of the current locale.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'
 '\"@help: tcl/strings/cequal
 '\"@brief: String equality convenience command.
 .TP
 .B cequal \fIstring1 string2\fR
 .br
 This command compares two strings for equality.
-Returns \fB1\fR if \fIstring1\fR and \fIstring2\fR are the identical
+It returns \fB1\fR if \fIstring1\fR and \fIstring2\fR are the identical
 and \fB0\fR if they are not.
 This command is a short-cut for \fBstring compare\fR and avoids the
 problems with string expressions being treated unintentionally as numbers.

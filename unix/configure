@@ -315,7 +315,7 @@ ac_compile='${CC-cc} $CFLAGS $LDFLAGS conftest.${ac_ext} -o conftest $LIBS >/dev
 
 
 #!/bin/sh
-# From configure.in Revision: 4.0 
+# From configure.in Revision: 4.1 
 
 
 
@@ -2272,7 +2272,7 @@ fi
 rm -f conftest*
 done
 
-for ac_func in bzero bcopy gethostbyname fsync getpriority
+for ac_func in bzero bcopy gethostbyname fsync getpriority strcoll
 do
 ac_tr_func=HAVE_`echo $ac_func | tr '[a-z]' '[A-Z]'`
 test -n "$silent" || echo "checking for ${ac_func}"

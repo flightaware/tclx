@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXstring.c,v 4.0 1994/07/16 05:28:00 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -107,6 +107,8 @@ Tcl_ClengthCmd (clientData, interp, argc, argv)
  *
  * Results:
  *      Standard Tcl result.
+ * Notes:
+ *   If clientData is TRUE its the range command, if its FALSE its csubstr.
  *-----------------------------------------------------------------------------
  */
 int
@@ -120,7 +122,7 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
     long      subLen;
     char     *strPtr;
     char      holdChar;
-    int       isRange = (argv [0][1] == 'r');  /* csubstr or crange */
+    int       isRange = (int) clientData;
 
     if (argc != 4) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -160,6 +162,64 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
     Tcl_SetResult (interp, strPtr, TCL_VOLATILE);
     strPtr [subLen] = holdChar;
 
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_Ccollate Cmd --
+ *     Implements the crange and csubstr TCL commands:
+ *         ccollate [-local] string1 string2
+ *
+ * Results:
+ *      Standard Tcl result.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_CcollateCmd (clientData, interp, argc, argv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          argc;
+    char       **argv;
+{
+    int argIndex, result, local = FALSE;
+
+    if ((argc < 3) || (argc > 4)) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " ?options? string1 string2", 
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (argc == 4) {
+        if (!STREQU (argv [1], "-local")) {
+            Tcl_AppendResult (interp, "Invalid option \"", argv [1],
+                              "\", expected \"-local\"",
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
+        local = TRUE;
+    }
+    argIndex = argc - 2;
+    
+    if (local) {
+#if HAVE_STRCOLL
+        result = strcoll (argv [argIndex], argv [argIndex + 1]);
+#else
+        result = strcmp (argv [argIndex], argv [argIndex + 1]);
+#endif
+    } else {
+        result = strcmp (argv [argIndex], argv [argIndex + 1]);
+    }
+
+    if (result < 0) {
+        interp->result = "-1";
+    } else if (result == 0) {
+        interp->result = "0";
+    } else {
+        interp->result = "1";
+    }
     return TCL_OK;
 }
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: string.test,v 4.0 1994/07/16 05:25:55 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -236,5 +236,44 @@ Test string-9.3 {cequal tests} {
 Test string-9.3 {cequal tests} {
     cequal abcded abcded
 } 0 1
+
+# ccollate command
+
+Test string-10.1 {ccollate tests} {
+    ccollate
+} 1 {wrong # args: ccollate ?options? string1 string2}
+
+Test string-10.2 {ccollate tests} {
+    ccollate aaa bbb ccc ddd
+} 1 {wrong # args: ccollate ?options? string1 string2}
+
+Test string-10.3 {ccollate tests} {
+    ccollate -bbb ccc ddd
+} 1 {Invalid option "-bbb", expected "-local"}
+
+Test string-10.4 {ccollate tests} {
+    ccollate nnn ccc ddd
+} 1 {Invalid option "nnn", expected "-local"}
+
+Test string-10.5 {ccollate tests} {
+    ccollate abcdef abcdef
+} 0 0
+
+Test string-10.6 {ccollate tests} {
+    ccollate abcdefg abcdef
+} 0 1
+
+Test string-10.7 {ccollate tests} {
+    ccollate abcde abcdef
+} 0 -1
+
+
+Test string-10.8 {ccollate tests} {
+    ccollate -local abcdefg abcdef
+} 0 1
+
+Test string-10.9 {ccollate tests} {
+    ccollate -local abcde abcdef
+} 0 -1
 
 

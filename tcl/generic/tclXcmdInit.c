@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 3.3 1994/06/28 07:07:09 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 4.0 1994/07/16 05:28:38 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -239,8 +239,10 @@ TclXCmd_Init (interp)
     Tcl_CreateCommand(interp, "clength", Tcl_ClengthCmd, 
                      (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand(interp, "crange", Tcl_CrangeCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
+                     (ClientData) TRUE, (void (*)()) NULL);
     Tcl_CreateCommand(interp, "csubstr", Tcl_CrangeCmd, 
+                     (ClientData) FALSE, (void (*)()) NULL);
+    Tcl_CreateCommand(interp, "ccollate", Tcl_CcollateCmd,
                      (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand(interp, "replicate", Tcl_ReplicateCmd, 
                      (ClientData) NULL, (void (*)()) NULL);

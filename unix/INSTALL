@@ -440,7 +440,12 @@ SGI:
      explictly checks for this version of IRIX and forces a functioning
      (but not internationalized) strftime to be built and added to libtclx.a.
 
-
+   o Systems upgraded to IRIX 5.2 may have old versions of libsocket.a and
+     libnsl.a left on the system.  The configure  will pick these up and 
+     attempt to use them.  This will prevent wishx from connecting to the
+     display.   Either remove the files from the system or edit tksrc/Makefile
+     to remove the use of "-lsocket -lnsl".
+  
 BSDI:
    o The BSDI 1.0  make is broken.  It does not correctly handle the setting of
      ${MAKEFLAGS} and quits on an error when an empty make flags set is passed
