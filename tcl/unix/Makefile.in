@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: Makefile.in,v 8.27 1999/05/10 15:25:53 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -126,7 +126,13 @@ TEST_SAOBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o \
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: tcl checkup RUNTIME tclXtest
+all: binaries libraries doc
+
+binaries: tcl checkup RUNTIME tclXtest
+
+libraries: tcl.tndx tcl.tlib tclx.tcl buildidx.tcl
+
+doc:
 
 static:	tcl.static tclXtest.static
 
@@ -303,7 +309,13 @@ buildhelp: tcl tcl.tndx
 
 #------------------------------------------------------------------------------
 
-install: install-runtime install-exec install-misc
+install: install-binaries install-libraries install-doc
+
+install-binaries: install-exec
+
+install-libraries: install-runtime install-misc
+
+install-doc:
 
 install-misc:
 	${INSTCOPY} ${TCLX_GENERIC_DIR}/tclExtend.h \
@@ -324,7 +336,7 @@ install-exec:
 	    ${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_STLIB_NAME}; \
 	fi
 	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
-	if test "@BUILD_SHARED@" = "YES"; then \
+	if test "@SHARED_BUILD@" = "1"; then \
 	    ${INSTCOPY} ${TCLX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
 	    ${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TCLX_EXEC_RUNTIME} ;\
 	fi

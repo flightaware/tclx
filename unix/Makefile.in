@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: Makefile.in,v 8.6 1999/03/31 06:37:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -33,7 +33,15 @@ PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}" "LDFLAGS=${LDFLAGS}"
 
 #------------------------------------------------------------------------------
 
-all: TCLX TKX_${TKX_BUILD}
+all: binaries libraries doc
+
+binaries: TCLX TKX_${TKX_BUILD}
+
+libraries:
+	(cd ../tcl/unix && ${MAKE} ${PASS_FLAGS} libraries)
+
+doc:
+	(cd ../tcl/unix && ${MAKE} ${PASS_FLAGS} doc)
 
 TCLX: TOOLS
 	(cd ../tcl/unix && ${MAKE} ${PASS_FLAGS} all)
@@ -110,7 +118,13 @@ buildhelp:
 #------------------------------------------------------------------------------
 # Install Extended Tcl.
 #
-install: all TCLX_INSTALL TKX_INSTALL_${TKX_BUILD} TCLX_INSTALL_MAN
+install: install-binaries install-libraries install-doc
+
+install-binaries: TCLX_INSTALL TKX_INSTALL_${TKX_BUILD}
+
+install-libraries: TCLX_INSTALL TKX_INSTALL_${TKX_BUILD}
+
+install-doc: TCLX_INSTALL_MAN
 
 install-exec: all TCLX_INSTALL_EXEC  TKX_INSTALL_EXEC_${TKX_BUILD}
 

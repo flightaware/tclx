@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id$
+dnl $Id: configure.in,v 8.24 1999/05/10 15:32:40 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision$),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.24 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -104,25 +104,9 @@ AC_SUBST(TKX_BUILD)
 # Check for the --enable-shared option.
 #------------------------------------------------------------------------------
 
-AC_ARG_ENABLE(shared,
-    [  --enable-shared         build and link with shared libraries],
-    [BUILD_SHARED=$enableval],
-    [BUILD_SHARED=NO])
-case "$BUILD_SHARED" in
-    YES|yes)
-        AC_MSG_RESULT(Will build shared libraries)
-        BUILD_SHARED=YES
-        ;;
-    NO|no)
-        AC_MSG_RESULT(Will not build shared libraries)
-        BUILD_SHARED=NO
-        ;;
-     *)
-        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
-        exit 1
-        ;;
-esac
-AC_SUBST(BUILD_SHARED)
+SC_ENABLE_SHARED
+
+AC_SUBST(SHARED_BUILD)
 
 #------------------------------------------------------------------------------
 # We need the real value of prefix and exec-prefix now, not when the generated
@@ -168,7 +152,14 @@ fi
 # changing this.
 #------------------------------------------------------------------------------
 
-AC_MSG_CHECKING(macro values from Config.mk)
+SC_PATH_TCLCONFIG
+SC_LOAD_TCLCONFIG
+
+if test "$TKX_BUILD" = "YES"; then
+    SC_PATH_TKCONFIG
+    SC_LOAD_TKCONFIG
+fi
+
 cat Config.mk >confmakefile
 echo "srcbasedir=$srcbasedir" >>confmakefile
 echo "bldbasedir=$bldbasedir" >>confmakefile
@@ -176,7 +167,6 @@ echo "prefix=$prefix" >>confmakefile
 echo "exec_prefix=$exec_prefix" >>confmakefile
 echo "all:" >>confmakefile
 echo '	@echo TCL_CONFIG=\"${TCL_CONFIG}\"' >>confmakefile
-echo '	@echo TCL_SRC=\"${TCL_SRC}\"' >>confmakefile
 echo '	@echo TCL_BUILD=\"${TCL_BUILD}\"' >>confmakefile
 echo '	@echo TK_CONFIG=\"${TK_CONFIG}\"' >>confmakefile
 echo '	@echo TK_SRC=\"${TK_SRC}\"' >>confmakefile
@@ -188,40 +178,16 @@ echo ".NO_PARALLEL: all" >>confmakefile
 eval `${MAKE-make} -f confmakefile`
 rm confmakefile
 
-if test ! -r "$TCL_CONFIG" ; then
-    AC_MSG_RESULT(failed)
-    AC_MSG_ERROR(
-    Config.mk does not set TCL_CONFIG to a valid path to
-    tclConfig.sh. TclX expects the Tcl to be built in the directory:
-        $TCL_CONFIG
-    Either build Tcl in this location or edit the value of TCL_CONFIG in
-    unix/Config.mk.)
-fi
-if test "$TKX_BUILD" = "YES"; then
-    if test ! -r "$TK_CONFIG" ; then
-        AC_MSG_RESULT(failed)
-        AC_MSG_ERROR(
-    Config.mk does not set TK_CONFIG to a valid path to
-    tkConfig.sh. TclX expects the Tk to be built in the directory:
-         $TK_CONFIG
-    Either build Tk in this location or edit the value of TK_CONFIG in
-    unix/Config.mk.)
-    fi
-fi
-AC_MSG_RESULT(ok)
-
 AC_SUBST(TCLX_INST_LIB)
 AC_SUBST(TKX_INST_LIB)
-
-# Get defines from tclConfig.sh
-. $TCL_CONFIG
 
 LIBS=$TCL_LIBS   # Need for tests.
 
 AC_SUBST(TCL_VERSION)
-AC_SUBST(TCL_SRC)
+AC_SUBST(TCL_SRC_DIR)
 AC_SUBST(TCL_BUILD)
-AC_SUBST(TK_SRC)
+#AC_SUBST(TCL_BUILD_DIR)
+AC_SUBST(TK_SRC_DIR)
 AC_SUBST(TK_BUILD)
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
@@ -233,15 +199,10 @@ AC_SUBST(TCL_SHLIB_LD_LIBS)
 AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(TCL_LD_FLAGS)
 AC_SUBST(TCL_LD_SEARCH_FLAGS)
-AC_SUBST(TCL_DBGX)
+AC_SUBST(TCLX_DBGX)
 AC_SUBST(TCL_EXTRA_CFLAGS)
 AC_SUBST(TCL_BUILD_LIB_SPEC)
 AC_SUBST(TCL_LIB_SPEC)
-
-# Get defines from tkConfig.sh
-if test "$TKX_BUILD" = "YES"; then
-   . $TK_CONFIG
-fi
 
 AC_SUBST(TK_VERSION)
 AC_SUBST(TK_DEFS)
@@ -250,7 +211,7 @@ AC_SUBST(TK_EXEC_PREFIX)
 AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TK_XLIBSW)
 AC_SUBST(TK_LD_SEARCH_FLAGS)
-AC_SUBST(TK_DBGX)
+AC_SUBST(TKX_DBGX)
 AC_SUBST(TK_BUILD_LIB_SPEC)
 AC_SUBST(TK_LIB_SPEC)
 
@@ -259,13 +220,7 @@ AC_SUBST(TK_LIB_SPEC)
 # variable is not set, the compiler used to build Tcl is used.
 #------------------------------------------------------------------------------
 
-AC_MSG_CHECKING(which C compiler to use)
-if test "X$CC" = "X"; then
-    CC=$TCL_CC
-    AC_MSG_RESULT(using C compiler specified in tclConfig.sh: $CC)
-else
-    AC_MSG_RESULT(using C compiler specified in by CC env var: $CC)
-fi
+SC_ENABLE_GCC
 AC_PROG_CC
 
 #------------------------------------------------------------------------------
@@ -304,6 +259,33 @@ AC_SUBST(SYSCFLAGS)
 AC_PROG_RANLIB
 
 #------------------------------------------------------------------------------
+# Test if we are to include debugging symbols in the binary targets
+#------------------------------------------------------------------------------
+
+SC_CONFIG_CFLAGS
+
+SC_ENABLE_SYMBOLS
+
+CFLAGS="${CFLAGS_DEFAULT}"
+TCLX_DBGX=${DBGX}
+TKX_DBGX=${DBGX}
+
+#------------------------------------------------------------------------------
+# Set this back to ${TCL_DBGX} because the UNSHARED_LIB_SUFFIX references
+# below refer to DBGX, not TCL_DBGX
+#------------------------------------------------------------------------------
+
+DBGX=${TCL_DBGX}
+
+#------------------------------------------------------------------------------
+# The tclX shell still needs to know this value so that it can construct
+# the correct library name for libtcl.
+#------------------------------------------------------------------------------
+
+AC_SUBST(TCL_DBGX)
+AC_SUBST(TK_DBGX)
+
+#------------------------------------------------------------------------------
 # If we can find "patch", set up to use it.
 #------------------------------------------------------------------------------
 
@@ -327,13 +309,13 @@ eval "TCL_STLIB_NAME=libtcl${TCL_UNSHARED_LIB_SUFFIX}"
 VERSION=$TK_VERSION
 eval "TK_STLIB_NAME=libtk${TCL_UNSHARED_LIB_SUFFIX}"
 
-VERSION=$TCLX_VERSION$TCL_DBGX
-eval "TCLX_STLIB_NAME=libtclx${TCL_UNSHARED_LIB_SUFFIX}"
-eval "TCLX_SHLIB_NAME=libtclx${TCL_SHARED_LIB_SUFFIX}"
+VERSION=$TCLX_VERSION
+eval "TCLX_STLIB_NAME=libtclx${UNSHARED_LIB_SUFFIX}"
+eval "TCLX_SHLIB_NAME=libtclx${SHARED_LIB_SUFFIX}"
 
-VERSION=$TKX_VERSION$TCL_DBGX
-eval "TKX_STLIB_NAME=libtkx${TCL_UNSHARED_LIB_SUFFIX}"
-eval "TKX_SHLIB_NAME=libtkx${TCL_SHARED_LIB_SUFFIX}"
+VERSION=$TKX_VERSION
+eval "TKX_STLIB_NAME=libtkx${UNSHARED_LIB_SUFFIX}"
+eval "TKX_SHLIB_NAME=libtkx${SHARED_LIB_SUFFIX}"
 
 #
 # Determine suffix to use for the object files for the shared library.
@@ -350,10 +332,10 @@ fi
 # A few system (AIX) have the same extension of shared and static libraries,
 # so shlib target must not be defined if not being build.
 #
-case "$BUILD_SHARED" in
-    YES)
-        TCLX_LIB_FLAG="-ltclx${TCLX_VERSION}${TCL_DBGX}"
-        TKX_LIB_FLAG="-ltkx${TKX_VERSION}${TCL_DBGX}"
+case "$SHARED_BUILD" in
+    1)
+        TCLX_LIB_FLAG="-ltclx${TCLX_VERSION}${TCLX_DBGX}"
+        TKX_LIB_FLAG="-ltkx${TKX_VERSION}${TCLX_DBGX}"
         if test "X${TCL_LIB_VERSIONS_OK}" = "Xnodots" ; then
             TCLX_LIB_FLAG=`echo ${TCLX_LIB_FLAG} | tr -d .`
             TKX_LIB_FLAG=`echo ${TKX_LIB_FLAG} | tr -d .`
@@ -371,9 +353,8 @@ case "$BUILD_SHARED" in
 	TCLX_LIB_NAME=${TCLX_SHLIB_NAME}
 	TKX_LIB_NAME=${TKX_SHLIB_NAME}
         ;;
-    NO|no)
+    0)
         AC_MSG_RESULT(Will not build shared libraries)
-        BUILD_SHARED=NO
         TCLX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/${TCLX_STLIB_NAME}"
         TCLX_LIB_SPEC="$TCLX_INST_LIB/${TCLX_STLIB_NAME}"
         TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/${TKX_STLIB_NAME}"
@@ -598,14 +579,20 @@ AC_SUBST(TKX_CC_SEARCH_FLAGS)
 # the TCL_DEFS variable from tclConfig.sh for DTCL_THREADS=1. Would
 # be nice if we could query tcl.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING("if tcl was built with thread support")
-if echo ${TCL_DEFS} | grep 'DTCL_THREADS=1' >/dev/null 2>/dev/null; then
+#AC_MSG_CHECKING("if tcl was built with thread support")
+#if echo ${TCL_DEFS} | grep 'DTCL_THREADS=1' >/dev/null 2>/dev/null; then
+#    TCL_THREAD_TEST="tclThreadTest.o"
+#    AC_MSG_RESULT(yes)
+#else
+#    AC_MSG_RESULT(no)
+#fi
+
+SC_ENABLE_THREADS
+
+if test "x${TCL_THREADS}" = x ; then
     TCL_THREAD_TEST="tclThreadTest.o"
-    AC_MSG_RESULT(yes)
-else
-    AC_MSG_RESULT(no)
+    AC_SUBST(TCL_THREAD_TEST)
 fi
-AC_SUBST(TCL_THREAD_TEST)
 
 #------------------------------------------------------------------------------
 # Determine if we have symbolic links on the filesystem we are building

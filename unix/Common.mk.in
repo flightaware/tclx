@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: Common.mk.in,v 8.9 1999/03/31 06:37:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -131,6 +131,8 @@ COMPAT_DIR         = ${srcbasedir}/tcl/compat
 #------------------------------------------------------------------------------
 # Programs run during the build.
 #
+TCLX_DBGX	   = @TCLX_DBGX@
+DBGX		   = @TCLX_DBGX@
 TCLX_TMP_RUNTIME   = ${bldbasedir}/tcl/unix
 TKX_TMP_RUNTIME    = ${bldbasedir}/tk/unix
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: Makefile.in,v 8.29 1999/05/10 15:25:53 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -85,7 +85,13 @@ TEST_SAOBJS = tkTest.o tkSquare.o @TCL_THREAD_TEST@ tkXunixTestSA.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: wishx RUNTIME tktest
+all: binaries libraries doc
+
+binaries: wishx tktest
+
+libraries: RUNTIME
+
+doc:
 
 static: wishx.static tktest.static
 
@@ -211,7 +217,13 @@ buildhelp:
 
 #------------------------------------------------------------------------------
 
-install: install-exec install-runtime install-misc
+install: install-binaries install-libraries install-doc
+
+install-binaries: install-exec
+
+install-libraries:  install-runtime install-misc
+
+install-doc:
 
 install-misc:
 	${INSTCOPY} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c \
@@ -229,7 +241,7 @@ install-exec:
 	    ${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_STLIB_NAME}; \
 	fi
 	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
-	if test "@BUILD_SHARED@" = "YES"; then \
+	if test "@SHARED_BUILD@" = "1"; then \
 	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB} ;\
 	    ${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TKX_EXEC_RUNTIME} ;\
 	fi
