@@ -1,12 +1,12 @@
 /*
  * tclXunixOS.c --
  *
- * OS portability interface for Unix systems.  The idea behind these functions
- * is to provide interfaces to various functions that vary on the various
- * platforms.  These functions either implement the call in a manner approriate
- * to the platform or return an error indicating the functionality is not
- * available on that platform.  This results in code with minimal number of
- * #ifdefs.
+ * OS system dependent interface for Unix systems.  The idea behind these
+ * functions is to provide interfaces to various functions that vary on the
+ * various platforms.  These functions either implement the call in a manner
+ * approriate to the platform or return an error indicating the functionality
+ * is not available on that platform.  This results in code with minimal
+ * number of #ifdefs.
  *-----------------------------------------------------------------------------
  * Copyright 1996-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.9 1996/08/19 07:43:37 markd Exp $
+ * $Id: tclXunixOS.c,v 7.10 1996/08/19 16:20:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -67,8 +67,9 @@ ConvertOwnerGroup _ANSI_ARGS_((Tcl_Interp  *interp,
  *-----------------------------------------------------------------------------
  */
 int
-TclXNotAvailableError (Tcl_Interp *interp,
-                       char       *funcName)
+TclXNotAvailableError (interp, funcName)
+    Tcl_Interp *interp;
+    char       *funcName;
 {
     Tcl_AppendResult (interp, funcName, " is not available on this system",
                       (char *) NULL);
@@ -151,7 +152,7 @@ TclXOSTicksToMS (numTicks)
 
 /*-----------------------------------------------------------------------------
  * TclXOSgetpriority --
- *   Portability interface to getpriority functionality.
+ *   System dependent interface to getpriority functionality.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -177,7 +178,7 @@ TclXOSgetpriority (interp, priority, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSincrpriority--
- *   Portability interface to increment or decrement the current priority.
+ *   System dependent interface to increment or decrement the current priority.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -215,7 +216,7 @@ TclXOSincrpriority (interp, priorityIncr, priority, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSpipe --
- *   Portability interface to create a pipes for the pipe command.
+ *   System dependent interface to create a pipes for the pipe command.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -252,7 +253,7 @@ TclXOSpipe (interp, channels)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsetitimer --
- *   Portability interface to setitimer functionality.
+ *   System dependent interface to setitimer functionality.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -308,7 +309,7 @@ TclXOSsetitimer (interp, seconds, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsleep --
- *   Portability interface to sleep functionallity.
+ *   System dependent interface to sleep functionallity.
  *
  * Parameters:
  *   o seconds - Seconds to sleep.
@@ -323,7 +324,7 @@ TclXOSsleep (seconds)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsync --
- *   Portability interface to sync functionality.
+ *   System dependent interface to sync functionality.
  *-----------------------------------------------------------------------------
  */
 void
@@ -334,8 +335,8 @@ TclXOSsync ()
 
 /*-----------------------------------------------------------------------------
  * TclXOSfsync --
- *   Portability interface to fsync functionallity.  Does a sync if fsync is
- * nor available.
+ *   System dependent interface to fsync functionallity.  Does a sync if fsync
+ * is not available.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -368,7 +369,7 @@ TclXOSfsync (interp, channel)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsystem --
- *   Portability interface to system functionallity (executing a command
+ *   System dependent interface to system functionallity (executing a command
  * with the standard system shell).
  *
  * Parameters:
@@ -465,7 +466,7 @@ TclXOSsystem (interp, command, exitCode)
 
 /*-----------------------------------------------------------------------------
  * TclXOSmkdir --
- *   Portability interface to mkdir functionallity.
+ *   System dependent interface to mkdir functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -490,7 +491,7 @@ TclXOSmkdir (interp, path)
 
 /*-----------------------------------------------------------------------------
  * TclX_OSlink --
- *   Portability interface to link functionallity.
+ *   System dependent interface to link functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -519,7 +520,7 @@ TclX_OSlink (interp, srcPath, targetPath, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclX_OSsymlink --
- *   Portability interface to symlink functionallity.
+ *   System dependent interface to symlink functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -554,7 +555,7 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSElapsedTime --
- *   Portability interface to get the elapsed CPU and real time. 
+ *   System dependent interface to get the elapsed CPU and real time. 
  *
  * Parameters:
  *   o realTime - Elapsed real time, in milliseconds is returned here.
@@ -597,7 +598,7 @@ TclXOSElapsedTime (realTime, cpuTime)
 
 /*-----------------------------------------------------------------------------
  * TclXOSkill --
- *   Portability interface to functionallity.
+ *   System dependent interface to functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -643,57 +644,8 @@ TclXOSkill (interp, pid, signal, funcName)
 }
 
 /*-----------------------------------------------------------------------------
- * TclXOSGetOpenFileMode --
- *   Portability interface to get the accessability on an open file number.
- *
- * Parameters:
- *   o interp - Errors returned in result.
- *   o fileNum - Number to return permissions on.
- *   o mode - Set of TCL_READABLE and TCL_WRITABLE.
- *   o nonBlocking - TRUE if the file is in non-blocking mode, FALSE if
- *     its normal.
- * Results:
- *   TCL_OK or TCL_ERROR.
- * FIX: How to handle portibility issues with this function.  Should not
- * take fileNum, but its pretty Unix specified.  Maybe ClientData.
- * will this even work on windows.
- *-----------------------------------------------------------------------------
- */
-int
-TclXOSGetOpenFileMode (interp, fileNum, mode, nonBlocking)
-    Tcl_Interp *interp;
-    int         fileNum;
-    int        *mode;
-    int        *nonBlocking;
-{
-    int fileMode;
-
-    fileMode = fcntl (fileNum, F_GETFL, 0);
-    if (fileMode == -1) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
-    }
-    switch (fileMode & O_ACCMODE) {
-      case O_RDONLY:
-        *mode = TCL_READABLE;
-        break;
-      case O_WRONLY:
-        *mode = TCL_WRITABLE;
-        break;
-      case O_RDWR:
-        *mode = TCL_READABLE | TCL_WRITABLE;
-        break;
-    }
-    if (fileMode & (O_NONBLOCK | O_NDELAY))
-        *nonBlocking = TRUE;
-    else
-        *nonBlocking = FALSE;
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
  * TclXOSFstat --
- *   Portability interface to get status information on an open file.
+ *   System dependent interface to get status information on an open file.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -730,7 +682,7 @@ TclXOSFstat (interp, channel, direction, statBuf, ttyDev)
 
 /*-----------------------------------------------------------------------------
  * TclXOSSeakable --
- *   Portability interface to determine if a channel is seekable.
+ *   System dependent interface to determine if a channel is seekable.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -769,7 +721,7 @@ TclXOSSeekable (interp, channel, seekablePtr)
 
 /*-----------------------------------------------------------------------------
  * TclXOSWalkDir --
- *   Portability interface to reading the contents of a directory.  The
+ *   System dependent interface to reading the contents of a directory.  The
  * specified directory is walked and a callback is called on each entry.
  * The "." and ".." entries are skipped.
  *
@@ -844,7 +796,7 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
 
 /*-----------------------------------------------------------------------------
  * TclXOSGetFileSize --
- *   Portability interface to get the size of an open file.
+ *   System dependent interface to get the size of an open file.
  *
  * Parameters:
  *   o channel - Channel.
@@ -872,7 +824,7 @@ TclXOSGetFileSize (channel, direction, fileSize)
 
 /*-----------------------------------------------------------------------------
  * TclXOSftruncate --
- *   Portability interface to ftruncate functionality.
+ *   System dependent interface to ftruncate functionality.
  *
  * Parameters:
  *   o interp - Error messages are returned in the interpreter.
@@ -911,7 +863,7 @@ TclXOSftruncate (interp, channel, newSize, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSfork --
- *   Portability interface to fork functionallity.
+ *   System dependent interface to fork functionallity.
  *
  * Parameters:
  *   o interp - A format process id or errors are returned in result.
@@ -942,7 +894,7 @@ TclXOSfork (interp, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSexecl --
- *   Portability interface to execl functionallity.
+ *   System dependent interface to execl functionallity.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -1005,7 +957,7 @@ TclXOSInetAtoN (interp, strAddress, inAddress)
 
 /*-----------------------------------------------------------------------------
  * TclXOSgetpeername --
- *   Portability interface to getpeername functionallity.
+ *   System dependent interface to getpeername functionallity.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -1035,7 +987,7 @@ TclXOSgetpeername (interp, channel, sockaddr, sockaddrSize)
 
 /*-----------------------------------------------------------------------------
  * TclXOSgetsockname --
- *   Portability interface to getsockname functionallity.
+ *   System dependent interface to getsockname functionallity.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -1126,7 +1078,7 @@ TclXOSsetsockopt (interp, channel, option, value)
 
 /*-----------------------------------------------------------------------------
  * TclXOSchmod --
- *   Portability interface to chmod functionallity.
+ *   System dependent interface to chmod functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -1152,7 +1104,7 @@ TclXOSchmod (interp, fileName, mode)
 
 /*-----------------------------------------------------------------------------
  * TclXOSfchmod --
- *   Portability interface to fchmod functionallity.
+ *   System dependent interface to fchmod functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -1467,7 +1419,7 @@ TclXOSGetSelectFnum (interp, channel, readFnumPtr, writeFnumPtr)
 
 /*-----------------------------------------------------------------------------
  * TclXOSFlock --
- *   Portability interface to locking a file.
+ *   System dependent interface to locking a file.
  *
  * Parameters:
  *   o interp - Pointer to the current interpreter, error messages will be
@@ -1524,7 +1476,7 @@ TclXOSFlock (interp, lockInfoPtr)
 
 /*-----------------------------------------------------------------------------
  * TclXOSFunlock --
- *   Portability interface to unlocking a file.
+ *   System dependent interface to unlocking a file.
  *
  * Parameters:
  *   o interp - Pointer to the current interpreter, error messages will be
@@ -1563,4 +1515,191 @@ TclXOSFunlock (interp, lockInfoPtr)
     return TclXNotAvailableError (interp,
                                   "file locking");
 #endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSGetAppend --
+ *   System dependent interface determine if a channel is in force append mode.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o valuePtr - TRUE is returned if in append mode, FALSE if not.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSGetAppend (interp, channel, valuePtr)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int        *valuePtr;
+{
+    int fnum, mode;
+
+    fnum = ChannelToFnum (channel, TCL_WRITABLE);
+    if (fnum < 0) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
+                          " is not open for write access", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    mode = fcntl (fnum, F_GETFL, 0);
+    if (mode == -1)
+        goto posixError;
+
+    *valuePtr = ((mode & O_APPEND) != 0);
+    return TCL_OK;
+
+  posixError:
+    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
+                      Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSSetAppend --
+ *   System dependent interface set force append mode on a channel.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o value - TRUE to enable, FALSE to disable.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSSetAppend (interp, channel, value)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int         value;
+{
+    int fnum, mode;
+
+    fnum = ChannelToFnum (channel, TCL_WRITABLE);
+    if (fnum < 0) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
+                          " is not open for write access", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    mode = fcntl (fnum, F_GETFL, 0);
+    if (mode == -1)
+        goto posixError;
+
+    mode = (mode & ~O_APPEND) | (value ? O_APPEND : 0);
+
+    if (fcntl (fnum, F_SETFL, mode) == -1)
+        goto posixError;
+
+    return TCL_OK;
+
+  posixError:
+    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
+                      Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSGetCloseOnExec --
+ *   System dependent interface determine if a channel has close-on-exec set.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o valuePtr - TRUE is close-on-exec, FALSE if not.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSGetCloseOnExec (interp, channel, valuePtr)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int        *valuePtr;
+{
+    int readFnum, writeFnum, readMode, writeMode;
+
+    readFnum = ChannelToFnum (channel, TCL_READABLE);
+    writeFnum = ChannelToFnum (channel, TCL_WRITABLE);
+
+    if (readFnum >= 0) {
+        readMode = fcntl (readFnum, F_GETFD, 0);
+        if (readMode == -1)
+            goto posixError;
+    }
+    if (writeFnum >= 0) {
+        writeMode = fcntl (writeFnum, F_GETFD, 0);
+        if (writeMode == -1)
+            goto posixError;
+    }
+
+    /*
+     * It's an error if both files are not the same.  This could only happen
+     * if they were set outside of TclX.  While this maybe overly strict,
+     * this may prevent bugs.
+     */
+    if ((readFnum >= 0) && (writeFnum >= 0) &&
+        ((readMode & 1) != (writeMode & 1))) {
+        Tcl_AppendResult (interp, Tcl_GetChannelName (channel), 
+                          ": read file of channel has close-on-exec ",
+                          (readMode & 1) ? "on" : "off",
+                          " and write file has it ",
+                          (writeMode & 1) ? "on" : "off",
+                          "; don't know how to get attribute for a channel "
+                          "configure this way", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    *valuePtr = (readFnum >= 0) ? (readMode & 1) : (writeMode & 1);
+    return TCL_OK;
+
+  posixError:
+    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
+                      Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSSetCloseOnExec --
+ *   System dependent interface set close-on-exec on a channel.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o value - TRUE to enable, FALSE to disable.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSSetCloseOnExec (interp, channel, value)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int         value;
+{
+    int readFnum, writeFnum;
+
+    readFnum = ChannelToFnum (channel, TCL_READABLE);
+    writeFnum = ChannelToFnum (channel, TCL_WRITABLE);
+
+    if (readFnum > 0) {
+        if (fcntl (readFnum, F_SETFD, value ? 1 : 0) == -1)
+            goto posixError;
+    }
+    if ((writeFnum > 0) && (readFnum != writeFnum)) {
+        if (fcntl (writeFnum, F_SETFD, value ? 1 : 0) == -1)
+            goto posixError;
+    }
+    return TCL_OK;
+
+  posixError:
+    Tcl_AppendResult (interp,  Tcl_GetChannelName (channel), ": ",
+                      Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
 }

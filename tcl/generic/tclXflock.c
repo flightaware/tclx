@@ -12,10 +12,10 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 7.1 1996/08/06 07:15:28 markd Exp $
+ * $Id: tclXflock.c,v 7.2 1996/08/19 16:20:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
-/* FIX: Interface to F_GETLK */
+/* FIX: Need to add an interface to F_GETLK */
 
 #include "tclExtdInt.h"
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 7.3 1996/08/02 10:59:48 markd Exp $
+ * $Id: tclXfstat.c,v 7.4 1996/08/19 07:42:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -302,7 +302,6 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     struct stat statBuf;
     int ttyDev;
 
-    /* FIX: modify to use channel and pass to OS routines. */
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " fileId ?item?|?stat arrayVar?", (char *) NULL);

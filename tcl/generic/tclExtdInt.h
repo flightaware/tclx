@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.9 1996/08/19 07:43:32 markd Exp $
+ * $Id: tclExtdInt.h,v 7.10 1996/08/19 16:20:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -197,17 +197,6 @@ typedef int
 /*
  * Prototypes for utility procedures.
  */
-extern void
-Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
-                               Tcl_Channel channel,
-                               int         fileNum));
-
-extern Tcl_Channel
-TclX_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                 int         fileNum,
-                                 int         mode,
-                                 int         isSocket));
-
 extern int
 Tcl_StrToOffset _ANSI_ARGS_((CONST char *string,
                              int         base,
@@ -229,10 +218,6 @@ TclX_WriteStr _ANSI_ARGS_((Tcl_Channel  channel,
 
 
 extern int
-TclX_ChannelFnum _ANSI_ARGS_((Tcl_Channel channel,
-                              int         direction));
-
-extern int
 TclX_GetChannelOption _ANSI_ARGS_((Tcl_Channel channel,
                                    int         option));
 
@@ -240,11 +225,6 @@ extern Tcl_Channel
 TclX_GetOpenChannel _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *handle,
                                  int         direction));
-
-extern int
-TclX_GetOpenFnum _ANSI_ARGS_ ((Tcl_Interp *interp,
-                               char       *handle,
-                               int         direction));
 
 extern int
 Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
@@ -673,12 +653,6 @@ TclXOSkill _ANSI_ARGS_((Tcl_Interp *interp,
                         char       *funcName));
 
 extern int
-TclXOSGetOpenFileMode _ANSI_ARGS_((Tcl_Interp *interp,
-                                   int         fileNum,
-                                   int        *mode,
-                                   int        *nonBlocking));
-
-extern int
 TclXOSFstat _ANSI_ARGS_((Tcl_Interp  *interp,
                          Tcl_Channel  channel,
                          int          direction,
@@ -786,4 +760,24 @@ TclXOSFlock _ANSI_ARGS_((Tcl_Interp     *interp,
 int
 TclXOSFunlock _ANSI_ARGS_((Tcl_Interp     *interp,
                            TclX_FlockInfo *lockInfoPtr));
+
+int
+TclXOSGetAppend _ANSI_ARGS_((Tcl_Interp *interp,
+                             Tcl_Channel channel,
+                             int        *valuePtr));
+
+int
+TclXOSSetAppend _ANSI_ARGS_((Tcl_Interp *interp,
+                             Tcl_Channel channel,
+                             int         value));
+
+int
+TclXOSGetCloseOnExec _ANSI_ARGS_((Tcl_Interp *interp,
+                                  Tcl_Channel channel,
+                                  int        *valuePtr));
+
+int
+TclXOSSetCloseOnExec _ANSI_ARGS_((Tcl_Interp *interp,
+                                  Tcl_Channel channel,
+                                  int         value));
 #endif

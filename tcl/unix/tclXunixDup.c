@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 7.3 1996/08/06 07:15:27 markd Exp $
+ * $Id: tclXunixDup.c,v 7.1 1996/08/19 07:43:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -166,7 +166,7 @@ TclXOSBindOpenFile (interp, fileNumStr)
     char       *fileNumStr;
 {
     unsigned fileNum;
-    int mode, nonBlocking, isSocket;
+    int fcntlMode, mode, nonBlocking, isSocket;
     struct stat fileStat;
     char channelName[20];
     Tcl_Channel channel = NULL;
@@ -181,8 +181,22 @@ TclXOSBindOpenFile (interp, fileNumStr)
     /*
      * Make sure file is open and determine the access mode and file type.
      */
-    if (TclXOSGetOpenFileMode (interp, fileNum, &mode, &nonBlocking) != TCL_OK)
-        return NULL;
+    fcntlMode = fcntl (fileNum, F_GETFL, 0);
+    if (fcntlMode == -1)
+        goto posixError;
+
+    switch (fcntlMode & O_ACCMODE) {
+      case O_RDONLY:
+        mode = TCL_READABLE;
+        break;
+      case O_WRONLY:
+        mode = TCL_WRITABLE;
+        break;
+      case O_RDWR:
+        mode = TCL_READABLE | TCL_WRITABLE;
+        break;
+    }
+    nonBlocking = ((fcntlMode & (O_NONBLOCK | O_NDELAY)) != 0);
 
     if (fstat (fileNum, &fileStat) < 0)
         goto posixError;

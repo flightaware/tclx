@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 7.2 1996/08/04 07:30:01 markd Exp $
+ * $Id: tclXunixSock.c,v 7.3 1996/08/06 07:15:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,11 +27,47 @@
 /*
  * Prototypes of internal functions.
  */
+static void
+CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
+                           Tcl_Channel channel,
+                           int         fileNum));
+
 static int
 BindFileHandles _ANSI_ARGS_((Tcl_Interp *interp,
                              unsigned    options,
                              int         socketFD));
 
+
+/*-----------------------------------------------------------------------------
+ * CloseForError --
+ *
+ *   Close a file on error.  If the file is associated with a channel, close
+ * it too. The error number will be saved and not lost.
+ *
+ * Parameters:
+ *   o interp (I) - Current interpreter.
+ *   o channel (I) - Channel to close if not NULL.
+ *   o fileNum (I) - File number to close if >= 0.
+ *-----------------------------------------------------------------------------
+ */
+static void
+CloseForError (interp, channel, fileNum)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int         fileNum;
+{
+    int saveErrNo = Tcl_GetErrno ();
+
+    /*
+     * Always close fileNum, even if channel close is done, as it doesn't
+     * close stdin, stdout or stderr numbers.
+     */
+    if (channel != NULL)
+        Tcl_UnregisterChannel (interp, channel);
+    if (fileNum >= 0)
+        close (fileNum);
+     Tcl_SetErrno (saveErrNo);
+}
 
 /*-----------------------------------------------------------------------------
  * BindFileHandles --
@@ -59,8 +95,8 @@ BindFileHandles (interp, options, socketFD)
     int socketFD2 = -1;
     Tcl_Channel channel = NULL, channel2 = NULL;
 
-    channel = TclX_SetupFileEntry (interp, socketFD, 
-                                   TCL_READABLE | TCL_WRITABLE, TRUE);
+    channel = Tcl_MakeTcpClientChannel ((ClientData) socketFD);
+    Tcl_RegisterChannel (interp, channel);
 
     if (options & SERVER_NOBUF) {
         if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
@@ -72,8 +108,8 @@ BindFileHandles (interp, options, socketFD)
     return TCL_OK;
 
   errorExit:
-    Tcl_CloseForError (interp, channel, socketFD);
-    Tcl_CloseForError (interp, channel2, socketFD2);
+    CloseForError (interp, channel, socketFD);
+    CloseForError (interp, channel2, socketFD2);
     return TCL_ERROR;
 }
 
@@ -189,7 +225,8 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     if (listen (socketFD, backlog) < 0)
         goto unixError;
 
-    channel = TclX_SetupFileEntry (interp, socketFD, TCL_READABLE, TRUE);
+    channel = Tcl_MakeTcpClientChannel ((ClientData) socketFD);
+    Tcl_RegisterChannel (interp, channel);
 
     Tcl_AppendResult (interp, Tcl_GetChannelName (channel), (char *) NULL);
     return TCL_OK;
@@ -204,7 +241,7 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
 
   unixError:
     interp->result = Tcl_PosixError (interp);
-    Tcl_CloseForError (interp, channel, socketFD);
+    CloseForError (interp, channel, socketFD);
     return TCL_ERROR;
 }
 

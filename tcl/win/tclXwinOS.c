@@ -1,7 +1,7 @@
 /*
  * tclXwinOS.c --
  *
- * OS portability interface for Windows systems.  The idea behind these
+ * OS system dependent interface for Windows systems.  The idea behind these
  * functions is to provide interfaces to various functions that vary on the
  * various platforms.  These functions either implement the call in a manner
  * approriate to the platform or return an error indicating the functionality
@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.7 1996/08/08 01:52:26 markd Exp $
+ * $Id: tclXwinOS.c,v 7.8 1996/08/09 04:12:33 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -227,8 +227,8 @@ ConvertToUnixTime (FILETIME fileTime)
 
 /*-----------------------------------------------------------------------------
  * TclXOSgetpriority --
- *   Portability interface to getpriority functionality, which is not available
- * on windows.
+ *   System dependent interface to getpriority functionality, which is not
+ * available* on windows.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -249,7 +249,7 @@ TclXOSgetpriority (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSincrpriority--
- *   Portability interface to increment or decrement the current priority,
+ *   System dependent interface to increment or decrement the current priority,
  * which is not available on windows.
  *
  * Parameters:
@@ -272,7 +272,7 @@ TclXOSincrpriority (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSpipe --
- *   Portability interface to create a pipes for the pipe command.
+ *   System dependent interface to create a pipes for the pipe command.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -315,8 +315,8 @@ TclXOSpipe (interp, channels)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsetitimer --
- *   Portability interface to setitimer functionality, which is not available
- * on windows.
+ *   System dependent interface to setitimer functionality, which is not
+ * available on windows.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -337,7 +337,7 @@ TclXOSsetitimer (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSsleep --
- *   Portability interface to sleep functionallity.
+ *   System dependent interface to sleep functionallity.
  *
  * Parameters:
  *   o seconds - Seconds to sleep.
@@ -351,7 +351,7 @@ TclXOSsleep (unsigned seconds)
 
 /*-----------------------------------------------------------------------------
  * TclXOSsync --
- *   Portability interface to sync functionality.
+ *   System dependent interface to sync functionality.
  *-----------------------------------------------------------------------------
  */
 void
@@ -362,8 +362,8 @@ TclXOSsync ()
 
 /*-----------------------------------------------------------------------------
  * TclXOSfsync --
- *   Portability interface to fsync functionallity.  Does a _flushall, since
- * fsync is no available.
+ *   System dependent interface to fsync functionallity.  Does a _flushall,
+ * since fsync is not available.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -389,7 +389,7 @@ TclXOSfsync (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSsystem --
- *   Portability interface to system functionallity (executing a command
+ *   System dependent interface to system functionallity (executing a command
  * with the standard system shell).
  *
  * Parameters:
@@ -431,7 +431,7 @@ TclXOSsystem (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSmkdir --
- *   Portability interface to mkdir functionallity.
+ *   System dependent interface to mkdir functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -455,7 +455,7 @@ TclXOSmkdir (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclX_OSlink --
- *   Portability interface to link functionallity, which is not available
+ *   System dependent interface to link functionallity, which is not available
  * on windows.
  *
  * Parameters:
@@ -478,8 +478,7 @@ TclX_OSlink (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclX_OSsymlink --
- *   Portability interface to symlink functionallity, which is not available
- * on windows.
+ *   System dependent interface to symlink functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -496,12 +495,13 @@ TclX_OSsymlink (Tcl_Interp *interp,
                 char       *targetPath,
                 char       *funcName)
 {
+    /* FIX: make an alias */
     return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
  * TclXOSElapsedTime --
- *   Portability interface to get the elapsed CPU and real time.  CPU time
+ *   System dependent interface to get the elapsed CPU and real time.  CPU time
  * is not available under windows and zero is always returned.
  *
  * Parameters:
@@ -538,7 +538,7 @@ TclXOSElapsedTime (clock_t *realTime,
 
 /*-----------------------------------------------------------------------------
  * TclXOSkill --
- *   Portability interface to functionallity, which is not available
+ *   System dependent interface to functionallity, which is not available
  * on windows.
  *
  * Parameters:
@@ -560,40 +560,8 @@ TclXOSkill (Tcl_Interp *interp,
 }
 
 /*-----------------------------------------------------------------------------
- * TclXOSGetOpenFileMode --
- *   Portability interface to get the accessability on an open file number.
- *
- * Parameters:
- *   o fileNum - Number to return permissions on.
- *   o mode - Set of TCL_READABLE and TCL_WRITABLE.
- *   o nonBlocking - Non-blocking mode, always returns FALSE under windows.
- * Results:
- *   TCL_OK or TCL_ERROR.  The Posix error number describes the error.
- *-----------------------------------------------------------------------------
- */
-int
-TclXOSGetOpenFileMode (int  fileNum,
-                       int *mode,
-                       int *nonBlocking)
-{
-    struct stat fileStat;
-
-    /* FIX: Probably not correct, how does one determine if a file is open
-       for read/write.  also, might want to determine if its a socket here.*/
-    if (fstat (fileNum, &fileStat) < 0)
-        return TCL_ERROR;
-    *mode = 0;
-    if (fileStat.st_mode & _S_IREAD)
-        *mode = TCL_READABLE;
-    if (fileStat.st_mode & _S_IWRITE)
-        *mode |= TCL_WRITABLE;
-    *nonBlocking = FALSE;
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
  * TclXOSFstat --
- *   Portability interface to get status information on an open file.
+ *   System dependent interface to get status information on an open file.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -685,7 +653,7 @@ TclXOSFstat (Tcl_Interp  *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSWalkDir --
- *   Portability interface to reading the contents of a directory.  The
+ *   System dependent interface to reading the contents of a directory.  The
  * specified directory is walked and a callback is called on each entry.
  * The "." and ".." entries are skipped.
  *
@@ -856,7 +824,7 @@ TclXOSWalkDir (Tcl_Interp       *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSGetFileSize --
- *   Portability interface to get the size of an open file.
+ *   System dependent interface to get the size of an open file.
  *
  * Parameters:
  *   o channel - Channel.
@@ -895,7 +863,7 @@ TclXOSGetFileSize (Tcl_Channel  channel,
 
 /*-----------------------------------------------------------------------------
  * TclXOSftruncate --
- *   Portability interface to ftruncate functionality. 
+ *   System dependent interface to ftruncate functionality. 
  *
  * Parameters:
  *   o interp - Error messages are returned in the interpreter.
@@ -917,7 +885,8 @@ TclXOSftruncate (Tcl_Interp  *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSfork --
- *   Portability interface to fork functionallity.  Not supported on windows.
+ *   System dependent interface to fork functionallity.  Not supported on
+ * windows.
  *
  * Parameters:
  *   o interp - An error  is returned in result.
@@ -935,8 +904,8 @@ TclXOSfork (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSexecl --
- *   Portability interface to execl functionallity.  On windows, this is the
- * equivlant of a fork and an execl, so a process id is returned.
+ *   System dependent interface to execl functionallity.  On windows, this is
+ * the equivlant of a fork and an execl, so a process id is returned.
  *
  * Parameters:
  *   o interp - A process id or errors are returned in result.
@@ -997,7 +966,7 @@ TclXOSInetAtoN (Tcl_Interp     *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSgetpeername --
- *   Portability interface to getpeername functionallity.
+ *   System dependent interface to getpeername functionallity.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -1029,7 +998,7 @@ TclXOSgetpeername (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSgetsockname --
- *   Portability interface to getsockname functionallity.
+ *   System dependent interface to getsockname functionallity.
  *
  * Parameters:
  *   o interp - Errors are returned in result.
@@ -1134,7 +1103,7 @@ TclXOSsetsockopt (interp, channel, option, value)
 
 /*-----------------------------------------------------------------------------
  * TclXOSchmod --
- *   Portability interface to chmod functionallity.
+ *   System dependent interface to chmod functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -1167,7 +1136,7 @@ TclXOSchmod (interp, fileName, mode)
 
 /*-----------------------------------------------------------------------------
  * TclXOSfchmod --
- *   Portability interface to fchmod functionallity.
+ *   System dependent interface to fchmod functionallity.
  *
  * Parameters:
  *   o interp - Errors returned in result.

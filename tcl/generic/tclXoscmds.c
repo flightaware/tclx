@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 7.4 1996/08/04 07:29:59 markd Exp $
+ * $Id: tclXoscmds.c,v 7.5 1996/08/06 07:15:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -158,12 +158,23 @@ MkdirPath (interp, path)
         path = TclX_JoinPath (prevPathBuf.string, pathArgv [idx], &pathBuf);
 
         /*
-         * FIX: Handle if it exists but is a file, should just try in this
-         * case.
+         * FIX: Handle if it the directory  exists but is a file. Should just
+         * try in this* case.
          */
         if (stat (path, &statBuf) < 0) {
             if (TclXOSmkdir (interp, path) == TCL_ERROR)
                 goto errorExit;
+        } else {
+            if (!S_ISDIR (statBuf.st_mode)) {
+                /*
+                 * Exists but is not a directory.
+                 */
+                Tcl_SetErrno (EEXIST);
+                Tcl_AppendResult (interp, "creating directory \"",
+                                  path, "\" failed: ", Tcl_PosixError (interp),
+                                  (char *) NULL);
+                goto errorExit;
+            }
         }
     }
 

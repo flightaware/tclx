@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 7.4 1996/08/06 07:15:30 markd Exp $
+ * $Id: tclXutil.c,v 7.5 1996/08/09 04:12:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -642,153 +642,6 @@ TclX_GetOpenChannel (interp, handle, direction)
     }
 
     return chan;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_GetOpenFnum --
- *
- *    Convert a file handle to a file number with error checking.
- *
- * Parameters:
- *   o interp (I) - Current interpreter.
- *   o handle (I) - The file handle to convert.
- *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
- *     return the first of the read and write numbers.
- * Returns:
- *   The file number of < 0 if an error occured.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_GetOpenFnum (interp, handle, direction)
-    Tcl_Interp *interp;
-    char       *handle;
-    int         direction;
-{
-    Tcl_Channel channel;
-    Tcl_File file;
-
-    channel = TclX_GetOpenChannel (interp, handle, direction);
-    if (channel == NULL)
-        return -1;
-
-    switch (direction) {
-      case 0:
-      case TCL_READABLE | TCL_WRITABLE:
-        file = Tcl_GetChannelFile (channel, TCL_READABLE);
-        if (file == NULL)
-            file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
-        break;
-      case TCL_READABLE:
-        file = Tcl_GetChannelFile (channel, TCL_READABLE);
-        break;
-      case TCL_WRITABLE:
-        file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
-        break;
-    }
-    if (file == NULL)
-        panic ("TclX_GetOpenFnum: file not available");
-
-    return (int) Tcl_GetFileInfo (file, NULL);
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_ChannelFnum --
- *
- *    Convert a channel to a file number.
- *
- * Parameters:
- *   o channel (I) - Channel to get file number for.
- *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
- *     return the first of the read and write numbers.
- * Returns:
- *   The file number or -1 if a file number is not associated with this access
- * direction.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_ChannelFnum (channel, direction)
-    Tcl_Channel channel;
-    int         direction;
-{
-    Tcl_File file;
-
-    if (direction == 0) {
-        file = Tcl_GetChannelFile (channel, TCL_READABLE);
-        if (file == NULL)
-            file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
-    } else {
-        file = Tcl_GetChannelFile (channel, direction);
-        if (file == NULL)
-            return -1;
-    }
-    return (int) Tcl_GetFileInfo (file, NULL);
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_SetupFileEntry --
- *
- * Set up an entry in the Tcl file table for a file number, including the stdio
- * FILE structure.
- *
- * Parameters:
- *   o interp (I) - Current interpreter.
- *   o fileNum (I) - File number to set up the entry for.
- *   o mode (I) - Flags consisting of TCL_READABLE, TCL_WRITABLE.
- *   o isSocket (I) - TRUE if its a socket, FALSE otherwise.
- * Returns:
- *   The channel.  No error can occur.
- *-----------------------------------------------------------------------------
- */
-Tcl_Channel
-TclX_SetupFileEntry (interp, fileNum, mode, isSocket)
-    Tcl_Interp *interp;
-    int         fileNum;
-    int         mode;
-    int         isSocket;
-{
-    Tcl_Channel channel;
-
-    if (isSocket) {
-        channel = Tcl_MakeTcpClientChannel ((ClientData) fileNum);
-    } else {
-        channel = Tcl_MakeFileChannel ((ClientData) fileNum,
-                                       (ClientData) fileNum,
-                                       mode);
-    }
-        
-    Tcl_RegisterChannel (interp, channel);
-    return channel;
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_CloseForError --
- *
- *   Close a file on error.  If the file is associated with a channel, close
- * it too. The error number will be saved and not lost.
- *
- * Parameters:
- *   o interp (I) - Current interpreter.
- *   o channel (I) - Channel to close if not NULL.
- *   o fileNum (I) - File number to close if >= 0.
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_CloseForError (interp, channel, fileNum)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         fileNum;
-{
-    int saveErrNo = Tcl_GetErrno ();
-
-    /*
-     * Always close fileNum, even if channel close is done, as it doesn't
-     * close stdin, stdout or stderr numbers.
-     */
-    if (channel != NULL)
-        Tcl_UnregisterChannel (interp, channel);
-    if (fileNum >= 0)
-        close (fileNum);
-     Tcl_SetErrno (saveErrNo);
 }
 
 /*-----------------------------------------------------------------------------

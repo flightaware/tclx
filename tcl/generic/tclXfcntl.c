@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 7.3 1996/08/08 01:52:22 markd Exp $
+ * $Id: tclXfcntl.c,v 7.4 1996/08/09 04:12:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -153,7 +153,7 @@ GetFcntlAttr (interp, channel, mode, attrib)
     int          mode;
     int          attrib;
 {
-    int current, value;
+    int value;
 
     switch (attrib) {
       case ATTR_RDONLY:
@@ -172,16 +172,12 @@ GetFcntlAttr (interp, channel, mode, attrib)
         value = (mode & TCL_WRITABLE);
         break;
       case ATTR_APPEND:
-        current = fcntl (TclX_ChannelFnum (channel, 0), F_GETFL, 0);
-        if (current == -1)
-            goto unixError;
-        value = ((current & O_APPEND) != 0);
+        if (TclXOSGetAppend (interp, channel, &value) != TCL_OK)
+            return TCL_ERROR;
         break;
       case ATTR_CLOEXEC:
-        current = fcntl (TclX_ChannelFnum (channel, 0), F_GETFD, 0);
-        if (current == -1)
-            goto unixError;
-        value = ((current & 1) != 0);
+        if (TclXOSGetCloseOnExec (interp, channel, &value) != TCL_OK)
+            return TCL_ERROR;
         break;
       case ATTR_NONBLOCK:
         value  = (TclX_GetChannelOption (channel, TCLX_COPT_BLOCKING) ==
@@ -200,15 +196,11 @@ GetFcntlAttr (interp, channel, mode, attrib)
             return TCL_ERROR;
         break;
       default:
-        panic ("fcntl get attrib");
+        panic ("bug in fcntl get attrib");
     }
 
     Tcl_SetResult (interp, (value ? "1" : "0"), TCL_STATIC);
     return TCL_OK;
-
-  unixError:
-    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -231,36 +223,19 @@ SetFcntlAttr (interp, channel, attrib, valueStr)
     int          attrib;
     char        *valueStr;
 {
-    int value, current, readFnum, writeFnum;
+    int value;
 
     if (Tcl_GetBoolean (interp, valueStr, &value) != TCL_OK)
         return TCL_ERROR;
 
-    if ((attrib == ATTR_APPEND) || (attrib == ATTR_CLOEXEC)) {
-        readFnum = TclX_ChannelFnum (channel, TCL_READABLE);
-        writeFnum = TclX_ChannelFnum (channel, TCL_WRITABLE);
-    }
-
     switch (attrib) {
       case ATTR_APPEND:
-        if (writeFnum < 0)
-            goto notWriteAccess;
-        current = fcntl (writeFnum, F_GETFL, 0);
-        if (current == -1)
-            goto unixError;
-        current = (current & ~O_APPEND) | (value ? O_APPEND : 0);
-        if (fcntl (writeFnum, F_SETFL, current) == -1)
-            goto unixError;
-
+        if (TclXOSSetAppend (interp, channel, value) != TCL_OK)
+            return TCL_ERROR;
+        return TCL_OK;
       case ATTR_CLOEXEC:
-        if (readFnum > 0) {
-            if (fcntl (readFnum, F_SETFD, value) == -1)
-                goto unixError;
-        }
-        if ((writeFnum > 0) && (readFnum != writeFnum)) {
-            if (fcntl (writeFnum, F_SETFD, value) == -1)
-                goto unixError;
-        }
+        if (TclXOSSetCloseOnExec (interp, channel, value) != TCL_OK)
+            return TCL_ERROR;
         return TCL_OK;
       case ATTR_NONBLOCK:
         return TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
@@ -277,17 +252,9 @@ SetFcntlAttr (interp, channel, attrib, valueStr)
       case ATTR_KEEPALIVE:
         return TclXOSsetsockopt (interp, channel, SO_KEEPALIVE, value);
       default:
-        panic ("fcntl set attrib");
+        panic ("buf in fcntl set attrib");
     }
-
-  unixError:
-    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
-    return TCL_ERROR;
-
-  notWriteAccess:
-    Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
-                      " not open for write access", (char *) NULL);
-    return TCL_ERROR;
+    return TCL_ERROR;  /* Should never be reached */
 }
 
 /*-----------------------------------------------------------------------------
