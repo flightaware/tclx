@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.4 1995/01/01 19:49:40 markd Exp markd $
+ * $Id: tclXutil.c,v 4.5 1995/03/28 18:09:47 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -783,7 +783,10 @@ Tcl_GetOpenFileStruct (interp, handle)
  * FILE structure.
  *
  * Parameters:
- *   o interp (I) - Current interpreter.
+ *   o interp (I) - Current interpreter.  The file handle is NOT returned
+ *     in result, it is cleared.  This is done because this function is
+ *     often used to setup more than one descriptor and we don't want the
+ *     error message from a second failure appended to a file descriptor.
  *   o fileNum (I) - File number to set up the entry for.
  *   o permissions (I) - Flags consisting of TCL_FILE_READABLE,
  *     TCL_FILE_WRITABLE.
@@ -821,6 +824,7 @@ Tcl_SetupFileEntry (interp, fileNum, permissions)
     }
     
     Tcl_EnterFile (interp, filePtr, permissions);
+    Tcl_ResetResult (interp);
 
     return filePtr;
 }
