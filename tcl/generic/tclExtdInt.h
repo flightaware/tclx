@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.9 1996/03/04 23:11:52 markd Exp $
+ * $Id: tclExtdInt.h,v 5.10 1996/03/10 22:16:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -225,15 +225,6 @@ TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
 
 extern int
 TclX_VarEval _ANSI_ARGS_(TCL_VARARGS(Tcl_Interp *, arg1));
-
-Tcl_Channel
-TclX_Stdin _ANSI_ARGS_((Tcl_Interp  *interp));
-
-Tcl_Channel
-TclX_Stdout _ANSI_ARGS_((Tcl_Interp  *interp));
-
-Tcl_Channel
-TclX_Stderr _ANSI_ARGS_((Tcl_Interp  *interp));
 
 int
 TclX_WriteStr _ANSI_ARGS_((Tcl_Channel  channel,

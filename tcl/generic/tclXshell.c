@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 5.3 1996/02/12 18:16:20 markd Exp $
+ * $Id: tclXshell.c,v 5.4 1996/03/11 04:10:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -198,7 +198,7 @@ ParseCmdLine (interp, argc, argv)
 
   usageError:
     {
-        Tcl_Channel stderrChan = TclX_Stderr (interp);
+        Tcl_Channel stderrChan = Tcl_GetStdChannel (TCL_STDERR);
         if (stderrChan != NULL) {
             TclX_WriteStr (stderrChan, "usage: ");
             TclX_WriteStr (stderrChan, argv [0]);

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.8 1996/02/20 09:10:42 markd Exp $
+ * $Id: tkXshell.c,v 5.9 1996/03/11 05:43:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -272,11 +272,14 @@ static void
 SignalProc (signalNum)
     int  signalNum;
 {
+    Tcl_Channel stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
     tclGotErrorSignal = 0;
     Tcl_DStringFree (&command);
     gotPartial = 0;
     if (tty) {
-        Tcl_Write (TclX_Stdout (interp), "\n", 1);
+        if (stdoutChan != NULL) {
+            Tcl_Write (stdoutChan, "\n", 1);
+        }
         TclX_OutputPrompt (interp, !gotPartial);
     }
 }

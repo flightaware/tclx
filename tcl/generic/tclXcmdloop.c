@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 5.2 1996/02/09 18:42:42 markd Exp $
+ * $Id: tclXcmdloop.c,v 5.3 1996/02/12 18:15:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -98,7 +98,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
     if ((checkCmd != NULL) && (intResult == TCL_OK) && IsSetVarCmd (checkCmd))
         return;
 
-    stdoutChan = TclX_Stdout (interp);
+    stdoutChan = Tcl_GetStdChannel (TCL_STDIN);
 
     if (intResult == TCL_OK) {
         if (stdoutChan == NULL)
@@ -111,7 +111,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
         Tcl_Channel stderrChan;
         char        msg [64];
 
-        stderrChan = TclX_Stderr (interp);
+        stderrChan = Tcl_GetStdChannel (TCL_STDERR);
         if (stderrChan == NULL)
             return;
        
@@ -163,7 +163,7 @@ TclX_OutputPrompt (interp, topLevel)
     if (promptHook != NULL) {
         result = Tcl_Eval (interp, promptHook);
         if (result == TCL_ERROR) {
-            Tcl_Channel stderrChan = TclX_Stderr (interp);
+            Tcl_Channel stderrChan = Tcl_GetStdChannel (TCL_STDERR);
             if (stderrChan != NULL) {
                 TclX_WriteStr (stderrChan, "Error in prompt hook: ");
                 TclX_WriteStr (stderrChan, interp->result);
@@ -175,7 +175,7 @@ TclX_OutputPrompt (interp, topLevel)
         }
     } 
 
-    stdoutChan = TclX_Stdout (interp);
+    stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
     if (stdoutChan != NULL) {
         if (!promptDone) {
             if (topLevel)
@@ -236,12 +236,13 @@ Tcl_CommandLoop (interp, interactive)
         /*
          * Output a prompt and input a command.
          */
-        stdinChan = TclX_Stdin (interp);
+        stdinChan = Tcl_GetStdChannel (TCL_STDIN);
         if (stdinChan == NULL)
             goto endOfFile;
 
-        if (interactive)
+        if (interactive) {
             TclX_OutputPrompt (interp, topLevel);
+        }
         Tcl_SetErrno (0);
         result = Tcl_Gets (stdinChan, &cmdBuf);
 
@@ -249,7 +250,7 @@ Tcl_CommandLoop (interp, interactive)
             if (Tcl_Eof (stdinChan) || Tcl_InputBlocked (stdinChan))
                 goto endOfFile;
             if (Tcl_GetErrno () == EINTR) {
-                Tcl_Channel stdoutChan = TclX_Stdout (interp);
+                Tcl_Channel stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
                 if (stdoutChan != NULL)
                     TclX_WriteNL (stdoutChan);
                 continue;  /* Next command */

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.10 1996/03/04 23:11:58 markd Exp $
+ * $Id: tclXinit.c,v 5.11 1996/03/10 04:42:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -291,8 +291,8 @@ TclX_ErrorExit (interp, exitCode)
     Tcl_DStringInit (&savedResult);
     Tcl_DStringAppend (&savedResult, interp->result, -1);
 
-    stdoutChan = TclX_Stdout (interp);
-    stderrChan = TclX_Stderr (interp);
+    stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
+    stderrChan = Tcl_GetStdChannel (TCL_STDERR);
 
     if (stdoutChan != NULL)
         Tcl_Flush (stdoutChan);

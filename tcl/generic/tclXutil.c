@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.7 1996/03/10 04:42:42 markd Exp $
+ * $Id: tclXutil.c,v 5.8 1996/03/10 22:16:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -968,64 +968,6 @@ TclX_VarEval TCL_VARARGS_DEF(Tcl_Interp *, arg1)
     Tcl_DStringFree (&cmdBuffer);
     
     return result;
-}
-
-
-/*-----------------------------------------------------------------------------
- * TclX_Stdin --
- *
- *   Get a pointer to the stdin channel.  This is used so that I/O will be
- * redirected if the Tcl file table is changed.
- *
- * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- * Returns:
- *   A pointer to the channel or NULL if its not open.
- *-----------------------------------------------------------------------------
- */
-Tcl_Channel
-TclX_Stdin (interp)
-    Tcl_Interp  *interp;
-{
-    return Tcl_GetChannel (interp, "stdin", NULL);
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_Stdout --
- *
- *   Get a pointer to the stdout channel.  This is used so that I/O will be
- * redirected if the Tcl file table is changed.
- *
- * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- * Returns:
- *   A pointer to the channel or NULL if its not open.
- *-----------------------------------------------------------------------------
- */
-Tcl_Channel
-TclX_Stdout (interp)
-    Tcl_Interp  *interp;
-{
-    return Tcl_GetChannel (interp, "stdout", NULL);
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_Stderr --
- *
- *   Get a pointer to the stderr channel.  This is used so that I/O will be
- * redirected if the Tcl file table is changed.
- *
- * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- * Returns:
- *   A pointer to the channel or NULL if its not open.
- *-----------------------------------------------------------------------------
- */
-Tcl_Channel
-TclX_Stderr (interp)
-    Tcl_Interp  *interp;
-{
-    return Tcl_GetChannel (interp, "stderr", NULL);
 }
 
 /*-----------------------------------------------------------------------------

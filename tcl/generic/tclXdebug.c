@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 5.2 1996/02/09 18:42:44 markd Exp $
+ * $Id: tclXdebug.c,v 5.3 1996/02/12 18:15:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -301,7 +301,7 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
 
         Tcl_AddErrorInfo (interp, "\n    (\"cmdtrace\" callback command)");
         
-        stderrChan = TclX_Stderr (interp);
+        stderrChan = Tcl_GetStdChannel (TCL_STDERR);
         if (stderrChan != NULL) {
             TclX_WriteStr (stderrChan, 
                            "cmdtrace callback command error: errorCode = ");
