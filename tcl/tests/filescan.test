@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 7.2 1996/07/26 05:56:18 markd Exp $
+# $Id: filescan.test,v 7.3 1996/08/03 01:25:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -67,9 +67,11 @@ proc ValMatch {scanInfo id} {
          list offset $matchInfo(offset)
     } 0 [list offset [keylget scanInfo offset]]
 
+    if 0 {
     Test filescan-${id}.2.1 {filescan tests} {
          list bytesread $matchInfo(bytesread)
     } 0 [list bytesread [keylget scanInfo bytesread]]
+    }
 
     Test filescan-${id}.3 {filescan tests} {
          list linenum $matchInfo(linenum)

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 7.1 1996/07/18 19:36:17 markd Exp $
+ * $Id: tclXfilescan.c,v 7.2 1996/08/03 01:25:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -533,10 +533,17 @@ SetMatchInfoVar (interp, scanData)
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
+#if 0
+        /*
+         * FIX: Don't expose till we decide on semantics: Should it include the
+         * current line?  All the pieces are here, include doc and tests, just
+         * disabled.
+         */
         sprintf (buf, "%ld", scanData->bytesRead);
         if (Tcl_SetVar2 (interp, MATCHINFO, "bytesread", buf,
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
+#endif
 
         sprintf (buf, "%ld", scanData->lineNum);
         if (Tcl_SetVar2 (interp, MATCHINFO, "linenum", buf,
