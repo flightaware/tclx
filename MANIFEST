@@ -138,7 +138,6 @@
 ./tcl/help/tcl/keyedlists/keylkeys
 ./tcl/help/tcl/keyedlists/keylset
 ./tcl/help/tcl/libraries/auto_commands
-./tcl/help/tcl/libraries/auto_load
 ./tcl/help/tcl/libraries/auto_load_file
 ./tcl/help/tcl/libraries/auto_packages
 ./tcl/help/tcl/libraries/buildpackageindex
