@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.tcl,v 4.0 1994/07/16 05:29:56 markd Rel markd $
+# $Id: pushd.tcl,v 4.1 1995/01/01 19:49:58 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,31 +23,42 @@ global TCLXENV(dirPushList)
 
 set TCLXENV(dirPushList) ""
 
-proc pushd {args} {
+proc pushd {{new ""}} {
     global TCLXENV
 
-    if {[llength $args] > 1} {
-        error "bad # args: pushd [dir_to_cd_to]"
+    set current [pwd]
+    if {[clength $new] > 0} {
+        set dirs [glob -nocomplain $new]
+        set count [llength $dirs]
+        if {$count == 0} {
+            error "no such directory: $new"
+        } elseif {$count != 1} {
+            error "ambiguous directory: $new: [join $directories ", "]"
+        }
+        cd [lindex $dirs 0]
+        lvarpush TCLXENV(dirPushList) $current
+    } else {
+        if [lempty $TCLXENV(dirPushList)] {
+            error "directory stack empty"
+        }
+        cd [lindex $TCLXENV(dirPushList) 0]
+        lvarpop TCLXENV(dirPushList)
+        lvarpush TCLXENV(dirPushList) $current
     }
-    set TCLXENV(dirPushList) [linsert $TCLXENV(dirPushList) 0 [pwd]]
-
-    if {[llength $args] != 0} {
-        cd [glob $args]
-    }
+    return [pwd]
 }
 
 proc popd {} {
     global TCLXENV
 
-    if [llength $TCLXENV(dirPushList)] {
-        cd [lvarpop TCLXENV(dirPushList)]
-        pwd
-    } else {
+    if [lempty $TCLXENV(dirPushList)] {
         error "directory stack empty"
     }
+    cd [lvarpop TCLXENV(dirPushList)]
+    return [pwd]
 }
 
 proc dirs {} { 
     global TCLXENV
-    echo [pwd] $TCLXENV(dirPushList)
+    return [concat [list [pwd]] $TCLXENV(dirPushList)]
 }
