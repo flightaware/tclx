@@ -376,6 +376,7 @@
 ./tk/unix/Makefile.in
 ./tk/unix/pkgIndex.tcl.in
 ./tk/unix/tkXAppInit.c
+./tk/unix/tkXunixTest.c
 ./tk/unix/tkxConfig.sh.in
 ./tk/win/makefile.vc
 ./tk/win/tkXAppInit.c
