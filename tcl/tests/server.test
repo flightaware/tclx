@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 4.1 1995/01/01 19:49:06 markd Exp $
+# $Id: server.test,v 1.1 1995/03/30 05:20:00 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -148,27 +148,6 @@ Test server-5.5 {server_send argument checking} {
 } 1 {expected one of "-nonewline", "-outofband", or "-dontroute" got "-bad"}
 
 
-Test server-6.1 {server_receive argument checking} {
-    server_receive
-} 1 {wrong # args: server_receive [options] fileid length}
-
-Test server-6.2 {server_receive argument checking} {
-    server_receive x y z
-} 1 {wrong # args: server_receive [options] fileid length}
-
-Test server-6.3 {server_receive argument checking} {
-    server_receive x y
-} 1 {bad file identifier "x"}
-
-Test server-6.4 {server_receive argument checking} {
-    server_receive -bad x y
-} 1 {expected one of "-outofband", "-peek", or "-waitall", got "-bad"}
-
-Test server-6.5 {server_receive argument checking} {
-    server_receive -keepnewline -bad x y
-} 1 {expected one of "-outofband", "-peek", or "-waitall", got "-bad"} 
-
-
 #
 # Test simple interaction with the echo server.  This proc is used to
 # do the actual interaction.  The server is connected to using various
@@ -205,23 +184,18 @@ proc TalkToEcho {testId readFH writeFH buffered} {
 
     Test $testId.3 {simple client interaction} {
         server_send $writeFH "Test #8"
-        server_receive $readFH 100
+        gets $readFH
     } 0 {Test #8}
 
     Test $testId.4 {simple client interaction} {
         server_send $writeFH "Test #9"
-        server_receive -keepnewline $readFH 100
+        read $readFH 8
     } 0 "Test #9\n"
 
     Test $testId.5 {simple client interaction} {
         server_send -nonewline $writeFH "Test #10"
-        server_receive -keepnewline $readFH 100
+        read $readFH 8
     } 0 {Test #10}
-
-    Test $testId.6 {simple client interaction} {
-        server_send  $writeFH "Test #11"
-        list [server_receive -peek $readFH 100] [server_receive $readFH 100]
-    } 0 {{Test #11} {Test #11}}
 
     close $readFH
     if ![cequal $readFH $writeFH] {

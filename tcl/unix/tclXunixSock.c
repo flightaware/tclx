@@ -836,90 +836,6 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ServerReceiveCmd --
- *     Implements the TCL server_receive command:
- *
- *        server_receive [options] fileid length
- *
- *          -outofband -peek -waitall -keepnewline
- *
- * Results:
- *   The data received.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_ServerReceiveCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    FILE        *filePtr;
-    int          bytesAttempted;
-    int          bytesReceived;
-    int          flags = 0;
-    int          nextArg;
-    char        *dataBuffer;
-    int          keepNewline = 0;
-
-    nextArg = 1;
-    while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
-        if (STREQU (argv [nextArg], "-outofband")) {
-            flags |= MSG_OOB;
-        } else if (STREQU (argv [nextArg], "-peek")) {
-            flags |= MSG_PEEK;
-        } else if (STREQU (argv [nextArg], "-waitall")) {
-            flags |= MSG_WAITALL;
-        } else if (STREQU (argv [nextArg], "-keepnewline")) {
-            keepNewline = 1;
-        } else {
-            Tcl_AppendResult (interp, "expected one of \"-outofband\",",
-                              " \"-peek\", or \"-waitall\", got \"", 
-                              argv [nextArg], "\"", (char *) NULL);
-            return TCL_ERROR;
-        }
-        nextArg++;
-    }
-
-    if (nextArg != argc - 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " [options] fileid length", (char *) NULL);
-        return TCL_ERROR;
-    }
-    
-    if (Tcl_GetOpenFile (interp, argv [nextArg++],
-                         FALSE, TRUE, /* Read access */
-                         &filePtr) != TCL_OK)
-        return TCL_ERROR;
-
-    if (Tcl_GetInt (interp, argv [nextArg], &bytesAttempted) != TCL_OK)
-        return TCL_ERROR;
-
-    dataBuffer = ckalloc (bytesAttempted + 1);
-    bytesReceived = recvfrom (fileno (filePtr), 
-                              dataBuffer,
-                              bytesAttempted,
-                              flags,
-                              (struct sockaddr *)NULL,
-                              (int *)NULL);
-
-    if (bytesReceived < 0) {
-      interp->result = Tcl_PosixError (interp);
-      return TCL_ERROR;
-    }
-
-    dataBuffer[bytesReceived] = '\0';
-    if (!keepNewline && dataBuffer[bytesReceived - 1] == '\n') {
-        dataBuffer[bytesReceived - 1] = '\0';
-    }
-
-    Tcl_SetResult (interp, dataBuffer, TCL_DYNAMIC);
-    return TCL_OK;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
  * Tcl_ServerInit --
  *     
  *   Initialize the server commands in the specified interpreter.
@@ -938,8 +854,6 @@ Tcl_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_accept", Tcl_ServerAcceptCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_send", Tcl_ServerSendCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "server_receive", Tcl_ServerReceiveCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 }
 #else
@@ -986,8 +900,6 @@ Tcl_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_accept", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_send", ServerNotAvailable,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "server_receive", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
 }
 #endif /* HAVE_GETHOSTBYNAME */

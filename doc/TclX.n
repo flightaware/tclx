@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.11 1995/03/29 17:29:19 markd Exp markd $
+.\" $Id: TclX.n,v 4.12 1995/03/30 05:25:51 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1529,11 +1529,20 @@ This procedure writes the specified strings to the named file.
 Commands are provided to access TCP/IP-based servers, and to create
 them.  It is easy to build servers using Extended Tcl that run under
 \fBinetd\fR, or even servers that run standalone and accept and manage
-multiple simultaneous connections.  The \fBfstat remotehost\fR and 
-\fBfstat localhost\fR requests are useful both for clients and
-servers.  The socket file handles maybe be read or written using either
-the \fBgets\fR, \fBread\fR, and \fBputs\fR commands or the \fBserver_send\fR
-\fBserver_receive\fR commands.
+multiple simultaneous connections.
+The socket file handles maybe be read using the either the
+\fBgets\fR or \fBread\fR command and written using either the \fBputs\fR or
+\fBserver_send\fR command.
+.PP
+The \fBfstat remotehost\fR and 
+\fBfstat localhost\fR requests are useful both for clients and servers.
+To obtain the host name of the system the script is running on, use
+\fBid host\fR.
+.PP
+If a TclX script is setup to run under \fBinetd\fR, it is launched with its
+stdin, stdout and stderr associated with the client socket.  The standard
+Tcl file ids \fBstdin\fR, \fBstdout\fR and \fBstderr\fR maybe then be used
+to communicate with the client.
 .TP
 .B server_connect ?\fIoption\fR? \fIhost service\fR
 .br
@@ -1558,9 +1567,7 @@ significantly better performance when reading data, and will also improve
 the performance of a series of writes done without intervening reads.
 The buffering is only used when accessing the file via
 the \fBgets\fR, \fBread\fR, and \fBputs\fR commands. The \fBserver_send\fR
-\fBserver_receive\fR commands do not use the file bufferes.  Mixing these
-two classes of commands on a buffered file may lead to indeterminate
-results.
+command does not use the buffer.
 .IP
 o\ \fB-nobuf\fR - The file is unbuffered. A single file id,
 open for both reading and writing, is returned.
@@ -1672,10 +1679,13 @@ aliases. See \fIifconfig(2)\fR.)
 .TP
 .B server_send \fI?options?\fR \fIfileid\fR \fIstring\fR
 .br
-Sends the specified string to the TCP/IP connection corresponding
-to \fIfileid\fR.  \fBserver_send\fR works like \fBputs\fR, including
-puts' \fInonewline\fR option, but is better at detecting lost
-connections and other IP-related error conditions.
+Send the specified string to the TCP/IP connection corresponding
+to \fIfileid\fR.  The\fBserver_send\fR command is provide as an option
+to \fBputs\fR for writing to a socket as it is better at detecting lost
+connections and other IP-related error conditions.  File buffering
+is ignored for \fBserver_send\fR. There is no need to \fBflush\fR after a
+\fBserver_send\fR.  The results of mixing \fBserver_send\fR with \fBputs\fR
+without flushing the \fBputs\fR output is indeterminate.
 .sp
 Options are:
 .IP
@@ -1686,30 +1696,6 @@ o\ \fB-dontroute\fR - Requests that routing be bypassed and the direct
 interface used (usually used only by diagnostic or routing programs)
 .IP
 o\ \fB-outofband\fR - Send out-of-band data on the socket.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/files/server_receive
-'\"@brief: Receive a message from a TCP/IP socket.
-.TP
-.B server_receive \fI?options?\fR \fIfileid\fR \fIlength\fR
-.br
-Receives from the TCP/IP socket associated with \fIfileid\fR a
-message of up to \fIlength\fR bytes and returns it to the caller.
-.sp
-Options are:
-.IP
-o\ \fB-outofband\fR - Receive out-of-band data.
-.IP
-o\ \fB-peek\fR - Peek at the incoming data (returning data from
-the receive queue without removing the data from the queue).
-.IP
-o\ \fB-waitall\fR - Request that the operation block until the
-full request is satisfied.
-.IP
-o\ \fB-keepnewline\fR - Don't discard the last character of the message
-if it is a newline.  Normally, a trailing newline is discarded.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
