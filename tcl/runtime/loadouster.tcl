@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loadouster.tcl,v 6.0 1996/05/10 16:16:39 markd Exp $
+# $Id: loadouster.tcl,v 7.0 1996/06/16 05:31:28 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -25,7 +25,8 @@ proc auto_load_ouster_index fn {
     }
     set error [catch {
         set id [gets $f]
-        if {$id == "# Tcl autoload index file, version 2.0"} {
+        if {($id == "# Tcl autoload index file, version 2.0") ||
+            ($id == {# Tcl autoload index file, version 2.0 for [incr Tcl]})} {
             eval [read $f]
         } elseif {$id == "# Tcl autoload index file: each line identifies a Tcl"} {
             while {[gets $f line] >= 0} {
