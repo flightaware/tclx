@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.3 1997/02/06 18:15:27 markd Exp $
+dnl $Id: configure.in,v 8.4 1997/02/12 16:13:10 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.3 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.4 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -374,8 +374,8 @@ if test -f conftest..o; then
     CC_SHOBJ_FLAG='-o $@'
     AC_MSG_RESULT([OK])
 else
-    OBJ_SAVE='@if test -f $*o ; then rm -f $*sav; mv $*o $*sav; fi;'
-    OBJ_RESTORE='@mv $*o $@; if test -f $*save ; then mv $*save $*o; fi;'
+    OBJ_SAVE='@b=`basename $@ ..o`; if test -f $$b.o ; then rm -f $$b.sav; mv $$
+    OBJ_RESTORE='@b=`basename $@ ..o`;mv $$b.o $@; if test -f $$b.sav ; then mv$
     CC_SHOBJ_FLAG=""
     AC_MSG_RESULT([buggy])
 fi

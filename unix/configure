@@ -516,7 +516,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.3 dnl
+# From configure.in Revision: 8.4 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -909,8 +909,8 @@ if test -f conftest..o; then
     CC_SHOBJ_FLAG='-o $@'
     echo "$ac_t""OK" 1>&6
 else
-    OBJ_SAVE='@if test -f $*o ; then rm -f $*sav; mv $*o $*sav; fi;'
-    OBJ_RESTORE='@mv $*o $@; if test -f $*save ; then mv $*save $*o; fi;'
+    OBJ_SAVE='@b=`basename $@ ..o`; if test -f $$b.o ; then rm -f $$b.sav; mv $$
+    OBJ_RESTORE='@b=`basename $@ ..o`;mv $$b.o $@; if test -f $$b.sav ; then mv$
     CC_SHOBJ_FLAG=""
     echo "$ac_t""buggy" 1>&6
 fi
