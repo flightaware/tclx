@@ -10,3 +10,11 @@ o Use install-sh for installation.
 o tkdemo proc is not installed.
 
 o tclhelp is not built for windows.
+
+o syslog interface.  Commands that give explicit access to syslog, plus
+  a channel that lets one write to syslog.  Should be able to dup channel
+  to have both stdout and stderr go to the same channel.  Need a dup
+  fconfigure option.
+
+o Making packages out of some of the new TclX functionallity, such as 
+  syslog idea above.
