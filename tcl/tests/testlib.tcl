@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.4 1993/09/09 06:07:15 markd Exp markd $
+# $Id: testlib.tcl,v 2.5 1993/09/18 22:58:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -127,7 +127,8 @@ proc ForkLoopingChild {{setPGroup 0}} {
     }
     execl ../tclmaster/bin/tcl \
         {-qc {unlink CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}}
-    error "Should never make it here"
+    puts stderr "execl failed"
+    exit 1
 }
 
 
