@@ -15,7 +15,7 @@
 
 #include "tclExtdInt.h"
 
-#ifdef HAVE_GETHOSTBYNAME
+#ifdef HAVE_SOCKET
 
 #include <sys/types.h>
 #ifndef NO_SYS_SOCKET_H
@@ -1021,4 +1021,4 @@ Tcl_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_send", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
 }
-#endif /* HAVE_GETHOSTBYNAME */
+#endif /* HAVE_SOCKET */

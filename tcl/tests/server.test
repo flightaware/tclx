@@ -14,13 +14,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.6 1995/04/02 19:41:56 markd Exp markd $
+# $Id: server.test,v 1.7 1995/04/02 20:18:44 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
-if ![infox have_sockets] return
+if ![infox have_sockets] {
+    echo "NOTE: sockets were found on this system.  Is this correct?"
+    return
+}
 
 #
 # Do all argument and error checking.  We can at least test this, even

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 4.1 1994/11/17 15:57:49 markd Exp markd $
+ * $Id: tclXgeneral.c,v 4.2 1995/01/01 19:49:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -134,7 +134,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_sockets", argv [1])) {
-#       ifdef HAVE_GETHOSTBYNAME
+#       ifdef HAVE_SOCKET
         interp->result = "1";
 #       else
         interp->result = "0";

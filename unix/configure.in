@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.17 1995/04/02 17:24:44 markd Exp markd $
+dnl $Id: configure.in,v 4.18 1995/04/12 07:23:56 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.17 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.18 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -528,7 +528,16 @@ AC_CHECK_LIB(dnet_stub, main, [LIBS="$LIBS -ldnet_stub"])
 
 AC_HAVE_FUNCS(getcwd select setitimer setvbuf sigaction setpgid getgroups)
 AC_HAVE_FUNCS(bzero bcopy fsync getpriority strcoll)
-AC_HAVE_FUNCS(gethostbyname inet_aton gethostname sendmsg)
+
+#------------------------------------------------------------------------------
+# Test for socket related functions.  Note that "socket" is just used to
+# determine if we have sockets at all.  We can't use "connect" or
+# "gethostbyname" because the Tk test that checks for socket related libraries
+# by set a cache value indicating we don't have them, even if we eventually
+# find libraries containing these functions.
+#------------------------------------------------------------------------------
+
+AC_HAVE_FUNCS(socket inet_aton gethostname sendmsg)
 
 #------------------------------------------------------------------------------
 # Check for catgets.  Not the some systems (NetBSD 1.0) have catclose declared
