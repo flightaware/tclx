@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: math.test,v 4.2 1995/01/23 23:41:30 markd Exp markd $
+# $Id: math.test,v 5.0 1995/07/25 05:41:40 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -57,9 +57,13 @@ Test math-2.4 {max tests} {
     max -68.7 -2
 } 0 -2
 
+Test math-2.4.1 {max tests} {
+    max -68.7
+} 0 -68.7
+
 Test math-2.5 {max tests} {
     max
-} 1 {wrong # args: max num1 num2 ?..numN?}
+} 1 {wrong # args: max num1 ?..numN?}
 
 Test math-2.6 {max tests} {
     max 1 2 3 foo
@@ -77,9 +81,13 @@ Test math-3.3 {min tests} {
     min -2000000000 2000000000 2 5
 } 0 -2000000000
 
+Test math-3.3 {min tests} {
+    min 5
+} 0 5
+
 Test math-3.4 {min tests} {
     min
-} 1 {wrong # args: min num1 num2 ?..numN?}
+} 1 {wrong # args: min num1 ?..numN?}
 
 Test math-3.5 {min tests} {
     min 1 2 3 foo

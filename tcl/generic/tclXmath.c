@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 4.4 1995/04/02 16:38:08 markd Exp markd $
+ * $Id: tclXmath.c,v 5.0 1995/07/25 05:42:44 markd Rel $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,7 +47,7 @@ Tcl_RandomCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  *
  * Tcl_MaxCmd --
  *      Implements the Tcl max command:
- *        max num1 num2 ?..numN?
+ *        max num1 ?..numN?
  *
  * Results:
  *      Standard TCL results.
@@ -65,9 +65,9 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
     int    idx,   maxIdx   =  1;
 
 
-    if (argc < 3) {
+    if (argc < 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " num1 num2 ?..numN?", (char *) NULL);
+                          " num1 ?..numN?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -88,7 +88,7 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
  *
  * Tcl_MinCmd --
  *     Implements the TCL min command:
- *         min num1 num2 ?..numN?
+ *         min num1 ?..numN?
  *
  * Results:
  *      Standard TCL results.
@@ -105,9 +105,9 @@ Tcl_MinCmd (clientData, interp, argc, argv)
     double value, minValue = MAXDOUBLE;
     int    idx,   minIdx   = 1;
 
-    if (argc < 3) {
+    if (argc < 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " num1 num2 ?..numN?", (char *) NULL);
+                          " num1 ?..numN?", (char *) NULL);
         return TCL_ERROR;
     }
 
