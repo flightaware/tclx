@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 4.0 1994/07/16 05:25:08 markd Rel markd $
+# $Id: help.test,v 4.1 1995/01/01 19:47:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -160,9 +160,9 @@ Test help-1.1.1 {help tests} {
 Subjects available in /tcl:
    control/         debug/           files/           filescan/
    internation/     intro/           keyedlists/      libraries/
-   lists/           math/            processes/       signals/
-   status/          strings/         tclshell/        time/
-   variables/
+   lists/           math/            processes/       server/
+   signals/         status/          strings/         tclshell/
+   time/            variables/
 }
 
 Test help-1.2 {help tests} {
