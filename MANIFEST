@@ -94,7 +94,6 @@
 ./tcl/help/tcl/files/chown
 ./tcl/help/tcl/files/chroot
 ./tcl/help/tcl/files/close
-./tcl/help/tcl/files/copyfile
 ./tcl/help/tcl/files/dup
 ./tcl/help/tcl/files/echo
 ./tcl/help/tcl/files/eof
@@ -269,10 +268,10 @@
 ./tcl/tests/cmdloop.test
 ./tcl/tests/cmdtrace.test
 ./tcl/tests/compat/clock.test
+./tcl/tests/compat/copyfile.test
 ./tcl/tests/compat/file.test
 ./tcl/tests/compat/server.test
 ./tcl/tests/convlib.test
-./tcl/tests/copyfile.test
 ./tcl/tests/dup.test
 ./tcl/tests/fcntl.test
 ./tcl/tests/filescan.test

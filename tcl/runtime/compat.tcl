@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 8.2 1997/04/17 04:59:02 markd Exp $
+# $Id: compat.tcl,v 8.3 1997/06/12 21:08:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -259,4 +259,101 @@ proc frename {old new} {
 }
 
 
+#@package: TclX-CopyFileCompat copyfile
 
+# Added TclX 8.0.0
+
+# copyfile ?-bytes num | \-maxbytes num? ?\-translate? fromFileId toFileId
+
+proc copyfile args {
+    global errorInfo errorCode
+
+    set copyMode NORMAL
+    set translate 0
+    while {[string match -* [lindex $args 0]]} {
+        set opt [lvarpop args]
+        switch -exact -- $opt {
+            -bytes {
+                set copyMode BYTES
+                if {[llength $args] == 0} {
+                    error "argument required for -bytes option"
+                }
+                set totalBytesToRead [lvarpop args]
+            }
+            -maxbytes {
+                set copyMode MAX_BYTES
+                if {[llength $args] == 0} {
+                    error "argument required for -maxbytes option"
+                }
+                set totalBytesToRead [lvarpop args]
+            }
+            -translate {
+                set translate 1
+            }
+            default {
+                error "invalid argument \"$opt\", expected \"-bytes\",\
+                        \"-maxbytes\", or \"-translate\""
+            }
+        }
+    }
+    if {[llength $args] != 2} {
+        error "wrong # args: copyfile ?-bytes num|-maxbytes num? ?-translate?\
+                fromFileId toFileId"
+    }
+    lassign $args fromFileId toFileId
+
+    if !$translate {
+        set fromOptions [list \
+                [fconfigure $fromFileId -translation] \
+                [fconfigure $fromFileId -eofchar]]
+        set toOptions [list \
+                [fconfigure $toFileId -translation] \
+                [fconfigure $toFileId -eofchar]]
+
+        fconfigure $fromFileId -translation binary
+        fconfigure $fromFileId -eofchar {}
+        fconfigure $toFileId -translation binary
+        fconfigure $toFileId -eofchar {}
+    }
+
+    set cmd [list fcopy $fromFileId $toFileId]
+    if ![cequal $copyMode NORMAL] {
+        lappend cmd -size $totalBytesToRead
+    }
+    
+    set stat [catch {eval $cmd} totalBytesRead]
+    if $stat {
+        set saveErrorResult $totalBytesRead
+        set saveErrorInfo $errorInfo
+        set saveErrorCode $errorCode
+    }
+
+    if !$translate {
+        # Try to restore state, even if we have an error.
+        if [catch {
+            fconfigure $fromFileId -translation [lindex $fromOptions 0]
+            fconfigure $fromFileId -eofchar [lindex $fromOptions 1]
+            fconfigure $toFileId -translation [lindex $toOptions 0]
+            fconfigure $toFileId -eofchar [lindex $toOptions 1]
+        } errorResult] {
+            # If fcopy did not get an error, we process this one
+            if !$stat {
+                set stat 1
+                set saveErrorResult $errorResult
+                set saveErrorInfo $errorInfo
+                set saveErrorCode $errorCode
+            }
+        }
+    }
+
+    if $stat {
+        error $saveErrorResult $saveErrorInfo $saveErrorCode
+    }
+
+    if {[cequal $copyMode BYTES] && ($totalBytesToRead > 0) && \
+            ($totalBytesRead != $totalBytesToRead)} {
+        error "premature EOF, $totalBytesToRead bytes expected,\
+                $totalBytesRead bytes actually read"
+    }
+    return $totalBytesRead
+}

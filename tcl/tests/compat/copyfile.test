@@ -12,11 +12,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: copyfile.test,v 8.0.4.1 1997/04/14 02:02:19 markd Exp $
+# $Id: copyfile.test,v 8.1 1997/04/17 04:59:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
+eval $SAVED_UNKNOWN
 
 #
 # Compare the contents of two files.  Return 1 if the same, 0 if different.
@@ -138,8 +139,7 @@ Test copyfile-1.7 {copyfile tests} {
     list $stat $msg
 } 0 [list 0 $testFileSize]
 
-# FIX: Need copy test on sockets, binary files, translation.
-
 TestRemove COPYFILE1.TMP COPYFILE2.TMP COPYFILE3.TMP
 
+rename unknown {}
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: buildutil.tcl,v 8.2 1997/04/17 05:00:23 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -56,10 +56,12 @@ proc CopyFile {sourceFile target} {
         set targetFile $target
     }
 
-    catch {file delete $targetFile}
+    file delete $targetFile
     set sourceFH [open $sourceFile r]
     set targetFH [open $targetFile w]
-    copyfile $sourceFH $targetFH
+    fconfigure $sourceFH -translate binary -eofchar {}
+    fconfigure $targetFH -translate binary -eofchar {}
+    fcopy $sourceFH $targetFH
     close $sourceFH
     close $targetFH
 

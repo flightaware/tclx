@@ -1216,7 +1216,7 @@
   o Integrated support for building both shared and static libraries at the
     same time from Jan Nijtmans' <nijtmans@nici.kun.nl> TclX plus patch.
   o Deprecated the mkdir, rmdir, unlink and frename commands in favor of the
-    new file subcommands. Compatbility with these commands is still supported
+    new file subcommands. Compatability with these commands is still supported
     for old scripts via procedures in the TclX library.
 -------------------------------------------------------------------------------
 19 Oct 96:
@@ -1289,4 +1289,7 @@
   o Fix trap signal handler overwriting interp result.
   o Modified the system command to take multiple arguments and concat them
     into a single command string.
+  o Deprecated the copyfile command in favor of the fcopy command. 
+    Compatability with copyfile is still supported for old scripts via a
+    procedure in the TclX library.
 -------------------------------------------------------------------------------

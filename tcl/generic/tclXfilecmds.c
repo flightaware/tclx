@@ -1,7 +1,7 @@
 /*
  * tclXfilecmds.c
  *
- * Extended Tcl pipe and copyfile commands.
+ * Extended Tcl file-related commands.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
@@ -12,51 +12,17 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.10 1997/07/03 07:14:13 markd Exp $
- *-----------------------------------------------------------------------------
- */
-/* 
- *-----------------------------------------------------------------------------
- * Note: The list parsing code is from Tcl distribution file tclUtil.c,
- * procedure TclFindElement.
- *-----------------------------------------------------------------------------
- * Copyright (c) 1987-1994 The Regents of the University of California.
- * All rights reserved.
- *
- * Permission is hereby granted, without written agreement and without
- * license or royalty fees, to use, copy, modify, and distribute this
- * software and its documentation for any purpose, provided that the
- * above copyright notice and the following two paragraphs appear in
- * all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * $Id: tclXfilecmds.c,v 8.11 1997/07/04 20:23:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 static char *FILE_ID_OPT = "-fileid";
-static char *TCL_TRANSLATION_OPT = "-translation";
-static char *TCL_EOFCHAR_OPT = "-eofchar";
 
 /*
  * Prototypes of internal functions.
  */
-static int
-CopyOpenFile _ANSI_ARGS_((Tcl_Interp *interp,
-                          long        maxBytes,
-                          Tcl_Channel inChan,
-                          Tcl_Channel outChan));
-
 static int
 TruncateByPath  _ANSI_ARGS_((Tcl_Interp  *interp,
                              char        *filePath,
@@ -71,10 +37,6 @@ ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
 
 static int 
 TclX_PipeObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-static int 
-TclX_CopyfileObjCmd _ANSI_ARGS_((ClientData clientData,
     Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
 
 static int
@@ -139,259 +101,6 @@ TclX_PipeObjCmd (clientData, interp, objc, objv)
     Tcl_Close (NULL, channels [1]);
     return TCL_ERROR;
 }
-
-/*-----------------------------------------------------------------------------
- * CopyOpenFile --
- * 
- *  Utility function to copy an open file to another open file.  Handles
- * non-blocking I/O in the same manner as gets.  It doesn't return an
- * error when EWOULDBLOCK or EAGAIN is returned if some data has been read.
- *
- * Parameters:
- *   o interp (I) - Error messages are returned in the interpreter.
- *   o maxBytes (I) - Maximum number of bytes to copy.
- *   o inChan (I) - Input channel.
- *   o outChan (I) - Output channel.
- * Returns:
- *    The number of bytes transfered or -1 on an error with the error in
- * errno.
- *-----------------------------------------------------------------------------
- */
-static int
-CopyOpenFile (interp, maxBytes, inChan, outChan)
-    Tcl_Interp *interp;
-    long        maxBytes;
-    Tcl_Channel inChan;
-    Tcl_Channel outChan;
-{
-    char   buffer [2048];
-    long   bytesToRead, bytesRead, totalBytesRead, bytesLeft;
-
-    bytesLeft = maxBytes;
-    totalBytesRead = 0;
-
-    while (bytesLeft > 0) {
-        bytesToRead = sizeof (buffer);
-        if (bytesToRead > bytesLeft)
-            bytesToRead = bytesLeft;
-
-        bytesRead = Tcl_Read (inChan, buffer, bytesToRead);
-        if (bytesRead <= 0) {
-            if (Tcl_Eof (inChan) || Tcl_InputBlocked (inChan)) {
-                break;
-            }
-            return -1;
-        }
-        if (Tcl_Write (outChan, buffer, bytesRead) != bytesRead)
-            return -1;
-
-        bytesLeft -= bytesRead;
-        totalBytesRead += bytesRead;
-    }
-
-    if (Tcl_Flush (outChan) == TCL_ERROR)
-        return -1;
-
-    return totalBytesRead;
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_CopyfileObjCmd --
- *     Implements the copyfile TCL command:
- *         copyfile ?-bytes num|-maxbytes num? -translate fromFileId toFileId
- *
- * Results:
- *      The number of bytes transfered or an error.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_CopyfileObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj     *CONST objv[];
-{
-#define TCLX_COPY_ALL        0
-#define TCLX_COPY_BYTES      1
-#define TCLX_COPY_MAX_BYTES  2
-
-    Tcl_Channel    inChan, outChan;
-    long           totalBytesToRead, totalBytesRead;
-    int            objIdx, copyMode, translate;
-    int            saveErrno = 0;
-    Tcl_DString    inChanTrans, outChanTrans;
-    Tcl_DString    inChanEOF, outChanEOF;
-    char          *switchString;
-
-    /*
-     * Parse arguments.
-     */
-    copyMode = TCLX_COPY_ALL;
-    totalBytesToRead = MAXLONG;
-    translate = FALSE;
-
-    for (objIdx = 1; objIdx < objc; objIdx++) {
-	switchString = Tcl_GetStringFromObj (objv [objIdx], NULL);
-	if (*switchString != '-')
-            break;
-        if (STREQU (switchString, "-bytes")) {
-            copyMode = TCLX_COPY_BYTES;
-            objIdx++;
-            if (objIdx >= objc) {
-                TclX_AppendObjResult (interp,
-                                      "argument required for -bytes option",
-                                      (char *) NULL);
-                return TCL_ERROR;
-            }
-	    if (Tcl_GetLongFromObj (interp, objv [objIdx],
-                                   &totalBytesToRead) != TCL_OK) 
-		    return TCL_ERROR;
-        } else if (STREQU (switchString, "-maxbytes")) {
-            copyMode = TCLX_COPY_MAX_BYTES;
-            objIdx++;
-            if (objIdx >= objc) {
-                TclX_AppendObjResult (interp,
-                                      "argument required for -maxbytes option",
-                                      (char *) NULL);
-                return TCL_ERROR;
-            }
-	    if (Tcl_GetLongFromObj (interp, objv [objIdx], &totalBytesToRead)
-		!= TCL_OK)
-                return TCL_ERROR;
-        } else if (STREQU (switchString, "-translate")) {
-            translate = TRUE;
-        } else {
-            TclX_AppendObjResult (interp, "invalid argument \"", 
-                                  Tcl_GetStringFromObj (objv [objIdx], NULL),
-                                  "\", expected \"-bytes\", \"-maxbytes\", or ",
-                                  "\"-translate\"", (char *) NULL);
-            return TCL_ERROR;
-        }
-    }
-    
-    if (objIdx != objc - 2) {
-        TclX_WrongArgs (interp, objv [0], 
-	    "?-bytes num|-maxbytes num? ?-translate? fromFileId toFileId");
-        return TCL_ERROR;
-    }
-
-    Tcl_DStringInit (&inChanTrans);
-    Tcl_DStringInit (&outChanTrans);
-    Tcl_DStringInit (&inChanEOF);
-    Tcl_DStringInit (&outChanEOF);
-
-    /*
-     * Get the channels.  Unless translation is enabled, save the current
-     * translation mode and put the files in binary mode and clear the
-     * EOF character.
-     */
-    inChan = TclX_GetOpenChannelObj (interp, objv [objIdx], TCL_READABLE);
-    if (inChan == NULL)
-        goto errorExit;
-    outChan = TclX_GetOpenChannelObj (interp, objv [objIdx + 1], TCL_WRITABLE);
-    if (outChan == NULL)
-        goto errorExit;
-
-    if (!translate) {
-        if (Tcl_GetChannelOption (interp, inChan, TCL_TRANSLATION_OPT,
-                                  &inChanTrans) != TCL_OK)
-            goto errorExit;
-        if (Tcl_GetChannelOption (interp, outChan, TCL_TRANSLATION_OPT,
-                                  &outChanTrans) != TCL_OK)
-            goto errorExit;
-        if (Tcl_GetChannelOption (interp, inChan, TCL_EOFCHAR_OPT,
-                                  &inChanEOF) != TCL_OK)
-            goto errorExit;
-        if (Tcl_GetChannelOption (interp, outChan, TCL_EOFCHAR_OPT,
-                                  &outChanEOF) != TCL_OK)
-            goto errorExit;
-
-        if (Tcl_SetChannelOption (interp, inChan, TCL_TRANSLATION_OPT,
-                                  "binary") != TCL_OK)
-            goto errorExit;
-        if (Tcl_SetChannelOption (interp, outChan, TCL_TRANSLATION_OPT,
-                                  "binary") != TCL_OK)
-            goto errorExit;
-        if (Tcl_SetChannelOption (interp, inChan, TCL_EOFCHAR_OPT,
-                                  "") != TCL_OK)
-            goto errorExit;
-        if (Tcl_SetChannelOption (interp, outChan, TCL_EOFCHAR_OPT,
-                                  "") != TCL_OK)
-            goto errorExit;
-    }
-
-    /*
-     * Copy the file, it an error occurs, save it until translation is
-     * restored.
-     */
-    totalBytesRead = CopyOpenFile (interp,
-                                   totalBytesToRead,
-                                   inChan, outChan);
-    if (totalBytesRead < 0)
-        saveErrno = Tcl_GetErrno ();
-
-    if (!translate) {
-        if (Tcl_SetChannelOption (interp, inChan, TCL_TRANSLATION_OPT,
-                                  inChanTrans.string) != TCL_OK)
-            goto errorExit;
-        if (Tcl_SetChannelOption (interp, outChan, TCL_TRANSLATION_OPT,
-                                  inChanTrans.string) != TCL_OK)
-            goto errorExit;
-        if (Tcl_SetChannelOption (interp, inChan, TCL_EOFCHAR_OPT,
-                                  inChanEOF.string) != TCL_OK)
-            goto errorExit;
-        if (Tcl_SetChannelOption (interp, outChan, TCL_EOFCHAR_OPT,
-                                  outChanEOF.string) != TCL_OK)
-            goto errorExit;
-    }
-
-    if (totalBytesRead < 0) {
-        Tcl_SetErrno (saveErrno);
-        TclX_AppendObjResult (interp, "copyfile failed: ",
-                              Tcl_PosixError (interp), (char *) NULL);
-        goto errorExit;
-    }
-
-    /*
-     * Return an error if -bytes were specified and not that many were
-     * available.
-     */
-    if ((copyMode == TCLX_COPY_BYTES) &&
-        (totalBytesToRead > 0) &&
-        (totalBytesRead != totalBytesToRead)) {
-
-	/* FIX: if there is ever a printf-style object text appender,
-	 * convert this code to use it.
-	 */
-
-	char bytesToReadString[16];
-	char totalBytesReadString[16];
-
-	sprintf (bytesToReadString, "%ld", totalBytesToRead);
-	sprintf (totalBytesReadString, "%ld", totalBytesRead);
-
-	TclX_AppendObjResult (interp, "premature EOF, ", bytesToReadString,
-                              " bytes expected, ", totalBytesReadString,
-                              " bytes actually read", (char *)NULL);
-        goto errorExit;
-    }
-
-    Tcl_SetIntObj (Tcl_GetObjResult (interp), totalBytesRead);
-    Tcl_DStringFree (&inChanTrans);
-    Tcl_DStringFree (&outChanTrans);
-    Tcl_DStringFree (&inChanEOF);
-    Tcl_DStringFree (&outChanEOF);
-    return TCL_OK;
-
-  errorExit:
-    Tcl_DStringFree (&inChanTrans);
-    Tcl_DStringFree (&outChanTrans);
-    Tcl_DStringFree (&inChanEOF);
-    Tcl_DStringFree (&outChanEOF);
-
-    return TCL_ERROR;
-}
-
 
 /*-----------------------------------------------------------------------------
  * TruncateByPath --
@@ -609,12 +318,6 @@ TclX_FilecmdsInit (interp)
     Tcl_CreateObjCommand (interp,
 			  "pipe",
 			  TclX_PipeObjCmd,
-                          (ClientData) NULL,
-			  (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp,
-			  "copyfile",
-			  TclX_CopyfileObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
