@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 5.4 1996/02/12 18:15:37 markd Exp $
+ * $Id: tclXdup.c,v 5.5 1996/02/24 23:08:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -99,17 +99,18 @@ DupFileHandle (interp, srcFileId, targetFileId)
     int mode, srcFileNum, isSocket;
     int newFileNum = -1;
     off_t seekOffset = -1;
-    char *value;
+    Tcl_DString optValue;
+
+    Tcl_DStringInit (&optValue);
 
     /*
      * Get all the information about the file being duplicated.  On Unix,
      * the channels we can dup share the same file for the read and write
      * directions, so use either.
      */
-    srcChannel = Tcl_GetChannel (interp, TclSubstChannelName (srcFileId),
-                                 &mode);
+    srcChannel = Tcl_GetChannel (interp, srcFileId, &mode);
     if (srcChannel == NULL)
-	return TCL_ERROR;
+	goto errorExit;
 
     if (mode & TCL_READABLE) {
         srcFileNum = TclX_ChannelFnum (srcChannel, TCL_READABLE);
@@ -122,7 +123,7 @@ DupFileHandle (interp, srcFileId, targetFileId)
         Tcl_AppendResult (interp, "can not \"dup\" a Tcl command pipeline ",
                           " created with the \"open\" command",
                           (char *) NULL);
-        return TCL_ERROR;
+	goto errorExit;
     }
     
     isSocket = STREQU (channelType->typeName, "tcp");
@@ -159,11 +160,9 @@ DupFileHandle (interp, srcFileId, targetFileId)
 
         newFileNum = ConvertFileHandle (interp, targetFileId);
         if (newFileNum < 0)
-            return TCL_ERROR;
+            goto errorExit;
 
-        newChannel = Tcl_GetChannel (interp,
-                                     TclSubstChannelName (targetFileId),
-                                     NULL);
+        newChannel = Tcl_GetChannel (interp, targetFileId, NULL);
         if (newChannel != NULL) {
             Tcl_UnregisterChannel (interp, newChannel);
         }
@@ -176,7 +175,7 @@ DupFileHandle (interp, srcFileId, targetFileId)
             Tcl_AppendResult (interp,
                               "dup: desired file number not returned",
                               (char *) NULL);
-            goto error;
+            goto errorExit;
         }
     } else {
         newFileNum = dup (srcFileNum);
@@ -195,52 +194,64 @@ DupFileHandle (interp, srcFileId, targetFileId)
      * Set channel options.  Only modify the value if its not the default,
      * as set blocking on standard files generates an error on some systems.
      */
-    value = Tcl_GetChannelOption (srcChannel,
-                                  COPT_BLOCKING);
-    if (value [0] == '0') {
+    if (Tcl_GetChannelOption (srcChannel, COPT_BLOCKING, &optValue) != TCL_OK)
+        goto channelOptError;
+
+    if (optValue.string [0] == '0') {
         if (Tcl_SetChannelOption (interp,
                                   newChannel,
                                   COPT_BLOCKING,
-                                  value) == TCL_ERROR)
-            goto error;
+                                  optValue.string) == TCL_ERROR)
+            goto errorExit;
     }
-    value = Tcl_GetChannelOption (srcChannel,
-                                  COPT_BUFFERING);
-    if (!STREQU (value, "none")) {
+    Tcl_DStringSetLength (&optValue, 0);
+
+    if (Tcl_GetChannelOption (srcChannel, COPT_BUFFERING, &optValue) != TCL_OK)
+        goto channelOptError;
+
+    if (!STREQU (optValue.string, "full")) {
         if (Tcl_SetChannelOption (interp,
                                   newChannel,
                                   COPT_BUFFERING,
-                                  value) == TCL_ERROR)
-            goto error;
+                                  optValue.string) == TCL_ERROR)
+            goto errorExit;
     }
+    Tcl_DStringSetLength (&optValue, 0);
 
-    value = Tcl_GetChannelOption (srcChannel,
-                                  COPT_TRANSLATION);
-    if (!STREQU (value, "auto")) {
+    if (Tcl_GetChannelOption (srcChannel, COPT_TRANSLATION,
+                              &optValue) != TCL_OK)
+        goto channelOptError;
+
+    if (!STREQU (optValue.string, "auto")) {
         if (Tcl_SetChannelOption (interp,
                                   newChannel,
                                   COPT_TRANSLATION,
-                                  value) == TCL_ERROR)
-            goto error;
+                                  optValue.string) == TCL_ERROR)
+            goto errorExit;
     }
 
 
     Tcl_AppendResult (interp, Tcl_GetChannelName (newChannel),
                       (char *) NULL);
+    Tcl_DStringFree (&optValue);
     return TCL_OK;
 
   unixError:
     Tcl_ResetResult (interp);
     Tcl_AppendResult (interp, "dup of \"", srcFileId, " failed: ",
                       Tcl_PosixError (interp), (char *) NULL);
-  error:
+  errorExit:
     if (newChannel != NULL) {
         Tcl_UnregisterChannel (interp, newChannel);
     } else {
         if (newFileNum >= 0)
             close (newFileNum);
     }
+    Tcl_DStringFree (&optValue);
     return TCL_ERROR;
+
+  channelOptError:
+    panic ("error getting channel opt");
 }
 
 /*-----------------------------------------------------------------------------
@@ -306,8 +317,7 @@ BindOpenFile (interp, fileNumStr)
     else
         sprintf (channelName, "file%d", fileNum);
 
-    if (Tcl_GetChannel (interp, TclSubstChannelName (channelName),
-                        NULL) != NULL) {
+    if (Tcl_GetChannel (interp, channelName, NULL) != NULL) {
         Tcl_ResetResult (interp);
         Tcl_AppendResult (interp, "file number \"", fileNumStr,
                           "\" is already bound to a Tcl file channel",
@@ -326,14 +336,14 @@ BindOpenFile (interp, fileNumStr)
                                   channel,
                                   COPT_BLOCKING,
                                   "0") == TCL_ERROR)
-            goto error;
+            goto errorExit;
     }
     if (isatty (fileNum)) {
         if (Tcl_SetChannelOption (interp,
                                   channel,
                                   COPT_BUFFERING,
                                   "line") == TCL_ERROR)
-            goto error;
+            goto errorExit;
     }
 
     Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
@@ -344,7 +354,7 @@ BindOpenFile (interp, fileNumStr)
     Tcl_ResetResult (interp);
     interp->result = Tcl_PosixError (interp);
 
-  error:
+  errorExit:
     if (channel != NULL) {
         Tcl_UnregisterChannel (interp, channel);
     }

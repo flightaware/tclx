@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 5.2 1996/02/12 18:15:59 markd Exp $
+ * $Id: tclXlib.c,v 5.3 1996/02/20 09:10:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -564,8 +564,9 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
     }
 
   reachedEOF:
-    Tcl_Close (indexChannel);
-    Tcl_DStringFree (&lineBuffer);
+    Tcl_DStringFree (&lineBuffer);    
+    if (Tcl_Close (NULL, indexChannel) != TCL_OK)
+        goto fileError;
 
     return TCL_OK;
 
@@ -594,7 +595,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
         ckfree ((char *) lineArgv);
     Tcl_DStringFree (&lineBuffer);
     if (indexChannel != NULL)
-        Tcl_Close (indexChannel);
+        Tcl_Close (NULL, indexChannel);
     return TCL_ERROR;
 }
 

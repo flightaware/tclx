@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 5.5 1996/02/18 22:08:23 markd Exp $
+ * $Id: tclXfcntl.c,v 5.6 1996/02/24 23:08:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -187,10 +187,13 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
     fcntlAttr_t attrib;
     int aFileNum, current, value;
     char *option;
+    Tcl_DString optValue;
+
+    Tcl_DStringInit (&optValue);
 
     if (XlateFcntlAttr (interp, attrName, &attrib) != TCL_OK)
-        return TCL_ERROR;
-
+        goto errorExit;
+    
     /*
      * If both file numbers are specified, pick one for the checking.  They
      * will be in sync for most options if the attributes were set by us.
@@ -221,7 +224,7 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
             panic ("fcntl bad attrib");
         }
         interp->result =  value ? "1" : "0";
-        return TCL_OK;
+        goto okExit;
     }
 
     /*
@@ -232,7 +235,7 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
         if (current == -1)
             goto unixError;
         interp->result = (current & attrib.fcntl) ? "1" : "0";
-        return TCL_OK;
+        goto okExit;
     }
 
     if (attrib.other == ATTR_CLOEXEC) {
@@ -240,35 +243,54 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
         if (current == -1)
             goto unixError;
         interp->result = (current & 1) ? "1" : "0";
-        return TCL_OK;
+        goto okExit;
     }
 
     /*
      * Get attributes maintained by the channel.
      */
     if (attrib.other == ATTR_NONBLOCK) {
-        interp->result =
-            (*Tcl_GetChannelOption (channel, "-blocking") == '0') ? "1" : "0";
-        return TCL_OK;
+        if (Tcl_GetChannelOption (channel, "-blocking",
+                                  &optValue) != TCL_OK)
+            goto channelOptError;
+    
+        interp->result = (optValue.string [0] == '0') ? "1" : "0";
+        goto okExit;
     }
     if (attrib.other == ATTR_NOBUF) {
-        if (STREQU (Tcl_GetChannelOption (channel, "-buffering"), "none"))
+        if (Tcl_GetChannelOption (channel, "-buffering",
+                                  &optValue) != TCL_OK)
+            goto channelOptError;
+        if (STREQU (optValue.string, "none"))
             interp->result = "1";
         else
             interp->result = "0";
-        return TCL_OK;
+        goto okExit;
     }
     if (attrib.other == ATTR_LINEBUF) {
-        if (STREQU (Tcl_GetChannelOption (channel, "-buffering"), "line"))
+        if (Tcl_GetChannelOption (channel, "-buffering",
+                                  &optValue) != TCL_OK)
+            goto channelOptError;
+        if (STREQU (optValue.string, "line"))
             interp->result = "1";
         else
             interp->result = "0";
-        return TCL_OK;
+        goto okExit;
     }
+
+  okExit:
+    Tcl_DStringFree (&optValue);
+    return TCL_OK;
 
   unixError:
     interp->result = Tcl_PosixError (interp);
+
+  errorExit:
+    Tcl_DStringFree (&optValue);
     return TCL_ERROR;
+
+  channelOptError:
+    panic ("error getting channel opt");
 }
 
 /*-----------------------------------------------------------------------------

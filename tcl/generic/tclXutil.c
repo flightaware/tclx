@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.5 1996/02/17 08:44:02 markd Exp $
+ * $Id: tclXutil.c,v 5.6 1996/02/24 23:09:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -623,9 +623,7 @@ TclX_GetOpenChannel (interp, handle, accessMode)
     Tcl_Channel chan;
     int mode;
 
-    chan = Tcl_GetChannel (interp,
-                           TclSubstChannelName (handle),
-                           &mode);
+    chan = Tcl_GetChannel (interp, handle, &mode);
     if (chan == (Tcl_Channel) NULL) {
 	return NULL;
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.6 1996/02/20 09:10:08 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.7 1996/02/24 23:08:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -133,11 +133,11 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
 
   errorExit:
     if (chans [0] != NULL) 
-        Tcl_Close (chans [0]);
+        Tcl_Close (NULL, chans [0]);
     else
         close (fileNums [0]);
     if (chans [1] != NULL) 
-        Tcl_Close (chans [1]);
+        Tcl_Close (NULL, chans [1]);
     else
         close (fileNums [1]);
     return TCL_ERROR;
@@ -510,6 +510,7 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     Tcl_DString buffer;
     int blocking;
     int stat, bufIdx = 0;
+    Tcl_DString optValue;
 
     if ((argc != 2) && (argc != 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
@@ -525,7 +526,13 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      * the channel I/O system doesn't give control over leaving data in the
      * buffer (yet).
      */
-    blocking = *Tcl_GetChannelOption (channel, "-blocking") == '1';
+    
+    Tcl_DStringInit (&optValue);
+    if (Tcl_GetChannelOption (channel, "-blocking", &optValue) != TCL_OK)
+        panic ("can't get channel opt");
+    blocking = (optValue.string [0] == '1');
+    Tcl_DStringFree (&optValue);
+
     if (!blocking) {
         if (Tcl_SetChannelOption (interp, channel, "-blocking",
                                   "1") == TCL_ERROR)

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.11 1996/02/29 07:02:45 markd Exp $
+# $Id: Config.mk,v 5.12 1996/03/01 17:38:22 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -54,10 +54,10 @@
 # library (libtcl7.4.so).  Note, access is required to tclInt.h which is not
 # installed by Tcl.
 
-TCL_SRC=${srcbasedir}/../tcl7.5b2
-TCL_CONFIG=${srcbasedir}/../tcl7.5b2/unix/tclConfig.sh
-TCL_LIB=${bldbasedir}/../tcl7.5b2/unix/libtcl7.5.a
-TCL_SHLIB_DIR=${bldbasedir}/../tcl7.5b2/unix
+TCL_SRC=${srcbasedir}/../tcl7.5b3
+TCL_CONFIG=${srcbasedir}/../tcl7.5b3/unix/tclConfig.sh
+TCL_LIB=${bldbasedir}/../tcl7.5b3/unix/libtcl7.5.a
+TCL_SHLIB_DIR=${bldbasedir}/../tcl7.5b3/unix
 TCL_SHLIB=-L${TCL_SHLIB_DIR} -ltcl7.5
 
 #------------------------------------------------------------------------------
@@ -66,10 +66,10 @@ TCL_SHLIB=-L${TCL_SHLIB_DIR} -ltcl7.5
 # path to tkConfig.sh, the path to the Tk library (libtk4.1.a) and the flags
 # neccessary to link with the Tk shared library (libtk4.1.so).
 
-TK_SRC=${srcbasedir}/../tk4.1b2
-TK_CONFIG=${srcbasedir}/../tk4.1b2/unix/tkConfig.sh
-TK_LIB=${bldbasedir}/../tk4.1b2/unix/libtk4.1.a
-TK_SHLIB_DIR=${bldbasedir}/../tk4.1b2/unix
+TK_SRC=${srcbasedir}/../tk4.1b3
+TK_CONFIG=${srcbasedir}/../tk4.1b3/unix/tkConfig.sh
+TK_LIB=${bldbasedir}/../tk4.1b3/unix/libtk4.1.a
+TK_SHLIB_DIR=${bldbasedir}/../tk4.1b3/unix
 TK_SHLIB=-L${TK_SHLIB_DIR} -ltk4.1
 
 #------------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 5.3 1996/02/12 18:17:16 markd Exp $
+ * $Id: tkXAppInit.c,v 5.4 1996/02/16 07:51:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -90,7 +90,9 @@ Tcl_AppInit (interp)
     if (Tkx_Init(interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
+    Tcl_StaticPackage(interp, "Tclx", Tclx_Init, (Tcl_PackageInitProc *) NULL);
     Tcl_StaticPackage(interp, "Tk", Tkx_Init, (Tcl_PackageInitProc *) NULL);
+    Tcl_StaticPackage(interp, "Tkx", Tkx_Init, (Tcl_PackageInitProc *) NULL);
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -103,6 +105,6 @@ Tcl_AppInit (interp)
      * where "app" is the name of the application.  If this line is deleted
      * then no user-specific startup file will be run under any conditions.
      */
-    Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclrc", TCL_GLOBAL_ONLY);
+    Tcl_SetVar(interp, "tcl_rcFileName", "~/.wishxrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }

@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 5.3 1996/02/18 22:10:31 markd Exp $
+# $Id: server.test,v 5.4 1996/02/24 23:09:10 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -162,12 +162,6 @@ if [info exists env(TCLX_FULL_TESTS)] {
     set safeHost 1
 }
 
-# TMP.PROBLEM???:
-puts stdout ""
-puts stdout "Note: Can't currently dup sockets to stdin/stdout/stderr."
-puts stdout "      Some test are skipped. This should be fixed in beta 3."
-puts stdout ""
-
 #
 # Test simple interaction with the echo server.  This proc is used to
 # do the actual interaction.  The server is connected to using various
@@ -244,8 +238,6 @@ proc TalkToEcho {testId readFH writeFH buffered} {
     # Try dup to stdin/stdout.  Skip under Tk, as fork with out exec will
     # not work.
 
-# TMP.PROBLEM???:
-if 0 {
     if [lempty [info commands button]] {
         flush stdout
         flush stderr
@@ -267,7 +259,6 @@ if 0 {
         }
         wait $pid
     }
-}
 
     # Test some of the fcntl options against a socket.
 
