@@ -1,0 +1,740 @@
+Apply this patch to Tcl 7.5 beta 1 before compiling TclX.
+
+*** generic/tcl.h.ORG	Wed Feb  7 22:54:38 1996
+--- generic/tcl.h	Wed Feb  7 22:55:55 1996
+***************
+*** 661,666 ****
+--- 661,668 ----
+  			    ClientData clientData));
+  EXTERN void		Tcl_CancelIdleCall _ANSI_ARGS_((Tcl_IdleProc *idleProc,
+  			    ClientData clientData));
++ EXTERN int		Tcl_ChannelBufferedData _ANSI_ARGS_((
++ 			   Tcl_Channel chan,  int direction));
+  EXTERN VOID *		Tcl_Ckalloc _ANSI_ARGS_((unsigned int size));
+  EXTERN void		Tcl_Ckfree _ANSI_ARGS_((char *ptr));
+  EXTERN int		Tcl_Close _ANSI_ARGS_((Tcl_Channel chan));
+***************
+*** 856,862 ****
+--- 858,874 ----
+  			    char *varName, char *addr, int type));
+  EXTERN void		Tcl_Main _ANSI_ARGS_((int argc, char **argv,
+  			    Tcl_AppInitProc *appInitProc));
++ EXTERN Tcl_Channel	Tcl_MakeFileChannel _ANSI_ARGS_((Tcl_Interp *interp,
++ 			    Tcl_File file, int channelPermissions,
++ 			    char *channelName));
+  EXTERN int		Tcl_MakeSafe _ANSI_ARGS_((Tcl_Interp *interp));
++ EXTERN Tcl_Channel	Tcl_MakeTcpClientChannel _ANSI_ARGS_((
++ 			    Tcl_Interp *interp, Tcl_File file,
++ 			    char *channelName));
++ EXTERN Tcl_Channel	Tcl_MakeTcpServerChannel _ANSI_ARGS_((
++ 			    Tcl_Interp *interp, Tcl_File file,
++ 			    Tcl_TcpAcceptProc *acceptProc,
++ 			    ClientData acceptProcData, char *channelName));
+  EXTERN char *		Tcl_Merge _ANSI_ARGS_((int argc, char **argv));
+  EXTERN Tcl_HashEntry *	Tcl_NextHashEntry _ANSI_ARGS_((
+  			    Tcl_HashSearch *searchPtr));
+*** generic/tclIO.c.ORG	Wed Feb  7 22:54:47 1996
+--- generic/tclIO.c	Thu Feb  8 22:30:47 1996
+***************
+*** 186,191 ****
+--- 186,192 ----
+                                           * byte seen was a "\r". */
+  #define TCL_INPUT_EOF_PENDING	(1<<11)	/* End of file with a pending "\r".
+  					 * We already produced the "\r". */
++ #define TCL_NOT_BUFFERED	(1<<12)	/* Flush after every write. */
+  
+  /*
+   * For each channel handler registered in a call to Tcl_CreateChannelHandler,
+***************
+*** 1460,1466 ****
+  
+          /*
+           * The current buffer is ready for output if it is full, or if it
+!          * contains a newline and this channel is line-buffered.
+           */
+  
+          outBufPtr->nextAdded += toCopy;
+--- 1461,1468 ----
+  
+          /*
+           * The current buffer is ready for output if it is full, or if it
+!          * contains a newline and this channel is line-buffered, or if its
+!          * not buffered.
+           */
+  
+          outBufPtr->nextAdded += toCopy;
+***************
+*** 1485,1490 ****
+--- 1487,1494 ----
+                  if (foundNewline) {
+                      chanPtr->flags |= TCL_BUFFER_READY;
+                  }
++             } else if (chanPtr->flags & TCL_NOT_BUFFERED) {
++                 chanPtr->flags |= TCL_BUFFER_READY;
+              }
+          }
+          
+***************
+*** 2708,2713 ****
+--- 2712,2721 ----
+              (strncmp(optionName, "linemode", len) == 0)) {
+          return (chanPtr->flags & TCL_LINE_BUFFERED) ? "1" : "0";
+      }
++     if ((optionName[0] == 'u') &&
++             (strncmp(optionName, "unbuffered", len) == 0)) {
++         return (chanPtr->flags & TCL_NOT_BUFFERED) ? "1" : "0";
++     }
+      if ((optionName[0] == 't') &&
+              (strncmp(optionName, "translation", len) == 0)) {
+          if (chanPtr->translation == TCL_TRANSLATE_AUTO) {
+***************
+*** 2825,2830 ****
+--- 2833,2851 ----
+          return TCL_OK;
+      }
+  
++     if ((optionName[1] == 'u') &&
++             (strncmp(optionName, "-unbuffered", len) == 0)) {
++         if (Tcl_GetBoolean(interp, newValue, &newMode) == TCL_ERROR) {
++             return TCL_ERROR;
++         }
++         if (newMode) {
++             chanPtr->flags |= TCL_NOT_BUFFERED;
++         } else {
++             chanPtr->flags &= (~(TCL_NOT_BUFFERED));
++         }
++         return TCL_OK;
++     }
++ 
+      if ((optionName[1] == 't') &&
+              (strncmp(optionName, "-translation", len) == 0)) {
+          if (strcmp(newValue, "auto") == 0) {
+***************
+*** 2856,2861 ****
+--- 2877,2912 ----
+      }
+  
+      return TCL_ERROR;
++ }
++ 
++ /*
++  *----------------------------------------------------------------------
++  *
++  * Tcl_ChannelBufferedData --
++  *
++  *	Determine if data is buffered for reading or writing.
++  *
++  * Results:
++  *	A standard Tcl result.
++  *
++  * Side effects:
++  *	None.
++  *
++  *----------------------------------------------------------------------
++  */
++ 
++ int
++ Tcl_ChannelBufferedData(chan, direction)
++     Tcl_Channel chan;		/* Channel to check. */
++     int direction;		/* TCL_WRITABLE or TCL_READABLE. */
++ {
++     TclChannel *chanPtr =  (TclChannel *) chan;
++ 
++     if (direction == TCL_READABLE) {
++         return (chanPtr->inQueueHead != (ChannelBuffer *) NULL);
++     } else {
++         return (chanPtr->outQueueHead != (ChannelBuffer *) NULL);
++     }
+  }
+  
+  /*
+*** unix/tclUnixChan.c.ORG	Wed Feb  7 22:54:25 1996
+--- unix/tclUnixChan.c	Wed Feb  7 22:55:56 1996
+***************
+*** 51,57 ****
+  static int		CommonOutput _ANSI_ARGS_((ClientData instanceData,
+  			    Tcl_File outFile, char *buf, int toWrite,
+  			    int *errorCode));
+! static TcpState *	CreateSocket _ANSI_ARGS_((Tcl_Interp *interp,
+  			    int port, char *host, int server));
+  static Tcl_Channel	CreateStdFileChannel _ANSI_ARGS_((char *name,
+  			    Tcl_File inFile, Tcl_File outFile));
+--- 51,57 ----
+  static int		CommonOutput _ANSI_ARGS_((ClientData instanceData,
+  			    Tcl_File outFile, char *buf, int toWrite,
+  			    int *errorCode));
+! static int		CreateSocket _ANSI_ARGS_((Tcl_Interp *interp,
+  			    int port, char *host, int server));
+  static Tcl_Channel	CreateStdFileChannel _ANSI_ARGS_((char *name,
+  			    Tcl_File inFile, Tcl_File outFile));
+***************
+*** 734,739 ****
+--- 734,788 ----
+  /*
+   *----------------------------------------------------------------------
+   *
++  * Tcl_MakeFileChannel --
++  *
++  *	Bind a file to a file based channel on Unix systems.
++  *
++  * Results:
++  *	The new channel or NULL. If NULL, the output argument
++  *	errorCodePtr is set to a POSIX error.
++  *
++  * Side effects:
++  *	Creates a new channel.
++  *
++  *----------------------------------------------------------------------
++  */
++ 
++ Tcl_Channel
++ Tcl_MakeFileChannel(interp, file, channelPermissions, channelName)
++     Tcl_Interp *interp;			/* Interpreter for error reporting;
++                                          * can be NULL. */
++     Tcl_File file;                      /* File to bind to channel. */
++     int channelPermissions;		/* Channel acesss flags. */
++     char *channelName;			/* Channel name or NULL to default */
++ {
++     Tcl_Channel chan;
++     char channelNameBuf[20];
++ 
++     if (channelName == NULL) {
++         sprintf(channelNameBuf, "file%d", (int) Tcl_GetFileInfo(file, NULL));
++         channelName = channelNameBuf;
++     }    
++ 
++     chan = Tcl_CreateChannel(&fileChannelType, channelName,
++             (channelPermissions & TCL_READABLE) ? file : NULL,
++             (channelPermissions & TCL_WRITABLE) ? file : NULL,
++             (ClientData) NULL);
++     if (chan == (Tcl_Channel) NULL) {
++         if (interp != (Tcl_Interp *) NULL) {
++             Tcl_AppendResult(interp, "could not open channel \"",
++                     channelName, "\": ", Tcl_PosixError(interp),
++                     (char *) NULL);
++         }
++         return NULL;
++     }
++ 
++     return chan;
++ }
++ 
++ /*
++  *----------------------------------------------------------------------
++  *
+   * Tcl_OpenFileChannel --
+   *
+   *	Open an File based channel on Unix systems.
+***************
+*** 760,789 ****
+                                           * file, with what modes to create
+                                           * it? */
+  {
+!     int fd, seekFlag, mode, channelPermissions;
+      Tcl_File file;
+      Tcl_Channel chan;
+!     char *nativeName, channelName[20];
+      Tcl_DString buffer;
+  
+      mode = TclGetOpenMode(interp, modeString, &seekFlag);
+      if (mode == -1) {
+          return NULL;
+      }
+-     switch (mode & (O_RDONLY | O_WRONLY | O_RDWR)) {
+- 	case O_RDONLY:
+- 	    channelPermissions = TCL_READABLE;
+- 	    break;
+- 	case O_WRONLY:
+- 	    channelPermissions = TCL_WRITABLE;
+- 	    break;
+- 	case O_RDWR:
+- 	    channelPermissions = (TCL_READABLE | TCL_WRITABLE);
+- 	    break;
+- 	default:
+- 	    panic("Tcl_OpenFileChannel: invalid mode value");
+- 	    return NULL;
+-     }
+  
+      nativeName = Tcl_TranslateFileName(interp, fileName, &buffer);
+      if (nativeName == NULL) {
+--- 809,824 ----
+                                           * file, with what modes to create
+                                           * it? */
+  {
+!     int fd, mode, seekFlag, channelPermissions;
+      Tcl_File file;
+      Tcl_Channel chan;
+!     char *nativeName;
+      Tcl_DString buffer;
+  
+      mode = TclGetOpenMode(interp, modeString, &seekFlag);
+      if (mode == -1) {
+          return NULL;
+      }
+  
+      nativeName = Tcl_TranslateFileName(interp, fileName, &buffer);
+      if (nativeName == NULL) {
+***************
+*** 800,818 ****
+          return NULL;
+      }
+      
+      file = Tcl_GetFile((ClientData) fd, TCL_UNIX_FD);
+!     sprintf(channelName, "file%d", (int) Tcl_GetFileInfo(file, NULL));
+!     
+!     chan = Tcl_CreateChannel(&fileChannelType, channelName,
+!             (channelPermissions & TCL_READABLE) ? file : NULL,
+!             (channelPermissions & TCL_WRITABLE) ? file : NULL,
+!             (ClientData) NULL);
+      if (chan == (Tcl_Channel) NULL) {
+-         if (interp != (Tcl_Interp *) NULL) {
+-             Tcl_AppendResult(interp, "could not open channel \"",
+-                     channelName, "\": ", Tcl_PosixError(interp),
+-                     (char *) NULL);
+-         }
+          Tcl_FreeFile(file);
+          close(fd);
+          return NULL;
+--- 835,859 ----
+          return NULL;
+      }
+      
++     switch (mode & (O_RDONLY | O_WRONLY | O_RDWR)) {
++ 	case O_RDONLY:
++ 	    channelPermissions = TCL_READABLE;
++ 	    break;
++ 	case O_WRONLY:
++ 	    channelPermissions = TCL_WRITABLE;
++ 	    break;
++ 	case O_RDWR:
++ 	    channelPermissions = (TCL_READABLE | TCL_WRITABLE);
++ 	    break;
++ 	default:
++ 	    panic("Tcl_OpenFileChannel: invalid mode value");
++ 	    return NULL;
++     }
++ 
+      file = Tcl_GetFile((ClientData) fd, TCL_UNIX_FD);
+! 
+!     chan = Tcl_MakeFileChannel(interp, file, channelPermissions, NULL);
+      if (chan == (Tcl_Channel) NULL) {
+          Tcl_FreeFile(file);
+          close(fd);
+          return NULL;
+***************
+*** 822,834 ****
+          if (Tcl_Seek(chan, 0, SEEK_END) < 0) {
+              if (interp != (Tcl_Interp *) NULL) {
+                  Tcl_AppendResult(interp, "could not seek to end of file on \"",
+!                         channelName, "\": ", Tcl_PosixError(interp),
+!                         (char *) NULL);
+              }
+              Tcl_Close(chan);
+              return NULL;
+          }
+      }
+      return chan;
+  }
+  
+--- 863,876 ----
+          if (Tcl_Seek(chan, 0, SEEK_END) < 0) {
+              if (interp != (Tcl_Interp *) NULL) {
+                  Tcl_AppendResult(interp, "could not seek to end of file on \"",
+!                         Tcl_GetChannelName(chan), "\": ",
+!                         Tcl_PosixError(interp), (char *) NULL);
+              }
+              Tcl_Close(chan);
+              return NULL;
+          }
+      }
++ 
+      return chan;
+  }
+  
+***************
+*** 1111,1117 ****
+   *	and initializes the TcpState structure.
+   *
+   * Results:
+!  *	Returns a new TcpState, or NULL with an error interp.
+   *
+   * Side effects:
+   *	None.
+--- 1153,1159 ----
+   *	and initializes the TcpState structure.
+   *
+   * Results:
+!  *	Returns a socket file descriptor, or -1 with an error interp.
+   *
+   * Side effects:
+   *	None.
+***************
+*** 1119,1125 ****
+   *----------------------------------------------------------------------
+   */
+  
+! static TcpState *
+  CreateSocket(interp, port, host, server)
+      Tcl_Interp *interp;		/* For error reporting; can be NULL. */
+      int port;			/* Port number to open. */
+--- 1161,1167 ----
+   *----------------------------------------------------------------------
+   */
+  
+! static int
+  CreateSocket(interp, port, host, server)
+      Tcl_Interp *interp;		/* For error reporting; can be NULL. */
+      int port;			/* Port number to open. */
+***************
+*** 1132,1138 ****
+      struct hostent *hostent;		/* Host database entry */
+      struct in_addr addr;		/* For 64/32 bit madness */
+      struct linger ling;			/* For making sockets linger. */
+-     TcpState *statePtr;
+  
+      (void) memset((char *) &sockaddr, '\0', sizeof(struct sockaddr_in));
+      sockaddr.sin_family = AF_INET;
+--- 1174,1179 ----
+***************
+*** 1208,1274 ****
+                      Tcl_PosixError(interp), (char *) NULL);
+          }
+          close(sock);
+!         return NULL;
+      }
+  
+!     /*
+!      * Allocate a new TcpState for this socket.
+!      */
+! 
+!     statePtr = (TcpState *) ckalloc((unsigned) sizeof(TcpState));
+!     statePtr->sock = Tcl_GetFile((ClientData) sock, TCL_UNIX_FD);
+! 
+!     return statePtr;
+  
+    error:
+      if (interp != NULL) {
+  	Tcl_AppendResult(interp, "couldn't open socket: ",
+  		Tcl_PosixError(interp), (char *) NULL);
+      }
+!     return NULL;
+  }
+  
+  /*
+   *----------------------------------------------------------------------
+   *
+!  * Tcl_OpenTcpClient --
+   *
+!  *	Opens a TCP client socket and creates a channel around it.
+   *
+   * Results:
+   *	The channel or NULL if failed.  An error message is returned
+   *	in the interpreter on failure.
+   *
+   * Side effects:
+!  *	Opens a client socket and creates a new channel.
+   *
+   *----------------------------------------------------------------------
+   */
+  
+  Tcl_Channel
+! Tcl_OpenTcpClient(interp, port, host)
+      Tcl_Interp *interp;			/* For error reporting; can be NULL. */
+!     int port;				/* Port number to open. */
+!     char *host;				/* Host on which to open port. */
+  {
+      Tcl_Channel chan;
+      TcpState *statePtr;
+!     char channelName[20];
+  
+      /*
+!      * Create a new client socket and wrap it in a channel.
+       */
+  
+!     statePtr = CreateSocket(interp, port, host, 0);
+!     if (statePtr == NULL) {
+! 	return NULL;
+!     }
+! 
+      statePtr->acceptProc = NULL;
+      statePtr->acceptProcData = (ClientData) NULL;
+  
+!     sprintf(channelName, "sock%d",
+! 	    (int) Tcl_GetFileInfo(statePtr->sock, NULL));
+  
+      chan = Tcl_CreateChannel(&tcpChannelType, channelName, statePtr->sock,
+  	    statePtr->sock, (ClientData) statePtr);
+--- 1249,1308 ----
+                      Tcl_PosixError(interp), (char *) NULL);
+          }
+          close(sock);
+!         return -1;
+      }
+  
+!     return sock;
+  
+    error:
+      if (interp != NULL) {
+  	Tcl_AppendResult(interp, "couldn't open socket: ",
+  		Tcl_PosixError(interp), (char *) NULL);
+      }
+!     return -1;
+  }
+  
+  /*
+   *----------------------------------------------------------------------
+   *
+!  * Tcl_MakeTcpClientChannel --
+   *
+!  *	Bind a TCP client socket file to a channel.
+   *
+   * Results:
+   *	The channel or NULL if failed.  An error message is returned
+   *	in the interpreter on failure.
+   *
+   * Side effects:
+!  *	Creates a new channel.
+   *
+   *----------------------------------------------------------------------
+   */
+  
+  Tcl_Channel
+! Tcl_MakeTcpClientChannel(interp, file, channelName)
+      Tcl_Interp *interp;			/* For error reporting; can be NULL. */
+!     Tcl_File file;			/* Socket file. */
+!     char *channelName;			/* Channel name or NULL to default */
+  {
+      Tcl_Channel chan;
+      TcpState *statePtr;
+!     char channelNameBuf[20];
+  
+      /*
+!      * Allocate a new TcpState for this socket.
+       */
+  
+!     statePtr = (TcpState *) ckalloc((unsigned) sizeof(TcpState));
+!     statePtr->sock = file;
+      statePtr->acceptProc = NULL;
+      statePtr->acceptProcData = (ClientData) NULL;
+  
+!     if (channelName == NULL) {
+!         sprintf(channelNameBuf, "sock%d",
+!                 (int) Tcl_GetFileInfo(statePtr->sock, NULL));
+!         channelName = channelNameBuf;
+!     }    
+  
+      chan = Tcl_CreateChannel(&tcpChannelType, channelName, statePtr->sock,
+  	    statePtr->sock, (ClientData) statePtr);
+***************
+*** 1283,1324 ****
+  /*
+   *----------------------------------------------------------------------
+   *
+!  * Tcl_OpenTcpServer --
+   *
+!  *	Opens a TCP server socket and creates a channel around it.
+   *
+   * Results:
+   *	The channel or NULL if failed.
+   *
+   * Side effects:
+!  *	Opens a server socket and creates a new channel.
+   *
+   *----------------------------------------------------------------------
+   */
+  
+  Tcl_Channel
+! Tcl_OpenTcpServer(interp, port, host, acceptProc, acceptProcData)
+      Tcl_Interp *interp;			/* For error reporting - may be
+                                           * NULL. */
+!     int port;				/* Port number to open. */
+!     char *host;				/* Name of local host. */
+      Tcl_TcpAcceptProc *acceptProc;	/* Callback for accepting connections
+                                           * from new clients. */
+      ClientData acceptProcData;		/* Data for the callback. */
+  {
+      Tcl_Channel chan;
+      TcpState *statePtr;
+!     char channelName[20];
+  
+      /*
+!      * Create a new client socket and wrap it in a channel.
+       */
+  
+!     statePtr = CreateSocket(interp, port, host, 1);
+!     if (statePtr == NULL) {
+! 	return NULL;
+!     }
+! 
+      statePtr->acceptProc = acceptProc;
+      statePtr->acceptProcData = acceptProcData;
+  
+--- 1317,1402 ----
+  /*
+   *----------------------------------------------------------------------
+   *
+!  * Tcl_OpenTcpClient --
+   *
+!  *	Opens a TCP client socket and creates a channel around it.
+!  *
+!  * Results:
+!  *	The channel or NULL if failed.  An error message is returned
+!  *	in the interpreter on failure.
+!  *
+!  * Side effects:
+!  *	Opens a client socket and creates a new channel.
+!  *
+!  *----------------------------------------------------------------------
+!  */
+! 
+! Tcl_Channel
+! Tcl_OpenTcpClient(interp, port, host)
+!     Tcl_Interp *interp;			/* For error reporting; can be NULL. */
+!     int port;				/* Port number to open. */
+!     char *host;				/* Host on which to open port. */
+! {
+!     Tcl_File file;
+!     Tcl_Channel chan;
+!     int sock;
+! 
+!     /*
+!      * Create a new client socket and wrap it in a channel.
+!      */
+! 
+!     sock = CreateSocket(interp, port, host, 0);
+!     if (sock < 0) {
+! 	return NULL;
+!     }
+! 
+!     file = Tcl_GetFile((ClientData) sock, TCL_UNIX_FD);
+! 
+!     chan = Tcl_MakeTcpClientChannel(interp, file, NULL);
+!     if (chan == (Tcl_Channel) NULL) {
+!         close(sock);
+!         Tcl_FreeFile(file);
+!         return NULL;
+!     }
+!     return chan;
+! }
+! 
+! /*
+!  *----------------------------------------------------------------------
+!  *
+!  * Tcl_MakeTcpServerChannel --
+!  *
+!  *	Bind a TCP server socket file to a channel.
+   *
+   * Results:
+   *	The channel or NULL if failed.
+   *
+   * Side effects:
+!  *	Creates a new channel.
+   *
+   *----------------------------------------------------------------------
+   */
+  
+  Tcl_Channel
+! Tcl_MakeTcpServerChannel(interp, file, acceptProc, acceptProcData, channelName)
+      Tcl_Interp *interp;			/* For error reporting - may be
+                                           * NULL. */
+!     Tcl_File file;			/* Socket file. */
+      Tcl_TcpAcceptProc *acceptProc;	/* Callback for accepting connections
+                                           * from new clients. */
+      ClientData acceptProcData;		/* Data for the callback. */
++     char *channelName;			/* Channel name or NULL to default */
+  {
+      Tcl_Channel chan;
+      TcpState *statePtr;
+!     char channelNameBuf[20];
+  
+      /*
+!      * Allocate a new TcpState for this socket.
+       */
+  
+!     statePtr = (TcpState *) ckalloc((unsigned) sizeof(TcpState));
+!     statePtr->sock = file;
+      statePtr->acceptProc = acceptProc;
+      statePtr->acceptProcData = acceptProcData;
+  
+***************
+*** 1332,1339 ****
+      Tcl_CreateFileHandler(statePtr->sock, TCL_READABLE, TcpAccept,
+              (ClientData) statePtr);
+      
+!     sprintf(channelName, "sock%d",
+! 	    (int) Tcl_GetFileInfo(statePtr->sock, NULL));
+  
+      chan = Tcl_CreateChannel(&tcpChannelType, channelName, NULL, NULL,
+              (ClientData) statePtr);
+--- 1410,1420 ----
+      Tcl_CreateFileHandler(statePtr->sock, TCL_READABLE, TcpAccept,
+              (ClientData) statePtr);
+      
+!     if (channelName == NULL) {
+!         sprintf(channelName, "sock%d",
+!                 (int) Tcl_GetFileInfo(statePtr->sock, NULL));
+!         channelName = channelNameBuf;
+!     }    
+  
+      chan = Tcl_CreateChannel(&tcpChannelType, channelName, NULL, NULL,
+              (ClientData) statePtr);
+***************
+*** 1342,1347 ****
+--- 1423,1479 ----
+       * Sockets start out with EOL translation set to "auto".
+       */
+      
++     return chan;
++ }
++ 
++ /*
++  *----------------------------------------------------------------------
++  *
++  * Tcl_OpenTcpServer --
++  *
++  *	Opens a TCP server socket and creates a channel around it.
++  *
++  * Results:
++  *	The channel or NULL if failed.
++  *
++  * Side effects:
++  *	Opens a server socket and creates a new channel.
++  *
++  *----------------------------------------------------------------------
++  */
++ 
++ Tcl_Channel
++ Tcl_OpenTcpServer(interp, port, host, acceptProc, acceptProcData)
++     Tcl_Interp *interp;			/* For error reporting - may be
++                                          * NULL. */
++     int port;				/* Port number to open. */
++     char *host;				/* Name of local host. */
++     Tcl_TcpAcceptProc *acceptProc;	/* Callback for accepting connections
++                                          * from new clients. */
++     ClientData acceptProcData;		/* Data for the callback. */
++ {
++     int sock;
++     Tcl_File file;
++     Tcl_Channel chan;
++ 
++     /*
++      * Create a new client socket and wrap it in a channel.
++      */
++ 
++     sock = CreateSocket(interp, port, host, 1);
++     if (sock < 0) {
++ 	return NULL;
++     }
++ 
++     file = Tcl_GetFile((ClientData) sock, TCL_UNIX_FD);
++ 
++     chan = Tcl_MakeTcpServerChannel(interp, file, acceptProc, acceptProcData,
++                                     NULL);
++     if (chan == (Tcl_Channel) NULL) {
++         close(sock);
++         Tcl_FreeFile(file);
++         return NULL;
++     }
+      return chan;
+  }
+  
