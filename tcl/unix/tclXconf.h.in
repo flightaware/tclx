@@ -150,8 +150,14 @@
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
+/* Define if you have the getgroups function.  */
+#undef HAVE_GETGROUPS
+
 /* Define if you have the gethostbyname function.  */
 #undef HAVE_GETHOSTBYNAME
+
+/* Define if you have the gethostname function.  */
+#undef HAVE_GETHOSTNAME
 
 /* Define if you have the getpriority function.  */
 #undef HAVE_GETPRIORITY

@@ -402,7 +402,7 @@ else
 fi
 
 
-# From configure.in Revision: 4.9 dnl
+# From configure.in Revision: 4.10 dnl
 
 
 
@@ -3067,7 +3067,7 @@ fi
 #       These must be after the library checks.
 #------------------------------------------------------------------------------
 
-for ac_func in getcwd select setitimer setvbuf sigaction setpgid
+for ac_func in getcwd select setitimer setvbuf sigaction setpgid getgroups
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
@@ -3118,7 +3118,7 @@ else
 fi
 done
 
-for ac_func in bzero bcopy gethostbyname fsync getpriority strcoll
+for ac_func in bzero bcopy gethostbyname fsync getpriority strcoll gethostname
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
