@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.8 1995/04/29 22:54:13 markd Exp markd $
+ * $Id: tclXutil.c,v 4.9 1995/04/30 00:48:00 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -855,6 +855,7 @@ Tcl_SetupFileEntry (interp, fileNum, permissions)
  *   o readFileNum (I) - Read file number to set up the entry for.
  *   o writeFileNum (I) - Write file number to set up the entry for.
  *   o writeFilePtrPtr (O) - Write FILE structure ptr is returned here.
+ *     If NULL, the pointer is not returned.
  * Returns:
  *   A pointer to the FILE structure for read file, or NULL if an error
  * occured.
@@ -867,7 +868,6 @@ Tcl_SetupFileEntry2 (interp, readFileNum, writeFileNum, writeFilePtrPtr)
     int         writeFileNum;
     FILE      **writeFilePtrPtr;
 {
-    Interp   *iPtr = (Interp *) interp;
     FILE     *readFilePtr, *writeFilePtr;
     OpenFile *tclFilePtr;
 
@@ -876,13 +876,13 @@ Tcl_SetupFileEntry2 (interp, readFileNum, writeFileNum, writeFilePtrPtr)
      */
     readFilePtr = fdopen (readFileNum, "r");
     if (readFilePtr == NULL) {
-        iPtr->result = Tcl_PosixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return NULL;
     }
     
     writeFilePtr = fdopen (writeFileNum, "w");
     if (writeFilePtr == NULL) {
-        iPtr->result = Tcl_PosixError (interp);
+        interp->result = Tcl_PosixError (interp);
         fclose (readFilePtr);
         return NULL;
     }
@@ -898,7 +898,8 @@ Tcl_SetupFileEntry2 (interp, readFileNum, writeFileNum, writeFilePtrPtr)
 
     Tcl_ResetResult (interp);
 
-    *writeFilePtrPtr = writeFilePtr;
+    if (writeFilePtrPtr != NULL)
+        *writeFilePtrPtr = writeFilePtr;
     return readFilePtr;
 }
 

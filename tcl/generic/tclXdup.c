@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 4.3 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclXdup.c,v 4.4 1995/01/01 19:49:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,11 +27,11 @@ ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
 
 static FILE *
 DoNormalDup _ANSI_ARGS_((Tcl_Interp *interp,
-                         OpenFile   *oldFilePtr));
+                         OpenFile   *srcFilePtr));
 
 static FILE *
 DoSpecifiedDup _ANSI_ARGS_((Tcl_Interp *interp,
-                            OpenFile   *oldFilePtr,
+                            OpenFile   *srcFilePtr,
                             char       *newFileId));
 
 
@@ -80,30 +80,40 @@ ConvertFileHandle (interp, handle)
  *
  * Parameters:
  *   o interp (I) - If an error occures, the error message is in result.
- *   o oldFilePtr (I) - Tcl file control block for the file to dup.
+ *   o srcFilePtr (I) - Tcl file control block for the file to dup.
  * Returns:
  *   A pointer to the file structure for the new file, or NULL if an
  * error occured.
  *-----------------------------------------------------------------------------
  */
 static FILE *
-DoNormalDup (interp, oldFilePtr)
+DoNormalDup (interp, srcFilePtr)
     Tcl_Interp *interp;
-    OpenFile   *oldFilePtr;
+    OpenFile   *srcFilePtr;
 {
-    int    newFileId;
+    int    newFileId, newFile2Id;
     FILE  *filePtr;
 
-    newFileId = dup (fileno (oldFilePtr->f));
+    newFileId = dup (fileno (srcFilePtr->f));
     if (newFileId < 0)
         goto unixError;
 
-    filePtr = Tcl_SetupFileEntry (interp, newFileId, oldFilePtr->permissions);
+    if (srcFilePtr->f2 == NULL) {
+        filePtr = Tcl_SetupFileEntry (interp, newFileId,
+                                      srcFilePtr->permissions);
+    } else {
+        newFile2Id = dup (fileno (srcFilePtr->f2));
+        if (newFile2Id < 0)
+            goto unixError;
+        filePtr = Tcl_SetupFileEntry2 (interp, newFileId, newFile2Id, NULL);
+    }
 
     return filePtr;
 
 unixError:
     interp->result = Tcl_PosixError (interp);
+    if (newFileId >= 0)
+        close (newFileId);
     return NULL;
 }
 
@@ -118,7 +128,7 @@ unixError:
  *
  * Parameters:
  *   o interp (I) - If an error occures, the error message is in result.
- *   o oldFilePtr (I) - Tcl file control block for the file to dup.
+ *   o srcFilePtr (I) - Tcl file control block for the file to dup.
  *   o targetFileId (I) - The id (handle) name for the new file.
  * Returns:
  *   A pointer to the open structure for the new file, or NULL if an
@@ -126,72 +136,83 @@ unixError:
  *-----------------------------------------------------------------------------
  */
 static FILE *
-DoSpecifiedDup (interp, oldFilePtr, targetFileId)
+DoSpecifiedDup (interp, srcFilePtr, targetFileId)
     Tcl_Interp *interp;
-    OpenFile   *oldFilePtr;
+    OpenFile   *srcFilePtr;
     char       *targetFileId;
 {
-    int    targetFileNum = -1;
-    FILE  *targetFilePtr;
+    int       newFileNum = -1, newFile2Num = -1;
+    FILE     *newFilePtr;
 
     /*
-     * Determine if the target file is currently open.  Also get the file
-     * number for the file.  Also flush the file.
+     * If the target file is currently open, close it.  Use the close command,
+     * as this will handle cleaning up pipelines, etc. Also get the file
+     * number for the file.  
      */
     if (Tcl_GetOpenFile (interp, targetFileId, 
                          FALSE, FALSE,  /* No checking */
-                         &targetFilePtr) != TCL_OK) {
+                         &newFilePtr) != TCL_OK) {
+        /*
+         * Not open, must convert file number.
+         */
         Tcl_ResetResult (interp);
-        targetFilePtr = NULL;
 
-        targetFileNum = ConvertFileHandle (interp, targetFileId);
-        if (targetFileNum < 0)
+        newFileNum = ConvertFileHandle (interp, targetFileId);
+        if (newFileNum < 0)
             return NULL;
-
     } else {
-        targetFileNum = fileno (targetFilePtr);
-        fflush (targetFilePtr);
-    }
-
-    /*
-     * If this is not one of the standard files, close it.  This will do all
-     * Tcl cleanup in case its a pipeline, etc.
-     */
-    if ((targetFilePtr != NULL) && (targetFileNum > 2)) {
         char *argv [2];
+
+        newFileNum = fileno (newFilePtr);
+        fflush (newFilePtr);
 
         argv [0] = "dup";
         argv [1] = targetFileId;
         if (Tcl_CloseCmd (NULL, interp, 2, argv) != TCL_OK)
             return NULL;
-        targetFilePtr = NULL;
     }
 
     /*
-     * Duplicate the old file to the specified file id.  This functionallity
-     * could be obtained with dup2 on most systems.
+     * Duplicate the src file to the specified file id.  This functionallity
+     * could be obtained with dup2 on most systems.  If there are two FILE
+     * structs associated with the src file, they must both be dupped.
      */
-    close (targetFileNum);
-    if (fcntl (fileno (oldFilePtr->f), F_DUPFD, targetFileNum) < 0)
+    close (newFileNum);
+    if (fcntl (fileno (srcFilePtr->f), F_DUPFD, newFileNum) < 0)
         goto unixError;
 
-    /*
-     * If the file is not open, setup a FILE structure and tell Tcl about it.
-     */
-    if (targetFilePtr == NULL) {
-        targetFilePtr = Tcl_SetupFileEntry (interp, targetFileNum,
-                                            oldFilePtr->permissions);
-        if (targetFilePtr == NULL)
+    if (srcFilePtr->f2 != NULL) {
+        newFile2Num = dup (fileno (srcFilePtr->f2));
+        if (newFile2Num < 0)
             goto unixError;
     }
 
-    return targetFilePtr;
+    /*
+     * Set up the Tcl file descriptor.
+     */
+    if (newFile2Num >= 0) {
+        newFilePtr = Tcl_SetupFileEntry2 (interp,
+                                          newFileNum,
+                                          newFile2Num,
+                                          NULL);
+    } else {
+        newFilePtr = Tcl_SetupFileEntry (interp,
+                                         newFileNum,
+                                         srcFilePtr->permissions);
+    }
+    if (newFilePtr == NULL)
+        goto unixError;
 
-unixError:
+    return newFilePtr;
+
+  unixError:
     interp->result = Tcl_PosixError (interp);
-    if (targetFileNum >= 0)
-        close (targetFileNum);
+    if (newFileNum >= 0)
+        Tcl_CloseForError (interp, newFileNum);
+    if (newFile2Num >= 0)
+        close (newFile2Num);
     return NULL;
+
 }
 
 /*
@@ -220,7 +241,7 @@ Tcl_DupCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    OpenFile *oldFilePtr;
+    OpenFile *srcFilePtr;
     FILE     *newFilePtr;
     off_t     seekOffset = -1;
 
@@ -230,11 +251,11 @@ Tcl_DupCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    oldFilePtr = Tcl_GetOpenFileStruct (interp, argv[1]);
-    if (oldFilePtr == NULL)
+    srcFilePtr = Tcl_GetOpenFileStruct (interp, argv[1]);
+    if (srcFilePtr == NULL)
 	return TCL_ERROR;
 
-    if (oldFilePtr->numPids > 0) {
+    if (srcFilePtr->numPids > 0) {
         Tcl_AppendResult (interp, "can not \"dup\" a Tcl pipeline created ",
                           "with \"open\" the command, use \"pipe\", \"fork\" ",
                           "and \"execl\" instead.", (char *) NULL);
@@ -247,17 +268,22 @@ Tcl_DupCmd (clientData, interp, argc, argv)
      * place.  The location is only recorded if the file is a reqular file,
      * since you cann't seek on other types of files.
      */
-    if (oldFilePtr->permissions  & TCL_FILE_WRITABLE) {
-        if (fflush (oldFilePtr->f) != 0)
-            goto unixError;
+    if (srcFilePtr->permissions  & TCL_FILE_WRITABLE) {
+        if (srcFilePtr->f2 != NULL) {
+            if (fflush (srcFilePtr->f2) != 0)
+                goto unixError;
+        } else {
+            if (fflush (srcFilePtr->f) != 0)
+                goto unixError;
+        }
     }
-    if (oldFilePtr->permissions & TCL_FILE_READABLE) {
+    if (srcFilePtr->permissions & TCL_FILE_READABLE) {
         struct stat statBuf;
         
-        if (fstat (fileno (oldFilePtr->f), &statBuf) < 0)
+        if (fstat (fileno (srcFilePtr->f), &statBuf) < 0)
             goto unixError;
         if ((statBuf.st_mode & S_IFMT) == S_IFREG) {
-            seekOffset = ftell (oldFilePtr->f);
+            seekOffset = ftell (srcFilePtr->f);
             if (seekOffset < 0)
                 goto unixError;
         }
@@ -268,9 +294,9 @@ Tcl_DupCmd (clientData, interp, argc, argv)
      * file handle.
      */
     if (argc == 2)
-        newFilePtr = DoNormalDup (interp, oldFilePtr);
+        newFilePtr = DoNormalDup (interp, srcFilePtr);
     else
-        newFilePtr = DoSpecifiedDup (interp, oldFilePtr, argv [2]);
+        newFilePtr = DoSpecifiedDup (interp, srcFilePtr, argv [2]);
 
     if (newFilePtr == NULL)
         return TCL_ERROR;

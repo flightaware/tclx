@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.8 1995/04/15 19:49:30 markd Exp markd $
+# $Id: server.test,v 1.9 1995/04/25 05:48:12 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -215,10 +215,50 @@ proc TalkToEcho {testId readFH writeFH buffered} {
         read $readFH 8
     } 0 {Test #10}
 
+    # Make sure we can dup a socket.
+
+    Test $testId.6 {simple client interaction} {
+        set write2FH [dup $writeFH]
+        if {"$readFH" != "$writeFH"} {
+            set read2FH [dup $readFH]
+        } else {
+            set read2FH $write2FH
+        }
+        server_send $write2FH "Test #11"
+        set result [gets $read2FH]
+
+        close $write2FH
+        if ![cequal $readFH $writeFH] {
+            close $read2FH
+        }
+        set result
+    } 0 {Test #11}
+
+    # Try dup to stdin/stdout.
+
+    flush stdout
+    flush stderr
+    if {[set pid [fork]] == 0} {
+        Test $testId.8 {simple client interaction} {
+            dup $readFH stdin
+            dup $writeFH stdout
+            close $writeFH
+            if ![cequal $readFH $writeFH] {
+                close $readFH
+            }
+            puts stdout "Test #12"
+            flush stdout
+            gets stdin
+        } 0 {Test #12}
+    }
+    wait $pid
+
+
     close $readFH
     if ![cequal $readFH $writeFH] {
         close $writeFH
     }
+
     return
 }
 
