@@ -12,11 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 2.6 1993/09/22 04:46:46 markd Exp markd $
+# $Id: flock.test,v 2.7 1993/09/23 02:15:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
 
 catch {flock} msg
 if {$msg == "File locking is not available on this system"} return
