@@ -403,6 +403,12 @@ General Porting Notes:
      you really don't have opendir on your system.  This will cause the glob
      command and TclX package libraries to fail.
 
+SVR3 systems (14 character file name limit):
+   o All critical files in TclX are 14 characters or less.  A few help
+     files are longer that 14 characters.  If these can be extracted with
+     name truncation, they can still be referenced in the help system by the
+     truncated name.  If they can't be extracted, then they can be regenerated
+     with truncated names by doing a "make buildhelp".
 
 DEC Ultrix:
    o Several tests fail when Tcl is run on an NFS mounted file system.

@@ -17,7 +17,7 @@
  * Fixes from ado@elsie.nci.nih.gov
  * February 1991
  *-----------------------------------------------------------------------------
- * $Id: strftime.c,v 3.0 1993/11/19 07:00:51 markd Rel markd $
+ * $Id: strftime.c,v 4.0 1994/07/16 05:30:13 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,7 +37,7 @@
 
 #undef strftime
 
-#include "tclXconfig.h"
+#include "tclXconf.h"
 
 extern char *strchr();
 static int weeknumber();

@@ -32,7 +32,7 @@
 ./src/tclXcmdInit.c
 ./src/tclXcmdloop.c
 ./src/tclXcnvclock.c
-./src/tclXconfig.h.in
+./src/tclXconf.h.in
 ./src/tclXdata.c
 ./src/tclXdebug.c
 ./src/tclXdup.c

@@ -3597,7 +3597,7 @@ done
 
 ac_given_srcdir=$srcdir
 
-trap 'rm -fr Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile tests/Makefile tktests/Makefile src/SYSLIBS tksrc/SYSLIBS src/tclXconfig.h conftest*; exit 1' 1 2 15
+trap 'rm -fr Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile tests/Makefile tktests/Makefile src/SYSLIBS tksrc/SYSLIBS src/tclXconf.h conftest*; exit 1' 1 2 15
 
 # Protect against being on the right side of a sed subst in config.status. 
 sed 's/%@/@@/; s/@%/@@/; s/%g$/@g/; /@g$/s/[\\\\&%]/\\\\&/g; 
@@ -3705,7 +3705,7 @@ ac_eB='$%\1#\2define\3'
 ac_eC=' '
 ac_eD='%g'
 
-CONFIG_HEADERS=${CONFIG_HEADERS-"src/tclXconfig.h"}
+CONFIG_HEADERS=${CONFIG_HEADERS-"src/tclXconf.h"}
 for ac_file in .. $CONFIG_HEADERS; do if test "x$ac_file" != x..; then
   # Support "outfile[:infile]", defaulting infile="outfile.in".
   case "$ac_file" in

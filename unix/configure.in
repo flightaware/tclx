@@ -13,12 +13,12 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.6 1995/01/23 03:22:18 markd Exp markd $
+dnl $Id: configure.in,v 4.7 1995/01/28 18:50:09 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.6 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.7 $),)dnl
 
-AC_CONFIG_HEADER(src/tclXconfig.h)
+AC_CONFIG_HEADER(src/tclXconf.h)
 
 #------------------------------------------------------------------------------
 # Check command line looking for the --arch= option.

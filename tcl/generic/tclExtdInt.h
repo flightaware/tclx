@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.7 1995/01/16 07:39:53 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.8 1995/01/23 23:41:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,7 +20,7 @@
 #define TCLEXTDINT_H
 
 #include "tclExtend.h"
-#include "tclXconfig.h"
+#include "tclXconf.h"
 #include "tclInt.h"
 
 #include <sys/param.h>
