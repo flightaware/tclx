@@ -13,11 +13,20 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 5.3 1996/02/12 18:16:26 markd Exp $
+ * $Id: tclXtest.c,v 5.4 1996/02/16 07:51:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtend.h"
+
+/*
+ * Error handler proc that causes errors to come out in the same format as
+ * the standard Tcl test shell.  This keeps certain Tcl tests from reporting
+ * errors.
+ */
+static char errorHandler [] =
+    "proc TclXTestError msg {puts stderr $msg; exit 1}\n \
+     set tclx_errorHandler TclXTestError";
 
 /*
  * The following variable is a special hack that insures the tcl
@@ -71,5 +80,6 @@ Tcl_AppInit (interp)
     if (Tcltest_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
-    return TCL_OK;
+
+    return Tcl_GlobalEval (interp, errorHandler);
 }
