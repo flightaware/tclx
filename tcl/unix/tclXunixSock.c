@@ -21,6 +21,7 @@
 #ifndef NO_SYS_SOCKET_H
 #    include <sys/socket.h>
 #endif
+#include <sys/uio.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -42,8 +43,9 @@ extern int h_errno;
 /*
  * Buffering options.
  */
-#define SERVER_BUF    1
-#define SERVER_NOBUF  2
+#define SERVER_BUF      1
+#define SERVER_NOBUF    2
+#define SERVER_TWOIDS   4
 
 /*
  * Prototypes of internal functions.
@@ -54,7 +56,7 @@ ReturnGetHostError _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 BindFileHandles _ANSI_ARGS_((Tcl_Interp *interp,
-                             unsigned    bufType,
+                             unsigned    options,
                              int         socketFD));
 
 static struct hostent *
@@ -123,27 +125,55 @@ ReturnGetHostError (interp, host)
  *
  * Parameters:
  *   o interp (O) - File handles or error messages are return in result.
- *   o bufType (I) - Type of buffering to do:
+ *   o options (I) - Options set controling buffering and handle allocation:
  *       o SERVER_BUF - Two file handle buffering.
  *       o SERVER_NOBUF - No buffering.
+ *       o SERVER_TWOIDS - Allocate two file handles (ids), one for reading
+ *         and one for writting.
  *   o socketFD (I) - File number of the socket that was opened.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-BindFileHandles (interp, bufType, socketFD)
+BindFileHandles (interp, options, socketFD)
     Tcl_Interp *interp;
-    unsigned    bufType;
+    unsigned    options;
     int         socketFD;
 {
-    int   socketFD2 = -1;
-    FILE *filePtr;
+    int      socketFD2 = -1;
+    FILE     *filePtr, *file2Ptr;
+    OpenFile *tclFilePtr;
 
     /*
-     * Unbuffered files get a single file descriptor.
+     * Handle setting up two file handles, buffered or unbuffered.
      */
-    if (bufType == SERVER_NOBUF) {
+    if (options & SERVER_TWOIDS) {
+        socketFD2 = dup (socketFD);
+        if (socketFD2 < 0) {
+            interp->result = Tcl_PosixError (interp);
+            goto errorExit;
+        }
+        filePtr = Tcl_SetupFileEntry (interp, socketFD, TCL_FILE_READABLE);
+        if (filePtr == NULL)
+            goto errorExit;
+
+        file2Ptr = Tcl_SetupFileEntry (interp, socketFD2, TCL_FILE_WRITABLE);
+        if (filePtr == NULL)
+            goto errorExit;
+
+        if (options & SERVER_NOBUF) {
+            setbuf (filePtr, NULL);
+            setbuf (file2Ptr, NULL);
+        }
+        sprintf (interp->result, "file%d file%d", socketFD, socketFD2);
+        return TCL_OK;
+    }
+
+    /*
+     * Setup unbuffered, single handle access.
+     */
+    if (options & SERVER_NOBUF) {
         filePtr = Tcl_SetupFileEntry (interp, socketFD,
                                       TCL_FILE_READABLE | TCL_FILE_WRITABLE);
         if (filePtr == NULL)
@@ -154,19 +184,33 @@ BindFileHandles (interp, bufType, socketFD)
         return TCL_OK;
     }
 
-    if (Tcl_SetupFileEntry (interp, socketFD, TCL_FILE_READABLE) == NULL)
-        goto errorExit;
-
+    /*
+     * Set up single handle, buffered access.  This requires creating
+     * two FILE objects, but binding them to a single handle.  This is
+     * something Tcl_GetOpenFile supports internally.
+     */
     socketFD2 = dup (socketFD);
     if (socketFD2 < 0) {
         interp->result = Tcl_PosixError (interp);
         goto errorExit;
     }
 
-    if (Tcl_SetupFileEntry (interp, socketFD2, TCL_FILE_WRITABLE) == NULL)
+    filePtr = Tcl_SetupFileEntry (interp, socketFD, TCL_FILE_READABLE);
+    if (filePtr == NULL)
         goto errorExit;
 
-    sprintf (interp->result, "file%d file%d", socketFD, socketFD2);
+    tclFilePtr = tclOpenFiles [fileno (filePtr)];
+
+    file2Ptr = fdopen (socketFD2, "w");
+    if (file2Ptr == NULL) {
+        interp->result = Tcl_PosixError (interp);
+        return NULL;
+    }
+
+    tclFilePtr->permissions |= TCL_FILE_WRITABLE;
+    tclFilePtr->f2 = file2Ptr;
+
+    sprintf (interp->result, "file%d", socketFD);
     return TCL_OK;
 
   errorExit:
@@ -180,13 +224,13 @@ BindFileHandles (interp, bufType, socketFD)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ServerOpenCmd --
- *     Implements the TCL server_open command:
+ * Tcl_ServerConnectCmd --
+ *     Implements the TCL server_connect command:
  *
- *        server_open ?options? host service
+ *        server_connect ?options? host service
  *
  *  Opens a stream socket to the specified host (host name or IP address),
- *  service name or port number.  Options maybe -buf or -nobuf, and
+ *  service name or port number.  Options maybe -buf or -nobuf, -twoids, and
  *  -hostip hostname.
  *
  * Results:
@@ -195,13 +239,13 @@ BindFileHandles (interp, bufType, socketFD)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ServerOpenCmd (clientData, interp, argc, argv)
+Tcl_ServerConnectCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;
 {
-    unsigned            bufType;
+    unsigned            options;
     char               *host, *service;
     int                 socketFD = -1, nextArg;
     struct hostent     *hostEntry;
@@ -218,12 +262,16 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
 
     bzero (&local, sizeof (local));
     nextArg = 1;
-    bufType = SERVER_BUF;
+    options = SERVER_BUF;
     while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
         if (STREQU ("-buf", argv [nextArg])) {
-            bufType = SERVER_BUF;
+            options &= ~SERVER_NOBUF;
+            options |= SERVER_BUF;
         } else if (STREQU ("-nobuf", argv [nextArg])) {
-            bufType = SERVER_NOBUF;
+            options &= ~SERVER_BUF;
+            options |= SERVER_NOBUF;
+        } else if (STREQU ("-twoids", argv [nextArg])) {
+            options |= SERVER_TWOIDS;
         } else if (STREQU ("-myip", argv [nextArg])) {
             if (nextArg >= argc - 1)
                 goto missingArg;
@@ -244,8 +292,8 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
                 return TCL_ERROR;
             local.sin_port = htons (myPort);
         } else {
-            Tcl_AppendResult (interp, "expected one of \"-buf\", \"-nobuf\"",
-                              " \"-myip\" or \"-myport\", got \"",
+            Tcl_AppendResult (interp, "expected one of \"-buf\", \"-nobuf\", ",
+                              "\"-twoids\", \"-myip\" or \"-myport\", got \"",
                               argv [nextArg], "\"", (char *) NULL);
             return TCL_ERROR;
         }
@@ -337,7 +385,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     /*
      * Set up stdio FILE structures and we are done.
      */
-    return BindFileHandles (interp, bufType, socketFD);
+    return BindFileHandles (interp, options, socketFD);
 
     /*
      * Exit points for errors.
@@ -373,7 +421,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
  * for connections by calling listen (2).
  *
  *  Options may be "-myip ip_address", "-myport port_number",
- *   and "-backlog backlog"
+ *  and "-backlog backlog"
  *
  * Results:
  *   If successful, a Tcl fileid is returned.
@@ -485,7 +533,7 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
  *        server_accept ?options? file
  *
  *  Accepts an IP connection request to a socket created by server_create.
- *  Option maybe -buf or -nobuf.
+ *  Options maybe -buf or -nobuf and -twoids.
  *
  * Results:
  *   If successful, a pair Tcl fileids are returned for -buf or a single fileid
@@ -499,7 +547,7 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    unsigned            bufType;
+    unsigned            options;
     int                 acceptSocketFD, addrLen;
     int                 socketFD = -1, nextArg;
     struct sockaddr_in  connectSocket;
@@ -509,21 +557,26 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
      * Parse arguments.
      */
     nextArg = 1;
-    bufType = SERVER_BUF;
+    options = SERVER_BUF;
     while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
         if (STREQU ("-buf", argv [nextArg])) {
-            bufType = SERVER_NOBUF;
+            options &= ~SERVER_NOBUF;
+            options |= SERVER_BUF;
         } else if (STREQU ("-nobuf", argv [nextArg])) {
-            bufType = SERVER_BUF;
+            options &= ~SERVER_BUF;
+            options |= SERVER_NOBUF;
+        } else if (STREQU ("-twoids", argv [nextArg])) {
+            options |= SERVER_TWOIDS;
         } else {
-            Tcl_AppendResult (interp, "expected \"-buf\" or \"-nobuf\"",
-                              ", got \"", argv [nextArg], "\"", (char *) NULL);
+            Tcl_AppendResult (interp, "expected \"-buf\", \"-nobuf\" or ",
+                              "\"-twoids\", got \"", argv [nextArg],
+                              "\"", (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
     }
 
-    if (nextArg != argc - 2) {
+    if (nextArg != argc - 1) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], " ?options? fileid",
                           (char *) NULL);
         return TCL_ERROR;
@@ -534,7 +587,8 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
      */
     bzero (&connectSocket, sizeof (connectSocket));
 
-    if (Tcl_GetOpenFile (interp, argv [nextArg], 0, 1,
+    if (Tcl_GetOpenFile (interp, argv [nextArg], 
+                         FALSE, TRUE,  /* Read access */
                          &acceptFilePtr) == TCL_ERROR) {
         return TCL_ERROR;
     }
@@ -549,7 +603,7 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
     /*
      * Set up stdio FILE structures and we are done.
      */
-    return BindFileHandles (interp, bufType, socketFD);
+    return BindFileHandles (interp, options, socketFD);
 
     /*
      * Exit points for errors.
@@ -698,7 +752,7 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
  *
  *        server_send [options] fileid message
  *
- *          -nonewline -outofband -noroute
+ *          -nonewline -outofband -dontroute
  *-----------------------------------------------------------------------------
  */
 int
@@ -708,14 +762,14 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    FILE        *filePtr;
-    int          bytesAttempted;
-    int          bytesSent;
-    int          flags = 0;
-    int          nonewline = 0;
-    int          nextArg;
-    Tcl_DString  buffer;
-    char        *message;
+    FILE         *filePtr;
+    int           bytesAttempted;
+    int           bytesSent;
+    int           flags = 0;
+    int           nonewline = 0;
+    int           nextArg;
+    struct msghdr msgHeader;
+    struct iovec  dataVec [2];
 
     nextArg = 1;
     while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
@@ -723,14 +777,12 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
             nonewline = 1;
         } else if (STREQU (argv [nextArg], "-outofband")) {
             flags |= MSG_OOB;
-        } else if (STREQU (argv [nextArg], "-noroute")) {
+        } else if (STREQU (argv [nextArg], "-dontroute")) {
             flags |= MSG_DONTROUTE;
         } else {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                              " bad option \"", argv [nextArg], 
-                              "\", should be one of \"-nonewline\",",
-                              " \"-outofband\",",
-                              " or \"-noroute\"", (char *) NULL);
+            Tcl_AppendResult (interp, "expected one of \"-nonewline\",",
+                              " \"-outofband\", or \"-dontroute\" got \"",
+                              argv [nextArg], "\"", (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
@@ -742,26 +794,33 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
     }
 
     if (Tcl_GetOpenFile (interp, argv [nextArg++],
-                         FALSE, FALSE, /* No checking */
+                         TRUE, TRUE, /* Write access */
                          &filePtr) != TCL_OK)
         return TCL_ERROR;
 
-    if (nonewline) {
-        message = argv [nextArg];
-        bytesAttempted = strlen (message);
-    } else {
-        Tcl_DStringInit (&buffer);
-        Tcl_DStringAppend (&buffer, argv [nextArg], -1);
-        Tcl_DStringAppend (&buffer, "\n", -1);
-        message = Tcl_DStringValue (&buffer);
-        bytesAttempted = Tcl_DStringLength (&buffer);
-    }
-        
-    bytesSent = send (fileno (filePtr), message,
-                      bytesAttempted, flags);
+    /*
+     * Fill in the message header and write vector.  If a newline is
+     * to be included, its the second element in the vector.
+     */
+    msgHeader.msg_name = NULL;
+    msgHeader.msg_namelen = 0;
+    msgHeader.msg_iov = dataVec;
+    msgHeader.msg_iovlen = 1;
+    msgHeader.msg_control = NULL;
+    msgHeader.msg_controllen = 0;
+    
+    bytesAttempted = strlen (argv [nextArg]);
+    dataVec [0].iov_base = argv [nextArg];
+    dataVec [0].iov_len = bytesAttempted;
+
     if (!nonewline) {
-        Tcl_DStringFree (&buffer);
+        dataVec [1].iov_base = "\n";
+        dataVec [1].iov_len = 1;
+        msgHeader.msg_iovlen++;
+        bytesAttempted++;
     }
+   
+    bytesSent = sendmsg (fileno (filePtr), &msgHeader, flags);
     if (bytesSent < 0) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
@@ -808,18 +867,15 @@ Tcl_ServerReceiveCmd (clientData, interp, argc, argv)
         if (STREQU (argv [nextArg], "-outofband")) {
             flags |= MSG_OOB;
         } else if (STREQU (argv [nextArg], "-peek")) {
-            flags |= MSG_DONTROUTE;
+            flags |= MSG_PEEK;
         } else if (STREQU (argv [nextArg], "-waitall")) {
             flags |= MSG_WAITALL;
         } else if (STREQU (argv [nextArg], "-keepnewline")) {
             keepNewline = 1;
         } else {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                              " bad option \"",
-                              argv [nextArg], 
-                              "\", should be one of \"-outofband\",",
-                              " \"-peek\",",
-                              " or \"-waitall\"", (char *) NULL);
+            Tcl_AppendResult (interp, "expected one of \"-outofband\",",
+                              " \"-peek\", or \"-waitall\", got \"", 
+                              argv [nextArg], "\"", (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
@@ -827,13 +883,12 @@ Tcl_ServerReceiveCmd (clientData, interp, argc, argv)
 
     if (nextArg != argc - 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " [options ] fileid length", (char *) NULL);
+                          " [options] fileid length", (char *) NULL);
         return TCL_ERROR;
     }
-
     
     if (Tcl_GetOpenFile (interp, argv [nextArg++],
-                         FALSE, FALSE, /* No checking */
+                         FALSE, TRUE, /* Read access */
                          &filePtr) != TCL_OK)
         return TCL_ERROR;
 
@@ -874,7 +929,7 @@ void
 Tcl_ServerInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateCommand (interp, "server_open", Tcl_ServerOpenCmd,
+    Tcl_CreateCommand (interp, "server_connect", Tcl_ServerConnectCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_info", Tcl_ServerInfoCmd,
                        (ClientData) NULL, (void (*)()) NULL);
@@ -922,7 +977,7 @@ void
 Tcl_ServerInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateCommand (interp, "server_open", ServerNotAvailable,
+    Tcl_CreateCommand (interp, "server_connect", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_info", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
