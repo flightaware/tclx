@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 8.1 1997/04/17 04:58:50 markd Exp $
+ * $Id: tclXshell.c,v 8.2 1997/06/12 21:08:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -299,12 +299,20 @@ TclX_Main (argc, argv, appInitProc)
      * Delete the interpreter if memory debugging or explictly requested.
      * Useful for finding memory leaks.
      */
-
 #if defined(TCL_MEM_DEBUG)
-    Tcl_DeleteInterp (interp);
-    if (Tcl_DumpActiveMemory ("mem.lst") != TCL_OK)
-        panic ("error accessing `mem.lst': %s", Tcl_ErrnoMsg (errno));
-    Tcl_Exit (0);
+    {
+        /*
+         * On Unix, Tcl_Exit will dump a list of leaked ckalloc's if this
+         * variable is set.  On Win32, we can't set it, since its in another
+         * DLL.
+         */
+#ifndef __WIN32__
+	extern char *tclMemDumpFileName;
+	tclMemDumpFileName = "mem.lst";
+#endif
+	Tcl_DeleteInterp (interp);
+	Tcl_Exit (0);
+    }
 #endif
 
     /*
