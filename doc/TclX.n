@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.8 1993/03/06 21:43:53 markd Exp markd $
+.\" $Id: TclX.man,v 2.9 1993/03/15 06:39:07 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -761,11 +761,11 @@ out.  Alternatively, the \fBfcntl\fR command may be used to set the buffering
 mode of a file to line-buffered or unbuffered.
 '@help: files/bsearch
 .TP
-.B bsearch \fIfilehandle key\fR ?\fIretvar\fR? ?\fIcompare_proc\fR?
+.B bsearch \fIfileId key\fR ?\fIretvar\fR? ?\fIcompare_proc\fR?
 .br
-Search an opened file containing lines of text sorted into ascending
-order for a match.  \fIFilehandle\fR is a Tcl filehandle as returned
-by the \fBopen\fR command.  \fIKey\fR contains the string to match.
+Search an opened file \fIfileId\fR containing lines of text sorted into
+ascending order for a match.
+\fIKey\fR contains the string to match.
 If \fIretvar\fR is specified, then the line from the
 file is returned in \fIretvar\fR, and the command returns \fB1\fR if \fIkey\fR
 was found, and \fB0\fR if it wasn't.  If \fIretvar\fR is not specified
@@ -788,31 +788,31 @@ results will occur.
 '@help: files/copyfile
 '@brief: Copy the remainder of one open file into another.
 .TP
-.B copyfile \fIhandle1 handle2\fR
+.B copyfile \fIfromFileId toFileId\fR
 .br
-Copies the rest of the file specified by \fIhandle1\fR, starting
+Copies the rest of the file specified by \fIfromFileId\fR, starting
 from its current position,
-to the file specified by \fIhandle2\fR, starting from its current
+to the file specified by \fItoFileId\fR, starting from its current
 position.
 '@endhelp
 '@help: files/dup
-'@brief: Duplicate an open filehandle.
+'@brief: Duplicate an open file
 .TP
-.B dup \fIfilehandle\fR ?\fIstdhandle\fR?
+.B dup \fIfileId\fR ?\fIstdfileId\fR?
 .br
 Duplicate an open file.  A file handle is created that addresses the
-same file as \fIfilehandle\fR.
+same file as \fIfileId\fR.
 .sp
 A special case is allowed for duping files to stdin, stdout or stderr.
-If \fIstdhandle\fR is specified, then it must contain either
+If \fIstdfileId\fR is specified, then it must contain either
 \fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.  In this form, the
-file corresponding to \fIstdhandle\fR is
-closed, and the dup is performed from \fIfilehandle\fR with the
-result going to \fIstdhandle\fR.
+file corresponding to \fIstdfileId\fR is
+closed, and the dup is performed from \fIfileId\fR with the
+result going to \fIstdfileId\fR.
 .sp
 The procedure shown below will create a child process and
-set its standard input and output filehandles to a pair
-of pipe filehandles we pass as arguments.
+set its standard input and output files to a pair
+of pipe files we pass as arguments.
 Finally the program does an \fBexecl\fR of a specified command,
 with the program's stdin and stdout coming from and going to
 our pair of pipes.
@@ -840,7 +840,7 @@ our pair of pipes.
 '@help: files/fcntl
 '@brief: Get or set file access options for an open file.
 .TP
-.B fcntl \fIhandle\fR \fIattribute ?value\fR? 
+.B fcntl \fIfileId\fR \fIattribute ?value\fR? 
 .br
 This command either sets or clears a file option or returns its current
 value.  If \fIvalue\fR are not specified, then the current value of
@@ -889,10 +889,10 @@ on the file or data may be lost.
 '@help: files/flock
 '@brief: Lock all or part of a file.
 .TP
-.B flock \fIoptions handle\fR ?\fIstart\fR? ?\fIlength\fR? ?\fIorigin\fR?
+.B flock \fIoptions fileId\fR ?\fIstart\fR? ?\fIlength\fR? ?\fIorigin\fR?
 .br
 This command places a lock on all or part of the file specified by
-\fIhandle\fR.  The lock is either advisory or mandatory, depending on the mode
+\fIfileId\fR.  The lock is either advisory or mandatory, depending on the mode
 bits of the file.  The lock is placed beginning at relative byte offset
 \fIstart\fR for \fIlength\fR bytes.  If \fIstart\fR or \fIlength\fR is omitted
 or empty, zero is assumed.  If \fIlength\fR is zero, then the lock always
@@ -922,7 +922,7 @@ file, it is best to use unbuffered file access (see the \fBfcntl\fR command).
 '@help: files/funlock
 '@brief: Remove a lock from part or all of a file.
 .TP
-.B funlock \fIhandle\fR ?\fIstart\fR? ?\fIlength\fR? ?\fIorigin\fR?
+.B funlock \fIfileId\fR ?\fIstart\fR? ?\fIlength\fR? ?\fIorigin\fR?
 .br
 Remove a locked from a file that was previously placed with the \fIflock\fR
 command.  The arguments are the same as for the \fIflock\fR command, see
@@ -932,7 +932,7 @@ that command for more details.
 '@help: files/fstat
 '@brief: Obtain status information about an open file.
 .TP
-.B fstat \fIhandle\fR ?\fIitem\fR?|?\fBstat \fIarrayvar\fR?
+.B fstat \fIfileId\fR ?\fIitem\fR?|?\fBstat \fIarrayvar\fR?
 .br
 Obtain status information about an open file.
 .sp
@@ -968,14 +968,22 @@ following values: \fBfile\fR, \fBdirectory\fR, \fBcharacterSpecial\fR,
 o\ \fBuid\fR - The user ID of the file's owner.
 .sp
 If one of these keys is specified as \fIitem\fR, then that data item is
-returned
+returned.
 .sp
 If \fBstat \fIarrayvar\fR is specified, then the information is returned in
 the array \fIarrrayvar\fR.  Each of the above keys indexes an element of the
 array containing the data.
 .sp
-If only \fIhandle\fR is specified, the command returns the data as a keyed
+If only \fIfileId\fR is specified, the command returns the data as a keyed
 list.
+.sp
+The following value may be returned only if explicitly asked for, it will not
+be returned with the array or keyed list forms:
+.IP
+o\ \fBremotehost\fR - If \fIfileId\fR is a TCP/IP socket connection, then a
+list is returned with the first element being the remote host IP address.  If
+the remote host name can be found, it is returned as the second element of
+the list.
 '@endhelp
 '
 '@help: files/lgets
@@ -1007,39 +1015,39 @@ what really happened.
 '@help: files/pipe
 '@brief: Create a pipe.
 .TP
-.B pipe ?\fIhandle_var_r handle_var_w\fR?
+.B pipe ?\fIfileId_var_r fileId_var_w\fR?
 .br
-Create a pipe.  If \fIhandle_var_r\fR
-and \fIhandle_var_r\fR are specified, then \fBpipe\fR will set the a
-variable named \fIhandle_var_r\fR to
-contain the handle of the side of the pipe that was opened for reading,
-and \fIhandle_var_w\fR will contain the handle of the side of the
+Create a pipe.  If \fIfileId_var_r\fR
+and \fIfileId_var_r\fR are specified, then \fBpipe\fR will set the a
+variable named \fIfileId_var_r\fR to
+contain the fileId of the side of the pipe that was opened for reading,
+and \fIfileId_var_w\fR will contain the fileId of the side of the
 pipe that was opened for writing.
 .sp
-If the handle variables are not specified, then a
-list containing the read and write handlew is returned as the
+If the fileId variables are not specified, then a
+list containing the read and write fileIdw is returned as the
 result of the command.
 '@endhelp
 '@help: files/select
 '@brief: Synchronous I/O multiplexing.
 .TP
-.B select \fIreadhandles\fR ?\fIwritehandles\fR? ?\fIexcepthandles\fR? ?\fItimeout\fR?
+.B select \fIreadfileIds\fR ?\fIwritefileIds\fR? ?\fIexceptfileIds\fR? ?\fItimeout\fR?
 .br
 This command allows an Extended Tcl program to wait
 on zero or more files being ready for
 for reading, writing, have an exceptional condition pending, or for
 a timeout period to expire.
-\fIreadhandles\fR, \fIwritehandles\fR, \fIexcepthandles\fR are each lists
-of file handles, as returned from \fBopen\fR, to query.  An empty list ({}) may
+\fIreadFileIds\fR, \fIwriteFileIds\fR, \fIexceptFileIds\fR are each lists
+of fileIds, as returned from \fBopen\fR, to query.  An empty list ({}) may
 be specified if a category is not used. 
 .sp
 The files 
 specified by
-the \fIreadhandles\fR list are checked to see if data is available for
-reading. The \fIwritehandles\fR are checked if the specified
+the \fIreadFileIds\fR list are checked to see if data is available for
+reading. The \fIwriteFileIds\fR are checked if the specified
 files are clear for writing.
 The
-\fIexcepthandles\fR are checked to see if an exceptional condition has
+\fIexceptFileIds\fR are checked to see if an exceptional condition has
 occured (typically, an error).
 The write and exception checking is most useful on devices, however,
 the read checking is very useful when communicating with multiple
@@ -1054,7 +1062,7 @@ files, returning immediately even if none are ready.
 .sp
 If the \fItimeout\fR period expires with none of the files becomming ready,
 then the command returns an empty list.  Otherwise the command returns a 
-list of three elements, each of those elements is a list of the file handles
+list of three elements, each of those elements is a list of the fileIds
 that are ready in the read, write and exception classes.  If none are ready in
 a class, then that element will be the null list.  For example:
 .sp
@@ -1070,6 +1078,38 @@ or perhaps
         file3 {} {}
 .fi
 .sp
+'@endhelp
+'
+.SH "CLIENT/SERVER ACCESS"
+.PP
+A command is provided to access TCP/IP based servers.  In addition it is
+easy to build servers using Extended Tcl that run under \fBinetd\fR.  The
+\fBfstat remotehost\fR request is useful for these servers.
+'
+'@help: files/server_open
+'@brief: Manage file scan contexts.
+.TP
+.B server_open ?\fIoption\fR? \fIhost service\fR
+.br
+Open a TCP/IP connection to a server of \fIhost\fR on the port specified by
+\fIservice\fR.  The server is then accessed using the standard Tcl
+file I/O commands.
+\fIHost\fR may be a host name or an IP address.  \fIPort\fR
+may be a port number of a service name.  Option is one of \fB-buf\fR or
+\fR-nobuf\fR.  If no options is specified, \fB-buf\fR is the default.
+.sp
+If \fB-buf\fR is specified, then the file is buffered.
+In this case, a pair of Tcl file ids are returned in a list.  The first id
+is open for read access, the second for write.  When writing to the file,
+the \fIflush\fR command must be used to force data in the buffer to
+be sent to the server.  The \fIclose\fR command must be called against both
+file ids when through with the socket.  Buffered access will result in 
+significantly better performance when reading data and will also improve
+a series of writes being done with out intermixed reads.  The \fIfcntl\fR
+command may be used to make one of these files unbuffered.
+.sp
+if \fB-nobuf\fR is specified, then the file is unbuffered and a single file id,
+open for both reading and writing, is returned.
 '@endhelp
 '
 .SH "FILE SCANNING COMMANDS"
@@ -1114,12 +1154,13 @@ of the
 match statements and compiled regular expressions associated with the
 specified context.
 '@endhelp
+'
 '@help: filescan/scanfile
 '@brief: Scan a file, executing match code when their patterns are matched.
 .TP
-.B scanfile \fIcontexthandle\fR \fIfilehandle\fR
+.B scanfile \fIcontexthandle\fR \fIfileId\fR
 .br
-Scan the file specified by \fIfilehandle\fR, starting at the
+Scan the file specified by \fIfileId\fR, starting at the
 current file position.  Check all patterns in the scan context specified by
 \fIcontexthandle\fR against
 it, executing the match commands corresponding to patterns matched.
@@ -1168,7 +1209,7 @@ line scanned, which is usually, but not necessarily, the first line of the
 file.  The first line is line number one.
 .TP
 .B matchInfo(handle)
-The file handle of the file currently being scanned.
+The file id (handle) of the file currently being scanned.
 .RE
 .PP
 All \fBscanmatch\fR patterns that match a line will be processed in the order
