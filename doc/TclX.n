@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.10 1994/06/28 07:06:25 markd Exp markd $
+.\" $Id: TclX.n,v 3.11 1994/06/29 04:14:57 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1177,30 +1177,6 @@ The target file should be open if its one of
 do an \fBexecl\fR.    Otherwise internal C code that
 uses one of these files via direct access to stdio FILE struct may behave
 strangely or fail.
-.sp
-The procedure shown below will create a child process and
-set its standard input and output files to a pair
-of pipe files we pass as arguments.
-Finally the program does an \fBexecl\fR of a specified command,
-with the program's stdin and stdout coming from and going to
-our pair of pipes.
-.sp
-.nf
-.ft CW
-    proc ChildProcess {cmd inPipe outPipe} {
-        if {[set childPid [fork]] == 0} {
-            dup $inPipe stdin
-            close $inPipe
-            dup $outPipe stdout
-            close $outPipe
-
-            execl $cmd
-            # will never make it here...
-        }
-        return $childPid
-    }
-.ft R
-.fi
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
