@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 8.2 1997/06/12 21:08:13 markd Exp $
+ * $Id: tclXcmdInit.c,v 8.3 1997/06/29 19:13:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -133,23 +133,7 @@ Tclxcmd_Init (interp)
     /*
      * from tclXprocess.c
      */
-    Tcl_CreateCommand (interp,
-		       "execl",
-		       TclX_ExeclCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp,
-                          "fork",
-			  TclX_ForkObjCmd,
-                          (ClientData) NULL,
-			  (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateCommand (interp,
-		       "wait",
-		       TclX_WaitCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
+    TclX_InitProcess (interp);
 
     /*
      * from tclXsignal.c

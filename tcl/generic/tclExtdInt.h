@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.3 1997/06/25 08:23:38 markd Exp $
+ * $Id: tclExtdInt.h,v 8.4 1997/06/29 19:13:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -466,15 +466,8 @@ TclX_InitMsgCat _ANSI_ARGS_((Tcl_Interp *interp));
 /*
  * from tclXprocess.c
  */
-extern int 
-TclX_ExeclCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-TclX_ForkObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-extern int 
-TclX_WaitCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+TclX_InitProcess _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXprofile.c

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 8.1 1997/04/17 04:58:47 markd Exp $
+ * $Id: tclXprocess.c,v 8.2 1997/06/12 21:08:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,6 +28,16 @@
 #    define  WUNTRACED  2
 #endif
 
+static int 
+TclX_ExeclCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+static int 
+TclX_ForkObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_WaitCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
 
 /*
  *-----------------------------------------------------------------------------
@@ -41,7 +51,7 @@
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_ForkObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -57,16 +67,16 @@ TclX_ForkObjCmd (clientData, interp, objc, objv)
 /*
  *-----------------------------------------------------------------------------
  *
- * TclX_ExeclCmd --
+ * TclX_ExeclObjCmd --
  *     Implements the TCL execl command:
- *     execl prog ?argList?
+ *     execl ?-argv0 ? prog ?argList?
  *
  * Results:
  *   Standard TCL results, may return the UNIX system error message.  On Win32,
  * a process id is returned.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_ExeclCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -159,7 +169,7 @@ TclX_ExeclCmd (clientData, interp, argc, argv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_WaitCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -274,4 +284,32 @@ TclX_WaitCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
+
+/*
+ *-----------------------------------------------------------------------------
+ * TclX_InitProcess --
+ *   Initialize process commands.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_InitProcess (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateCommand (interp,
+		       "execl",
+		       TclX_ExeclCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
 
+    Tcl_CreateObjCommand (interp,
+                          "fork",
+			  TclX_ForkObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateCommand (interp,
+		       "wait",
+		       TclX_WaitCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
+}
