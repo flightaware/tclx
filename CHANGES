@@ -312,3 +312,8 @@
   o Changed help and buildhelp.tcl so that multiple brief files are allowed
     (extension .brf).
 -------------------------------------------------------------------------------
+ 7 Oct 92:
+  o Signal handling changed so that if multiple signals are received before
+    before they are handle and if trap code is associated with that signal,
+    then the trap code will be run once for every signal received.
+-------------------------------------------------------------------------------
