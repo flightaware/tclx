@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.0 1994/07/16 05:28:07 markd Rel markd $
+ * $Id: tclXutil.c,v 4.1 1994/10/02 05:06:13 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -649,11 +649,11 @@ Tcl_CloseForError (interp, fileNum)
  *   Milliseconds.
  *-----------------------------------------------------------------------------
  */
-long
+clock_t
 Tcl_TicksToMS (numTicks)
-     long numTicks;
+     clock_t numTicks;
 {
-    static long msPerTick = 0;
+    static clock_t msPerTick = 0;
 
     /*
      * Some systems (SVR4) implement CLK_TCK as a call to sysconf, so lets only
@@ -674,6 +674,6 @@ Tcl_TicksToMS (numTicks)
          * On systems (Cray) where the question is ticks per millisecond, not
          * milliseconds per tick, we need to use floating point arithmetic.
          */
-        return (long) ((numTicks) * 1000.0 / msPerTick);
+        return ((numTicks) * 1000.0 / msPerTick);
     }
 }

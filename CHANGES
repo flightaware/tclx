@@ -846,3 +846,22 @@
    o Changed for_file, for_array_keys and for_recursive_glob to handle
      "return" in command correctly.
 -------------------------------------------------------------------------------
+25 Nov 94:
+   o Scanfile now handles returning submatches after missing optional matches.
+   o Improved performance of scanfile.
+   o Added the matchInfo(context) to scanfile.
+   o Added "scancontext copyfile" subcommand.
+-------------------------------------------------------------------------------
+ 5 Dec 94:
+  o Modified unknown command handler to produce a more readable errorInfo on
+    an unknown command or other error.
+-------------------------------------------------------------------------------
+ 27 Dec 94:
+  o Use clock_t instead of assuming long for real times.
+  o A main is no longer part of the library, its should be part of the
+    tclAppInit.c file.  This follows conventions for Tcl & Tk.
+    (*POTENTIAL INCOMPATIBILITY*)
+  o Port to Tcl 7.4/Tk 4.0 beta 1.
+===============================================================================
+ 28 Dec 94: Released TclX7.4a-beta1.
+===============================================================================

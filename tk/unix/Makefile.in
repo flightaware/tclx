@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.0 1994/07/16 05:30:54 markd Rel markd $
+# $Id: Makefile.in,v 4.1 1994/11/25 19:00:41 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -31,7 +31,7 @@ prefix      = /usr/local
 exec_prefix = /usr/local
 ARCH        = @TCL_ARCH@
 XINCLUDES   = @XINCLUDES@
-LIBS        = @LIBS@
+LIBS        = @LIBS@ @MATH_LIBS@
 XLIBSW      = @XLIBSW@
 
 #------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ LIBTCLX_A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
 # "random" in a BSD module.  This would conflict with the one in the Tcl
 # library if it was brought in.
 
-LDLIBS = ${LIBTKX_A} ${LIBTK_A} ${XLIBSW} ${LIBTCLX_A} ${LIBTCL_A} -lm ${LIBS}
+LDLIBS = ${LIBTKX_A} ${LIBTK_A} ${XLIBSW} ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \

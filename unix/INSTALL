@@ -2,14 +2,14 @@ EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 =======================================
 
 Building the Extended Tcl requires access to built Tcl and Tk source
-directories.  Their location relative to the tclX7.3b directory must be
-configured by editing tclX7.3b/Config.mk.  The default is to place tclX7.3b
+directories.  Their location relative to the tclX7.4a directory must be
+configured by editing tclX7.4a/Config.mk.  The default is to place tclX7.4a
 in a directory parallel to the Tcl and Tk distributions:
 
-                   tcl7.3      tk3.6      tclX7.3b
+                   tcl7.4      tk4.0      tclX7.4a
 
 
-The following directories are included under the tclX7.3b directory:
+The following directories are included under the tclX7.4a directory:
 
     o man - Unformatted manual pages for TclX.
 
@@ -66,8 +66,8 @@ by configure, "prefix" and "exec_prefix".  The variable "prefix" is the
 path that will contain the directories containing hardware and system
 independent files:
 
-   o ${prefix}/tclX/7.3b - TclX runtime files.
-   o ${prefix}/tkX/3.6b - TkX runtime files.
+   o ${prefix}/tclX/7.4a - TclX runtime files.
+   o ${prefix}/tkX/4.0a - TkX runtime files.
    o ${prefix}/include - Include files for TclX.
    o ${prefix}/man - Manual pages for TclX.
 
@@ -93,33 +93,33 @@ Master Directory Installation Model
 The master directory model installs *all* files required by TclX (including
 files from the Tcl and Tk distributions) in master directories.  
 
-   o ${prefix}/tclX/7.3b - TclX runtime files.
-   o ${prefix}/tclX/7.3b/include - Include files.
-   o ${prefix}/tclX/7.3b/man - Manual pages.
-   o ${prefix}/tclX/7.3b/bin - tcl program.
-   o ${prefix}/tclX/7.3b/lib - libtclx.a and libtcl.a
+   o ${prefix}/tclX/7.4a - TclX runtime files.
+   o ${prefix}/tclX/7.4a/include - Include files.
+   o ${prefix}/tclX/7.4a/man - Manual pages.
+   o ${prefix}/tclX/7.4a/bin - tcl program.
+   o ${prefix}/tclX/7.4a/lib - libtclx.a and libtcl.a
 
-   o ${prefix}/tkX/3.6b - TkX runtime files.
-   o ${prefix}/tkX/3.6b/include - Include files.
-   o ${prefix}/tkX/3.6b/man - Manual pages.
-   o ${prefix}/tkX/3.6b/bin - wishx and tclhelp programs.
-   o ${prefix}/tkX/3.6b/lib - libtkx.a and libtk.a
+   o ${prefix}/tkX/4.0a - TkX runtime files.
+   o ${prefix}/tkX/4.0a/include - Include files.
+   o ${prefix}/tkX/4.0a/man - Manual pages.
+   o ${prefix}/tkX/4.0a/bin - wishx and tclhelp programs.
+   o ${prefix}/tkX/4.0a/lib - libtkx.a and libtk.a
 
 Symbolic links are then built for executables from the standard locations
 to the files in the master directory.
 
-   /usr/local/bin/tcl   -> /usr/local/tclX/7.3b/bin/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/3.6b/bin/wishx
+   /usr/local/bin/tcl   -> /usr/local/tclX/7.4a/bin/tcl
+   /usr/local/bin/wishx -> /usr/local/tkX/4.0a/bin/wishx
 
 
 If the --with-arch=ARCH option was specified to configure (see below), the bin
 and lib files are stored in architecture-dependent directories with the
 specified architecture as a suffix to the directory name:
 
-   o ${prefix}/tclX/7.3b/bin.arch
-   o ${prefix}/tclX/7.3b/lib.arch
-   o ${prefix}/tkX/3.6b/bin.arch
-   o ${prefix}/tkX/3.6b/lib.arch
+   o ${prefix}/tclX/7.4a/bin.arch
+   o ${prefix}/tclX/7.4a/lib.arch
+   o ${prefix}/tkX/4.0a/bin.arch
+   o ${prefix}/tkX/4.0a/lib.arch
 
 You may defined "arch" to be any string you like; it might include OS type or
 version as well as processor architecture.
@@ -127,8 +127,8 @@ version as well as processor architecture.
 Symbolic links are still build from the standard locations of the machines
 of specified architecture to the master directory:
 
-   /usr/local/bin/tcl   -> /usr/local/tclX/7.3b/bin.sparc/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/3.6b/bin.sparc/wishx
+   /usr/local/bin/tcl   -> /usr/local/tclX/7.4a/bin.sparc/tcl
+   /usr/local/bin/wishx -> /usr/local/tkX/4.0a/bin.sparc/wishx
 
 Symbolic links are also built for the include and library files in a similar
 manner.  Due to the difficulty in getting it right, manual pages must be linked
@@ -137,11 +137,11 @@ by hand.
 HOW TO BUILD EXTENDED TCL
 =========================
 
-    o Configure and compile Tcl 7.3 following the instructions that come with
+    o Configure and compile Tcl 7.4 following the instructions that come with
       Tcl.  You do not need to install it.
 
     o If you are going to be using Tk and want to build an Extended Tcl wish
-      shell (wishx), configure and compile Tk 3.6.  You do not need to install
+      shell (wishx), configure and compile Tk 4.0.  You do not need to install
       it.
 
     o Enter ./configure to run the configure script.  The following options are
@@ -202,8 +202,8 @@ HOW TO BUILD EXTENDED TCL
       can't be run directly.  To run them before installation, use "runtcl" or
       "runwishx".
 
-    o Extended Tcl comes with help pages that are built from the Tcl 7.3 and
-      Tk 3.6 manual pages as well as the TclX manual page.  If you are building
+    o Extended Tcl comes with help pages that are built from the Tcl 7.4 and
+      Tk 4.0 manual pages as well as the TclX manual page.  If you are building
       TclX with a later version of Tcl or Tk, you might want to rebuild these
       manual pages.  If new manual pages have been added, you can add them
       by editing the files "tools/tclmanpages" and "tools/tkmanpages".
@@ -232,8 +232,8 @@ Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
     o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.3b directory.  The some of the UCB tests require a tcl shell with
-      added commands (tcltest in the tcl7.3 distribution).  Because the
+      tclX7.4a directory.  The some of the UCB tests require a tcl shell with
+      added commands (tcltest in the tcl7.4 distribution).  Because the
       Extended TCL shell (tcl) does not have these commands, the you will
       receive warnings about not having the following commands:
 
@@ -250,7 +250,7 @@ library.
         T2
 
     o To run the Tk tests with wishx, type "make tktest".  The tests require
-      a tcl shell with added commands (tcltest in the tcl7.3 distribution).
+      a tcl shell with added commands (tcltest in the tcl7.4 distribution).
       Because the Extended TCL shell (tcl) does not have these commands, the
       following tests will not run:
 
@@ -269,8 +269,8 @@ library.
 
     o If you're having trouble with the Berkeley tests, and you suspect that
       the extensions might be involved, you can build a special minimal
-      version of Berkeley Tcl by cd'ing to the tcl7.3 directory and doing
-      a "make test".  Similarly, you can do "make test" in the tk3.6 directory.
+      version of Berkeley Tcl by cd'ing to the tcl7.4 directory and doing
+      a "make test".  Similarly, you can do "make test" in the tk4.0 directory.
 
 INSTALLING EXTENDED TCL
 =======================
@@ -319,8 +319,8 @@ INTEGRATING PATCHES
 
 TclX copies and recomplies the following files:
 
-   ${TCL_UCB_SRC}/tcl7.3/tclCmdIL.c to src/tclCmdIL.c
-   ${TK_UCB_SRC/tk3.6/tkWindow.c to tksrc/tkWindow.c
+   ${TCL_UCB_SRC}/tcl7.4/tclCmdIL.c to src/tclCmdIL.c
+   ${TK_UCB_SRC/tk4.0/tkWindow.c to tksrc/tkWindow.c
 
 If you patch either of these files, you must compile TclX.  The make rules
 should take care of recompiling the correct files.  If you patch any of the
@@ -360,7 +360,7 @@ If you need more details on how to initialize TclX, see the TclXInit(3) manual
 page.
 
 TkPixmap:
-    o Build Tk with TkPixmap as directed.  You should have TkPixmap 3.6e or
+    o Build Tk with TkPixmap as directed.  You should have TkPixmap 4.0e or
       greater.
 
     o If TclX is already built, do a "rm -rf tkmaster".
@@ -397,7 +397,7 @@ General Porting Notes:
      tests/flock.bad to prevent them from being run.  If anyone can give
      any clues into what is going on, we would love to detect this.
 
-   o glob failures:  Don't add tcl7.3/compat/opendir.o to your libtcl.a unless
+   o glob failures:  Don't add tcl7.4/compat/opendir.o to your libtcl.a unless
      you really don't have opendir on your system.  This will cause the glob
      command and TclX package libraries to fail.
 

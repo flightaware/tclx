@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXprofile.c,v 4.0 1994/07/16 05:27:39 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,8 +27,8 @@
  */
 
 typedef struct profStackEntry_t {
-    long                     realTime;      /* Real time at procedure entry. */
-    long                     cpuTime;       /* CPU time at procedure entry.  */
+    clock_t                  realTime;      /* Real time at procedure entry. */
+    clock_t                  cpuTime;       /* CPU time at procedure entry.  */
     int                      procLevel;     /* Call level of this procedure  */
     int                      evalLevel;     /* Eval level of this prodecure  */
     struct profStackEntry_t *prevEntryPtr;  /* Previous stack entry.         */
@@ -41,8 +41,8 @@ typedef struct profStackEntry_t {
  */
 
 typedef struct saveStackEntry_t {
-    long                      realTime;      /* Real and CPU time this when  */
-    long                      cpuTime;       /* stack section was saved.     */
+    clock_t                   realTime;      /* Real and CPU time this when  */
+    clock_t                   cpuTime;       /* stack section was saved.     */
     profStackEntry_t         *topPtr;        /* Top of saved stack section   */
     profStackEntry_t         *bottomPtr;     /* Bottom of saved stack        */
     struct saveStackEntry_t  *prevEntryPtr;  /* Previous saved stack section */
@@ -53,9 +53,9 @@ typedef struct saveStackEntry_t {
  */
 
 typedef struct profDataEntry_t {
-    long count;
-    long realTime;
-    long cpuTime;
+    clock_t count;
+    clock_t realTime;
+    clock_t cpuTime;
 } profDataEntry_t;
 
 /*
@@ -68,10 +68,10 @@ typedef struct profInfo_t {
     Tcl_Interp       *interp;            /* Interpreter this is for.         */
     Tcl_Trace         traceHolder;       /* Handle to current trace.         */
     int               allCommands;       /* Prof all commands, not just procs*/
-    long              realTime;          /* Real and CPU time counter.       */
-    long              cpuTime;
-    long              lastRealTime;      /* Real and CPU time of last exit   */
-    long              lastCpuTime;       /* from profiling routines.         */
+    clock_t           realTime;          /* Real and CPU time counter.       */
+    clock_t           cpuTime;
+    clock_t           lastRealTime;      /* Real and CPU time of last exit   */
+    clock_t           lastCpuTime;       /* from profiling routines.         */
     profStackEntry_t *stackPtr;          /* Pointer to the top of prof stack */
     saveStackEntry_t *saveStackPtr;      /* Frames saved during an uplevel   */
     Tcl_HashTable     profDataTable;     /* Cumulative time table, Keyed by  */
@@ -82,8 +82,8 @@ typedef struct profInfo_t {
  * Prototypes of internal functions.
  */
 
-static long
-GetTimes _ANSI_ARGS_((long  *cpuTimesPtr));
+static clock_t
+GetTimes _ANSI_ARGS_((clock_t  *cpuTimesPtr));
 
 static void
 ProcEntry _ANSI_ARGS_((profInfo_t *infoPtr,
@@ -150,12 +150,12 @@ CleanUpProfMon _ANSI_ARGS_((ClientData  clientData,
  *   The current real time of the process, in milliseconds.
  *-----------------------------------------------------------------------------
  */
-static long
+static clock_t
 GetTimes (cpuTimePtr)
-    long  *cpuTimePtr;
+    clock_t  *cpuTimePtr;
 {
     struct tms cpuTimes;
-    long       realTime;
+    clock_t    realTime;
 
     realTime = Tcl_TicksToMS (times (&cpuTimes));
     *cpuTimePtr = Tcl_TicksToMS (cpuTimes.tms_utime + cpuTimes.tms_stime);
@@ -178,14 +178,14 @@ GetTimes (cpuTimePtr)
  * first time this function was called.
  *-----------------------------------------------------------------------------
  */
-static long
+static clock_t
 GetTimes (cpuTimePtr)
-    long  *cpuTimePtr;
+    clock_t  *cpuTimePtr;
 {
     static struct timeval startTime = {0, 0};
     struct timeval        currentTime;
     struct tms            cpuTimes;
-    long                  realTime;
+    clock_t               realTime;
 
     /*
      * If this is the first call, get base time.
@@ -337,8 +337,8 @@ StackSync (infoPtr, procLevel, evalLevel)
     int         procLevel;
     int         evalLevel;
 {
-    long              cpuDelta;
-    long              realDelta;
+    clock_t           cpuDelta;
+    clock_t           realDelta;
     profStackEntry_t *endPtr;
     profStackEntry_t *scanPtr;
     saveStackEntry_t *saveEntryPtr;
@@ -464,7 +464,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     profInfo_t  *infoPtr   = (profInfo_t *) clientData;
     int          procLevel = (iPtr->varFramePtr == NULL) ? 0 : 
                              iPtr->varFramePtr->level;
-    long         cpuTime;
+    clock_t      cpuTime;
 
     /*
      * Calculate the time spent since the last trace.

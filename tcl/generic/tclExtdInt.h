@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.2 1994/11/25 19:00:41 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.3 1994/11/29 04:35:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -282,8 +282,8 @@ extern void
 Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
                                int         fileNum));
 
-extern long
-Tcl_TicksToMS _ANSI_ARGS_((long numTicks));
+extern clock_t
+Tcl_TicksToMS _ANSI_ARGS_((clock_t numTicks));
 
 /*
  * Definitions required to initialize all extended commands.  These are either

@@ -103,6 +103,9 @@
 #undef gid_t
 #undef pid_t
 #undef mode_t
+
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef clock_t
 #undef time_t
 
 /* Define if the `getloadavg' function needs to be run setuid or setgid.  */
