@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 8.0.4.1 1997/04/14 02:02:51 markd Exp $
+ * $Id: tclXunixPort.h,v 8.1 1997/04/17 04:59:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,10 +27,6 @@
 #    include <values.h>
 #else
 #    include <limits.h>
-#endif
-
-#ifndef MAXDOUBLE
-#    define MAXDOUBLE HUGE_VAL
 #endif
 
 #include <sys/times.h>
@@ -90,6 +86,13 @@ extern int h_errno;
 
 #ifdef NO_BZERO
 #    define bzero(to,length) memset(to,'\0',length)
+#endif
+
+/*
+ * Math defines.
+ */
+#ifndef MAXDOUBLE
+#    define MAXDOUBLE HUGE_VAL
 #endif
 
 
