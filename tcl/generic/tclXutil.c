@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.11 1997/07/03 20:09:08 markd Exp $
+ * $Id: tclXutil.c,v 8.12 1997/07/04 09:24:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,6 +34,9 @@ ParseTranslationOption _ANSI_ARGS_((char *strValue));
 
 static char *
 FormatTranslationOption _ANSI_ARGS_((int value));
+
+static char *ERRORINFO = "errorInfo";
+static char *ERRORCODE = "errorCode";
 
 /*
  * Used to return argument messages by most commands.
@@ -1048,15 +1051,15 @@ TclX_SaveResultErrorInfo (interp)
     Tcl_Obj *saveObjv [3];
     Tcl_Obj *nameObjPtr;
 
-    saveObjv [0] = Tcl_GetObjResult (interp);
+    saveObjv [0] = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
     
-    nameObjPtr = Tcl_NewStringObj ("errorInfo", -1);
+    nameObjPtr = Tcl_NewStringObj (ERRORINFO, -1);
     saveObjv [1] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL, TCL_PARSE_PART1);
     if (saveObjv [1] == NULL) {
         saveObjv [1] = Tcl_NewObj ();
     }
 
-    nameObjPtr = Tcl_NewStringObj ("errorCode", -1);
+    nameObjPtr = Tcl_NewStringObj (ERRORCODE, -1);
     saveObjv [2] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL, TCL_PARSE_PART1);
     if (saveObjv [2] == NULL) {
         saveObjv [2] = Tcl_NewObj ();
@@ -1093,10 +1096,10 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
         panic ("invalid TclX result save object");
     }
 
-    nameObjPtr = Tcl_NewStringObj ("errorInfo", -1);
+    nameObjPtr = Tcl_NewStringObj (ERRORINFO, -1);
     Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [1], TCL_PARSE_PART1);
 
-    nameObjPtr = Tcl_NewStringObj ("errorCode", -1);
+    nameObjPtr = Tcl_NewStringObj (ERRORCODE, -1);
     Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [2], TCL_PARSE_PART1);
 
     Tcl_SetObjResult (interp, saveObjv [0]);
