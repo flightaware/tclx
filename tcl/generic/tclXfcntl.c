@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 5.3 1996/02/12 07:21:15 markd Exp $
+ * $Id: tclXfcntl.c,v 5.4 1996/02/12 18:15:40 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,6 +33,7 @@
 #define ATTR_CLOEXEC  1  /* Other attribute sets */
 #define ATTR_NOBUF    2
 #define ATTR_LINEBUF  4
+#define ATTR_NONBLOCK 8
 
 typedef struct {
     int  access;
@@ -126,16 +127,16 @@ XlateFcntlAttr (interp, attrName, attrPtr)
         attrPtr->access = ATTR_WRITE;
         return TCL_OK;
     }
-    if (STREQU (attrNameUp, "NONBLOCK")) {
-        attrPtr->fcntl = O_NONBLOCK;
-        return TCL_OK;
-    }
     if (STREQU (attrNameUp, "APPEND")) {
         attrPtr->fcntl = O_APPEND;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "CLOEXEC")) {
         attrPtr->other = ATTR_CLOEXEC;
+        return TCL_OK;
+    }
+    if (STREQU (attrNameUp, "NONBLOCK")) {
+        attrPtr->other = ATTR_NONBLOCK;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "NOBUF")) {
@@ -245,6 +246,11 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
     /*
      * Get attributes maintained by the channel.
      */
+    if (attrib.other == ATTR_NONBLOCK) {
+        interp->result =
+            (*Tcl_GetChannelOption (channel, "-blocking") == '0') ? "1" : "0";
+        return TCL_OK;
+    }
     if (attrib.other == ATTR_NOBUF) {
         interp->result = Tcl_GetChannelOption (channel, "-unbuffered");
         return TCL_OK;
@@ -304,6 +310,11 @@ SetAttrOnFile (interp, channel, fileNum, attrib, value)
         return TCL_OK;
     }
 
+    if (attrib.other == ATTR_NONBLOCK) {
+        return Tcl_SetChannelOption (interp, channel, "-blocking",
+                                     value ? "0" : "1");
+        return TCL_OK;
+    }
     if (attrib.other == ATTR_NOBUF) {
         return Tcl_SetChannelOption (interp, channel, "-unbuffered",
                                      value ? "1" : "0");
