@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 4.5 1995/07/02 05:12:44 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 4.6 1995/07/02 17:43:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -75,8 +75,9 @@ Tcl_GetTimeZone (currentTime)
 #endif
 
 /*
- * Must prefer timezone variable over gettimeofday, as gettimeofday is
- * broken on Solaris.
+ * Must prefer timezone variable over gettimeofday, as gettimeofday does not
+ * return timezone information on many systems that have moved this information
+ * outside of the kernel.
  */
 #if defined(HAVE_TIMEZONE_VAR) && !defined (TCL_GOT_TIMEZONE)
 #   define TCL_GOT_TIMEZONE
