@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 3.0 1993/11/19 07:01:33 markd Rel markd $
+ * $Id: tkXAppInit.c,v 3.1 1993/11/21 01:19:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 3.0 1993/11/19 07:01:33 markd Rel markd $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 3.1 1993/11/21 01:19:20 markd Exp markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"
@@ -55,7 +55,7 @@ static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppIn
 
 EXTERN int main _ANSI_ARGS_((int     argc,
                              char  **argv));
-int *tclDummyMainPtr = (int *) main;
+int (*tclXDummyMainPtr)() = (int (*)()) main;
 
 /*
  * The following variable is a special hack that insures the tcl
@@ -65,7 +65,7 @@ int *tclDummyMainPtr = (int *) main;
 
 #if defined(DOMAIN) && defined(SING)
 EXTERN int matherr _ANSI_ARGS_((struct exception *));
-int *tclDummyMathPtr = (int *) matherr;
+int (*tclDummyMathPtr)() = (int (*)()) matherr;
 #endif
 
 
