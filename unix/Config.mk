@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.25 1993/08/01 05:43:35 markd Exp markd $
+# $Id: Config.mk,v 2.26 1993/08/13 15:01:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -57,7 +57,7 @@ DO_STRIPPING=false
 #DO_STRIPPING=true
 
 #------------------------------------------------------------------------------
-# Definition of the compiler ar and yacc program you wish to use.
+# Definition of the compiler, ar and yacc program you wish to use.
 #
 
 #CC=cc
@@ -66,9 +66,9 @@ YACC=yacc
 #YACC=bison -b y
 
 #------------------------------------------------------------------------------
-# EXtra flags to specified:
-#   o XCFLAGS - Extra cc flags on all compiles and links
-#   o XLDFLAGS - Extra cc flags to specify at link time.
+# EXtra flags:
+#   o XCFLAGS - Extra compiler flags on all compiles and links
+#   o XLDFLAGS - Extra compiler flags to specify at link time.
 #   o XLDLIBS - Extra libraries to use at link time.
 
 XCFLAGS=
@@ -87,7 +87,7 @@ CCPLUS=CC
 # The master Tcl directory that the Extended Tcl runtime files are installed
 # into.  All files are installed in this directory, then symbolic links are
 # built from the outside. A directory whose name is the TclX version number
-# will be build in this directory.
+# will be built in this directory.
 #
 TCL_MASTERDIR=/usr/local/tclX
 
@@ -95,17 +95,17 @@ TCL_MASTERDIR=/usr/local/tclX
 # The master Tk directory that the Tk runtime files are installed into.
 # All files are installed in this directory, then symbolic links are
 # built from the outside. A directory whose name is the TkX version number
-# will be build in this directory.
+# will be built in this directory.
 
 TK_MASTERDIR=/usr/local/tkX
 
 #------------------------------------------------------------------------------
-# The directory to install Tcl binary into.
+# # The directory to install the tcl, wishx and tclhelp binaries into.
 
 TCL_BINDIR=/usr/local/bin
 
 #------------------------------------------------------------------------------
-# The directory tcl.a library goes into.
+# The directory to install the libtcl.a and libtclx.a libraries into.
 
 TCL_LIBDIR=/usr/local/lib
 
@@ -116,11 +116,10 @@ TCL_INCLUDEDIR=/usr/local/include
 
 #==============================================================================
 # These defines specify where and how the manual pages are to be installed.
-# They are actually defined in the system specific configuration file in the
-# config directory.  Install manual pages is somewhat problematic, so a global
-# option not to install manual pages is provided. Since there are so many
-# manual pages provided, they are placed together in one Tcl manual page
-# directory, rather than splitting into the standard manual pages directories.
+# Install manual pages is somewhat problematic, so a global option not to
+# install manual pages is provided. Since there are so many manual pages
+# provided, they are placed together in one Tcl manual page directory, rather
+# than splitting into the standard manual pages directories.
 # You might want to modify these values.
 #..............................................................................
 
@@ -130,7 +129,7 @@ TCL_INCLUDEDIR=/usr/local/include
 TCL_MAN_INSTALL=1
 
 #------------------------------------------------------------------------------
-# o TCL_MAN_BASEDIR - Base manual directory where all of the man.* and cat.*
+# o TCL_MAN_BASEDIR - Base manual directory where all of the man* and cat*
 #   directories live.
 
 TCL_MAN_BASEDIR=/usr/local/man
@@ -141,7 +140,7 @@ TCL_MAN_BASEDIR=/usr/local/man
 #
 # o TCL_MAN_FUNC_SECTION - Section for Tcl C level function manual pages.
 #   In some cases it might be desirable install all manual pages in one
-#   section, in this case, the value should be the same as TCL_MAN_CMD_SECTION.
+#   section. In this case, the value should be the same as TCL_MAN_CMD_SECTION.
 
 TCL_MAN_CMD_SECTION=TCL
 TCL_MAN_FUNC_SECTION=TCL
@@ -154,7 +153,7 @@ TCL_MAN_FUNC_SECTION=TCL
 #
 # o TK_MAN_FUNC_SECTION - Section for Tk C level function manual pages.
 #   In some cases it might be desirable install all manual pages in one
-#   section, in this case, the value should be the same as TK_MAN_CMD_SECTION.
+#   section. In this case, the value should be the same as TK_MAN_CMD_SECTION.
 
 TK_MAN_CMD_SECTION=TK
 TK_MAN_FUNC_SECTION=TK

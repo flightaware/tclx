@@ -1,16 +1,16 @@
 
                      *** README file for Extended Tcl ***
 
-BETA 2 RELEASE NOTES
+BETA 3 RELEASE NOTES
 ====================
 
-   This is the TclX7.0a Beta-2 release.  This release is tested and compatible
-with tcl7.0b2 and tk3.3b2.  Please forward questions/bugs/suggestions to 
+   This is the TclX7.0a Beta-3 release.  This release is tested and compatible
+with tcl7.0b2 and tk3.3b2.  Please forward questions/bugs/suggestions to
 tcl-project@NeoSoft.com.  This releases is not complete.  The following
 functionality is not complete:
 
    o installation - "make install" only partially works.  The master
-     directories are installed by symbolic links are only made to the bin
+     directories installed by symbolic links are only made to the bin
      files.  If you need links to include or man files, you must build them
      by hand.
 
@@ -50,7 +50,7 @@ on the commands and functionality provided by Extended Tcl, see the manual
 page man/TclX.man.
 
     o A shell, which provides an environment for developing and executing
-      Tcl programs.  
+      Tcl programs.
 
     o Advanced Tcl code library facility that is compatible with standard
       Tcl auto-loading.
@@ -61,14 +61,14 @@ page man/TclX.man.
     o Unix access commands provide access to many Unix system calls, including
       process management.
 
-    o File I/O commands provided added facilities for accessing and
+    o File I/O commands provide added facilities for accessing and
       manipulating open files.
 
     o File scanning facility that provides awk-like functionality.
 
-    o Extended list manipulation commands
+    o Extended list manipulation commands.
 
-    o Keyed lists, a type of list that provided functionality similar to C
+    o Keyed lists, a type of list that provides functionality similar to C
       structures.
 
     o Extended string and character manipulation commands.
@@ -95,7 +95,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and the
-extensions in the directory tclX7.0a/man.  Start with the TclX.man manual.
+extensions in the directory tclX7.0a*/man.  Start with the TclX.man manual.
 
 EXTENDED TCL VERSION NAMING
 ===========================
@@ -129,10 +129,10 @@ LINKING TCL APPLICATIONS
 ========================
 
    To build a TclX based application containing C code, start with either
-src/main.c (for just Tcl) or tksrc/tkMain.c (for Tk) and add your apllication
+src/main.c (for just Tcl) or tksrc/tkMain.c (for Tk) and add your application
 initialization.  There are comments in the code to guide you.  These need
-to be linked with libtclx.a and libtkx.a  These libraries are super-sets
-of the standard Tcl libraries and should be used in there place.
+to be linked with libtclx.a and libtkx.a.  These libraries are super-sets
+of the standard Tcl libraries and should be used in their place.
 
 SUPPORT FOR EXTENDED TCL
 ========================
@@ -158,11 +158,11 @@ CHANGES file for full details.  These are the major incompatible changes:
      been renamed "auto_load_file".  The "autoload" procedure no longer exists.
    o The variable programName was changed to argv0 for compatibility with
      Tcl.
-   o Removed oytdated execvp proc, use execl directly.
+   o Removed outdated execvp proc, use execl directly.
    o Removed "flush" option on "cmdtrace".  Output lines are now flushed after
      each command is traced.
    o Changed "signal trap" to edit the command, replacing %S with the signal
-     name rather than storing in the global variable. "signalReceived".  This
+     name rather than storing in the global variable "signalReceived".  This
      fixes bugs with signals received in a signal handler.
 
 

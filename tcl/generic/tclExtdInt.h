@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.18 1993/08/03 06:13:44 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.19 1993/08/05 06:41:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,10 +34,10 @@
 #    include <sys/time.h>
 #    include <time.h>
 #else
-#    ifdef HAVE_SYS_TIME_H
-#        include <sys/time.h>
-#    else
+#    ifdef NO_SYS_TIME_H
 #        include <time.h>
+#    else
+#        include <sys/time.h>
 #    endif
 #endif
 
@@ -58,12 +58,12 @@
 
 #define MS_PER_TICK ((1000 + CLK_TCK/2) / CLK_TCK)
 
-#ifdef HAVE_VALUES_H
-#    include <values.h>
-#else
+#ifdef NO_VALUES_H
 #    include <math.h>
 #    include <limits.h>
 #    define MAXDOUBLE HUGE_VAL
+#else
+#    include <values.h>
 #endif
 
 #include <grp.h>
@@ -112,6 +112,13 @@ struct tm *localtime ();
 
 #ifndef MININT
 #    define MININT (-MAXINT)-1
+#endif
+
+/*
+ * If no MAXLONG, assume sizeof (long) == sizeof (int).
+ */
+#ifndef MAXLONG
+#    define MAXLONG MAXINT  
 #endif
 
 #ifndef TRUE
