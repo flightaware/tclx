@@ -12,11 +12,19 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 4.1 1995/01/01 19:49:26 markd Exp markd $
+ * $Id: tclXid.c,v 4.2 1995/03/29 08:23:58 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+#ifndef NGROUPS
+#   ifdef NGROUPS_MAX
+#       define NGROUPS NGROUPS_MAX
+#   else
+#       define NGROUPS 32
+#   endif
+#endif
 
 /*
  * Prototypes of internal functions.
