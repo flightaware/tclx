@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 8.6 1999/06/26 00:25:53 surles Exp $
+ * $Id: tkXAppInit.c,v 8.7 1999/08/25 01:18:45 wart Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -41,8 +41,8 @@ WinMain(hInstance, hPrevInstance, lpszCmdLine, nCmdShow)
     LPSTR lpszCmdLine;
     int nCmdShow;
 {
-    char **argv;
-    int argc;
+    char **argv = NULL;		/* Initialize the arg to avoid warnings. */
+    int argc = 0;		/* Initialize the arg to avoid warnings. */
 
     /*
      * Set up the default locale to be standard "C" locale so parsing
@@ -129,6 +129,7 @@ Tcl_AppInit (Tcl_Interp *interp)
 
   errorExit:
     TkX_Panic ("%s\n", interp->result);
+    return TCL_ERROR;
 }
 
 
