@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.5 1995/04/30 06:13:55 markd Exp markd $
+# $Id: Makefile.in,v 4.6 1995/06/30 18:02:52 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -50,7 +50,7 @@ TKTCL        = ${TMPMASTER}/tk.tcl
 TKTLIB       = ${TMPMASTER}/tk.tlib
 TKTNDX       = ${TMPMASTER}/tk.tndx
 PROLOGPS     = ${TMPMASTER}/prolog.ps
-TMPDEMOS     = ${TMPMASTER}/demos
+DEMOS        = ${TMPMASTER}/demos
 TMPHELP      = ${TMPMASTER}/help
 
 #------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ TMPHELP      = ${TMPMASTER}/help
 #
 
 all: made.tmp ${TKTCL} ${TKTLIB} ${TKTNDX} ${PROLOGPS} tclhelp ${TMPHELP} \
-     ${TMPDEMOS}
+     ${DEMOS}
 
 # Can't use 'test -d X || mkdir X', it don't work on Ultrix
 made.tmp:
@@ -104,16 +104,21 @@ ${TMPHELP}:
 	    (cd ${HELPSRC}; tar -cf -) | (cd ${TMPHELP}; tar -xf -) ;\
 	fi
 
-${TMPDEMOS}:
+#------------------------------------------------------------------------------
+# Build demos directory for wishx
+
+DEMOPROGS = browse hello ixset rmt rolodex square tcolor timer widget
+
+${DEMOS}:
 	if [ ! -d ${TMPMASTER} ] ; then mkdir ${TMPMASTER} ; else exit 0; fi
-	if [ "@HAVE_SYML@" = "YES" ] ; then \
-	    rm -rf ${TMPDEMOS}  ;\
-	    ln -s ${DEMOSSRC} ${TMPDEMOS} ;\
-	else \
-	    rm -rf ${TMPDEMOS} ;\
-	    mkdir ${TMPDEMOS} ;\
-	    (cd ${DEMOSSRC}; tar -cf -) | (cd ${TMPDEMOS}; tar -xf -) ;\
-	fi
+	if [ ! -d ${DEMOS} ] ; then mkdir ${DEMOS} ; else exit 0; fi
+	${INSTCOPY} ${DEMOSSRC} ${DEMOS}
+	@for i in $(DEMOPROGS); \
+	    do \
+	    rm -f ${DEMOS}/$$i; \
+	    sed -e "s/^exec wish/exec wishx"/ ${DEMOSSRC}/$$i >${DEMOS}/$$i; \
+	    chmod 755 ${DEMOS}/$$i; \
+	done;
 
 #------------------------------------------------------------------------------
 # Build help for Tk.
@@ -129,7 +134,7 @@ install:
 	${INSTCOPY} ${TKTCL} ${TKTLIB} ${TKTNDX} ${INST_MASTER}
 	${INSTCOPY} ${TK_UCB_SRC}/library/prolog.ps  ${INST_MASTER}
 	${INSTCOPY} ${HELPSRC} ${INST_MASTER}/help
-	${INSTCOPY} ${DEMOSSRC} ${INST_MASTER}/demos
+	${INSTCOPY} ${DEMOS} ${INST_MASTER}/demos
 
 install-exec:
 	${INSTCOPY} tclhelp ${TCL_BINDIR}
