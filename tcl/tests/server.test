@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.7 1995/04/02 20:18:44 markd Exp markd $
+# $Id: server.test,v 1.8 1995/04/15 19:49:30 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -341,7 +341,7 @@ Test server-8.2 {Tcl server} {
     set data
 } 0 {{Got "Are you still there?"} {Got "Are you really still there?"}}
 
-Test server-8.2 {Tcl server} {
+Test server-8.3 {Tcl server} {
     set fh [server_connect -nobuf localhost $serverPort]
     puts $fh "EXIT"
     lrange [wait $serverPID] 1 2
