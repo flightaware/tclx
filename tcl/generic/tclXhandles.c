@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 2.3 1993/04/07 03:24:08 markd Exp markd $
+ * $Id: tclXhandles.c,v 2.4 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -68,20 +68,20 @@ typedef entryHeader_t *entryHeader_pt;
 /*
  * Prototypes of internal functions.
  */
-void
+static void
 LinkInNewEntries _ANSI_ARGS_((tblHeader_pt tblHdrPtr,
                               int          newIdx,
                               int          numEntries));
 
-void
+static void
 ExpandTable _ANSI_ARGS_((tblHeader_pt tblHdrPtr,
                          int          neededIdx));
 
-entryHeader_pt
+static entryHeader_pt
 AllocEntry _ANSI_ARGS_((tblHeader_pt  tblHdrPtr,
                         int          *entryIdxPtr));
 
-int
+static int
 HandleDecode _ANSI_ARGS_((Tcl_Interp   *interp,
                           tblHeader_pt  tblHdrPtr,
                           CONST char   *handle));

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXkeylist.c,v 2.3 1993/05/02 15:37:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,7 +33,7 @@ typedef struct fieldInfo_t {
 /*
  * Prototypes of internal functions.
  */
-int
+static int
 CompareKeyListField _ANSI_ARGS_((Tcl_Interp   *interp,
                                  CONST char   *fieldName,
                                  CONST char   *field,
@@ -41,7 +41,7 @@ CompareKeyListField _ANSI_ARGS_((Tcl_Interp   *interp,
                                  int          *valueSizePtr,
                                  int          *bracedPtr));
 
-int
+static int
 SplitAndFindField _ANSI_ARGS_((Tcl_Interp  *interp,
                                CONST char  *fieldName,
                                CONST char  *keyedList,

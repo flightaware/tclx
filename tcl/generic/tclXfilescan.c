@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.5 1993/07/13 03:04:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -57,32 +57,32 @@ typedef scanGlob_t *scanGlob_pt;
 /*
  * Prototypes of internal functions.
  */
-int
+static int
 CleanUpContext _ANSI_ARGS_((scanGlob_pt    scanGlobPtr,
                             scanContext_pt contextPtr));
 
-int
+static int
 CreateScanContext _ANSI_ARGS_((Tcl_Interp  *interp,
                                scanGlob_pt  scanGlobPtr));
 
-int
+static int
 SelectScanContext _ANSI_ARGS_((Tcl_Interp  *interp,
                                scanGlob_pt  scanGlobPtr,
                                char        *contextHandle));
 
-int
+static int
 Tcl_Delete_scancontextCmd _ANSI_ARGS_((Tcl_Interp  *interp,
                                        scanGlob_pt  scanGlobPtr,
                                        char        *contextHandle));
 
-int
+static int
 SetMatchVar _ANSI_ARGS_((Tcl_Interp *interp,
                          char       *fileLine,
                          long        fileOffset,
                          long        scanLineNum,
                          char       *fileHandle));
 
-void
+static void
 FileScanCleanUp _ANSI_ARGS_((ClientData  clientData,
                              Tcl_Interp *interp));
 

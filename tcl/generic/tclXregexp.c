@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXregexp.c,v 2.3 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,11 +43,11 @@ extern char *tclRegexpError;
  * Prototypes of internal functions.
  */
 
-char *
+static char *
 BoyerMooreCompile _ANSI_ARGS_((char *pat,
                                   int patlen));
 
-char *
+static char *
 BoyerMooreExecute _ANSI_ARGS_((char     *text,
                                unsigned  textlen,
                                char     *compPtr,

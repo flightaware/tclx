@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXdebug.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,24 +37,24 @@ typedef struct traceInfo_t {
 /*
  * Prototypes of internal functions.
  */
-void
+static void
 PrintStr _ANSI_ARGS_((FILE *filePtr,
                       char *string,
                       int   numChars));
 
-void
+static void
 PrintArg _ANSI_ARGS_((FILE *filePtr,
                       char *argStr,
                       int   noTruncate));
 
-void
+static void
 TraceCode  _ANSI_ARGS_((traceInfo_pt traceInfoPtr,
                         int          level,
                         char        *command,
                         int          argc,
                         char       **argv));
 
-void
+static void
 CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              Tcl_Interp   *interp,
                              int           level,
@@ -64,7 +64,7 @@ CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              int           argc,
                              char        **argv));
 
-void
+static void
 DebugCleanUp _ANSI_ARGS_((ClientData  clientData,
                           Tcl_Interp *interp));
 

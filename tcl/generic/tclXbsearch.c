@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 2.3 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXbsearch.c,v 2.4 1993/07/13 03:04:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -36,18 +36,18 @@ typedef struct binSearchCB_t {
 /*
  * Prototypes of internal functions.
  */
-int
+static int
 StandardKeyCompare _ANSI_ARGS_((char *key,
                                 char *line));
 
-int
+static int
 TclProcKeyCompare _ANSI_ARGS_((binSearchCB_t *searchCBPtr));
 
-int
+static int
 ReadAndCompare _ANSI_ARGS_((long           fileOffset,
                             binSearchCB_t *searchCBPtr));
 
-int
+static int
 BinSearch _ANSI_ARGS_((binSearchCB_t *searchCBPtr));
 
 /*

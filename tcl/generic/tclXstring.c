@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.2 1993/04/07 03:24:08 markd Exp markd $
+ * $Id: tclXstring.c,v 2.3 1993/07/12 06:28:33 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,7 +21,7 @@
 /*
  * Prototypes of internal functions.
  */
-unsigned int
+static unsigned int
 ExpandString _ANSI_ARGS_((unsigned char *s,
                           unsigned char  buf[]));
 

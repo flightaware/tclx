@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 2.3 1993/04/07 05:55:07 markd Exp markd $
+ * $Id: tclXdup.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,15 +21,15 @@
 /*
  * Prototypes of internal functions.
  */
-int
+static int
 ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
                                char       *handle));
 
-FILE *
+static FILE *
 DoNormalDup _ANSI_ARGS_((Tcl_Interp *interp,
                          OpenFile   *oldFilePtr));
 
-FILE *
+static FILE *
 DoSpecialDup _ANSI_ARGS_((Tcl_Interp *interp,
                           OpenFile   *oldFilePtr,
                           char       *newFileId));
@@ -71,7 +71,6 @@ ConvertFileHandle (interp, handle)
                           (char *) NULL);
     return fileId;
 }
-
 
 /*
  *-----------------------------------------------------------------------------
@@ -138,8 +137,8 @@ DoSpecialDup (interp, oldFilePtr, targetFileId)
     char  *mode;
 
     /*
-     * Determine if the target file is currently open.  Also get the file number
-     * for the file.  Also flush the file.
+     * Determine if the target file is currently open.  Also get the file
+     * number for the file.  Also flush the file.
      */
     if (Tcl_GetOpenFile (interp, targetFileId, 
                          FALSE, FALSE,  /* No checking */
@@ -158,7 +157,7 @@ DoSpecialDup (interp, oldFilePtr, targetFileId)
 
     /*
      * If this is not one of the standard files, close it.  This will do all
-     * Tcl cleanup incase its a pipeline, etc.
+     * Tcl cleanup in case its a pipeline, etc.
      */
     if (targetFileNum > 2) {
         char *argv [2];
@@ -171,8 +170,8 @@ DoSpecialDup (interp, oldFilePtr, targetFileId)
     }
 
     /*
-     * Duplicate the old file to the specified file id.  This functionallity may
-     * be obtained with dup2 on most systems.
+     * Duplicate the old file to the specified file id.  This functionallity
+     * could be obtained with dup2 on most systems.
      */
     close (targetFileNum);
     if (fcntl (fileno (oldFilePtr->f), F_DUPFD, targetFileNum) < 0)
