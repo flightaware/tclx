@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 3.0 1993/11/19 07:01:31 markd Rel markd $
+ * $Id: tkXinit.c,v 3.1 1994/02/07 02:47:51 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,9 +44,9 @@ int *tclxDummyMainWindowPtr = (int *) Tk_MainWindow;
  */
 int
 TkX_Init (interp)
-    Tcl_Interp          *interp;
+    Tcl_Interp  *interp;
 {
-    char        *value;
+    char  *value;
 
     tclAppName     = "Wishx";
     tclAppLongname = "Extended Tk Shell - Wishx";
