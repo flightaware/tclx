@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.14 2000/06/14 07:48:25 markd Exp $
+ * $Id: tkXshell.c,v 8.15 2000/07/11 04:42:05 welch Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -31,7 +31,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkXshell.c,v 8.14 2000/06/14 07:48:25 markd Exp $
+ * RCS: @(#) $Id: tkXshell.c,v 8.15 2000/07/11 04:42:05 welch Exp $
  */
 
 /*
@@ -404,10 +404,10 @@ Tk_MainEx(argc, argv, appInitProc, interp)
      */
 
     Tk_MainLoop();
-    Tcl_DeleteInterp(interp);
 #ifdef TKX_SHELL
     TclX_ShellExit(interp, 0);
 #else
+    Tcl_DeleteInterp(interp);
     Tcl_Exit(0);
 #endif
 
