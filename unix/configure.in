@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.0 1996/11/21 00:25:48 markd Exp $
+dnl $Id: configure.in,v 8.1 1997/01/11 04:46:21 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.0 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.1 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -215,6 +215,7 @@ AC_SUBST(TCL_VERSION)
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
 AC_SUBST(TCL_EXEC_PREFIX)
+TCL_SHLIB_CFLAGS=`echo "$TCL_SHLIB_CFLAGS" |sed -e "s|-fPIC|-fpic|" -e "s|-PIC|-pic|" -e "s|-K PIC|-K pic|" -e "s|-KPIC|-Kpic|" -e "s|+Z|+z|"`
 AC_SUBST(TCL_SHLIB_CFLAGS)
 AC_SUBST(TCL_SHLIB_LD)
 AC_SUBST(TCL_SHLIB_LD_LIBS)
@@ -421,7 +422,7 @@ AC_SUBST(TCLX_CC_SEARCH_FLAGS)
 
 if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
     LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib:$TCLX_INST_LIB:$TKX_INST_LIB"
-    X11_LIB_DIR=`echo ${TK_XLIBSW} |sed -e "s|-L||" -e "s/ .*$//g" -e "s/-l.*$//g"`
+    X11_LIB_DIR=`echo ${TK_XLIBSW} |sed -e "s|-L||" -e "s/ .*$//g" -e "s/-l.*$//g" -e "s|/libX11.*$||" -e "s|/libXhp11.*$||"`
     if test "x${X11_LIB_DIR}" != "x"; then
 	LIB_RUNTIME_DIR="${LIB_RUNTIME_DIR}:${X11_LIB_DIR}"
     fi
