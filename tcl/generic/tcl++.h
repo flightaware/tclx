@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.0 1992/10/16 04:51:25 markd Rel markd $
+ * $Id: tcl++.h,v 2.1 1992/12/11 04:51:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -212,11 +212,11 @@ public:
     }
 
     inline const char *
-    GetVar2 (const char *name1, 
-             const char *name2,
+    GetVar2 (const char *part1, 
+             const char *part2,
              int         flags = 0)
     { 
-        return Tcl_GetVar2 (interp, (char *) name1, (char *) name2, flags); 
+        return Tcl_GetVar2 (interp, (char *) part1, (char *) part2, flags); 
     }
 
     inline void
@@ -268,12 +268,12 @@ public:
     }
 
     inline const char *
-    SetVar2 (const char *name1, 
-             const char *name2, 
+    SetVar2 (const char *part1, 
+             const char *part2, 
              const char *newValue, 
              int         global)
     {
-         return Tcl_SetVar2 (interp, (char *) name1, (char *) name2, 
+         return Tcl_SetVar2 (interp, (char *) part1, (char *) part2, 
                              (char *) newValue, global);
     }
 
@@ -299,13 +299,13 @@ public:
     }
 
     inline int
-    TraceVar2 (const char       *name1, 
-               const char       *name2,
+    TraceVar2 (const char       *part1, 
+               const char       *part2,
                int               flags, 
                Tcl_VarTraceProc *proc, 
                ClientData        clientData)
     {
-         return Tcl_TraceVar2 (interp, (char *) name1, (char *) name2, flags,
+         return Tcl_TraceVar2 (interp, (char *) part1, (char *) part2, flags,
                                proc, clientData); 
     }
 
@@ -323,10 +323,10 @@ public:
 
     inline void
     UnsetVar2 (Tcl_Interp *interp,
-               const char *name1, 
-               const char *name2, 
+               const char *part1, 
+               const char *part2, 
                int         global)
-        { Tcl_UnsetVar2 (interp, (char *) name1, (char *) name2, global); }
+        { Tcl_UnsetVar2 (interp, (char *) part1, (char *) part2, global); }
 
     inline void
     UntraceVar (const char       *varName, 
@@ -340,13 +340,13 @@ public:
 
     inline void
     UntraceVar2 (Tcl_Interp       *interp,
-                 const char       *name1,
-                 const char       *name2,
+                 const char       *part1,
+                 const char       *part2,
                  int               flags, 
                  Tcl_VarTraceProc *proc, 
                  ClientData        clientData)
     { 
-        Tcl_UntraceVar2 (interp, (char *) name1, (char *) name2, flags, proc,
+        Tcl_UntraceVar2 (interp, (char *) part1, (char *) part2, flags, proc,
                          clientData);
     }
 
@@ -365,13 +365,13 @@ public:
     }
 
     inline ClientData
-    VarTraceInfo2 (const char       *name1, 
-                   const char       *name2, 
+    VarTraceInfo2 (const char       *part1, 
+                   const char       *part2, 
                    int               flags,
                    Tcl_VarTraceProc *procPtr,
                    ClientData        prevClientData)
     { 
-        return Tcl_VarTraceInfo2 (interp, (char *) name1, (char *) name2, 
+        return Tcl_VarTraceInfo2 (interp, (char *) part1, (char *) part2, 
                                   flags, procPtr, prevClientData);
     }
 
