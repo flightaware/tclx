@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.10 1995/03/23 07:40:06 markd Exp markd $
+# $Id: Makefile.in,v 4.11 1995/03/28 18:10:33 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -103,19 +103,19 @@ tclCmdIL.c: ${TCL_UCB_SRC}/tclCmdIL.c
 	echo '#include "tclXconf.h"'     > tclCmdIL.c
 	cat ${TCL_UCB_SRC}/tclCmdIL.c   >> tclCmdIL.c
 
-tclXlibInit.o: tclXlibInit.c
+tclXlibInit.o: ${srcdir}/tclXlibInit.c
 	MASTER=${TCL_MASTERDIR}/`../tools/tclxversion` ;\
 	${CC} -c ${CC_FLAGS} -DTCLX_LIBRARY=\"$$MASTER\" \
 	    ${srcdir}/tclXlibInit.c
 
-tclXcmdInit.o: tclXcmdInit.c tclXpatchl.h
+tclXcmdInit.o: ${srcdir}/tclXcmdInit.c ${srcdir}/tclXpatchl.h
 
-tclXgetdate.c: tclXgetdate.y
+tclXgetdate.c: ${srcdir}/tclXgetdate.y
 	${YACC} $(srcdir)/tclXgetdate.y
 	sed 's/yy/TclXyy/g' <y.tab.c >tclXgetdate.c
 	rm y.tab.c
 
-tcl++.o: tcl++.C tcl++.h
+tcl++.o: ${srcdir}/tcl++.C ${srcdir}/tcl++.h
 	${CXX} -c ${CXX_FLAGS} ${srcdir}/tcl++.C
 	${AR} cr ${LIBTCLX_A} tcl++.o
 	${RANLIB} ${LIBTCLX_A}
@@ -125,15 +125,15 @@ tcl++.o: tcl++.C tcl++.h
 # Copy include files, etc to the master directory.
 #
 
-${TCLEXTEND_H}: tclExtend.h
+${TCLEXTEND_H}: ${srcdir}/tclExtend.h
 	rm -f ${TCLEXTEND_H}
 	cp ${srcdir}/tclExtend.h ${TCLEXTEND_H}
 
-${TCLPP_H}: tcl++.h
+${TCLPP_H}: ${srcdir}/tcl++.h
 	rm -f ${TCLPP_H}
 	cp ${srcdir}/tcl++.h ${TCLPP_H}
 
-${APPINIT}: tclXAppInit.c
+${APPINIT}: ${srcdir}/tclXAppInit.c
 	rm -f ${APPINIT}
 	cp ${srcdir}/tclXAppInit.c ${APPINIT}
 
@@ -152,10 +152,10 @@ tcl++: tclXAppInit++.o tcl++.o made.tmp
 	${CXX} ${CXX_FLAGS} ${XLDFLAGS} tclXAppInit++.o \
            ${LDLIBS} ${XLDLIBS} -o tcl++
 
-tclXAppInit++.o: tcl++.h tclXAppInit++.C
+tclXAppInit++.o: ${srcdir}/tcl++.h tclXAppInit++.C
 	${CXX} -c ${CXX_FLAGS} tclXAppInit++.C
 
-tclXAppInit++.C: tclXAppInit.c
+tclXAppInit++.C: ${srcdir}/tclXAppInit.c
 	rm -f tclXAppInit++.C
 	cp ${srcdir}/tclXAppInit.c tclXAppInit++.C
 
