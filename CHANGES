@@ -1252,5 +1252,8 @@
   o Fixed bug that caused intersect3 to return bogus results if a list item
     was duplicated in the second list.
 -------------------------------------------------------------------------------
+22 Dec 96:
+  o Fixed unlink compat function failing to unlink a symbolic link.
+-------------------------------------------------------------------------------
 
  

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 7.3 1996/11/04 17:08:11 markd Exp $
+# $Id: compat.tcl,v 8.0 1996/11/21 00:24:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -226,14 +226,15 @@ proc unlink args {
         set saveErrorCode $errorCode
     }
     foreach file [lindex $args 0] {
-        if {[file exists $file] &&[cequal [file type $file] directory]} {
+        if {[file exists $file] && [cequal [file type $file] directory]} {
             if !$nocomplain {
                 error "$file: not owner" {} {POSIX EPERM {not owner}}
             }
         } elseif $nocomplain {
             catch {file delete $file}
         } else {
-            if ![file exists $file] {
+            if {!([file exists $file] || \
+                    ([catch {file readlink $file}] == 0))} {
                 error "can't remove \"$file\": no such file or directory" {} \
                         {POSIX ENOENT {no such file or directory}}
             }
