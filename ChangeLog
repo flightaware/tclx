@@ -1,3 +1,8 @@
+2004-11-23  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* configure.in, configure: add check for NO_UNION_WAIT for
+	Solaris, HP and related systems
+
 2004-11-22  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* library/tclx.tcl: Reintroduce the addition of the 'help' command

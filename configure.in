@@ -3,7 +3,7 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.7 2004/11/23 00:13:39 hobbs Exp $
+# RCS: @(#) $Id: configure.in,v 1.8 2004/11/23 05:54:14 hobbs Exp $
 
 AC_PREREQ(2.13)
 
@@ -125,6 +125,26 @@ if test "${TEA_PLATFORM}" = "unix" ; then
     #-------------------------------------------------------------------------
 
     TEA_TIME_HANDLER
+
+    #--------------------------------------------------------------------
+    #	The check below checks whether <sys/wait.h> defines the type
+    #	"union wait" correctly.  It's needed because of weirdness in
+    #	HP-UX where "union wait" is defined in both the BSD and SYS-V
+    #	environments.  Checking the usability of WIFEXITED seems to do
+    #	the trick.
+    #--------------------------------------------------------------------
+
+    AC_MSG_CHECKING([union wait])
+    AC_CACHE_VAL(tcl_cv_union_wait,
+	AC_TRY_LINK([#include <sys/types.h> 
+#include <sys/wait.h>], [
+union wait x;
+WIFEXITED(x);	/* Generates compiler error if WIFEXITED uses an int. */
+			 ], tcl_cv_union_wait=yes, tcl_cv_union_wait=no))
+    AC_MSG_RESULT($tcl_cv_union_wait)
+    if test $tcl_cv_union_wait = no; then
+	AC_DEFINE(NO_UNION_WAIT)
+    fi
 
     #-------------------------------------------------------------------------
     # Test to see if "times" returns a status or the amount of elapsed real
