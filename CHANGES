@@ -1098,3 +1098,12 @@
   o Cleaned up the runtime initialization.  Renamed TclInit.tcl to be tclx.tcl
     and created tkx.tcl.
 -------------------------------------------------------------------------------
+10 Mar 96:
+  o Removed socket functionallity that duplicated Tcl's. Deprecated the
+    server_connect, server_create, server_accept and  server_cntl commands.
+    Renamed server_info to be host_info and moved the server_cntl
+    functionallity info the fcntl command.   Compatbility with these commands
+    is still supported for old scripts.
+  o Since sockets are now required to build base Tcl, they are no longer
+    optional with TclX.
+-------------------------------------------------------------------------------

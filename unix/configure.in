@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.20 1996/03/10 01:14:21 markd Exp $
+dnl $Id: configure.in,v 5.21 1996/03/10 04:43:07 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.20 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.21 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -469,11 +469,9 @@ AC_CHECK_FUNC(waitpid, , AC_DEFINE(NO_WAITPID))
 AC_CHECK_FUNC(sysconf, , AC_DEFINE(NO_SYSCONF))
 
 #------------------------------------------------------------------------------
-# Test for socket related functions.  Note that "socket" is just used to
-# determine if we have sockets at all.
+# Test for socket related functions.
 #------------------------------------------------------------------------------
 
-AC_CHECK_FUNC(socket, , AC_DEFINE(NO_SOCKET))
 AC_CHECK_FUNC(inet_aton, , AC_DEFINE(NO_INET_ATON))
 AC_CHECK_FUNC(gethostname, , AC_DEFINE(NO_GETHOSTNAME))
 

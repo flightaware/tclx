@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 5.6 1996/02/24 23:08:57 markd Exp $
+ * $Id: tclXfcntl.c,v 5.7 1996/03/10 04:42:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,18 +22,19 @@
  * Attributes sets used by fcntl command.  Also a structure to return parsed
  * attribute information in.
  */
-#define ATTR_NONE     0  /* No attributes in this class */
+#define ATTR_NONE             0  /* No attributes in this class */
 
-#define ATTR_RDONLY   1  /* Access checks desired.      */
-#define ATTR_WRONLY   2
-#define ATTR_RDWR     3
-#define ATTR_READ     4
-#define ATTR_WRITE    5
+#define ATTR_RDONLY           1  /* Access checks desired.      */
+#define ATTR_WRONLY           2
+#define ATTR_RDWR             3
+#define ATTR_READ             4
+#define ATTR_WRITE            5
 
-#define ATTR_CLOEXEC  1  /* Other attribute sets */
-#define ATTR_NOBUF    2
-#define ATTR_LINEBUF  4
-#define ATTR_NONBLOCK 8
+#define ATTR_CLOEXEC          1  /* Other attributes */
+#define ATTR_NOBUF            2
+#define ATTR_LINEBUF          3
+#define ATTR_NONBLOCK         4
+#define ATTR_KEEPALIVE        5
 
 typedef struct {
     int  access;
@@ -139,6 +140,10 @@ XlateFcntlAttr (interp, attrName, attrPtr)
         attrPtr->other = ATTR_NONBLOCK;
         return TCL_OK;
     }
+    if (STREQU (attrNameUp, "KEEPALIVE")) {
+        attrPtr->other = ATTR_KEEPALIVE;
+        return TCL_OK;
+    }
     if (STREQU (attrNameUp, "NOBUF")) {
         attrPtr->other = ATTR_NOBUF;
         return TCL_OK;
@@ -154,7 +159,8 @@ XlateFcntlAttr (interp, attrName, attrPtr)
   invalidAttrName:
     Tcl_AppendResult (interp, "unknown attribute name \"", attrName,
                       "\", expected one of APPEND, CLOEXEC, LINEBUF, ",
-                      "NONBLOCK, NOBUF, READ, RDONLY, RDWR, WRITE, WRONLY",
+                      "NONBLOCK, NOBUF, READ, RDONLY, RDWR, WRITE, WRONLY, ",
+                      "or KEEPALIVE", 
                       (char *) NULL);
     return TCL_ERROR;
 }
@@ -278,6 +284,12 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
         goto okExit;
     }
 
+    if (attrib.other == ATTR_KEEPALIVE) {
+        if (TclXGetKeepAlive (interp, channel, &value) != TCL_OK)
+            goto errorExit;
+        interp->result = value ? "1" : "0";
+    }
+
   okExit:
     Tcl_DStringFree (&optValue);
     return TCL_OK;
@@ -350,6 +362,10 @@ SetAttrOnFile (interp, channel, fileNum, attrib, value)
     if (attrib.other == ATTR_LINEBUF) {
         return Tcl_SetChannelOption (interp, channel, "-buffering",
                                      value ? "line" : "full");
+    }
+
+    if (attrib.other == ATTR_KEEPALIVE) {
+        return TclXSetKeepAlive (interp, channel, value);
     }
 
   unixError:

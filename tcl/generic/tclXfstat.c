@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 5.2 1996/02/12 07:21:18 markd Exp $
+ * $Id: tclXfstat.c,v 5.3 1996/02/12 18:15:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -20,11 +20,6 @@
 /*
  * Prototypes of internal functions.
  */
-static int
-GetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
-                         int         fileNum,
-                         int         which));
-
 static char *
 GetFileType _ANSI_ARGS_((struct stat  *statBufPtr));
 
@@ -45,90 +40,6 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
                             struct stat  *statBufPtr,
                             char         *itemName));
 
-/*
- * Defines for GetHostInfo
- */
-#define GETHOSTINFO_LOCAL 0
-#define GETHOSTINFO_REMOTE 1
-
-#ifndef NO_SYS_SOCKET_H
-
-/*-----------------------------------------------------------------------------
- * GetHostInfo --
- *     Return a host address, name (if it can be obtained) and port number.
- *     
- * Parameters:
- *   o interp (O) - List is returned in the result.
- *   o fileNum (I) - File number.  Should be a socket connection.
- *   o which (I) -  GETHOSTINFO_LOCAL or GETHOSTINFO_REMOTE indicating if
- *     local or remote information should be returned.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-static int
-GetHostInfo (interp, fileNum, which)
-    Tcl_Interp *interp;
-    int         fileNum;
-    int         which;
-{
-    int                 nameLen;
-    struct sockaddr_in  sockaddr;
-    struct hostent     *hostEntry;
-    char               *hostName;
-    char                portText [32];
-
-    nameLen = sizeof (sockaddr);
-
-    if (which == GETHOSTINFO_REMOTE) {
-        if (getpeername (fileNum, (struct sockaddr *) &sockaddr,
-                         &nameLen) < 0)
-            goto unixError;
-    } else {
-        if (getsockname (fileNum, (struct sockaddr *) &sockaddr,
-                         &nameLen) < 0)
-            goto unixError;
-    }
-
-    hostEntry = gethostbyaddr ((char *) &(sockaddr.sin_addr),
-                               sizeof (sockaddr.sin_addr),
-                               AF_INET);
-    if (hostEntry != NULL)
-        hostName = hostEntry->h_name;
-    else
-        hostName = "";
-
-    Tcl_AppendElement (interp, inet_ntoa (sockaddr.sin_addr));
-
-    Tcl_AppendElement (interp, hostName);
-
-    sprintf (portText, "%u", ntohs (sockaddr.sin_port));
-    Tcl_AppendElement (interp, portText);
-       
-    return TCL_OK;
-
-  unixError:
-    Tcl_ResetResult (interp);
-    interp->result = Tcl_PosixError (interp);
-    return TCL_ERROR;
-}
-#else
-
-/*-----------------------------------------------------------------------------
- * GetHostInfo --
- *     Version of this functions that always returns an error on systems that
- * don't have sockets.
- *-----------------------------------------------------------------------------
- */
-static int
-GetHostInfo (interp, fileNum)
-    Tcl_Interp *interp;
-    int         fileNum;
-{
-    interp->result = "sockets are not available on this system";
-    return TCL_ERROR;
-}
-#endif /* NO_SYS_SOCKET_H */
 
 /*-----------------------------------------------------------------------------
  * GetFileType --
@@ -339,10 +250,10 @@ ReturnStatItem (interp, fileNum, statBufPtr, itemName)
     else if (STREQU (itemName, "tty"))
         interp->result = isatty (fileNum) ? "1" : "0";
     else if (STREQU (itemName, "remotehost")) {
-        if (GetHostInfo (interp, fileNum, GETHOSTINFO_REMOTE) != TCL_OK)
+        if (TclXGetHostInfo (interp, fileNum, TRUE) != TCL_OK)
             return TCL_ERROR;
     } else if (STREQU (itemName, "localhost")) {
-        if (GetHostInfo (interp, fileNum, GETHOSTINFO_LOCAL) != TCL_OK)
+        if (TclXGetHostInfo (interp, fileNum, FALSE) != TCL_OK)
             return TCL_ERROR;
     } else {
         Tcl_AppendResult (interp, "Got \"", itemName, "\", expected one of ",

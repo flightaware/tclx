@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 5.2 1996/02/12 18:16:44 markd Exp $
+# $Id: compat.tcl,v 5.3 1996/02/18 22:10:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -36,7 +36,8 @@ proc assign_fields {list args} {
 # Added TclX 7.4a
 proc cexpand str {subst -nocommands -novariables $str}
 
-#@package: TclX-ServerCompat assign_fields cexpand server_open server_send
+#@package: TclX-ServerCompat assign_fields cexpand server_open server_connect \
+           server_send server_info server_cntl
 
 # Added TclX 7.4a
 
@@ -53,14 +54,51 @@ proc server_open args {
         }
         lappend cmd $opt
     }
-    set handles [uplevel [concat $cmd $args]]
+    set handle [uplevel [concat $cmd $args]]
     if $buffered {
-        lappend handles [dup $handles]
+        lappend handle [dup $handle]
     }
-    return $handles
+    return $handle
 }
 
 # Added TclX 7.5a
+
+proc server_connect args {
+    set cmd socket
+
+    set buffered 1
+    set twoids 0
+    while {[string match -* [lindex $args 0]]} {
+        switch -- [set opt [lvarpop args]] {
+            -buf {
+                set buffered 1
+            }
+            -nobuf {
+                set buffered 0
+            }
+            -myip {
+                lappend cmd -myaddr [lvarpop args]
+            }
+            -myport {
+                lappend cmd -myport [lvarpop args]
+            }
+            -twoids {
+                set twoids 1
+            }
+            default {
+                error "unknown option \"$opt\""
+            }
+        }
+    }
+    set handle [uplevel [concat $cmd $args]]
+    if !$buffered {
+        fconfigure $handle -buffering none 
+    }
+    if $twoids {
+        lappend handle [dup $handle]
+    }
+    return $handle
+}
 
 proc server_send args {
     set cmd puts
@@ -78,6 +116,14 @@ proc server_send args {
     }
     uplevel [concat $cmd $args]
     flush [lindex $args 0]
+}
+
+proc server_info args {
+    eval [concat host_info $args]
+}
+
+proc server_cntl args {
+    eval [concat fcntl $args]
 }
 
 #@package: TclX-ClockCompat fmtclock convertclock getclock

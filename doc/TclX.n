@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.6 1996/02/18 22:10:15 markd Exp $
+.\" $Id: TclX.n,v 5.7 1996/03/04 23:11:42 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -45,7 +45,7 @@ o Unix Access Commands
 .TP
 o File Commands
 .TP
-o TCP/IP Server Access
+o Network Programming Support
 .TP
 o File Scanning Commands
 .TP
@@ -168,11 +168,6 @@ catalogs, always returning the default string.
 Return \fB1\fR if Posix signals are available (\fBblock\fR and \fBunblock\fR
 options available for the signal command).  \fB0\fR is returned if Posix
 signals are not available.
-.TP
-.B have_sockets
-Return \fB1\fR if sockets are available (\fBserver_*\fR suite
-and \fBfstat\fR \fBlocalhost\fR and \fBremotehost\fR options).
-\fB0\fR is returned if sockets are not available.
 .TP
 .B have_truncate
 Return \fB1\fR if the \fBtruncate\fR system call is available.
@@ -1133,6 +1128,14 @@ for the file.
 be flushed when a newline is written, when the buffer is full,
 or when input is requested.
 .sp
+\fBKEEPALIVE\fR - Keep a socket connection alive.
+If SIGPIPE is enabled, then it
+is sent if connection is broken and data is written to the socket.
+Note that SIGPIPE is set to be ignored by the Tcl library to
+support pipes to processes in the \fBexec\fR and \fBopen\fR commands.
+If SIGPIPE is ignored, an error is returned on the write.  This attribute
+is valid only on sockets.
+.sp
 The \fBAPPEND\fR, \fBNONBLOCK\fR, and \fBCLOEXEC\fR attributes may be set or
 cleared by specifying the attribute name and a value \fB1\fR to set the
 attribute and \fB0\fR to clear it.
@@ -1446,136 +1449,25 @@ This procedure writes the specified strings to the named file.
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
 '
-.SH "TCP/IP SERVER ACCESS"
+.SH "NETWORK PROGRAMMING SUPPORT"
 .PP
-Commands are provided to access TCP/IP-based servers, and to create
-them.  It is easy to build servers using Extended Tcl that run under
-\fBinetd\fR, or even servers that run standalone and accept and manage
-multiple simultaneous connections.
-The socket file handles maybe be read using the either the
-\fBgets\fR or \fBread\fR command and written using \fBputs\fR command.
-.PP
-The \fBfstat remotehost\fR and 
-\fBfstat localhost\fR requests are useful both for clients and servers.
-To obtain the host name of the system the script is running on, use
-\fBid host\fR.
-.PP
-If a TclX script is setup to run under \fBinetd\fR, it is launched with its
-stdin, stdout and stderr associated with the client socket.  The standard
-Tcl file ids \fBstdin\fR, \fBstdout\fR and \fBstderr\fR maybe then be used
-to communicate with the client.
+TclX provides functionality to complement the Tcl \fBsocket\fR command.
+The \fBhost_info\fR command is used to get information about a host by
+name or IP address.  In addition, the \fBfstat\fR and \fBfcntl\fR commands
+provide options of querying and controling connected sockets.
+To obtain the host name of the system the local system, use the
+\fBid host\fR command.
 '
-'\"@help: tcl/sockets/server_connect
-'\"@brief: Connect to a TCP/IP based server.
+'\"@help: tcl/sockets/host_info
+'\"@brief: Obtain information about an internet host.
 .TP
-.B server_connect ?\fIoptions\fR? \fIhost service\fR
+.B host_info \fBaddresses\fR \fIhost\fR
 .br
-Open a TCP/IP connection to a server of \fIhost\fR on the port specified by
-\fIservice\fR.  The server is then accessed using the standard Tcl
-file I/O commands.
-\fIHost\fR may be a host name or an IP address.  \fIPort\fR
-may be a port number of a service name.
-.sp
-If a destination host name is supplied and more that one address is valid 
-for the host, the host's addresses will be tried in the order returned
-until one can be connected to, or the list is exhausted.  You may also
-use the \fBserver_info\fR command to obtain the list of valid address.
-.sp
-The options are:
+.B host_info \fBofficial_name\fR \fIhost\fR
 .br
-.IP
-o\ \fB-buf\fR - Specifies that the file is buffered.  When writing to the file,
-the \fBflush\fR command must be used to force data in the buffer to
-be sent to the server.  Buffered access will result in 
-significantly better performance when reading data, and will also improve
-the performance of a series of writes done without intervening reads.
-.IP
-o\ \fB-nobuf\fR - The file is unbuffered. A single file id,
-open for both reading and writing, is returned.
-.IP
-o\ \fB-myip\fR \fIipNumber\fR - Define the IP
-number for your side of the connection.  This is useful for multi-homed 
-hosts (hosts with more than one IP address).  Note that only IP addresses 
-corresponding to network interfaces on your machine may be used.  
-If \fB-myip\fR is not specified, the operating system will assign the 
-IP number for you.
-.IP
-o\ \fB-myport\fR \fIportNumber\fR|\fBresvered\fR - Define the
-port number for your side of the connection.  If the port number is
-already in use, an error will be returned.  If the port number is in
-the privileged range, the Tcl program will have to be running as superuser,
-or an error will be returned.  If the string \fBresvered\fR is specified,
-a available reserved port number will be allocated.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/sockets/server_create
-'\"@brief: Create a TCP/IP server socket that can accept multiple connections.
-.TP
-.B server_create ?\fIoptions\fR?
+.B host_info \fBaliases\fR \fIhost\fR
 .br
-Creates a TCP/IP server socket on the local machine.  A
-file handle is returned upon successful creation.  When a connection
-request is made to the server, the file handle becomes read-ready.
-Connections can be accepted using \fBserver_accept\fR.
-.sp
-The file handle can be detected as read-ready using \fBselect\fR,
-by using \fBfcntl\fR to make the handle nonblocking and then calling
-\fBserver_accept\fR, or by using the \fBTk fileevent\fR command.
-.sp
-Options are:
-.IP
-o\ \fB-myip\fR \fIipNumber\fR - Define the IP
-number for your side of the connection.  This is useful for multi-homed 
-hosts (hosts with more than one IP address).  Note that only IP addresses 
-corresponding to network interfaces on your machine may be used.  
-If \fB-myip\fR is not specified, the operating system will assign the 
-IP number for you.
-.IP
-o\ \fB-myport\fR \fIportNumber\fR|\fBresvered\fR - Define the
-port number for your side of the connection.  If the port number is
-already in use, an error will be returned.  If the port number is in
-the privileged range, the Tcl program will have to be running as superuser,
-or an error will be returned.  If the string \fBresvered\fR is specified,
-a available reserved port number will be allocated.
-.IP
-o\ \fB-backlog\fR \fIcount\fR - Maximum length the queue of pending
-connections may grow to.  If a connection request arrives with the queue full,
-the client may receive an error with an indication of \fIECONNREFUSED\fR, or,
-if the underlying protocol supports retransmission, the request may be ignored
-so that retries may succeed.  Note that on at least some BSD-based systems the
-backlog is silently limited to 5, regardless of the value specified.  The
-default is 5.
-.sp
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/sockets/server_accept
-'\"@brief: Accept a client connection to a TCP/IP server socket.
-.TP
-.B server_accept ?\fIoptions\fR? \fIfileid\fR
-.br
-Accept a TCP/IP connection to the server socket associated with
-\fIfileid\fR.
-Options are \fB-buf\fR abd \fB-nobuf\fR.
-See the \fBserver_connect\fR command for a description of these options.
-A file handle is return.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/sockets/server_info
-'\"@brief: Obtain information about a TCP/IP server.
-.TP
-.B server_info \fBaddresses\fR \fIhost\fR
-.br
-.B server_info \fBofficial_name\fR \fIhost\fR
-.br
-.B server_info \fBaliases\fR \fIhost\fR
-.br
-Optain information about a TCP/IP server. The argument \fBhost\fR can be either
+Optain information about a internet host. The argument \fBhost\fR can be either
 a host name or an IP address.
 .sp
 The following subcommands are recognized:
@@ -1587,27 +1479,6 @@ o\ \fBofficial_name\fR - Return official name for \fIhost\fR.
 o\ \fBaliases\fR - Return the list of aliases for \fIhost\fR.
 (Note that these are IP number aliases, not DNS \fICNAME\fR
 aliases. See \fIifconfig(2)\fR.)
-'\"@endhelp
-'
-'\"@help: tcl/sockets/server_cntl
-'\"@brief: Set options on to a TCP/IP socket.
-.TP
-.B server_cntl \fIfileid\fR \fIattribute\fR \fI[value]\fR
-.br
-Set or get the value of a socket attribute.
-.sp
-Attributes are:
-.IP
-o\ \fBKEEPALIVE\fR - Keep connection alive.  If SIGPIPE is enabled, then it
-is sent if connection is broken and data is written to the socket.
-Note that SIGPIPE is set to be ignored by the Tcl library to
-support pipes to processes in the \fBexec\fR and \fBopen\fR commands.
-If SIGPIPE is ignored, an error is returned on the write.
-.sp
-If \fIvalue\fR is specifice, the options is set to that value.  Otherwise,
-the value is returned.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
 .SH "FILE SCANNING COMMANDS"

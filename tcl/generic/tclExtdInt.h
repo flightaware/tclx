@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.8 1996/02/20 09:10:00 markd Exp $
+ * $Id: tclExtdInt.h,v 5.9 1996/03/04 23:11:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -586,6 +586,21 @@ Tcl_RmdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  * from tclXserver.c
  */
 extern void
-Tcl_ServerInit _ANSI_ARGS_((Tcl_Interp*));
+Tcl_ServerInit _ANSI_ARGS_((Tcl_Interp *interp));
+
+extern int
+TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
+                             int         fileNum,
+                             int         remoteHost));
+
+extern int
+TclXGetKeepAlive _ANSI_ARGS_((Tcl_Interp  *interp,
+                              Tcl_Channel  channel,
+                              int         *valuePtr));
+
+extern int
+TclXSetKeepAlive _ANSI_ARGS_((Tcl_Interp  *interp,
+                              Tcl_Channel  channel,
+                              int          value));
 
 #endif

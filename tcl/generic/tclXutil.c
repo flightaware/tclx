@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.6 1996/02/24 23:09:04 markd Exp $
+ * $Id: tclXutil.c,v 5.7 1996/03/10 04:42:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -696,7 +696,8 @@ TclX_GetOpenFnum (interp, handle, accessMode)
  * Parameters:
  *   o interp (I) - Current interpreter.
  *   o handle (I) - The file handle to convert.
- *   o direction (I) - TCL_READABLE or TCL_WRITABLE.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
  * Returns:
  *   The file number or -1 if a file number is not associated with this access
  * direction.
@@ -709,10 +710,15 @@ TclX_ChannelFnum (channel, direction)
 {
     Tcl_File file;
 
-    file = Tcl_GetChannelFile (channel, direction);
-    if (file == NULL)
-        return -1;
-
+    if (direction == 0) {
+        file = Tcl_GetChannelFile (channel, TCL_READABLE);
+        if (file == NULL)
+            file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+    } else {
+        file = Tcl_GetChannelFile (channel, direction);
+        if (file == NULL)
+            return -1;
+    }
     return (int) Tcl_GetFileInfo (file, NULL);
 }
 

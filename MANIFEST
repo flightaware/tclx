@@ -183,11 +183,7 @@
 ./tcl/help/tcl/processes/system
 ./tcl/help/tcl/processes/wait
 ./tcl/help/tcl/signals/signal
-./tcl/help/tcl/sockets/server_accept
-./tcl/help/tcl/sockets/server_cntl
-./tcl/help/tcl/sockets/server_connect
-./tcl/help/tcl/sockets/server_create
-./tcl/help/tcl/sockets/server_info
+./tcl/help/tcl/sockets/host_info
 ./tcl/help/tcl/sockets/socket
 ./tcl/help/tcl/status/cd
 ./tcl/help/tcl/status/dirs
