@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 4.1 1995/01/01 19:49:18 markd Exp markd $
+ * $Id: tclXclock.c,v 4.2 1995/04/25 03:11:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,6 +76,18 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     char            *savedTZEnv;
 #endif
 
+#ifdef HAVE_TZSET
+    /*
+     * Some systems forgot to call tzset in localtime, make sure its done.
+     */
+    static int  calledTzset = FALSE;
+
+    if (!calledTzset) {
+        tzset ();
+        calledTzset = TRUE;
+    }
+#endif
+
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " clockval ?format? ?GMT|{}?", (char *) NULL);
@@ -102,7 +114,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     /*
      * This is a horrible kludge for systems not having the timezone in
      * struct tm.  No matter what was specified, they use the global time
-     * zone.
+     * zone.  (Thanks Solaris).
      */
     if (useGMT) {
         char *varValue;

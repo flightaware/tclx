@@ -222,6 +222,9 @@
 /* Define if you have the strcoll function.  */
 #undef HAVE_STRCOLL
 
+/* Define if you have the tzset function.  */
+#undef HAVE_TZSET
+
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
 

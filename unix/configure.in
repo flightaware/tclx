@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.21 1995/04/24 06:38:31 markd Exp markd $
+dnl $Id: configure.in,v 4.22 1995/04/25 03:04:32 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.21 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.22 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -153,8 +153,6 @@ AC_TRY_COMPILE([#include <time.h>], [struct tm tm; tm.tm_gmtoff;],
         [AC_DEFINE(HAVE_TM_GMTOFF)
          AC_MSG_RESULT(yes)],
         AC_MSG_RESULT(no))
-
-AC_HAVE_FUNCS(gettimeofday)
 
 #
 # Its important to include time.h in this check, as some systems (like convex)
@@ -604,7 +602,7 @@ AC_CHECK_LIB(dnet_stub, main, [LIBS="$LIBS -ldnet_stub"])
 #------------------------------------------------------------------------------
 
 AC_HAVE_FUNCS(getcwd select setitimer setvbuf sigaction setpgid getgroups)
-AC_HAVE_FUNCS(bzero bcopy fsync getpriority strcoll)
+AC_HAVE_FUNCS(bzero bcopy fsync getpriority strcoll tzset gettimeofday)
 
 #------------------------------------------------------------------------------
 # Test for socket related functions.  Note that "socket" is just used to
