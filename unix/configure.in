@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.14 1997/08/17 04:08:48 markd Exp $
+dnl $Id: configure.in,v 8.15 1997/08/30 22:30:18 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.14 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.15 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -481,35 +481,48 @@ for i in $dirs ; do
 done
 AC_SUBST(SHARED_LIBS)
 
-#--------------------------------------------------------------------
-# Check if libtcl.a contains a definition of Tcl_InitStandAlone()
-#--------------------------------------------------------------------
-AC_MSG_CHECKING([standalone support of Tcl])
+#------------------------------------------------------------------------------
+# Check for Plus patch being installed. Does libtcl.a contains a definition of
+# Tcl_InitStandAlone() and does Tk contain Tk_InitStandAlone.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING([standalone support of Tcl (Plus patch)])
 if test -f "${TCL_BUILD}/unix/${TCL_STLIB_NAME}"; then
     x=`nm -p "${TCL_BUILD}/unix/${TCL_STLIB_NAME}" |grep 'Tcl_InitStandAlone'`
     if test "x$x" != "x"; then
-        # Variables already set
+        # Build variables already set
 	AC_MSG_RESULT([yes])
-        AC_DEFINE(HAVE_STANDALONE)
+        AC_DEFINE(HAVE_TCL_STANDALONE)
     else
 	AC_MSG_RESULT([no])
-	STANDALONE_FLAGS=""
 	TCLX_BUILD_STANDALONE=""
-	TKX_BUILD_STANDALONE=""
 	TCLX_BUILD_DUMMY_STANDALONE=""
+    fi
+else
+    AC_MSG_RESULT([no])
+    TCLX_BUILD_STANDALONE=""
+    TCLX_BUILD_DUMMY_STANDALONE=""
+fi
+AC_SUBST(TCLX_BUILD_STANDALONE)
+AC_SUBST(TCLX_BUILD_DUMMY_STANDALONE)
+
+AC_MSG_CHECKING([standalone support of Tk (Plus patch)])
+if test "${TKX_BUILD}" = "YES" -a -f "${TK_BUILD}/unix/${TCL_STLIB_NAME}"; then
+    x=`nm -p "${TK_BUILD}/unix/${TK_STLIB_NAME}" |grep 'Tk_InitStandAlone'`
+    if test "x$x" != "x"; then
+        # Build variables already set
+	AC_MSG_RESULT([yes])
+        AC_DEFINE(HAVE_TK_STANDALONE)
+    else
+	AC_MSG_RESULT([no])
+	TKX_BUILD_STANDALONE=""
 	TKX_BUILD_DUMMY_STANDALONE=""
     fi
 else
     AC_MSG_RESULT([no])
-    STANDALONE_FLAGS=""
-    TCLX_BUILD_STANDALONE=""
     TKX_BUILD_STANDALONE=""
-    TCLX_BUILD_DUMMY_STANDALONE=""
     TKX_BUILD_DUMMY_STANDALONE=""
 fi
-AC_SUBST(TCLX_BUILD_STANDALONE)
 AC_SUBST(TKX_BUILD_STANDALONE)
-AC_SUBST(TCLX_BUILD_DUMMY_STANDALONE)
 AC_SUBST(TKX_BUILD_DUMMY_STANDALONE)
 
 #------------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.8 1997/08/17 08:44:44 markd Exp $
+ * $Id: tclXinit.c,v 8.9 1997/08/30 22:29:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,7 +48,7 @@ static char tclx_findinit [] =
     }\n\
     lappend dirs $defaultLib\n\
     set libDir {}\n\
-#ifdef HAVE_STANDALONE
+#ifdef HAVE_TCL_STANDALONE
     if ![catch {uplevel #0 source -rsrc ${w}x}] {\n\
 	uplevel #0 source -rsrc ${w}x:tclIndex
 	return\n\
