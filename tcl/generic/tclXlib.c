@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXlib.c,v 1.1 1992/09/20 23:19:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -1158,7 +1158,7 @@ LoadDirIndexes (interp, dirName)
              * accessed.
              */
             if (CheckTCLENVFileIdEntry (interp, filePath) ||
-                (eaccess (filePath, R_OK) < 0))
+                (access (filePath, R_OK) < 0))
                 continue;
 
             if (entryPtr->d_name [nameLen - 5] == '.') {
@@ -1225,7 +1225,7 @@ Loadpackageindexes (interp, path)
             if (dirName == NULL)
                 continue;
         }
-        if (eaccess (dirName, X_OK) == 0)
+        if (access (dirName, X_OK) == 0)
             status = LoadDirIndexes (interp, dirName);
         else
             status = TCL_OK;
