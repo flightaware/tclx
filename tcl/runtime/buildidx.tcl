@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 7.0 1996/06/16 05:31:12 markd Exp $
+# $Id: buildidx.tcl,v 7.1 1996/07/26 05:56:11 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -23,18 +23,18 @@
 #
 #   o name - The name of the package.
 #   o offset - The byte offset of the package in the file.
+#   o length - Number of bytes in the current package (EOLN counts as one byte,
+#     even if <cr><lf> is used.  This makes it possible to do a single read.
 #   o procs - The list of entry point procedures defined for the package.
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # Write a line to the index file describing the package.
 #
-proc TCLSH:PutIdxEntry {outfp pkgInfo nextOffset} {
-    set len [expr {$nextOffset - [keylget pkgInfo offset] - 1}]
-    set len [expr $nextOffset - [keylget pkgInfo offset]]
+proc TCLSH:PutIdxEntry {outfp pkgInfo} {
     puts $outfp [concat [keylget pkgInfo name] \
                         [keylget pkgInfo offset] \
-                        $len \
+                        [keylget pkgInfo length] \
                         [keylget pkgInfo procs]]
 }
 
@@ -45,15 +45,18 @@ proc TCLSH:PutIdxEntry {outfp pkgInfo nextOffset} {
 proc TCLSH:ParsePkgHeader matchInfoVar {
     upvar $matchInfoVar matchInfo
 
+    set length [expr [clength $matchInfo(line)] + 1]
     set line [string trimright $matchInfo(line)]
     while {[string match {*\\} $line]} {
         set line [csubstr $line 0 [expr [clength $line]-1]]
-        append line " " [string trimright [gets $matchInfo(handle)]]
+        set nextLine [gets $matchInfo(handle)]
+        append line " " [string trimright $nextLine]
+        incr length [expr [clength $nextLine] + 1]
     }
-
-    keylset pkgInfo name   [lindex $line 1]
+    keylset pkgInfo name [lindex $line 1]
     keylset pkgInfo offset $matchInfo(offset)
-    keylset pkgInfo procs  [lrange $line 2 end]
+    keylset pkgInfo procs [lrange $line 2 end]
+    keylset pkgInfo length $length
     return $pkgInfo
 }
 
@@ -79,7 +82,7 @@ proc TCLSH:CreateLibIndex {libName} {
             error "invalid package header \"$matchInfo(line)\""
         }
         if ![lempty $pkgInfo] {
-            TCLSH:PutIdxEntry $idxFH $pkgInfo $matchInfo(offset)
+            TCLSH:PutIdxEntry $idxFH $pkgInfo
         }
         set pkgInfo [TCLSH:ParsePkgHeader matchInfo]
         incr packageCnt
@@ -89,8 +92,18 @@ proc TCLSH:CreateLibIndex {libName} {
         if [lempty $pkgInfo] {
             error "#@packend without #@package in $libName"
         }
-        TCLSH:PutIdxEntry $idxFH $pkgInfo $matchInfo(offset)
+        keylset pkgInfo length \
+                [expr [keylget pkgInfo length]+[clength $matchInfo(line)]+1]
+        TCLSH:PutIdxEntry $idxFH $pkgInfo
         set pkgInfo {}
+    }
+
+
+    scanmatch $contectHdl {
+        if ![lempty $pkgInfo] {
+            keylset pkgInfo length \
+                   [expr [keylget pkgInfo length]+[clength $matchInfo(line)]+1]
+        }
     }
 
     set pkgInfo {}
@@ -107,7 +120,7 @@ proc TCLSH:CreateLibIndex {libName} {
        error $msg $errorInfo $errorCode
     }
     if ![lempty $pkgInfo] {
-        TCLSH:PutIdxEntry $idxFH $pkgInfo [tell $libFH] 
+        TCLSH:PutIdxEntry $idxFH $pkgInfo
     }
     close $libFH
     close $idxFH

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.2 1996/07/22 17:10:05 markd Exp $
+ * $Id: tclXlib.c,v 7.3 1996/07/26 05:55:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -199,21 +199,6 @@ static void
 TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
                            Tcl_Interp *interp));
 
-/*
- * FIX: (actually report to John).
- *   TclX auto package indexes consist of a byte offset and length of the
- * package.  On Windoz, with <cr><lf> pairs, this causes grief.  If translation
- * is enabled, the byte count that is passed to Tcl_Read is a value after
- * translation, so this gets us off by one.  Fine, so we don't do translation
- * and just read in the the <cr><lf> pairs and eval it.  However, this
- * breaks backslash continunation of comments, because the don't absorbe the
- * <cr>.  Backslash continunation works in other places.  This is believed
- * to be a bug in Tcl.  The short term solution is to read a line at a time
- * with Tcl_Gets, and count the bytes we know are actually in the file,
- * based on the translation.
- */
-#define TCL_COMMENT_CONT_BUF
-
 
 /*-----------------------------------------------------------------------------
  * EvalFilePart --
@@ -240,9 +225,6 @@ EvalFilePart (interp, fileName, offset, length)
     Tcl_DString pathBuf, cmdBuf;
     char *oldScriptFile, *buf;
     Tcl_Channel channel = NULL;
-#ifdef TCL_COMMENT_CONT_BUF
-    int byteCnt, got;
-#endif
     Tcl_ResetResult (interp);
     Tcl_DStringInit (&pathBuf);
     Tcl_DStringInit (&cmdBuf);
@@ -278,28 +260,6 @@ EvalFilePart (interp, fileName, offset, length)
     if (Tcl_Seek (channel, offset, SEEK_SET) < 0)
         goto posixError;
 
-#ifdef TCL_COMMENT_CONT_BUF
-    for (byteCnt = 0; byteCnt < length;) {
-        got = Tcl_Gets (channel, &cmdBuf);
-        if (got < 0) {
-            if (Tcl_Eof (channel))
-                goto prematureEof;
-            else
-                goto posixError;
-        }
-        byteCnt += (got + 1);  /* include <nl *.
-        
-        /*
-         * If the last character is a <cr> strip it out.  Seperate lines
-         * with <nl>.
-         */
-        if (cmdBuf.string [cmdBuf.length-1] == '\r') {
-            cmdBuf.string [cmdBuf.length-1] = '\n';
-        } else {
-            Tcl_DStringAppend (&cmdBuf, "\n", -1);
-        }
-    }
-#else
     Tcl_DStringSetLength (&cmdBuf, length + 1);
     if (Tcl_Read (channel, cmdBuf.string, length) != length) {
         if (Tcl_Eof (channel))
@@ -308,7 +268,6 @@ EvalFilePart (interp, fileName, offset, length)
             goto posixError;
     }
     cmdBuf.string [length] = '\0';
-#endif
 
     if (Tcl_Close (NULL, channel) != 0)
         goto posixError;
