@@ -2,13 +2,14 @@
 # Modified version of the standard Tcl auto_load_index proc that calls a TclX
 # command load TclX .tndx library indices. 
 #
+# $Id: $
+# from Tcl: init.tcl,v 1.22 1998/11/12 05:54:02 welch Exp 
+#
 
 # init.tcl --
 #
 # Default system startup file for Tcl-based applications.  Defines
 # "unknown" procedure and auto-load facilities.
-#
-# RCS: @(#) $Id: init.tcl,v 1.22 1998/11/12 05:54:02 welch Exp $
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.
