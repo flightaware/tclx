@@ -30,9 +30,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 4.0 1994/07/16 05:28:59 markd Rel markd $
+# $Id: bldmanhelp.tcl,v 4.1 1995/01/01 19:49:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
+
+#
+# Flag indicating if errors occured.
+#
+set gotErrors 0
 
 #-----------------------------------------------------------------------------
 # Process the name section.  This is used to generate a @brief: entry.
@@ -61,6 +66,8 @@ proc CopyManPage {manPage outFH} {
         open $manPage
     } fh]
     if {$stat != 0} {
+        global gotErrors
+        set gotErrors 1
         puts stderr "can't open \"$manPage\" $fh"
         return
     }
@@ -123,7 +130,8 @@ proc GenInputFile {docDir manInfoTbl tmpFile} {
 # file for the buildhelp command.
 
 if {[llength $argv] != 4} {
-    error "wrong # args: bldmanhelp docdir maninfo helpdir brief"
+    puts stderr "wrong # args: bldmanhelp docdir maninfo helpdir brief"
+    exit 1
 }
 
 set tmpFile "bldmanhelp.tmp"
@@ -139,3 +147,9 @@ GenInputFile $docDir $manInfoTbl $tmpFile
 buildhelp $helpDir $brief [list $tmpFile]
 
 unlink $tmpFile
+
+if $gotErrors {
+    puts stderr "Errors occured processing manual files"
+    exit 1
+}
+exit 0
