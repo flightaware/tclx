@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 3.1 1994/02/07 02:47:51 markd Exp markd $
+ * $Id: tkXinit.c,v 3.2 1994/04/12 01:50:24 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,6 +47,18 @@ TkX_Init (interp)
     Tcl_Interp  *interp;
 {
     char  *value;
+
+    /*
+     * Make sure main window exists, or Tk_Init will fail in a confusing
+     * way.
+     */
+
+    if (Tk_MainWindow (interp) == NULL) {
+        Tcl_AppendResult (interp,
+                          "TkX_Init called before calling Tk_CreateMainWindow",
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
 
     tclAppName     = "Wishx";
     tclAppLongname = "Extended Tk Shell - Wishx";
