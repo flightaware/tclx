@@ -429,6 +429,11 @@ SOLARIS:
      Cause unknown, but a trivial program to opendir/readdir a directory
      fails.  Remember to set CC=gcc environment variable, make clean, and
      reconfigure before going a "make CC=gcc"
+   o Using SIGCHLD to detect the termination of processes created by "exec" or
+    "open" has been observed to cause core dumps on Solaris 2.3.  Either use
+     the TclX fork and execl commands to start the process or change
+     Tcl_CreatePipeline in the Tcl file tclUnixUtil.c to use fork instead of
+     vfork.
 
 SCO:
    o SCO Unix systems have a "ranlib" command that is used for Xenix cross-
