@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.8 1993/08/31 23:24:52 markd Exp markd $
+ * $Id: tclXstring.c,v 2.9 1993/09/25 18:26:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -448,12 +448,7 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
 
         if (failIndex) 
           goto failInvalid;
-        if ((scanPtr[0] == '\0') || (scanPtr[1] != '\0')) {
-            Tcl_AppendResult (interp, "string to convert must be only one",
-                              " character", (char *) NULL);
-            return TCL_ERROR;
-        }
-        
+
         value = 0xff & scanPtr[0];  /* Prevent sign extension */
         sprintf (interp->result, "%u", value);
         return TCL_OK;
