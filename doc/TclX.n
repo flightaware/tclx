@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.4 1994/01/11 04:38:45 markd Exp markd $
+.\" $Id: TclX.n,v 3.5 1994/01/11 06:31:35 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -839,7 +839,7 @@ on systems that support symbolic links.)
 '\"@endhelp
 '
 '\"@help: tcl/files/mkdir
-'\"@brief: Create a new directory
+'\"@brief: Create a new directory.
 .TP
 .B mkdir ?-path? \fIdirList\fR
 .br
@@ -867,6 +867,17 @@ increasing priority with negative niceness values will only work for the
 superuser.
 .sp
 The new priority is returned.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/files/readdir
+'\"@brief: Read the contents of a directory.
+.TP
+.B readdir \fIdirPath\fR
+.br
+Returns a list containing the contents of the directory \fIdirPath\fR.  The
+directory entries "." and ".." are not returned.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.14 1993/11/17 15:16:25 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 3.0 1993/11/19 06:58:38 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -564,7 +564,7 @@ errorExit:
  *-----------------------------------------------------------------------------
  *
  * Tcl_FrenameCmd --
- *     Implements the rename TCL command:
+ *     Implements the frename TCL command:
  *         frename oldPath newPath
  *
  * Results:
@@ -619,6 +619,74 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
   errorExit:
     Tcl_DStringFree (&tildeBuf1);
     Tcl_DStringFree (&tildeBuf2);
+    return TCL_ERROR;
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_ReaddirCmd --
+ *     Implements the rename TCL command:
+ *         readdir dirPath
+ *
+ * Results:
+ *      Standard TCL result.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_ReaddirCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    Tcl_DString    tildeBuf;
+    char          *dirPath;
+    DIR           *dirPtr;
+    struct dirent *entryPtr;
+
+    if (argc != 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " dirPath", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    Tcl_DStringInit (&tildeBuf);
+
+    dirPath = argv [1];
+    if (dirPath [0] == '~') {
+        dirPath = Tcl_TildeSubst (interp, dirPath, &tildeBuf);
+        if (dirPath == NULL)
+            goto errorExit;
+    }
+
+    dirPtr = opendir (dirPath);
+    if (dirPtr == NULL)  {
+        Tcl_AppendResult (interp, dirPath, ": ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        goto errorExit;
+    }
+
+    while (TRUE) {
+        entryPtr = readdir (dirPtr);
+        if (entryPtr == NULL)
+            break;
+        if (entryPtr->d_name [0] == '.') {
+            if (entryPtr->d_name [1] == '\0')
+                continue;
+            if ((entryPtr->d_name [1] == '.') &&
+                (entryPtr->d_name [2] == '\0'))
+                continue;
+        }
+        Tcl_AppendElement (interp, entryPtr->d_name);
+    }
+    closedir (dirPtr);
+    Tcl_DStringFree (&tildeBuf);
+    return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&tildeBuf);
     return TCL_ERROR;
 }
 
