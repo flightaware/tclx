@@ -320,3 +320,6 @@
  8 Oct 92:
   o Recoded assign_fields to use upvar.
 -------------------------------------------------------------------------------
+11 Oct 92:
+  o Modified install script to purge the target help tree before installing.
+-------------------------------------------------------------------------------
