@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 7.1 1996/07/18 19:36:30 markd Exp $
+# $Id: filescan.test,v 7.2 1996/07/26 05:56:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -48,9 +48,9 @@ proc IncrName {Name args} {
 # Proc to generate record that can be validated.  The record has 
 # grows quite large to test the dynamic buffering in the file I/O.
 
-proc GenScanRec {Key LineNum} {
-  set extra [replicate :@@@@@@@@: $LineNum]
-  return  "$Key This is a test record ($extra) index is $Key"
+proc GenScanRec {key lineNum} {
+  set extra [replicate :@@@@@@@@: $lineNum]
+  return  "$key This is a test record ($extra) index is $key"
 }
 
 # Proc to validate a matched record.
@@ -59,24 +59,28 @@ proc ValMatch {scanInfo id} {
     global testFH matchInfo
 
     Test filescan-${id}.1 {filescan tests} {
-         set matchInfo(line)
-    } 0 [GenScanRec [lindex $scanInfo 0] [lindex $scanInfo 2]]
+        list line $matchInfo(line)
+    } 0 [list line [GenScanRec [keylget scanInfo key] \
+                               [keylget scanInfo linenum]]]
 
     Test filescan-${id}.2 {filescan tests} {
-         set matchInfo(offset)
-    } 0 [lindex $scanInfo 1]
+         list offset $matchInfo(offset)
+    } 0 [list offset [keylget scanInfo offset]]
+
+    Test filescan-${id}.2.1 {filescan tests} {
+         list bytesread $matchInfo(bytesread)
+    } 0 [list bytesread [keylget scanInfo bytesread]]
 
     Test filescan-${id}.3 {filescan tests} {
-         set matchInfo(linenum)
-    } 0 [lindex $scanInfo 2]
+         list linenum $matchInfo(linenum)
+    } 0 [list linenum [keylget scanInfo linenum]]
 
     Test filescan-${id}.4 {filescan tests} {
-         set matchInfo(handle)
-    } 0 $testFH
+         list handle $matchInfo(handle)
+    } 0 [list handle $testFH]
 
-    set matchType [lindex $scanInfo 3] 
     global matchCnt
-    incr matchCnt($matchType)
+    incr matchCnt([keylget scanInfo matchType])
 }
 
 global matchInfo matchCnt chkMatchCnt testFH
@@ -97,16 +101,23 @@ set testFH [open TEST.TMP w]
 set testChkFH [open TESTCHK.TMP w]
 
 set key FatHeadAAAA
+set bytesRead 0
 for {set cnt 0} {$cnt < $maxRec} {incr cnt} {
     set rec [GenScanRec $key [expr $cnt+1]]
+    incr bytesRead [expr [clength $rec] + 1]
     if {($cnt % 10) == 0} {
         set matchType [random 4]
         incr chkMatchCnt($matchType)
-        set scanInfo [list "$key [tell $testFH] [expr $cnt+1] $matchType"]
+        set scanInfo {}
+        keylset scanInfo key $key
+        keylset scanInfo offset [tell $testFH]
+        keylset scanInfo bytesread $bytesRead
+        keylset scanInfo linenum [expr $cnt+1]
+        keylset scanInfo matchType $matchType
         if {[random 2]} {
-            set scanList [concat $scanList $scanInfo]
+            set scanList [concat $scanList [list $scanInfo]]
         } else {
-            set scanList [concat $scanInfo $scanList]
+            set scanList [concat [list $scanInfo] $scanList]
         }
     } else {
         incr chkMatchCnt(df)
@@ -127,9 +138,9 @@ close $testChkFH
 set testCH [scancontext create]
 
 foreach scanInfo $scanList {
-    set key [lindex $scanInfo 0]
-    set matchType [lindex $scanInfo 3]
-    set cmd "global matchInfo; ValMatch \{$scanInfo\} 1.1" 
+    set key [keylget scanInfo key]
+    set matchType [keylget scanInfo matchType]
+    set cmd "global matchInfo; ValMatch [list $scanInfo] 1.1" 
     case $matchType in {
       {0} {scanmatch -nocase $testCH [string toupper $key] $cmd}
       {1} {scanmatch $testCH ^$key  $cmd}

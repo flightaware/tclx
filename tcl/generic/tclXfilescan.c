@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 7.0 1996/06/16 05:30:20 markd Exp $
+ * $Id: tclXfilescan.c,v 7.1 1996/07/18 19:36:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,6 +43,25 @@ typedef struct scanContext_t {
     Tcl_Channel  copyFileChannel;
     int          fileOpen;
 } scanContext_t;
+
+/*
+ * Data kept on a specific scan.
+ */
+typedef struct {
+    int               storedLine;   /* Has the current line been stored in
+                                       matchInfo? */
+    scanContext_t    *contextPtr;   /* Current scan context. */
+    Tcl_Channel       channel;      /* The channel being scanned. */
+    char             *line;         /* The line from the file. */
+    off_t             offset;       /* The offset into the file. */
+    long              bytesRead;    /* Number of translated bytes read.*/
+    long              lineNum;      /* Current scanned line in the file. */
+    matchDef_t       *matchPtr;     /* The current match, or NULL for the
+                                       default. */
+    Tcl_SubMatchInfo  subMatchInfo; /* Information about the subexpressions
+                                       that matched, or NULL if this is the
+                                       default match. */
+} scanData_t;
 
 /*
  * Prototypes of internal functions.
@@ -91,14 +110,7 @@ ClearCopyFile _ANSI_ARGS_((scanContext_t *contextPtr));
 
 static int
 SetMatchInfoVar _ANSI_ARGS_((Tcl_Interp       *interp,
-                             int              *storedLinePtr,
-                             scanContext_t    *contextPtr,
-                             Tcl_Channel       channel,
-                             char             *fileLine,
-                             off_t             fileOffset,
-                             long              scanLineNum,
-                             matchDef_t       *matchPtr,
-                             Tcl_SubMatchInfo  subMatchInfo));
+                             scanData_t       *scanData));
 
 static int
 ScanFile _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -491,30 +503,14 @@ argError:
  * Parameters:
  *   o interp (O) - The Tcl interpreter to set the matchInfo variable in.
  *     Errors are returned in result.
- *   o storedLinePtr (I/O) - A flag that indicates if the current line has
+ *   o scanData (I/O) - Data about the current line being scanned.
  *     been stored.  Should be set to FALSE when a new line is read.
- *   o contextPtr (I) - The current scan context.
- *   o channel (I) - The file being scanned.
- *   o fileLine (I) - The current line.
- *   o fileOffset (I) - Offset into the file.
- *   o scanLineNum (I) - Current scanned line in the file.
- *   o matchPtr (I) - The current match, or NULL fo the default.
- *   o subMatchInfo (I) - Information about the subexpressions that matched,
- *     or NULL if this is the default match.
  *-----------------------------------------------------------------------------
  */
 static int
-SetMatchInfoVar (interp, storedLinePtr, contextPtr, channel, fileLine,
-                 fileOffset, scanLineNum, matchPtr, subMatchInfo)
-    Tcl_Interp       *interp;
-    int              *storedLinePtr;
-    scanContext_t    *contextPtr;
-    Tcl_Channel       channel;
-    char             *fileLine;
-    off_t             fileOffset;
-    long              scanLineNum;
-    matchDef_t       *matchPtr;
-    Tcl_SubMatchInfo  subMatchInfo;
+SetMatchInfoVar (interp, scanData)
+    Tcl_Interp *interp;
+    scanData_t *scanData;
 {
     static char *MATCHINFO = "matchInfo";
     int idx, start, end;
@@ -523,50 +519,55 @@ SetMatchInfoVar (interp, storedLinePtr, contextPtr, channel, fileLine,
     /*
      * Save information about the current line, if it hasn't been saved.
      */
-    if (!*storedLinePtr) {
-        *storedLinePtr = TRUE;
+    if (!scanData->storedLine) {
+        scanData->storedLine = TRUE;
 
         Tcl_UnsetVar (interp, MATCHINFO, 0);
         
-        if (Tcl_SetVar2 (interp, MATCHINFO, "line", fileLine, 
+        if (Tcl_SetVar2 (interp, MATCHINFO, "line", scanData->line, 
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
-        sprintf (buf, "%ld", fileOffset);
+        sprintf (buf, "%ld", scanData->offset);
         if (Tcl_SetVar2 (interp, MATCHINFO, "offset", buf,
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
-        sprintf (buf, "%ld", scanLineNum);
+        sprintf (buf, "%ld", scanData->bytesRead);
+        if (Tcl_SetVar2 (interp, MATCHINFO, "bytesread", buf,
+                         TCL_LEAVE_ERR_MSG) == NULL)
+            return TCL_ERROR;
+
+        sprintf (buf, "%ld", scanData->lineNum);
         if (Tcl_SetVar2 (interp, MATCHINFO, "linenum", buf,
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
         if (Tcl_SetVar2 (interp, MATCHINFO, "context",
-                         contextPtr->contextHandle,
+                         scanData->contextPtr->contextHandle,
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
         if (Tcl_SetVar2 (interp, MATCHINFO, "handle", 
-                         Tcl_GetChannelName (channel),
+                         Tcl_GetChannelName (scanData->channel),
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
     }
 
-    if (contextPtr->copyFileChannel != NULL) {
+    if (scanData->contextPtr->copyFileChannel != NULL) {
         if (Tcl_SetVar2 (interp, MATCHINFO, "copyHandle", 
-                         Tcl_GetChannelName (contextPtr->copyFileChannel),
-                         TCL_LEAVE_ERR_MSG) == NULL)
+                Tcl_GetChannelName (scanData->contextPtr->copyFileChannel),
+                TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
     }
 
-    if (subMatchInfo == NULL)
+    if (scanData->matchPtr == NULL)
         return TCL_OK;
 
-    for (idx = 0; idx < matchPtr->regExpInfo.numSubExprs; idx++) {
-        start = subMatchInfo [idx].start;
-        end = subMatchInfo [idx].end;
+    for (idx = 0; idx < scanData->matchPtr->regExpInfo.numSubExprs; idx++) {
+        start = scanData->subMatchInfo [idx].start;
+        end = scanData->subMatchInfo [idx].end;
 
         sprintf (key, "subindex%d", idx);
         sprintf (buf, "%d %d", start, end);
@@ -581,12 +582,12 @@ SetMatchInfoVar (interp, storedLinePtr, contextPtr, channel, fileLine,
                                   "",
                                   TCL_LEAVE_ERR_MSG);
         } else {
-            holdChar = fileLine [end + 1];
-            fileLine [end + 1] = '\0';
+            holdChar = scanData->line [end + 1];
+            scanData->line [end + 1] = '\0';
             varPtr = Tcl_SetVar2 (interp, "matchInfo", key,
-                                  fileLine + start,
+                                  scanData->line + start,
                                   TCL_LEAVE_ERR_MSG);
-            fileLine [end + 1] = holdChar;
+            scanData->line [end + 1] = holdChar;
         }
         if (varPtr == NULL)
             return TCL_ERROR;
@@ -607,28 +608,31 @@ ScanFile (interp, contextPtr, channel)
     Tcl_Channel    channel;
 {
     Tcl_DString buffer, lowerBuffer;
-    matchDef_t *matchPtr;
-    off_t fileOffset;
-    int result, matchedAtLeastOne, storedThisLine;
-    long scanLineNum = 0;
-    Tcl_SubMatchInfo subMatchInfo;
-
+    int result, matchedAtLeastOne;
+    scanData_t data;
+    
     if (contextPtr->matchListHead == NULL) {
         Tcl_AppendResult (interp, "no patterns in current scan context",
                           (char *) NULL);
         return TCL_ERROR;
     }
 
+    data.storedLine = FALSE;
+    data.contextPtr = contextPtr;
+    data.channel = channel;
+    data.bytesRead = 0;
+    data.lineNum = 0;
+    
     Tcl_DStringInit (&buffer);
     Tcl_DStringInit (&lowerBuffer);
 
     result = TCL_OK;
     while (TRUE) {
-        Tcl_DStringSetLength (&buffer, 0);
         if (!contextPtr->fileOpen)
             goto scanExit;  /* Closed by a callback */
 
-        fileOffset = Tcl_Tell (channel);
+        data.offset = Tcl_Tell (channel);
+        Tcl_DStringSetLength (&buffer, 0);
         if (Tcl_Gets (channel, &buffer) < 0) {
             if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))
                 goto scanExit;
@@ -636,42 +640,37 @@ ScanFile (interp, contextPtr, channel)
             result = TCL_ERROR;
             goto scanExit;
         }
-
-        scanLineNum++;
-        storedThisLine = FALSE;
+        data.line = buffer.string;
+        data.bytesRead += (buffer.length + 1);  /* Include EOLN */
+        data.lineNum++;
+        data.storedLine = FALSE;
         matchedAtLeastOne = FALSE;
 
         if (contextPtr->flags & CONTEXT_A_CASE_INSENSITIVE_FLAG) {
-            Tcl_DStringFree (&lowerBuffer);
+            Tcl_DStringSetLength (&lowerBuffer, 0);
             Tcl_DStringAppend (&lowerBuffer, buffer.string, -1);
             Tcl_DownShift (lowerBuffer.string, lowerBuffer.string);
         }
 
-        for (matchPtr = contextPtr->matchListHead; matchPtr != NULL; 
-                 matchPtr = matchPtr->nextMatchDefPtr) {
+        for (data.matchPtr = contextPtr->matchListHead; 
+             data.matchPtr != NULL; 
+             data.matchPtr = data.matchPtr->nextMatchDefPtr) {
 
             if (!TclX_RegExpExecute (interp,
-                                     &matchPtr->regExpInfo,
+                                     &(data.matchPtr->regExpInfo),
                                      buffer.string,
                                      lowerBuffer.string,
-                                     subMatchInfo))
+                                     data.subMatchInfo))
                 continue;  /* Try next match pattern */
 
             matchedAtLeastOne = TRUE;
 
             result = SetMatchInfoVar (interp,
-                                      &storedThisLine,
-                                      contextPtr,
-                                      channel,
-                                      buffer.string,
-                                      fileOffset,
-                                      scanLineNum,
-                                      matchPtr,
-                                      subMatchInfo);
+                                      &data);
             if (result != TCL_OK)
                 goto scanExit;
 
-            result = Tcl_Eval(interp, matchPtr->command);
+            result = Tcl_Eval(interp, data.matchPtr->command);
             if (result == TCL_ERROR) {
                 Tcl_AddErrorInfo (interp, 
                     "\n    while executing a match command");
@@ -697,15 +696,9 @@ ScanFile (interp, contextPtr, channel)
          * Process default action if required.
          */
         if ((contextPtr->defaultAction != NULL) && (!matchedAtLeastOne)) {
+            data.matchPtr = NULL;
             result = SetMatchInfoVar(interp,
-                                     &storedThisLine,
-                                     contextPtr,
-                                     channel,
-                                     buffer.string,
-                                     fileOffset,
-                                     scanLineNum,
-                                     NULL,
-                                     NULL);
+                                     &data);
             if (result != TCL_OK)
                 goto scanExit;
 
