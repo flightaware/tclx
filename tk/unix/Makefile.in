@@ -13,13 +13,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.4 1995/09/30 22:35:41 markd Exp $
+# $Id: Makefile.in,v 5.5 1995/12/30 13:34:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 #------------------------------------------------------------------------------
 # Common and user-editable defines.
 #
+srcdir = @srcdir@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
@@ -37,7 +38,8 @@ SHLDLIBS = ${TKX_SHLIBS} ${XLIBSW} ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 	      -I${TKX_GENERIC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
-	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_DIR} \
+	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
+	      -I${TCLX_UNIX_BLD_DIR} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR} \
 	      ${XINCLUDES}
 
@@ -64,7 +66,7 @@ TEST_OBJS = tktest.o tkSquare.o tkXtest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtkx.a wishx RUNTIME tktest runtest
+all: libtkx.a wishx RUNTIME tktest runtest ${bldbasedir}/tk/tests
 
 wishx: tkXAppInit.o libtkx.a ${LIBTK} ${TCL_LIB} ${TK_LIB}
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
@@ -107,6 +109,7 @@ RUNTIME: tk.tlib tk.tndx tk.tcl prolog.ps tclhelp help demos
 tk.tlib: ${TK_SRC}/library/tclIndex ${srcdir}/../runtime/tkdemo.tcl
 	rm -f tk.tlib tk.tndx
 	${CONVERTLIB} ${TK_SRC}/library/tclIndex tk.tlib
+	rm -f tk.tndx
 	cat ${srcdir}/../runtime/tkdemo.tcl >>tk.tlib
 
 tk.tndx: tk.tlib
@@ -190,8 +193,8 @@ runtest: Makefile
 	@echo '#!/bin/sh'                                           >runtest
 	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
 	@echo "TKX_LIBRARY=${TKX_TMP_MASTER}"                      >>runtest
-	@echo "TCL_PROGRAM=${TCLX_UNIX_DIR}/tcl"                   >>runtest
-	@echo "TESTWISH=${bldbasedir}/tk/unix/tkXtest"             >>runtest
+	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtest
+	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tkXtest"               >>runtest
 	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"        >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
@@ -200,6 +203,13 @@ runtest: Makefile
 	@echo "    exec \$$TESTWISH \"\$$@\""                      >>runtest
 	@echo "fi"                                                 >>runtest
 	chmod a+rx runtest
+
+#------------------------------------------------------------------------------
+# If test directory in not in build tree, copy it from the source tree.
+#
+${bldbasedir}/tk/tests:
+	mkdir ${bldbasedir}/tk/tests
+	cp ${srcbasedir}/tk/tests/*.test ${bldbasedir}/tk/tests
 
 #------------------------------------------------------------------------------
 # Run the UCB tests with wishx.
@@ -219,7 +229,14 @@ buildtkhelp:
 
 #------------------------------------------------------------------------------
 
-install: install-exec
+install: install-exec install-runtime
+
+install-runtime:
+	${INSTCOPY} tk.tcl tk.tlib tk.tndx ${INSTALL_ROOT}${TKX_INST_MASTER}
+	${INSTCOPY} ${TK_SRC}/library/prolog.ps \
+	    ${INSTALL_ROOT}${TKX_INST_MASTER}
+	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_MASTER}/help
+	${INSTCOPY} demos ${INSTALL_ROOT}${TKX_INST_MASTER}/demos
 
 install-exec:
 	${INSTCOPY} wishx ${INSTALL_ROOT}${TCL_BINDIR}
@@ -227,31 +244,44 @@ install-exec:
 	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TCL_LIBDIR}
 	${RANLIB} ${INSTALL_ROOT}${TCL_LIBDIR}/libtkx.a
 	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
+	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TCL_BINDIR}
 
-install-master: install-master-exec
+install-master: install-runtime install-master-exec
 	${INSTCOPY} ${TK_SRC}/generic/tk.h \
-	    ${INSTALL_ROOT}${INST_MASTER}/include
-	${SYMLINKEXT} ${INST_MASTER}/include/* ${INSTALL_ROOT}${TCL_INCLUDEDIR}
+	    ${INSTALL_ROOT}${TKX_INST_MASTER}/include
+	${SYMLINKEXT} ${TKX_INST_MASTER}/include/* \
+	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
+	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
+	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
+	    ${TK_MAN_UNIXCMD_SECTION} \
+	    ${TK_SRC}/doc ${INSTALL_ROOT}${TKX_INST_MASTER}/man
 
 install-master-exec:
-	${INSTCOPY} wishx ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}
-	${STRIP} ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}/wishx
-	${INSTCOPY} ${LIBTK} libtkx.a ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
-	${RANLIB} ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}/*.a
-	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
-	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${INSTALL_ROOT}${TCL_BINDIR}
-	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${INSTALL_ROOT}${TCL_LIBDIR}
+	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_MASTER}/bin${ARCH}
+	${STRIP} ${INSTALL_ROOT}${TKX_INST_MASTER}/bin${ARCH}/wishx
+	${INSTCOPY} ${LIBTK} libtkx.a \
+	    ${INSTALL_ROOT}${TKX_INST_MASTER}/lib${ARCH}
+	${RANLIB} ${INSTALL_ROOT}${TKX_INST_MASTER}/lib${ARCH}/*.a
+	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TKX_INST_MASTER}/lib${ARCH}
+	${SYMLINKEXT} ${TKX_INST_MASTER}/bin${ARCH}/* \
+	    ${INSTALL_ROOT}${TCL_BINDIR}
+	${SYMLINKEXT} ${TKX_INST_MASTER}/lib${ARCH}/* \
+	    ${INSTALL_ROOT}${TCL_LIBDIR}
+	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_MASTER}/bin${ARCH}
+	${SYMLINKEXT} ${TKX_INST_MASTER}/bin${ARCH}/tclhelp \
+	    ${INSTALL_ROOT}${TCL_BINDIR}
 
 #------------------------------------------------------------------------------
 clean:
-	-rm -f tkXAppInit.o ${OBJS} wishx libtkx.a
+	-rm -f tkXAppInit.o ${OBJS} ${TEST_OBJS} wishx libtkx.a
+	-rm -f tktest.c tkSquare.c
 	-rm -rf tk.tlib tk.tndx tk.tcl prolog.ps tclhelp help demos
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
 
 distclean: clean
-	rm -f Makefile tkxlibs.mk
+	rm -f Makefile tkxlibs.mk runtest tktest
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:

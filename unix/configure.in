@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.5 1995/11/15 06:40:29 markd Exp $
+dnl $Id: configure.in,v 5.6 1995/12/30 13:34:32 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.5 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.6 $),)dnl
 
 AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
 
@@ -24,6 +24,32 @@ AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
 # encounters no `make' conflicts.
 #
 unset MFLAGS MAKEFLAGS
+
+#------------------------------------------------------------------------------
+# If the --srcdir option has been used, make sure we are in a directory called
+# "unix" and build the other output directories, configure will not do this.
+#------------------------------------------------------------------------------
+
+case `pwd` in
+  */unix) ;;
+  *) echo '*** Error: Should be in a directory named "unix".  If your using'
+     echo 'the --srcdir option, create a directory called "unix" and run'
+     echo 'configure from there.  Other build directories will be created'
+     echo 'under the parent directory of "unix".'
+     exit 1 ;;
+esac
+if test ! -d ../tcl ; then
+   mkdir ../tcl || exit 1
+fi
+if test ! -d ../tcl/unix ; then
+   mkdir ../tcl/unix || exit 1
+fi
+if test ! -d ../tk ; then
+   mkdir ../tk || exit 1
+fi
+if test ! -d ../tk ; then
+   mkdir ../tk || exit 1
+fi
 
 #------------------------------------------------------------------------------
 # Check command line looking for the --arch= option.

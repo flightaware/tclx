@@ -13,13 +13,15 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.1 1995/09/08 21:02:43 markd Exp $
+# $Id: Makefile.in,v 5.2 1995/12/30 13:34:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 #------------------------------------------------------------------------------
 # Common and user-editable defines.
 #
+srcdir = @srcdir@
+
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
@@ -53,7 +55,7 @@ runtcl: Makefile
 	@echo '#!/bin/sh'                                           >runtcl
 	@echo '# script for testing Tcl before installation'       >>runtcl
 	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtcl
-	@echo "TCL_PROGRAM=${TCLX_UNIX_DIR}/tcl"                   >>runtcl
+	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtcl
 	@echo "export TCLX_LIBRARY TCL_PROGRAM"                    >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
 	@echo "then"                                               >>runtcl
@@ -68,8 +70,8 @@ runwishx: Makefile
 	@echo '# script for testing wishx before installation'    >>runwishx
 	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                   >>runwishx
 	@echo "TKX_LIBRARY=${TKX_TMP_MASTER}"                     >>runwishx
-	@echo "TCL_PROGRAM=${TCLX_UNIX_DIR}/tcl"                  >>runwishx
-	@echo "WISHX=${TKX_UNIX_DIR}/wishx"                       >>runwishx
+	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"              >>runwishx
+	@echo "WISHX=${TKX_UNIX_BLD_DIR}/wishx"                   >>runwishx
 	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"       >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx
@@ -111,17 +113,18 @@ tktest: all
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
 # Tk versions have changed.
-
+#
 buildhelp: buildtclhelp buildtkhelp
 
 buildtclhelp:
 	cd ../tcl/unix; ${MAKE} buildtclhelp
 
 buildtkhelp:
-	cd ../tkunix;   ${MAKE} buildtkhelp
+	cd ../tk/unix;  ${MAKE} buildtkhelp
 
 #------------------------------------------------------------------------------
-
+# Install Extended Tcl using the standard model.
+#
 install: all TCLXINSTALL INST_${TK_BUILD}
 
 install-exec: all TCLXINSTALL_EXEC INST_EXEC_${TK_BUILD}
@@ -130,23 +133,19 @@ TCLXINSTALL:
 	@echo ""
 	@echo "   Install Extended Tcl using standard model"
 	@echo ""
-	cd src;       ${MAKE} install
-	cd tclsrc;    ${MAKE} install
-	cd man;       ${MAKE} install
+	cd ../tcl/unix; ${MAKE} install
 
 TCLXINSTALL_EXEC:
 	@echo ""
 	@echo "   Install Extended Tcl executables using standard model"
 	@echo ""
-	cd src;       ${MAKE} install-exec
+	cd ../tcl/unix; ${MAKE} install-exec
 
 TKXINSTALL:
-	cd tksrc;     ${MAKE} install
-	cd tktclsrc;  ${MAKE} install
+	cd ../tk/unix; ${MAKE} install
 
 TKXINSTALL_EXEC:
-	cd tksrc;     ${MAKE} install-exec
-	cd tktclsrc;  ${MAKE} install-exec
+	cd ../tk/unix; ${MAKE} install-exec
 
 # Targets to decide if we install wishx or not.
 
@@ -158,7 +157,7 @@ INST_EXEC_:
 
 #------------------------------------------------------------------------------
 # Install Extended Tcl using the master directory model.
-
+#
 install-master: all MASTER-NOTE TCLXMINSTALL ${TK_BUILD}MMAYBE
 
 install-master-exec: all MASTER-NOTE TCLXMINSTALL-EXEC ${TK_BUILD}MMAYBE-EXEC
@@ -176,24 +175,19 @@ TCLXMINSTALL:
 	@echo ""
 	@echo "   Install TclX using master directory model"
 	@echo ""
-	cd src;       ${MAKE} install-master
-	cd tclsrc;    ${MAKE} install-master
-	cd man;       ${MAKE} install-master
+	cd ../tcl/unix; ${MAKE} install-master
 
 TCLXMINSTALL-EXEC:
 	@echo ""
 	@echo "   Install TclX executables using master directory model"
 	@echo ""
-	cd src;       ${MAKE} install-master-exec
+	cd ../tcl/unix; ${MAKE} install-master-exec
 
 TKXMINSTALL:
-	cd tksrc;     ${MAKE} install-master
-	cd tktclsrc;  ${MAKE} install-master
-	cd man;       ${MAKE} install-tk-master
+	cd ../tk/unix; ${MAKE} install-master
 
 TKXMINSTALL-EXEC:
-	cd tksrc;     ${MAKE} install-master-exec
-	cd tktclsrc;  ${MAKE} install-master-exec
+	cd ../tk/unix; ${MAKE} install-master-exec
 
 # Fake targets to decide if we install wishx or not.
 
@@ -209,6 +203,7 @@ WISHXMMAYBE-EXEC: TKXMINSTALL-EXEC
 clean:
 	cd ../tk/unix;  ${MAKE} clean
 	cd ../tcl/unix; ${MAKE} clean
+	cd tools;       ${MAKE} clean
 	-rm -f runtcl runwishx
 
 
@@ -216,16 +211,10 @@ clean:
 # Restore to the distributed state.
 
 distclean: clean
-	cd tools;     ${MAKE} ${PASS_FLAGS} distclean
-	cd osSupport; ${MAKE} ${PASS_FLAGS} distclean
-	cd src;       ${MAKE} ${PASS_FLAGS} distclean
-	cd tclsrc;    ${MAKE} ${PASS_FLAGS} distclean
-	cd tksrc;     ${MAKE} ${PASS_FLAGS} distclean
-	cd tktclsrc;  ${MAKE} ${PASS_FLAGS} distclean
-	cd tests;     ${MAKE} ${PASS_FLAGS} distclean
-	cd tktests;   ${MAKE} ${PASS_FLAGS} distclean
-	cd man;       ${MAKE} ${PASS_FLAGS} distclean
-	rm -f Makefile config.status config.cache config.log
+	cd ../tk/unix;  ${MAKE} distclean
+	cd ../tcl/unix; ${MAKE} distclean
+	cd tools;       ${MAKE} distclean
+	rm -f Makefile config.status config.cache config.log Common.mk
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:

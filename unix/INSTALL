@@ -2,48 +2,34 @@ EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 =======================================
 
 Building the Extended Tcl requires access to built Tcl and Tk source
-directories.  Their location relative to the tclX7.5a directory must be
-configured by editing tclX7.5a/Config.mk.  The default is to place tclX7.5a
-in a directory parallel to the Tcl and Tk distributions:
+directories.  Their location relative to the tclX7.5a directory is
+configured by editing tclX7.5a/Config.mk.  The default is to place
+tclX7.5a in a directory parallel to the Tcl and Tk distributions:
 
                    tcl7.5      tk4.1      tclX7.5a
 
 
-The following directories are included under the tclX7.5a directory:
+The following directories and subdirectories are included under the TclX
+directory:
 
-    o man - Unformatted manual pages for TclX.
+  o unix - Build directory for Unix systems:
+    o tools - Build tools.
 
-    o src - The main source for TclX.
+  o tcl - TclX extensions to the Tcl language and the TclX shell:
+    o generic - Source code that executes on multiple platforms.
+    o tests - Test scripts.
+    o compat - C library routines that are not available on all systems.
+    o runtime - Run time Tcl code.
+    o unix - Unix specific source code and build directory.
 
-    o osSupport - Library routines required by TclX that may not be available
-      on all Unix versions.
+  o tk - TclX extensions to the Tk environment, including the wishx shell:
+    o generic - Source code that executes on multiple platforms.
+    o tests - Test scripts.
+    o compat - C library routines that are not available on all systems.
+    o runtime - Run time Tcl code.
+    o unix - Unix specific source code and build directory.
 
-    o tclsrc - Tcl source that is built into the standard Tcl package library.
-      The makefile also handles generation of help files.
-
-    o tests - Tests for TclX.
-
-    o tclhelp - The Tcl and TclX help files.  These can be rebuilt from the
-      manual pages if necessary.
-
-    o tksrc - A makefile that builds a version of the Tk wish shell containing
-      Extended Tcl.
-
-    o tktclsrc - Tcl source that is built into the standard Tk package library.
-      The makefile also handles generation of help files.
-
-    o tktests - Files used to test wishx.
-
-    o tkhelp - The Tk help files.  These can be rebuilt from the manual pages
-      if necessary.
-
-    o tools - Tools used for building and installing TclX.
-
-    o tclmaster - Tcl master (library) directory for testing.  It is created
-      during the build.
-
-    o tkmaster - Tk master (library) directory for testing.  It is created
-      during the build.
+  o doc - Unformatted manual pages for TclX.
 
 THE EXTENDED TCL INSTALLATION MODELS
 ====================================
@@ -130,8 +116,8 @@ Symbolic links are also built for the include and library files in a similar
 manner.  Due to the difficulty in getting it right, manual pages must be linked
 by hand.
         
-HOW TO BUILD EXTENDED TCL
-=========================
+HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
+==========================================
 
     o Configure and compile Tcl 7.5 following the instructions that come with
       Tcl.  You do not need to install it.
@@ -140,13 +126,19 @@ HOW TO BUILD EXTENDED TCL
       shell (wishx), configure and compile Tk 4.0.  You do not need to install
       it.
 
+    o cd to tclX7.5a/unix
+
     o Enter ./configure to run the configure script.  If you are going to
       be compiling with gcc, set the environment variable CC to "gcc".
       The following options are recognized by the TclX configure script:
  
         o --srcdir=DIR
           If you are using a make that supports VPATH (e.g. GNU make) you can
-          use this to compile in a separate directory from the source.
+          use this to compile in a separate directory from the source.  You
+          must create a directory called "unix" in your build tree and run
+          configure while in the "unix" directory.  The --srcdir argument must
+          specify the "tclX7.5a/unix" directory, not the top-level TclX 
+          directory.
           Note: The source directory must be clean, it can't contain a built
           copy of TclX.
 
@@ -198,22 +190,21 @@ HOW TO BUILD EXTENDED TCL
 
      These variables are passed using a command line in the form:
 
-         make CC=gcc CFLAGS="-O =g"
+         make CC=gcc CFLAGS="-O -g"
 
     o Until the Extended Tcl runtime files are installed, "tcl" and "wishx"
       can't be run directly.  To run them before installation, use the
-      "runtcl" and "runwishx" scripts generated in the top level directory.
+      "runtcl" and "runwishx" scripts generated in the unix directory.
 
     o Extended Tcl comes with help pages that are built from the Tcl 7.5 and
       Tk 4.0 manual pages as well as the TclX manual page.  If you are building
       TclX with a later version of Tcl or Tk, you might want to rebuild these
       manual pages.  If new manual pages have been added, you can add them
-      by editing the files "tools/tclmanpages" and "tools/tkmanpages".
+      by editing the "unix/tools/tclmanpages" and "unix/tools/tkmanpages".
       You must have nroff and the man macro package installed on your system
       to build the manual pages.  Enter "make buildtclhelp" to build the
       Tcl and TclX help pages and "make buildtkhelp" to build the Tk manual
-      pages or "make buildhelp" to build both.  If the help files are rebuilt,
-      another make should be done to copy them into the master directories.
+      pages or "make buildhelp" to build both.
 
     o Note that if you modify any files in the Tcl or Tk library directories
       you need to do a "make clean" and a "make" to rebuild Extended Tcl,
@@ -234,7 +225,7 @@ Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
     o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.5a directory.
+      tclX7.5a/unix directory.
 
     o To run the Tk tests with wishx, type "make tktest".
 
@@ -292,8 +283,7 @@ SHARED LIBRARIES
    Shared libraries are not directly supported by the TclX build process,
 since the mechanisms for building them are not portable across Unix
 platforms.  See the file README.SHLIB for help in building shared libraries.
-This file is oriented towards Suns.  If you have instructions on other
-platforms, please contact us.
+If you have instructions on other platforms, please contact us.
 
 INTEGRATING WITH OTHER EXTENSIONS AND APPLICATIONS
 ==================================================
