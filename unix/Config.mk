@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.0 1992/10/16 04:54:43 markd Rel markd $
+# $Id: Config.mk,v 2.1 1992/11/07 22:34:13 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -309,7 +309,7 @@ TK_MAN_FUNC_SECTION=3
 #    o SUPPORT_OBJS - The object files to compile to implement library 
 #      functions that are not available on this particular version of Unix or 
 #      do not function correctly.  The following are available:
-#         o strftime
+#         o strftime.o
 #
 #..............................................................................
 
