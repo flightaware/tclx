@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.37 1993/09/25 17:03:12 markd Exp markd $
+.\" $Id: TclX.man,v 2.38 1993/09/25 18:26:04 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1039,9 +1039,9 @@ from its current position,
 to the file specified by \fItoFileId\fR, starting from its current
 position.
 .sp
-If \fB-bytes\fR is specified, then \fBInum\fR bytes are copied.  If less than
+If \fB-bytes\fR is specified, then \fInum\fR bytes are copied.  If less than
 \fInum\fR bytes are available, an error is returned.  If \fB-maxbytes\fR is
-specified, then \fBInum\fR bytes are copied but no error is returned if less
+specified, then \fInum\fR bytes are copied but no error is returned if less
 are available.
 .sp
 The command returns the number of bytes that were copied.
