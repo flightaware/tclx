@@ -1,3 +1,17 @@
+2002-11-12  Karl Lehenbauer <karl@procplace.com>
+
+	* Makefile.in: Put some variables back in that were previously
+	    found in Config.mk.  "make buildhelp" now works again.
+	* configure:
+	* configure.in: Moved the help dir to the top directory of the
+	    TclX source code.  It was using a subdir that no longer exists.
+	* unix/tools/bldmanhelp.tcl: Add "package require Tclx" and source
+	    the help tools.
+	* unix/tools/instcopy.tcl: Add "package require Tclx" and source
+	    the TclX build utilities.
+	* unix/tools/runbuildhelp.tcl: "driver" to run buildhelp since
+	    we don't have a Tcl command line that can take the command
+	    on the command line.
 
 2002-11-03  Karl Lehenbauer <karl@procplace.com>
 

@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 8.5 2000/07/14 18:08:03 welch Exp $
+# $Id: instcopy.tcl,v 8.6 2002/09/26 00:23:30 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
@@ -31,6 +31,9 @@
 #  o targetdir - Target directory to copy the files to.  If the directory does
 #    not exist, it is created (including parent directories).
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+package require Tclx
+source [file join [file dirname [info script]] buildutil.tcl]
 
 #------------------------------------------------------------------------------
 # Usage --

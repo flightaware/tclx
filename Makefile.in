@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.3 2002/04/04 06:14:43 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.4 2002/04/04 07:57:25 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -170,6 +170,11 @@ TCLSH_ENV	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library` \
 TCLSH_PROG	= @TCLSH_PROG@
 TCLSH		= $(TCLSH_ENV) $(TCLSH_PROG)
 SHARED_BUILD	= @SHARED_BUILD@
+
+TCLX_TOOLS_SRC_DIR = $(srcdir)/unix/tools
+TCLX_DOC_DIR = $(srcdir)/doc
+TCLX_INSTCOPY = ${TCLSH} ${TCLX_TOOLS_SRC_DIR}/instcopy.tcl
+TCLX_HELP_INST_DIR = $(DESTDIR)$(pkglibdir)/help
 
 TCLX_INCLUDES	= @TCLX_INCLUDES@
 INCLUDES	= $(TCLX_INCLUDES) @TCL_INCLUDES@
@@ -440,12 +445,14 @@ uninstall-binaries:
 # the help command will work before installation.  Normally just symlink,
 # unless we don't have them.
 #
+RUNTIME_DIR = $(srcdir)/library
+
 RUNTIME: tcl.tlib tcl.tndx tclx.tcl buildidx.tcl autoload.tcl help.tmp \
          dltest.tmp checkup
 
-tcl.tlib: ${TLIB_SRCS} autoload.tcl
+tcl.tlib: ${RUNTIME_SOURCES} autoload.tcl
 	-rm -f tcl.tlib tcl.tndx
-	cat ${TLIB_SRCS} | grep -v '^#[^@].*' | grep -v '#$$' > $@
+	cat ${RUNTIME_SOURCES} | grep -v '^#[^@].*' | grep -v '#$$' > $@
 
 tcl.tndx: tcl.tlib tclx.tcl buildidx.tcl
 	${GENTNDX} tcl.tlib
@@ -477,13 +484,15 @@ help.tmp:
 # distribution and not rebuilt by users.
 #
 BUILDHELP=@BUILDHELP@
-buildhelp: tcl tcl.tndx
+buildhelp:
 	rm -rf ${HELP_DIR} help help.tmp
 	if test ! -d @HELP_DIR@ ; then \
 	    mkdir -p @HELP_DIR@ ; \
 	fi
 	mkdir -p ${HELP_DIR}
-	${BLDMANHELP} ${TCL_SRC_DIR}/doc ${TCLX_TOOLS_SRC_DIR}/tclmanpages \
+	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/bldmanhelp.tcl ${TCL_SRC_DIR}/doc ${TCLX_TOOLS_SRC_DIR}/tclmanpages \
 	    ${HELP_DIR} Tcl.brf
-	${RUNTCL} -c "buildhelp ${HELP_DIR} TclX.brf ${TCLX_DOC_DIR}/TclX.n"
-	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_RUNTIME}/help
+	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/runbuildhelp.tcl ${HELP_DIR} TclX.brf ${TCLX_DOC_DIR}/TclX.n
+	mkdir -p $(DESTDIR)$(pkglibdir)/help
+	${TCLX_INSTCOPY} ${HELP_DIR} ${TCLX_HELP_INST_DIR}
+

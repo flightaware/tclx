@@ -3,7 +3,7 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.4 2002/10/15 17:52:00 andreas_kupries Exp $
+# RCS: @(#) $Id: configure.in,v 1.5 2002/10/15 18:51:14 hobbs Exp $
 
 #--------------------------------------------------------------------
 # Sample configure.in for Tcl Extensions.  The only places you should
@@ -263,7 +263,7 @@ AC_ARG_WITH(help, [  --with-help              directory containing generated hel
 if test x"${with_help}" != x ; then
     HELP_DIR=${with_help}
 else
-    HELP_DIR=${srcdir}/tcl/help
+    HELP_DIR=${srcdir}/help
 fi
 AC_SUBST(HELP_DIR)
 

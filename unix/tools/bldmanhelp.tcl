@@ -30,9 +30,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 8.3 1999/03/31 06:37:58 markd Exp $
+# $Id: bldmanhelp.tcl,v 8.4 2000/07/14 18:08:03 welch Exp $
 #------------------------------------------------------------------------------
 #
+
+package require Tclx
+
+#
+# pull in buildhelp procs
+#
+source $env(TCLX_LIBRARY)/buildhelp.tcl
 
 #
 # Flag indicating if errors occured.
