@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 5.0 1995/07/25 06:00:01 markd Rel $
+# $Id: setfuncs.tcl,v 5.1 1996/02/12 18:17:00 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -54,38 +54,20 @@ proc lrmdups list {
 #
 
 proc intersect3 {list1 list2} {
-    set list1Result ""
-    set list2Result ""
-    set intersectList ""
-
-    set list1 [lrmdups $list1]
-    set list2 [lrmdups $list2]
-
-    while {1} {
-        if [lempty $list1] {
-            if ![lempty $list2] {
-                set list2Result [concat $list2Result $list2]
-            }
-            break
-        }
-        if [lempty $list2] {
-	    set list1Result [concat $list1Result $list1]
-            break
-        }
-        set compareResult [string compare [lindex $list1 0] [lindex $list2 0]]
-
-        if {$compareResult < 0} {
-            lappend list1Result [lvarpop list1]
-            continue
-        }
-        if {$compareResult > 0} {
-            lappend list2Result [lvarpop list2]
-            continue
-        }
-        lappend intersectList [lvarpop list1]
-        lvarpop list2
+    set a1(0) {} ; unset a1(0)
+    set a2(0) {} ; unset a2(0)
+    set a3(0) {} ; unset a3(0)
+    foreach v $list1 {
+        set a1($v) {}
     }
-    return [list $list1Result $intersectList $list2Result]
+    foreach v $list2 {
+        if [info exists a1($v)] {
+            set a2($v) {} ; unset a1($v)
+        } {
+            set a3($v) {}
+        }
+    }
+    list [array names a1] [array names a2] [array names a3]
 }
 
 #
