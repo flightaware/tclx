@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.13 1996/03/10 04:43:01 markd Exp $
+# $Id: Config.mk,v 5.14 1996/03/11 08:14:13 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -43,8 +43,8 @@
 #     ${bldbasedir}/../tk4.0/libtk.a
 #
 # Other macros used in file paths:
-#   o TCLX_SYM_VERSION is the full TclX version.
-#   o TKX_SYM_VERSION is the full TkX version.
+#   o TCLX_FULL_VERSION is the full TclX version.
+#   o TKX_FULL_VERSION is the full TkX version.
 #   o ARCH is either ".arch", as specified to configure, or empty.
 #------------------------------------------------------------------------------
 
@@ -120,13 +120,13 @@ INSTALL_ROOT =
 # The TclX runtime directory that the Extended Tcl runtime files are installed
 # into.
 
-TCLX_INST_RUNTIME=${prefix}/tclX/${TCLX_SYM_VERSION}
+TCLX_INST_RUNTIME=${prefix}/tclX/${TCLX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 # The TkX runtimes that the Tk runtime files are installed into.  A directory
 # whose name is the TkX version number will be built in this directory.
 
-TKX_INST_RUNTIME=${prefix}/tkX/${TKX_SYM_VERSION}
+TKX_INST_RUNTIME=${prefix}/tkX/${TKX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 # The directory to install the tcl, wishx and tclhelp binaries in when the
