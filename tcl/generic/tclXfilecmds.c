@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXfilecmds.c,v 1.1 1992/09/20 23:17:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -451,7 +451,8 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     if (argc == 3)
         return ReturnStatItem (interp, filePtr, &statBuf, argv [2]);
 
-    return ReturnStatList (interp, filePtr, &statBuf);
+    ReturnStatList (interp, filePtr, &statBuf);
+    return TCL_OK;
 
 }
 
