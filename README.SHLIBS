@@ -333,14 +333,19 @@ TclX
         % cp libtkx.so.400.0 /usr/local/lib
         % ln -s libtk.so.400.0 /usr/local/lib/libtk.so
 
-    (7) TclX provides a special target to rebuild the programs with shared
-        libraries.  The -R flag is passed, pointing to the location the
-        libraries are installed.
+    (7) Edit Config.mk to add the -R flag to the TCLX_SHLIBS and TKX_SHLIBS
+        macros:
+
+        TCLX_SHLIBS=-L${TCL_LIBDIR} -R${TCL_LIBDIR} -ltclx -ltcl
+        TKX_SHLIBS=-L${TCL_LIBDIR} -R${TCL_LIBDIR} -ltkx -ltk
+
+    (8) TclX provides a special target to rebuild the programs with shared
+        libraries.
 
         % cd ../..
-        % make shlink LDFLAGS=-R/usr/local/lib
+        % make shlink
         
-    (7) Verify the dependencies
+    (9) Verify the dependencies
 
         % ldd src/tcl
         % ldd tksrc/wishx
@@ -567,18 +572,23 @@ TclX
 
         % cp libtkx.so.400.0 /usr/local/lib
 
-    (7) Can't use TclX's special target, you must rebuild by hand to force the
-        libraries in front.
+    (7) Edit Config.mk to specify the TCLX_SHLIBS and TKX_SHLIBS macros as
+        absolute paths to the shared libraries.  If this is not done the
+        static, older versions of the Tcl libraries that are part of the SCO
+        development system will be picked up.
 
-        % cd ../../src
-        % cc -O -belf tclXAppInit.o /usr/local/lib/libtclx.so.740.0 \
-            /usr/local/lib/libtcl.so.74.0 -lintl  -lsocket -lnsl -lm -o tcl
-        % cd ../tksrc
-        % cc -O -belf tclXAppInit.o /usr/local/lib/libtkx.so.400.0 \
-            /usr/local/lib/libtk.so.40.0  /usr/local/lib/libtclx.so.740.0 \
-            /usr/local/lib/libtcl.so.74.0 -lintl  -lsocket -lnsl -lm -o tcl
+        TCLX_SHLIBS= /usr/local/lib/libtclx.so.740.0 \
+                     /usr/local/lib/libtcl.so.74.0
+        TKX_SHLIBS= /usr/local/lib/libtkx.so.400.0 \
+                    /usr/local/lib/libtk.so.40.0
+
+    (8) TclX provides a special target to rebuild the programs with shared
+        libraries.
+
+        % cd ../..
+        % make shlink LDFLAGS=-belf
         
-    (8) Verify the dependencies.
+    (9) Verify the dependencies.
 
         % ldd src/tcl
         % ldd tksrc/wishx

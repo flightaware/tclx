@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.16 1995/07/16 23:57:54 markd Exp markd $
+# $Id: Makefile.in,v 4.17 1995/07/17 00:33:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -56,8 +56,7 @@ SYMLINKEXT   = ../tools/symlinkext
 LDLIBS = -L. -ltkx -L${TK_UCB_LIB} -ltk ${XLIBSW} \
 	 -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS} ${XLDLIBS}
 
-SHLDLIBS = -L${TCL_LIBDIR} -ltkx -ltk ${XLIBSW} -ltclx -ltcl ${LIBS} \
-	   ${XLDLIBS}
+SHLDLIBS = ${TKX_SHLIBS} ${XLIBSW} ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \

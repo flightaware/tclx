@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.13 1995/07/15 23:08:32 markd Exp markd $
+# $Id: Config.mk,v 4.14 1995/07/17 00:33:07 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -97,6 +97,16 @@ STRIP=strip
 XCFLAGS=
 XLDFLAGS=
 XLDLIBS=
+
+#------------------------------------------------------------------------------
+# Library arguments to use when building share library versions of the TclX
+# programs. This can be user to set absolute paths to shared libraries, etc.
+# This is used on the "make shlink" target.  Shared libraries must still be
+# built by hand, but this makes it easier to link the programs.  See
+# README.SHLIB for details.
+#
+TCLX_SHLIBS=-L${TCL_LIBDIR} -ltclx -ltcl
+TKX_SHLIBS=-L${TCL_LIBDIR} -ltkx -ltk
 
 #------------------------------------------------------------------------------
 # If C++ is to be used to compile support for the class in tcl++.h, then
