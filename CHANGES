@@ -1433,3 +1433,8 @@
 ===============================================================================
 25 Jun 99: Released TclX 8.1.1
 ===============================================================================
+4 Jul 99:
+  o Cleaned up configuration to work better with new Tcl autoconf macros.
+    Deleted Config.mk, all configration variables are set in Common.mk.
+  o --with-tcl and --with-tk now work.
+-------------------------------------------------------------------------------
