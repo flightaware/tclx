@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 2.0 1992/10/16 04:51:02 markd Rel markd $
+ * $Id: tclXmsgcat.c,v 2.1 1993/03/06 21:43:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -339,11 +339,20 @@ void
 Tcl_InitMsgCat (interp)
     Tcl_Interp *interp;
 {
+    int incrUseCount;
 
-    if (msgCatTblPtr == NULL)
+    /*
+     * Set up the table.  It is shared between all interpreters, so the use
+     * count reflects the number of commands mapped into each interpreter.
+     */
+    if (msgCatTblPtr == NULL) {
         msgCatTblPtr = Tcl_HandleTblInit ("msgcat", sizeof (nl_catd), 6);
+        incrUseCount = 2;  /* Init set the use count to 1 */
+    } else {
+        incrUseCount = 3;  /* 3 commands in each interp */
+    }
 
-    (void) Tcl_HandleTblUseCount (msgCatTblPtr, 2);  /* 3 commands total */
+    (void) Tcl_HandleTblUseCount (msgCatTblPtr, incrUseCount);
 
     /*
      * Initialize the commands.
