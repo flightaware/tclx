@@ -37,7 +37,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+# $Id: cpmanpages.tcl,v 4.0 1994/07/16 05:29:12 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -294,7 +294,7 @@ set testName "$targetDir/TclX-long-test-file-name"
 if [catch {open $testName w} fh] {
     puts stdout ""
     puts stdout "*** NOTE: long file names do not appear to be available on"
-    puts stdout "*** this system. Attempt to create a long named file in
+    puts stdout "*** this system. Attempt to create a long named file in"
     puts stdout "*** $targetDir returned the error: $errorCode"
     puts stdout ""
     set longNames 0
