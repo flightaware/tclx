@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.2 1993/02/17 03:00:50 markd Exp markd $
+# $Id: Makefile,v 2.3 1993/04/07 02:40:03 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -28,11 +28,10 @@ TCL.TNDX=../tcllib/tcl.tndx
 
 #------------------------------------------------------------------------------
 
-TCL_SRCS=arrayprocs.tcl   bldtkhelp.tcl    compat.tcl       convlib.tcl    \
-         edprocs.tcl      forfile.tcl      forrecur.tcl     globrecur.tcl  \
-         help.tcl         installTcl.tcl   packages.tcl     profrep.tcl    \
-         pushd.tcl        setfuncs.tcl     showprocs.tcl    stringfile.tcl \
-         tkdemo.tcl       ucblib.tcl      \
+TCL_SRCS=arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
+         forfile.tcl      forrecur.tcl     globrecur.tcl    help.tcl        \
+         packages.tcl     profrep.tcl      pushd.tcl        setfuncs.tcl    \
+         showprocs.tcl    stringfile.tcl  tkdemo.tcl        ucblib.tcl      \
          parray.tcl       ../$(TCL_UCB_DIR)/library/parray.tcl
 
 #------------------------------------------------------------------------------
