@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.3 1997/06/30 06:07:39 markd Exp $
+ * $Id: tclXunixOS.c,v 8.4 1997/06/30 07:57:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1538,8 +1538,9 @@ TclXOSFlock (interp, lockInfoPtr)
     if (stat < 0) {
         lockInfoPtr->gotLock = FALSE;
         TclX_AppendResult (interp, "lock of \"",
-                                    Tcl_GetChannelName (lockInfoPtr->channel),
-                                    "\" failed: ", Tcl_PosixError (interp));
+                           Tcl_GetChannelName (lockInfoPtr->channel),
+                           "\" failed: ", Tcl_PosixError (interp),
+                           (char *) NULL);
         return TCL_ERROR;
     }
 
