@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXstartup.c,v 1.1 1993/07/18 15:50:42 markd Exp markd $
+ * $Id: tkXstartup.c,v 1.2 1993/07/19 06:25:21 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -56,7 +56,8 @@ TkX_Startup (interp, interactive)
                       TCLSH_ABORT_STARTUP_ERR |
                           (interactive ? TCLSH_INTERACTIVE : 0));
 
-    Tcl_SetLibraryDirEnvVar ("TK_LIBRARY",
+    Tcl_SetLibraryDirEnvVar (interp,
+                             "TK_LIBRARY",
                              TK_MASTERDIR,
                              TK_VERSION,
                              TCL_EXTD_VERSION_SUFFIX);

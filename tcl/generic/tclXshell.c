@@ -13,21 +13,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.13 1993/07/19 15:30:04 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.14 1993/07/20 03:43:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
-/*
- * Note: on BSD 4.4 based machines setenv has a third parameter.  Tcl's
- * setenv doesn't have this argument.  The #define games make sure that
- * the prototype doesn't cause the compile to bomb.
- */
-#define setenv IGNORE_SETENV
 #include "tclExtdInt.h"
 #include "patchlevel.h"
-#undef setenv
-
-extern char *getenv ();
 
 extern char *optarg;
 extern int   optind, opterr;
@@ -225,6 +216,7 @@ MergeMasterDirPath (dir, version1, version2, dirPathPtr)
  * does not exist.
  *
  * Parameters:
+ *   o interp - A pointer to the interpreter.
  *   o envVar (I) - Environement variable to set if it does not exist.
  *   o dir (I) - The directory name.
  *   o version1, version2 - Two part version number forming a directory under
@@ -232,19 +224,20 @@ MergeMasterDirPath (dir, version1, version2, dirPathPtr)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_SetLibraryDirEnvVar (envVar, dir, version1, version2)
-    char  *envVar;
-    char  *dir;
-    char  *version1;
-    char  *version2;
+Tcl_SetLibraryDirEnvVar (interp, envVar, dir, version1, version2)
+    Tcl_Interp  *interp;
+    char        *envVar;
+    char        *dir;
+    char        *version1;
+    char        *version2;
 {
     Tcl_DString   masterDir;
 
-    if (getenv (envVar) != NULL)
+    if (Tcl_GetVar (interp, envVar, TCL_GLOBAL_ONLY) != NULL)
         return;
 
     MergeMasterDirPath (dir, version1, version2, &masterDir);
-    setenv (envVar, masterDir.string);
+    Tcl_SetVar (interp, envVar, masterDir.string, TCL_GLOBAL_ONLY);
 
     Tcl_DStringFree (&masterDir);
 
@@ -396,7 +389,8 @@ Tcl_ShellEnvInit (interp, options)
     if (tclAppVersion == NULL)
         tclAppVersion = tclxVersion;
 
-    Tcl_SetLibraryDirEnvVar ("TCL_LIBRARY",
+    Tcl_SetLibraryDirEnvVar (interp,
+                             "TCL_LIBRARY",
                              TCL_MASTERDIR,
                              TCL_VERSION,
                              TCL_EXTD_VERSION_SUFFIX);
