@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.13 1993/08/01 18:30:07 markd Exp markd $
+# $Id: Makefile.in,v 2.14 1993/08/02 04:41:49 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -76,7 +76,7 @@ main.o: patchlevel.h main.c
 
 tclXgetdate.c: tclXgetdate.y
 	${YACC} tclXgetdate.y
-	mv y.tab.c tclXgetdate.c
+	sed 's/yy/TclXyy/g' <y.tab.c >tclXgetdate.c
 
 tcl++.o: tcl++.C tcl++.h
 	${CCPLUS} -c ${CFLAGS} tcl++.C
