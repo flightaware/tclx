@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.12 1997/07/05 09:36:12 markd Exp $
+ * $Id: tclXlib.c,v 8.13 1997/07/10 10:06:41 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -244,7 +244,7 @@ EvalFilePart (interp, fileName, offset, length)
     if (channel == NULL)
         goto errorExit;
 
-    if (TclXOSGetFileSize (channel, TCL_READABLE, &fileSize) == TCL_ERROR)
+    if (TclXOSGetFileSize (channel, &fileSize) == TCL_ERROR)
         goto posixError;
 
     if ((fileSize < offset + length) || (offset < 0)) {

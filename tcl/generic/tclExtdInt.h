@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.16 1997/07/04 22:43:03 markd Exp $
+ * $Id: tclExtdInt.h,v 8.17 1997/07/04 23:59:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -443,6 +443,9 @@ TclXOSBindOpenFile _ANSI_ARGS_((Tcl_Interp *interp,
 extern int
 TclXNotAvailableError _ANSI_ARGS_((Tcl_Interp *interp,
                                    char       *funcName));
+extern int
+TclXNotAvailableObjError _ANSI_ARGS_((Tcl_Interp *interp,
+				      Tcl_Obj *obj));
 
 extern clock_t
 TclXOSTicksToMS _ANSI_ARGS_((clock_t numTicks));
@@ -506,7 +509,6 @@ TclXOSkill _ANSI_ARGS_((Tcl_Interp *interp,
 extern int
 TclXOSFstat _ANSI_ARGS_((Tcl_Interp  *interp,
                          Tcl_Channel  channel,
-                         int          direction,
                          struct stat *statBuf,
                          int         *ttyDev));
     
@@ -524,7 +526,6 @@ TclXOSWalkDir _ANSI_ARGS_((Tcl_Interp       *interp,
 
 extern int
 TclXOSGetFileSize _ANSI_ARGS_((Tcl_Channel  channel,
-                               int          direction,
                                off_t       *fileSize));
 
 extern int
@@ -581,14 +582,6 @@ TclXOSfchmod _ANSI_ARGS_((Tcl_Interp *interp,
                           Tcl_Channel channel,
                           int         mode,
                           char       *funcName));
-
-extern int
-TclXOSChangeOwnGrp _ANSI_ARGS_((Tcl_Interp  *interp,
-                                unsigned     options,
-                                char        *ownerStr,
-                                char        *groupStr,
-                                char       **files,
-                                char       *funcName));
 extern int  
 TclXOSChangeOwnGrpObj _ANSI_ARGS_((Tcl_Interp  *interp,
                                    unsigned     options,
@@ -596,14 +589,6 @@ TclXOSChangeOwnGrpObj _ANSI_ARGS_((Tcl_Interp  *interp,
                                    char        *groupStr,
                                    Tcl_Obj     *fileList,
                                    char        *funcName));
-
-extern int
-TclXOSFChangeOwnGrp _ANSI_ARGS_((Tcl_Interp *interp,
-                                 unsigned    options,
-                                 char       *ownerStr,
-                                 char       *groupStr,
-                                 char      **channelIds,
-                                 char       *funcName));
 
 extern int
 TclXOSFChangeOwnGrpObj _ANSI_ARGS_((Tcl_Interp *interp,

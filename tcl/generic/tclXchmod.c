@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 8.5 1997/06/30 07:57:43 markd Exp $
+ * $Id: tclXchmod.c,v 8.6 1997/07/04 20:23:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -288,7 +288,7 @@ ChmodFileIdObj (interp, modeInfo, fileIdObj)
     }
 
     if (modeInfo.symMode != NULL) {
-        if (TclXOSFstat (interp, channel, 0, &fileStat, NULL) != 0)
+        if (TclXOSFstat (interp, channel, &fileStat, NULL) != 0)
             return TCL_ERROR;
         newMode = ConvSymMode (interp, modeInfo.symMode,
                                fileStat.st_mode & 07777);

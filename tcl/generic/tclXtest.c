@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 8.3 1997/07/01 02:58:06 markd Exp $
+ * $Id: tclXtest.c,v 8.4 1997/07/04 20:24:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,6 +27,13 @@ TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 int
 Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
+/*
+ * If this variable is non-zero, the TclX shell will delete the interpreter
+ * at the end of a script instead of exiting immediately.  This is for
+ * applications that want to track down memory leaks.
+ */
+int tclDeleteInterpAtEnd = FALSE;
 
 /*
  * Error handler proc that causes errors to come out in the same format as

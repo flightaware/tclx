@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.7 1997/07/04 20:23:51 markd Exp $
+ * $Id: tclXgeneral.c,v 8.8 1997/07/10 07:21:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -406,7 +406,7 @@ GlobalImport (interp)
     static char global [] = "global";
     Tcl_Obj *savedResult;
     Tcl_CmdInfo cmdInfo;
-    static int globalObjc = 4;
+#define globalObjc (4)
     Tcl_Obj *globalObjv [globalObjc];
     int idx, code = TCL_OK;
 
@@ -503,7 +503,7 @@ TclX_Try_EvalObjCmd (dummy, interp, objc, objv)
    }
 
     /*
-     * If a finally command is supplied, evaulate it, preserving the error
+     * If a finally command is supplied, evaluate it, preserving the error
      * status.
      */
     if (haveFinally) {

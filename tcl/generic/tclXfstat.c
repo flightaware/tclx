@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.4 1997/06/30 15:35:58 markd Exp $
+ * $Id: tclXfstat.c,v 8.5 1997/07/04 20:23:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -352,7 +352,7 @@ TclX_FstatObjCmd (clientData, interp, objc, objv)
     if (channel == NULL)
         return TCL_ERROR;
     
-    if (TclXOSFstat (interp, channel, 0, &statBuf, &ttyDev)) {
+    if (TclXOSFstat (interp, channel, &statBuf, &ttyDev)) {
         return TCL_ERROR;
     }
 
