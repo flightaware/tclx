@@ -126,16 +126,16 @@ Do the following:
 
     (8) create the .so part of the shared library
 
-	% ld -o libtcl.so.7.1 *.o -assert pure-text   <--- there should be
+	% ld -o libtcl.so.7.4 *.o -assert pure-text   <--- there should be
 							   no complaints from
 							   the assertion
-        % cp libtcl.so.7.1 ../
+        % cp libtcl.so.7.4 ../
 
     (9) create the .sa part of the shared library
 
 	% cd ../
-	% ar rcv libtcl.sa.7.1 tclMtherr.o
-	% ranlib libtcl.sa.7.1
+	% ar rcv libtcl.sa.7.4 tclMtherr.o
+	% ranlib libtcl.sa.7.4
 
    (10) build a version of tclsh using shared libraries
 
@@ -145,7 +145,7 @@ Do the following:
 
             % ldd tclsh.shared
 
-		-ltcl.7 => .//libtcl.so.7.1
+		-ltcl.7 => .//libtcl.so.7.4
 		-lc.1 => /usr/lib/libc.so.1.8
 		-ldl.1 => /usr/lib/libdl.so.1.0
 
@@ -165,7 +165,7 @@ The reason for the patch to tclAppInit.c is to guarantee the tcl-version of
 matherr() is used rather than the system version contained in the math library,
 libm.a. The dummy reference to matherr() creates a demand that is resolved 
 at link time by the tcl-version of matherr() contained in the [static] 
-archive libtcl.sa.7.1. Note that this is a hack since tclMtherr.c contains
+archive libtcl.sa.7.4. Note that this is a hack since tclMtherr.c contains
 no exported, initialized data items. To see see the consequences of these
 actions try :
 
@@ -215,25 +215,29 @@ Do the following:
 
     (7) build a version of wish using shared libaries
 
-        % gcc -O -o wish.shared -L./ -ltk -L../tcl7.1 -ltcl -lX11 -lm
+        % gcc -O -o wish.shared tkAppInit.o -L./ -ltk -L../tcl7.4 -ltcl -lX11 -lm
 
 TCLX
 ----
 
     (1) run configure
-    (2) edit Config.mk: add PIC flag to CFLAGS
-    (3) run make
-    (4) % cd tclmaster/lib
+    (2) make CFLAGS="-fPIC -O" (or -PIC for Sun cc)
+    (3) % cd src/lib
         % mkdir shared
         % cd shared
         % ar xv ../libtclx.a
-        % ld -o libtclx.so.7.1 *.o -assert pure-text
-        % cp libtclx.so.7.1 ../
-    (5) % cd ./tkmaster/lib
+        % ld -o libtclx.so.7.4 *.o -assert pure-text
+        % cp libtclx.so.7.4 ../
+        % cd ..
+        % rm tcl
+        % make
+    (4) % cd tksrc/lib
         % mkdir shared
         % cd shared
         % ar xv ../libtkx.a
         % ld -o libtkx.so.3.4 *.o -assert pure-text
         % cp libtkx.so.3.4 ../
+        % rm wishx
+        % make
 
-    (6) copy the two shared libaries to their final destination
+    (5) copy the two shared libaries to their final destination
