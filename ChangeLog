@@ -1,4 +1,10 @@
-2000-07-20 Brent Welch <welch@ajubasolutions.com>
+2000-08-01 Brent Welch <welch@ajubasolutions.com>
+	* tcl/unix/Makefile.in:
+	* tk/unix/Makefile.in:
+	Fixed bogus "test -f" on the new HELP_DIR directory, which should
+	be "test -d".
+
+2000-07-30 Brent Welch <welch@ajubasolutions.com>
 	* win/Makefile.in - fixed because of new definition of
 	TCL_SRC_DIR and TK_SRC_DIR
 
