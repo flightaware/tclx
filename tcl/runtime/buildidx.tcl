@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 2.0 1992/10/16 04:51:38 markd Rel markd $
+# $Id: buildidx.tcl,v 2.1 1993/05/04 02:57:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -110,11 +110,13 @@ proc TCLSH:CreateLibIndex {libName} {
     scancontext delete $contectHdl
 
     # Set mode and ownership of the index to be the same as the library.
+    # Ignore errors if you can't set the ownership.
 
     file stat $libName statInfo
     chmod $statInfo(mode) $idxName
-    chown [list $statInfo(uid) $statInfo(gid)] $idxName
-
+    catch {
+       chown [list $statInfo(uid) $statInfo(gid)] $idxName
+    }
 }
 
 #------------------------------------------------------------------------------
