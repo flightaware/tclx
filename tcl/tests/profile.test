@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 2.2 1993/05/13 06:07:08 markd Exp markd $
+# $Id: profile.test,v 2.3 1993/05/16 16:24:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -240,9 +240,9 @@ Profile Test 5.1
 ---------------------------------------------------------
 Procedure Call Stack          Calls  Real Time   CPU Time
 ---------------------------------------------------------
+EatTime                          12       2870       1180
 ProcB4                            7         80         11
 ProcA4                            5       1250       1180
-EatTime                           4        800         10
 ProcC4                            3       1000        100
 ProcD4                            1        100       1070
 }
@@ -255,9 +255,9 @@ Profile Test 5.2
 ---------------------------------------------------------
 Procedure Call Stack          Calls  Real Time   CPU Time
 ---------------------------------------------------------
+EatTime                          12       2870       1180
 ProcA4                            5       1250       1180
 ProcC4                            3       1000        100
-EatTime                           4        800         10
 ProcD4                            1        100       1070
 ProcB4                            7         80         11
 }
@@ -271,10 +271,10 @@ Profile Test 5.3
 Procedure Call Stack          Calls  Real Time   CPU Time
 ---------------------------------------------------------
 ProcA4                            5       1250       1180
+EatTime                          12       2870       1180
 ProcD4                            1        100       1070
 ProcC4                            3       1000        100
 ProcB4                            7         80         11
-EatTime                           4        800         10
 }
 
 Test profile-5.4 {profrep tests} {
