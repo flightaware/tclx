@@ -125,7 +125,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.5 
+# From configure.in Revision: 1.6 
 
 
 
@@ -1588,7 +1588,7 @@ else
 fi
 rm -f conftest*
 if test "$XINCLUDES" = nope; then
-    dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include"
+    dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include"
     for i in $dirs ; do
         if test -r $i/X11/Intrinsic.h; then
             XINCLUDES=" -I$i"
@@ -1597,6 +1597,7 @@ if test "$XINCLUDES" = nope; then
 fi
 if test "$XINCLUDES" = nope; then
   echo "Warning:  couldn't find any X11 include files."
+  echo "          set XINCLUDES in Config.mk"
   XINCLUDES="# no include files found"
 fi
 
@@ -1643,9 +1644,11 @@ else
 fi
 
 if test "$XLIBSW" = nope; then
-    dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib"
+    dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"
     for i in $dirs ; do
-        if test -r $i/libX11.a; then
+        if test -r $i/libX11_s.a; then
+            XLIBSW="-L$i -lX11_s"
+        elif test -r $i/libX11.a; then
             XLIBSW="-L$i -lX11"
         fi
     done

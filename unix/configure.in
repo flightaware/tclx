@@ -11,11 +11,11 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.5 1993/08/26 04:55:13 markd Exp markd $
+dnl $Id: configure.in,v 1.6 1993/08/31 23:03:20 markd Exp markd $
 dnl----------------------------------------------------------------------------
 
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.5 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.6 $),)dnl
 
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
@@ -300,7 +300,7 @@ if test "$XINCLUDES" = nope; then
 fi
 if test "$XINCLUDES" = nope; then
   echo "Warning:  couldn't find any X11 include files."
-  echo "          define XINCLUDES in Config.mk"
+  echo "          set XINCLUDES in Config.mk"
   XINCLUDES="# no include files found"
 fi
 AC_SUBST(XINCLUDES)
