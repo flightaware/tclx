@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 5.2 1996/02/20 09:10:12 markd Exp $
+ * $Id: tclXid.c,v 5.3 1996/02/22 07:35:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -374,7 +374,7 @@ IdGroupids (interp, argc, argv, symbolic)
     groups = (gid_t *) ckalloc (confNGroups * sizeof (gid_t));
 
 
-    nGroups = getgroups (NGROUPS, groups);
+    nGroups = getgroups (confNGroups, groups);
     if (nGroups < 0) {
         interp->result = Tcl_PosixError (interp);
         ckfree (groups);
