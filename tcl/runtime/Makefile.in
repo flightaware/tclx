@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.9 1993/07/30 15:05:15 markd Exp markd $
+# $Id: Makefile.in,v 2.10 1993/07/31 04:43:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -77,6 +77,8 @@ ${TCL.TLIB}: ${TCL_SRCS} ${BUILDIDX.TCL} ${TCLINIT.TCL}
 ${MAN}: ${TCLINIT.TCL} ${TCL.TLIB}
 	if [ ! -d ${MAN} ] ; then \
 	    ../runtcl ../tools/cpmanpages.tcl TCL ${MAN_DIR_SEPARATOR} ;\
+	else \
+	    exit 0 ;\
 	fi
 
 #------------------------------------------------------------------------------

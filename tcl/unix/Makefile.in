@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.12 1993/07/30 15:05:15 markd Exp markd $
+# $Id: Makefile.in,v 2.13 1993/08/01 18:30:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -59,7 +59,10 @@ ${TCL}: main.o ${LIBTCLX.A} made.tmp
 	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${LDLIBS} ${XLDLIBS} -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
-	    ${MCS_CMD} ${TCL}; fi
+	    ${MCS_CMD} ${TCL}; \
+	else \
+	    exit 0 ;\
+	fi
 
 made.tmp: ${OBJS} ${CPLUSOBJS}
 	${AR} cr ${LIBTCLX.A} ${OBJS} ${CPLUSOBJS}

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.10 1993/07/30 15:05:15 markd Exp markd $
+# $Id: Makefile.in,v 2.11 1993/08/01 18:30:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -58,8 +58,11 @@ all: made.tmp ${WISHX}
 ${WISHX}: tkMain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
 	${CC} ${CFLAGS} ${XLDFLAGS} tkMain.o ${LDLIBS} ${XLDLIBS} -o ${WISHX}
 	if ${DO_STRIPPING} ; then \
-	    strip ${WISHX}; \
-	    ${MCS_CMD} ${WISHX}; fi
+	    strip ${WISHX}  ;\
+	    ${MCS_CMD} ${WISHX} ;\
+	else \
+	    exit 0 ;\
+	fi
 
 made.tmp: ${OBJS}
 	${AR} cr ${LIBTKX.A} ${OBJS}
