@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 3.3 1994/06/28 15:44:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -205,7 +205,6 @@ Tcl_CommandLoop (interp, interactive)
     int         interactive;
 {
     Tcl_DString cmdBuf;
-    char        inputBuf [128];
     int         topLevel = TRUE;
     int         result;
     FILE       *stdinPtr, *stdoutPtr;
@@ -238,19 +237,27 @@ Tcl_CommandLoop (interp, interactive)
         if (interactive)
             TclX_OutputPrompt (interp, topLevel);
         errno = 0;
-        if (fgets (inputBuf, sizeof (inputBuf), stdinPtr) == NULL) {
-            if (!feof(stdinPtr) && (errno == EINTR)) {
+        result = Tcl_DStringGets (stdinPtr, &cmdBuf);
+
+        if (result == TCL_BREAK)
+            goto endOfFile;
+
+        if (result == TCL_ERROR) {
+            if (errno == EINTR) {
                 putchar('\n');
                 continue;  /* Next command */
             }
-            if (ferror (stdinPtr)) {
-                Tcl_AppendResult (interp, "command input error on stdin: ",
-                                  Tcl_PosixError (interp), (char *) NULL);
-                return TCL_ERROR;
-            }
-            goto endOfFile;
+            Tcl_AppendResult (interp, "command input error on stdin: ",
+                              Tcl_PosixError (interp), (char *) NULL);
+            return TCL_ERROR;
         }
-        Tcl_DStringAppend (&cmdBuf, inputBuf, -1);
+
+        /*
+         * Newline was stripped by Tcl_DStringGets, but is needed for
+         * command-complete checking, add it back in.  If the command is
+         * not complete, get the next line.
+         */
+        Tcl_DStringAppend (&cmdBuf, "\n", 1);
 
         if (!Tcl_CommandComplete (cmdBuf.string)) {
             topLevel = FALSE;
