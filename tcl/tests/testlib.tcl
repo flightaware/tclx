@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 4.2 1995/04/30 05:46:07 markd Exp markd $
+# $Id: testlib.tcl,v 4.3 1995/07/01 17:50:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -61,7 +61,7 @@ if {[info command unknown] != ""} {
 #
 proc OutTestError {test_name test_description contents_of_test
                    passing_int_result passing_result int_result result} {
-    global TEST_ERROR_INFO errorInfo
+    global TEST_ERROR_INFO errorInfo errorCode
     set int(0) TCL_OK
     set int(1) TCL_ERROR
     set int(2) TCL_RETURN
