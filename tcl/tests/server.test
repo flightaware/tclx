@@ -1,8 +1,8 @@
 #
 # server.test
 #
-# Test for server commands.  Some tests will be skipped if we are no on a host
-# on a known development machine, due to difficutly in certain environments.
+# Test for server commands.  Some tests will be skipped if we are not on a
+# known development machine, due to difficutly in certain environments.
 # Set the environment variable TCLX_FULL_TESTS to override.
 #------------------------------------------------------------------------------
 # Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.5 1995/04/02 19:00:01 markd Exp markd $
+# $Id: server.test,v 1.6 1995/04/02 19:41:56 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -152,7 +152,7 @@ Test server-5.5 {server_send argument checking} {
 
 #
 # Determine if we are at a development site we know is good.  If we are, we
-# do more checking.
+# do more checking
 #
 switch -glob -- [id host] {
     {*.neosoft.com} {set safeHost 1}
