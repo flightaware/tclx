@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkdemo.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: tkdemo.tcl,v 4.0 1994/07/16 05:30:38 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -26,7 +26,7 @@ proc tkdemo {} {
     }
     set demos [searchpath $auto_path demos]
     if {$demos == "" || ![file isdirectory $demos]} {
-        error "can't find Tk `demos' directory on the auto_path (auto_path):
+        error "can't find Tk `demos' directory on the auto_path (auto_path)"
     }
     uplevel #0 source $demos/widget
 }
