@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: chmod.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -76,6 +76,7 @@ if {[catch {id group}] != 0} {
 
 # Create the test files.
 
+unlink -nocomplain {CHECK.TMP CHMOD.TMP CHMOD2.TMP}
 exec touch CHECK.TMP CHMOD.TMP CHMOD2.TMP
 
 # Set the umask so that no bits are masked.  Some system chmods use umask
