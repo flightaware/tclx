@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 4.0 1994/07/16 05:24:43 markd Rel markd $
+# $Id: cmdtrace.test,v 4.1 1995/01/01 19:47:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -149,11 +149,76 @@ Test cmdtrace-2.1 {command trace argument error checking} {
 
 Test cmdtrace-2.2 {command trace argument error checking} {
     cmdtrace on foo
-} 1 {invalid option: expected one of "noeval", "notruncate", "procs", or a file id}
+} 1 {invalid option: expected one of "noeval", "notruncate", "procs", "command", or a file id}
 
 Test cmdtrace-2.3 {command trace argument error checking} {
     catch {close file20}
     cmdtrace on file20
 } 1 {file "file20" isn't open}
+
+Test cmdtrace-2.5 {command trace argument error checking} {
+    cmdtrace on command
+} 1 {command option requires an argument}
+
+Test cmdtrace-2.6 {command trace argument error checking} {
+    cmdtrace on file20 command arf
+} 1 {can not specify both the command option and a file handle}
+
+
+# cmdtrace callback.  Can't log level as it might change depending on how
+# the test is run.
+
+set traceout {}
+proc ctcallback {clientdata command argv evalLevel procLevel args} {
+    global traceout
+    expr $evalLevel+1  ;# Error if not a number
+    expr $procLevel+1
+    lappend traceout [list $clientdata $command $argv $args]
+    catch {badcommand}
+}
+
+Test cmdtrace-3.1 {command trace argument error checking} {
+    set errorInfo ERRORINFO
+    set errorCode ERRORCODE
+    cmdtrace on command "ctcallback CD"
+    DoStuff4
+    cmdtrace off
+    lappend traceout $errorInfo $errorCode
+    set traceout
+} 0 [list {CD DoStuff4 DoStuff4 {}} \
+{CD DoStuff3 DoStuff3 {}} \
+{CD DoStuff2 DoStuff2 {}} \
+{CD DoStuff1 DoStuff1 {}} \
+{CD DoStuff DoStuff {}} \
+{CD {{replicate "-TheString-" 10}} {{replicate -TheString- 10}} {}} \
+{CD {{set foo [replicate "-TheString-" 10]}} {{set foo -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
+{CD {{set baz $foo}} {{set baz -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
+{CD {{set wap 1}} {{set wap 1}} {}} \
+{CD {{if {$wap} {
+        set wap 0
+    } else {
+        set wap 1
+    }}} {{if {$wap} {
+        set wap 0
+    } else {
+        set wap 1
+    }}} {}} \
+{CD {{set wap 0}} {{set wap 0}} {}} \
+{CD {{cmdtrace off}} {{cmdtrace off}} {}}\
+ERRORINFO \
+ERRORCODE]
+
+
+Test cmdtrace-3.2 {command trace argument error checking} {
+    exec $TCL_PROGRAM -qc {cmdtrace on command {foo $NOTDEFINED}
+                           puts stderr "EC=$errorCode"
+                           puts stderr "EI=$errorInfo"}
+} 1 {cmdtrace callback command error: errorCode = NONE
+can't read "NOTDEFINED": no such variable
+    while executing
+"foo $NOTDEFINED..."
+    ("cmdtrace" callback command)
+EC=
+EI=}
 
 unlink CMDTRACE.OUT

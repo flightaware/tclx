@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.23 1995/06/29 16:26:53 markd Exp markd $
+.\" $Id: TclX.n,v 4.24 1995/07/03 06:35:43 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -324,7 +324,7 @@ useful for developing and debugging Tcl scripts.
 '\"@help: tcl/debug/cmdtrace
 '\"@brief: Trace Tcl execution.
 .TP
-.B cmdtrace \fIlevel\fR|\fBon\fR ?\fBnoeval\fR? ?\fBnotruncate\fR? ?\fIprocs\fR? ?\fIfileid\fR?
+.B cmdtrace \fIlevel\fR|\fBon\fR ?\fBnoeval\fR? ?\fBnotruncate\fR? ?\fIprocs\fR? ?\fIfileid\fR? ?\fBcommand\fI cmd\fR?
 .br
 Print a trace statement for all commands executed at depth of \fIlevel\fR or
 below (1 is the top level).  If \fBon\fR is specified, all commands at any
@@ -360,7 +360,14 @@ the trace output will be written to the file rather than stdout.  A stdio
 buffer flush is done after every line is written so that the trace may be
 monitored externally or provide useful information for debugging problems that
 cause core dumps.
+.TP
+.B command \fIcmd\fR
+Call the specified command \fIcmd\fR on when each command is executed instead 
+of tracing to a file.
+See the description of the functionally below.
+This option may not be specified with a \fBfileid\fR.
 .RE
+.sp
 The most common use of this command is to enable tracing to a file during the
 development.  If a failure occurs, a trace is then available when needed.
 Command tracing will slow down the execution of code, so it should be
@@ -368,6 +375,35 @@ removed when code is debugged.  The following command will enable tracing
 to a file for the remainder of the program:
 .IP
   cmdtrace on [open cmd.log w]
+.P
+The \fBcommand\fR option causes a user specified trace command to be called
+for each command executed.
+The command will have the following arguments appended to it before evaluation:
+.sp
+.IP
+1) \fIcommand\fR -A string containing the text of the command, before any
+argument substitution.
+.IP
+2) \fIargv\fR - A list of the final argument information that will be passed to
+the command after command, variable, and backslash substitution.
+.IP
+3) \fIevalLevel\fR - The \fBTcl_Eval\fR call level.
+.IP
+4) \fIprocLevel\fR - The procedure call level.
+.P
+The command should be constructed in such a manner that it will work if
+additional arguments are added in the future.  It is suggested that the command
+be a \fBproc\fR with the final argument being \fBargs\fR.
+.sp
+Tracing will be turned off while the command is being executed.  The values
+of the \fBerrorInfo\fR and \fBerrorCode\fR variables will be saved and
+restored on return from the command.  It is the command's responsibility
+to preserve all other state.
+.sp
+If an error occurs during the execution of \fBcommand\fR, an error message
+is dumped to \fRstderr\fR and the tracing is disabled.  The underlying
+mechanism that this functionality is built on does not support returning
+an error to the interpreter.
 .TP
 .B cmdtrace off
 Turn off all tracing.
