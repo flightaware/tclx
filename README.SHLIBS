@@ -239,7 +239,7 @@ Tcl
 
     (2) Compile with the appropriate position-independent-code flag.
 
-        make CFLAGS="-O -K PIC"       <--- SPARCcompiler C
+        make CFLAGS="-O -KPIC"        <--- SPARCcompiler C
         make CFLAGS="-O -fPIC"        <--- GNU gcc
 
     (3) Create a directory named ./shared and extract all of the library
@@ -251,12 +251,12 @@ Tcl
 
     (4) Create the the shared library.
 
-        % ld -o libtcl.so.74.0 *.o -G -ztext
+        % ld -o libtcl.so.740 *.o -G -ztext
 
     (5) Copy the library to it's final location.
 
-        % cp libtcl.so.74.0 /usr/local/lib
-        % ln -s libtcl.so.74.0 /usr/local/lib/libtcl.so
+        % cp libtcl.so.740 /usr/local/lib
+        % ln -s libtcl.so.740 /usr/local/lib/libtcl.so
 
     (6) Build a version of tclsh using shared libraries.
         
@@ -273,19 +273,19 @@ Tk
 
     (1) Run configure.
 
-    (2) make CFLAGS="-O -K PIC"       <--- SPARCcompiler C
+    (2) make CFLAGS="-O -KPIC"        <--- SPARCcompiler C
         make CFLAGS="-O -fPIC"        <--- GNU gcc
 
     (3) % mkdir ./shared
         % cd ./shared
         % ar xv ../libtk.a
 
-    (4) % ld -o libtk.so.40.0 *.o -G -ztext
+    (4) % ld -o libtk.so.400 *.o -G -ztext
 
     (5) Copy the library to it's final location.
 
-        % cp libtk.so.40.0 /usr/local/lib
-        % ln -s libtk.so.40.0 /usr/local/lib/libtk.so
+        % cp libtk.so.400 /usr/local/lib
+        % ln -s libtk.so.400 /usr/local/lib/libtk.so
         
     (5) Build a version of wish using shared libaries.
 
@@ -302,7 +302,7 @@ TclX
 
     (1) Run configure.
 
-    (2) make CFLAGS="-O -K PIC" CXXFLAGS="-O -K PIC"     <--- SPARCcompiler C
+    (2) make CFLAGS="-O -KPIC" CXXFLAGS="-O -KPIC"       <--- SPARCcompiler C
         make CFLAGS="-O -fPIC"  CXXFLAGS="-O -fPIC"      <--- GNU gcc
 
         CXXFLAGS is passed to the C++ compiler.
@@ -317,8 +317,8 @@ TclX
 
     (4) Copy the library to it's final location.
 
-        % cp libtclx.so.740.0 /usr/local/lib
-        % ln -s libtclx.so.740.0 /usr/local/lib/libtclx.so
+        % cp libtclx.so.7400 /usr/local/lib
+        % ln -s libtclx.so.7400 /usr/local/lib/libtclx.so
 
     (5) Create the TkX shared library.
 
@@ -326,12 +326,12 @@ TclX
         % mkdir shared
         % cd shared 
         % ar xv ../libtkx.a
-        % ld -o libtkx.so.400.0 *.o -G -ztext
+        % ld -o libtkx.so.4000 *.o -G -ztext
         
     (6) Copy the library to it's final location.
 
-        % cp libtkx.so.400.0 /usr/local/lib
-        % ln -s libtk.so.400.0 /usr/local/lib/libtk.so
+        % cp libtkx.so.4000 /usr/local/lib
+        % ln -s libtk.so.4000 /usr/local/lib/libtk.so
 
     (7) Edit Config.mk to add the -R flag to the TCLX_SHLIBS and TKX_SHLIBS
         macros:
