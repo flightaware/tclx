@@ -323,12 +323,15 @@
 ./tk/help/tk/control/lower
 ./tk/help/tk/control/option
 ./tk/help/tk/control/pack
+./tk/help/tk/control/pack-old
 ./tk/help/tk/control/place
 ./tk/help/tk/control/raise
 ./tk/help/tk/control/selection
 ./tk/help/tk/control/send
 ./tk/help/tk/control/tk
+./tk/help/tk/control/tk_bisque
 ./tk/help/tk/control/tk_focusNext
+./tk/help/tk/control/tk_setPalette
 ./tk/help/tk/control/tkerror
 ./tk/help/tk/control/tkvars
 ./tk/help/tk/control/tkwait
