@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 7.3 1996/10/04 15:30:14 markd Exp $
+# $Id: buildidx.tcl,v 8.0.4.1 1997/04/14 02:02:01 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -155,4 +155,6 @@ proc buildpackageindex {libfilelist} {
         }
     }
 }
+
+
 

@@ -3,7 +3,7 @@
  *
  *  Chmod, chown and chgrp Tcl commands.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 7.3 1996/08/06 07:15:25 markd Exp $
+ * $Id: tclXchmod.c,v 8.0.4.1 1997/04/14 02:01:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -179,13 +179,13 @@ ConvSymMode (interp, symMode, modeVal)
     return modeVal;
 
   invalidMode:
-    Tcl_AppendResult (interp, "invalid file mode \"", symMode, "\"",
-                      (char *) NULL);
+    TclX_StringAppendObjResult (interp, "invalid file mode \"", symMode, "\"",
+                                (char *) NULL);
     return -1;
 }
 
 /*-----------------------------------------------------------------------------
- * ChmodFileName --
+ * ChmodFileNameObj --
  *   Change the mode of a file by name.
  *
  * Parameters:
@@ -198,18 +198,20 @@ ConvSymMode (interp, symMode, modeVal)
  *-----------------------------------------------------------------------------
  */
 static int
-ChmodFileName (interp, modeInfo, fileName)
+ChmodFileNameObj (interp, modeInfo, fileNameObj)
     Tcl_Interp  *interp;
     modeInfo_t   modeInfo;
-    char        *fileName;
+    Tcl_Obj     *fileNameObj;
 {
     char         *filePath;
     struct stat   fileStat;
     Tcl_DString   pathBuf;
     int           newMode;
+    char         *fileName;
 
     Tcl_DStringInit (&pathBuf);
 
+    fileName = Tcl_GetStringFromObj (fileNameObj, NULL);
     filePath = Tcl_TranslateFileName (interp, fileName, &pathBuf);
     if (filePath == NULL) {
         Tcl_DStringFree (&pathBuf);
@@ -241,7 +243,7 @@ ChmodFileName (interp, modeInfo, fileName)
 }
 
 /*-----------------------------------------------------------------------------
- * ChmodFileId --
+ * ChmodFileIdObj --
  *   Change the mode of a file by file id.
  *
  * Parameters:
@@ -254,18 +256,22 @@ ChmodFileName (interp, modeInfo, fileName)
  *-----------------------------------------------------------------------------
  */
 static int
-ChmodFileId (interp, modeInfo, fileId)
+ChmodFileIdObj (interp, modeInfo, fileIdObj)
     Tcl_Interp  *interp;
     modeInfo_t   modeInfo;
-    char        *fileId;
+    Tcl_Obj     *fileIdObj;
 {
     Tcl_Channel channel;
     struct stat fileStat;
-    int newMode;
+    int         newMode;
+    char       *fileId;
 
+    fileId = Tcl_GetStringFromObj (fileIdObj, NULL);
     channel = TclX_GetOpenChannel (interp, fileId, 0);
-    if (channel == NULL)
+    if (channel == NULL) {
+	TclSetObjResultFromStrResult (interp);
         return TCL_ERROR;
+    }
 
     if (modeInfo.symMode != NULL) {
         if (TclXOSFstat (interp, channel, 0, &fileStat, NULL) != 0)
@@ -285,7 +291,7 @@ ChmodFileId (interp, modeInfo, fileId)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ChmodCmd --
+ * Tcl_ChmodObjCmd --
  *     Implements the TCL chmod command:
  *     chmod [fileid] mode filelist
  *
@@ -295,60 +301,67 @@ ChmodFileId (interp, modeInfo, fileId)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChmodCmd (clientData, interp, argc, argv)
+Tcl_ChmodObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    int           argIdx, idx, fileArgc, fileIds, result;
+    int           objIdx, idx, fileObjc, fileIds, result;
     modeInfo_t    modeInfo;
-    char        **fileArgv;
+    Tcl_Obj     **fileObjv;
+    char         *fileIdsString;
+    int           fileIdsStrLen;
+    char         *modeString;
+    long          modeBits;
 
     /*
      * Options are not parsable just looking for "-", since modes can
      * start with "-".
      */
     fileIds = FALSE;
-    argIdx = 1;
-    if ((argc > 1) && (STREQU (argv [argIdx], FILE_ID_OPT))) {
-        fileIds = TRUE;
-        argIdx++;
+    objIdx = 1;
+    if (objc > 1) {
+	fileIdsString = Tcl_GetStringFromObj (objv [objIdx], &fileIdsStrLen);
+        if (STREQU (fileIdsString, FILE_ID_OPT)) {
+	    fileIds = TRUE;
+	    objIdx++;
+	}
     }
 
-    if (argIdx != argc - 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " [-fileid] mode filelist", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objIdx != objc - 2)
+	return TclX_WrongArgs (interp, objv [0], "[-fileid] mode filelist");
 
-    if (ISDIGIT (argv [argIdx][0])) {
-        if (Tcl_GetInt (interp, argv [argIdx], &modeInfo.absMode) != TCL_OK)
+    modeString = Tcl_GetStringFromObj (objv [objIdx], NULL);
+    if (ISDIGIT (modeString[0])) {
+        if (Tcl_GetIntFromObj (interp, objv [objIdx], &modeBits) 
+	  != TCL_OK)
             return TCL_ERROR;
+	modeInfo.absMode = modeBits;
         modeInfo.symMode = NULL;
     } else {
-        modeInfo.symMode = argv [argIdx];
+        modeInfo.symMode = modeString;
     }
 
-    if (Tcl_SplitList (interp, argv [argIdx + 1], &fileArgc,
-                       &fileArgv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, objv [objIdx + 1], &fileObjc,
+                       &fileObjv) != TCL_OK)
         return TCL_ERROR;
 
     result = TCL_OK;
-    for (idx = 0; (idx < fileArgc) && (result == TCL_OK); idx++) {
+    for (idx = 0; (idx < fileObjc) && (result == TCL_OK); idx++) {
         if (fileIds) {
-            result = ChmodFileId (interp, modeInfo, fileArgv [idx]); 
+            result = ChmodFileIdObj (interp, modeInfo, fileObjv [idx]); 
         } else {
-            result = ChmodFileName (interp, modeInfo, fileArgv [idx]);
+            result = ChmodFileNameObj (interp, modeInfo, fileObjv [idx]);
         }
     }
 
-    ckfree ((char *) fileArgv);
+    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return result;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ChownCmd --
+ * Tcl_ChownObjCmd --
  *     Implements the TCL chown command:
  *     chown [-fileid] userGrpSpec filelist
  *
@@ -359,91 +372,91 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChownCmd (clientData, interp, argc, argv)
+Tcl_ChownObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    int argIdx, ownerArgc, fileArgc, fileIds;
-    char **ownerArgv = NULL, **fileArgv = NULL, *owner, *group;
-    unsigned options;
+    int        objIdx, ownerObjc, fileIds;
+    Tcl_Obj  **ownerObjv = NULL;
+    unsigned   options;
+    char      *fileIdsSwitch;
+    int        fileIdsSwitchLen;
+    char      *owner;
+    int        ownerStrLen;
+    char      *group;
+    int        groupStrLen;
 
     /*
      * Parse options.
      */
     fileIds = FALSE;
-    for (argIdx = 1; (argIdx < argc) && (argv [argIdx] [0] == '-'); argIdx++) {
-        if (STREQU (argv [argIdx], FILE_ID_OPT)) {
+    for (objIdx = 1; objIdx < objc ; objIdx++) {
+	fileIdsSwitch = Tcl_GetStringFromObj (objv[objIdx],
+					      &fileIdsSwitchLen);
+        if (fileIdsSwitchLen == 0 || fileIdsSwitch[0] != '-') break;
+        if (STREQU (fileIdsSwitch, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
-            Tcl_AppendResult (interp, "Invalid option \"", argv [argIdx],
-                              "\", expected \"", FILE_ID_OPT, "\"",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp, "Invalid option \"", 
+		              fileIdsSwitch, "\", expected \"", 
+			      FILE_ID_OPT, "\"", (char *) NULL);
             return TCL_ERROR;
         }
     }
 
-    if (argIdx != argc - 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " [-fileid] user|{user group} filelist",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-
+    if (objIdx != objc - 2)
+	return TclX_WrongArgs (interp, objv[0],
+                          "[-fileid] user|{user group} filelist");
     /*
      * Parse the owner/group parameter.
      */
-    if (Tcl_SplitList (interp, argv [argIdx],
-                       &ownerArgc, &ownerArgv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, objv [objIdx], &ownerObjc,
+				&ownerObjv) != TCL_OK)
         return TCL_ERROR;
 
-    if ((ownerArgc < 1) || (ownerArgc > 2)) {
-        Tcl_AppendResult (interp, "owner arg should be: user or {user group}",
-                          (char *) NULL);
+    if ((ownerObjc < 1) || (ownerObjc > 2)) {
+        TclX_StringAppendObjResult (interp, 
+				    "owner arg should be: user or {user group}",
+                                    (char *) NULL);
         goto errorExit;
     }
     options = TCLX_CHOWN;
-    owner = ownerArgv [0];
+    owner = Tcl_GetStringFromObj (ownerObjv [0], &ownerStrLen);
     group = NULL;
-    if (ownerArgc == 2) {
+    if (ownerObjc == 2) {
         options |= TCLX_CHGRP;
-        if (ownerArgv [1][0] != '\0')
-            group = ownerArgv [1];
+	group = Tcl_GetStringFromObj (ownerObjv [1], &groupStrLen);
+        if (groupStrLen == 0)
+            group = NULL;
     }
-
-    /*
-     * Split the list of file names or channel ids.
-     */
-    if (Tcl_SplitList (interp, argv [argIdx + 1], &fileArgc,
-                       &fileArgv) != TCL_OK)
-        goto errorExit;
 
     /*
      * Finally, change ownership.
      */
     if (fileIds) {
-        if (TclXOSFChangeOwnGrp (interp, options, owner, group,
-                                 fileArgv, "chown -fileid") != TCL_OK)
+        if (TclXOSFChangeOwnGrpObj (interp, options, owner, group,
+				objv [objIdx + 1], "chown -fileid") != TCL_OK)
             goto errorExit;
     } else {
-        if (TclXOSChangeOwnGrp (interp, options, owner, group,
-                                fileArgv, "chown") != TCL_OK)
+        if (TclXOSChangeOwnGrpObj (interp, options, owner, group,
+			       objv [objIdx + 1], "chown") != TCL_OK)
             goto errorExit;
     }
 
-    ckfree ((char *) ownerArgv);
-    ckfree ((char *) fileArgv);
+    /* Tcl_DecrRefCount ((Tcl_Obj *)ownerObjv); ??? */
+    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_OK;
 
   errorExit:
-    ckfree ((char *) ownerArgv);
-    ckfree ((char *) fileArgv);
+    /* Tcl_DecrRefCount ((Tcl_Obj *)ownerObjv); ??? */
+    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ChgrpCmd --
+ * Tcl_ChgrpObjCmd --
  *     Implements the TCL chgrp command:
  *     chgrp [-fileid] group filelist
  *
@@ -453,51 +466,53 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChgrpCmd (clientData, interp, argc, argv)
+Tcl_ChgrpObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    int argIdx, fileArgc, fileIds;
-    char  **fileArgv;
+    int        objIdx, fileIds, fileIdsSwitchLen;
+    char      *fileIdsSwitch;
+    char      *groupString;
 
     fileIds = FALSE;
-    for (argIdx = 1; (argIdx < argc) && (argv [argIdx] [0] == '-'); argIdx++) {
-        if (STREQU (argv [argIdx], FILE_ID_OPT)) {
+    for (objIdx = 1; objIdx < objc; objIdx++) {
+	fileIdsSwitch = Tcl_GetStringFromObj (objv [objIdx],
+					      &fileIdsSwitchLen);
+        if (fileIdsSwitchLen == 0 || fileIdsSwitch[0] != '-') break;
+        if (STREQU (fileIdsSwitch, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
-            Tcl_AppendResult (interp, "Invalid option \"", argv [argIdx],
+            TclX_StringAppendObjResult (interp, 
+			      "Invalid option \"", fileIdsSwitch,
                               "\", expected \"", FILE_ID_OPT, "\"",
                               (char *) NULL);
             return TCL_ERROR;
         }
     }
 
-    if (argIdx != argc - 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " [-fileid] group filelist", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objIdx != objc - 2)
+	return TclX_WrongArgs (interp, objv [0], "[-fileid] group filelist");
 
-    if (Tcl_SplitList (interp, argv [argIdx + 1], &fileArgc,
-                       &fileArgv) != TCL_OK)
-        return TCL_ERROR;
+    groupString = Tcl_GetStringFromObj (objv [objIdx], NULL);
     
     if (fileIds) {
-        if (TclXOSFChangeOwnGrp (interp, TCLX_CHGRP, NULL, argv [argIdx],
-                                 fileArgv, "chgrp - fileid") != TCL_OK)
+        if (TclXOSFChangeOwnGrpObj (interp, TCLX_CHGRP, NULL, groupString,
+				objv [objIdx + 1], "chgrp - fileid") != TCL_OK)
             goto errorExit;
     } else {
-        if (TclXOSChangeOwnGrp (interp, TCLX_CHGRP, NULL, argv [argIdx],
-                                fileArgv, "chgrp") != TCL_OK)
+        if (TclXOSChangeOwnGrpObj (interp, TCLX_CHGRP, NULL, groupString,
+			       objv [objIdx + 1], "chgrp") != TCL_OK)
             goto errorExit;
     }
 
-    ckfree ((char *) fileArgv);
+    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_OK;
 
   errorExit:
-    ckfree ((char *) fileArgv);
+    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_ERROR;
 }
+
+

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkdemo.tcl,v 7.0 1996/06/16 05:33:55 markd Exp $
+# $Id: tkdemo.tcl,v 8.0.4.1 1997/04/14 02:03:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -30,5 +30,7 @@ proc tkdemo {} {
     }
     uplevel #0 source $demos/widget
 }
+
+
 
 

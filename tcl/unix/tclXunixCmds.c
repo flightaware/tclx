@@ -4,7 +4,7 @@
  * Tcl commands to access unix system calls that are not portable to other
  * platforms.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixCmds.c,v 7.2 1996/07/22 17:10:16 markd Exp $
+ * $Id: tclXunixCmds.c,v 8.0.4.1 1997/04/14 02:02:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,7 +21,7 @@
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_ChrootCmd --
+ * Tcl_ChrootObjCmd --
  *     Implements the TCL chroot command:
  *         chroot path
  *
@@ -31,29 +31,32 @@
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChrootCmd (clientData, interp, argc, argv)
+Tcl_ChrootObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " path", 
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    char   *chrootString;
+    int     chrootStrLen;
 
-    if (chroot (argv [1]) < 0) {
-        Tcl_AppendResult (interp, "changing root to \"", argv [1],
-                          "\" failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
+    if (objc != 2)
+	return TclX_WrongArgs (interp, objv [0], "path");
+
+    chrootString = Tcl_GetStringFromObj (objv [1], &chrootStrLen);
+
+    if (chroot (chrootString) < 0) {
+        TclX_StringAppendObjResult (interp, "changing root to \"", 
+				    chrootString,
+                                    "\" failed: ", Tcl_PosixError (interp),
+                                    (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_TimesCmd --
+ * Tcl_TimesObjCmd --
  *     Implements the TCL times command:
  *     times
  *
@@ -63,25 +66,28 @@ Tcl_ChrootCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_TimesCmd (clientData, interp, argc, argv)
+Tcl_TimesObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     struct tms tm;
+    char       timesBuf [48];
 
-    if (argc != 1) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 1)
+	return TclX_WrongArgs (interp, objv [0], "");
 
     times (&tm);
 
-    sprintf (interp->result, "%ld %ld %ld %ld", 
+    sprintf (timesBuf, "%ld %ld %ld %ld", 
              TclXOSTicksToMS (tm.tms_utime),
              TclXOSTicksToMS (tm.tms_stime),
              TclXOSTicksToMS (tm.tms_cutime),
              TclXOSTicksToMS (tm.tms_cstime));
+
+    Tcl_SetStringObj (Tcl_GetObjResult (interp), timesBuf, -1);
     return TCL_OK;
 }
+
+

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 8.2 1997/04/14 00:52:17 markd Exp $
+# $Id:$
 #------------------------------------------------------------------------------
 #
 
@@ -32,6 +32,7 @@ TKX_FULL_VERSION   = @TKX_FULL_VERSION@
 #
 CC           = @CC@
 CFLAGS       = @CFLAGS@
+SYSCFLAGS    = @SYSCFLAGS@
 RANLIB       = @RANLIB@
 LN_S         = ln -s
 srcbasedir   = @srcbasedir@
@@ -136,4 +137,6 @@ BLDMANHELP         = ${RUNTCL} ${bldbasedir}/unix/tools/bldmanhelp
 CONVERTLIB         = ${RUNTCL} ${srcbasedir}/unix/tools/libconvert.tcl
 INSTCOPY           = ${RUNTCL} ${bldbasedir}/unix/tools/instcopy
 CPMANPAGES         = ${RUNTCL} ${bldbasedir}/unix/tools/cpmanpages
+
+
 

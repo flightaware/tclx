@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.6 1997/04/08 16:39:47 markd Exp $
+dnl $Id: configure.in,v 8.7 1997/04/14 00:34:59 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.6 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.7 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -255,7 +255,15 @@ if test "X$CC" = "X"; then
 else
     AC_MSG_RESULT(using C compiler specified in by CC env var: $CC)
 fi
+AC_PROG_CC
+case "$GCC" in
+   YES|yes)
+        SYSCFLAGS="-pipe";;
+   NO|no)
+        SYSCFLAGS="";;
+esac
 AC_SUBST(CC)
+AC_SUBST(SYSCFLAGS)
 AC_PROG_RANLIB
 
 #------------------------------------------------------------------------------
@@ -694,4 +702,6 @@ fi
 AC_SUBST(TCLX_LIBS)
 
 AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxConfig.sh ../tk/unix/tkxConfig.sh ../tcl/unix/pkgIndex.tcl ../tk/unix/pkgIndex.tcl)
+
+
 

@@ -6,7 +6,7 @@
  * functionallity, however they can't be implemented as backwards
  * compatibility procs.
  *---------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 7.4 1996/08/20 03:50:00 markd Exp $
+ * $Id: tclXunixSock.c,v 8.0.4.1 1997/04/14 02:02:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -356,3 +356,5 @@ TclX_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_create", Tcl_ServerCreateCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 }
+
+

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 7.7 1996/10/04 15:30:19 markd Exp $
+# $Id: fcntl.test,v 8.0.4.1 1997/04/14 02:02:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -201,3 +201,5 @@ if $doSocketTests {
 }
 
 TestRemove FCNTL1.TMP FCNTL2.TMP FCNTL3.TMP
+
+

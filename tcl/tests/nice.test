@@ -94,7 +94,7 @@ if {[id user] != "root"} {
             set stat [list $stat $msg]
         }
         set stat
-    } 0 1
+    } 0 {1 {}}
 
     puts "*************************************************************"
     puts "Notice: You are not running as `root', certain nice tests"
@@ -120,3 +120,5 @@ Test nice-1.12 {nice tests} {
 } 0 [list [expr $niceBase+3+4-1-9-10-1] [expr $niceBase+3+4-1-9-10-1]]
 
 exit
+
+

@@ -1,5 +1,5 @@
 .\"
-.\" CmdWrite.3
+.\" ObjCmdWrite.3
 .\"
 .\" Command writing manual.
 .\"----------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: CmdWrite.3,v 8.0.4.1 1997/04/14 02:01:29 markd Exp $
+.\" $Id: ObjCmdWrite.3,v 1.1.2.1 1997/04/14 02:01:31 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Command Writing" TCL "" "Tcl"
@@ -24,16 +24,43 @@ TclCommandWriting - Writing C language extensions to Tcl.
 This document is intended to help the programmer who wishes to extend
 Tcl with C language routines.  It should also be useful to someone
 wishing to add Tcl to an existing editor, communications program, 
-window manager, etc.
-C programming
-information can also be found in the \fI*.3\fR manual pages in the
-\fIdoc\fR directory of the Berkeley distribution, and in the \fI*.3\fR 
-manpages in the \fIman\fR directory of Extended Tcl.
+window manager, etc.  Experienced extension writers may find this manual
+helpful in rewriting their applications to use the new Tcl object system.
+We assume you are already fluent in the C programming language and that
+you have built and installed Tcl on your machine.
+.PP
+Information on the available C interface routines to Tcl can be found in 
+the \fI*.3\fR manual pages in the \fIdoc\fR directory of the baseline Tcl 
+distribution, and in the \fI*.3\fR manpages in the \fIdoc\fR directory of 
+Extended Tcl.
 '
+.SH TCL OBJECTS
+'
+With the release of Tcl version 8, Tcl has a new system for managing Tcl 
+values internally.  The new objects look and act like strings externally,
+but they now also can hold cached internal representations of the strings,
+for example, a string containing an integer along with it's machine-code
+integer representation.  Using these objects is much more efficient than
+using the older-style Tcl strings, although the older style is still
+currently supported.
+.PP
+Although the object system has almost no effect at all on how the Tcl
+programmer uses Tcl, the object system's C interfaces to strings, integers,
+lists, etc., have changed considerably.
+.PP
+We have chosen, then, to rewrite the Command Writer's manpage, which has
+been shipping with Extended Tcl for a number of yours, to produce this
+new version, based on the new object system.  The old manpage, based on
+the older string-oriented routines, will still be included in TclX releases
+for the time being.  The old manual will be dropped from the release once
+we deem it unneeded; the old interfaces should now be considered legacy
+interfaces, and all new development should be done using the new object
+interfaces, unless backwards compatibility to pre-Tcl-8 releases is needed.
+
 .SH WRITING TCL EXTENSIONS IN C
 All C-based Tcl commands are called with four arguments: a client data pointer,
 an interpreter pointer, an argument count and a pointer to an array of
-pointers to character strings containing the Tcl arguments to the command.
+Tcl objects containing the Tcl arguments to the command.
 .PP
 A simple Tcl extension in C is now presented, and described below:
 .sp
@@ -41,17 +68,20 @@ A simple Tcl extension in C is now presented, and described below:
 .ft CW
     #include "tcl.h"
 
-    int App_EchoCmd(clientData, interp, argc, argv)
-        void       *clientData;
-        Tcl_Interp *interp;
-        int         argc;
-        char      **argv;
+    int App_DumpArgsObjCmd(clientData, interp, objc, objv)
+        void          *clientData;
+        Tcl_Interp    *interp;
+        int            objc;
+        Tcl_Obj      **objv;
     {
-            int i;
+            int   i;
+	    int   stringLen;
+	    char *stringPtr;
 
-            for (i = 1; i < argc; i++) {
-                    printf("%s",argv[i]);
-		    if (i < argc - 1) printf(" ");
+            for (i = 1; i < objc; i++) {
+		    stringPtr = Tcl_GetStringFromObj (objv [i], &stringLen);
+                    printf("%s", stringPtr);
+		    if (i < objc - 1) printf(" ");
             }
             printf("\\n");
             return TCL_OK;
@@ -69,53 +99,86 @@ and all of the subordinate structures that branch off of it, make up a
 Tcl interpreter, which includes all of the currently defined 
 procedures, commands, variables, arrays and the execution state of that
 interpreter.  (For more information on creating and deleting interpreters,
-please examine the \fBCrtInterp\fR(3) manpage in the Berkeley Tcl distribution.
+please examine the \fBCrtInterp\fR(3) manpage in the core Tcl distribution.
 For information on creating interpreters that include the commands provided
 by Extended Tcl, check out the \fBTclX_Init\fR(3) manpage of Extended
 Tcl.
 For a manual page describing the user-visible fields of a Tcl interpreter,
-please look at \fBInterp\fR(3) in Berkeley Tcl.)
+please look at \fBInterp\fR(3) in core Tcl.)
 .PP
-The argument count and pointer to an array of pointers to textual arguments
-is handled by your C code in the same manner that you would use in writing a
-C \fImain\fR function -- the argument count and array of pointers
-works the same
-as in a C \fImain\fR call; pointers to the arguments to the function are
-contained
-in the \fIargv\fR array.  Similar to a C main, the first argument
-(\fIargv[0]\fR) is the
-name the routine was called as (in a main, the name the program
-was invoked as).
+The argument count, or object count (objc), and pointer to an array of 
+pointers to Tcl objects of the command's arguments (objv) is handled by your 
+C code, in a manner similar to the one you would use in writing a C \fImain\fR 
+function -- an argument count and array of pointers works the same as in a 
+C \fImain\fR call; pointers to the arguments to the function are contained in 
+the \fIobjv\fR array.  Similar to a C main, the first argument 
+(\fIobjv[0]\fR) is the name the routine was called as (in a main, the name 
+the program was invoked as).
+.PP
+In Tcl, however, the array of pointers are not pointers to character
+strings (although they were in all version of Tcl before 8.0).
 .PP
 In the above example, all of the arguments are output with a space between
-each one by looping through \fIargv\fR from one to the argument count,
-\fIargc\fR, and a
+each one by looping through \fIobjv\fR from one to the argument count,
+\fIobjv\fR, and a
 newline is output to terminate the line -- an ``echo'' command.
+Of course, this example uses printf for simplicity -- you would need to
+learn the Tcl filesystem interfaces, see \fBGetFile\fR(3) and friends.
 .PP
-All arguments from a Tcl call to a Tcl C extension are passed as strings.
-If your C routine expects certain numeric arguments, your routine must first
-convert them using the \fBTcl_GetInt\fR or \fBTcl_GetDouble\fR
-function, Extended Tcl's \fBTcl_GetLong\fR or \fBTcl_GetUnsigned\fR,
-or some other method of your own devising.  Likewise for converting
-boolean values, \fBTcl_GetBoolean\fR should be used.
+All arguments from a Tcl call to a Tcl C extension are passed as Tcl Objects.
+If your C routine wants to look at one of those arguments as an integer, 
+you need to make a call to a routine to fetch the representation of the
+object that you need.  In the earlier example, for instance, 
+\fBTcl_GetStringFromObj\fR is called to obtain a textual representation
+of an object.  Additional routines are available to fetch the representation
+of a data element as other data types.  Tcl_GetBooleanFromObj,
+Tcl_GetDoubleFromObj, GetIntFromObj and Tcl_GetIndexFromObj fetch object
+representations of Tcl strings as booleans, double-precision floating point,
+integer, and lists, among others.
+.PP
 These routines automatically leave an appropriate error message in
-the Tcl interpreter's result buffer and return \fBTCL_ERROR\fR if
+the Tcl interpreter's result object and return \fBTCL_ERROR\fR if
 a conversion error occurs.   (For more information on these
-routines, please look at the \fBGetInt\fR(3) manpage in the
-Berkeley Tcl distribution.)
+routines, please look at the \fBObject\fR(3) manpage in the
+core Tcl distribution.)
 .PP
 Likewise, if you program produces a numeric result, it should
-return a string equivalent to that numeric value.  A common way of doing
-this is something like...
+set the result object to contain that numeric value.  
+A common way of doing this is something like...
 .sp
 .nf
 .ft CW
-	sprintf(interp->result, "%ld", result);
+        Tcl_Obj *obj;
+
+        obj = Tcl_GetObjResult (interp);
+	Tcl_SetIntObj (obj, value);
 .ft R
 .fi
 .PP
-Writing results directly into the interpreter's result buffer is only
-good for relatively short results.  Tcl has a function, \fBTcl_SetResult\fR,
+The above code obtains a pointer to the result object (an object made
+available to your routine that you're supposed to store your results
+into) and sets the integer value \fIvalue\fR into it.
+.PP
+Another way to do it would be to set up a new object and set it as the
+result...
+.sp
+.nf
+.ft CW
+        Tcl_Obj *resultObj;
+
+        /* create a new for use as a result */
+	resultObj = Tcl_NewObj ();
+
+	Tcl_SetIntObj (obj, value);
+	Tcl_SetObjResult (interp, resultObj);
+.ft R
+.fi
+.PP
+The old technique of writing small results directory into the interpreter's
+result buffer is no longer used.
+
+***********
+
 which provides the ability for your C
 extensions to return very large strings to Tcl, with the ability to
 tell the interpreter whether it ``owns'' the string (meaning that Tcl should 
@@ -300,7 +363,7 @@ to the specified interpreter.  The client data pointer and callback
 function pointer are NULL.  (For complete information on
 \fBTcl_CreateCommand\fR and its companion routine, \fBTcl_CommandInfo\fR,
 please examine the \fBCrtCommand\fR(3) command page in the
-Berkeley Tcl distribution.)
+core Tcl distribution.)
 .PP
 .SH DYNAMIC STRINGS
 .PP
@@ -313,7 +376,7 @@ of appending information to them.  DStrings reduce the amount of
 allocating and copying required to add information to a string.
 Further, they simplify the process of doing so.  For complete information
 on dynamic strings, please examine the \fBDString\fR(3) manual page in
-the Berkeley Tcl distribution.
+the core Tcl distribution.
 .PP
 .SH CLIENT DATA
 .PP
@@ -470,7 +533,7 @@ when an interpreter is deleted.  To arrange for a C function to be
 called when the interpreter is deleted, call \fBTcl_CallWhenDeleted\fR
 from your application initialization routine.  For details on how to
 use this function, read the \fBCallDel\fR(3) manual page that ships with
-Berkeley Tcl.
+core Tcl.
 .PP
 .SH EXECUTING TCL CODE FROM YOUR C EXTENSION
 
@@ -492,7 +555,7 @@ set from C extensions through the \fBTcl_SetVar\fR and
 the \fBTcl_UnsetVar\fR and \fBTcl_UnsetVar2\fR functions.
 For complete information on these functions,
 please refer to the \fBSetVar\fR(3) manual
-page in the \fIdoc\fR directory of the Berkeley Tcl distribution.
+page in the \fIdoc\fR directory of the core Tcl distribution.
 .PP
 .SH LINKING TCL VARIABLES TO C VARIABLES
 
@@ -513,7 +576,7 @@ variable will be updated to have the same value.
 .PP
 \fIInt\fR, \fIdouble\fR, \fIboolean\fR and \fIchar *\fR variables
 are supported.  For more information, please examine the \fBLinkVar\fR(3)
-manual page in the Berkeley Tcl distribution.
+manual page in the core Tcl distribution.
 .PP
 .SH ADDING NEW MATH FUNCTIONS TO TCL
 As of Tcl version 7.0, math functions such as \fIsin\fR, \fIcos\fR, etc,
@@ -525,7 +588,7 @@ New math functions can be added to Tcl, or existing math functions
 can be replaced, by calling \fBTcl_CreateMathFunc\fR.
 .PP
 For more information on adding math functions, please examine the
-\fBCrtMathFnc\fR(3) manual page in the Berkeley Tcl distribution.
+\fBCrtMathFnc\fR(3) manual page in the core Tcl distribution.
 .PP
 .SH PERFORMING TILDE SUBSTITUTIONS ON FILENAMES
 
@@ -534,7 +597,7 @@ to perform tilde substitutions on filenames.  If the name starts
 with a ``~'' character, the function returns a new string where
 the name is replaced with the home directory of the given user.
 For more information please consult the \fBTildeSubst\fR(3) manual
-page in the Berkeley Tcl distribution.
+page in the core Tcl distribution.
 .PP
 .SH SETTING THE RECURSION LIMIT
 
@@ -546,7 +609,7 @@ or, worse, available swap space on the system, are exceeded.
 The default limit is just a guess, however, and applications that make
 heavy use of recursion may need to call \fBTcl_SetRecursionLimit\fR
 to raise this limit.  For more information, please consult the
-\fBSetRecLmt\fR(3) manual page in the Berkeley Tcl distribution.
+\fBSetRecLmt\fR(3) manual page in the core Tcl distribution.
 .PP
 .SH HANDLING SIGNALS FROM TCL EXTENSIONS
 
@@ -564,7 +627,7 @@ The \fBTcl_AsyncCreate\fR, \fBTcl_AsyncMark\fR, \fBTcl_AsyncInvoke\fR,
 and \fBTcl_AsyncDelete\fR functions provide a safe mechanism for dealing
 with signals and other asynchronous events.  For more information on how
 to use this capability, please refer to the \fBAsync\fR(3) manual page
-in the Berkeley Tcl distribution.
+in the core Tcl distribution.
 
 .SH PARSING BACKSLASH SEQUENCES
 
@@ -575,7 +638,7 @@ so forth.  \fBTcl_Backslash\fR parses a single backslash sequence and
 returns a single character corresponding to the backslash sequence.
 .PP
 For more info on this call, look at the \fBBackslash\fR(3) manual page
-in the Berkeley Tcl distribution.  For information on the valid backslash
+in the core Tcl distribution.  For information on the valid backslash
 sequences, consult the summary of Tcl language syntax, \fBTcl\fR(n)
 in the same distribution.
 .PP
@@ -595,7 +658,7 @@ and the seemingly inevitable growth in amount of data processed
 per run over the life of the program.
 .PP
 For more information on hash tables, please consult the \fBHash\fR(3) manual
-page in the Berkeley Tcl distribution.
+page in the core Tcl distribution.
 .PP
 .SH TRACING VARIABLE ACCESSES
 
@@ -613,7 +676,7 @@ already has an array name in one string and a variable name in another,
 request information about traces and to delete them.
 .PP
 For more information on variable traces, consult the \fBTraceVar\fR(3)
-manual page in the Berkeley Tcl distribution.
+manual page in the core Tcl distribution.
 .PP
 .SH TRACING EXECUTION
 
@@ -626,7 +689,7 @@ Command tracing is used in Extended Tcl to implement the
 Tcl applications.
 .PP
 For complete information on execution tracing, please look at
-the \fBCrtTrace\fR(3) manual pages in the Berkeley Tcl distribution.
+the \fBCrtTrace\fR(3) manual pages in the core Tcl distribution.
 .PP
 .SH EVALUATING TCL EXPRESSIONS FROM C
 
@@ -639,7 +702,7 @@ result is either a C \fIlong\fR, a \fIdouble\fR, a boolean
 .PP
 For complete information on evaluating Tcl expressions from C, you
 are invited to examine the \fBExprLong\fR(3) manpage in the
-Berkeley Tcl distribution.
+core Tcl distribution.
 .PP
 .SH PATTERN MATCHING
 
@@ -650,7 +713,7 @@ patterns is identical.  The pattern format is similar to the one
 used by the C-shell; \fBstring\fR(n) describes this format.
 .PP
 More information about \fBTcl_StringMatch\fR is available in
-the \fBStrMatch\fR(3) manpage in the Berkeley Tcl distribution.
+the \fBStrMatch\fR(3) manpage in the core Tcl distribution.
 .PP
 .SH REGULAR EXPRESSION PATTERN MATCHING
 \fBTcl_RegExpMatch\fR can be called to determine whether
@@ -658,7 +721,7 @@ a string matches a regular expression.  \fBTcl_RegExpMatch\fR
 is used internally by the \fIregexp\fR Tcl command.
 .PP
 For more information on this function, please consult
-the \fBRegExp\fR(3) manpage in the Berkeley Tcl distribution.
+the \fBRegExp\fR(3) manpage in the core Tcl distribution.
 .PP
 .SH MANIPULATING TCL LISTS FROM C EXTENSIONS
 
@@ -673,7 +736,7 @@ do most of the work of \fBTcl_Merge\fR, and may also be of use
 to the C programmer.
 .PP
 For more information on these commands, please consult the
-\fBSplitList\fR(3) manual page in the Berkeley Tcl distribution.
+\fBSplitList\fR(3) manual page in the core Tcl distribution.
 .PP
 .SH CONCATENATING STRINGS
 
@@ -683,7 +746,7 @@ works like \fITcl_Merge\fR, except that \fBTcl_Concat\fR does
 not attempt to make the resulting string into a valid Tcl list.
 .PP
 \fBTcl_Concat\fR is documented in the \fBConcat\fR(3) manpage
-in the Berkeley Tcl distribution.
+in the core Tcl distribution.
 .PP
 .SH DETECTING WHETHER OR NOT YOU HAVE A COMPLETE COMMAND
 
@@ -695,7 +758,7 @@ typed-in Tcl input such as Tcl shells need this capability.)
 complete command.
 .PP
 For more information examine \fBCmdCmplt\fR(3) in the
-Berkeley Tcl distribution.
+core Tcl distribution.
 .PP
 .SH RECORDING COMMANDS FOR COMMAND HISTORY
 
@@ -711,7 +774,7 @@ the user to easily access, edit and reissue previously issued
 commands.
 .PP
 For complete information on this function, please examine the
-\fBRecordEval\fR.3 manual page in the Berkeley Tcl distribution.
+\fBRecordEval\fR.3 manual page in the core Tcl distribution.
 .PP
 .SH CONVERTING FLOATING POINT VALUES TO STRINGS
 
@@ -725,7 +788,7 @@ string is controlled by the Tcl \fBtcl_precision\fR
 variable.
 .PP
 For complete information on \fITcl_PrintDouble\fR,
-examine \fBPrintDbl\fR(3) in the Berkeley
+examine \fBPrintDbl\fR(3) in the core
 Tcl distribution.
 .PP
 .SH CREATING CHILD PROCESSES AND PIPELINES FROM C
@@ -747,7 +810,7 @@ passed to your C extension can be translated to a Posix
 \fIFILE *\fR structure using the \fBTcl_GetOpenFile\fR function.
 .PP
 For complete explanations of these commands, please look at
-\fBEnterFile\fR(3) in the Berkeley Tcl distribution.
+\fBEnterFile\fR(3) in the core Tcl distribution.
 
 .SH MANAGING BACKGROUND PROCESS TERMINATION AND CLEANUP
 
@@ -769,7 +832,7 @@ detect the termination of any processes turned over to Tcl,
 permitting the processes to be fully reclaimed by the operating system.
 .PP
 For complete information on these routines, please look at
-\fIDetachPids(3)\fR in the Berkeley Tcl distribution.
+\fIDetachPids(3)\fR in the core Tcl distribution.
 .PP
 .SH FOR MORE INFORMATION
 .PP

@@ -12,12 +12,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showproc.test,v 7.1 1996/10/04 05:02:47 markd Exp $
+# $Id: showproc.test,v 8.0.4.1 1997/04/14 02:02:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
+
 
 set testProcVar {proc testproc testVar {
     return 1
@@ -54,4 +56,7 @@ Test showproc-1.3 {showproc command} {
 unset testProcVar
 rename testproc ""
 rename unknown {}
+
+
+
 

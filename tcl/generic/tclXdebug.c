@@ -3,7 +3,7 @@
  *
  * Tcl command execution trace command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 7.3 1996/11/20 00:50:15 markd Exp $
+ * $Id: tclXdebug.c,v 8.0.4.1 1997/04/14 02:01:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -207,6 +207,8 @@ TraceCode (infoPtr, level, command, argc, argv)
         Tcl_Write (infoPtr->channel, "  ", 2);
 
     if (infoPtr->noEval) {
+        /* FIX: 8.0a2 bug, command always NULL */
+        command = "*** noeval option broken with 8.0a2 ***";
         cmdLen = printLen = strlen (command);
         if ((!infoPtr->noTruncate) && (printLen > CMD_TRUNCATE_SIZE))
             printLen = CMD_TRUNCATE_SIZE;
@@ -549,13 +551,13 @@ DebugCleanUp (clientData, interp)
 
 /*
  *-----------------------------------------------------------------------------
- * Tcl_InitDebug --
+ * TclX_DebugInit --
  *
  *  Initialize the TCL debugging commands.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_InitDebug (interp)
+TclX_DebugInit (interp)
     Tcl_Interp *interp;
 {
     traceInfo_pt infoPtr;
@@ -577,5 +579,7 @@ Tcl_InitDebug (interp)
     Tcl_CreateCommand (interp, "cmdtrace", Tcl_CmdtraceCmd, 
                        (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 }
+
+
 
 

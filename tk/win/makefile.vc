@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.8 1996/11/19 22:39:34 markd Exp $
+# $Id: makefile.vc,v 8.0.4.1 1997/04/14 02:03:07 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -177,4 +177,6 @@ $(TMP_DIR)\tkSquare.obj: $(TK_GENERIC_DIR)\tkSquare.c
 
 {$(TKX_WIN_DIR)}.rc{$(TMP_DIR)}.res:
         $(rc32) -fo $@ -r -i $(TCLX_GENERIC_DIR) -i $(TCLX_WIN_DIR) $<
+
+
 

@@ -3,7 +3,7 @@
  *
  * Tcl command to create and manage processes.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 7.2 1996/07/22 17:10:08 markd Exp $
+ * $Id: tclXprocess.c,v 8.0.4.1 1997/04/14 02:01:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,7 +32,7 @@
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ForkCmd --
+ * Tcl_ForkObjCmd --
  *     Implements the TCL fork command:
  *     fork
  *
@@ -42,18 +42,16 @@
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ForkCmd (clientData, interp, argc, argv)
+Tcl_ForkObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    if (argc != 1) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 1)
+	return TclX_WrongArgs (interp, objv [0], "");
 
-    return TclXOSfork (interp, argv [0]);
+    return TclXOSfork (interp, objv [0]);
 }
 
 /*
@@ -276,3 +274,5 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
                       "than zero", (char *) NULL);
     return TCL_ERROR;
 }
+
+

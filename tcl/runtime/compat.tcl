@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 8.0.2.1 1996/12/22 08:50:24 markd Exp $
+# $Id:$
 #------------------------------------------------------------------------------
 #
 
@@ -257,4 +257,6 @@ proc frename {old new} {
     }
     file rename $old $new
 }
+
+
 

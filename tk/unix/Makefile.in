@@ -27,9 +27,9 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${SYSCFLAGS} \
               ${TK_DEFS} \
-	      -I${TKX_GENERIC_DIR} \
+	      -I${TKX_GENERIC_DIR} -I${TKX_UNIX_SRC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
 	      -I${TCLX_UNIX_BLD_DIR} \
@@ -128,6 +128,7 @@ tkXshell..o: ${TKX_GENERIC_DIR}/tkXshell.c
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
 	    ${TKX_GENERIC_DIR}/tkXshell.c
 	@OBJ_RESTORE@
+
 
 #------------------------------------------------------------------------------
 # We need the "help" directory here so that the help command will work before
@@ -263,3 +264,5 @@ distclean: clean
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:
+
+

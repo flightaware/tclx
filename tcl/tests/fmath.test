@@ -14,12 +14,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fmath.test,v 7.1 1996/10/04 05:02:33 markd Exp $
+# $Id: fmath.test,v 8.0.4.1 1997/04/14 02:02:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
 
 set F_E	        2.71828
 set F_LN10	2.30258
@@ -127,4 +128,7 @@ Test fmath-1.21 {math error tests} {
 } 1 {floating-point value too large to represent}
 
 rename unknown {}
+
+
+
 

@@ -3,7 +3,7 @@
  *
  * Tcl performance profile monitor.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,6 +14,10 @@
  *-----------------------------------------------------------------------------
  * $Id:$
  *-----------------------------------------------------------------------------
+ */
+
+/*
+ * FIX: What about compiled commands???
  */
 
 #include "tclExtdInt.h"
@@ -64,24 +68,26 @@ typedef struct profDataEntry_t {
  */
 
 typedef struct profInfo_t { 
-    Tcl_Interp     *interp;            /* Interpreter this is for.           */
-    Tcl_Trace       traceHandle;       /* Handle to current trace.           */
-    int             commandMode;       /* Prof all commands, not just procs. */
-    int             evalMode;          /* Use eval stack, not scope stack.   */
-    Command        *currentCmdPtr;     /* Current Tcl command table entry.   */
-    Tcl_CmdProc    *savedCmdProc;      /* Saved command executor function.   */
-    ClientData      savedCmdClientData;/* Save command clientData.           */
-    int             evalLevel;         /* Eval level when invoked.           */
-    clock_t         realTime;          /* Current real and CPU time.         */
+    Tcl_Interp     *interp;                /* Interpreter this is for.       */
+    Tcl_Trace       traceHandle;           /* Handle to current trace.       */
+    int             commandMode;           /* Prof all commands?             */
+    int             evalMode;              /* Use eval stack.                */
+    Command        *currentCmdPtr;         /* Current command table entry.   */
+    Tcl_CmdProc    *savedStrCmdProc;       /* Saved string command function  */
+    ClientData      savedStrCmdClientData; /* and clientData.                */
+    Tcl_ObjCmdProc *savedObjCmdProc;       /* Saved object command function  */
+    ClientData      savedObjCmdClientData; /* and clientData.                */
+    int             evalLevel;             /* Eval level when invoked.       */
+    clock_t         realTime;              /* Current real and CPU time.     */
     clock_t         cpuTime;
-    clock_t         prevRealTime;      /* Real and CPU time of previous      */
-    clock_t         prevCpuTime;       /* trace.                             */
-    int             updatedTimes;      /* Has current times been updated?    */
-    profEntry_t    *stackPtr;          /* Proc/command nesting stack.        */
-    int             stackSize;         /* Size of the stack.                 */
-    profEntry_t    *scopeChainPtr;     /* Variable scope chain.              */
-    Tcl_HashTable   profDataTable;     /* Cumulative time table, Keyed by    */
-                                       /* call stack list.                   */
+    clock_t         prevRealTime;          /* Real and CPU time of previous  */
+    clock_t         prevCpuTime;           /* trace.                         */
+    int             updatedTimes;          /* Has current times been updated?*/
+    profEntry_t    *stackPtr;              /* Proc/command nesting stack.    */
+    int             stackSize;             /* Size of the stack.             */
+    profEntry_t    *scopeChainPtr;         /* Variable scope chain.          */
+    Tcl_HashTable   profDataTable;         /* Cumulative time table, Keyed   */
+                                           /* by call stack list.            */
 } profInfo_t;
 
 /*
@@ -110,11 +116,26 @@ PopEntry _ANSI_ARGS_((profInfo_t *infoPtr));
 static void
 UpdateTOSTimes _ANSI_ARGS_((profInfo_t *infoPtr));
 
+static Command *
+ProfCommandEvalSetup _ANSI_ARGS_((profInfo_t *infoPtr,
+                                  char       *cmdName,
+                                  int        *isProcPtr));
+    
+static void
+ProfCommandEvalFinishup _ANSI_ARGS_((profInfo_t *infoPtr,
+                                     int         isProc));
+
 static int
-ProfCommandEval _ANSI_ARGS_((ClientData    clientData,
-                             Tcl_Interp   *interp,
-                             int           argc,
-                             char        **argv));
+ProfStrCommandEval _ANSI_ARGS_((ClientData    clientData,
+                                Tcl_Interp   *interp,
+                                int           argc,
+                                char        **argv));
+
+static int
+ProfObjCommandEval _ANSI_ARGS_((ClientData    clientData,
+                                Tcl_Interp   *interp,
+                                int           objc,
+                                Tcl_Obj     **objv));
 
 static void
 ProfTraceRoutine _ANSI_ARGS_((ClientData    clientData,
@@ -147,10 +168,10 @@ TurnOffProfiling _ANSI_ARGS_((Tcl_Interp *interp,
                               char       *varName));
 
 static int
-Tcl_ProfileCmd _ANSI_ARGS_((ClientData    clientData,
-                            Tcl_Interp   *interp,
-                            int           argc,
-                            char        **argv));
+TclX_ProfileObjCmd _ANSI_ARGS_((ClientData   clientData,
+                                Tcl_Interp  *interp,
+                                int          objc,
+                                Tcl_Obj    **objv));
 
 static void
 ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -372,39 +393,43 @@ UpdateTOSTimes (infoPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * ProfCommandEval --
- *   Function to evaluate a command.  The procedure trace routine substitutes
- * this function for the command executor function in the Tcl command table.
- * We restore the command table, record data about the start of the command
- * and then actually execute the command.  When the command returns, we record
- * data about the time it took.
+ * ProfCommandEvalSetup --
+ *   Do initial work that is common to both the string and object command
+ * evaluators.
  *
- * FIX:  This all falls apart if another trace is executed between the
- * doctoring of the command entry and this function being called.
+ * Returns:
+ *   A pointer to the current command table entry.
  *-----------------------------------------------------------------------------
  */
-static int
-ProfCommandEval (clientData, interp, argc, argv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           argc;
-    char        **argv;
+static Command *
+ProfCommandEvalSetup (infoPtr, cmdName, isProcPtr)
+    profInfo_t *infoPtr;
+    char       *cmdName;
+    int        *isProcPtr;
 {
-    Interp *iPtr = (Interp *) interp;
-    profInfo_t *infoPtr = (profInfo_t *) clientData;
+    Interp *iPtr = (Interp *) infoPtr->interp;
     Command *currentCmdPtr;
     CallFrame *framePtr;
-    int procLevel, scopeLevel, isProc, result;
+    int procLevel, scopeLevel, isProc;
 
     /*
-     * Restore the command table entry.
+     * Restore the command table entry.  If the command has modified it, don't
+     * mess with it.
      */
     currentCmdPtr = infoPtr->currentCmdPtr;
-    currentCmdPtr->proc = infoPtr->savedCmdProc;
-    currentCmdPtr->clientData = infoPtr->savedCmdClientData;
+    if (currentCmdPtr->proc == ProfStrCommandEval)
+        currentCmdPtr->proc = infoPtr->savedStrCmdProc;
+    if (currentCmdPtr->clientData == infoPtr)
+        currentCmdPtr->clientData = infoPtr->savedStrCmdClientData;
+    if (currentCmdPtr->objProc == ProfObjCommandEval)
+        currentCmdPtr->objProc = infoPtr->savedObjCmdProc;
+    if (currentCmdPtr->objClientData == infoPtr)
+        currentCmdPtr->objClientData = infoPtr->savedObjCmdClientData;
     infoPtr->currentCmdPtr = NULL;
-    infoPtr->savedCmdProc = NULL;
-    infoPtr->savedCmdClientData = NULL;
+    infoPtr->savedStrCmdProc = NULL;
+    infoPtr->savedStrCmdClientData = NULL;
+    infoPtr->savedObjCmdProc = NULL;
+    infoPtr->savedObjCmdClientData = NULL;
 
     /*
      * Determine current proc and var levels.
@@ -433,7 +458,7 @@ ProfCommandEval (clientData, interp, argc, argv)
      * If this command is a procedure or if all commands are being traced,
      * handle the entry.
      */
-     isProc = (TclFindProc (iPtr, argv [0]) != NULL);
+     isProc = (TclFindProc (iPtr, cmdName) != NULL);
 #ifdef ITCL_NAMESPACES      
     if (infoPtr->commandMode || isProc) {
         char *commandNamesp;
@@ -463,10 +488,10 @@ ProfCommandEval (clientData, interp, argc, argv)
     if (infoPtr->commandMode || isProc) {
         UpdateTOSTimes (infoPtr);
         if (isProc) {
-            PushEntry (infoPtr, argv [0], TRUE,
+            PushEntry (infoPtr, cmdName, TRUE,
                        procLevel + 1, scopeLevel + 1, infoPtr->evalLevel);
         } else {
-            PushEntry (infoPtr, argv [0], FALSE,
+            PushEntry (infoPtr, cmdName, FALSE,
                        procLevel, scopeLevel, infoPtr->evalLevel);
         }
     }
@@ -476,12 +501,21 @@ ProfCommandEval (clientData, interp, argc, argv)
      */
     infoPtr->updatedTimes = FALSE;
 
-    /*
-     * Call the command we intercepted.
-     */
-    result = (*currentCmdPtr->proc) (currentCmdPtr->clientData, interp,
-                                     argc, argv);
-
+    *isProcPtr = isProc;
+    return currentCmdPtr;
+}
+
+/*-----------------------------------------------------------------------------
+ * ProfCommandEvalFinishup --
+ *   Do final work that is common to both the string and object command
+ * evaluators.
+ *-----------------------------------------------------------------------------
+ */
+static void
+ProfCommandEvalFinishup (infoPtr, isProc)
+    profInfo_t *infoPtr;
+    int         isProc;
+{
     /*
      * If tracing is still running, pop the entry, recording the information.
      */
@@ -495,7 +529,73 @@ ProfCommandEval (clientData, interp, argc, argv)
      * Leaving profiler, must get time again when we reenter.
      */
     infoPtr->updatedTimes = FALSE;
+}
+
+/*-----------------------------------------------------------------------------
+ * ProfStrCommandEval --
+ *   Function to evaluate a string command.  The procedure trace routine
+ * substitutes this function for the command executor function in the Tcl
+ * command table.  We restore the command table, record data about the start
+ * of the command and then actually execute the command.  When the command
+ * returns, we record data about the time it took.
+ *
+ * FIX:  This all falls apart if another trace is executed between the
+ * doctoring of the command entry and this function being called.
+ *-----------------------------------------------------------------------------
+ */
+static int
+ProfStrCommandEval (clientData, interp, argc, argv)
+    ClientData    clientData;
+    Tcl_Interp   *interp;
+    int           argc;
+    char        **argv;
+{
+    profInfo_t *infoPtr = (profInfo_t *) clientData;
+    Command *currentCmdPtr;
+    int isProc, result;
 
+    currentCmdPtr = ProfCommandEvalSetup (infoPtr, argv [0], &isProc);
+
+    result = (*currentCmdPtr->proc) (currentCmdPtr->clientData, interp,
+                                     argc, argv);
+
+    ProfCommandEvalFinishup (infoPtr, isProc);
+    return result;
+}
+
+/*-----------------------------------------------------------------------------
+ * ProfObjCommandEval --
+ *   Function to evaluate a object command.  The procedure trace routine
+ * substitutes this function for the command executor function in the Tcl
+ * command table.  We restore the command table, record data about the start
+ * of the command and then actually execute the command.  When the command
+ * returns, we record data about the time it took.
+ *
+ * FIX:  This all falls apart if another trace is executed between the
+ * doctoring of the command entry and this function being called.
+ *-----------------------------------------------------------------------------
+ */
+static int
+ProfObjCommandEval (clientData, interp, objc, objv)
+    ClientData    clientData;
+    Tcl_Interp   *interp;
+    int           objc;
+    Tcl_Obj     **objv;
+{
+    profInfo_t *infoPtr = (profInfo_t *) clientData;
+    Command *currentCmdPtr;
+    int isProc, result, strLen;
+
+    /* FIX: Need version of ProfCommandEvalSetup that takes an object */
+    currentCmdPtr = ProfCommandEvalSetup (infoPtr, 
+                                          Tcl_GetStringFromObj (objv [0],
+                                                                &strLen),
+                                          &isProc);
+
+    result = (*currentCmdPtr->objProc) (currentCmdPtr->objClientData, interp,
+                                        objc, objv);
+
+    ProfCommandEvalFinishup (infoPtr, isProc);
     return result;
 }
 
@@ -541,13 +641,29 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     if ((cmdPtr->proc != cmdProc) || (cmdPtr->clientData != cmdClientData))
         panic (PROF_PANIC, 6);
 
+    /*
+     * If command is to be compiled, we can't profile it.
+     */
+    if (cmdPtr->compileProc != NULL)
+        return;
+
+    /*
+     * Save current state information.
+     */
     infoPtr->currentCmdPtr = cmdPtr;
-    infoPtr->savedCmdProc = cmdPtr->proc;
-    infoPtr->savedCmdClientData = cmdPtr->clientData;
+    infoPtr->savedStrCmdProc = cmdPtr->proc;
+    infoPtr->savedStrCmdClientData = cmdPtr->clientData;
+    infoPtr->savedObjCmdProc = cmdPtr->objProc;
+    infoPtr->savedObjCmdClientData = cmdPtr->objClientData;
     infoPtr->evalLevel = evalLevel;
 
-    cmdPtr->proc = ProfCommandEval;
-    cmdPtr->clientData = clientData;
+    /*
+     * Force our routines to be called.
+     */
+    cmdPtr->proc = ProfStrCommandEval;
+    cmdPtr->clientData = infoPtr;
+    cmdPtr->objProc = ProfObjCommandEval;
+    cmdPtr->objClientData = infoPtr;
 }
 
 /*-----------------------------------------------------------------------------
@@ -593,11 +709,16 @@ InitializeProcStack (infoPtr, framePtr)
     profInfo_t *infoPtr;
     CallFrame  *framePtr;
 {
+    int nameLen;  /* FIX: remove when NULL is allowed in GetString */
+
     if (framePtr == NULL)
         return;
     InitializeProcStack (infoPtr, framePtr->callerPtr);
     
-    PushEntry (infoPtr, framePtr->argv[0], TRUE,
+        
+    PushEntry (infoPtr,
+               Tcl_GetStringFromObj (framePtr->objv [0], &nameLen),
+               TRUE,
                infoPtr->stackPtr->procLevel + 1,
                framePtr->level,
                UNKNOWN_LEVEL);
@@ -700,6 +821,7 @@ DeleteProfTrace (infoPtr)
  *   o varName - The name of the variable to save the data in.
  * Returns:
  *   TCL_OK or TCL_ERROR.
+ * FIX: Should take Tcl_Obj for varName.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -751,50 +873,62 @@ TurnOffProfiling (interp, infoPtr, varName)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ProfileCmd --
+ * TclX_ProfileObjCmd --
  *   Implements the TCL profile command:
  *     profile ?-commands? ?-eval? on
  *     profile off arrayvar
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ProfileCmd (clientData, interp, argc, argv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           argc;
-    char        **argv;
+TclX_ProfileObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj    **objv;
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
-    int argIdx, commandMode = FALSE, evalMode = FALSE;
+    int argIdx, strLen;
+    int commandMode = FALSE, evalMode = FALSE;
+    char *argStr;
         
     /*
      * Parse option arguments.
      */
-    for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
-        if (STREQU (argv [argIdx], "-commands")) {
+    for (argIdx = 1; argIdx < objc; argIdx++) {
+        argStr = Tcl_GetStringFromObj (objv [argIdx], &strLen);
+        if (argStr[0] != '-')
+            break;
+        if (STREQU (argStr, "-commands")) {
             commandMode = TRUE;
-        } else if (STREQU (argv [argIdx], "-eval")) {
+        } else if (STREQU (argStr, "-eval")) {
             evalMode = TRUE;
         } else {
-            Tcl_AppendResult (interp, "expected one of \"-commands\", or ",
-                              "\"-eval\", got \"", argv [argIdx], "\"",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp,
+                                        "expected one of \"-commands\", or ",
+                                        "\"-eval\", got \"", argStr,
+                                        (char *) NULL);
             return TCL_ERROR;
         }
     }
-    if (argIdx >= argc)
+    if (argIdx >= objc)
         goto wrongArgs;
+
+    /*
+     * Get argument string for remainder of strings.
+     */
+    argStr = Tcl_GetStringFromObj (objv [argIdx], &strLen);
     
     /*
      * Handle the on command.
      */
-    if (STREQU (argv [argIdx], "on")) {
-        if (argIdx != argc - 1)
+    if (STREQU (argStr, "on")) {
+        if (argIdx != objc - 1)
             goto wrongArgs;
 
         if (infoPtr->traceHandle != NULL) {
-            Tcl_AppendResult (interp, "profiling is already enabled",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp,
+                                        "profiling is already enabled",
+                                        (char *) NULL);
             return TCL_ERROR; 
         }
 
@@ -805,26 +939,29 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
     /*
      * Handle the off command.  Dump the hash table to a variable.
      */
-    if (STREQU (argv [argIdx], "off")) {
+    if (STREQU (argStr, "off")) {
 
-        if (argIdx != argc - 2)
+        if (argIdx != objc - 2)
             goto wrongArgs;
 
         if (commandMode || evalMode) {
-            Tcl_AppendResult (interp, "option \"",
-                              commandMode ? "-command" : "-eval",
-                              "\" not valid when turning off profiling",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp, "option \"",
+                                        commandMode ? "-command" : "-eval",
+                                        "\" not valid when turning off ",
+                                        "profiling", (char *) NULL);
             return TCL_ERROR;
         }
 
         if (infoPtr->traceHandle == NULL) {
-            Tcl_AppendResult (interp, "profiling is not currently enabled",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp,
+                                        "profiling is not currently enabled",
+                                        (char *) NULL);
             return TCL_ERROR;
         }
             
-        if (TurnOffProfiling (interp, infoPtr, argv [argIdx + 1]) != TCL_OK)
+        if (TurnOffProfiling (interp, infoPtr, 
+                              Tcl_GetStringFromObj (objv [argIdx + 1],
+                                                    &strLen)) != TCL_OK)
             return TCL_ERROR;
         return TCL_OK;
     }
@@ -832,14 +969,14 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
     /*
      * Not a valid subcommand.
      */
-    Tcl_AppendResult (interp, "expected one of \"on\" or \"off\", got \"",
-                      argv [1], "\"", (char *) NULL);
+    TclX_StringAppendObjResult (interp,
+                                "expected one of \"on\" or \"off\", got \"",
+                                argStr, "\"", (char *) NULL);
     return TCL_ERROR;
 
   wrongArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                      " ?-commands? ?-eval? on|off arrayVar", (char *) NULL);
-    return TCL_ERROR;
+    return TclX_WrongArgs (interp, objv [0],
+                           "?-commands? ?-eval? on|off arrayVar");
 }
 
 /*-----------------------------------------------------------------------------
@@ -867,7 +1004,7 @@ ProfMonCleanUp (clientData, interp)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_InitProfile (interp)
+TclX_ProfileInit (interp)
     Tcl_Interp *interp;
 {
     profInfo_t *infoPtr;
@@ -879,8 +1016,10 @@ Tcl_InitProfile (interp)
     infoPtr->commandMode = FALSE;
     infoPtr->evalMode = FALSE;
     infoPtr->currentCmdPtr = NULL;
-    infoPtr->savedCmdProc = NULL;
-    infoPtr->savedCmdClientData = NULL;
+    infoPtr->savedStrCmdProc = NULL;
+    infoPtr->savedStrCmdClientData = NULL;
+    infoPtr->savedObjCmdProc = NULL;
+    infoPtr->savedObjCmdClientData = NULL;
     infoPtr->evalLevel = UNKNOWN_LEVEL;
     infoPtr->realTime = 0;
     infoPtr->cpuTime = 0;
@@ -894,7 +1033,9 @@ Tcl_InitProfile (interp)
 
     Tcl_CallWhenDeleted (interp, ProfMonCleanUp, (ClientData) infoPtr);
 
-    Tcl_CreateCommand (interp, "profile", Tcl_ProfileCmd, 
-                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "profile", -1, TclX_ProfileObjCmd,
+                          (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 }
+
+
 

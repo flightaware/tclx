@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: msgcat.test,v 7.2 1996/10/04 05:02:42 markd Exp $
+# $Id: msgcat.test,v 8.0.4.1 1997/04/14 02:02:30 markd Exp $
 #------------------------------------------------------------------------------
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
@@ -113,4 +113,6 @@ Test message-cat-3.5 {catgets tests} {
     catgets $msgcat 102 "This is an actual emergency"
 } 1 {wrong # args: catgets catHandle setnum msgnum defaultstr}
 catch {catclose $msgcat}
+
+
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: edprocs.tcl,v 7.0 1996/06/16 05:31:17 markd Exp $
+# $Id: edprocs.tcl,v 8.0.4.1 1997/04/14 02:02:03 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -54,3 +54,5 @@ proc edprocs {args} {
     unlink $tmpFilename
     return
 }
+
+

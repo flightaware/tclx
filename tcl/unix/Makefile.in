@@ -26,7 +26,7 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${SYSCFLAGS} \
 	      ${TCL_DEFS} ${TCLX_DEFS} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
 	      -I${TCLX_UNIX_BLD_DIR} \
@@ -668,3 +668,5 @@ distclean: clean
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:
+
+

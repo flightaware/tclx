@@ -12,12 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.test,v 7.2 1996/10/04 15:30:18 markd Exp $
+# $Id: convlib.test,v 8.0.4.1 1997/04/14 02:02:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
 
 catch {file delete -force convlib.tmp}
 file mkdir convlib.tmp
@@ -74,4 +75,7 @@ LibValidate convlib-1.3 {Convert library tests}
 
 TestRemove convlib.tmp
 rename unknown {}
+
+
+
 

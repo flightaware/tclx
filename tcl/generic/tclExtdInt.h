@@ -3,7 +3,7 @@
  *
  * Standard internal include file for Extended Tcl.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.15 1996/10/04 15:30:11 markd Exp $
+ * $Id: tclExtdInt.h,v 8.0.4.1 1997/04/14 02:01:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,10 +34,19 @@
 #include "tclInt.h"
 
 /*
+ * Assert macro for use in TclX.  It is controlled by our own #define, not
+ * NDEBUG, but other than that, it is a wrapper around assert.
+ */
+#if TCLX_DEBUG
+#   define TCLX_ASSERT(expr) (assert (expr))
+#else
+#   define TCLX_ASSERT(expr)
+#endif
+
+/*
  * Get ranges of integers and longs.
  * If no MAXLONG, assume sizeof (long) == sizeof (int).
  */
-
 #ifndef MAXINT
 #    ifdef INT_MAX	/* POSIX */
 #        define MAXINT INT_MAX
@@ -91,7 +100,7 @@ typedef struct {
 } Tcl_SubMatchInfo [NSUBEXP];
 
 /*
- * Flags used by TclX_RegExpCompile:
+ * Flags used by TclX_RegExpCompileObj:
  */
 #define TCLX_REXP_NO_CASE         1   /* Do matching regardless of case    */
 #define TCLX_REXP_BOTH_ALGORITHMS 2   /* Use boyer-moore along with regexp */
@@ -160,6 +169,7 @@ typedef struct {
  * Used to return argument messages by most commands.
  */
 extern char *tclXWrongArgs;
+extern Tcl_Obj *tclXWrongArgsObj;
 
 /*
  * Macros to do string compares.  They pre-check the first character before
@@ -226,6 +236,11 @@ TclX_GetOpenChannel _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *handle,
                                  int         direction));
 
+extern Tcl_Channel
+TclX_GetOpenChannelObj _ANSI_ARGS_((Tcl_Interp *interp,
+                                    Tcl_Obj    *handle,
+                                    int         direction));
+
 extern int
 Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
                            CONST char *string,
@@ -235,10 +250,10 @@ extern void
 TclX_RegExpClean _ANSI_ARGS_((TclX_regexp *regExpPtr));
 
 extern int
-TclX_RegExpCompile _ANSI_ARGS_((Tcl_Interp   *interp,
-                                TclX_regexp  *regExpPtr,
-                                char         *expression,
-                                int          flags));
+TclX_RegExpCompileObj _ANSI_ARGS_((Tcl_Interp   *interp,
+                                   TclX_regexp  *regExpPtr,
+                                   Tcl_Obj      *expression,
+                                   int          flags));
 
 extern int
 TclX_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
@@ -249,10 +264,10 @@ TclX_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
 
 
 extern int
-Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
-                              char        *cstringExpr,
-                              long         stringLen,
-                              long        *exprResultPtr));
+TclX_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
+                               Tcl_Obj     *exprPtr,
+                               long         stringLen,
+                               long        *exprResultPtr));
 
 extern int
 TclXRuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
@@ -270,6 +285,14 @@ extern char *
 TclX_JoinPath _ANSI_ARGS_((char        *path1,
                            char        *path2,
                            Tcl_DString *joinedPath));
+
+extern int  
+TclX_WrongArgs _ANSI_ARGS_((Tcl_Interp *interp, 
+                            Tcl_Obj    *commandNameObj, 
+			    char       *string));
+
+extern void
+TclX_StringAppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
 
 /*
  * Definitions required to initialize all extended commands.  These are either
@@ -292,13 +315,16 @@ Tcl_BsearchCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  * from tclXchmod.c
  */
 extern int 
-Tcl_ChmodCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_ChmodObjCmd _ANSI_ARGS_((ClientData clientData, 
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_ChownCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_ChownObjCmd _ANSI_ARGS_((ClientData clientData, 
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_ChgrpCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_ChgrpObjCmd _ANSI_ARGS_((ClientData clientData, 
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 /*
  * from tclXcmdloop.c
  */
@@ -309,13 +335,13 @@ Tcl_CommandloopCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  * from tclXdebug.c
  */
 extern void
-Tcl_InitDebug _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_DebugInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXdup.c
  */
-extern int 
-Tcl_DupCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+TclX_DupInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXfcntl.c
@@ -327,19 +353,25 @@ Tcl_FcntlCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  * from tclXfilecmds.c
  */
 extern int 
-Tcl_PipeCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_PipeObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_CopyfileCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_CopyfileObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
 Tcl_LgetsCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int
-Tcl_FtruncateCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_FtruncateObjCmd _ANSI_ARGS_((ClientData clientData, 
+                                 Tcl_Interp   *interp, 
+				 int           objc,
+				 Tcl_Obj     **objv));
 
 extern int
-Tcl_ReaddirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_ReaddirObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 /*
  * from tclXfstat.c
@@ -367,13 +399,16 @@ Tcl_InitFilescan _ANSI_ARGS_((Tcl_Interp *interp));
  */
 
 extern int 
-Tcl_EchoCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_EchoObjCmd _ANSI_ARGS_((ClientData clientData, 
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_InfoxCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_InfoxObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_LoopCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_LoopObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 /*
  * from tclXid.c
@@ -384,17 +419,8 @@ Tcl_IdCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 /*
  * from tclXkeylist.c
  */
-extern int 
-Tcl_KeyldelCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_KeylgetCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_KeylkeysCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_KeylsetCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+TclX_KeyedListInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXlib.c
@@ -405,32 +431,14 @@ TclX_LibraryInit _ANSI_ARGS_((Tcl_Interp *interp));
 /*
  * from tclXlist.c
  */
-extern int 
-Tcl_LvarpopCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_LvarcatCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_LvarpushCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_LemptyCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_LassignCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_LmatchCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_LcontainCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+TclX_ListInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXmath.c
  */
 extern void
-Tcl_InitMath _ANSI_ARGS_((Tcl_Interp*));
+Tcl_InitMath _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXmsgcat.c
@@ -445,7 +453,8 @@ extern int
 Tcl_ExeclCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
-Tcl_ForkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_ForkObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
 Tcl_WaitCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
@@ -454,7 +463,7 @@ Tcl_WaitCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  * from tclXprofile.c
  */
 void
-Tcl_InitProfile _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_ProfileInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXselect.c
@@ -471,35 +480,8 @@ Tcl_InitSignalHandling _ANSI_ARGS_((Tcl_Interp *interp));
 /*
  * from tclXstring.c
  */
-extern int 
-Tcl_CindexCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_ClengthCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int
-Tcl_CconcatCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CrangeCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CcollateCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_ReplicateCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_TranslitCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CtypeCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CtokenCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CequalCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+TclX_StringInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXlib.c
@@ -511,34 +493,47 @@ Tcl_InitLibrary _ANSI_ARGS_((Tcl_Interp *interp));
  * from tclXoscmds.c
  */
 extern int 
-Tcl_AlarmCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_AlarmObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_LinkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_LinkObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_NiceCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_NiceObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_SleepCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_SleepObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_SyncCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_SyncObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_SystemCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_SystemObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 extern int 
-Tcl_UmaskCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_UmaskObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj **objv));
 
 /*
  * from tclXunixCmds.c or tclXwinCmds.c
  */
 extern int 
-Tcl_ChrootCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_ChrootObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp, 
+			      int         objc,
+			      Tcl_Obj     **objv));
 
 extern int 
-Tcl_TimesCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+Tcl_TimesObjCmd _ANSI_ARGS_((ClientData   clientData,
+                             Tcl_Interp  *interp,
+			     int          objc,
+			     Tcl_Obj      **objv));
 
 
 /*
@@ -550,10 +545,10 @@ TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
                              int         remoteHost));
 
 extern int
-Tcl_HostInfoCmd _ANSI_ARGS_((ClientData  clientData,
-                             Tcl_Interp *interp,
-                             int         argc,
-                             char      **argv));
+Tcl_HostInfoObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   **objv));
 
 /*
  * from tclXunixSock.c and stubbed in tclXwinCmds.c.
@@ -572,7 +567,7 @@ TclXOSDupChannel _ANSI_ARGS_((Tcl_Interp *interp,
 
 Tcl_Channel
 TclXOSBindOpenFile _ANSI_ARGS_((Tcl_Interp *interp,
-                                char       *fileNumStr));
+                                int         fileNum));
 
 /*
  * from tclXxxxOS.c
@@ -672,7 +667,7 @@ TclXOSftruncate _ANSI_ARGS_((Tcl_Interp  *interp,
 
 extern int
 TclXOSfork _ANSI_ARGS_((Tcl_Interp *interp,
-                        char       *funcName));
+                        Tcl_Obj    *funcNameObj));
 
 extern int
 TclXOSexecl _ANSI_ARGS_((Tcl_Interp *interp,
@@ -726,6 +721,13 @@ TclXOSChangeOwnGrp _ANSI_ARGS_((Tcl_Interp  *interp,
                                 char        *groupStr,
                                 char       **files,
                                 char       *funcName));
+extern int  
+TclXOSChangeOwnGrpObj _ANSI_ARGS_((Tcl_Interp  *interp,
+                                   unsigned     options,
+                                   char        *ownerStr,
+                                   char        *groupStr,
+                                   Tcl_Obj     *fileList,
+                                   char        *funcName));
 
 extern int
 TclXOSFChangeOwnGrp _ANSI_ARGS_((Tcl_Interp *interp,
@@ -735,12 +737,19 @@ TclXOSFChangeOwnGrp _ANSI_ARGS_((Tcl_Interp *interp,
                                  char      **channelIds,
                                  char       *funcName));
 
+extern int
+TclXOSFChangeOwnGrpObj _ANSI_ARGS_((Tcl_Interp *interp,
+                                    unsigned    options,
+                                    char       *ownerStr,
+                                    char       *groupStr,
+                                    Tcl_Obj    *channelIdList,
+                                    char       *funcName));
+
 int
 TclXOSGetSelectFnum _ANSI_ARGS_((Tcl_Interp *interp,
                                  Tcl_Channel channel,
                                  int        *readFnumPtr,
                                  int        *writeFnumPtr));
-
 int
 TclXOSHaveFlock _ANSI_ARGS_((void));
 
@@ -772,3 +781,5 @@ TclXOSSetCloseOnExec _ANSI_ARGS_((Tcl_Interp *interp,
                                   Tcl_Channel channel,
                                   int         value));
 #endif
+
+

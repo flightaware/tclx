@@ -8,7 +8,7 @@
  * is not available on that platform.  This results in code with minimal
  * number of #ifdefs.
  *-----------------------------------------------------------------------------
- * Copyright 1996-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1996-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 8.0 1996/11/21 00:25:25 markd Exp $
+ * $Id:$
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -45,6 +45,7 @@ TclXNotAvailableError (Tcl_Interp *interp,
 {
     Tcl_AppendResult (interp, funcName, " is not available on MS Windows",
                       (char *) NULL);
+    TclSetObjResultFromStrResult (interp);  /* FIX: remove */
     return TCL_ERROR;
 }
 
@@ -1698,3 +1699,5 @@ TclXOSSetCloseOnExec (interp, channel, value)
     }
     return TCL_OK;
 }
+
+

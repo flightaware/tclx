@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: select.test,v 7.2 1996/10/04 05:02:45 markd Exp $
+# $Id: select.test,v 8.0.4.1 1997/04/14 02:02:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -118,4 +118,6 @@ Test select-2.1 {select tests} {
 Test select-2.2 {select tests} {
      select $pipeReadList $pipeWriteList {} X
 } 1 {expected floating-point number but got "X"}
+
+
 

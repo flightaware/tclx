@@ -3,7 +3,7 @@
  *
  *      Extended TCL string and character manipulation commands.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,11 +12,15 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 7.1 1996/09/28 16:21:25 markd Exp $
+ * $Id: tclXstring.c,v 8.0.4.1 1997/04/14 02:01:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * FIX: Eliminate use of TclSetObjResultFromStrResult.
+ */
 
 /*
  * Prototypes of internal functions.
@@ -25,48 +29,106 @@ static unsigned int
 ExpandString _ANSI_ARGS_((unsigned char *s,
                           unsigned char  buf[]));
 
+static int 
+TclX_CindexObjCmd _ANSI_ARGS_((ClientData clientData,
+                               Tcl_Interp *interp,
+                               int         objc,
+                               Tcl_Obj   **objv));
+
+static int 
+TclX_ClengthObjCmd _ANSI_ARGS_((ClientData clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   **objv));
+
+static int
+TclX_CconcatObjCmd _ANSI_ARGS_((ClientData clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   **objv));
+
+static int 
+TclX_CrangeObjCmd _ANSI_ARGS_((ClientData clientData,
+                               Tcl_Interp *interp,
+                               int         objc,
+                               Tcl_Obj   **objv));
+
+static int 
+TclX_CcollateObjCmd _ANSI_ARGS_((ClientData clientData,
+                                 Tcl_Interp *interp,
+                                 int         objc,
+                                 Tcl_Obj   **objv));
+
+static int 
+TclX_ReplicateObjCmd _ANSI_ARGS_((ClientData clientData,
+                                  Tcl_Interp *interp,
+                                  int         objc,
+                                  Tcl_Obj   **objv));
+
+static int 
+TclX_TranslitObjCmd _ANSI_ARGS_((ClientData clientData,
+                                 Tcl_Interp *interp,
+                                 int         objc,
+                                 Tcl_Obj   **objv));
+
+static int 
+TclX_CtypeObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp,
+                              int         objc,
+                              Tcl_Obj   **objv));
+
+static int 
+TclX_CtokenObjCmd _ANSI_ARGS_((ClientData clientData,
+                               Tcl_Interp *interp,
+                               int         objc,
+                               Tcl_Obj   **objv));
+
+static int 
+TclX_CequalObjCmd _ANSI_ARGS_((ClientData clientData,
+                               Tcl_Interp *interp,
+                               int         objc,
+                               Tcl_Obj   **objv));
+
 
 /*-----------------------------------------------------------------------------
- * Tcl_CindexCmd --
+ * TclX_CindexObjCmd --
  *     Implements the cindex Tcl command:
  *         cindex string indexExpr
  *
  * Results:
- *      Returns the character indexed by  index  (zero  based)  from
- *      string. 
+ *      Returns the character indexed by  index  (zero  based)  from string. 
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_CindexCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_CindexObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    long index, len;
-    char result [2];
+    int stringLen;
+    long index;
+    char *stringPtr;
 
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " string indexExpr", (char *) NULL);
+    if (objc != 3)
+        return TclX_WrongArgs (interp, objv[0], "string indexExpr");
+    
+    stringPtr = Tcl_GetStringFromObj (objv[1], &stringLen);
+
+    if (TclX_RelativeExpr (interp, objv [2], stringLen, &index) != TCL_OK) {
         return TCL_ERROR;
     }
-    
-    len = strlen (argv [1]);
-    if (Tcl_RelativeExpr (interp, argv[2], len, &index) != TCL_OK)
-        return TCL_ERROR;
-    if ((index < 0) || (index >= len))
+
+    if ((index < 0) || (index >= stringLen))
         return TCL_OK;
 
-    result [0] = argv[1][index];
-    result [1] = '\0';
-    Tcl_SetResult (interp, result, TCL_VOLATILE);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp), stringPtr + index, 1);
     return TCL_OK;
-
 }
+
 
 /*-----------------------------------------------------------------------------
- * Tcl_ClengthCmd --
+ * TclX_ClengthObjCmd --
  *     Implements the clength Tcl command:
  *         clength string
  *
@@ -74,29 +136,28 @@ Tcl_CindexCmd (clientData, interp, argc, argv)
  *      Returns the length of string in characters. 
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_ClengthCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_ClengthObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    char numBuf [32];
+    int length;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " string", 
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 2)
+        return TclX_WrongArgs (interp, objv[0], "string");
 
-    sprintf (numBuf, "%d", strlen (argv[1]));
-    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+    Tcl_GetStringFromObj (objv[1], &length);
+
+    Tcl_SetIntObj (Tcl_GetObjResult (interp), length);
     return TCL_OK;
-
 }
+
+
 
 /*-----------------------------------------------------------------------------
- * Tcl_CconcatCmd --
+ * TclX_CconcatObjCmd --
  *     Implements the cconcat Tcl command:
  *         cconcat ?string? ?string? ?...?
  *
@@ -104,23 +165,28 @@ Tcl_ClengthCmd (clientData, interp, argc, argv)
  *      The arguments concatenated.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_CconcatCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_CconcatObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
+    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
     int idx;
 
-    for (idx = 1; idx < argc; idx++) {
-        Tcl_AppendResult (interp, argv [idx], (char *) NULL);
+    /*
+     * FIX: It would be faster if we calculated up how much space we needed all
+     * at once.  Also we could iterate a pointer into objv until NULL
+     */
+    for (idx = 1; idx < objc; idx++) {
+        Tcl_StringObjAppendObj (resultPtr, objv [idx]);
     }
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CrangeCmd --
+ * TclX_CrangeObjCmd --
  *     Implements the crange and csubstr Tcl commands:
  *         crange string firstExpr lastExpr
  *         csubstr string firstExpr lengthExpr
@@ -131,42 +197,44 @@ Tcl_CconcatCmd (clientData, interp, argc, argv)
  *   If clientData is TRUE its the range command, if its FALSE its csubstr.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_CrangeCmd (clientData, interp, argc, argv)
+static int
+TclX_CrangeObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    long      fullLen, first;
-    long      subLen;
-    char     *strPtr;
-    char      holdChar;
-    int       isRange = (int) clientData;
+    long first, subLen;
+    int fullLen;
+    int isRange = (int) clientData;
+    char *targetString;
 
-    if (argc != 4) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " string firstExpr ", 
-                          (isRange) ? "lastExpr" : "lengthExpr",
-                          (char *) NULL);
-        return TCL_ERROR;
+    if (objc != 4) {
+        if (isRange)
+            return TclX_WrongArgs (interp, objv[0], 
+                                   "string firstExpr lastExpr");
+        else
+            return TclX_WrongArgs (interp, objv[0], 
+                                   "string firstExpr lengthExpr");
     }
 
-    fullLen = strlen (argv [1]);
+    targetString = Tcl_GetStringFromObj (objv [1], &fullLen);
 
-    if (Tcl_RelativeExpr (interp, argv[2], fullLen, &first) != TCL_OK)
+    if (TclX_RelativeExpr (interp, objv [2], fullLen, &first) != TCL_OK) {
         return TCL_ERROR;
+    }
 
     if ((first < 0) || (first >= fullLen))
         return TCL_OK;
 
-    if (Tcl_RelativeExpr (interp, argv[3], fullLen, &subLen) != TCL_OK)
+    if (TclX_RelativeExpr (interp, objv [3], fullLen, &subLen) != TCL_OK) {
         return TCL_ERROR;
+    }
         
     if (isRange) {
         if (subLen < first) {
-            Tcl_AppendResult (interp, "last is before first",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp, " last is before first", 
+                                        (char *) NULL);
             return TCL_ERROR;
         }
         subLen = subLen - first +1;
@@ -175,69 +243,70 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
     if (first + subLen > fullLen)
         subLen = fullLen - first;
 
-    strPtr = argv [1] + first;
-
-    holdChar = strPtr [subLen];
-    strPtr [subLen] = '\0';
-    Tcl_SetResult (interp, strPtr, TCL_VOLATILE);
-    strPtr [subLen] = holdChar;
-
+    Tcl_StringObjAppend (Tcl_GetObjResult (interp),
+                         targetString + first, subLen);
     return TCL_OK;
 }
+
 
 /*-----------------------------------------------------------------------------
- * Tcl_Ccollate Cmd --
- *     Implements the crange and csubstr Tcl commands:
+ * TclX_CcollateObjCmd --
+ *     Implements ccollate Tcl commands:
  *         ccollate [-local] string1 string2
  *
  * Results:
  *      Standard Tcl result.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_CcollateCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_CcollateObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
     int argIndex, result, local = FALSE;
+    char *optionString;
+    int optStrLen;
+    char *string1Ptr;
+    int string1Len;
+    char *string2Ptr;
+    int string2Len;
 
-    if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " ?options? string1 string2", 
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if ((objc < 3) || (objc > 4))
+        return TclX_WrongArgs (interp, objv[0], "?options? string1 string2");
 
-    if (argc == 4) {
-        if (!STREQU (argv [1], "-local")) {
-            Tcl_AppendResult (interp, "Invalid option \"", argv [1],
-                              "\", expected \"-local\"",
-                              (char *) NULL);
+    if (objc == 4) {
+        optionString = Tcl_GetStringFromObj (objv [1], &optStrLen);
+        if (!STREQU (optionString, "-local")) {
+            TclX_StringAppendObjResult (interp, "Invalid option \"",
+                                        optionString,
+                                        "\", expected \"-local\"",
+                                        (char *) NULL);
             return TCL_ERROR;
         }
         local = TRUE;
     }
-    argIndex = argc - 2;
+    argIndex = objc - 2;
     
+    string1Ptr = Tcl_GetStringFromObj (objv [argIndex], &string1Len);
+    string2Ptr = Tcl_GetStringFromObj (objv [argIndex + 1], &string2Len);
     if (local) {
 #ifndef NO_STRCOLL
-        result = strcoll (argv [argIndex], argv [argIndex + 1]);
+        result = strcoll (string1Ptr, string2Ptr);
 #else
-        result = strcmp (argv [argIndex], argv [argIndex + 1]);
+        result = strcmp (string1Ptr, string2Ptr);
 #endif
     } else {
-        result = strcmp (argv [argIndex], argv [argIndex + 1]);
+        result = strcmp (string1Ptr, string2Ptr);
     }
-    Tcl_SetResult (interp,
-                   ((result == 0) ? "0" : ((result < 0) ? "-1" : "1")),
-                   TCL_STATIC);
+    Tcl_SetIntObj (Tcl_GetObjResult (interp),
+                   ((result == 0) ? 0 : ((result < 0) ? -1 : 1)));
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ReplicateCmd --
+ * TclX_ReplicateObjCmd --
  *     Implements the replicate Tcl command:
  *         replicate string countExpr
  *
@@ -245,37 +314,30 @@ Tcl_CcollateCmd (clientData, interp, argc, argv)
  *      Returns string replicated count times.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_ReplicateCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_ReplicateObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    long repCount, cnt;
-    Tcl_DString newStr;
+    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
+    long count, repCount;
 
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " string countExpr", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 3)
+        return TclX_WrongArgs (interp, objv[0], "string countExpr");
 
-    if (Tcl_ExprLong (interp, argv [2], &repCount) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, objv [2], &repCount) != TCL_OK)
         return TCL_ERROR;
 
-    Tcl_DStringInit (&newStr);
-    for (cnt = 0; cnt < repCount; cnt++) {
-        Tcl_DStringAppend (&newStr, argv [1], -1);
+    for (count = 0; count < repCount; count++) {
+        Tcl_StringObjAppendObj (resultPtr, objv [1]);
     }
-    Tcl_DStringResult (interp, &newStr);
-    Tcl_DStringFree (&newStr);
     return TCL_OK;
-
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CtokenCmd --
+ * TclX_CtokenObjCmd --
  *     Implements the clength Tcl command:
  *         ctoken strvar separators
  *
@@ -283,47 +345,59 @@ Tcl_ReplicateCmd (clientData, interp, argc, argv)
  *      Returns the first token and removes it from the string variable.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_CtokenCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_CtokenObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    Tcl_DString  string;
-    char        *varValue, *startPtr;
-    int          tokenLen;
+    Tcl_Obj      *varValueObj;
+    Tcl_DString   string;
+    char         *varValue;
+    char         *startPtr;
+    char         *tokenString;
+    int           tokenLen;
+    int           varValueLen;
+    int           tokenStrLen;
+    Tcl_Obj      *newVarValueObj;
 
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " strvar separators", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 3)
+        return TclX_WrongArgs (interp, objv[0], "strvar separators");
     
-    varValue = Tcl_GetVar (interp, argv [1], TCL_LEAVE_ERR_MSG);
+    varValueObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
+                                  TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED);
+
+    varValue = Tcl_GetStringFromObj (varValueObj, &varValueLen);
+
     if (varValue == NULL)
         return TCL_ERROR;
 
     Tcl_DStringInit (&string);
     Tcl_DStringAppend (&string, varValue, -1);
 
-    startPtr = string.string + strspn (string.string, argv [2]);
-    tokenLen = strcspn (startPtr, argv [2]);
+    tokenString = Tcl_GetStringFromObj (objv [2], &tokenStrLen);
 
-    if (Tcl_SetVar (interp, argv [1], startPtr + tokenLen,
-                    TCL_LEAVE_ERR_MSG) == NULL) {
+    startPtr = string.string + strspn (string.string, tokenString);
+    tokenLen = strcspn (startPtr, tokenString);
+
+    newVarValueObj = Tcl_NewStringObj (startPtr + tokenLen, -1);
+
+    if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, newVarValueObj,
+                        TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL) {
         Tcl_DStringFree (&string);
+        Tcl_DecrRefCount (newVarValueObj);
         return TCL_ERROR;
     }
-    startPtr [tokenLen] = '\0';
-    Tcl_SetResult (interp, startPtr, TCL_VOLATILE);
-    Tcl_DStringFree (&string);
 
+    Tcl_StringObjAppend (Tcl_GetObjResult (interp), startPtr, tokenLen);
+    Tcl_DStringFree (&string);
+    Tcl_DecrRefCount (newVarValueObj);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CequalCmd --
+ * TclX_CequalObjCmd --
  *     Implements the cexpand Tcl command:
  *         cequal string1 string2
  *
@@ -331,22 +405,28 @@ Tcl_CtokenCmd (clientData, interp, argc, argv)
  *   "0" or "1".
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_CequalCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_CequalObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " string1 string2", (char *) NULL);
-        return TCL_ERROR;
-    }
-    ;
-    Tcl_SetResult (interp,
-                   ((strcmp (argv [1], argv [2]) == 0) ? "1" : "0"),
-                   TCL_STATIC);
+    char *string1Ptr;
+    int string1Len;
+    char *string2Ptr;
+    int string2Len;
+
+    if (objc != 3)
+        return TclX_WrongArgs (interp, objv[0], "string1 string2");
+
+    string1Ptr = Tcl_GetStringFromObj (objv[1], &string1Len);
+    string2Ptr = Tcl_GetStringFromObj (objv[2], &string2Len);
+
+    Tcl_SetBooleanObj (Tcl_GetObjResult (interp),
+                       ((string1Len == string2Len) &&
+                        (*string1Ptr == *string2Ptr) &&
+                        STREQU (string1Ptr, string2Ptr)));
     return TCL_OK;
 }
 
@@ -381,7 +461,7 @@ ExpandString (s, buf)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_TranslitCmd --
+ * TclX_TranslitObjCmd --
  *     Implements the Tcl translit command:
  *     translit inrange outrange string
  *
@@ -389,32 +469,41 @@ ExpandString (s, buf)
  *  Standard Tcl results.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_TranslitCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_TranslitObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
     unsigned char from [MAX_EXPANSION+1];
     unsigned char to   [MAX_EXPANSION+1];
     unsigned char map  [MAX_EXPANSION+1];
-    unsigned char *s, *t;
-    int idx;
+    unsigned char *s;
+    char          *fromString;
+    int            fromStringLen;
+    char          *toString;
+    int            toStringLen;
+    Tcl_Obj       *transStringObj;
+    char          *transString;
+    int            transStringLen;
+    int            idx;
+    int            stringIndex;
 
-    if (argc != 4) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " from to string", (char *) NULL);
+    if (objc != 4)
+        return TclX_WrongArgs (interp, objv[0], "from to string");
+
+    fromString = Tcl_GetStringFromObj (objv[1], &fromStringLen);
+    if (!ExpandString ((unsigned char *) fromString, from)) {
+        TclX_StringAppendObjResult (interp, "inrange expansion too long",
+                                    (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (!ExpandString ((unsigned char *) argv[1], from)) {
-        interp->result = "inrange expansion too long";
-        return TCL_ERROR;
-    }
-
-    if (!ExpandString ((unsigned char *) argv[2], to)) {
-        interp->result = "outrange expansion too long";
+    toString = Tcl_GetStringFromObj (objv[2], &toStringLen);
+    if (!ExpandString ((unsigned char *) toString, to)) {
+        TclX_StringAppendObjResult (interp, "outrange expansion too long",
+                                    (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -428,26 +517,28 @@ Tcl_TranslitCmd (clientData, interp, argc, argv)
             break;
     }
     if (to [idx] != '\0') {
-        interp->result = "inrange longer than outrange";
+        TclX_StringAppendObjResult (interp, "inrange longer than outrange", 
+                                    (char *) NULL);
         return TCL_ERROR;
     }
 
     for (; from [idx] != '\0'; idx++)
         map [from [idx]] = 0;
 
-    for (s = t = (unsigned char *) argv[3]; *s != '\0'; s++) {
+    transStringObj = Tcl_DuplicateObj (objv [3]);
+    transString = Tcl_GetStringFromObj (transStringObj, &transStringLen);
+    for (s = (unsigned char *) transString, stringIndex = 0; 
+         stringIndex < transStringLen; stringIndex++) {
         if (map[*s] != '\0')
-            *t++ = map [*s];
+            *s++ = map [*s];
     }
-    *t = '\0';
 
-    Tcl_SetResult (interp, argv[3], TCL_VOLATILE);
-
+    Tcl_SetObjResult (interp, transStringObj);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CtypeCmd --
+ * TclX_CtypeObjCmd --
  *
  *      This function implements the 'ctype' command:
  *      ctype ?-failindex? class string ?failIndexVar?
@@ -462,202 +553,251 @@ Tcl_TranslitCmd (clientData, interp, argc, argv)
  *       converted value.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_CtypeCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
+static int
+TclX_CtypeObjCmd (dummy, interp, objc, objv)
+    ClientData   dummy;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    **objv;
 {
     int             failIndex = FALSE;
-    char           *failVar;
     register char  *class;
-    char           *string;
     register char  *scanPtr;
+    int             scanStringLen;
+    int             classLen;
+    int             optStrLen;
 
-    if (argc < 3)
-	goto wrongNumArgs;
+    Tcl_Obj        *failVarObj;
+    Tcl_Obj        *classObj;
+    Tcl_Obj        *stringObj;
 
-    if (argv [1][0] == '-') {
-	if (STREQU (argv [1], "-failindex")) {
-	    failIndex = TRUE;
-	} else {
-	    Tcl_AppendResult(interp, "invalid option \"", argv [1],
-		"\", must be -failindex", (char *) NULL);
-	    return TCL_ERROR;
-	}
+    char           *optionString;
+    int             index;
+
+    if (objc < 3)
+        goto wrongNumArgs;
+
+    optionString = Tcl_GetStringFromObj (objv [1], &optStrLen);
+    if (*optionString == '-') {
+        if (STREQU (optionString, "-failindex")) {
+            failIndex = TRUE;
+        } else {
+            int len;
+            TclX_StringAppendObjResult (interp,
+                                        "invalid option \"",
+                                        Tcl_GetStringFromObj (objv [1], &len),
+                                        "\", must be -failindex",
+                                        NULL);
+            return TCL_ERROR;
+        }
     }
     if (failIndex) {
-        if (argc != 5) 
+        if (objc != 5) 
             goto wrongNumArgs;
-        failVar = argv [2];
-        class = argv [3];
-        string = argv [4];
+        failVarObj = objv [2];
+        classObj = objv [3];
+        stringObj = objv [4];
     } else {
-        if (argc != 3) 
+        if (objc != 3) 
             goto wrongNumArgs;
-        class = argv [1];
-        string = argv [2];
+        classObj = objv [1];
+        stringObj = objv [2];
     }
-    scanPtr = string;
+    scanPtr = Tcl_GetStringFromObj (stringObj, &scanStringLen);
+    class = Tcl_GetStringFromObj (classObj, &classLen);
 
     /*
      * Handle conversion requests.
      */
     if (STREQU (class, "char")) {
-        int number;
+        long number;
+        char myChar;
 
         if (failIndex) 
           goto failInvalid;
-        if (Tcl_GetInt (interp, scanPtr, &number) != TCL_OK)
+        if (Tcl_GetIntFromObj (interp, stringObj, &number) != TCL_OK)
             return TCL_ERROR;
         if ((number < 0) || (number > 255)) {
-            Tcl_AppendResult (interp, "number must be in the range 0..255",
-                              (char *) NULL);
+            TclX_StringAppendObjResult (interp,
+                                    "number must be in the range 0..255", 
+                                     NULL);
             return TCL_ERROR;
         }
 
-        interp->result [0] = number;
-        interp->result [1] = 0;
+        myChar = number;
+        Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                          &myChar, 1);
         return TCL_OK;
     }
 
     if (STREQU (class, "ord")) {
-        int value;
-
         if (failIndex) 
           goto failInvalid;
 
-        value = 0xff & scanPtr[0];  /* Prevent sign extension */
-        sprintf (interp->result, "%u", value);
+        /*
+         * Mask to prevent sign extension.
+         */
+        Tcl_SetIntObj (Tcl_GetObjResult (interp), 
+                       0xff & scanPtr [0]);
         return TCL_OK;
     }
 
-    if (STREQU (class, "alnum")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isalnum (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "alpha")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isalpha (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "ascii")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isascii (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "cntrl")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!iscntrl (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "digit")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isdigit (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "graph")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isgraph (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "lower")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!islower (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "print")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isprint (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "punct")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!ispunct (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "space")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isspace (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "upper")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isupper (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
-    if (STREQU (class, "xdigit")) {
-        for (; *scanPtr != 0; scanPtr++) {
-            if (!isxdigit (UCHAR (*scanPtr)))
-                break;
-        }
-        goto returnResult;
-    }
     /*
-     * No match on class.
+     * The remainder of cases scan the string, stoping when their test case
+     * fails.  The value of `index' after the loops indicating if it succeeds
+     * or fails and where it fails.
      */
-    Tcl_AppendResult (interp, "unrecognized class specification: \"", class,
-                      "\", expected one of: alnum, alpha, ascii, char, ",
-                      "cntrl, digit, graph, lower, ord, print, punct, space, ",
-                      "upper or xdigit", (char *) NULL);
-    return TCL_ERROR;
-
+    if (STREQU (class, "alnum")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isalnum (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "alpha")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isalpha (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "ascii")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isascii (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "cntrl")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!iscntrl (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "digit")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isdigit (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "graph")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isgraph (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "lower")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!islower (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "print")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isprint (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "punct")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!ispunct (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "space")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isspace (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "upper")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isupper (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else if (STREQU (class, "xdigit")) {
+        for (index = 0; index < scanStringLen; index++) {
+            if (!isxdigit (UCHAR (*(scanPtr + index))))
+                break;
+        }
+    } else {
+        TclX_StringAppendObjResult (interp,
+                                    "unrecognized class specification: \"",
+                                    class,
+                                    "\", expected one of: alnum, alpha, ascii, ",
+                                    "char, cntrl, digit, graph, lower, ord, ",
+                                    "print, punct, space, upper or xdigit",
+                                    (char *) NULL);
+        return TCL_ERROR;
+    }
+    
     /*
      * Return true or false, depending if the end was reached.  Always return 
      * false for a null string.  Optionally return the failed index if there
      * is no match.
      */
-  returnResult:
-    if ((*scanPtr == 0) && (scanPtr != string))
-        interp->result = "1";
+    if ((index != 0) && (*(scanPtr + index) == 0))
+        Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
     else {
         /*
          * If the fail index was requested, set the variable here.
          */
         if (failIndex) {
-            char indexStr [50];
+            Tcl_Obj *iObj = Tcl_NewIntObj (index);
 
-            sprintf (indexStr, "%d", scanPtr - string);
-            if (Tcl_SetVar(interp, failVar, indexStr,
-                           TCL_LEAVE_ERR_MSG) == NULL)
+            if (Tcl_ObjSetVar2 (interp, failVarObj, (Tcl_Obj *) NULL, 
+                    iObj, TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL) {
+                Tcl_DecrRefCount (iObj);
                 return TCL_ERROR;
+            }
         }
-        interp->result = "0";
+        Tcl_SetBooleanObj (Tcl_GetObjResult (interp), FALSE);
     }
     return TCL_OK;
 
   wrongNumArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                      " ?-failindex var? class string",
-                      (char *) NULL);
-    return TCL_ERROR;
+    return TclX_WrongArgs (interp, objv[0], "?-failindex var? class string");
     
   failInvalid:
-    Tcl_AppendResult (interp, "-failindex option is invalid for class \"",
-                      class, "\"", (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+                                "-failindex option is invalid for class \"",
+                                class, "\"", (char *) NULL);
     return TCL_ERROR;
 }
+
+/*-----------------------------------------------------------------------------
+ * TclX_StringInit --
+ *   Initialize the list commands in an interpreter.
+ *
+ * Parameters:
+ *   o interp - Interpreter to add commands to.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_StringInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp, "cindex", -1,
+                         TclX_CindexObjCmd, (ClientData) 0, 
+                         (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "clength", -1,
+                          TclX_ClengthObjCmd, (ClientData) 0,
+                          (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateObjCommand (interp, "cconcat", -1,
+                          TclX_CconcatObjCmd, (ClientData) 0,
+                          (Tcl_CmdDeleteProc *)NULL);
+    Tcl_CreateObjCommand (interp, "crange", -1,
+                          TclX_CrangeObjCmd, (ClientData) TRUE, 
+                          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "csubstr", -1,
+                          TclX_CrangeObjCmd, (ClientData) FALSE, 
+                          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "ccollate", -1,
+                          TclX_CcollateObjCmd, (ClientData) 0,
+                          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "replicate", -1,
+                          TclX_ReplicateObjCmd, (ClientData) 0, 
+                          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "translit", -1,
+                          TclX_TranslitObjCmd, (ClientData) 0, 
+                          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "ctype", -1,
+                          TclX_CtypeObjCmd, (ClientData) 0, 
+                          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "ctoken", -1,
+                          TclX_CtokenObjCmd, (ClientData) 0, 
+                          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "cequal", -1,
+                          TclX_CequalObjCmd, (ClientData) 0, 
+                          (Tcl_CmdDeleteProc*) NULL);
+
+}
+
+

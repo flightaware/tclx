@@ -4,7 +4,7 @@
  * Tcl commands to access unix system calls that are portable to other
  * platforms.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 7.7 1996/10/04 15:30:13 markd Exp $
+ * $Id: tclXoscmds.c,v 8.0.4.1 1997/04/14 02:01:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,7 +21,7 @@
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_AlarmCmd --
+ * Tcl_AlarmObjCmd --
  *     Implements the TCL Alarm command:
  *         alarm seconds
  *
@@ -31,33 +31,29 @@
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_AlarmCmd (clientData, interp, argc, argv)
+Tcl_AlarmObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     double seconds;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " seconds", 
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 2)
+	return TclX_WrongArgs (interp, objv [0], "seconds");
 
-    if (Tcl_GetDouble (interp, argv[1], &seconds) != TCL_OK)
-        return TCL_ERROR;
+    if (Tcl_GetDoubleFromObj (interp, objv[1], &seconds) != TCL_OK)
+	return TCL_ERROR;
 
     if (TclXOSsetitimer (interp, &seconds, "alarm") != TCL_OK)
         return TCL_ERROR;
 
-    sprintf (interp->result, "%g", seconds);
-
+    Tcl_SetDoubleObj (Tcl_GetObjResult (interp), seconds);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_LinkCmd --
+ * Tcl_LinkObjCmd --
  *     Implements the TCL link command:
  *         link ?-sym? srcpath destpath
  *
@@ -66,46 +62,54 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_LinkCmd (clientData, interp, argc, argv)
+Tcl_LinkObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     char *srcPath, *destPath;
     Tcl_DString  srcPathBuf, destPathBuf;
+    char *argv0String;
+    char *srcPathString;
+    char *destPathString;
 
     Tcl_DStringInit (&srcPathBuf);
     Tcl_DStringInit (&destPathBuf);
 
-    if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " ?-sym? srcpath destpath", (char *) NULL);
-        return TCL_ERROR;
-    }
-    if (argc == 4) {
-        if (!STREQU (argv [1], "-sym")) {
-            Tcl_AppendResult (interp, "invalid option, expected: \"-sym\", ",
-                              "got: ", argv [1], (char *) NULL);
+    if ((objc < 3) || (objc > 4))
+	return TclX_WrongArgs (interp, objv [0], "?-sym? srcpath destpath");
+
+    if (objc == 4) {
+        char *argv1String = Tcl_GetStringFromObj (objv [1], NULL);
+
+        if (!STREQU (argv1String, "-sym")) {
+            TclX_StringAppendObjResult (
+                interp,
+                "invalid option, expected: \"-sym\", got: ",
+                Tcl_GetStringFromObj (objv [1], NULL),
+                (char *) NULL);
             return TCL_ERROR;
         }
     }
 
-    srcPath = Tcl_TranslateFileName (interp, argv [argc - 2], &srcPathBuf);
+    srcPathString = Tcl_GetStringFromObj (objv [objc - 2], NULL);
+    srcPath = Tcl_TranslateFileName (interp, srcPathString, &srcPathBuf);
     if (srcPath == NULL)
         goto errorExit;
 
-    destPath = Tcl_TranslateFileName (interp, argv [argc - 1], &destPathBuf);
+    destPathString = Tcl_GetStringFromObj (objv [objc - 1], NULL);
+    destPath = Tcl_TranslateFileName (interp, destPathString, &destPathBuf);
     if (destPath == NULL)
         goto errorExit;
 
-    if (argc == 4) {
-        if (TclX_OSsymlink (interp, srcPath, destPath, argv [0]) != TCL_OK)
+    argv0String = Tcl_GetStringFromObj (objv [0], NULL);
+    if (objc == 4) {
+        if (TclX_OSsymlink (interp, srcPath, destPath, argv0String) != TCL_OK)
             goto errorExit;
     } else {
-        if (TclX_OSlink (interp, srcPath, destPath, argv [0]) != TCL_OK) {
+        if (TclX_OSlink (interp, srcPath, destPath, argv0String) != TCL_OK)
             goto errorExit;
-        }
     }
 
     Tcl_DStringFree (&srcPathBuf);
@@ -119,7 +123,7 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_NiceCmd --
+ * Tcl_NiceObjCmd --
  *     Implements the TCL nice command:
  *         nice ?priorityincr?
  *
@@ -129,48 +133,50 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_NiceCmd (clientData, interp, argc, argv)
+Tcl_NiceObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
+    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
     int priorityIncr, priority;
-    char numBuf [32];
+    long longPriorityIncr;
+    char *argv0String;
 
-    if (argc > 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?priorityincr?",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc > 2)
+	return TclX_WrongArgs (interp, objv [0], "?priorityincr?");
+
+    argv0String = Tcl_GetStringFromObj (objv [0], NULL);
 
     /*
      * Return the current priority if an increment is not supplied.
      */
-    if (argc == 1) {
-        if (TclXOSgetpriority (interp, &priority, argv [0]) != TCL_OK)
+    if (objc == 1) {
+        if (TclXOSgetpriority (interp, &priority, argv0String) != TCL_OK)
             return TCL_ERROR;
-        sprintf (numBuf, "%d", priority);
-        Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+	Tcl_SetIntObj (Tcl_GetObjResult (interp), priority);
         return TCL_OK;
     }
 
     /*
      * Increment the priority.
      */
-    if (Tcl_GetInt (interp, argv[1], &priorityIncr) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, objv [1], &longPriorityIncr) != TCL_OK)
         return TCL_ERROR;
 
+    priorityIncr = (int)longPriorityIncr;
+
     if (TclXOSincrpriority (interp, priorityIncr, &priority,
-                             argv [0]) != TCL_OK)
+                            argv0String) != TCL_OK)
         return TCL_ERROR;
-    sprintf (numBuf, "%d", priority);
-    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+
+    Tcl_SetIntObj (resultPtr, priority);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SleepCmd --
+ * Tcl_SleepObjCmd --
  *     Implements the TCL sleep command:
  *         sleep seconds
  *
@@ -180,30 +186,26 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SleepCmd (clientData, interp, argc, argv)
+Tcl_SleepObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    unsigned time;
+    long time;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " seconds", 
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 2)
+	return TclX_WrongArgs (interp, objv [0], "seconds");
 
-    if (Tcl_GetUnsigned (interp, argv[1], &time) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, objv [1], &time) != TCL_OK)
         return TCL_ERROR;
 
-    TclXOSsleep (time);
+    TclXOSsleep ((int) time);
     return TCL_OK;
-
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SyncCmd --
+ * Tcl_SyncObjCmd --
  *     Implements the TCL sync command:
  *         sync
  *
@@ -213,40 +215,38 @@ Tcl_SleepCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SyncCmd (clientData, interp, argc, argv)
+Tcl_SyncObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    Tcl_Channel channel;
+    Tcl_Channel  channel;
+    char        *fileHandle;
 
-    if ((argc < 1) || (argc > 2)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?filehandle?",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if ((objc < 1) || (objc > 2))
+	return TclX_WrongArgs (interp, objv [0], "?filehandle?");
 
-    if (argc == 1) {
+    if (objc == 1) {
 	TclXOSsync ();
 	return TCL_OK;
     }
 
-    channel = TclX_GetOpenChannel (interp, argv [1], TCL_WRITABLE);
+    fileHandle = Tcl_GetStringFromObj (objv [1], NULL);
+    channel = TclX_GetOpenChannel (interp, fileHandle, TCL_WRITABLE);
     if (channel == NULL)
         return TCL_ERROR;
 
     if (Tcl_Flush (channel) < 0) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp),
-                          (char *) NULL);
+	Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                          Tcl_PosixError (interp), -1);
         return TCL_ERROR;
     }
-
     return TclXOSfsync (interp, channel);
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SystemCmd --
+ * Tcl_SystemObjCmd --
  *     Implements the TCL system command:
  *     system command
  *
@@ -256,29 +256,28 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SystemCmd (clientData, interp, argc, argv)
+Tcl_SystemObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
+    char *systemString;
     int exitCode;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " command",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 2)
+	return TclX_WrongArgs (interp, objv [0], "command");
 
-    if (TclXOSsystem (interp, argv [1], &exitCode) != TCL_OK)
+    systemString = Tcl_GetStringFromObj (objv [1], NULL);
+    if (TclXOSsystem (interp, systemString, &exitCode) != TCL_OK)
         return TCL_ERROR;
 
-    sprintf (interp->result, "%d", exitCode);
+    Tcl_SetIntObj (Tcl_GetObjResult (interp), exitCode);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_UmaskCmd --
+ * Tcl_UmaskObjCmd --
  *     Implements the TCL umask command:
  *     umask ?octalmask?
  *
@@ -288,33 +287,41 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_UmaskCmd (clientData, interp, argc, argv)
+Tcl_UmaskObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
-    int mask;
+    int    mask;
+    char  *umaskString;
+    char   numBuf [32];
 
-    if ((argc < 1) || (argc > 2)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?octalmask?",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if ((objc < 1) || (objc > 2))
+	return TclX_WrongArgs (interp, objv [0], "?octalmask?");
 
-    if (argc == 1) {
+    /*
+     * FIX: Should include leading 0 to make it a legal number.
+     */
+    if (objc == 1) {
         mask = umask (0);
         umask ((unsigned short) mask);
-        sprintf (interp->result, "%o", mask);
+        sprintf (numBuf, "%o", mask);
+	Tcl_SetStringObj (Tcl_GetObjResult (interp), numBuf, -1);
     } else {
-        if (!Tcl_StrToInt (argv [1], 8, &mask)) {
-            Tcl_AppendResult (interp, "Expected octal number got: ", argv [1],
-                              (char *) NULL);
+	umaskString = Tcl_GetStringFromObj (objv [1], NULL);
+        if (!Tcl_StrToInt (umaskString, 8, &mask)) {
+            TclX_StringAppendObjResult (interp, 
+                                        "Expected octal number got: ",
+                                        Tcl_GetStringFromObj (objv [1],
+                                                              NULL),
+                                        (char *) NULL);
             return TCL_ERROR;
         }
 
         umask ((unsigned short) mask);
     }
-
     return TCL_OK;
 }
+
+

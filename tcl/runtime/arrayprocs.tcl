@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayprocs.tcl,v 7.0 1996/06/16 05:31:09 markd Exp $
+# $Id: arrayprocs.tcl,v 8.0.4.1 1997/04/14 02:02:00 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -45,3 +45,5 @@ proc for_array_keys {varName arrayName codeFragment} {
     }
     return -code $code $result
 }
+
+

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: file.test,v 8.0.2.1 1996/12/22 08:50:28 markd Exp $
+# $Id:$
 #------------------------------------------------------------------------------
 #
 
@@ -143,4 +143,7 @@ TestRemove MKDIR1.TMP MKDIR2.TMP MKDIR3.TMP UNLINK1.TMP UNLINK2.TMP \
         UNLINK3.TMP FRENAME1.TMP FRENAME2.TMP
 
 rename unknown {}
+
  
+
+

@@ -24,7 +24,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: checkup.tcl,v 7.0 1996/06/16 05:34:32 markd Exp $
+# $Id: checkup.tcl,v 8.0.4.1 1997/04/14 02:03:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -71,3 +71,5 @@ CheckDirList [readdir .] readdir
 proc MissingMsg {msg} {
     # Not done yet.
 }
+
+

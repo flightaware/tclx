@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 7.0 1996/06/16 05:34:00 markd Exp $
+# $Id: signal.test,v 8.0.4.1 1997/04/14 02:03:04 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -61,3 +61,5 @@ button .signalTest.exit  -text "Exit" -command exit
 pack configure .signalTest .signalTest.title \
         .signalTest.alarm .signalTest.exit \
         -fill x
+
+

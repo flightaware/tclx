@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # tclx.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: tclx.tcl,v 7.2 1996/10/04 04:43:27 markd Exp $
+# $Id: tclx.tcl,v 8.0.4.1 1997/04/14 02:02:10 markd Exp $
 #-----------------------------------------------------------------------------
 
 if {[info exists tclx_library] && ![cequal $tclx_library {}]} {
@@ -25,3 +25,5 @@ if ![info exists tcl_prompt1] {
 if ![info exists tcl_prompt2] {
     set tcl_prompt2 {puts -nonewline stdout =>}
 }
+
+

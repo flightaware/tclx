@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.tcl,v 7.1 1996/07/26 05:56:11 markd Exp $
+# $Id: globrecur.tcl,v 8.0.4.1 1997/04/14 02:02:05 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -33,7 +33,7 @@ proc recursive_glob {dirlist globlist} {
             set file [file join $dir $file]
             if [file isdirectory $file] {
                 set fileTail [file tail $file]
-                if {!(($fileTail == ".") || ($fileTail == ".."))} {
+                if {!([cequal $fileTail .] || [cequal $fileTail ..])} {
                     lappend recurse $file
                 }
             }
@@ -80,7 +80,7 @@ proc for_recursive_glob {var dirlist globlist cmd {depth 1}} {
             set file [file join $dir $file]
             if [file isdirectory $file] {
                 set fileTail [file tail $file]
-                if {!(($fileTail == ".") || ($fileTail == ".."))} {
+                if {!([cequal $fileTail .] || [cequal $fileTail ..])} {
                     lappend recurse $file
                 }
             }
@@ -88,7 +88,9 @@ proc for_recursive_glob {var dirlist globlist cmd {depth 1}} {
     }
     if ![lempty $recurse] {
         return [for_recursive_glob $var $recurse $globlist $cmd \
-                    [expr {$depth + 1}]]
+                    [expr $depth + 1]]
     }
     return {}
 }
+
+

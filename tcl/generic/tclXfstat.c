@@ -3,7 +3,7 @@
  *
  * Extended Tcl fstat command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 7.6 1996/09/03 23:39:04 markd Exp $
+ * $Id: tclXfstat.c,v 8.0.4.1 1997/04/14 02:01:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -339,3 +339,5 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     ReturnStatList (interp, ttyDev, &statBuf);
     return TCL_OK;
 }
+
+

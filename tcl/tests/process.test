@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 7.2 1996/10/04 05:02:43 markd Exp $
+# $Id: process.test,v 8.0.4.1 1997/04/14 02:02:32 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -201,3 +201,5 @@ Test process-2.3 {fork, execl, wait tests} {
     set result2 [wait -pgroup -untraced $testPid]
     list $result1 [lrange $result2 1 end]
 } 0 {{} {SIG SIGTERM}}
+
+

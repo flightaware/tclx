@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 8.0.2.1 1996/12/21 05:52:38 markd Exp $
+# $Id:$
 #------------------------------------------------------------------------------
 #
 
@@ -104,5 +104,7 @@ proc intersect {list1 list2} {
     }
     return $intersectList
 }
+
+
 
 

@@ -3,7 +3,7 @@
  *
  * Extended Tcl binary file search command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 7.2 1996/07/22 17:09:59 markd Exp $
+ * $Id: tclXbsearch.c,v 8.0.4.1 1997/04/14 02:01:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -355,3 +355,5 @@ Tcl_BsearchCmd (clientData, interp, argc, argv)
     }
     return TCL_OK;
 }
+
+

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: list.test,v 7.2 1996/10/04 05:02:39 markd Exp $
+# $Id: list.test,v 8.0.4.1 1997/04/14 02:02:28 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -234,6 +234,29 @@ Test list-4.4 {lcontain} {
     lcontain {aaaa bbbb cccc} a
 } 0 0
 
+Test list-5.1 {lempty} {
+    lempty {}
+} 0 1
 
+Test list-5.2 {lempty} {
+    lempty "\t"
+} 0 1
+
+Test list-5.3 {lempty} {
+    lempty "\tx"
+} 0 0
+
+Test list-5.4 {lempty} {
+    # lempty doesn't check for a valid list.
+    lempty  {   {X}xx}
+} 0 0
+
+Test list-5.5 {lempty} {
+    lempty 
+} 1 {wrong # args: lempty list}
+
+Test list-5.6 {lempty} {
+    lempty x y
+} 1 {wrong # args: lempty list}
 
 

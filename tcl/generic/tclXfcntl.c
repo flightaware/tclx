@@ -3,7 +3,7 @@
  *
  * Extended Tcl fcntl command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 7.5 1996/08/20 03:49:52 markd Exp $
+ * $Id: tclXfcntl.c,v 8.0.4.1 1997/04/14 02:01:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -296,3 +296,5 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     }
     return TCL_OK;
 }
+
+

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 7.5 1996/11/16 20:38:20 markd Exp $
+# $Id: help.test,v 8.0.4.1 1997/04/14 02:02:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -230,4 +230,6 @@ puts $helpServerFH "exit 0"
 close $helpServerFH
 
 TestRemove HELP.PRG
+
+
 

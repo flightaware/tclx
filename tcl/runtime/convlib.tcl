@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.tcl,v 7.1 1996/07/17 09:06:24 markd Exp $
+# $Id: convlib.tcl,v 8.0.4.1 1997/04/14 02:02:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -110,3 +110,5 @@ proc convert_lib {tclIndex packageLib {ignore {}}} {
         error "*** Not all entries converted, but library generated"
     }
 }
+
+

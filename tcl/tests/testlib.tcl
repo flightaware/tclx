@@ -16,12 +16,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 8.0 1996/11/21 00:25:07 markd Exp $
+# $Id:$
 #------------------------------------------------------------------------------
 #
 
 # Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
-# that variable.  Don't do this more than once.
+# that variable.
 
 global SAVED_UNKNOWN TCL_PROGRAM env TEST_ERROR_INFO tcl_platform testXConfig
 global TEST_VERBOSE
@@ -89,6 +89,7 @@ if {[info command unknown] != ""} {
     append SAVED_UNKNOWN "\{[info body unknown]\}"
     rename unknown {}
 }
+
 
 #
 # Convert a Tcl result code to a string.
@@ -245,3 +246,5 @@ proc TestRemove args {
         catch {file delete -force $f}
     }
 }
+
+

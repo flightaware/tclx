@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 7.7 1996/10/04 15:30:19 markd Exp $
+# $Id: dup.test,v 8.0.4.1 1997/04/14 02:02:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -262,4 +262,6 @@ if [cequal $tcl_platform(platform) unix] {
 }
 
 TestRemove DUP.TMP DUP2.TMP INCMDS.TMP OUTPUT.TMP
+
+
 

@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: genindex.tcl,v 7.1 1996/07/26 05:56:32 markd Exp $
+# $Id: genindex.tcl,v 8.0.4.1 1997/04/14 02:03:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,3 +22,5 @@ global tclx_library
 source [file join $tclx_library buildidx.tcl]
 
 buildpackageindex $argv
+
+

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfile.tcl,v 7.0 1996/06/16 05:31:36 markd Exp $
+# $Id: stringfile.tcl,v 8.0.4.1 1997/04/14 02:02:09 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -51,4 +51,6 @@ proc write_file {fileName args} {
         error $result $errorInfo $errorCode
     }
 }
+
+
 

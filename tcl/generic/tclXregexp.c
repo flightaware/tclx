@@ -3,7 +3,7 @@
  *
  * Tcl regular expression pattern matching utilities.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -408,7 +408,7 @@ PreParseRegExp (expression, infoPtr)
 /*
  *-----------------------------------------------------------------------------
  *
- * TclX_RegExpCompile --
+ * TclX_RegExpCompileObj --
  *     Compile a regular expression.
  *
  * Parameters:
@@ -427,18 +427,22 @@ PreParseRegExp (expression, infoPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_RegExpCompile (interp, regExpPtr, expression, flags)
+TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
     Tcl_Interp  *interp;
     TclX_regexp *regExpPtr;
-    char        *expression;
+    Tcl_Obj     *expressionObj;
     int          flags;
 {
+    char           *expression;
     char           *expBuf;
     int             preParseOk;
+    int             expressionLen;
     preParseInfo_t  preParseInfo;
 
-    if (*expression == '\0') {
-        Tcl_AppendResult (interp, "Null regular expression", (char *) NULL);
+    expression = Tcl_GetStringFromObj (expressionObj, &expressionLen);
+    if (expressionLen == 0) {
+        TclX_StringAppendObjResult (interp, 
+				    "Null regular expression", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -493,8 +497,9 @@ TclX_RegExpCompile (interp, regExpPtr, expression, flags)
             panic ("scanmatch preparse bug");
         
         if (regExpPtr->progPtr == NULL) {
-            Tcl_AppendResult (interp, "error in regular expression: ", 
-                              TclGetRegError (), (char *) NULL);
+            TclX_StringAppendObjResult (interp, 
+				        "error in regular expression: ", 
+                                        TclGetRegError (), (char *) NULL);
             if (flags & TCLX_REXP_NO_CASE)
                 ckfree (expBuf);
             TclX_RegExpClean (regExpPtr);
@@ -605,3 +610,5 @@ exitPoint:
         ckfree (matchStr);
     return result;
 }
+
+

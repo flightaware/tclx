@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: readdir.test,v 1.2 1996/10/19 21:55:22 markd Exp $
+# $Id: readdir.test,v 8.0.4.1 1997/04/14 02:02:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -48,3 +48,5 @@ Test readdir-1.4 {readdir tests} {
 
 catch {eval file delete [glob -nocomplain READDIR.TMP/*]}
 catch {file delete READDIR.TMP}
+
+

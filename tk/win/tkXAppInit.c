@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 1.4 1996/10/27 00:34:16 markd Exp $
+ * $Id: tkXAppInit.c,v 8.0.4.1 1997/04/14 02:03:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -148,3 +148,5 @@ Tcl_AppInit (Tcl_Interp *interp)
   errorExit:
     TkX_Panic ("%s\n", interp->result);
 }
+
+

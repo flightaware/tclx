@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cphelpdir.sh,v 7.0 1996/06/16 05:34:34 markd Exp $
+# $Id: cphelpdir.sh,v 8.0.4.1 1997/04/14 02:03:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -44,4 +44,6 @@ else
     ../runtcl ../tools/instcopy -dirname $SRC $BUILD
     exit $?
 fi
+
+
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pipe.test,v 1.2 1996/10/04 05:02:43 markd Exp $
+# $Id: pipe.test,v 8.0.4.1 1997/04/14 02:02:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -74,6 +74,8 @@ Test pipe-1.2 {pipe tests} {
     close $readChan
     close $writeChan
 } 0 {} {unixOnly}
+
+
 
 
 

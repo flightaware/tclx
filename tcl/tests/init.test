@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: init.test,v 7.1 1996/10/04 05:02:37 markd Exp $
+# $Id: init.test,v 8.0.4.1 1997/04/14 02:02:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,3 +27,5 @@ Test init-1.0 {safe interp with TclX} {
     interp delete $si
     lsort $xcmds
 } 0 {keyldel keylget keylkeys keylset}
+
+

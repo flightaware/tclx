@@ -3,7 +3,7 @@
  *
  * Socket utility functions and commands.
  *---------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 1.4 1996/08/17 02:10:14 markd Exp $
+ * $Id: tclXsocket.c,v 8.0.4.1 1997/04/14 02:01:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,8 +27,8 @@ ReturnGetHostError _ANSI_ARGS_((Tcl_Interp *interp,
 
 static struct hostent *
 InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
-                         int         argc,
-                         char      **argv));
+                         int         objc,
+                         Tcl_Obj   **objv));
 
 
 /*-----------------------------------------------------------------------------
@@ -142,43 +142,47 @@ TclXGetHostInfo (interp, channel, remoteHost)
  *
  * Parameters:
  *   o interp (O) - The error message is returned in the result.
- *   o argc, argv (I) - Command argments.  Host name or IP address is expected
- *     in argv [2].
+ *   o objc, objv (I) - Command argments as Tcl objects.  Host name or IP 
+ *     address is expected in objv [2].
  * Returns:
  *   Pointer to the host entry or NULL if an error occured.
  *-----------------------------------------------------------------------------
  */
 static struct hostent *
-InfoGetHost (interp, argc, argv)
+InfoGetHost (interp, objc, objv)
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     struct hostent *hostEntry;
     struct in_addr address;
 
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", argv [1],
-                          " host", (char *) NULL);
+    char *command =    Tcl_GetStringFromObj (objv [0], NULL);
+    char *subCommand = Tcl_GetStringFromObj (objv [1], NULL);
+    char *host       = Tcl_GetStringFromObj (objv [2], NULL);
+
+    if (objc != 3) {
+        TclX_StringAppendObjResult (interp, tclXWrongArgs, command, " ", 
+	    subCommand, " host", (char *) NULL);
         return NULL;
     }
 
-    if (TclXOSInetAtoN (NULL, argv [2], &address) == TCL_OK) {
+    if (TclXOSInetAtoN (NULL, host, &address) == TCL_OK) {
         hostEntry = gethostbyaddr ((char *) &address,
                                    sizeof (address),
                                    AF_INET);
     } else {
-        hostEntry = gethostbyname (argv [2]);
+        hostEntry = gethostbyname (host);
     }
     if (hostEntry == NULL) {
-        ReturnGetHostError (interp, argv [2]);
+        ReturnGetHostError (interp, host);
         return NULL;
     }
     return hostEntry;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_HostInfoCmd --
+ * Tcl_HostInfoObjCmd --
  *     Implements the TCL host_info command:
  *
  *      host_info addresses host
@@ -190,24 +194,27 @@ InfoGetHost (interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_HostInfoCmd (clientData, interp, argc, argv)
+Tcl_HostInfoObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   **objv;
 {
     struct hostent *hostEntry;
     struct in_addr  inAddr;
     int             idx;
+    char           *subCommand;
+    Tcl_Obj        *listObj;
+    Tcl_Obj        *resultPtr;
 
-    if (argc < 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " option ...", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc < 2)
+	return TclX_WrongArgs (interp, objv [0], "option ...");
 
-    if (STREQU (argv [1], "addresses")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
+    resultPtr = Tcl_GetObjResult (interp);
+    subCommand = Tcl_GetStringFromObj (objv [1], NULL);
+
+    if (STREQU (subCommand, "addresses")) {
+        hostEntry = InfoGetHost (interp, objc, objv);
         if (hostEntry == NULL)
             return TCL_ERROR;
 
@@ -215,13 +222,15 @@ Tcl_HostInfoCmd (clientData, interp, argc, argv)
             bcopy ((VOID *) hostEntry->h_addr_list [idx],
                    (VOID *) &inAddr,
                    hostEntry->h_length);
-            Tcl_AppendElement (interp, inet_ntoa (inAddr));
+
+	    listObj = Tcl_NewStringObj (inet_ntoa (inAddr), -1);
+	    Tcl_ListObjAppendElement (interp, resultPtr, listObj);
         }
         return TCL_OK;
     }
 
-    if (STREQU (argv [1], "address_name")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
+    if (STREQU (subCommand, "address_name")) {
+        hostEntry = InfoGetHost (interp, objc, objv);
         if (hostEntry == NULL)
             return TCL_ERROR;
 
@@ -229,33 +238,37 @@ Tcl_HostInfoCmd (clientData, interp, argc, argv)
             bcopy ((VOID *) hostEntry->h_addr_list [idx],
                    (VOID *) &inAddr,
                    hostEntry->h_length);
-            Tcl_AppendElement (interp, hostEntry->h_name);
+	    listObj = Tcl_NewStringObj (hostEntry->h_name, -1);
+	    Tcl_ListObjAppendElement (interp, resultPtr, listObj);
         }
         return TCL_OK;
     }
 
-    if (STREQU (argv [1], "official_name")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
+    if (STREQU (subCommand, "official_name")) {
+        hostEntry = InfoGetHost (interp, objc, objv);
         if (hostEntry == NULL)
             return TCL_ERROR;
 
-        Tcl_SetResult (interp, hostEntry->h_name, TCL_STATIC);
+        Tcl_SetStringObj (resultPtr, hostEntry->h_name, -1);
         return TCL_OK;
     }
 
-    if (STREQU (argv [1], "aliases")) {
-        hostEntry = InfoGetHost (interp, argc, argv);
+    if (STREQU (subCommand, "aliases")) {
+        hostEntry = InfoGetHost (interp, objc, objv);
         if (hostEntry == NULL)
             return TCL_ERROR;
 
         for (idx = 0; hostEntry->h_aliases [idx] != NULL; idx++) {
-            Tcl_AppendElement (interp, hostEntry->h_aliases [idx]);
+	    listObj = Tcl_NewStringObj (hostEntry->h_aliases [idx], -1);
+	    Tcl_ListObjAppendElement (interp, resultPtr, listObj);
         }
         return TCL_OK;
     }
 
-    Tcl_AppendResult (interp, "invalid option \"", argv [1],
+    TclX_StringAppendObjResult (interp, "invalid option \"", subCommand,
                       "\", expected one of \"addresses\", \"official_name\"",
                       " or \"aliases\"", (char *) NULL);
     return TCL_ERROR;
 }
+
+

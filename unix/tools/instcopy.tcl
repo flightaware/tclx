@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 7.3 1996/11/16 20:38:20 markd Exp $
+# $Id: instcopy.tcl,v 8.0.4.1 1997/04/14 02:03:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
@@ -122,3 +122,5 @@ if [catch {
     puts stderr "Error: $msg"
     exit 1
 }
+
+

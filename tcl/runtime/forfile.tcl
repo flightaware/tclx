@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.tcl,v 7.0 1996/06/16 05:31:23 markd Exp $
+# $Id: forfile.tcl,v 8.0.4.1 1997/04/14 02:02:04 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -38,3 +38,5 @@ proc for_file {var filename cmd} {
     }
     return -code $code $result
 }
+
+

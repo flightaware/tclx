@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.tcl,v 7.0 1996/06/16 05:31:31 markd Exp $
+# $Id: pushd.tcl,v 8.0.4.1 1997/04/14 02:02:07 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -62,3 +62,5 @@ proc dirs {} {
     global TCLXENV
     return [concat [list [pwd]] $TCLXENV(dirPushList)]
 }
+
+

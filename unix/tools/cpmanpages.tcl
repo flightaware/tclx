@@ -37,7 +37,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 7.1 1996/10/04 15:30:34 markd Exp $
+# $Id: cpmanpages.tcl,v 8.0.4.1 1997/04/14 02:03:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -321,4 +321,6 @@ foreach sourceFile $sourceFiles {
     }
     InstallManPage $sourceFile $targetDir $sectionXRef($ext)
 }
+
+
 

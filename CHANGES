@@ -1248,10 +1248,9 @@
   o Fixed bug that caused some scanmatch regular expression to fail to match
     due to problems with the BoyerMoore pre-parse.
 -------------------------------------------------------------------------------
-02 Jan 97:
-  o Changed to compile shared libraries with -fpic and +z.
-  o Added Win32 support for ftruncate, close-on-exec and partial support for
-    dup-ing and open file.  Supplied by Alan Dewar <alan@calgary.hp.com>.
+27 Dec 96:
+  o Converted keyed lists to be stored as Tcl_Obj.  A new C interface to keyed
+    lists is supplied. (* POTENTIAL C INCOMPATIBILITY *)
 -------------------------------------------------------------------------------
 20 Dec 96:
   o Fixed bug that caused intersect3 to return bogus results if a list item
@@ -1259,4 +1258,9 @@
 -------------------------------------------------------------------------------
 22 Dec 96:
   o Fixed unlink compat function failing to unlink a symbolic link.
+-------------------------------------------------------------------------------
+02 Jan 97:
+  o Changed to compile shared libraries with -fpic and +z.
+  o Added Win32 support for ftruncate, close-on-exec and partial support for
+    dup-ing and open file.  Supplied by Alan Dewar <alan@calgary.hp.com>.
 -------------------------------------------------------------------------------

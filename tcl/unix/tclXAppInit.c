@@ -4,7 +4,7 @@
  * Provides a default version of the Tcl_AppInit procedure for use with
  * applications built with Extended Tcl on Unix systems.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 1.3 1996/10/25 04:55:30 markd Exp $
+ * $Id: tclXAppInit.c,v 8.0.4.1 1997/04/14 02:02:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -95,3 +95,5 @@ Tcl_AppInit (interp)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
+
+

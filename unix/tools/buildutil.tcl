@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 8.0.2.1 1996/12/21 05:06:58 markd Exp $
+# $Id:$
 #------------------------------------------------------------------------------
 #
 
@@ -134,4 +134,6 @@ proc CopyDir {sourceDir destDir} {
         error $msg $errorInfo $errorCode
     }
 }
+
+
 

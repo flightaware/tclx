@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fmath.tcl,v 7.0 1996/06/16 05:31:22 markd Exp $
+# $Id: fmath.tcl,v 8.0.4.1 1997/04/14 02:02:04 markd Exp $
 #------------------------------------------------------------------------------
 
 #@package: TclX-fmath acos asin atan ceil cos cosh exp fabs floor log log10 \
@@ -47,4 +47,6 @@ proc abs    x {uplevel [list expr abs($x)]}
 proc double x {uplevel [list expr double($x)]}
 proc int    x {uplevel [list expr int($x)]}
 proc round  x {uplevel [list expr round($x)]}
+
+
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXwinUtil.c,v 7.1 1996/11/07 01:09:51 markd Exp $
+ * $Id: tkXwinUtil.c,v 8.0.4.1 1997/04/14 02:03:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -76,3 +76,5 @@ TkX_Panic TCL_VARARGS_DEF(char *,fmt)
                 MB_ICONSTOP | MB_OK | MB_TASKMODAL | MB_SETFOREGROUND);
     ExitProcess (1);
 }
+
+

@@ -1,31 +1,34 @@
-                           Extended Tcl (TclX) 7.6.0
+                           Extended Tcl (TclX) 8.0.0
                            =========================
 INTRODUCTION
 ============
 
-    Extended Tcl (TclX), is a set of extensions to Tcl 7.6, the Tool Command
+    Extended Tcl (TclX), is a set of extensions to Tcl 8.0, the Tool Command
 Language invented by Dr. John Ousterhout.  Tcl is a powerful, yet simple
-embeddable programming language.  Extended Tcl is oriented towards Unix system
+embeddable programming language.  Extended Tcl is oriented towards system
 programming tasks and large application development.  TclX provides additional
-interfaces to the Unix operating system are provided and many new programming
-constructs and debugging tools.
+interfaces to the operating system, and adds many new programming constructs,
+text manipulation tools, and debugging tools.
 
-    It is upwardly compatible with Tcl 7.6.  You take the Extended Tcl package,
-add it to Tcl 7.6, and from that you get Extended Tcl.  (Tcl is not included
-in this distribution, obtain it from ftp.smli.com).
+    TclX is upwardly compatible with Tcl 8.0.  You take the Extended Tcl 
+    package, add it to Tcl 8.0, and from that you get Extended Tcl.  (Tcl 
+    is not included in this distribution; please obtain it from ftp.smli.com
+    or ftp.neosoft.com).
 
-   Support is also included for building a Tk 4.2 wish shell (wishx)
+   Support is also included for building a Tk 8.0 wish shell (wishx)
 with the Extended Tcl command set and signal handling.
 
-   Extended Tcl runs on most Unix like systems and Windows 95/NT.  However
+   Extended Tcl runs on most Unix-like systems and Windows 95/NT.  However
 the Windows 95/NT work is not complete and should be considered alpha quality.
 
-   While this TclX distribution is tested with Tcl 7.6 and Tk 4.2, it will
-probably work with new versions of Tcl & Tk with little or no changes.
+   While this TclX distribution is tested with Tcl 8.0 and Tk 8.0, it will
+probably work with newer versions of 8.x-series Tcl & Tk with little or no 
+changes.  Please check the Extended Tcl homepage at www.neosoft.com/tclx
+for the latest release and information.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
 (karl@NeoSoft.com) and Mark Diekhans (markd@Grizzly.com), with help
-in the early stages from Peter da Silva (peter@NeoSoft.com).
+in the earliest stages from Peter da Silva (peter@NeoSoft.com).
 
    As with Tcl, all of Extended Tcl is freely redistributable, including for
 commercial use and resale.
@@ -37,7 +40,12 @@ BUILDING TCLX
 see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.  A binary
 release for Windows 95/NT is also available.
 
-CHANGES IN TCLX 7.6.0
+CHANGES IN TCLX 8.0.0
+=====================
+  o Extensive internal use of Tcl 8.0's new object structures makes
+    TclX execute very quickly.
+
+CHANGES IN TCLX 8.0.0
 =====================
   o Partial support for Windows 95/NT.
 
@@ -105,7 +113,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX7.6.0/doc.  Start with the
+the extensions in the directory tclX8.0.0/doc.  Start with the
 TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
@@ -113,7 +121,7 @@ EXTENDED TCL VERSION NAMING
 
     Extended Tcl takes its version number from the corresponding
 version of Tcl upon which it is based, with the addition of another
-decimal number.  This release is TclX 7.6.0.
+decimal number.  This release is TclX 8.0.0.
 
 LINKING APPLICATIONS AND EXTENSION WITH TCLX
 ============================================
@@ -155,9 +163,9 @@ in the body of the mail.  Send messages to this list at tclx-win@grizzly.com.
 WHERE TO GET IT
 ===============
 
-Extended Tcl 7.6.0 can be downloaded by anonymous FTP from:
+Extended Tcl 8.0.0 can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/TclX/tclX7.6.0.tar.gz
+   ftp.neosoft.com:/pub/tcl/TclX/tclX8.0.0.tar.gz
 
 A contributed sources archive resides on ftp.aud.alcatel.com and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently
@@ -186,7 +194,11 @@ to get shared library support working for several system.
 NEOSOFT TCL CONSULTING
 ======================
 
-  NeoSoft, co-developers of Extended Tcl, provides commercial Tcl
-releases, support, training and consulting.  NeoSoft can be reached 
-by sending electronic mail to info@NeoSoft.com or by phoning 
-+1 713 968-5800.
+  NeoSoft, home of Extended Tcl co-inventor Karl Lehenbauer, provides 
+  commercial Tcl releases, support, training and consulting.  NeoSoft 
+  can be reached by sending electronic mail to info@NeoSoft.com or by 
+  phoning +1 713 968-5800.
+
+
+
+

@@ -18,22 +18,22 @@ To build the release:
      of a Borland C++ makefile would be welcome (and a donation of a licensed
      copy of the current Borland C++ even more welcome).
      
-   o Tcl 7.6 and Tk 4.2 should be in a directory adjacent to the tclX7.6.0
+   o Tcl 8.0 and Tk 8.0 should be in a directory adjacent to the tclX8.0.0
      directory or the paths in common.vc need to be changed.
 
-   o Edit tclX7.6.0/win/common.vc to set the macro TOOLS32 to the path to the
+   o Edit tclX8.0.0/win/common.vc to set the macro TOOLS32 to the path to the
      install directory for MS Visual C++ 4.o.  By default, this is c:\msdev.
 
-   o Edit tclX7.6.0/win/common.vc to set the macro PREFIX to the location
+   o Edit tclX8.0.0/win/common.vc to set the macro PREFIX to the location
      you want TclX installed.  This PREFIX's parent directory must exist, all
      other directories, including PREFIX will be built if they don't exist.
      The resulting directories that will be used for installation are:
         $(PREFIX)/bin - Executables and DLLs.
-        $(PREFIX)/lib/tclX7.6.0 - Runtime Tcl code and help files for TclX.
-        $(PREFIX)/lib/tkX4.2.0 - Runtime Tcl code and help files for TkX.
+        $(PREFIX)/lib/tclX8.0.0 - Runtime Tcl code and help files for TclX.
+        $(PREFIX)/lib/tkX8.0.0 - Runtime Tcl code and help files for TkX.
         $(PREFIX)/include - Include files.
 
-   o To compile, cd to tclX7.6.0/win and enter the command:
+   o To compile, cd to tclX8.0.0/win and enter the command:
 
         nmake -f makefile.vc
 
@@ -51,7 +51,7 @@ To build the release:
         o In the Open dialog:
             o Set the "Files of Type" field to be "All Files (*.*)"
             o Set the "Open As" field to be "Makefile"
-            o Now select "tclX7.6.0b2/tcl/win/makefile.vc" using the
+            o Now select "tclX8.0.0b2/tcl/win/makefile.vc" using the
               standard open dialog.
         o A warning dialog will come up asking if you want to wrap a
           workspace around the makefile.  Answer "Yes'.
@@ -100,3 +100,5 @@ In this release, the following restrictions apply:
       process and returns its process id.
 
     o Running the Tk tests does not work (nmake tktest).
+
+

@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 8.0.2.1 1996/12/21 05:06:53 markd Exp $
+# $Id:$
 #------------------------------------------------------------------------------
 #
 
@@ -336,3 +336,5 @@ proc apropos {regexp} {
 global TCLXENV
 
 set TCLXENV(help:curSubject) "/"
+
+

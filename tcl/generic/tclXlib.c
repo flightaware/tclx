@@ -3,7 +3,7 @@
  *
  * Tcl commands to load libraries of Tcl code.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -50,6 +50,17 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
  * Its writable so it works with gcc.
  */
 static char loadOusterCmd [] = "source [file join $tclx_library loadouster.tcl]";
+
+
+/*
+ * FIX: Ugly hack to work around problems with tcl_safeInitInterp that
+ * wants to define auto_load as a proc in slave interps.  Our auto_load is
+ * now named tclx_autoload, this code takes the existing auto_load proc to
+ * check if tclx_autoload is available.  If it is, we use it, otherwise fall
+ * through to the standard code.
+ */
+static char hackAutoLoadCmd [] = 
+  "eval [list proc auto_load cmd [concat {if {[info command tclx_auto_load] != {}} {return [tclx_auto_load $cmd]};} [info body auto_load]]]";
 
 /*
  * Indicates the type of library index.
@@ -1293,11 +1304,13 @@ LoadITclImportProc (interp, command)
         Tcl_DStringSetLength (&fullName, 0);
         if (TclFindElement (interp,
                             nsSearchPathv [idx],
+                            strlen (nsSearchPathv [idx]),
                             &nameSpace,
                             &nextPtr,
                             &nameSpaceLen,
                             NULL))
             goto errorExit;
+
         nameSpace [nameSpaceLen] = '\0';
         if (!STREQU (nameSpace, "::")) {
             Tcl_DStringAppend (&fullName, nameSpace, -1);
@@ -1324,7 +1337,7 @@ LoadITclImportProc (interp, command)
     if (Tcl_GlobalEval (interp, loadCmd) == TCL_ERROR)
         goto errorExit;
 
-    ckfree (nsSearchPathv);
+    ckfree ((char *) nsSearchPathv);
     Tcl_DStringFree (&tmpResult);
     Tcl_DStringFree (&fullName);
     return TCL_OK;
@@ -1332,7 +1345,7 @@ LoadITclImportProc (interp, command)
     
   errorExit:
     if (nsSearchPathv != NULL)
-        ckfree (nsSearchPathv);
+        ckfree ((char *) nsSearchPathv);
     Tcl_DStringFree (&tmpResult);
     Tcl_DStringFree (&fullName);
     return TCL_ERROR;
@@ -1584,10 +1597,15 @@ TclX_LibraryInit (interp)
 
     Tcl_CreateCommand (interp, "auto_load_pkg", Tcl_Auto_load_pkgCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "auto_load", Tcl_Auto_loadCmd,
+    Tcl_CreateCommand (interp, "tclx_auto_load", Tcl_Auto_loadCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "loadlibindex", Tcl_LoadlibindexCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
+
+    if (Tcl_GlobalEval (interp, hackAutoLoadCmd) == TCL_ERROR)
+        return TCL_ERROR;
+    Tcl_ResetResult (interp);
+                                                                  
 
     /*
      * Check for ITcl namespaces.
@@ -1597,4 +1615,6 @@ TclX_LibraryInit (interp)
                                          &cmdInfo);
     return TCL_OK;
 }
+
+
 

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXunixTest.c,v 7.1 1996/11/16 15:57:47 markd Exp $
+ * $Id: tkXunixTest.c,v 8.0.4.1 1997/04/14 02:03:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,6 +43,7 @@ int (*tclDummyMathPtr)() = matherr;
  *	This is the main program for the application.
  *----------------------------------------------------------------------
  */
+int
 main (argc, argv)
     int    argc;
     char **argv;
@@ -93,3 +94,5 @@ Tcl_AppInit (interp)
                       (Tcl_PackageInitProc *) NULL);
     return TCL_OK;
 }
+
+

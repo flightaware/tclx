@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 7.1 1996/10/04 05:02:38 markd Exp $
+# $Id: keylist.test,v 8.0.4.1 1997/04/14 02:02:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -108,17 +108,17 @@ Test keylist-1.18 {keylget tests} {
 Test keylist-1.19 {keylget tests} {
     set keyedlist {{} {keyB valueB} {keyD valueD}}
     keylget keyedlist keyB
-} 1 {invalid keyed list format: list contains an empty field entry}
+} 1 {keyed list entry must be a two element list, found ""}
 
 Test keylist-1.20 {keylget tests} {
     set keyedlist {keyA {keyB valueB} {keyD valueD}}
     keylget keyedlist keyB
-} 1 {invalid keyed list format or inconsistent field name scoping: no value associated with field "keyA"}
+} 1 {keyed list entry must be a two element list, found "keyA"}
 
 Test keylist-1.21 {keylget tests} {
     set keyedlist {{{} valueA} {keyB valueB} {keyD valueD}}
     keylget keyedlist keyB
-} 1 {invalid keyed list format: list contains an empty field name}
+} 1 {keyed list key may not be an empty string}
 
 Test keylist-1.22 {keylget tests} {
     keylget
@@ -216,7 +216,7 @@ Test keylist-3.8 {keylset tests} {
     catch {unset keyedlist}
     set keyedlist {{keyA valueA valueBad} {keyB valueB}}
     keylset keyedlist keyA valueA
-} 1 {invalid keyed list format: trailing data following value in field: "valueA valueBad"}
+} 1 {keyed list entry must be a two element list, found "keyA valueA valueBad"}
 
 Test keylist-3.9 {keylset tests} {
     set keyedlist {}    
@@ -226,7 +226,6 @@ Test keylist-3.9 {keylset tests} {
 
 Test keylist-3.10 {keylset tests} {
     keylset keyedlist A.AA aa
-    set keyedlist
     set keyedlist
 } 0 {{C {{CC {{CCC ccc}}}}} {A {{AA aa}}}}
 
@@ -275,11 +274,11 @@ Test keylist-4.3 {keyldel tests} {
 Test keylist-4.4 {keyldel tests} {
     set keyedlist {{keyA valueA} {keyB valueB} {keyD valueD}}
     keyldel keyedlist keyC
-} 1 {field name not found: "keyC"}
+} 1 {key not found: "keyC"}
 
 Test keylist-4.5 {keyldel tests} {
     keyldel keyedlist
-} 1 {wrong # args: keyldel listvar key}
+} 1 {wrong # args: keyldel listvar key ?key ...?}
 
 Test keylist-4.6 {keyldel tests} {
     set keyedlist $list3
@@ -328,6 +327,13 @@ Test keylist-4.14 {keyldel tests} {
     set keyedlist
 } 0 {}
 
+Test keylist-4.15 {keyldel tests} {
+    set keyedlist $list3
+    keyldel keyedlist B A
+    set keyedlist
+} 0 {{C {{CC {{CCC ccc}}}}}}
+
+
 # Handling of empty lists.
 
 set keyedlist {}
@@ -357,3 +363,143 @@ Test keylist-5.5 {empty keyed list tests} {
 Test keylist-5.6 {empty keyed list tests} {
     keylget keyedlist A
 } 1 {key "A" not found in keyed list}
+
+
+#
+# Some stress cases. Cause table expansions, etc.
+#
+
+#
+# Proc to recurse through generated keyed list name space and execute
+# commands.  Variables `keyedList', `key' and `depth' maybe use in the
+# commands.
+#
+proc PoundKeyedList {klVar depth field entrySizes leafCmd branchCmd} {
+    upvar $klVar keyedList
+    
+    if [lempty $field] {
+        set separ ""
+    } else {
+        set separ .
+    }
+    set keybase [ctype char [expr [ctype ord A]+$depth]]
+    for {set keyIdx 0} {$keyIdx < [lindex $entrySizes 0]} {incr keyIdx} {
+        set key "${field}${separ}${keybase}_${keyIdx}"
+        if {[llength $entrySizes] > 1} {
+            eval $branchCmd
+            PoundKeyedList keyedList [expr $depth + 1] $key \
+                    [lrange $entrySizes 1 end] $leafCmd $branchCmd
+        } else {
+            eval $leafCmd
+        }
+    }
+}
+
+#
+# Build, access and delete elements from a keyed list which is wide at the top.
+#
+Test keylist-6.0 {large list tests} {
+    set keyedList {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        keylset keyedList $key VAL_$key
+    } {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        if ![cequal [keylget keyedList $key] VAL_$key] {
+            error "got value of \"[keylget keyedList $key]\", \
+                    expected \"VAL_$key\""
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        keyldel keyedList $key
+    } {}
+    set keyedList
+} 0 {}
+
+#
+# Build, access and delete elements from a keyed list which is wide at the top.
+# Do it with odd keys then even keys, reverse order of access, then again for
+# delete.
+#
+Test keylist-6.1 {large list tests} {
+    set keyedList {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        if {($keyIdx % 2) == 0} {
+            keylset keyedList $key VAL_$key
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        if {($keyIdx % 2) == 1} {
+            keylset keyedList $key VAL_$key
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        if {($keyIdx % 2) == 1} {
+            if ![cequal [keylget keyedList $key] VAL_$key] {
+                error "got value of \"[keylget keyedList $key]\", \
+                        expected \"VAL_$key\""
+            }
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        if {($keyIdx % 2) == 0} {
+            if ![cequal [keylget keyedList $key] VAL_$key] {
+                error "got value of \"[keylget keyedList $key]\", \
+                        expected \"VAL_$key\""
+            }
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        if {($keyIdx % 2) == 0} {
+            keyldel keyedList $key
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {50 2 3} {
+        if {($keyIdx % 2) == 1} {
+            keyldel keyedList $key
+        }
+    } {}
+    set keyedList
+} 0 {}
+
+#
+# Build, access and delete elements from a keyed list which is wide in the
+# middle.
+#
+Test keylist-6.2 {large list tests} {
+    set keyedList {}
+    PoundKeyedList keyedList 0 "" {10 30 5} {
+        keylset keyedList $key VAL_$key
+    } {}
+    PoundKeyedList keyedList 0 "" {10 30 5} {
+        if ![cequal [keylget keyedList $key] VAL_$key] {
+            error "got value of \"[keylget keyedList $key]\", \
+                    expected \"VAL_$key\""
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {10 30 5} {
+        keyldel keyedList $key
+    } {}
+    set keyedList
+} 0 {}
+
+#
+# Build, access and delete elements from a keyed list which is deep.
+#
+Test keylist-6.3 {large list tests} {
+    set keyedList {}
+    PoundKeyedList keyedList 0 "" {3 3 3 3 3 3} {
+        keylset keyedList $key VAL_$key
+    } {}
+    PoundKeyedList keyedList 0 "" {3 3 3 3 3 3} {
+        if ![cequal [keylget keyedList $key] VAL_$key] {
+            error "got value of \"[keylget keyedList $key]\", \
+                    expected \"VAL_$key\""
+        }
+    } {}
+    PoundKeyedList keyedList 0 "" {3 3 3 3 3 3} {
+        keyldel keyedList $key
+    } {}
+    set keyedList
+} 0 {}
+
+

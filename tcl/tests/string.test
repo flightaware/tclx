@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 7.2 1996/10/04 05:02:49 markd Exp $
+# $Id: string.test,v 8.0.4.1 1997/04/14 02:02:38 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -266,6 +266,8 @@ Test string-11.2 {cconcat tests} {
 Test string-11.3 {cconcat tests} {
     cconcat Aaa " " Bbb
 } 0 {Aaa Bbb}
+
+
 
 
 

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 7.1 1996/08/17 02:10:20 markd Exp $
+ * $Id: tkXAppInit.c,v 8.0.4.1 1997/04/14 02:03:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -103,3 +103,5 @@ Tcl_AppInit (interp)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.wishxrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
+
+

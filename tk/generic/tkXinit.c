@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 7.1 1996/08/21 06:54:58 markd Exp $
+ * $Id: tkXinit.c,v 8.0.4.1 1997/04/14 02:03:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -62,3 +62,5 @@ Tkx_Init (interp)
                      "\n    (while initializing TkX)");
     return TCL_ERROR;
 }
+
+

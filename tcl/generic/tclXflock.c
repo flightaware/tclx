@@ -3,7 +3,7 @@
  *
  * Extended Tcl flock and funlock commands.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 7.3 1996/08/20 03:49:53 markd Exp $
+ * $Id: tclXflock.c,v 8.0.4.1 1997/04/14 02:01:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Need to add an interface to F_GETLK */
@@ -229,3 +229,5 @@ Tcl_FunlockCmd (notUsed, interp, argc, argv)
                       " fileId ?start? ?length? ?origin?", (char *) NULL);
     return TCL_ERROR;
 }
+
+

@@ -17,3 +17,5 @@ foreach i [concat [lsort [glob *.test]] [lsort [glob -nocomplain compat/*.test]]
 if !$tcl_interactive {
     exit
 }
+
+

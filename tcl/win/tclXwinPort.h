@@ -3,7 +3,7 @@
  *
  * Portability include file for MS Windows systems.
  *-----------------------------------------------------------------------------
- * Copyright 1996-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1996-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 8.0 1996/11/21 00:25:26 markd Exp $
+ * $Id:$
  *-----------------------------------------------------------------------------
  */
 
@@ -22,6 +22,7 @@
 #include "tclWinPort.h"
 
 #include <direct.h>
+#include <assert.h>
 
 /*
  * Types needed for fstat, but are not directly supported (we emulate).  If
@@ -72,3 +73,5 @@ getopt (int           nargc,
         const char   *ostr);
 
 #endif
+
+

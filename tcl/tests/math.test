@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: math.test,v 7.1 1996/10/04 05:02:41 markd Exp $
+# $Id: math.test,v 8.0.4.1 1997/04/14 02:02:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -141,4 +141,6 @@ Test math-5.3 {min function tests} {
 Test math-5.4 {min function tests} {
     expr min(-68.7, -2)
 } 0 -68.7
+
+
 

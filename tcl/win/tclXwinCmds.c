@@ -4,7 +4,7 @@
  * Tcl commands to access Win32 functionality and stubs for Unix commands that
  * are not implemented.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 7.5 1996/09/03 23:39:10 markd Exp $
+ * $Id: tclXwinCmds.c,v 8.0.4.1 1997/04/14 02:02:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -73,3 +73,5 @@ void
 TclX_ServerInit (Tcl_Interp *interp)
 {
 }
+
+

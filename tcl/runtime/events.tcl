@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: events.tcl,v 7.0 1996/06/16 05:31:20 markd Exp $
+# $Id: events.tcl,v 8.0.4.1 1997/04/14 02:02:03 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -28,3 +28,5 @@ proc mainloop {} {
     catch {vwait loopVar}
     exit
 }
+
+

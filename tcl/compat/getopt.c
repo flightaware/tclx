@@ -130,3 +130,5 @@ getopt(nargc, nargv, ostr)
 	}
 	return (optopt);			/* dump back option letter */
 }
+
+

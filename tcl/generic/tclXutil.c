@@ -3,7 +3,7 @@
  *
  * Utility functions for Extended Tcl.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 7.6 1996/08/20 03:49:55 markd Exp $
+ * $Id: tclXutil.c,v 8.0.4.1 1997/04/14 02:01:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,6 +42,7 @@ FormatTranslationOption _ANSI_ARGS_((int value));
  * Used to return argument messages by most commands.
  */
 char *tclXWrongArgs = "wrong # args: ";
+Tcl_Obj *tclXWrongArgsObj;
 
 /*-----------------------------------------------------------------------------
  * ReturnOverflow --
@@ -553,7 +554,7 @@ Tcl_GetOffset(interp, string, offsetPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_RelativeExpr --
+ * TclX_RelativeExpr --
  *
  *    Evaluate an expression that may start with the magic words "end" or
  * "len".  These strings are replaced with either the end offset or the
@@ -561,7 +562,7 @@ Tcl_GetOffset(interp, string, offsetPtr)
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter.
- *   o cstringExpr (I) - The expression to evaludate.
+ *   o exprPtr (I) - Object with expression to evaluate.
  *   o stringLen (I) - The length of the string.
  *   o exprResultPtr (O) - The result of the expression is returned here.
  * Returns:
@@ -569,32 +570,43 @@ Tcl_GetOffset(interp, string, offsetPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_RelativeExpr (interp, cstringExpr, stringLen, exprResultPtr)
+TclX_RelativeExpr (interp, exprPtr, stringLen, exprResultPtr)
     Tcl_Interp  *interp;
-    char        *cstringExpr;
+    Tcl_Obj     *exprPtr;
     long         stringLen;
     long        *exprResultPtr;
 {
     
-    char *buf;
-    int   exprLen, result;
-    char  staticBuf [64];
+    char *exprStr, *buf;
+    int exprLen, exprStrLen, result;
+    char staticBuf [32];
 
-    if (!(STRNEQU (cstringExpr, "end", 3) ||
-          STRNEQU (cstringExpr, "len", 3))) {
-        return Tcl_ExprLong (interp, cstringExpr, exprResultPtr);
+    if (exprPtr->typePtr == Tcl_GetObjType ("int")) {
+        if (Tcl_GetIntFromObj (interp, exprPtr, exprResultPtr) != TCL_OK)
+            return TCL_ERROR;
+        return TCL_OK;
+    }
+
+    exprStr = Tcl_GetStringFromObj (exprPtr, &exprStrLen);
+
+    if (!(STRNEQU (exprStr, "end", 3) ||
+          STRNEQU (exprStr, "len", 3))) {
+        if (Tcl_ExprLong (interp, exprStr, exprResultPtr) != TCL_OK) {
+            TclSetObjResultFromStrResult (interp);
+            return TCL_ERROR;
+        }
     }
 
     sprintf (staticBuf, "%ld",
-             stringLen - ((cstringExpr [0] == 'e') ? 1 : 0));
-    exprLen = strlen (staticBuf) + strlen (cstringExpr) - 2;
+             stringLen - ((exprStr [0] == 'e') ? 1 : 0));
+    exprLen = strlen (staticBuf) + exprStrLen - 2;
 
     buf = staticBuf;
     if (exprLen > sizeof (staticBuf)) {
         buf = (char *) ckalloc (exprLen);
         strcpy (buf, staticBuf);
     }
-    strcat (buf, cstringExpr + 3);
+    strcat (buf, exprStr + 3);
 
     result = Tcl_ExprLong (interp, buf, exprResultPtr);
 
@@ -628,7 +640,7 @@ TclX_GetOpenChannel (interp, handle, direction)
 
     chan = Tcl_GetChannel (interp, handle, &mode);
     if (chan == (Tcl_Channel) NULL) {
-	return NULL;
+        return NULL;
     }
     if ((direction & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
         Tcl_AppendResult(interp, "channel \"", handle,
@@ -637,6 +649,50 @@ TclX_GetOpenChannel (interp, handle, direction)
     }
     if ((direction & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
         Tcl_AppendResult(interp, "channel \"", handle,
+                "\" wasn't opened for writing", (char *) NULL);
+        return NULL;
+    }
+
+    return chan;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_GetOpenChannelObj --
+ *
+ *    Convert a file handle to a channel with error checking.
+ *
+ * Parameters:
+ *   o interp    (I) - Current interpreter.
+ *   o handleObj (I) - The file handle object to convert.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
+ * Returns:
+ *   A the channel or NULL if an error occured.
+ *-----------------------------------------------------------------------------
+ */
+Tcl_Channel
+TclX_GetOpenChannelObj (interp, handleObj, direction)
+    Tcl_Interp *interp;
+    Tcl_Obj    *handleObj;
+    int         direction;
+{
+    Tcl_Channel  chan;
+    int          mode;
+    char        *handle;
+
+    handle = Tcl_GetStringFromObj (handleObj, NULL);
+    chan = Tcl_GetChannel (interp, handle, &mode);
+    if (chan == (Tcl_Channel) NULL) {
+	TclSetObjResultFromStrResult (interp);  /* FIX: remove */
+        return NULL;
+    }
+    if ((direction & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
+        TclX_StringAppendObjResult (interp, "channel \"", handle,
+                "\" wasn't opened for reading", (char *) NULL);
+        return NULL;
+    }
+    if ((direction & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
+        TclX_StringAppendObjResult (interp, "channel \"", handle,
                 "\" wasn't opened for writing", (char *) NULL);
         return NULL;
     }
@@ -1100,3 +1156,70 @@ TclX_JoinPath (path1, path2, joinedPath)
 
     return joinedPath->string;
 }
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_WrongArgs --
+ *
+ *   Easily create "wrong # args" error messages.
+ *
+ * Parameters:
+ *   o commandNameObj (I) - Object containing name of command (objv[0])
+ *   o string (I) - Text message to append.
+ * Returns:
+ *   TCL_ERROR
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_WrongArgs (interp, commandNameObj, string)
+    Tcl_Interp  *interp;
+    Tcl_Obj     *commandNameObj;
+    char        *string;
+{
+    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
+
+    Tcl_StringObjAppendObj (resultPtr, tclXWrongArgsObj);
+    Tcl_StringObjAppendObj (resultPtr, commandNameObj);
+
+    if (*string != '\0') {
+        Tcl_StringObjAppend (resultPtr, " ", 1);
+        Tcl_StringObjAppend (resultPtr, string, -1);
+    }
+    return TCL_ERROR;
+}
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_StringAppendObjResult --
+ *
+ *   Append a variable number of strings onto the object result already
+ * present for an interpreter.
+ *
+ * Parameters:
+ *   o interp (I) - Interpreter to set the result in.
+ *   o args (I) - Strings to append, terminated by a NULL.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_StringAppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
+{
+    Tcl_Interp *interp;
+    Tcl_Obj *resultPtr;
+    va_list argList;
+    char *string;
+
+    interp = TCL_VARARGS_START (Tcl_Interp *, arg1, argList);
+    resultPtr = Tcl_GetObjResult (interp);
+
+    TCL_VARARGS_START(Tcl_Interp *,arg1,argList);
+    while (1) {
+        string = va_arg(argList, char *);
+        if (string == NULL) {
+            break;
+        }
+        Tcl_StringObjAppend (resultPtr, string, -1);
+    }
+    va_end(argList);
+}
+
+

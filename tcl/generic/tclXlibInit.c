@@ -4,7 +4,7 @@
  * Function to add the Extented Tcl library commands into an interpreter. This
  * also sets the Tcl auto_path, tcl_library and tclx_library variable.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlibInit.c,v 7.0 1996/06/16 05:30:35 markd Exp $
+ * $Id: tclXlibInit.c,v 8.0.4.1 1997/04/14 02:01:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,4 +35,6 @@ Tclxlib_Init (interp)
 
     return TCL_OK;
 }
+
+
 
