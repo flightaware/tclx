@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.5 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tcl++.h,v 2.6 1993/05/04 06:29:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -77,10 +77,9 @@ public:
     */
 
     inline void
-    AppendElement (const char *string,
-                   int         noSep)
+    AppendElement (const char *string)
     { 
-        Tcl_AppendElement (interp, (char *) string, noSep);
+        Tcl_AppendElement (interp, (char *) string);
     }
 
     void
@@ -93,6 +92,22 @@ public:
         Tcl_AddErrorInfo (interp, (char *)message);
     }
 
+    inline void
+    CallWhenDeleted (Tcl_InterpDeleteProc *proc,
+                     ClientData            clientData)
+    {
+        Tcl_CallWhenDeleted (interp, proc, clientData);
+    }
+
+    inline Tcl_CmdProc *
+    CommandInfo (const char         *cmdName,
+                 ClientData         *clientDataPtr,
+                 Tcl_CmdDeleteProc **deleteProcPtr)
+    {
+        return Tcl_CommandInfo (interp, (char *) cmdName, clientDataPtr,
+                                deleteProcPtr);
+    }
+
     inline void 
     CreateCommand (const char        *cmdName,
                    Tcl_CmdProc       *proc, 
@@ -100,6 +115,17 @@ public:
                    Tcl_CmdDeleteProc *deleteProc)
     { 
         Tcl_CreateCommand (interp, (char*) cmdName, proc, data, deleteProc);
+    }
+
+    inline void
+    CreateMathFunc (const char    *name,
+                    int            numArgs,
+                    Tcl_ValueType *argTypes,
+                    Tcl_MathProc  *proc,
+                    ClientData     clientData)
+    {
+        Tcl_CreateMathFunc (interp, (char *) name, numArgs, argTypes,
+			    proc,  clientData);
     }
 
     inline int
@@ -141,12 +167,18 @@ public:
         Tcl_DetachPids (numPids, pidPtr);
     }
 
-    inline int 
-    Eval (char   *cmd, 
-          char    flags = 0, 
-          char  **termPtr = NULL)
+    inline void
+    EnterFile (FILE       *file,
+               int         readable,
+               int         writable)
     {
-        return Tcl_Eval (interp, cmd, flags, termPtr);
+        Tcl_EnterFile (interp, file, readable, writable);
+    }
+
+    inline int 
+    Eval (char  *cmd)
+    {
+        return Tcl_Eval (interp, cmd);
     }
 
     inline int
@@ -183,27 +215,34 @@ public:
     }
 
     inline int
-    GetBoolean (Tcl_Interp *interp,
-                const char *string,
+    GetBoolean (const char *string,
                 int        *boolPtr)
     { 
         return Tcl_GetBoolean (interp, (char *) string, boolPtr);
     }
 
     inline int
-    GetDouble (Tcl_Interp *interp,
-               const char *string,
+    GetDouble (const char *string,
                double     *doublePtr)
     { 
         return Tcl_GetDouble (interp, (char *) string, doublePtr);
     }
 
     inline int
-    GetInt (Tcl_Interp *interp,
-            const char *string,
+    GetInt (const char *string,
             int        *intPtr)
     { 
         return Tcl_GetInt (interp, (char *) string, intPtr);
+    }
+
+    inline int
+    GetOpenFile (const char *string,
+                 int         write,
+                 int         checkUsage,
+                 FILE      **filePtr)
+    {
+        return Tcl_GetOpenFile (interp, (char *) string, write, checkUsage,
+                                filePtr);
     }
 
     inline const char *
@@ -222,15 +261,30 @@ public:
     }
 
     inline void
-    InitMemory ()
+    LinkedVarWritable (const char *varName,
+                       int         writable)
     {
-        Tcl_InitMemory (interp);
+        Tcl_LinkedVarWritable (interp, (char *) varName, writable);
+    }
+
+    inline int
+    LinkVar (const char *varName,
+             char       *addr,
+             int         type)
+    {
+        return Tcl_LinkVar (interp, (char *) varName, addr, type);
     }
 
     inline char *
     ParseVar (const char  *string, 
               char       **termPtr)
        { return Tcl_ParseVar (interp, (char *) string, termPtr); }
+
+    inline const char *
+    PosixError ()
+    {
+        return Tcl_PosixError (interp);
+    }
 
     inline int 
     RecordAndEval (const char *cmd, 
@@ -280,15 +334,19 @@ public:
     }
 
     inline int 
-    SplitList (const char   *list, 
-               int          &argcP, 
-               char       **&argvP)
-        { return Tcl_SplitList (interp, (char *) list, &argcP, &argvP); }
+    SplitList (const char   *list,
+               int          &argcPtr,
+               char       **&argvPtr)
+    {
+        return Tcl_SplitList (interp, (char *) list, &argcPtr, &argvPtr);
+    }
 
     inline char *
-    TildeSubst (Tcl_Interp *interp,
-                const char *name)
-        { return Tcl_TildeSubst (interp, (char *) name); }
+    TildeSubst (const char  *name,
+                Tcl_DString *bufferPtr)
+    {
+        return Tcl_TildeSubst (interp, (char *) name, bufferPtr);
+    }
 
     int
     TraceVar (const char       *varName,
@@ -311,24 +369,26 @@ public:
                                proc, clientData); 
     }
 
-    inline const char *
-    UnixError ()
+    inline void
+    UnlinkVar (const char *varName)
     {
-        return Tcl_UnixError (interp);
+        Tcl_UnlinkVar (interp, (char *) varName);
     }
 
     inline void
-    UnsetVar (Tcl_Interp *interp,
-              const char *varName,
+    UnsetVar (const char *varName,
               int         global)
-        { Tcl_UnsetVar (interp, (char *) varName, global); }
+    {
+        Tcl_UnsetVar (interp, (char *) varName, global);
+    }
 
     inline void
-    UnsetVar2 (Tcl_Interp *interp,
-               const char *part1, 
+    UnsetVar2 (const char *part1, 
                const char *part2, 
                int         global)
-        { Tcl_UnsetVar2 (interp, (char *) part1, (char *) part2, global); }
+    {
+        Tcl_UnsetVar2 (interp, (char *) part1, (char *) part2, global);
+    }
 
     inline void
     UntraceVar (const char       *varName, 
@@ -341,8 +401,7 @@ public:
 
 
     inline void
-    UntraceVar2 (Tcl_Interp       *interp,
-                 const char       *part1,
+    UntraceVar2 (const char       *part1,
                  const char       *part2,
                  int               flags, 
                  Tcl_VarTraceProc *proc, 
@@ -385,10 +444,9 @@ public:
     inline void
     CommandLoop (FILE       *inFile,
                  FILE       *outFile,
-                 int         (*evalProc) (),
                  unsigned    options)
     {
-        Tcl_CommandLoop (interp, inFile, outFile, evalProc, options);
+        Tcl_CommandLoop (interp, inFile, outFile, options);
     }
 
     inline char *
@@ -426,16 +484,14 @@ public:
     }
 
     inline int
-    GetLong (Tcl_Interp *interp,
-             const char *string,
+    GetLong (const char *string,
              long       *longPtr)
     {
         return Tcl_GetLong (interp, string, longPtr);
     }
 
     inline int
-    GetUnsigned (Tcl_Interp *interp,
-                 const char *string,
+    GetUnsigned (const char *string,
                  unsigned   *unsignedPtr)
     {
          return Tcl_GetUnsigned (interp, string, unsignedPtr);
@@ -451,30 +507,29 @@ public:
     }
 
     inline int
-    ShellEnvInit (unsigned     options,
-                  const char  *programName, 
-                  int          argc,
-                  const char **argv,
-                  int          interactive,
-                  const char  *initFile)
+    ShellEnvInit (unsigned         options,
+                  const char      *programName, 
+                  int              argc,
+                  const char     **argv,
+                  tclInitFile_t **initFiles)
      {
          return Tcl_ShellEnvInit (interp, options, programName, argc, argv,
-                                  interactive, initFile);
+                                  initFiles);
      }
 
     inline void 
-    Startup (int          argc,
-             const char **argv,
-             const char  *initFile,
-             unsigned     options = 0) 
+    Startup (unsigned        options,
+             int             argc,
+             const char    **argv,
+             tclInitFile_t **initFiles)
     {
-        Tcl_Startup (interp, argc, argv, initFile, options);
+        Tcl_Startup (interp, options, argc, argv, initFiles);
     }
 };
 
 class TclTrace_cl
 {
-    Tcl_Trace trace;
+    Tcl_Trace   trace;
     Tcl_Interp *interp;
 
 public:
@@ -489,25 +544,6 @@ public:
 
     inline ~TclTrace_cl () 
         { Tcl_DeleteTrace (interp, trace); }
-};
-
-
-class TclCmdBuf_cl
-{
-    Tcl_CmdBuf buf;
-
-public:
-    inline 
-    TclCmdBuf_cl () 
-        { buf = Tcl_CreateCmdBuf (); }
-
-    inline 
-    ~TclCmdBuf_cl () 
-        { Tcl_DeleteCmdBuf (buf); }
-
-    inline const char *
-    AssembleCmd (const char *string)
-        { return Tcl_AssembleCmd (buf, (char *) string); }
 };
 
 class TclHandleTbl_cl

@@ -52,7 +52,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     char               *host, *service;
     int                 socketFD = -1, socketFD2 = -1, nextArg, buffered;
     struct sockaddr_in  server;
-    OpenFile           *filePtr;
+    FILE               *filePtr;
 
     /*
      * Parse arguments.
@@ -159,7 +159,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
         if (filePtr == NULL)
             goto errorExit;
 
-        setbuf (filePtr->f, NULL);
+        setbuf (filePtr, NULL);
         sprintf (interp->result, "file%d", socketFD);
         return TCL_OK;
     }
@@ -181,7 +181,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
      * Exit points for errors.
      */
   unixError:
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
 
   errorExit:
     if (socketFD >= 0)

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.6 1993/04/06 05:58:20 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.7 1993/05/19 04:19:21 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -280,7 +280,7 @@ Tcl_KillCmd (clientData, interp, argc, argv)
 
         if (kill ((pid_t) procId, signalNum) < 0) {
             Tcl_AppendResult (interp, "pid ", procArgv [idx],
-                              ": ", Tcl_UnixError (interp), (char *) NULL);
+                              ": ", Tcl_PosixError (interp), (char *) NULL);
             goto exitPoint;
         }
      }
@@ -543,8 +543,7 @@ Tcl_CheckForSignal (interp, cmdResultCode)
     if (!tclReceivedSignal)
         return cmdResultCode;  /* No signal received */
 
-    savedResult = ckalloc (strlen (interp->result) + 1);
-    strcpy (savedResult, interp->result);
+    savedResult = ckstrdup (interp->result);
     Tcl_ResetResult (interp);
 
     for (signalNum = 1; signalNum < MAXSIG; signalNum++) {
@@ -578,7 +577,7 @@ Tcl_CheckForSignal (interp, cmdResultCode)
         else
             signalName = Tcl_SignalId (retErrorForSignal);
 
-        Tcl_SetErrorCode (interp, "UNIX", "SIG", signalName, (char*) NULL);
+        Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);
         Tcl_AppendResult (interp, signalName, " signal received", 
                           (char *)NULL);
         Tcl_SetVar (interp, "errorInfo", "", TCL_GLOBAL_ONLY);
@@ -701,7 +700,7 @@ SignalBlocked (interp, signalNum)
     sigset_t sigBlockSet;
 
     if (sigprocmask (SIG_BLOCK, NULL, &sigBlockSet)) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return NULL;
     }
     return sigismember (&sigBlockSet, signalNum) ? "1" : "0";
@@ -785,7 +784,7 @@ unixSigError:
     for (idx = 0; idx <= actuallyDone; idx++)
         ckfree (stateKeyedList [idx]);
 
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }
 
@@ -816,10 +815,7 @@ SetSignalStates (interp, signalListSize, signalList, actionFunc, command)
     char            *command;
 
 {
-    int idx, signalNum, commandLen;
-
-    if (command != NULL)
-        commandLen = strlen (command);
+    int idx, signalNum;
 
     for (idx = 0; idx < signalListSize; idx ++) {
         signalNum = signalList [idx];
@@ -831,16 +827,14 @@ SetSignalStates (interp, signalListSize, signalList, actionFunc, command)
         if (!SetSignalAction (signalNum, actionFunc))
             goto unixSigError;
 
-        if (command != NULL) {
-            signalTrapCmds [signalNum] = ckalloc (commandLen + 1);
-            strcpy (signalTrapCmds [signalNum], command);
-        }
+        if (command != NULL)
+            signalTrapCmds [signalNum] = ckstrdup (command);
     }
 
     return TCL_OK;
 
 unixSigError:
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }
 
@@ -878,7 +872,7 @@ BlockSignals (interp, action, signalListSize, signalList)
         sigaddset (&sigBlockSet, signalList [idx]);
 
     if (sigprocmask (action, &sigBlockSet, NULL)) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXfstat.c,v 1.1 1993/04/07 06:02:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -31,25 +31,25 @@
  */
 static int
 GetRemoteHost _ANSI_ARGS_((Tcl_Interp *interp,
-                           OpenFile   *filePtr));
+                           FILE       *filePtr));
 
 static char *
 GetFileType _ANSI_ARGS_((struct stat  *statBufPtr));
 
 static void
 ReturnStatList _ANSI_ARGS_((Tcl_Interp   *interp,
-                            OpenFile     *filePtr,
+                            FILE         *filePtr,
                             struct stat  *statBufPtr));
 
 static int
 ReturnStatArray _ANSI_ARGS_((Tcl_Interp   *interp,
-                             OpenFile     *filePtr,
+                             FILE         *filePtr,
                              struct stat  *statBufPtr,
                              char         *arrayName));
 
 static int
 ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
-                            OpenFile     *filePtr,
+                            FILE         *filePtr,
                             struct stat  *statBufPtr,
                             char         *itemName));
 
@@ -72,13 +72,13 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
 static int
 GetRemoteHost (interp, filePtr)
     Tcl_Interp *interp;
-    OpenFile   *filePtr;
+    FILE       *filePtr;
 {
     int                 socketFD, nameLen;
     struct sockaddr_in  remote;
     struct hostent     *hostEntry;
 
-    socketFD = fileno (filePtr->f);
+    socketFD = fileno (filePtr);
     nameLen = sizeof (remote);
 
     if (getpeername (socketFD, &remote, &nameLen) < 0)
@@ -95,7 +95,7 @@ GetRemoteHost (interp, filePtr)
 
   unixError:
     Tcl_ResetResult (interp);
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }
 #else
@@ -111,7 +111,7 @@ GetRemoteHost (interp, filePtr)
 static int
 GetRemoteHost (interp, filePtr)
     Tcl_Interp *interp;
-    OpenFile  *filePtr;
+    FILE       *filePtr;
 {
     interp->result = "sockets are not available on this system";
     return TCL_ERROR;
@@ -178,7 +178,7 @@ GetFileType (statBufPtr)
 static void
 ReturnStatList (interp, filePtr, statBufPtr)
     Tcl_Interp   *interp;
-    OpenFile     *filePtr;
+    FILE         *filePtr;
     struct stat  *statBufPtr;
 {
     char statList [200];
@@ -192,7 +192,7 @@ ReturnStatList (interp, filePtr, statBufPtr)
     sprintf (statList, 
              "{mtime %d} {nlink %d} {size %d} {uid %d} {tty %d} {type %s}",
              statBufPtr->st_mtime,  statBufPtr->st_nlink, statBufPtr->st_size,
-             statBufPtr->st_uid,    isatty (fileno (filePtr->f)),
+             statBufPtr->st_uid,    isatty (fileno (filePtr)),
              GetFileType (statBufPtr));
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
@@ -217,7 +217,7 @@ ReturnStatList (interp, filePtr, statBufPtr)
 static int
 ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
     Tcl_Interp   *interp;
-    OpenFile     *filePtr;
+    FILE         *filePtr;
     struct stat  *statBufPtr;
     char         *arrayName;
 {
@@ -274,7 +274,7 @@ ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
         return TCL_ERROR;
 
     if (Tcl_SetVar2 (interp, arrayName, "tty", 
-                     isatty (fileno (filePtr->f)) ? "1" : "0",
+                     isatty (fileno (filePtr)) ? "1" : "0",
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
@@ -305,7 +305,7 @@ ReturnStatArray (interp, filePtr, statBufPtr, arrayName)
 static int
 ReturnStatItem (interp, filePtr, statBufPtr, itemName)
     Tcl_Interp   *interp;
-    OpenFile     *filePtr;
+    FILE         *filePtr;
     struct stat  *statBufPtr;
     char         *itemName;
 {
@@ -332,7 +332,7 @@ ReturnStatItem (interp, filePtr, statBufPtr, itemName)
     else if (STREQU (itemName, "type"))
         interp->result = GetFileType (statBufPtr);
     else if (STREQU (itemName, "tty"))
-        interp->result = isatty (fileno (filePtr->f)) ? "1" : "0";
+        interp->result = isatty (fileno (filePtr)) ? "1" : "0";
     else if (STREQU (itemName, "remotehost")) {
         if (GetRemoteHost (interp, filePtr) != TCL_OK)
             return TCL_ERROR;
@@ -365,7 +365,7 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    OpenFile    *filePtr;
+    FILE         *filePtr;
     struct stat  statBuf;
 
     if ((argc < 2) || (argc > 4)) {
@@ -374,11 +374,13 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (TclGetOpenFile (interp, argv[1], &filePtr) != TCL_OK)
+    if (Tcl_GetOpenFile (interp, argv[1],
+                         FALSE, FALSE,  /* No checking */
+                         &filePtr) != TCL_OK)
 	return TCL_ERROR;
     
-    if (fstat (fileno (filePtr->f), &statBuf)) {
-        interp->result = Tcl_UnixError (interp);
+    if (fstat (fileno (filePtr), &statBuf)) {
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
 

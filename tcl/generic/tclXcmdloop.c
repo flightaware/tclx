@@ -12,21 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.2 1993/04/01 03:53:29 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-
-/*
- * Pointer to eval procedure to use.  This way bring in the history module
- * from a library can be made optional.  This only works because the calling
- * sequence of Tcl_Eval is a superset of Tcl_RecordAndEval.  This defaults
- * to no history, set this variable to Tcl_RecordAndEval to use history.
- */
-
-int (*tclShellCmdEvalProc) () = Tcl_Eval;
 
 /*
  * Prototypes of internal functions.
@@ -217,35 +207,30 @@ OutputPrompt (interp, outFP, topLevel)
  *   o interp (I) - A pointer to the interpreter
  *   o inFile (I) - The file to read commands from.
  *   o outFile (I) - The file to write the prompts to. 
- *   o evalProc (I) - The function to call to evaluate a command.
- *     Should be either Tcl_Eval or Tcl_RecordAndEval if history is desired.
  *   o options (I) - Currently unused.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_CommandLoop (interp, inFile, outFile, evalProc, options)
+Tcl_CommandLoop (interp, inFile, outFile, options)
     Tcl_Interp *interp;
     FILE       *inFile;
     FILE       *outFile;
-    int         (*evalProc) ();
     unsigned    options;
 {
-    Tcl_CmdBuf cmdBuf;
-    char       inputBuf [256];
-    int        topLevel = TRUE;
-    int        result;
-    char      *cmd;
+    Tcl_DString cmdBuf;
+    char        inputBuf [128];
+    int         topLevel = TRUE;
+    int         result;
 
-    cmdBuf = Tcl_CreateCmdBuf();
+    Tcl_DStringInit (&cmdBuf);
 
     while (TRUE) {
         /*
          * If a signal came in, process it and drop any pending command.
          */
         if (tclReceivedSignal) {
-            Tcl_CheckForSignal (interp, TCL_OK);
-            Tcl_DeleteCmdBuf(cmdBuf);
-            cmdBuf = Tcl_CreateCmdBuf();
+            Tcl_CheckForSignal (interp, TCL_OK); 
+            Tcl_DStringFree (&cmdBuf);
             topLevel = TRUE;
         }
         /*
@@ -265,9 +250,9 @@ Tcl_CommandLoop (interp, inFile, outFile, evalProc, options)
                        strerror (errno));
             goto endOfFile;
         }
-        cmd = Tcl_AssembleCmd(cmdBuf, inputBuf);
+        Tcl_DStringAppend (&cmdBuf, inputBuf, -1);
 
-        if (cmd == NULL) {
+        if (!Tcl_CommandComplete (cmdBuf.string)) {
             topLevel = FALSE;
             continue;  /* Next line */
         }
@@ -275,13 +260,14 @@ Tcl_CommandLoop (interp, inFile, outFile, evalProc, options)
          * Finally have a complete command, go eval it and maybe output the
          * result.
          */
-        result = (*evalProc) (interp, cmd, 0, (char **)NULL);
-        if (result != TCL_OK || !IsSetVarCmd (interp, cmd))
+        result = Tcl_RecordAndEval (interp, cmdBuf.string, 0);
+        if (result != TCL_OK || !IsSetVarCmd (interp, cmdBuf.string))
             Tcl_PrintResult (outFile, result, interp->result);
         topLevel = TRUE;
+        Tcl_DStringFree (&cmdBuf);
     }
 endOfFile:
-    Tcl_DeleteCmdBuf(cmdBuf);
+    Tcl_DStringFree (&cmdBuf);
 }
 
 /*
@@ -316,10 +302,8 @@ SetPromptVar (interp, hookVarName, newHookValue, oldHookValuePtr)
     if (oldHookValuePtr != NULL) {
         hookValue = Tcl_GetVar2 (interp, "TCLENV", hookVarName, 
                                  TCL_GLOBAL_ONLY);
-        if (hookValue != NULL) {
-            oldHookPtr = ckalloc (strlen (hookValue) + 1);
-            strcpy (oldHookPtr, hookValue);
-        }
+        if (hookValue != NULL)
+            oldHookPtr =  ckstrdup (hookValue);
     }
     if (Tcl_SetVar2 (interp, "TCLENV", hookVarName, newHookValue, 
                      TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL) {
@@ -371,7 +355,7 @@ Tcl_CommandloopCmd(clientData, interp, argc, argv)
             goto exitPoint;
     }
 
-    Tcl_CommandLoop (interp, stdin, stdout, tclShellCmdEvalProc, 0);
+    Tcl_CommandLoop (interp, stdin, stdout, 0);
 
     if (oldTopLevelHook != NULL)
         SetPromptVar (interp, "topLevelPromptHook", oldTopLevelHook, NULL);

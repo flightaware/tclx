@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.3 1993/05/28 03:57:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -49,7 +49,6 @@ typedef struct scanContext_t *scanContext_pt;
  */
 
 typedef struct {
-    int             useCount;      /* Commands that current share globals */
     void_pt         tblHdrPtr;     /* Scan context handle table           */
     char            curName [16];  /* Current context name.               */ 
     } scanGlob_t;
@@ -84,15 +83,16 @@ SetMatchVar _ANSI_ARGS_((Tcl_Interp *interp,
                          char       *fileHandle));
 
 void
-FileScanCleanUp _ANSI_ARGS_((ClientData clientData));
+FileScanCleanUp _ANSI_ARGS_((ClientData  clientData,
+                             Tcl_Interp *interp));
 
 
 /*
  *-----------------------------------------------------------------------------
+ * CleanUpContext --
  *
- * CleanUpContext
- *     Release all resources allocated to the specified scan context
- *     entry.  The entry itself is not released.
+ *   Release all resources allocated to the specified scan context entry.  The
+ *  entry itself is not released.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -121,11 +121,10 @@ CleanUpContext (scanGlobPtr, contextPtr)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * CreateScanContext --
- *     Create a new scan context, implements the subcommand:
- *         scancontext create
  *
+ *   Create a new scan context, implements the subcommand:
+ *         scancontext create
  *-----------------------------------------------------------------------------
  */
 static int
@@ -148,11 +147,10 @@ CreateScanContext (interp, scanGlobPtr)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * DeleteScanContext --
- *     Deletes the specified scan context, implements the subcommand:
- *         scancontext delete contexthandle
  *
+ *   Deletes the specified scan context, implements the subcommand:
+ *         scancontext delete contexthandle
  *-----------------------------------------------------------------------------
  */
 static int
@@ -175,16 +173,11 @@ DeleteScanContext (interp, scanGlobPtr, contextHandle)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * Tcl_ScancontextCmd --
- *     Implements the TCL scancontext Tcl command, which has the 
- *     following forms.
+ *
+ *   Implements the TCL scancontext Tcl command, which has the following forms:
  *         scancontext create
  *         scancontext delete
- *
- * Results:
- *    Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -232,15 +225,12 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * Tcl_ScanmatchCmd --
- *     Implements the TCL command:
+ *
+ *   Implements the TCL command:
  *         scanmatch ?-nocase? contexthandle ?regexp? command
- *     This uses both Boyer_Moore and regular expressions matching.
  *
- * Results:
- *    Standard TCL results.
- *
+ *   This uses both Boyer_Moore and regular expressions matching.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -284,8 +274,7 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
                               "specified in this scan context", (char *) NULL);
             return TCL_ERROR;
         }
-        contextPtr->defaultAction = ckalloc (strlen (argv [2]) + 1);
-        strcpy (contextPtr->defaultAction, argv [2]);
+        contextPtr->defaultAction = ckstrdup (argv [2]);
 
         return TCL_OK;
     }
@@ -308,8 +297,7 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
         return (TCL_ERROR);
     }
 
-    newmatch->command = ckalloc (strlen (argv[firstArg + 2]) + 1);
-    strcpy(newmatch->command, argv [firstArg + 2]);
+    newmatch->command = ckstrdup (argv [firstArg + 2]);
 
     /*
      * Link in the new match.
@@ -332,16 +320,10 @@ argError:
 
 /*
  *-----------------------------------------------------------------------------
- *
  * SetMatchVar --
- *     Sets the TCL array variable matchInfo to contain information 
- *     about the line that is matched.
- * Results:
- *     TCL_OK if all is ok, TCL_ERROR if an error occures setting the
- *     variables.
- * Side effects:
- *     A TCL array variable is created or altered.
- * 
+ *
+ *   Sets the TCL array variable matchInfo to contain information 
+ *  about the line that is matched.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -376,14 +358,10 @@ SetMatchVar (interp, fileLine, fileOffset, scanLineNum, fileHandle)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * Tcl_ScanfileCmd --
- *     Implements the TCL command:
- *         scanfile contexthandle filehandle
  *
- * Results:
- *    Standard TCL results.
- *
+ *   Implements the TCL command:
+ *        scanfile contexthandle filehandle
  *-----------------------------------------------------------------------------
  */
 static int
@@ -395,8 +373,8 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
 {
     scanGlob_pt     scanGlobPtr = (scanGlob_pt) clientData;
     scanContext_pt  contextPtr;
-    dynamicBuf_t    dynBuf, lowerDynBuf;
-    OpenFile       *filePtr;
+    Tcl_DString     dynBuf, lowerDynBuf;
+    FILE           *filePtr;
     matchDef_pt     matchPtr;
     int             result;
     int             matchedAtLeastOne;
@@ -413,7 +391,10 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
                                        argv [1])) == NULL)
         return TCL_ERROR;
 
-    if (TclGetOpenFile (interp, argv [2], &filePtr) != TCL_OK)
+    if (Tcl_GetOpenFile (interp, argv [2],
+                         FALSE,  /* Read access  */
+                         TRUE,   /* Check access */
+                         &filePtr) != TCL_OK)
             return TCL_ERROR;
 
     if (contextPtr->matchListHead == NULL) {
@@ -422,17 +403,18 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    Tcl_DynBufInit (&dynBuf);
-    Tcl_DynBufInit (&lowerDynBuf);
+    Tcl_DStringInit (&dynBuf);
+    Tcl_DStringInit (&lowerDynBuf);
 
     result = TCL_OK;  /* Assume the best */
 
     while (result == TCL_OK) {
         int storedThisLine = FALSE;
 
-        switch (Tcl_DynamicFgets (&dynBuf, filePtr->f, FALSE)) {
+        switch (Tcl_DStringGets (filePtr, &dynBuf)) {
           case -1:  /* Error */
-            interp->result = Tcl_UnixError (interp);
+            interp->result = Tcl_PosixError (interp);
+            result = TCL_ERROR;
             goto scanExit;
             
           case 0:  /* EOF */
@@ -442,21 +424,22 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
         storedThisLine = 0;
         matchedAtLeastOne = 0;
         if (contextPtr->flags & CONTEXT_A_CASE_INSENSITIVE_FLAG) {
-            lowerDynBuf.len = 0;
-            Tcl_DynBufAppend (&lowerDynBuf, dynBuf.ptr);
-            Tcl_DownShift (lowerDynBuf.ptr, lowerDynBuf.ptr);
+            Tcl_DStringFree (&lowerDynBuf);
+            Tcl_DStringAppend (&lowerDynBuf, dynBuf.string, -1);
+            Tcl_DownShift (lowerDynBuf.string, lowerDynBuf.string);
         }
+
         for (matchPtr = contextPtr->matchListHead; matchPtr != NULL; 
                  matchPtr = matchPtr->nextMatchDefPtr) {
 
-            if (!Tcl_RegExpExecute (interp, &matchPtr->regExpInfo, dynBuf.ptr, 
-                                    lowerDynBuf.ptr))
+            if (!Tcl_RegExpExecute (interp, &matchPtr->regExpInfo,
+                                    dynBuf.string, lowerDynBuf.string))
                 continue;  /* Try next match pattern */
 
             matchedAtLeastOne = TRUE;
             if (!storedThisLine) {
-                matchOffset = ftell (filePtr->f) - (strlen(dynBuf.ptr) + 1);
-                result = SetMatchVar (interp, dynBuf.ptr, matchOffset, 
+                matchOffset = ftell (filePtr) - (strlen(dynBuf.string) + 1);
+                result = SetMatchVar (interp, dynBuf.string, matchOffset, 
                                       scanLineNum, argv[2]);
                 if (result != TCL_OK)
                     goto scanExit;
@@ -493,8 +476,8 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
          */
         if ((contextPtr->defaultAction != NULL) && (!matchedAtLeastOne)) {
 
-            matchOffset = ftell (filePtr->f) - (strlen(dynBuf.ptr) + 1);
-            result = SetMatchVar (interp, dynBuf.ptr, matchOffset, 
+            matchOffset = ftell (filePtr) - (strlen(dynBuf.string) + 1);
+            result = SetMatchVar (interp, dynBuf.string, matchOffset, 
                                   scanLineNum, argv[2]);
             if (result != TCL_OK)
                 goto scanExit;
@@ -510,8 +493,8 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
         }
     }
 scanExit:
-    Tcl_DynBufFree (&dynBuf);
-    Tcl_DynBufFree (&lowerDynBuf);
+    Tcl_DStringFree (&dynBuf);
+    Tcl_DStringFree (&lowerDynBuf);
     if (result == TCL_RETURN)
         result = TCL_OK;
     return result;
@@ -519,25 +502,21 @@ scanExit:
 
 /*
  *-----------------------------------------------------------------------------
+ * FileScanCleanUp --
  *
- *  FileScanCleanUp --
- *      Decrements the use count on the globals when a command is deleted.
- *      If it goes to zero, all resources are released.      
- *
+ *    Called when the interpreter is deleted to cleanup all filescan
+ * resources
  *-----------------------------------------------------------------------------
  */
 static void
-FileScanCleanUp (clientData)
-    ClientData clientData;
+FileScanCleanUp (clientData, interp)
+    ClientData  clientData;
+    Tcl_Interp *interp;
 {
     scanGlob_pt    scanGlobPtr = (scanGlob_pt) clientData;
     scanContext_pt contextPtr;
     int            walkKey;
     
-    scanGlobPtr->useCount--;
-    if (scanGlobPtr->useCount > 0)
-        return;
-
     walkKey = -1;
     while ((contextPtr = Tcl_HandleWalk (scanGlobPtr->tblHdrPtr, 
             &walkKey)) != NULL)
@@ -549,15 +528,14 @@ FileScanCleanUp (clientData)
 
 /*
  *-----------------------------------------------------------------------------
- *
  *  Tcl_InitFilescan --
- *      Initialize the TCL file scanning facility..
  *
+ *    Initialize the TCL file scanning facility..
  *-----------------------------------------------------------------------------
  */
 void
 Tcl_InitFilescan (interp)
-Tcl_Interp *interp;
+    Tcl_Interp *interp;
 {
     scanGlob_pt    scanGlobPtr;
     void_pt        fileCbTblPtr;
@@ -566,16 +544,16 @@ Tcl_Interp *interp;
     scanGlobPtr->tblHdrPtr = 
         Tcl_HandleTblInit ("context", sizeof (scanContext_t), 5);
 
+    Tcl_CallWhenDeleted (interp, FileScanCleanUp, (ClientData) scanGlobPtr);
+
     /*
      * Initialize the commands.
      */
-    scanGlobPtr->useCount = 3;  /* Number of commands */
-
     Tcl_CreateCommand (interp, "scanfile", Tcl_ScanfileCmd, 
-                       (ClientData)scanGlobPtr, FileScanCleanUp);
+                       (ClientData) scanGlobPtr, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "scanmatch", Tcl_ScanmatchCmd, 
-                       (ClientData)scanGlobPtr, FileScanCleanUp);
+                       (ClientData) scanGlobPtr, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "scancontext", Tcl_ScancontextCmd,
-                       (ClientData)scanGlobPtr, FileScanCleanUp);
+                       (ClientData) scanGlobPtr, (void (*)()) NULL);
 }
 

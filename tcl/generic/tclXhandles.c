@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXhandles.c,v 2.3 1993/04/07 03:24:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -39,7 +39,7 @@ typedef struct {
     int      entrySize;         /* Entry size in bytes, including overhead */
     int      tableSize;         /* Current number of entries in the table  */
     int      freeHeadIdx;       /* Index of first free entry in the table  */
-    ubyte_pt bodyP;             /* Pointer to table body                   */
+    ubyte_pt bodyPtr;           /* Pointer to table body                   */
     int      baseLength;        /* Length of handleBase.                   */
     char     handleBase [1];    /* Base handle name.  MUST BE LAST FIELD!  */
     } tblHeader_t;
@@ -53,8 +53,8 @@ typedef entryHeader_t *entryHeader_pt;
 /*
  * This macro is used to return a pointer to an entry, given its index.
  */
-#define TBL_INDEX(hdrP, idx) \
-    ((entryHeader_pt) (hdrP->bodyP + (hdrP->entrySize * idx)))
+#define TBL_INDEX(hdrPtr, idx) \
+    ((entryHeader_pt) (hdrPtr->bodyPtr + (hdrPtr->entrySize * idx)))
 
 /*
  * This macros to convert between pointers to the user and header area of
@@ -132,7 +132,7 @@ ExpandTable (tblHdrPtr, neededIdx)
     tblHeader_pt tblHdrPtr;
     int          neededIdx;
 {
-    ubyte_pt oldBodyP = tblHdrPtr->bodyP;
+    ubyte_pt oldbodyPtr = tblHdrPtr->bodyPtr;
     int      numNewEntries;
     int      newSize;
     
@@ -142,12 +142,12 @@ ExpandTable (tblHdrPtr, neededIdx)
         numNewEntries = (neededIdx - tblHdrPtr->tableSize) + 1;
     newSize = (tblHdrPtr->tableSize + numNewEntries) * tblHdrPtr->entrySize;
 
-    tblHdrPtr->bodyP = (ubyte_pt) ckalloc (newSize);
-    memcpy (tblHdrPtr->bodyP, oldBodyP, 
+    tblHdrPtr->bodyPtr = (ubyte_pt) ckalloc (newSize);
+    memcpy (tblHdrPtr->bodyPtr, oldbodyPtr, 
             (tblHdrPtr->tableSize * tblHdrPtr->entrySize));
     LinkInNewEntries (tblHdrPtr, tblHdrPtr->tableSize, numNewEntries);
     tblHdrPtr->tableSize += numNewEntries;
-    ckfree (oldBodyP);
+    ckfree (oldbodyPtr);
     
 }
 
@@ -252,7 +252,7 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
                           sizeof (int)) * sizeof (int);
     tblHdrPtr->freeHeadIdx = NULL_IDX;
     tblHdrPtr->tableSize = initEntries;
-    tblHdrPtr->bodyP = (ubyte_pt) ckalloc (initEntries * tblHdrPtr->entrySize);
+    tblHdrPtr->bodyPtr = (ubyte_pt) ckalloc (initEntries * tblHdrPtr->entrySize);
     LinkInNewEntries (tblHdrPtr, 0, initEntries);
 
     return (void_pt) tblHdrPtr;
@@ -284,8 +284,8 @@ Tcl_HandleTblUseCount (headerPtr, amount)
 /*=============================================================================
  * Tcl_HandleTblRelease --
  *   Decrement the use count on a Tcl dynamic handle table.  If the count
- *   goes to zero or negative, then release the table.  It is designed to be 
- *   called when a command is released.
+ * goes to zero or negative, then release the table.
+ *
  * Parameters:
  *   o headerPtr (I) - Pointer to the table header.
  *-----------------------------------------------------------------------------
@@ -294,11 +294,11 @@ void
 Tcl_HandleTblRelease (headerPtr)
     void_pt headerPtr;
 {
-    tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
+    tblHeader_pt  tblHdrPtr = (tblHeader_pt) headerPtr;
 
     tblHdrPtr->useCount--;
     if (tblHdrPtr->useCount <= 0) {
-        ckfree (tblHdrPtr->bodyP);
+        ckfree (tblHdrPtr->bodyPtr);
         ckfree ((char *) tblHdrPtr);
     }
 }
@@ -450,7 +450,7 @@ Tcl_HandleFree (headerPtr, entryPtr)
 
     freeentryPtr = HEADER_AREA (entryPtr);
     freeentryPtr->freeLink = tblHdrPtr->freeHeadIdx;
-    tblHdrPtr->freeHeadIdx = (((ubyte_pt) entryPtr) - tblHdrPtr->bodyP) /
+    tblHdrPtr->freeHeadIdx = (((ubyte_pt) entryPtr) - tblHdrPtr->bodyPtr) /
                            tblHdrPtr->entrySize;
     
 }

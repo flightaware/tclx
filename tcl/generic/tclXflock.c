@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 1.1 1993/04/07 06:02:59 markd Exp markd $
+ * $Id: tclXflock.c,v 1.2 1993/05/29 00:27:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -67,7 +67,8 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, filePtrPtr, lockInfoPtr)
     lockInfoPtr->l_len    = 0;
     lockInfoPtr->l_whence = 0;
 
-    if (TclGetOpenFile (interp, argv [argIdx], filePtrPtr) != TCL_OK)
+    *filePtrPtr = Tcl_GetOpenFileStruct (interp, argv [argIdx]);
+    if (*filePtrPtr == NULL)
 	return TCL_ERROR;
     argIdx++;
 
@@ -184,7 +185,7 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
      * an error.
      */
     if ((stat < 0) && !((errno == EACCES) || (errno == EAGAIN))) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
     
@@ -258,7 +259,7 @@ Tcl_FunlockCmd (notUsed, interp, argc, argv)
     lockInfo.l_type = F_UNLCK;
     
     if (fcntl (fileno(filePtr->f), F_SETLK, &lockInfo) < 0) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
     

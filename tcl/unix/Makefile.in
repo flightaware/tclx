@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.4 1993/03/15 06:39:07 markd Exp markd $
+# $Id: Makefile,v 2.5 1993/04/07 05:55:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -34,9 +34,9 @@ OBJS= \
     tclXbsearch.o    tclXchmod.o      tclXclock.o      tclXcmdloop.o \
     tclXcnvclock.o   tclXcreate.o     tclXdebug.o      tclXdup.o     \
     tclXfcntl.o      tclXfilecmds.o   tclXfilescan.o   tclXflock.o   \
-    tclXfmath.o      tclXfstat.o      tclXgeneral.o    tclXgetdate.o \
+    tclXfstat.o      tclXgeneral.o    tclXgetdate.o                  \
     tclXhandles.o    tclXid.o         tclXkeylist.o    tclXlib.o     \
-    tclXlist.o       tclXmath.o       tclXmatherr.o    tclXmsgcat.o  \
+    tclXlist.o       tclXmath.o       tclXmsgcat.o                   \
     tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
     tclXserver.o     tclXsignal.o     tclXstartup.o    tclXstring.o  \
     tclXunixcmds.o   tclXutil.o
@@ -53,7 +53,7 @@ tclXstartup.o: patchlevel.h tclXstartup.c
 	$(CC) -c $(CFLAGS) -DTCL_MASTERDIR=\"$(TCL_MASTERDIR)\" tclXstartup.c
 
 main.o: patchlevel.h main.c
-	$(CC) -c $(CFLAGS) $(HISTORY_FLAG) main.c
+	$(CC) -c $(CFLAGS) main.c
 
 tclXgetdate.c: tclXgetdate.y
 	$(YACC) tclXgetdate.y
@@ -66,14 +66,8 @@ tclXgetdate.c: tclXgetdate.y
 	    strip ../tcl; \
 	    $(MCS_CMD) ../tcl; fi
 
-
-#------------------------------------------------------------------------------
-# This is a painful situation.  The file tcl++.h requires string.h, which is
-# redefined in the UCB Tcl directory.  We force the compiler to search the
-# C++ directories first.
-
 tcl++.o: tcl++.C tcl++.h
-	$(CCPLUS) -c -I$(CPLUSINCL) $(CFLAGS) $(HISTORY_FLAG) tcl++.C
+	$(CCPLUS) -c $(CFLAGS) $(HISTORY_FLAG) tcl++.C
 
 #------------------------------------------------------------------------------
 # This is just to test if it compiles.

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcreate.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXcreate.c,v 2.3 1993/04/07 05:55:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -139,46 +139,6 @@ Tcl_CreateExtendedInterp ()
     Tcl_InitFilescan (interp);
 
     /*
-     * from tclXfmath.c
-     */
-    Tcl_CreateCommand(interp, "acos", Tcl_AcosCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "asin", Tcl_AsinCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "atan", Tcl_AtanCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "cos", Tcl_CosCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "sin", Tcl_SinCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "tan", Tcl_TanCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "cosh", Tcl_CoshCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "sinh", Tcl_SinhCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "tanh", Tcl_TanhCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "exp", Tcl_ExpCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "log", Tcl_LogCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "log10", Tcl_Log10Cmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "sqrt", Tcl_SqrtCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "fabs", Tcl_FabsCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "floor", Tcl_FloorCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "ceil", Tcl_CeilCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "fmod", Tcl_FmodCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand(interp, "pow", Tcl_PowCmd, 
-                     (ClientData) NULL, (void (*)()) NULL);
-
-    /*
      * from tclXgeneral.c
      */
     Tcl_CreateCommand(interp, "echo", Tcl_EchoCmd, 
@@ -281,10 +241,7 @@ Tcl_CreateExtendedInterp ()
     /*
      * from tclXlib.c
      */
-    Tcl_CreateCommand (interp, "demand_load", Tcl_Demand_loadCmd,
-                      (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "loadlibindex", Tcl_LoadlibindexCmd,
-                      (ClientData) NULL, (void (*)()) NULL);
+    Tcl_InitLibrary (interp);
 
     /*
      * from tclXunixcmds.c

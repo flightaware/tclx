@@ -12,11 +12,10 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXprofile.c,v 2.4 1993/05/16 16:24:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
-#include "tclHash.h"
 #include "tclExtdInt.h"
 
 /*
@@ -130,14 +129,15 @@ Tcl_ProfileCmd _ANSI_ARGS_((ClientData    clientData,
                             char        **argv));
 
 static void
-CleanUpProfMon _ANSI_ARGS_((ClientData clientData));
+CleanUpProfMon _ANSI_ARGS_((ClientData  clientData,
+                            Tcl_Interp *interp));
 
 #ifdef TCL_NO_REAL_TIMES
 
 /*
  *-----------------------------------------------------------------------------
- *
  * GetTimes --
+ *
  *   Get the current real and CPU time for the process.  This version of this
  * function is used on systems where the times systems call does not return the
  * elasped real time.  It uses gettimeofday to figure out the real time.
@@ -177,8 +177,8 @@ GetTimes (cpuTimePtr)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * GetTimes --
+ *
  *   Get the current real and CPU time for the process.  This version of this
  * function is used on systems where the times systems call returns the
  * elasped real time.
@@ -204,8 +204,8 @@ GetTimes (cpuTimePtr)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * ProcEntry --
+ *
  *   Push a procedure entry onto the stack.
  *
  * Parameters:
@@ -249,8 +249,8 @@ ProcEntry (infoPtr, procName, procLevel, evalLevel)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * ProcPopEntry --
+ *
  *   Pop the procedure entry from the top of the stack and record its
  * times in the data table.
  *
@@ -315,8 +315,8 @@ ProcPopEntry (infoPtr)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * StackSync --
+ *
  *   Synchronize the profile stack with the interpreter procedure stack.
  * This is done once return from uplevels, exits and error unwinds are
  * detected (the command after).  Saved profile stack entries may be
@@ -367,7 +367,6 @@ StackSync (infoPtr, procLevel, evalLevel)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * DoUplevel --
  *
  *   Do processing required when an uplevel is detected.  Builds and
@@ -418,10 +417,9 @@ DoUplevel (infoPtr, procLevel)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * ProfTraceRoutine --
- *  Routine called by Tcl_Eval to do profiling.
  *
+ *  Routine called by Tcl_Eval to do profiling.
  *-----------------------------------------------------------------------------
  */
 static void
@@ -498,7 +496,6 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
 
 /*
  *-----------------------------------------------------------------------------
- *
  * CleanDataTable --
  *
  *  Clean up the hash data table, releasing all resources and setting it
@@ -526,7 +523,6 @@ CleanDataTable (infoPtr)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * DeleteProfTrace --
  *
  *   Delete the profile trace and clean up the stack, logging all procs
@@ -549,7 +545,6 @@ DeleteProfTrace (infoPtr)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * DumpTableData --
  *
  *   Dump the table data to an array variable.  Entries will be deleted
@@ -611,15 +606,11 @@ DumpTableData (interp, infoPtr, varName)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * Tcl_ProfileCmd --
- *     Implements the TCL profile command:
+ *
+ *   Implements the TCL profile command:
  *     profile ?-commands? on
  *     profile off arrayvar
- *
- * Results:
- *  Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -720,16 +711,15 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
 
 /*
  *-----------------------------------------------------------------------------
+ * ProfMonCleanUp --
  *
- *  CleanUpProfMon --
- *
- *  Release the client data area when the profile command is deleted.
- *
+ *   Release the client data area when the interpreter is deleted.
  *-----------------------------------------------------------------------------
  */
 static void
-CleanUpProfMon (clientData)
-    ClientData clientData;
+ProfMonCleanUp (clientData, interp)
+    ClientData  clientData;
+    Tcl_Interp *interp;
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
 
@@ -742,11 +732,9 @@ CleanUpProfMon (clientData)
 
 /*
  *-----------------------------------------------------------------------------
+ * Tcl_InitProfile --
  *
- *  Tcl_InitProfile --
- *
- *  Initialize the Tcl profiling command.
- *
+ *   Initialize the Tcl profiling command.
  *-----------------------------------------------------------------------------
  */
 void
@@ -763,7 +751,9 @@ Tcl_InitProfile (interp)
     infoPtr->saveStackPtr = NULL;
     Tcl_InitHashTable (&infoPtr->profDataTable, TCL_STRING_KEYS);
 
+    Tcl_CallWhenDeleted (interp, ProfMonCleanUp, (ClientData) infoPtr);
+
     Tcl_CreateCommand (interp, "profile", Tcl_ProfileCmd, 
-                       (ClientData)infoPtr, CleanUpProfMon);
+                       (ClientData) infoPtr, (void (*)()) NULL);
 }
 

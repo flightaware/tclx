@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.4 1993/05/04 06:29:22 markd Exp markd $
+ * $Id: tclExtend.h,v 2.5 1993/06/06 15:05:35 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@
  * version to form the actual extended Tcl version.
  */
 
-#define TCL_EXTD_VERSION_SUFFIX "c"   /* 6.1c, 6.2c or 6.3c */
+#define TCL_EXTD_VERSION_SUFFIX "a-B1"   /* 7.0a */
 
 typedef void *void_pt;
 
@@ -49,12 +49,6 @@ extern int   tclxPatchlevel;     /* Extended Tcl patch level.               */
 extern char *tclAppName;         /* Application name                        */
 extern char *tclAppLongname;     /* Long, natural language application name */
 extern char *tclAppVersion;      /* Version number of the application       */
-
-/*
- * If set to be a pointer to the procedure Tcl_RecordAndEval, will link in
- * history.  Should be set by main.
- */
-extern int (*tclShellCmdEvalProc) ();
 
 /*
  * If non-zero, a signal was received.  Normally signals are handled in
@@ -94,7 +88,6 @@ EXTERN void
 Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
                              FILE       *inFile,
                              FILE       *outFile,
-                             int         (*evalProc) (),
                              unsigned    options));
 
 EXTERN Tcl_Interp * 
@@ -197,10 +190,6 @@ EXTERN void_pt
 Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              void_pt      headerPtr,
                              CONST  char *handle));
-
-EXTERN int
-Tcl_MathError _ANSI_ARGS_((char *functionName,
-                           int   errorType));
 
 EXTERN void 
 Tcl_Startup _ANSI_ARGS_((Tcl_Interp     *interp,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.3 1993/04/07 05:58:36 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -52,7 +52,7 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     }
 
     if (pipe (fileNums) < 0) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
 
@@ -100,9 +100,9 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    OpenFile  *fromFilePtr, *toFilePtr;
-    char       transferBuffer [2048];
-    int        bytesRead;
+    FILE  *fromFilePtr, *toFilePtr;
+    char   transferBuffer [2048];
+    int    bytesRead;
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -110,30 +110,27 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (TclGetOpenFile (interp, argv[1], &fromFilePtr) != TCL_OK)
+    if (Tcl_GetOpenFile (interp, argv[1],
+                         FALSE,  /* Read access  */
+                         TRUE,   /* Check access */  
+                         &fromFilePtr) != TCL_OK)
 	return TCL_ERROR;
-    if (TclGetOpenFile (interp, argv[2], &toFilePtr) != TCL_OK)
+    if (Tcl_GetOpenFile (interp, argv[2],
+                         TRUE,   /* Write access */
+                         TRUE,   /* Check access */
+                         &toFilePtr) != TCL_OK)
 	return TCL_ERROR;
-
-    if (!fromFilePtr->readable) {
-        interp->result = "Source file is not open for read access";
-	return TCL_ERROR;
-    }
-    if (!toFilePtr->writable) {
-        interp->result = "Target file is not open for write access";
-	return TCL_ERROR;
-    }
 
     while (TRUE) {
         bytesRead = fread (transferBuffer, sizeof (char), 
-                           sizeof (transferBuffer), fromFilePtr->f);
+                           sizeof (transferBuffer), fromFilePtr);
         if (bytesRead <= 0) {
-            if (feof (fromFilePtr->f))
+            if (feof (fromFilePtr))
                 break;
             else
                 goto unixError;
         }
-        if (fwrite (transferBuffer, sizeof (char), bytesRead, toFilePtr->f) != 
+        if (fwrite (transferBuffer, sizeof (char), bytesRead, toFilePtr) != 
                     bytesRead)
             goto unixError;
     }
@@ -141,7 +138,7 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
 unixError:
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }
 
@@ -168,26 +165,29 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    dynamicBuf_t  dynBuf;
-    char          prevChar;
-    int           bracesDepth, inQuotes, inChar;
-    OpenFile     *filePtr;
+    Tcl_DString  dynBuf;
+    char         buffer [128];
+    char        *bufPtr, *bufEnd;
+    char         prevChar;
+    int          bracesDepth, inQuotes, inChar;
+    FILE        *filePtr;
 
     if ((argc != 2) && (argc != 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " fileId ?varName?", (char *) NULL);
         return TCL_ERROR;
     }
-    if (TclGetOpenFile(interp, argv[1], &filePtr) != TCL_OK) {
-        return TCL_ERROR;
-    }
-    if (!filePtr->readable) {
-        Tcl_AppendResult (interp, "\"", argv[1],
-                          "\" wasn't opened for reading", (char *) NULL);
+    if (Tcl_GetOpenFile (interp, argv[1],
+                         FALSE,  /* Read access  */
+                         TRUE,   /* Check access */
+                         &filePtr) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    Tcl_DynBufInit (&dynBuf);
+    Tcl_DStringInit (&dynBuf);
+
+    bufPtr = buffer;
+    bufEnd = buffer + sizeof (buffer) - 1;
 
     prevChar = '\0';
     bracesDepth = 0;
@@ -199,11 +199,9 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      */
 
     while (TRUE) {
-        if (dynBuf.len + 1 == dynBuf.size)
-            Tcl_ExpandDynBuf (&dynBuf, 0);
-        inChar = getc (filePtr->f);
+        inChar = getc (filePtr);
         if (inChar == EOF) {
-            if (ferror (filePtr->f))
+            if (ferror (filePtr))
                 goto readError;
             break;
         }
@@ -226,40 +224,49 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
         prevChar = inChar;
         if ((inChar == '\n') && (bracesDepth == 0) && !inQuotes)
             break;
-        dynBuf.ptr [dynBuf.len++] = inChar;
+        *bufPtr++ = inChar;
+        if (bufPtr > bufEnd) {
+            Tcl_DStringAppend (&dynBuf, buffer, sizeof (buffer));
+            bufPtr = buffer;
+        }
     }
 
-    dynBuf.ptr [dynBuf.len] = '\0';
-
+    if (bufPtr != buffer) {
+        Tcl_DStringAppend (&dynBuf, buffer, bufPtr - buffer);
+    }
     if ((bracesDepth != 0) || inQuotes) {
         Tcl_AppendResult (interp, "miss-matched ",
                          (bracesDepth != 0) ? "braces" : "quote",
-                         " in inputed list: ", dynBuf.ptr, (char *) NULL);
+                         " in inputed list: ", dynBuf.string, (char *) NULL);
         goto errorExit;
     }
 
+    /*
+     * Return the string as a result or in a variable.
+     */
     if (argc == 2) {
-        Tcl_DynBufReturn (interp, &dynBuf);
+        Tcl_DStringResult (interp, &dynBuf);
     } else {
-        if (Tcl_SetVar (interp, argv[2], dynBuf.ptr, 
+        if (Tcl_SetVar (interp, argv[2], dynBuf.string,
                         TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
-        if (feof (filePtr->f) && (dynBuf.len == 0))
+
+        if (feof (filePtr) && (dynBuf.length == 0))
             interp->result = "-1";
         else
-            sprintf (interp->result, "%d", dynBuf.len);
-        Tcl_DynBufFree (&dynBuf);
+            sprintf (interp->result, "%d", dynBuf.length);
+
+        Tcl_DStringFree (&dynBuf);
     }
     return TCL_OK;
 
 readError:
     Tcl_ResetResult (interp);
-    interp->result = Tcl_UnixError (interp);
-    clearerr (filePtr->f);
-    goto errorExit;
+    interp->result = Tcl_PosixError (interp);
+    clearerr (filePtr);
 
 errorExit:
-    Tcl_DynBufFree (&dynBuf);
+    Tcl_DStringFree (&dynBuf);
     return TCL_ERROR;
 
 }

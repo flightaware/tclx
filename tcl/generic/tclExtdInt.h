@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.7 1993/04/13 01:19:19 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.8 1993/04/16 04:24:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,18 +31,13 @@
 
 /*
  * If tclUnix.h has already included time.h, don't include it again, some
- * systems don't #ifdef inside of the file.  On some systems, undef
- * CLK_TCK (defined in tclUnix.h) to avoid an annoying warning about
- * redefinition.
+ * systems don't #ifdef inside of the file.
  */
-#ifdef TCL_NEED_TIME_H
-#    if TCL_SYS_TIME_H
-#        ifdef TCL_DUP_CLK_TCK
-#            undef CLK_TCK
-#        endif        
-#        include <time.h>
-#    endif
+#ifndef NO_SYS_TIME_H
+#   include <time.h>
 #endif
+
+#include <sys/times.h>
 
 /*
  * Precompute milliseconds-per-tick, the " + CLK_TCK / 2" bit gets it to
@@ -120,22 +115,6 @@ typedef regexp_t *regexp_pt;
 #define REXP_BOTH_ALGORITHMS 2   /* Use boyer-moore along with regexp */
 
 /*
- * Data structure to control a dynamic buffer.  These buffers are primarly
- * used for reading things from files, were the maximum size is not known
- * in advance, and the buffer must grow.  These are used in the case were
- * the value is not to be returned as the interpreter result.
- */
-
-#define INIT_DYN_BUFFER_SIZE 256
-
-typedef struct dynamicBuf_t {
-    char  buf [INIT_DYN_BUFFER_SIZE];   /* Initial buffer area.              */
-    char *ptr;                          /* Pointer to buffer area.           */
-    int   size;                         /* Current size of buffer.           */
-    int   len;                          /* Current string length (less '\0') */
-    } dynamicBuf_t;
-
-/*
  * Used to return argument messages by most commands.
  */
 extern char *tclXWrongArgs;
@@ -151,40 +130,28 @@ extern char *tclXWrongArgs;
         (((str1) [0] == (str2) [0]) && (strncmp (str1, str2, cnt) == 0))
 
 /*
+ * Macro that behaves like strdup, only uses ckalloc.
+ */
+#define ckstrdup(sourceStr) \
+  (strcpy (ckalloc (strlen (sourceStr) + 1), sourceStr))
+
+
+/*
  * Prototypes for utility procedures.
  */
-void
-Tcl_DynBufInit _ANSI_ARGS_((dynamicBuf_t *dynBufPtr));
-
-void
-Tcl_DynBufFree _ANSI_ARGS_((dynamicBuf_t *dynBufPtr));
-
-void
-Tcl_DynBufReturn _ANSI_ARGS_((Tcl_Interp    *interp,
-                              dynamicBuf_t *dynBufPtr));
-
-void
-Tcl_DynBufAppend _ANSI_ARGS_((dynamicBuf_t *dynBufPtr,
-                              char         *newStr));
-
-void
-Tcl_ExpandDynBuf _ANSI_ARGS_((dynamicBuf_t *dynBufPtr,
-                              int           appendSize));
-
 int
-Tcl_DynamicFgets _ANSI_ARGS_((dynamicBuf_t *dynBufPtr,
-                              FILE         *filePtr,
-                              int           append));
-
-int
-Tcl_ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
-                                  char       *handle));
+Tcl_DStringGets _ANSI_ARGS_((FILE         *filePtr,
+                             Tcl_DString  *dynStrPtr));
 
 int
 Tcl_GetDate _ANSI_ARGS_((char   *p,
                          time_t  now,
                          long    zone,
                          time_t *timePtr));
+
+OpenFile *
+Tcl_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
+                                   char       *handle));
 
 int
 Tcl_ProcessSignal _ANSI_ARGS_((Tcl_Interp *interp,
@@ -207,19 +174,15 @@ Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp  *interp,
 void
 Tcl_ResetSignals ();
 
-int
-Tcl_ReturnDouble _ANSI_ARGS_((Tcl_Interp *interp,
-                              double      number));
-
-OpenFile *
+FILE *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
                                 int         readable,
                                 int         writable));
 
 void
-Tcl_CloseForError  _ANSI_ARGS_((Tcl_Interp *interp,
-                                int         fileNum));
+Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
+                               int         fileNum));
 
 void
 Tcl_SetupSigInt _ANSI_ARGS_(());
@@ -324,63 +287,6 @@ Tcl_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  */
 extern void
 Tcl_InitFilescan _ANSI_ARGS_((Tcl_Interp *interp));
-
-/*
- * from tclXfmath.c
- */
-extern int 
-Tcl_AcosCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_AsinCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_AtanCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CosCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_SinCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_TanCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CoshCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_SinhCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_TanhCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_ExpCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_LogCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_Log10Cmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_SqrtCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_FabsCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_FloorCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_CeilCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_FmodCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_PowCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
  * from tclXgeneral.c
@@ -506,11 +412,8 @@ Tcl_CtypeCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 /*
  * from tclXlib.c
  */
-extern int
-Tcl_Demand_loadCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int
-Tcl_LoadlibindexCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+Tcl_InitLibrary _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXunixcmds.c

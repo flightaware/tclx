@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 2.1 1993/03/06 21:42:30 markd Exp markd $
+ * $Id: tclXbsearch.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@ typedef struct binSearchCB_t {
     char         *key;            /* The key to search for.                  */
 
     FILE         *fileCBPtr;      /* Open file structure.                    */
-    dynamicBuf_t  dynBuf;         /* Dynamic buffer to hold a line of file.  */
+    Tcl_DString   dynBuf;         /* Dynamic buffer to hold a line of file.  */
     long          lastRecOffset;  /* Offset of last record read.             */
     int           cmpResult;      /* -1, 0 or 1 result of string compare.    */
     char         *tclProc;        /* Name of Tcl comparsion proc, or NULL.   */
@@ -104,13 +104,12 @@ static int
 TclProcKeyCompare (searchCBPtr)
     binSearchCB_t *searchCBPtr;
 {
-    char *cmdArgv [3];
-    char *command;
+    char *cmdArgv [3], *command, *oldResult;
     int   result;
 
     cmdArgv [0] = searchCBPtr->tclProc;
     cmdArgv [1] = searchCBPtr->key;
-    cmdArgv [2] = searchCBPtr->dynBuf.ptr;
+    cmdArgv [2] = searchCBPtr->dynBuf.string;
     command = Tcl_Merge (3, cmdArgv);
 
     result = Tcl_Eval (searchCBPtr->interp, command, 0, (char **) NULL);
@@ -121,9 +120,8 @@ TclProcKeyCompare (searchCBPtr)
 
     if (!Tcl_StrToInt (searchCBPtr->interp->result, 0, 
                        &searchCBPtr->cmpResult)) {
-        char *oldResult = ckalloc (strlen (searchCBPtr->interp->result + 1));
-        
-        strcpy (oldResult, searchCBPtr->interp->result);
+        oldResult = ckstrdup (searchCBPtr->interp->result);
+
         Tcl_ResetResult (searchCBPtr->interp);
         Tcl_AppendResult (searchCBPtr->interp, "invalid integer \"", oldResult,
                           "\" returned from compare proc \"",
@@ -189,8 +187,8 @@ ReadAndCompare (fileOffset, searchCBPtr)
 
     searchCBPtr->lastRecOffset = fileOffset;
 
-    status = Tcl_DynamicFgets (&searchCBPtr->dynBuf, searchCBPtr->fileCBPtr, 
-                               FALSE);
+    status = Tcl_DStringGets (searchCBPtr->fileCBPtr,
+                              &searchCBPtr->dynBuf);
     if (status < 0)
         goto unixError;
 
@@ -205,7 +203,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
 
     if (searchCBPtr->tclProc == NULL) {
         searchCBPtr->cmpResult = StandardKeyCompare (searchCBPtr->key, 
-                                                     searchCBPtr->dynBuf.ptr);
+                                                     searchCBPtr->dynBuf.string);
     } else {
         if (TclProcKeyCompare (searchCBPtr) != TCL_OK)
             return TCL_ERROR;
@@ -215,7 +213,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
 
 unixError:
    Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
-                     Tcl_UnixError (searchCBPtr->interp), (char *) NULL);
+                     Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 
@@ -241,15 +239,17 @@ static int
 BinSearch (searchCBPtr)
     binSearchCB_t *searchCBPtr;
 {
-    OpenFile   *filePtr;
+    FILE       *filePtr;
     long        middle, high, low;
     struct stat statBuf;
 
-    if (TclGetOpenFile (searchCBPtr->interp, searchCBPtr->fileHandle, 
+    if (Tcl_GetOpenFile (searchCBPtr->interp, searchCBPtr->fileHandle,
+                         FALSE,  /* Read access  */
+                         TRUE,   /* Check access */
                         &filePtr) != TCL_OK)
         return TCL_ERROR;
 
-    searchCBPtr->fileCBPtr = filePtr->f;
+    searchCBPtr->fileCBPtr = filePtr;
     searchCBPtr->lastRecOffset = -1;
 
     if (fstat (fileno (searchCBPtr->fileCBPtr), &statBuf) < 0)
@@ -287,7 +287,7 @@ BinSearch (searchCBPtr)
 
 unixError:
    Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
-                     Tcl_UnixError (searchCBPtr->interp), (char *) NULL);
+                     Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 
@@ -324,29 +324,29 @@ Tcl_BsearchCmd (clientData, interp, argc, argv)
     searchCB.fileHandle = argv [1];
     searchCB.key = argv [2];
     searchCB.tclProc = (argc == 5) ? argv [4] : NULL;
-    Tcl_DynBufInit (&searchCB.dynBuf);
+    Tcl_DStringInit (&searchCB.dynBuf);
 
     status = BinSearch (&searchCB);
     if (status == TCL_ERROR) {
-        Tcl_DynBufFree (&searchCB.dynBuf);
+        Tcl_DStringFree (&searchCB.dynBuf);
         return TCL_ERROR;
     }
 
     if (status == TCL_BREAK) {
-        Tcl_DynBufFree (&searchCB.dynBuf);
+        Tcl_DStringFree (&searchCB.dynBuf);
         if ((argc >= 4) && (argv [3][0] != '\0'))
             interp->result = "0";
         return TCL_OK;
     }
 
     if ((argc == 3) || (argv [3][0] == '\0')) {
-        Tcl_DynBufReturn (interp, &searchCB.dynBuf);
+        Tcl_DStringResult (interp, &searchCB.dynBuf);
     } else {
         char *varPtr;
 
-        varPtr = Tcl_SetVar (interp, argv[3], searchCB.dynBuf.ptr,
+        varPtr = Tcl_SetVar (interp, argv[3], searchCB.dynBuf.string,
                              TCL_LEAVE_ERR_MSG);
-        Tcl_DynBufFree (&searchCB.dynBuf);
+        Tcl_DStringFree (&searchCB.dynBuf);
         if (varPtr == NULL)
             return TCL_ERROR;
         interp->result = "1";

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.3 1993/04/07 05:55:07 markd Exp markd $
+ * $Id: tclXutil.c,v 2.4 1993/05/04 06:29:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -258,162 +258,53 @@ Tcl_UpShift (targetStr, sourceStr)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ExpandDynBuf --
+ * Tcl_DStringGets --
  *
- *    Expand a dynamic buffer so that it will have room to hold the 
- *    specified additional space.  If `appendSize' is zero, the buffer
- *    size will just be doubled.
- *
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_ExpandDynBuf (dynBufPtr, appendSize)
-    dynamicBuf_t *dynBufPtr;
-    int           appendSize;
-{
-    int   newSize, minSize;
-    char *oldBufPtr;
-
-    newSize = dynBufPtr->size * 2;
-    minSize = dynBufPtr->len + 1 + appendSize;
-    if (newSize < minSize)
-        newSize = minSize;
-
-    oldBufPtr = dynBufPtr->ptr;
-    dynBufPtr->ptr = ckalloc (newSize);
-    memcpy (dynBufPtr->ptr, oldBufPtr, dynBufPtr->len + 1);
-    if (oldBufPtr != dynBufPtr->buf)
-        ckfree ((char *) oldBufPtr);
-    dynBufPtr->size = newSize;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_DynBufInit --
- *
- *    Initializes a dynamic buffer.
- *
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_DynBufInit (dynBufPtr)
-    dynamicBuf_t *dynBufPtr;
-{
-    dynBufPtr->buf [0] = '\0';
-    dynBufPtr->ptr = dynBufPtr->buf;
-    dynBufPtr->size = INIT_DYN_BUFFER_SIZE;
-    dynBufPtr->len = 0;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_DynBufFree --
- *
- *    Clean up a dynamic buffer, release space if it was dynamicly
- * allocated.
- *
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_DynBufFree (dynBufPtr)
-    dynamicBuf_t *dynBufPtr;
-{
-    if (dynBufPtr->ptr != dynBufPtr->buf)
-        ckfree (dynBufPtr->ptr);
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_DynBufReturn --
- *
- *    Return the contents of the dynamic buffer as an interpreter result.
- * Don't call DynBufFree after calling this procedure.  The dynamic buffer
- * must be re-initialized to reuse it.
- *
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_DynBufReturn (interp, dynBufPtr)
-    Tcl_Interp    *interp;
-    dynamicBuf_t *dynBufPtr;
-{
-    if (dynBufPtr->ptr != dynBufPtr->buf)
-        Tcl_SetResult (interp, dynBufPtr->ptr, TCL_DYNAMIC);
-    else
-        Tcl_SetResult (interp, dynBufPtr->ptr, TCL_VOLATILE);
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_DynBufAppend --
- *
- *    Append the specified string to the dynamic buffer, expanding if
- *    necessary. Assumes the string in the buffer is zero terminated.
- *
- *-----------------------------------------------------------------------------
- */
-void
-Tcl_DynBufAppend (dynBufPtr, newStr)
-    dynamicBuf_t *dynBufPtr;
-    char         *newStr;
-{
-    int newLen, currentUsed;
-
-    newLen = strlen (newStr);
-    if ((dynBufPtr->len + newLen + 1) > dynBufPtr->size)
-        Tcl_ExpandDynBuf (dynBufPtr, newLen);
-    strcpy (dynBufPtr->ptr + dynBufPtr->len, newStr);
-    dynBufPtr->len += newLen;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_DynamicFgets --
- *
- *    Reads a line from a file into a dynamic buffer.  The buffer will be
+ *    Reads a line from a file into a dynamic string.  The string will be
  * expanded, if necessary and reads are done until EOL or EOF is reached.
- * Any data already in the buffer will be overwritten. if append is not
- * specified.  Even if an error or EOF is encountered, the buffer should
- * be cleaned up, as storage may have still been allocated.
  *
- * Results:
- *    If data was transfered, returns 1, if EOF was encountered without
- * transfering any data, returns 0.  If an error occured, returns, -1.
- *
+ * Parameter
+ *   o filePtr (I) - File to read from.
+ *   o dynStrPtr (I) - String to return the data in.
+ * Returns:
+ *    0 - EOF
+ *    1 - If data was transfered.
+ *   -1 - An error occured.
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_DynamicFgets (dynBufPtr, filePtr, append)
-    dynamicBuf_t *dynBufPtr;
+Tcl_DStringGets (filePtr, dynStrPtr)
     FILE         *filePtr;
-    int           append;
+    Tcl_DString  *dynStrPtr;
 {
-    int   readVal;
+    char           buffer [128];
+    register char *bufPtr, *bufEnd;
+    register int   readVal;
 
-    if (!append)
-        dynBufPtr->len = 0;
+    Tcl_DStringFree (dynStrPtr);
+
+    bufPtr = buffer;
+    bufEnd = buffer + sizeof (buffer) - 1;
 
     while (TRUE) {
-        if (dynBufPtr->len + 1 == dynBufPtr->size)
-            Tcl_ExpandDynBuf (dynBufPtr, 0);
-
         readVal = getc (filePtr);
         if (readVal == '\n')      /* Is it a new-line? */
             break;
-        if (readVal == EOF) {     /* Is it an EOF or an error? */
-            if (feof (filePtr)) {
-                break;
-            }
-            return -1;   /* Error */
+        if (readVal == EOF)
+            break;
+        *bufPtr++ = readVal;
+        if (bufPtr > bufEnd) {
+            Tcl_DStringAppend (dynStrPtr, buffer, sizeof (buffer));
+            bufPtr = buffer;
         }
-        dynBufPtr->ptr [dynBufPtr->len++] = readVal;
     }
-    dynBufPtr->ptr [dynBufPtr->len] = '\0';
+    if ((readVal == EOF) && ferror (filePtr))
+        return -1;   /* Error */
+
+    if (bufPtr != buffer) {
+        Tcl_DStringAppend (dynStrPtr, buffer, bufPtr - buffer);
+    }
+
     return (readVal == EOF) ? 0 : 1;
 }
 
@@ -514,38 +405,32 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ConvertFileHandle --
+ * Tcl_GetOpenFileStruct --
  *
- * Convert a file handle to its file number. The file handle maybe one 
- * of "stdin", "stdout" or "stderr" or "fileNNN", were NNN is the file
- * number.  If the handle is invalid, -1 is returned and a error message
- * will be returned in interp->result.  This is used when the file may
- * not be currently open.
+ *    Convert a file handle to a pointer to the internal Tcl file structure.
  *
+ * Parameters:
+ *   o interp (I) - Current interpreter.
+ *   o handle (I) - The file handle to convert.
+ * Returns:
+ *   A pointer to the open file structure for the file, or NULL if an error
+ * occured.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_ConvertFileHandle (interp, handle)
+OpenFile *
+Tcl_GetOpenFileStruct (interp, handle)
     Tcl_Interp *interp;
     char       *handle;
 {
-    int fileId = -1;
+    Interp *iPtr = (Interp *) interp;
+    FILE   *filePtr;
 
-    if (handle [0] == 's') {
-        if (STREQU (handle, "stdin"))
-            fileId = 0;
-        else if (STREQU (handle, "stdout"))
-            fileId = 1;
-        else if (STREQU (handle, "stderr"))
-            fileId = 2;
-    } else {
-       if (STRNEQU (handle, "file", 4))
-           Tcl_StrToInt (&handle [4], 10, &fileId);
-    }
-    if (fileId < 0)
-        Tcl_AppendResult (interp, "invalid file handle: ", handle,
-                          (char *) NULL);
-    return fileId;
+    if (Tcl_GetOpenFile (interp, handle,
+                         FALSE, FALSE,  /* No checking */
+                         &filePtr) != TCL_OK)
+        return NULL;
+
+    return iPtr->oFilePtrArray [fileno (filePtr)];
 }
 
 /*
@@ -562,11 +447,11 @@ Tcl_ConvertFileHandle (interp, handle)
  *   o readable (I) - TRUE if read access to the file.
  *   o writable (I) - TRUE if  write access to the file.
  * Returns:
- *   A pointer to the OpenFile structure for the file, or NULL if an error
+ *   A pointer to the FILE structure for the file, or NULL if an error
  * occured.
  *-----------------------------------------------------------------------------
  */
-OpenFile *
+FILE *
 Tcl_SetupFileEntry (interp, fileNum, readable, writable)
     Tcl_Interp *interp;
     int         fileNum;
@@ -575,8 +460,7 @@ Tcl_SetupFileEntry (interp, fileNum, readable, writable)
 {
     Interp   *iPtr = (Interp *) interp;
     char     *mode;
-    FILE     *fileCBPtr;
-    OpenFile *filePtr;
+    FILE     *filePtr;
 
     /*
      * Set up a stdio FILE control block for the new file.
@@ -588,28 +472,13 @@ Tcl_SetupFileEntry (interp, fileNum, readable, writable)
     } else {
         mode = "r";
     }
-    fileCBPtr = fdopen (fileNum, mode);
-    if (fileCBPtr == NULL) {
-        iPtr->result = Tcl_UnixError (interp);
+    filePtr = fdopen (fileNum, mode);
+    if (filePtr == NULL) {
+        iPtr->result = Tcl_PosixError (interp);
         return NULL;
     }
-
-    /*
-     * Put the file in the Tcl table.
-     */
-    TclMakeFileTable (iPtr, fileNum);
-    if (iPtr->filePtrArray [fileno (fileCBPtr)] != NULL)
-        panic ("file already open");
-    filePtr = (OpenFile *) ckalloc (sizeof (OpenFile));
-    iPtr->filePtrArray [fileno (fileCBPtr)] = filePtr;
-
-    filePtr->f        = fileCBPtr;
-    filePtr->f2       = NULL;
-    filePtr->readable = readable;
-    filePtr->writable = writable;
-    filePtr->numPids  = 0;
-    filePtr->pidPtr   = NULL;
-    filePtr->errorId  = -1;
+    
+    Tcl_EnterFile (interp, filePtr, readable, writable);
 
     return filePtr;
 }
@@ -620,14 +489,12 @@ Tcl_SetupFileEntry (interp, fileNum, readable, writable)
  * Tcl_CloseForError --
  *
  *   Close a file number on error.  If the file is in the Tcl file table, clean
- * it up too. The variable errno will be saved and not lost.
+ * it up too. The variable errno, and interp->result and the errorCode variable
+ * will be saved and not lost.
  *
  * Parameters:
  *   o interp (I) - Current interpreter.
  *   o fileNum (I) - File number to close.
- * Returns:
- *   A pointer to the OpenFile structure for the file, or NULL if an error
- * occured.
  *-----------------------------------------------------------------------------
  */
 void
@@ -635,96 +502,34 @@ Tcl_CloseForError (interp, fileNum)
     Tcl_Interp *interp;
     int         fileNum;
 {
-    Interp   *iPtr = (Interp *) interp;
-    int       saveErrNo = errno;
+    static char *ERROR_CODE = "errorCode";
+    int          saveErrNo = errno;
+    char        *saveResult, *errorCode, *saveErrorCode, *argv [2], buf [32];
 
-    if ((fileNum < iPtr->numFiles) && (iPtr->filePtrArray [fileNum] != NULL)) {
-        fclose (iPtr->filePtrArray [fileNum]->f);
-        ckfree (iPtr->filePtrArray [fileNum]);
-        iPtr->filePtrArray [fileNum] = NULL;
-    } else {
-        close (fileNum);
+    saveResult = strdup (interp->result);
+
+    errorCode = Tcl_GetVar (interp, ERROR_CODE, TCL_GLOBAL_ONLY);
+    if (errorCode != NULL)
+        saveErrorCode = strdup (errorCode);
+    else
+        saveErrorCode = NULL;
+
+    sprintf (buf, "file%d", fileNum);
+
+    argv [0] = "close";
+    argv [1] = buf;
+    Tcl_CloseCmd (NULL, interp, 2, argv);
+    Tcl_ResetResult (interp);
+
+    if (saveErrorCode != NULL) {
+        Tcl_SetVar (interp, ERROR_CODE, saveErrorCode, TCL_GLOBAL_ONLY);
+        free (saveErrorCode);
     }
+    Tcl_SetResult (interp, saveResult, TCL_VOLATILE);
+    free (saveResult);
+
+    close (fileNum);  /* In case Tcl didn't have it open */
+    
     errno = saveErrNo;
-}
-
-/*
- *--------------------------------------------------------------
- *
- * Tcl_ReturnDouble --
- *
- *	Format a double to the maximum precision supported on
- *	this machine.  If the number formats to an even integer,
- *	a ".0" is append to assure that the value continues to
- *	represent a floating point number.
- *
- * Results:
- *	A standard Tcl result.	If the result is TCL_OK, then the
- *	interpreter's result is set to the string value of the
- *	double.	 If the result is TCL_OK, then interp->result
- *	contains an error message (If the number had the value of
- *	"not a number" or "infinite").
- *
- * Side effects:
- *	None.
- *
- *--------------------------------------------------------------
- */
-
-int
-Tcl_ReturnDouble(interp, number)
-    Tcl_Interp *interp;			/* ->result gets converted number */
-    double number;			/* Number to convert */
-{
-    static int precision = 0;
-    register char *scanPtr;
-
-    /*
-     * On the first call, determine the number of decimal digits that represent
-     * the precision of a double.
-     */
-    if (precision == 0) {
-	sprintf (interp->result, "%.0f", pow (2.0, (double) DSIGNIF));
-	precision = strlen (interp->result);
-    }
-
-    sprintf (interp->result, "%.*g", precision, number);
-
-    /*
-     * Scan the number for "." or "e" to assure that the number has not been
-     * converted to an integer.	 Also check for NaN on infinite
-     */
-
-    scanPtr = interp->result;
-    if (scanPtr [0] == '-')
-	scanPtr++;
-    for (; isdigit (*scanPtr); scanPtr++)
-	continue;
-
-    switch (*scanPtr) {
-      case '.':
-      case 'e':
-	return TCL_OK;
-      case 'n':
-      case 'N':
-	interp->result = "Floating point error, result is not a number";
-	return TCL_ERROR;
-      case 'i':
-      case 'I':
-	interp->result = "Floating point error, result is infinite";
-	return TCL_ERROR;
-      case '\0':
-	scanPtr [0] = '.';
-	scanPtr [1] = '0';
-	scanPtr [2] = '\0';
-	return TCL_OK;
-    }
-
-    /*
-     * If we made it here, this sprintf returned something we did not expect.
-     */
-    Tcl_AppendResult (interp, ": unexpected floating point conversion result",
-		      (char *) NULL);
-    return TCL_ERROR;
 }
      

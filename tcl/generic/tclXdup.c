@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXdup.c,v 2.3 1993/04/07 05:55:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,15 +21,57 @@
 /*
  * Prototypes of internal functions.
  */
-OpenFile *
+int
+ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
+                               char       *handle));
+
+FILE *
 DoNormalDup _ANSI_ARGS_((Tcl_Interp *interp,
                          OpenFile   *oldFilePtr));
 
-OpenFile *
+FILE *
 DoSpecialDup _ANSI_ARGS_((Tcl_Interp *interp,
                           OpenFile   *oldFilePtr,
-                          char       *newHandleName));
+                          char       *newFileId));
 
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * ConvertFileHandle --
+ *
+ * Convert a file handle to its file number. The file handle maybe one 
+ * of "stdin", "stdout" or "stderr" or "fileNNN", were NNN is the file
+ * number.  If the handle is invalid, -1 is returned and a error message
+ * will be returned in interp->result.  This is used when the file may
+ * not be currently open.
+ *
+ *-----------------------------------------------------------------------------
+ */
+static int
+ConvertFileHandle (interp, handle)
+    Tcl_Interp *interp;
+    char       *handle;
+{
+    int fileId = -1;
+
+    if (handle [0] == 's') {
+        if (STREQU (handle, "stdin"))
+            fileId = 0;
+        else if (STREQU (handle, "stdout"))
+            fileId = 1;
+        else if (STREQU (handle, "stderr"))
+            fileId = 2;
+    } else {
+       if (STRNEQU (handle, "file", 4))
+           Tcl_StrToInt (&handle [4], 10, &fileId);
+    }
+    if (fileId < 0)
+        Tcl_AppendResult (interp, "invalid file handle: ", handle,
+                          (char *) NULL);
+    return fileId;
+}
+
 
 /*
  *-----------------------------------------------------------------------------
@@ -38,21 +80,20 @@ DoSpecialDup _ANSI_ARGS_((Tcl_Interp *interp,
  *   Process a normal dup command (i.e. the new file is not specified).
  *
  * Parameters:
- *   o interp (I) - If an error occures, the error message is in result,
- *     otherwise the file handle is in result.
+ *   o interp (I) - If an error occures, the error message is in result.
  *   o oldFilePtr (I) - Tcl file control block for the file to dup.
  * Returns:
- *   A pointer to the open file structure for the new file, or NULL if an
+ *   A pointer to the file structure for the new file, or NULL if an
  * error occured.
  *-----------------------------------------------------------------------------
  */
-static OpenFile *
+static FILE *
 DoNormalDup (interp, oldFilePtr)
     Tcl_Interp *interp;
     OpenFile   *oldFilePtr;
 {
-    int       newFileId;
-    OpenFile *filePtr;
+    int    newFileId;
+    FILE  *filePtr;
 
     newFileId = dup (fileno (oldFilePtr->f));
     if (newFileId < 0)
@@ -61,14 +102,10 @@ DoNormalDup (interp, oldFilePtr)
     filePtr = Tcl_SetupFileEntry (interp, newFileId,
                                   oldFilePtr->readable,
                                   oldFilePtr->writable);
-    if (filePtr == NULL)
-        return NULL;
-
-    sprintf (interp->result, "file%d", newFileId);
     return filePtr;
 
 unixError:
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return NULL;
 }
 
@@ -76,103 +113,88 @@ unixError:
  *-----------------------------------------------------------------------------
  *
  * DoSpecialDup --
- *   Process a special dup command.  This is the case were the file is
- *   dup-ed to stdin, stdout or stderr.  The new file may or be open or
- *   closed
+ *   Process a special dup command where the file is dupped to a specified
+ * fileid.  The new file may or be open or closed, but its better if is open 
+ * if stdin, stdout or stderr are being used, otherwise the a different
+ * stdio file descriptior maybe bound to these descriptors.
+ *
  * Parameters:
- *   o interp (I) - If an error occures, the error message is in result,
- *     otherwise nothing is returned.
+ *   o interp (I) - If an error occures, the error message is in result.
  *   o oldFilePtr (I) - Tcl file control block for the file to dup.
- *   o newFileHandle (I) - The handle name for the new file.
+ *   o targetFileId (I) - The id (handle) name for the new file.
  * Returns:
- *   A pointer to the open file structure for the new file, or NULL if an
+ *   A pointer to the open structure for the new file, or NULL if an
  * error occured.
  *-----------------------------------------------------------------------------
  */
-static OpenFile *
-DoSpecialDup (interp, oldFilePtr, newHandleName)
+static FILE *
+DoSpecialDup (interp, oldFilePtr, targetFileId)
     Tcl_Interp *interp;
     OpenFile   *oldFilePtr;
-    char       *newHandleName;
+    char       *targetFileId;
 {
-    Interp   *iPtr = (Interp *) interp;
-    int       newFileId;
-    FILE     *newFileCbPtr;
-    OpenFile *newFilePtr;
+    int    targetFileNum = -1;
+    FILE  *targetFilePtr;
+    char  *mode;
 
     /*
-     * Duplicate the old file to the specified file id.
+     * Determine if the target file is currently open.  Also get the file number
+     * for the file.  Also flush the file.
      */
-    newFileId = Tcl_ConvertFileHandle (interp, newHandleName);
-    if (newFileId < 0)
-        return NULL;
-    if (newFileId > 2) {
-        Tcl_AppendResult (interp, "target handle must be one of stdin, ",
-                          "stdout, stderr, file0, file1, or file2: got \"",
-                          newHandleName, "\"", (char *) NULL);
-        return NULL;
-    }
-    switch (newFileId) {
-        case 0: 
-            newFileCbPtr = stdin;
-            break;
-        case 1: 
-            newFileCbPtr = stdout;
-            break;
-        case 2: 
-            newFileCbPtr = stderr;
-            break;
+    if (Tcl_GetOpenFile (interp, targetFileId, 
+                         FALSE, FALSE,  /* No checking */
+                         &targetFilePtr) != TCL_OK) {
+        Tcl_ResetResult (interp);
+        targetFilePtr = NULL;
+
+        targetFileNum = ConvertFileHandle (interp, targetFileId);
+        if (targetFileNum < 0)
+            return NULL;
+
+    } else {
+        targetFileNum = fileno (targetFilePtr);
+        fflush (targetFilePtr);
     }
 
     /*
-     * If the specified id is not open, set up a stdio file descriptor.
+     * If this is not one of the standard files, close it.  This will do all
+     * Tcl cleanup incase its a pipeline, etc.
      */
-    TclMakeFileTable (iPtr, newFileId);
-    if (iPtr->filePtrArray [newFileId] == NULL) {
-        char *mode;
+    if (targetFileNum > 2) {
+        char *argv [2];
 
-        /*
-         * Set up a stdio FILE control block for the new file.
-         */
-        if (oldFilePtr->readable && oldFilePtr->writable) {
-            mode = "r+";
-        } else if (oldFilePtr->writable) {
-            mode = "w";
-        } else {
-            mode = "r";
-        }
-        if (freopen ("/dev/null", mode, newFileCbPtr) == NULL)
-            goto unixError;
+        argv [0] = "dup";
+        argv [1] = targetFileId;
+        if (Tcl_CloseCmd (NULL, interp, 2, argv) != TCL_OK)
+            return NULL;
+        targetFilePtr = NULL;
     }
-    
+
     /*
-     * This functionallity may be obtained with dup2 on most systems.  Being
-     * open is optional.
+     * Duplicate the old file to the specified file id.  This functionallity may
+     * be obtained with dup2 on most systems.
      */
-    close (newFileId);
-    if (fcntl (fileno (oldFilePtr->f), F_DUPFD, newFileId) < 0)
+    close (targetFileNum);
+    if (fcntl (fileno (oldFilePtr->f), F_DUPFD, targetFileNum) < 0)
         goto unixError;
 
     /*
-     * Set up a Tcl OpenFile structure for the new file handle.
+     * If the file is not open, setup a FILE structure and tell Tcl about it.
      */
-    newFilePtr = iPtr->filePtrArray [fileno (newFileCbPtr)];
-    if (newFilePtr == NULL) {
-        newFilePtr = (OpenFile*) ckalloc (sizeof (OpenFile));
-        iPtr->filePtrArray [fileno (newFileCbPtr)] = newFilePtr;
+    if (targetFilePtr == NULL) {
+        targetFilePtr = Tcl_SetupFileEntry (interp, targetFileNum,
+                                            oldFilePtr->readable,
+                                            oldFilePtr->writable);
+        if (targetFilePtr == NULL)
+            goto unixError;
     }
-    newFilePtr->f        = newFileCbPtr;
-    newFilePtr->f2       = NULL;
-    newFilePtr->readable = oldFilePtr->readable;
-    newFilePtr->writable = oldFilePtr->writable;
-    newFilePtr->numPids  = 0;
-    newFilePtr->pidPtr   = NULL;
-    newFilePtr->errorId  = -1;
 
-    return newFilePtr;
+    return targetFilePtr;
 
 unixError:
-    iPtr->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
+    if (targetFileNum >= 0)
+        close (targetFileNum);
     return NULL;
 }
 
@@ -181,7 +203,7 @@ unixError:
  *
  * Tcl_DupCmd --
  *     Implements the dup TCL command:
- *         dup filehandle ?stdhandle?
+ *         dup fileId ?targetFileId?
  *
  * Results:
  *      Returns TCL_OK and interp->result containing a filehandle
@@ -202,18 +224,21 @@ Tcl_DupCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    OpenFile *oldFilePtr, *newFilePtr;
+    OpenFile *oldFilePtr;
+    FILE     *newFilePtr;
     long      seekOffset = -1;
 
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
-                          " filehandle ?stdhandle?", (char *) NULL);
+                          " fileId ?targetFileId?", (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (TclGetOpenFile(interp, argv[1], &oldFilePtr) != TCL_OK)
+    oldFilePtr = Tcl_GetOpenFileStruct (interp, argv[1]);
+    if (oldFilePtr == NULL)
 	return TCL_ERROR;
-    if (oldFilePtr->numPids > 0) { /*??????*/
+
+    if (oldFilePtr->numPids > 0) {
         Tcl_AppendResult (interp, "can not `dup' a pipeline", (char *) NULL);
         return TCL_ERROR;
     }
@@ -253,13 +278,14 @@ Tcl_DupCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     if (seekOffset >= 0) {
-        if (fseek (newFilePtr->f, seekOffset, SEEK_SET) != 0)
+        if (fseek (newFilePtr, seekOffset, SEEK_SET) != 0)
             goto unixError;
     }
+    sprintf (interp->result, "file%d", fileno (newFilePtr));
     return TCL_OK;
 
 unixError:
     Tcl_ResetResult (interp);
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }

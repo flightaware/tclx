@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 2.3 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXprocess.c,v 2.4 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -87,7 +87,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
         if (argList != staticArgv)
             ckfree (argList);
 
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
 
@@ -119,73 +119,15 @@ Tcl_ForkCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    pid = Tcl_Fork ();
+    pid = fork ();
     if (pid < 0) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
 
     sprintf(interp->result, "%d", pid);
     return TCL_OK;
 }
-#ifndef TCL_HAVE_WAITPID
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tcl_WaitCmd --
- *   Implements the TCL wait command:
- *     wait pid
- *
- * This version is for Tcl 6.4 that does not have the waitpid changes (which
- * have not yet been released).
- * 
- * Results:
- *   Standard TCL results, may return the UNIX system error message.
- *
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_WaitCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    WAIT_STATUS_TYPE  status;
-    int               pid, returnedPid;
-
-
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " pid",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-    
-    if (Tcl_GetInt (interp, argv [1], &pid) != TCL_OK)
-        return TCL_ERROR;
-
-    returnedPid = Tcl_WaitPids (1, &pid, (WAIT_STATUS_TYPE *) &status);
-
-    if (returnedPid < 0) {
-        interp->result = Tcl_UnixError (interp);
-        return TCL_ERROR;
-    }
-    
-    if (WIFEXITED (status))
-        sprintf (interp->result, "%d %s %d", returnedPid, "EXIT", 
-                 WEXITSTATUS (status));
-    else if (WIFSIGNALED (status))
-        sprintf (interp->result, "%d %s %s", returnedPid, "SIG", 
-                 Tcl_SignalId (WTERMSIG (status)));
-    else if (WIFSTOPPED (status))
-        sprintf (interp->result, "%d %s %s", returnedPid, "STOP", 
-                 Tcl_SignalId (WSTOPSIG (status)));
-
-    return TCL_OK;
-
-}
-#else
 
 /*
  *-----------------------------------------------------------------------------
@@ -250,10 +192,10 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
         pid = -1;  /* pid not supplied */
     }
 
-#if !TCL_HAVE_WAITPID
     /*
      * Versions that don't have real waitpid have limited functionality.
      */
+#if NO_WAITPID
     if ((options != 0) || pgroup) {
         Tcl_AppendResult (interp, "The \"-nohang\", \"-untraced\" and ",
                           "\"-pgroup\" options are not available on this ",
@@ -272,7 +214,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     returnedPid = waitpid (pid, &status, options);
 
     if (returnedPid < 0) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
     
@@ -294,4 +236,3 @@ usage:
                       (char *) NULL);
     return TCL_ERROR;
 }
-#endif

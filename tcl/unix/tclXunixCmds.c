@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.3 1993/05/04 06:29:22 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.4 1993/05/28 04:43:03 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -89,7 +89,7 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
 
 
     if (setitimer (ITIMER_REAL, &timer, &oldTimer) < 0) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
     seconds  = oldTimer.it_value.tv_sec;
@@ -166,7 +166,7 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
 
     exitCode = system (argv [1]);
     if (exitCode == -1) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
     sprintf (interp->result, "%d", exitCode);
@@ -272,7 +272,11 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    char *tmppath, *srcpath, *destpath;
+    char        *srcPath,    *destPath;
+    Tcl_DString  srcPathBuf,  destPathBuf;
+
+    Tcl_DStringInit (&srcPathBuf);
+    Tcl_DStringInit (&destPathBuf);
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -292,33 +296,34 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
 #endif
     }
 
-    tmppath = Tcl_TildeSubst (interp, argv [argc - 2]);
-    if (tmppath == NULL)
-        return TCL_ERROR;
-    srcpath = ckalloc (strlen (tmppath) + 1);
-    strcpy (srcpath, tmppath);
+    srcPath = Tcl_TildeSubst (interp, argv [argc - 2], &srcPathBuf);
+    if (srcPath == NULL)
+        goto errorExit;
 
-    destpath = Tcl_TildeSubst (interp, argv [argc - 1]);
-    if (destpath == NULL)
+    destPath = Tcl_TildeSubst (interp, argv [argc - 1], &destPathBuf);
+    if (destPath == NULL)
         goto errorExit;
 
     if (argc == 4) {
 #ifdef S_IFLNK
-        if (symlink (srcpath, destpath) != 0)
+        if (symlink (srcPath, destPath) != 0)
            goto unixError;
 #endif
     } else {
-        if (link (srcpath, destpath) != 0)
+        if (link (srcPath, destPath) != 0)
            goto unixError;
     }
-    ckfree (srcpath);
+
+    Tcl_DStringFree (&srcPathBuf);
+    Tcl_DStringFree (&destPathBuf);
     return TCL_OK;
 
   unixError:
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
 
   errorExit:
-    ckfree (srcpath);
+    Tcl_DStringFree (&srcPathBuf);
+    Tcl_DStringFree (&destPathBuf);
     return TCL_ERROR;
 }
 
@@ -341,9 +346,12 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int    idx, fileArgc;
-    char **fileArgv, *fileName;
-    int    noComplain;
+    int           idx, fileArgc;
+    char        **fileArgv, *fileName;
+    int           noComplain;
+    Tcl_DString   tildeBuf;
+
+    Tcl_DStringInit (&tildeBuf);
     
     if ((argc < 2) || (argc > 3))
         goto badArgs;
@@ -361,23 +369,26 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx], &tildeBuf);
         if (fileName == NULL) {
             if (!noComplain)
                 goto errorExit;
+            Tcl_DStringFree (&tildeBuf);
             continue;
         }
         if ((unlink (fileName) != 0) && !noComplain) {
             Tcl_AppendResult (interp, fileArgv [idx], ": ",
-                              Tcl_UnixError (interp), (char *) NULL);
+                              Tcl_PosixError (interp), (char *) NULL);
             goto errorExit;
         }
+        Tcl_DStringFree (&tildeBuf);
     }
 
     ckfree ((char *) fileArgv);
     return TCL_OK;
 
   errorExit:
+    Tcl_DStringFree (&tildeBuf);
     ckfree ((char *) fileArgv);
     return TCL_ERROR;
 
@@ -409,6 +420,9 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
     int           idx, dirArgc, result;
     char        **dirArgv, *dirName, *scanPtr;
     struct stat   statBuf;
+    Tcl_DString   tildeBuf;
+
+    Tcl_DStringInit (&tildeBuf);
 
     if ((argc < 2) || (argc > 3))
         goto usageError;
@@ -417,12 +431,13 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
 
     if (Tcl_SplitList (interp, argv [argc - 1], &dirArgc, &dirArgv) != TCL_OK)
         return TCL_ERROR;
+
     /*
      * Make all the directories, optionally making directories along the path.
      */
 
     for (idx = 0; idx < dirArgc; idx++) {
-        dirName = Tcl_TildeSubst (interp, dirArgv [idx]);
+        dirName = Tcl_TildeSubst (interp, dirArgv [idx], &tildeBuf);
         if (dirName == NULL)
            goto errorExit;
 
@@ -450,15 +465,18 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
          */
         if (mkdir (dirName, S_IFDIR | 0777) != 0)
            goto mkdirError;
+
+        Tcl_DStringFree (&tildeBuf);
     }
 
     ckfree ((char *) dirArgv);
     return TCL_OK;
 
   mkdirError:
-    Tcl_AppendResult (interp, dirArgv [idx], ": ", Tcl_UnixError (interp),
+    Tcl_AppendResult (interp, dirArgv [idx], ": ", Tcl_PosixError (interp),
                       (char *) NULL);
   errorExit:
+    Tcl_DStringFree (&tildeBuf);
     ckfree ((char *) dirArgv);
     return TCL_ERROR;
 
@@ -487,9 +505,12 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int    idx, dirArgc;
-    char **dirArgv, *dirName;
-    int    noComplain;
+    int          idx, dirArgc;
+    char       **dirArgv, *dirName;
+    int          noComplain;
+    Tcl_DString  tildeBuf;
+
+    Tcl_DStringInit (&tildeBuf);
     
     if ((argc < 2) || (argc > 3))
         goto badArgs;
@@ -506,23 +527,26 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < dirArgc; idx++) {
-        dirName = Tcl_TildeSubst (interp, dirArgv [idx]);
+        dirName = Tcl_TildeSubst (interp, dirArgv [idx], &tildeBuf);
         if (dirName == NULL) {
             if (!noComplain)
                 goto errorExit;
+            Tcl_DStringFree (&tildeBuf);
             continue;
         }
         if ((rmdir (dirName) != 0) && !noComplain) {
            Tcl_AppendResult (interp, dirArgv [idx], ": ",
-                             Tcl_UnixError (interp), (char *) NULL);
+                             Tcl_PosixError (interp), (char *) NULL);
            goto errorExit;
         }
+        Tcl_DStringFree (&tildeBuf);
     }
 
     ckfree ((char *) dirArgv);
     return TCL_OK;
 
   errorExit:
+    Tcl_DStringFree (&tildeBuf);
     ckfree ((char *) dirArgv);
     return TCL_ERROR;;
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 2.2 1993/03/06 21:42:30 markd Exp markd $
+ * $Id: tclXdebug.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -65,16 +65,16 @@ CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              char        **argv));
 
 void
-CleanUpDebug _ANSI_ARGS_((ClientData clientData));
+DebugCleanUp _ANSI_ARGS_((ClientData  clientData,
+                          Tcl_Interp *interp));
 
 
 /*
  *-----------------------------------------------------------------------------
- *
  * PrintStr --
+ *
  *     Print an string, truncating it to the specified number of characters.
  * If the string contains newlines, \n is substituted.
- *
  *-----------------------------------------------------------------------------
  */
 static void
@@ -98,12 +98,11 @@ PrintStr (filePtr, string, numChars)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * PrintArg --
- *     Print an argument string, truncating and adding "..." if its longer
- *     then ARG_TRUNCATE_SIZE.  If the string contains white spaces, quote
- *     it with angle brackets.
  *
+ *   Print an argument string, truncating and adding "..." if its longer
+ * then ARG_TRUNCATE_SIZE.  If the string contains white spaces, quote
+ * it with angle brackets.
  *-----------------------------------------------------------------------------
  */
 static void
@@ -137,11 +136,10 @@ PrintArg (filePtr, argStr, noTruncate)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * TraceCode --
- *    Print out a trace of a code line.  Level is used for indenting
+ *
+ *   Print out a trace of a code line.  Level is used for indenting
  * and marking lines and may be eval or procedure level.
- * 
  *-----------------------------------------------------------------------------
  */
 static void
@@ -183,10 +181,9 @@ TraceCode (traceInfoPtr, level, command, argc, argv)
 
 /*
  *-----------------------------------------------------------------------------
- *
  * CmdTraceRoutine --
- *  Routine called by Tcl_Eval to trace a command.
  *
+ *  Routine called by Tcl_Eval to trace a command.
  *-----------------------------------------------------------------------------
  */
 static void
@@ -218,16 +215,12 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
 
 /*
  *-----------------------------------------------------------------------------
- *
  * Tcl_CmdtraceCmd --
- *     Implements the TCL trace command:
+ *
+ * Implements the TCL trace command:
  *     cmdtrace level|on ?noeval? ?notruncate? ?procs? ?fileid?
  *     cmdtrace off
  *     cmdtrace depth
- *
- * Results:
- *  Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 static int
@@ -315,16 +308,14 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
             return TCL_ERROR;
     }
     if (fileHandle != NULL) {
-        OpenFile *tclFilePtr;
+        FILE *filePtr;
 
-        if (TclGetOpenFile (interp, fileHandle, &tclFilePtr) != TCL_OK)
+        if (Tcl_GetOpenFile (interp, fileHandle, 
+                             TRUE,   /* Write access */
+                             TRUE,   /* Check access */
+                             &filePtr) != TCL_OK)
 	    return TCL_ERROR;
-        if (!tclFilePtr->writable) {
-            Tcl_AppendResult (interp, "file not writable: ", fileHandle,
-                              (char *) NULL);
-            return TCL_ERROR;
-        }
-        infoPtr->filePtr = tclFilePtr->f;
+        infoPtr->filePtr = filePtr;
     }
     
     infoPtr->traceHolder = Tcl_CreateTrace (interp, infoPtr->depth,
@@ -347,16 +338,15 @@ invalidOption:
 
 /*
  *-----------------------------------------------------------------------------
+ * DebugCleanUp --
  *
- *  CleanUpDebug --
- *
- *  Release the client data area when the trace command is deleted.
- *
+ *  Release the debug data area when the interpreter is deleted.
  *-----------------------------------------------------------------------------
  */
 static void
-CleanUpDebug (clientData)
-    ClientData clientData;
+DebugCleanUp (clientData, interp)
+    ClientData  clientData;
+    Tcl_Interp *interp;
 {
     traceInfo_pt infoPtr = (traceInfo_pt) clientData;
 
@@ -367,11 +357,9 @@ CleanUpDebug (clientData)
 
 /*
  *-----------------------------------------------------------------------------
- *
- *  Tcl_InitDebug --
+ * Tcl_InitDebug --
  *
  *  Initialize the TCL debugging commands.
- *
  *-----------------------------------------------------------------------------
  */
 void
@@ -389,8 +377,10 @@ Tcl_InitDebug (interp)
     infoPtr->procCalls   = FALSE;
     infoPtr->depth       = 0;
 
+    Tcl_CallWhenDeleted (interp, DebugCleanUp, (ClientData) infoPtr);
+
     Tcl_CreateCommand (interp, "cmdtrace", Tcl_CmdtraceCmd, 
-                       (ClientData)infoPtr, CleanUpDebug);
+                       (ClientData) infoPtr, (void (*)()) NULL);
 }
 
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXfcntl.c,v 2.4 1993/04/06 05:58:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -56,12 +56,12 @@ XlateFcntlAttr  _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 GetFcntlAttr _ANSI_ARGS_((Tcl_Interp *interp,
-                          OpenFile   *filePtr,
+                          FILE       *filePtr,
                           char       *attrName));
 
 static int
 SetFcntlAttr _ANSI_ARGS_((Tcl_Interp *interp,
-                          OpenFile   *filePtr,
+                          FILE       *filePtr,
                           char       *attrName,
                           char       *valueStr));
 
@@ -172,7 +172,7 @@ XlateFcntlAttr (interp, attrName, fcntlAttrPtr, otherAttrPtr)
 static int
 GetFcntlAttr (interp, filePtr, attrName)
     Tcl_Interp *interp;
-    OpenFile   *filePtr;
+    FILE       *filePtr;
     char       *attrName;
 {
     int fcntlAttr, otherAttr, current;
@@ -181,7 +181,7 @@ GetFcntlAttr (interp, filePtr, attrName)
         return TCL_ERROR;
 
     if (fcntlAttr != 0) {
-        current = fcntl (fileno (filePtr->f), F_GETFL, 0);
+        current = fcntl (fileno (filePtr), F_GETFL, 0);
         if (current == -1)
             goto unixError;
         interp->result = (current & fcntlAttr) ? "1" : "0";
@@ -189,7 +189,7 @@ GetFcntlAttr (interp, filePtr, attrName)
     }
     
     if (otherAttr & ATTR_CLOEXEC) {
-        current = fcntl (fileno (filePtr->f), F_GETFD, 0);
+        current = fcntl (fileno (filePtr), F_GETFD, 0);
         if (current == -1)
             goto unixError;
         interp->result = (current & 1) ? "1" : "0";
@@ -209,35 +209,35 @@ GetFcntlAttr (interp, filePtr, attrName)
 
 #if defined (linux)
     if (otherAttr & ATTR_NOBUF) {
-        interp->result = (filePtr->f->_flags & _IONBF) ? "1" : "0";
+        interp->result = (filePtr->_flags & _IONBF) ? "1" : "0";
         return TCL_OK;
     }
     if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->f->_flags & _IOLBF) ? "1" : "0";
+        interp->result = (filePtr->_flags & _IOLBF) ? "1" : "0";
         return TCL_OK;
     }
 #elif (defined(_IONBF) && !defined(_SNBF))
     if (otherAttr & ATTR_NOBUF) {
-        interp->result = (filePtr->f->_flag & _IONBF) ? "1" : "0";
+        interp->result = (filePtr->_flag & _IONBF) ? "1" : "0";
         return TCL_OK;
     }
     if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->f->_flag & _IOLBF) ? "1" : "0";
+        interp->result = (filePtr->_flag & _IOLBF) ? "1" : "0";
         return TCL_OK;
     }
 #else
     if (otherAttr & ATTR_NOBUF) {
-        interp->result = (filePtr->f->_flags & _SNBF) ? "1" : "0";
+        interp->result = (filePtr->_flags & _SNBF) ? "1" : "0";
         return TCL_OK;
     }
     if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->f->_flags & _SLBF) ? "1" : "0";
+        interp->result = (filePtr->_flags & _SLBF) ? "1" : "0";
         return TCL_OK;
     }
 #endif
 
 unixError:
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }
 
@@ -261,7 +261,7 @@ unixError:
 static int
 SetFcntlAttr (interp, filePtr, attrName, valueStr)
     Tcl_Interp *interp;
-    OpenFile   *filePtr;
+    FILE       *filePtr;
     char       *attrName;
     char       *valueStr;
 {
@@ -291,18 +291,18 @@ SetFcntlAttr (interp, filePtr, attrName, valueStr)
     }
 
     if (otherAttr == ATTR_CLOEXEC) {
-        if (fcntl (fileno (filePtr->f), F_SETFD, setValue) == -1)
+        if (fcntl (fileno (filePtr), F_SETFD, setValue) == -1)
             goto unixError;
         return TCL_OK;
     }
 
     if (otherAttr == ATTR_NOBUF) {
-        setbuf (filePtr->f, NULL);
+        setbuf (filePtr, NULL);
         return TCL_OK;
     }
 
     if (otherAttr == ATTR_LINEBUF) {
-        if (SET_LINE_BUF (filePtr->f) != 0)
+        if (SET_LINE_BUF (filePtr) != 0)
             goto unixError;
         return TCL_OK;
     }
@@ -311,19 +311,19 @@ SetFcntlAttr (interp, filePtr, attrName, valueStr)
      * Handle standard fcntl attrs.
      */
        
-    current = fcntl (fileno (filePtr->f), F_GETFL, 0);
+    current = fcntl (fileno (filePtr), F_GETFL, 0);
     if (current == -1)
         goto unixError;
     current &= ~fcntlAttr;
     if (setValue)
         current |= fcntlAttr;
-    if (fcntl (fileno (filePtr->f), F_SETFL, current) == -1)
+    if (fcntl (fileno (filePtr), F_SETFL, current) == -1)
         goto unixError;
 
     return TCL_OK;
 
   unixError:
-    interp->result = Tcl_UnixError (interp);
+    interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
    
 }
@@ -343,7 +343,7 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    OpenFile    *filePtr;
+    FILE  *filePtr;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -351,7 +351,9 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (TclGetOpenFile (interp, argv[1], &filePtr) != TCL_OK)
+    if (Tcl_GetOpenFile (interp, argv [1], 
+                         FALSE, FALSE,   /* No access checking */
+                         &filePtr) != TCL_OK)
 	return TCL_ERROR;
     if (argc == 3) {    
         if (GetFcntlAttr (interp, filePtr, argv [2]) != TCL_OK)

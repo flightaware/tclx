@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 2.1 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXchmod.c,v 2.2 1993/05/28 04:43:03 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -200,6 +200,9 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
     int           idx, modeVal, fileArgc, absMode;
     char        **fileArgv, *fileName;
     struct stat   fileStat;
+    Tcl_DString   tildeBuf;
+
+    Tcl_DStringInit (&tildeBuf);
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -218,7 +221,7 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx], &tildeBuf);
         if (fileName == NULL)
             goto errorExit;
         
@@ -231,9 +234,10 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
         }
         if (chmod (fileName, (unsigned short) modeVal) < 0)
             goto fileError;
+
+        Tcl_DStringFree (&tildeBuf);
     }
 
-  exitPoint:
     ckfree ((char *) fileArgv);
     return TCL_OK;
 
@@ -241,10 +245,11 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
     /*
      * Error accessing file, assumes file name is fileArgv [idx].
      */
-    Tcl_AppendResult (interp, fileArgv [idx], ": ", Tcl_UnixError (interp),
+    Tcl_AppendResult (interp, fileArgv [idx], ": ", Tcl_PosixError (interp),
                       (char *) NULL);
 
   errorExit:
+    Tcl_DStringFree (&tildeBuf);
     ckfree ((char *) fileArgv);
     return TCL_ERROR;
 }
@@ -276,6 +281,9 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
     struct passwd *passwdPtr;
     struct group  *groupPtr;
     int            result = TCL_ERROR;
+    Tcl_DString    tildeBuf;
+
+    Tcl_DStringInit (&tildeBuf);
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -341,14 +349,14 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
         goto exitPoint;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx], &tildeBuf);
         if (fileName == NULL)
             goto exitPoint;
         
         if (!chGroup) {
             if (stat (fileName, &fileStat) != 0) {
                 Tcl_AppendResult (interp, fileArgv [idx], ": ",
-                                  Tcl_UnixError (interp), (char *) NULL);
+                                  Tcl_PosixError (interp), (char *) NULL);
                 goto exitPoint;
             }
             groupId = fileStat.st_gid;
@@ -356,14 +364,17 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
 
         if (chown (fileName, ownerId, groupId) < 0) {
             Tcl_AppendResult (interp, fileArgv [idx], ": ",
-                              Tcl_UnixError (interp), (char *) NULL);
+                              Tcl_PosixError (interp), (char *) NULL);
             goto exitPoint;
         }
 
-    } /* Modify each file */
+        Tcl_DStringFree (&tildeBuf);
+    }
 
     result = TCL_OK;
 exitPoint:
+    Tcl_DStringFree (&tildeBuf);
+
     ckfree ((char *) ownArgv);
     if (fileArgv != NULL)
         ckfree ((char *) fileArgv);
@@ -393,6 +404,9 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
     char         **fileArgv, *fileName;
     struct stat    fileStat;
     struct group  *groupPtr;
+    Tcl_DString    tildeBuf;
+
+    Tcl_DStringInit (&tildeBuf);
 
     if (argc < 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -414,20 +428,23 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx], &tildeBuf);
         if (fileName == NULL)
             goto exitPoint;
         
         if ((stat (fileName, &fileStat) != 0) ||
                 (chown (fileArgv[idx], fileStat.st_uid, groupId) < 0)) {
             Tcl_AppendResult (interp, fileArgv [idx], ": ",
-                              Tcl_UnixError (interp), (char *) NULL);
+                              Tcl_PosixError (interp), (char *) NULL);
             goto exitPoint;
         }
-    } /* Modify each file */
+
+        Tcl_DStringFree (&tildeBuf);
+    }
 
     result = TCL_OK;
 exitPoint:
+    Tcl_DStringFree (&tildeBuf);
     ckfree ((char *) fileArgv);
     return result;
 }

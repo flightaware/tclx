@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.3 1993/04/06 05:58:20 markd Exp markd $
+ * $Id: tclXselect.c,v 2.4 1993/04/07 05:55:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -128,16 +128,18 @@ ParseSelectFileList (interp, handleList, fileDescSetPtr, fileDescListPtr,
     fileDescList = (FILE **) ckalloc (sizeof (FILE *) * handleCnt);
 
     for (idx = 0; idx < handleCnt; idx++) {
-        OpenFile *filePtr;
-        int       fileId;
+        FILE *filePtr;
+        int   fileId;
 
-        if (TclGetOpenFile (interp, handleArgv [idx], &filePtr) != TCL_OK) {
+        if (Tcl_GetOpenFile (interp, handleArgv [idx],
+                             FALSE, FALSE,  /* No checking */
+                             &filePtr) != TCL_OK) {
             ckfree ((char *) handleArgv);
             ckfree ((char *) fileDescList);
             return -1;
         }
-        fileId = fileno (filePtr->f);
-        fileDescList [idx] = filePtr->f;
+        fileId = fileno (filePtr);
+        fileDescList [idx] = filePtr;
 
         FD_SET (fileId, fileDescSetPtr);
         if (fileId > *maxFileIdPtr)
@@ -360,7 +362,7 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
     numSelected = select (maxFileId + 1, &readFdSet, &writeFdSet, &exceptFdSet,
                           timeoutRecPtr);
     if (numSelected < 0) {
-        interp->result = Tcl_UnixError (interp);
+        interp->result = Tcl_PosixError (interp);
         goto exitPoint;
     }
 

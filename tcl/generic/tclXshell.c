@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.7 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.8 1993/06/06 15:05:35 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -240,16 +240,14 @@ GetInitFile (initFileDesc, dirPathPtr, filePathPtr)
      */
     if ((initFileDesc->envVar != NULL) &&
         ((envPath = getenv (initFileDesc->envVar)) != NULL)) {
-        pathLen = strlen (envPath) + 1;
-            
-        *dirPathPtr = ckalloc (pathLen);
-        strcpy (*dirPathPtr, envPath);
+
+        *dirPathPtr = ckstrdup (envPath);
+
         if (initFileDesc->initFile != NULL) {
             strPtr = strrchr (*dirPathPtr, '/');
             if (strPtr != NULL)
                 *strPtr = '\0';
-            *filePathPtr = ckalloc (strlen (envPath) + 1);
-            strcpy (*filePathPtr, envPath);
+            *filePathPtr = ckstrdup (envPath);
         } else {
             *filePathPtr = NULL;
         }
@@ -344,17 +342,17 @@ InitFilesSetup (interp, initFiles)
     initFilePaths [numInitFiles] = NULL;
 
     /*
-     * Set the TCLPATH variable.  It can be overriden by an environment
-     * variable.
+     * Set the auto_path variable.  It can be overriden by an environment
+     * variable.???
      */
     if ((strPtr = getenv ("TCLPATH")) != NULL) {
-        if (Tcl_SetVar (interp, "TCLPATH", strPtr,
+        if (Tcl_SetVar (interp, "auto_path", strPtr,
                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL) {
             return NULL;
         }
     } else {
         strPtr = Tcl_Merge (numInitDirs, initDirPaths);
-        if (Tcl_SetVar (interp, "TCLPATH", strPtr,
+        if (Tcl_SetVar (interp, "auto_path", strPtr,
                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL) {
             return NULL;
         }
@@ -653,7 +651,7 @@ Tcl_Startup (interp, options, argc, argv, initFiles)
         if (result != TCL_OK)
             goto errorAbort;
     } else {
-        Tcl_CommandLoop (interp, stdin, stdout, tclShellCmdEvalProc, 0);
+        Tcl_CommandLoop (interp, stdin, stdout, 0);
     }
 
     Tcl_ResetResult (interp);

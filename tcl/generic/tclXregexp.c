@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 2.1 1993/02/13 02:48:16 markd Exp markd $
+ * $Id: tclXregexp.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -481,7 +481,7 @@ Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower)
     /*
      * Give it a go with full regular expressions
      */
-    result = regexec (regExpPtr->progPtr, matchStr);
+    result = regexec (regExpPtr->progPtr, matchStr, matchStr);
 
     /*
      * Clean up and return status here.
