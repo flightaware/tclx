@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.10 1992/10/13 06:39:49 markd Exp markd $
+# $Id: Config.mk,v 2.0 1992/10/16 04:54:43 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -310,7 +310,6 @@ TK_MAN_FUNC_SECTION=3
 #      functions that are not available on this particular version of Unix or 
 #      do not function correctly.  The following are available:
 #         o strftime
-#         o strtoul
 #
 #..............................................................................
 
