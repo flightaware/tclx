@@ -88,9 +88,6 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           If "YES", build and link with shared libraries if "NO", no shared
           libraries will be compiled.  Default is "NO".
 
-        o -with-tcl=DIR - Specify location of Tcl build directory.  If not
-           specified ../tcl7.6 is assumed.
- 
         o --with-tk=YES|NO
           If "YES", compile Tk specific code and wishx, if "NO", no Tk related
           code will be compiled.  Default is "YES".

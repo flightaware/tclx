@@ -4,7 +4,7 @@
 
 global errorInfo
 
-foreach i [concat [lsort [glob *.test]] [lsort [glob compat/*.test]]] {
+foreach i [concat [lsort [glob *.test]] [lsort [glob -nocomplain compat/*.test]]] {
     puts $i
     if [catch {source $i} msg] {
         puts [replicate "=" 75]

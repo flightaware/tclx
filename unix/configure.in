@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.3 1996/10/04 04:25:26 markd Exp $
+dnl $Id: configure.in,v 7.4 1996/10/18 02:48:16 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.3 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.4 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -74,19 +74,17 @@ if test ! -d ../tk/unix ; then
 fi
 
 #------------------------------------------------------------------------------
-# See if there was a command-line option for where Tcl is;  if	not, assume
-# that its top-level directory is a sibling of ours.
+# Check command line looking for the --with-arch= option.
 #------------------------------------------------------------------------------
 
-AC_ARG_WITH(tcl, [  --with-tcl=DIR          use Tcl 7.5 binaries from DIR],
-	TCL_BIN_DIR=$withval, TCL_BIN_DIR=`echo "${TCL_CONFIG}" |sed -e "s|/tclConfig.sh||"`)
-if test ! -d $TCL_BIN_DIR; then
-    AC_MSG_ERROR(Tcl directory $TCL_BIN_DIR doesn't exist)
-fi
-TCL_SRC_DIR=`MAKELEVEL=0; cd $TCL_BIN_DIR; make topDirName`
-
-AC_SUBST(TCL_BIN_DIR)
-AC_SUBST(TCL_SRC_DIR)
+AC_ARG_WITH(arch,
+    [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
+                      and lib directory names],
+    [TCLX_ARCH=.$withval
+     AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
+    ],
+    [AC_MSG_RESULT("No architecture suffix will be used")])
+AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
 # Check command line looking for the --with-tk=YES/NO option.
@@ -111,19 +109,6 @@ case "$TKX_BUILD" in
         ;;
 esac
 AC_SUBST(TKX_BUILD)
-
-#------------------------------------------------------------------------------
-# Check command line looking for the --with-arch= option.
-#------------------------------------------------------------------------------
-
-AC_ARG_WITH(arch,
-    [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
-                      and lib directory names],
-    [TCLX_ARCH=.$withval
-     AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
-    ],
-    [AC_MSG_RESULT("No architecture suffix will be used")])
-AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
 # We need the real value of prefix and exec-prefix now, not when the generated
@@ -183,6 +168,7 @@ echo "all:" >>confmakefile
 echo '	@echo TCL_CONFIG=\"${TCL_CONFIG}\"' >>confmakefile
 echo '	@echo TK_CONFIG=\"${TK_CONFIG}\"' >>confmakefile
 echo '	@echo TCLX_INST_LIB=\"${TCLX_INST_LIB}\"' >>confmakefile
+echo '	@echo TKX_INST_LIB=\"${TKX_INST_LIB}\"' >>confmakefile
 echo ".NO_PARALLEL: all" >>confmakefile
 
 eval `${MAKE-make} -f confmakefile`
@@ -199,6 +185,7 @@ fi
 AC_MSG_RESULT(ok)
 
 AC_SUBST(TCLX_INST_LIB)
+AC_SUBST(TKX_INST_LIB)
 
 # Get defines from tclConfig.sh
 . $TCL_CONFIG
@@ -299,7 +286,7 @@ AC_PROG_RANLIB
 
 #------------------------------------------------------------------------------
 # Determine the names of the shared libraries to build.
-#
+#------------------------------------------------------------------------------
 
 TCLX_STLIB_NAME=libtclx.a
 TKX_STLIB_NAME=libtkx.a
@@ -624,5 +611,5 @@ fi
 
 AC_SUBST(TCLX_LIBS)
 
-AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxConfig.sh ../tk/unix/tkxConfig.sh ../tcl/unix/pkgIndex.proto)
+AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxConfig.sh ../tk/unix/tkxConfig.sh ../tcl/unix/pkgIndex.tcl ../tk/unix/pkgIndex.tcl)
 

@@ -1215,7 +1215,6 @@
  3 Oct 96:
   o Integrated support for building both shared and static libraries at the
     same time from Jan Nijtmans' <nijtmans@nici.kun.nl> TclX plus patch.
-  o Added --with-tcl option to configure from the plus patch.
   o Deprecated the mkdir, rmdir, unlink and frename commands in favor of the
     new file subcommands. Compatbility with these commands is still supported
     for old scripts via procedures in the TclX library.

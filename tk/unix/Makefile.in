@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.3 1996/09/25 01:56:57 markd Exp $
+# $Id: Makefile.in,v 7.4 1996/10/04 04:25:23 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -233,11 +233,12 @@ install-exec:
 	fi
 	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
 	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
+	${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TKX_INST_LIB}/tkX${TKX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 clean:
-	-rm -f tkXAppInit.o ${OBJS} ${TEST_OBJS} wishx libtkx.a tkx.tcl
-	-rm -rf tclhelp help help.tmp SHLIB_YES SHLIB_NO
+	-rm -f tkXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} wishx libtkx.a
+	-rm -rf tkx.tcl tclhelp help help.tmp SHLIB_YES SHLIB_NO
 	-rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME}
 
 #------------------------------------------------------------------------------

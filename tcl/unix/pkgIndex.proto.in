@@ -1,7 +1,0 @@
-# Tcl package index file, version 1.0
-# 
-# Prototype pkgIndex.tcl file for TclX.  Either copy and rename this file
-# into the directory containing @TCLX_SHLIB_NAME@ or add the package
-# ifneeded command to an existing pkgIndex.tcl in that directory.
-
-package ifneeded Tclx @TCLX_VERSION@ "load $dir/@TCLX_SHLIB_NAME@"

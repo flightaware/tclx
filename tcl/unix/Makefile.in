@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.11 1996/09/17 22:29:02 markd Exp $
+# $Id: Makefile.in,v 7.12 1996/10/04 04:25:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -53,15 +53,24 @@ GENERIC_OBJS = \
     tclXunixOS.o     tclXoscmds.o     tclXunixDup.o
 
 GENERIC_SOBJS = \
-    tclXbsearch@SHOBJ_SUFFIX@    tclXchmod@SHOBJ_SUFFIX@      tclXcmdInit@SHOBJ_SUFFIX@    tclXcmdloop@SHOBJ_SUFFIX@  \
-    tclXdebug@SHOBJ_SUFFIX@      tclXdup@SHOBJ_SUFFIX@        tclXfcntl@SHOBJ_SUFFIX@      tclXfilecmds@SHOBJ_SUFFIX@ \
-    tclXfilescan@SHOBJ_SUFFIX@   tclXflock@SHOBJ_SUFFIX@      tclXfstat@SHOBJ_SUFFIX@      tclXgeneral@SHOBJ_SUFFIX@  \
-    tclXhandles@SHOBJ_SUFFIX@    tclXunixId@SHOBJ_SUFFIX@     tclXinit@SHOBJ_SUFFIX@       tclXkeylist@SHOBJ_SUFFIX@  \
-    tclXlib@SHOBJ_SUFFIX@        tclXlist@SHOBJ_SUFFIX@       tclXmath@SHOBJ_SUFFIX@       tclXmsgcat@SHOBJ_SUFFIX@   \
-    tclXlibInit@SHOBJ_SUFFIX@    tclXprocess@SHOBJ_SUFFIX@    tclXprofile@SHOBJ_SUFFIX@    tclXregexp@SHOBJ_SUFFIX@   \
-    tclXselect@SHOBJ_SUFFIX@     tclXunixSock@SHOBJ_SUFFIX@   tclXsignal@SHOBJ_SUFFIX@     tclXshell@SHOBJ_SUFFIX@    \
-    tclXstring@SHOBJ_SUFFIX@     tclXsocket@SHOBJ_SUFFIX@     tclXunixCmds@SHOBJ_SUFFIX@   tclXutil@SHOBJ_SUFFIX@     \
-    tclXunixOS@SHOBJ_SUFFIX@     tclXoscmds@SHOBJ_SUFFIX@     tclXunixDup@SHOBJ_SUFFIX@
+    tclXbsearch@SHOBJ_SUFFIX@    tclXchmod@SHOBJ_SUFFIX@    \
+    tclXcmdInit@SHOBJ_SUFFIX@    tclXcmdloop@SHOBJ_SUFFIX@  \
+    tclXdebug@SHOBJ_SUFFIX@      tclXdup@SHOBJ_SUFFIX@      \
+    tclXfcntl@SHOBJ_SUFFIX@      tclXfilecmds@SHOBJ_SUFFIX@ \
+    tclXfilescan@SHOBJ_SUFFIX@   tclXflock@SHOBJ_SUFFIX@    \
+    tclXfstat@SHOBJ_SUFFIX@      tclXgeneral@SHOBJ_SUFFIX@  \
+    tclXhandles@SHOBJ_SUFFIX@    tclXunixId@SHOBJ_SUFFIX@   \
+    tclXinit@SHOBJ_SUFFIX@       tclXkeylist@SHOBJ_SUFFIX@  \
+    tclXlib@SHOBJ_SUFFIX@        tclXlist@SHOBJ_SUFFIX@     \
+    tclXmath@SHOBJ_SUFFIX@       tclXmsgcat@SHOBJ_SUFFIX@   \
+    tclXlibInit@SHOBJ_SUFFIX@    tclXprocess@SHOBJ_SUFFIX@  \
+    tclXprofile@SHOBJ_SUFFIX@    tclXregexp@SHOBJ_SUFFIX@   \
+    tclXselect@SHOBJ_SUFFIX@     tclXunixSock@SHOBJ_SUFFIX@ \
+    tclXsignal@SHOBJ_SUFFIX@     tclXshell@SHOBJ_SUFFIX@    \
+    tclXstring@SHOBJ_SUFFIX@     tclXsocket@SHOBJ_SUFFIX@   \
+    tclXunixCmds@SHOBJ_SUFFIX@   tclXutil@SHOBJ_SUFFIX@     \
+    tclXunixOS@SHOBJ_SUFFIX@     tclXoscmds@SHOBJ_SUFFIX@   \
+    tclXunixDup@SHOBJ_SUFFIX@
 
 COMPAT_OBJS = @LIBOBJS@
 
@@ -581,7 +590,7 @@ install: install-runtime install-exec
 	    ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_RUNTIME}/help
 
-install-runtime: inst_pkgindex_@BUILD_SHARED@
+install-runtime:
 	${INSTCOPY} tclx.tcl tcl.tlib tcl.tndx buildidx.tcl loadouster.tcl \
 	    ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 
@@ -597,21 +606,12 @@ install-exec:
 		   ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_BASE_NAME} ;\
 	fi
 	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
-
-inst_pkgindex_YES: 
-	echo "Installing pkgIndex.tcl"
-	PATH=$(TCL_BIN_DIR):${PATH}; export PATH; \
-	LD_LIBRARY_PATH=${TCL_BIN_DIR}:${LD_LIBRARY_PATH}; \
-	export LD_LIBRARY_PATH; \
-	TCL_LIBRARY=@TCL_SRC_DIR@/library; export TCL_LIBRARY; \
-	../../unix/tools/pkgInstall.tcl ${INSTALL_ROOT}${TCLX_INST_LIB}
-
-inst_pkgindex_NO:
+	${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TCLX_INST_LIB}/tclX${TCLX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclXAppInit.o ${OBJS} libtclx.a tcl checkup.done
+	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} libtclx.a tcl checkup.done
 	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
 	-rm -f SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_BASE_NAME}
 	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
@@ -620,7 +620,7 @@ clean:
 # Restore to the distributed state.
 
 distclean: clean
-	rm -f Makefile tclxConfig.sh pkgIndex.proto
+	rm -f Makefile tclxConfig.sh pkgIndex.tcl
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
 .NO_PARALLEL:

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 7.1 1996/08/09 07:06:37 markd Exp $
+# $Id: Config.mk,v 7.2 1996/09/04 17:15:13 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -51,26 +51,26 @@
 
 #------------------------------------------------------------------------------
 # The Tcl source distribution directory, the path to tclConfig.sh, the Tcl
-# library (libtcl7.4.a) and the flags neccessary to link with the Tcl shared
-# library (libtcl7.4.so).  Note, access is required to tclInt.h which is not
+# library (libtcl7.6.a) and the flags neccessary to link with the Tcl shared
+# library (libtcl7.6.so).  Note, access is required to tclInt.h which is not
 # installed by Tcl.  If you want to use the installed Tcl library, set TCL_LIB
 # to ${TCL_LIB_SPEC}.
 # 
 
-TCL_SRC=${srcbasedir}/../tcl7.6b1
-TCL_BUILD=${bldbasedir}/../tcl7.6b1
+TCL_SRC=${srcbasedir}/../tcl7.6
+TCL_BUILD=${bldbasedir}/../tcl7.6
 TCL_CONFIG=${TCL_BUILD}/unix/tclConfig.sh
 TCL_LIB=${TCL_BUILD_LIB_SPEC}
 
 #------------------------------------------------------------------------------
 # Unless configure is going to be run with --with-tk=NO, these defines must be
 # set.  They define the directory containing the Tk source distribution, the
-# path to tkConfig.sh, the path to the Tk library (libtk4.1.a) and the flags
-# neccessary to link with the Tk shared library (libtk4.1.so).  If you want to
+# path to tkConfig.sh, the path to the Tk library (libtk4.2.a) and the flags
+# neccessary to link with the Tk shared library (libtk4.2.so).  If you want to
 # use the installed Tk library, set TK_LIB to ${TK_LIB_SPEC}.
 
-TK_SRC=${srcbasedir}/../tk4.2b1
-TK_BUILD=${bldbasedir}/../tk4.2b1
+TK_SRC=${srcbasedir}/../tk4.2
+TK_BUILD=${bldbasedir}/../tk4.2
 TK_CONFIG=${TK_BUILD}/unix/tkConfig.sh
 TK_LIB=${TK_BUILD_LIB_SPEC}
 
@@ -130,8 +130,8 @@ TKX_EXEC_PREFIX="${exec_prefix}"
 # The TclX and TkX runtime directories.  This is where the shared runtime and
 # help files are installed.
 
-TCLX_INST_RUNTIME=${TCLX_PREFIX}/lib/tclX/${TCLX_FULL_VERSION}
-TKX_INST_RUNTIME=${TKX_PREFIX}/lib/tkX/${TKX_FULL_VERSION}
+TCLX_INST_RUNTIME=${TCLX_PREFIX}/lib/tclX${TCLX_FULL_VERSION}
+TKX_INST_RUNTIME=${TKX_PREFIX}/lib/tkX${TKX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 # The directories to install the executables in.

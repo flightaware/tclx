@@ -1,8 +1,8 @@
                            Extended Tcl (TclX) 7.6.0
                            =========================
-Beta 1 release:  
-   This is an beta 1 release for TclX 7.6.0.  It corresponds to the Tcl 7.6b1
-and Tk 4.1b1 releases.  It also includes partial support for Windows 95/NT
+Beta 2 release:  
+   This is an beta 2 release for TclX 7.6.0.  It corresponds to the Tcl 7.6
+and Tk 4.2 releases.  It also includes partial support for Windows 95/NT
 functionality.  See win/INSTALL for details and restrictions.
 
 INTRODUCTION
@@ -128,9 +128,12 @@ with other extensions:
 See the TclX_Init.3 manual page for more details.  The pkg_mkIndex does not
 generate a pkgIndex.tcl file that works with TclX.  See TclX_Init.3 for
 instructions on how to setup a pkgIndex.tcl file for use with the
-package require command.  A prototype pkgIndex.tcl file is installed into the
-TclX run time directory.  There is no need to dynamically load libtkx, its
+package require command.   There is no need to dynamically load libtkx, its
 only there to support wishx and applications that want wishx's signal handling.
+
+TclX will build and install a pkgIndex.tcl that will be automatically found
+by Tcl if TclX is installed in the same location.
+
 
 SUPPORT FOR EXTENDED TCL
 ========================
