@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.15 2000/07/11 04:42:05 welch Exp $
+ * $Id: tkXshell.c,v 8.16 2000/08/04 05:54:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -31,7 +31,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkXshell.c,v 8.15 2000/07/11 04:42:05 welch Exp $
+ * RCS: @(#) $Id: tkXshell.c,v 8.16 2000/08/04 05:54:37 markd Exp $
  */
 
 /*
@@ -190,12 +190,16 @@ Tk_MainEx(argc, argv, appInitProc, interp)
     fileName = NULL;
     argi = 1;
     while ((argi < argc) && (argv[argi][0] == '-')) {
-        argi++;
         if (STREQU(argv[argi], "--")) {
+	    /*
+	     * Fix for #230194.
+	     */
+	    argi ++;
             break; /* end of options */
         } else if (!STREQU(argv[argi], "-sync")) {
-            argi++; /* takes an argument */
+            argi++; /* Option is not "-sync", takes an argument */
         }
+	argi ++;
     }
     /* Parse out file name, if supplied. */
     if (argi < argc) {
@@ -210,7 +214,10 @@ Tk_MainEx(argc, argv, appInitProc, interp)
         while (argi < argc) {
             argv[i++] = argv[argi++];
         }
-        argc = i+1;
+	/*
+	 * Fix for #230194.
+	 */
+        argc = i;
     }
 #else
     /*
