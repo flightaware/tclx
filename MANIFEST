@@ -128,9 +128,9 @@
 ./tcl/help/tcl/filescan/scancontext
 ./tcl/help/tcl/filescan/scanfile
 ./tcl/help/tcl/filescan/scanmatch
-./tcl/help/tcl/internation/catclose
-./tcl/help/tcl/internation/catgets
-./tcl/help/tcl/internation/catopen
+./tcl/help/tcl/intl/catclose
+./tcl/help/tcl/intl/catgets
+./tcl/help/tcl/intl/catopen
 ./tcl/help/tcl/intl/encoding
 ./tcl/help/tcl/intl/msgcat
 ./tcl/help/tcl/intro/keyedlists

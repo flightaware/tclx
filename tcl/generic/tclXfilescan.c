@@ -461,8 +461,8 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
 
     newmatch = (matchDef_t *) ckalloc(sizeof (matchDef_t));
 
-    newmatch->regExp = (Tcl_RegExp )TclRegCompObj(interp, objv[firstArg + 1],
-                                                  regExpFlags);
+    newmatch->regExp = (Tcl_RegExp)
+        Tcl_GetRegExpFromObj(interp, objv[firstArg + 1], regExpFlags);
     if (newmatch->regExp == NULL) {
         ckfree ((char *) newmatch);
 	return TCL_ERROR;
@@ -602,8 +602,8 @@ SetMatchInfoVar (interp, scanData)
 
         sprintf (key, "submatch%d", idx);
         Tcl_DStringSetLength(&valueBuf, 0);
-        value = TclUniCharToUtfDString(scanData->uniLine + start, end - start,
-                                       &valueBuf);
+        value = Tcl_UniCharToUtfDString(scanData->uniLine + start, end - start,
+                                        &valueBuf);
         valueObjPtr = Tcl_NewStringObj(value, (end - start));
 
         if (Tcl_SetVar2Ex(interp, MATCHINFO, key, valueObjPtr,
@@ -678,9 +678,9 @@ ScanFile (interp, contextPtr, channel)
 
         /* Convert to UTF to UniCode */
         Tcl_DStringSetLength (&uniLineBuf, 0);
-        data.uniLine =
-            TclUtfToUniCharDString(Tcl_DStringValue(&lineBuf), Tcl_DStringLength(&lineBuf),
-                                   &uniLineBuf);
+        data.uniLine = Tcl_UtfToUniCharDString(Tcl_DStringValue(&lineBuf),
+                                               Tcl_DStringLength(&lineBuf),
+                                               &uniLineBuf);
         data.uniLineLen = Tcl_DStringLength(&uniLineBuf) / sizeof(Tcl_UniChar);
 
         matchedAtLeastOne = FALSE;
