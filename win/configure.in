@@ -2,14 +2,14 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.1 1999/06/23 00:39:13 surles Exp $
+# RCS: @(#) $Id: configure.in,v 1.1 1999/06/26 00:18:14 surles Exp $
 
 AC_INIT(../tcl/generic/tclExtend.h)
 
-TCLX_VERSION=8.1.2
+TCLX_VERSION=8.1.1
 TCLX_MAJOR_VERSION=8
 TCLX_MINOR_VERSION=1
-TCLX_PATCH_LEVEL=.2
+TCLX_PATCH_LEVEL=.1
 VER=$TCLX_MAJOR_VERSION$TCLX_MINOR_VERSION
 
 #--------------------------------------------------------------------

@@ -1426,3 +1426,10 @@
   o Defined TclX_MainEx to take an interp as an argument.  TclX_Main is
     now a macro that calls TclX_MainEx.  When passing the interp argument,
     Tcl_CreateInterp() is called.  This is done so TclX can use stubs.
+-------------------------------------------------------------------------------
+25 Jun 99:
+  o TclX version numbering and library naming change.  The third number is
+    now the patch level.
+===============================================================================
+25 Jun 99: Released TclX 8.1.1
+===============================================================================

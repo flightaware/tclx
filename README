@@ -1,4 +1,4 @@
-                          Extended Tcl (TclX) 8.1.0
+                          Extended Tcl (TclX) 8.1.1
                           =========================
 
 INTRODUCTION
@@ -11,17 +11,16 @@ programming tasks and large application development.  TclX provides additional
 interfaces to the operating system, and adds many new programming constructs,
 text manipulation tools, and debugging tools.
 
-    TclX is upwardly compatible with Tcl 8.1.  You take the Extended Tcl 
-package, add it to Tcl 8.1, and from that you get Extended Tcl.  (Tcl 
-is not included in this distribution; please obtain it from ftp.smli.com
-or ftp.neosoft.com).
+    TclX is upwardly compatible with Tcl.  You take the Extended Tcl 
+package, add it to Tcl, and from that you get Extended Tcl.  (Tcl 
+is not included in this distribution; please obtain it from ftp.scriptics.com).
 
-   Support is also included for building a Tk 8.1 wish shell (wishx)
+   Support is also included for building a Tk wish shell (wishx)
 with the Extended Tcl command set and signal handling.
 
    Extended Tcl runs on most Unix-like systems and Windows 95/NT.
 
-   While this TclX distribution is tested with Tcl 8.1 and Tk 8.1, it will
+   While this TclX distribution is tested with Tcl 8.1.1 and Tk 8.1.1, it will
 probably work with newer versions of 8.1.*-series Tcl & Tk with little or no 
 changes.  Please check the Extended Tcl homepage at www.neosoft.com/tclx
 for the latest release and information.
@@ -40,13 +39,9 @@ BUILDING TCLX
    For instructions on how to build TclX on Unix and Unix-like systems,
 see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
 
-Tcl 8.1 and Tk 8.1 are required.
-
-CHANGES IN TCLX 8.1
+CHANGES IN TCLX 8.1.1
 =====================
-  o Compability with Tcl 8.1 and Tk 8.1
-  o Added support of UniCode characters in most commands.
-  o Use new Tcl regular expression facility.
+  o Library naming and version numbering changed to match Tcl's.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -109,15 +104,14 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX8.1.0/doc.  Start with the
+the extensions in the directory tclX8.1.1/doc.  Start with the
 TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
 ===========================
 
-    Extended Tcl takes its version number from the corresponding
-version of Tcl upon which it is based, with the addition of another
-decimal number.  This release is TclX 8.1.0.
+    Extended Tcl version numbering has been changed to track the 
+Tcl/Tk version numbering directly.
 
 LINKING APPLICATIONS AND EXTENSION WITH TCLX
 ============================================
@@ -161,7 +155,7 @@ WHERE TO GET IT
 
 Extended Tcl 8.1.0 can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/TclX/tclX8.1.0.ar.gz
+   ftp.neosoft.com:/pub/tcl/TclX/tclX8.1.1.tar.gz
 
 A contributed sources archive resides on ftp.neosoft.com.com.
 A Frequently Asked Questions (FAQ) document exists in this archive.

@@ -345,11 +345,11 @@
 ./tk/generic/tkXinitSA.c
 ./tk/generic/tkXshell.c
 ./tk/help/Tk.brf
+./tk/help/tcl/control/dde
 ./tk/help/tk/control/bell
 ./tk/help/tk/control/bind
 ./tk/help/tk/control/bindtags
 ./tk/help/tk/control/clipboard
-./tk/help/tk/control/dde
 ./tk/help/tk/control/destroy
 ./tk/help/tk/control/event
 ./tk/help/tk/control/focus
