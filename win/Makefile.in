@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.9 1999/10/12 06:45:57 wart Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.12 2000/07/05 22:36:49 davidg Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -184,7 +184,7 @@ SHLIB_CFLAGS	= @SHLIB_CFLAGS@
 SHLIB_SUFFIX	= @SHLIB_SUFFIX@
 VER		= @TCLX_MAJOR_VERSION@@TCLX_MINOR_VERSION@@TCLX_PATCH_LEVEL@
 DOTVER	        = @TCLX_MAJOR_VERSION@.@TCLX_MINOR_VERSION@.@TCLX_PATCH_LEVEL@
-LIBS		= @LIBS@ Wsock32.lib gdi32.lib comdlg32.lib
+LIBS		= @LIBS@ Wsock32.lib user32.lib advapi32.lib gdi32.lib comdlg32.lib
 RMDIR		= rm -rf
 MKDIR		= mkdir -p
 RM		= rm -f
@@ -211,7 +211,7 @@ CC_SWITCHES = ${CFLAGS} ${CFLAGS_WARNING} ${SHLIB_CFLAGS} \
 -I"${TK_XLIB_DIR_NATIVE}" -I"${TK_BITMAP_DIR_NATIVE}"  \
 ${AC_FLAGS}
 
-STUB_CC_SWITCHES = ${CC_SWITCHES} -DUSE_TCL_STUBS
+STUB_CC_SWITCHES = ${CC_SWITCHES}
 
 RUN_TCLX_SETUP	= PATH="$(bindir)"; export PATH; \
 		  TCL_LIBRARY="$(TCL_LIBRARY_DIR_NATIVE)"; export TCL_LIBRARY; \
@@ -339,20 +339,26 @@ doc:
 
 $(TCLXSH): $(TCLX_LIB_FILE) $(TCLXSH_OBJS) tcl.res
 	$(CC) $(CFLAGS) $(TCLXSH_OBJS) $(TCL_LIB_FILE) $(TCLX_LIB_FILE) \
+	@STUB_LIBS@ \
 	$(LIBS) tcl.res $(CC_EXENAME)
 
 $(TCLXTEST): $(TCLX_LIB_FILE) $(TCLXTEST_OBJS) tcl.res
 	$(CC) $(CFLAGS) $(TCLXTEST_OBJS) $(TCL_LIB_FILE) $(TCLX_LIB_FILE) \
+	@STUB_LIBS@ \
 	$(LIBS) tcl.res $(CC_EXENAME)
 
 $(WISHX): $(TKX_LIB_FILE) $(WISHX_OBJS) wishx.res
 	$(CC) $(CFLAGS) $(WISHX_OBJS) $(TKX_LIB_FILE) $(TCLX_LIB_FILE) \
-	$(TCL_LIB_FILE) $(TK_LIB_FILE) $(LIBS) wishx.res $(CC_EXENAME) \
+	$(TCL_LIB_FILE) $(TK_LIB_FILE) \
+	@STUB_LIBS@ \
+	$(LIBS) wishx.res $(CC_EXENAME) \
 	-link $(LDFLAGS_WINDOW)
 
 $(TKXTEST): $(TKX_LIB_FILE) $(TKXTEST_OBJS) wishx.res
 	$(CC) $(CFLAGS) $(TKXTEST_OBJS) $(TKX_LIB_FILE) $(TCLX_LIB_FILE) \
-	$(TCL_LIB_FILE) $(TK_LIB_FILE) $(LIBS) wishx.res $(CC_EXENAME)
+	$(TCL_LIB_FILE) $(TK_LIB_FILE) \
+	@STUB_LIBS@ \
+	$(LIBS) wishx.res $(CC_EXENAME)
 
 $(CAT32)${EXEEXT}: $(CAT32).${OBJEXT}
 	$(CC) $(CFLAGS) $(CAT32).${OBJEXT} $(CC_EXENAME) \
@@ -418,16 +424,16 @@ getopt.$(OBJEXT): getopt.c
 
 tkXinit.$(OBJEXT): tkXinit.c
 	$(CC) -c $(STUB_CC_SWITCHES) ${DEPARG} \
-	 -DUSE_TK_STUBS -DBUILD_tkx \
+	-DBUILD_tkx \
 	-DTKX_LIBRARY="\"$(TCLX_LIBRARY)\"" $(CC_OBJNAME)
 
 tkXshell.$(OBJEXT): tkXshell.c
 	$(CC) -c $(STUB_CC_SWITCHES) ${DEPARG} \
-	-DBUILD_tkx -DUSE_TK_STUBS $(CC_OBJNAME)
+	-DBUILD_tkx $(CC_OBJNAME)
 
 tkXwinUtil.$(OBJEXT): tkXwinUtil.c
 	$(CC) -c $(STUB_CC_SWITCHES) ${DEPARG} \
-	-DBUILD_tkx -DUSE_TK_STUBS $(CC_OBJNAME)
+	-DBUILD_tkx $(CC_OBJNAME)
 
 tkXAppInit.$(OBJEXT): tkXAppInit.c
 	$(CC) -c $(CC_SWITCHES) ${DEPARG} $(CC_OBJNAME)

@@ -13,31 +13,21 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 8.4 1999/03/31 06:37:54 markd Exp $
+ * $Id: tclXAppInit.c,v 8.5 1999/06/23 00:32:42 surles Exp $
  *-----------------------------------------------------------------------------
  */
+
+/*
+ * As a shell (i.e., the main program) we cannot be using the stubs table.
+ */
+#ifdef USE_TCL_STUBS
+#undef USE_TCL_STUBS
+#endif
 
 #include "tclExtend.h"
-
 
 /*-----------------------------------------------------------------------------
- * main --
- *
- * This is the main program for the application.
- *-----------------------------------------------------------------------------
- */
-int
-main (int    argc,
-      char **argv)
-{
-    TclX_Main (argc, argv, Tcl_AppInit);
-
-    return 0;                   /* Needed only to prevent compiler warning. */
-}
-
-
-/*-----------------------------------------------------------------------------
- * Tcl_AppInit --
+ * TclX_AppInit --
  *
  * This procedure performs application-specific initialization.  Most
  * applications, especially those that incorporate additional packages, will
@@ -49,7 +39,7 @@ main (int    argc,
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_AppInit (Tcl_Interp *interp)
+TclX_AppInit (Tcl_Interp *interp)
 {
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
@@ -74,4 +64,19 @@ Tcl_AppInit (Tcl_Interp *interp)
     return TCL_OK;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * main --
+ *
+ * This is the main program for the application.
+ *-----------------------------------------------------------------------------
+ */
+int
+main (int    argc,
+      char **argv)
+{
+    TclX_MainEx (argc, argv, TclX_AppInit, Tcl_CreateInterp());
+
+    return 0;                   /* Needed only to prevent compiler warning. */
+}
 

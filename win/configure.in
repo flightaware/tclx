@@ -2,7 +2,7 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.6 1999/07/09 23:13:14 redman Exp $
+# RCS: @(#) $Id: configure.in,v 1.7 1999/08/25 00:53:16 wart Exp $
 
 AC_INIT(../tcl/generic/tclExtend.h)
 
@@ -52,6 +52,14 @@ SC_ENABLE_THREADS
 #--------------------------------------------------------------------
 
 SC_ENABLE_SHARED
+if test x"${SHARED_BUILD}" = x1 ; then
+    AC_DEFINE(USE_TCL_STUBS)
+    AC_DEFINE(USE_TK_STUBS)
+    STUB_LIBS="\$(TK_STUB_LIB_FILE) \$(TCL_STUB_LIB_FILE)"
+else
+    STUB_LIBS=""
+fi
+AC_SUBST(STUB_LIBS)
 
 #--------------------------------------------------------------------
 # The statements below define a collection of compile flags.  This 

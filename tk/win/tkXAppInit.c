@@ -14,9 +14,20 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 8.7 1999/08/25 01:18:45 wart Exp $
+ * $Id: tkXAppInit.c,v 8.8 1999/09/21 20:13:42 surles Exp $
  *-----------------------------------------------------------------------------
  */
+
+/*
+ * As a main program, we cannot link against the stubs table.
+ */
+
+#ifdef USE_TCL_STUBS
+#undef USE_TCL_STUBS
+#endif
+#ifdef USE_TK_STUBS
+#undef USE_TK_STUBS
+#endif
 
 #include "tclExtend.h"
 #include "tk.h"

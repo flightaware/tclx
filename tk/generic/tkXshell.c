@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.13 2000/06/06 20:31:09 wart Exp $
+ * $Id: tkXshell.c,v 8.14 2000/06/14 07:48:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -31,7 +31,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkXshell.c,v 8.13 2000/06/06 20:31:09 wart Exp $
+ * RCS: @(#) $Id: tkXshell.c,v 8.14 2000/06/14 07:48:25 markd Exp $
  */
 
 /*
@@ -145,7 +145,7 @@ Tk_MainEx(argc, argv, appInitProc, interp)
     Tcl_Channel errChannel;
     int argi;
 #endif
-
+#ifdef USE_TCL_STUBS
     /*
      * Ensure that we are getting the matching version of Tcl.  This is
      * really only an issue when Tk is loaded dynamically.
@@ -154,6 +154,7 @@ Tk_MainEx(argc, argv, appInitProc, interp)
     if (Tcl_InitStubs(interp, TCL_VERSION, 1) == NULL) {
 	abort();
     }
+#endif
 #ifdef TKX_SHELL
     if (TclX_InitTclStubs(interp, TCLX_VERSION, 0) == NULL) {
 	abort();
