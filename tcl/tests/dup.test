@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 4.1 1995/01/01 19:47:38 markd Exp markd $
+# $Id: dup.test,v 4.2 1995/06/29 16:26:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -91,7 +91,8 @@ foreach line $data {
 }
 close $outFH
 
-# Test binding of open files to ids.
+# Test binding of open files to ids.  Solaris opens pipes RDWR (I don't know
+# why), so skip some tests if this is the case.
 
 pipe fromChild toParent
 pipe fromParent toChild
@@ -106,14 +107,16 @@ if {[set childPid [fork]] == 0} {
         set toParent [crange $toParent 4 end]
         set fromParent [crange $fromParent 4 end]
         set childProgram {}
-        append childProgram "set toParent \[dup $toParent\];"
-        append childProgram "set fromParent \[dup $fromParent\];"
-        append childProgram {catch {puts $fromParent arf} msg;}
-        append childProgram {puts $toParent "msg1: $msg";}
-        append childProgram {flush $toParent;}
-        append childProgram {catch {gets $toParent} msg;}
-        append childProgram {puts $toParent "msg2: $msg";}
-        append childProgram {flush $toParent;}
+        append childProgram "set toParent \[dup $toParent\]" \n
+        append childProgram "set fromParent \[dup $fromParent\]" \n
+        append childProgram {if ![fcntl $fromParent RDWR] } "{\n"
+        append childProgram {    catch {puts $fromParent arf} msg} \n
+        append childProgram {    puts $toParent "msg1: $msg"} \n
+        append childProgram {    flush $toParent} \n
+        append childProgram {    catch {gets $toParent} msg} \n
+        append childProgram {    puts $toParent "msg2: $msg"} \n
+        append childProgram {    flush $toParent} \n
+        append childProgram "}\n"
         append childProgram {while {[gets $fromParent msg] >= 0} {
             puts $toParent "got: $msg"; flush $toParent}}
         execl $TCL_PROGRAM [list -qc $childProgram]
@@ -124,23 +127,26 @@ if {[set childPid [fork]] == 0} {
 close $toParent
 close $fromParent
 
-Test dup-2.1 {dup tests} {
-    set msg [gets $fromChild]
-    if [regexp {^msg1: "file.*" wasn't opened for writing} $msg] {
-        list OK
-    } else {
-        list $msg
-    }
-} 0 {OK}
+if ![fcntl $toChild RDWR] {
 
-Test dup-2.2 {dup tests} {
-    set msg [gets $fromChild]
-    if [regexp {^msg2: "file.*" wasn't opened for reading} $msg] {
-        list OK
-    } else {
-        list $msg
-    }
-} 0 {OK}
+    Test dup-2.1 {dup tests} {
+        set msg [gets $fromChild]
+        if [regexp {^msg1: "file.*" wasn't opened for writing} $msg] {
+            list OK
+        } else {
+            list $msg
+        }
+    } 0 {OK}
+
+    Test dup-2.2 {dup tests} {
+        set msg [gets $fromChild]
+        if [regexp {^msg2: "file.*" wasn't opened for reading} $msg] {
+            list OK
+        } else {
+            list $msg
+        }
+    } 0 {OK}
+}
 
 Test dup-2.2 {dup tests} {
     puts $toChild "test 2.2"
@@ -159,6 +165,11 @@ Test dup-2.4 {dup tests} {
     close $fromChild
     wait $childPid
 } 0 [list $childPid EXIT 0]
+
+Test dup-2.5 {dup tests} {
+   set stat [catch {dup 100}]
+   list $stat [lrange $errorCode 0 1]
+} 0 {1 {POSIX EBADF}}
 
 
 unlink -nocomplain {DUP.TMP DUP2.TMP INCMDS.TMP OUTPUT.TMP}
