@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.26 1993/09/17 04:21:00 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.27 1993/09/21 03:40:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -230,6 +230,12 @@ Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
                                char             *matchStrIn,
                                char             *matchStrLower,
                                Tcl_SubMatchInfo  subMatchInfo));
+
+
+extern int
+Tcl_GetTime _ANSI_ARGS_((Tcl_Interp *interp,
+                         CONST char *string,
+                         time_t     *timePtr));
 
 extern int
 Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,

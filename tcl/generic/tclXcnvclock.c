@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 2.9 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 2.10 1993/08/19 16:02:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -128,10 +128,11 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
 	return TCL_ERROR;
     }
     if (argc == 4) {
-        if (Tcl_GetLong (interp, argv [3], &baseClock) != TCL_OK)
+        if (Tcl_GetTime (interp, argv [3], &baseClock) != TCL_OK)
             return TCL_ERROR;
-    } else
+    } else {
         time (&baseClock);
+    }
 
     if ((argc > 2) && (argv [2][0] != '\0')) {
         if (!STREQU (argv [2], "GMT")) {

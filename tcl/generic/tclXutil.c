@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.9 1993/08/19 16:08:37 markd Exp markd $
+ * $Id: tclXutil.c,v 2.10 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -319,7 +319,7 @@ Tcl_DStringGets (filePtr, dynStrPtr)
  *      Given a string, produce the corresponding long value.
  *
  * Results:
- *      The return value is normally TCL_OK;  in this case *intPtr
+ *      The return value is normally TCL_OK;  in this case *longPtr
  *      will be set to the integer value equivalent to string.  If
  *      string is improperly formed then TCL_ERROR is returned and
  *      an error message will be left in interp->result.
@@ -331,10 +331,9 @@ Tcl_DStringGets (filePtr, dynStrPtr)
  */
 int
 Tcl_GetLong(interp, string, longPtr)
-    Tcl_Interp *interp;         /* Interpreter to use for error reporting. */
-    CONST char *string;         /* String containing a (possibly signed)
-                                 * integer in a form acceptable to strtol. */
-    long       *longPtr;        /* Place to store converted result. */
+    Tcl_Interp *interp;
+    CONST char *string;
+    long       *longPtr;
 {
     char *end;
     long  i;
@@ -360,7 +359,7 @@ Tcl_GetLong(interp, string, longPtr)
  *      Given a string, produce the corresponding unsigned integer value.
  *
  * Results:
- *      The return value is normally TCL_OK;  in this case *intPtr
+ *      The return value is normally TCL_OK;  in this case *unsignedPtr
  *      will be set to the integer value equivalent to string.  If
  *      string is improperly formed then TCL_ERROR is returned and
  *      an error message will be left in interp->result.
@@ -372,10 +371,9 @@ Tcl_GetLong(interp, string, longPtr)
  */
 int
 Tcl_GetUnsigned(interp, string, unsignedPtr)
-    Tcl_Interp *interp;         /* Interpreter to use for error reporting. */
-    CONST char *string;         /* String containing a (possibly signed)
-                                 * integer in a form acceptable to strtoul. */
-    unsigned   *unsignedPtr;    /* Place to store converted result. */
+    Tcl_Interp *interp;
+    CONST char *string;
+    unsigned   *unsignedPtr;
 {
     char          *end;
     unsigned long  i;
@@ -402,6 +400,54 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
   badUnsigned:
     Tcl_AppendResult (interp, "expected unsigned integer but got \"", 
                       string, "\"", (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_GetTime --
+ *
+ *      Given a string, produce the corresponding time_t value.
+ *
+ * Results:
+ *      The return value is normally TCL_OK;  in this case *timepPtr
+ *      will be set to the integer value equivalent to string.  If
+ *      string is improperly formed then TCL_ERROR is returned and
+ *      an error message will be left in interp->result.
+ *
+ * Side effects:
+ *      None.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_GetTime(interp, string, timePtr)
+    Tcl_Interp *interp;
+    CONST char *string;
+    time_t     *timePtr;
+{
+    char   *end;
+    long   i;
+    time_t time;
+
+    i = strtol(string, &end, 0);
+    while ((*end != '\0') && ISSPACE(*end)) {
+        end++;
+    }
+    if ((end == string) || (*end != 0))
+        goto badTime;
+
+    time = (time_t) i;
+    if (time != i)
+        goto badTime;
+
+    *timePtr = time;
+    return TCL_OK;
+
+  badTime:
+    Tcl_AppendResult (interp, "integer time \"", string, "\" to large\"",
+                      (char *) NULL);
     return TCL_ERROR;
 }
 

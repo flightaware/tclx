@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.19 1993/09/16 05:37:54 markd Exp markd $
+# $Id: Makefile.in,v 2.20 1993/09/20 02:39:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -82,9 +82,9 @@ ${LIBTCL.A}: ${TCL_UCB_LIB}/libtcl.a
 	cp ${TCL_UCB_LIB}/libtcl.a ${LIBTCL.A}
 	${RANLIB} ${LIBTCL.A}
 
-${TCL.H}: ${TCL_UCB_LIB}/tcl.h
+${TCL.H}: ${TCL_UCB_SRC}/tcl.h
 	rm -f ${TCL.H}
-	cp ${TCL_UCB_LIB}/tcl.h ${TCL.H}
+	cp ${TCL_UCB_SRC}/tcl.h ${TCL.H}
 
 #------------------------------------------------------------------------------
 # Generate a wish shell {wishx} with Extended Tcl commands.
@@ -115,9 +115,9 @@ ${LIBTK.A}: ${TK_UCB_LIB}/libtk.a
 	cp ${TK_UCB_LIB}/libtk.a ${LIBTK.A}
 	${RANLIB} ${LIBTK.A}
 
-${TK.H}: ${TK_UCB_LIB}/tk.h
+${TK.H}: ${TK_UCB_SRC}/tk.h
 	rm -f ${TK.H}
-	cp ${TK_UCB_LIB}/tk.h ${TK.H}
+	cp ${TK_UCB_SRC}/tk.h ${TK.H}
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
@@ -174,7 +174,7 @@ ucbtests: all
 	@echo "***     Uncaught error in expr.test: unknown math function T1"
 	@echo "***************************************************************"
 	@echo ""
-	./runtcl -c "cd ${TCL_UCB_LIB}/tests;source ${srcbasedir}/tests/all"
+	./runtcl -c "cd ${TCL_UCB_SRC}/tests;source ${srcbasedir}/tests/all"
 
 extdtests: all
 	./runtcl -c "cd tests;source all"	
@@ -185,7 +185,7 @@ tktest: all
 	@echo "***     testmakexists"
 	@echo "***************************************************************"
 	@echo ""
-	cd tktests ; ../runwishx -f tktests.tcl -n wish ${TK_UCB_LIB}
+	cd tktests ; ../runwishx -f tktests.tcl -n wish ${TK_UCB_SRC}
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or

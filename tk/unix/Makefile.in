@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.19 1993/09/20 02:39:07 markd Exp markd $
+# $Id: Makefile.in,v 2.20 1993/09/21 03:40:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -105,8 +105,7 @@ TCL_PLUS: wishx++ ${TKXMAINPP.O}
 
 wishx++: tkXmain++.o made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
-	    -o ${WISHX} || (rm -f ${WISHX}; exit 1)
-	if ${DO_STRIPPING} ; then \
+	    -o wishx++ || (rm -f wishx++; exit 1)
 
 tkXmain++.o: tkXmain++.C
 	${CCPLUS} -c -I${CPLUSINCL} ${CC_FLAGS} tkXmain++.C

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 2.6 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXclock.c,v 2.7 1993/08/25 03:15:47 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -66,7 +66,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     int              useGMT = FALSE;
-    long             clockVal;
+    time_t           clockVal;
     char            *format;
     struct tm       *timeDataPtr;
     int              stat;
@@ -81,7 +81,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (Tcl_GetLong (interp, argv[1], &clockVal) != TCL_OK)
+    if (Tcl_GetTime (interp, argv[1], &clockVal) != TCL_OK)
         return TCL_ERROR;
     if ((argc == 4) && (argv [3][0] != '\0')) {
         if (!STREQU (argv [3], "GMT")) {
@@ -119,9 +119,9 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
 #endif
 
     if (useGMT)
-        timeDataPtr = gmtime ((time_t *) &clockVal);
+        timeDataPtr = gmtime (&clockVal);
     else    
-        timeDataPtr = localtime ((time_t *) &clockVal);
+        timeDataPtr = localtime (&clockVal);
 
     stat = strftime (interp->result, TCL_RESULT_SIZE, format, timeDataPtr);
 

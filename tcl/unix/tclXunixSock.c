@@ -23,6 +23,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#ifndef HAVE_BCOPY
+#    define bcopy(from, to, length)    memmove((to), (from), (length))
+#endif
+#ifndef HAVE_BZERO
+#    define bzero(to, length)          memset((to), '\0', (length))
+#endif
+
 extern int h_errno;
 
 
