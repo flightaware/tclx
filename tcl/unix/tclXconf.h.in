@@ -38,6 +38,9 @@
 /* Define if you have and need sys/select.h */
 #undef HAVE_SYS_SELECT_H
 
+/* Define if don't you have values.h */
+#undef NO_VALUES_H
+
 /* Define if your struct tm has tm_zone.  */
 #undef HAVE_TM_ZONE
 
