@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.7 1994/04/08 06:27:44 markd Exp markd $
+# $Id: Makefile.in,v 3.8 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -120,7 +120,7 @@ wishx++: tkXmain++.o made.tmp
 	    -o wishx++ || (rm -f wishx++; exit 1)
 
 tkXmain++.o: tkXmain++.C
-	${CCPLUS} -c -I${CPLUSINCL} ${CC_FLAGS} tkXmain++.C
+	${CCPLUS} -c ${CC_FLAGS} tkXmain++.C
 
 tkXmain++.C: tkXmain.c
 	rm -f tkXmain++.C
