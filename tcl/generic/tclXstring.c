@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.1 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXstring.c,v 2.2 1993/04/07 03:24:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,17 +46,18 @@ Tcl_CindexCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    long index;
+    long index, len;
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
                           " string indexExpr", (char *) NULL);
         return TCL_ERROR;
     }
-
-    if (Tcl_ExprLong (interp, argv[2], &index) != TCL_OK)
+    
+    len = strlen (argv [1]);
+    if (Tcl_RelativeExpr (interp, argv[2], len, &index) != TCL_OK)
         return TCL_ERROR;
-    if (index >= strlen (argv [1]))
+    if (index >= len)
         return TCL_OK;
 
     interp->result [0] = argv[1][index];
@@ -129,31 +130,28 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (Tcl_ExprLong (interp, argv[2], &first) != TCL_OK)
+    fullLen = strlen (argv [1]);
+
+    if (Tcl_RelativeExpr (interp, argv[2], fullLen, &first) != TCL_OK)
         return TCL_ERROR;
 
-    fullLen = strlen (argv [1]);
     if (first >= fullLen)
         return TCL_OK;
 
-    if (STREQU (argv[3], "end"))
-        subLen = fullLen - first;
-    else {
-        if (Tcl_ExprLong (interp, argv[3], &subLen) != TCL_OK)
-            return TCL_ERROR;
+    if (Tcl_RelativeExpr (interp, argv[3], fullLen, &subLen) != TCL_OK)
+        return TCL_ERROR;
         
-        if (isRange) {
-            if (subLen < first) {
-                Tcl_AppendResult (interp, "last is before first",
-                                  (char *) NULL);
-                return TCL_ERROR;
-            }
-            subLen = subLen - first +1;
+    if (isRange) {
+        if (subLen < first) {
+            Tcl_AppendResult (interp, "last is before first",
+                              (char *) NULL);
+            return TCL_ERROR;
         }
-
-        if (first + subLen > fullLen)
-            subLen = fullLen - first;
+        subLen = subLen - first +1;
     }
+
+    if (first + subLen > fullLen)
+        subLen = fullLen - first;
 
     strPtr = argv [1] + first;
 
@@ -163,7 +161,6 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
     strPtr [subLen] = holdChar;
 
     return TCL_OK;
-
 }
 
 /*

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.9 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.10 1993/07/12 05:26:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -139,6 +139,9 @@ extern char *tclXWrongArgs;
 /*
  * Prototypes for utility procedures.
  */
+extern void 
+Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp));
+
 int
 Tcl_DStringGets _ANSI_ARGS_((FILE         *filePtr,
                              Tcl_DString  *dynStrPtr));
@@ -152,6 +155,15 @@ Tcl_GetDate _ANSI_ARGS_((char   *p,
 OpenFile *
 Tcl_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
                                    char       *handle));
+
+extern void
+Tcl_OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
+                              int         topLevel));
+
+extern void
+Tcl_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
+                             int         intResult,
+                             char       *checkCmd));
 
 int
 Tcl_ProcessSignal _ANSI_ARGS_((Tcl_Interp *interp,
@@ -171,6 +183,13 @@ Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp  *interp,
                                regexp_pt    regExpPtr,
                                char        *matchStrIn,
                                char        *matchStrLower));
+
+int
+Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
+                              char        *cstringExpr,
+                              long         stringLen,
+                              long        *exprResultPtr));
+
 void
 Tcl_ResetSignals ();
 
@@ -234,18 +253,6 @@ Tcl_ConvertclockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 /*
  * from tclXcmdloop.c
  */
-extern void 
-Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp));
-
-extern void
-Tcl_OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
-                              int         topLevel));
-
-extern void
-Tcl_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
-                             int         intResult,
-                             char       *checkCmd));
-
 extern int 
 Tcl_CommandloopCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 

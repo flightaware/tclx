@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 2.0 1992/10/16 04:50:12 markd Rel markd $
+# $Id: string.test,v 2.1 1993/06/21 05:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -36,6 +36,26 @@ Test string-1.3 {cindex tests} {
 Test string-1.4 {cindex tests} {
     cindex ABCDEFG 7
 } 0 {}
+
+Test string-1.5 {cindex tests} {
+    cindex ABCDEFG end-2
+} 0 {E}
+
+Test string-1.6 {cindex tests} {
+    cindex ABCDEFG len-3
+} 0 {E}
+
+Test string-1.7 {cindex tests} {
+    cindex ABCDEFG lenx-3
+} 1 {syntax error in expression "7x-3"}
+
+Test string-1.8 {cindex tests} {
+    cindex ABCDEFG
+} 1 {wrong # args: cindex string indexExpr}
+
+Test string-1.9 {cindex tests} {
+    cindex ABCDEFG 1 10
+} 1 {wrong # args: cindex string indexExpr}
 
 # Test the 'clength' command.
 
@@ -74,6 +94,18 @@ Test string-3.5 {crange tests} {
     crange ABCD 4 1
 } 0 {}
 
+Test string-3.6 {crange tests} {
+    crange ABCD end-2 len-1
+} 0 {BCD}
+
+Test string-3.7 {crange tests} {
+    crange ABCD len-3 end-1
+} 0 {BC}
+
+Test string-3.8 {crange tests} {
+    crange ABCD lenx-3 end-1
+} 1 {syntax error in expression "4x-3"}
+
 # Test the 'replicate' command
 
 Test string-4.1 {replicate tests} {
@@ -111,18 +143,32 @@ Test string-5.5 {csubstr tests} {
     csubstr ABCD 4 1
 } 0 {}
 
-Test string-5.6 {translit tests} {
+Test string-5.6 {csubstr tests} {
+    csubstr ABCD 1 end-1
+} 0 {BC}
+
+Test string-5.7 {csubstr tests} {
+    csubstr ABCD len-2 end
+} 0 {CD}
+
+Test string-5.8 {csubstr tests} {
+    csubstr ABCD 0 len
+} 0 {ABCD}
+
+# Test the translit command.
+
+Test string-6.1 {translit tests} {
     set str "Captain Midnight Secret Decoder Ring"
     translit {A-MN-Za-mn-z} {N-ZA-Mn-za-m} $str
 } 0 {Pncgnva Zvqavtug Frperg Qrpbqre Evat}
 
-Test string-5.7 {translit tests} {
+Test string-6.2 {translit tests} {
     set str "Captain Midnight Secret Decoder Ring"
     set str2 [translit {A-MN-Za-mn-z} {N-ZA-Mn-za-m} $str]
     translit {A-MN-Za-mn-z} {N-ZA-Mn-za-m} $str2
 } 0 {Captain Midnight Secret Decoder Ring}
 
-Test string-5.8 {translit tests} {
+Test string-6.3 {translit tests} {
     translit
 } 1 {wrong # args: translit from to string}
 

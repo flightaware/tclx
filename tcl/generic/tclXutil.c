@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.4 1993/05/04 06:29:22 markd Exp markd $
+ * $Id: tclXutil.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -400,6 +400,59 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
     Tcl_AppendResult (interp, "expected unsigned integer but got \"", 
                       string, "\"", (char *) NULL);
     return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_RelativeExpr --
+ *
+ *    Evaluate an expression that may start with the magic words "end" or
+ * "len".  These strings are replaced with either the end offset or the
+ * length that is passed in.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o cstringExpr (I) - The expression to evaludate.
+ *   o stringLen (I) - The length of the string.
+ *   o exprResultPtr (O) - The result of the expression is returned here.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_RelativeExpr (interp, cstringExpr, stringLen, exprResultPtr)
+    Tcl_Interp  *interp;
+    char        *cstringExpr;
+    long         stringLen;
+    long        *exprResultPtr;
+{
+    
+    char *buf;
+    int   exprLen, result;
+    char  staticBuf [64];
+
+    if (!(STRNEQU (cstringExpr, "end", 3) ||
+          STRNEQU (cstringExpr, "len", 3))) {
+        return Tcl_ExprLong (interp, cstringExpr, exprResultPtr);
+    }
+
+    sprintf (staticBuf, "%ld",
+             stringLen - ((cstringExpr [0] == 'e') ? 1 : 0));
+    exprLen = strlen (staticBuf) + strlen (cstringExpr) - 2;
+
+    buf = staticBuf;
+    if (exprLen > sizeof (staticBuf)) {
+        buf = (char *) ckalloc (exprLen);
+        strcpy (buf, staticBuf);
+    }
+    strcat (buf, cstringExpr + 3);
+
+    result = Tcl_ExprLong (interp, buf, exprResultPtr);
+
+    if (buf != staticBuf)
+        ckfree (buf);
+    return result;
 }
 
 /*
