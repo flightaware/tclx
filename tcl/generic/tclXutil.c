@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.14 1997/07/04 20:24:05 markd Exp $
+ * $Id: tclXutil.c,v 8.15 1997/07/04 22:43:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,6 +42,82 @@ static char *ERRORCODE = "errorCode";
  * Used to return argument messages by most commands.
  */
 char *tclXWrongArgs = "wrong # args: ";
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_ObjGetVar2S --
+ *    Front-end to Tcl_ObjGetVar2 that takes strings for that name parts.
+ * FIX: Should be in base Tcl.
+ *-----------------------------------------------------------------------------
+ */
+Tcl_Obj *
+TclX_ObjGetVar2S (interp, part1Ptr, part2Ptr, flags)
+    Tcl_Interp *interp;
+    char *part1Ptr;
+    char *part2Ptr;
+    int flags;
+{
+    Tcl_Obj *part1ObjPtr;
+    Tcl_Obj *part2ObjPtr;
+    Tcl_Obj *varValuePtr;
+
+    part1ObjPtr = Tcl_NewStringObj (part1Ptr, -1);
+    Tcl_IncrRefCount (part1ObjPtr);
+    if (part2Ptr == NULL) {
+        part2ObjPtr = NULL;
+    } else {
+        part2ObjPtr = Tcl_NewStringObj (part2Ptr, -1);
+        Tcl_IncrRefCount (part2ObjPtr);
+    }
+    
+    varValuePtr = Tcl_ObjGetVar2 (interp, part1ObjPtr, part2ObjPtr, flags);
+
+    Tcl_DecrRefCount (part1ObjPtr);
+    if (part2ObjPtr != NULL) {
+        Tcl_DecrRefCount (part2ObjPtr);
+    }
+    
+    return varValuePtr;
+}
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_ObjSetVar2S --
+ *    Front-end to Tcl_ObjSetVar2 that takes strings for that name parts.
+ * FIX: Should be in base Tcl.
+ *-----------------------------------------------------------------------------
+ */
+Tcl_Obj *
+TclX_ObjSetVar2S (interp, part1Ptr, part2Ptr, newValuePtr, flags)
+    Tcl_Interp *interp;
+    char *part1Ptr;
+    char *part2Ptr;
+    Tcl_Obj *newValuePtr;
+    int flags;
+{
+    Tcl_Obj *part1ObjPtr;
+    Tcl_Obj *part2ObjPtr;
+    Tcl_Obj *varValuePtr;
+
+    part1ObjPtr = Tcl_NewStringObj (part1Ptr, -1);
+    Tcl_IncrRefCount (part1ObjPtr);
+    if (part2Ptr == NULL) {
+        part2ObjPtr = NULL;
+    } else {
+        part2ObjPtr = Tcl_NewStringObj (part2Ptr, -1);
+        Tcl_IncrRefCount (part2ObjPtr);
+    }
+    
+    varValuePtr = Tcl_ObjSetVar2 (interp, part1ObjPtr, part2ObjPtr,
+                                  newValuePtr, flags);
+
+    Tcl_DecrRefCount (part1ObjPtr);
+    if (part2ObjPtr != NULL) {
+        Tcl_DecrRefCount (part2ObjPtr);
+    }
+    
+    return varValuePtr;
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -119,6 +195,7 @@ TclX_StrToInt (string, base, intPtr)
  *
  * Returns:
  *      Returns 1 if the string was a valid number, 0 invalid.
+ * FIX: Delete when done with objs.
  *-----------------------------------------------------------------------------
  */
 int
@@ -165,6 +242,7 @@ TclX_StrToUnsigned (string, base, unsignedPtr)
  *
  * Returns:
  *      Returns 1 if the string was a valid number, 0 invalid.
+ * FIX: Delete when done with objs.
  *-----------------------------------------------------------------------------
  */
 int
@@ -226,6 +304,7 @@ TclX_StrToOffset (string, base, offsetPtr)
  *
  * Returns:
  *   A pointer to the down-shifted string
+ * FIX: Make object based.
  *-----------------------------------------------------------------------------
  */
 char *
@@ -262,6 +341,7 @@ TclX_DownShift (targetStr, sourceStr)
  * Returns:
  *   A pointer to the up-shifted string.
  * FIX: Get strcasecmp and replace this with it.
+ * FIX: Make object based.
  *-----------------------------------------------------------------------------
  */
 char *
@@ -487,7 +567,7 @@ TclX_GetOpenChannelObj (interp, handleObj, chanAccess)
  *   o interp - A pointer to the interpreter.
  * Returns:
  *   The Tcl result code from the handler.  TCL_ERROR is returned and
- * result unchanged if not handler is available.
+ * result unchanged if no handler is available.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -496,7 +576,7 @@ CallEvalErrorHandler (interp)
 {
     static char *ERROR_HANDLER = "tclx_errorHandler";
     Tcl_CmdInfo cmdInfo;
-    char *errorHandler;
+    Tcl_Obj *errorHandler;
     Tcl_Obj *command;
     int result;
 
@@ -504,21 +584,20 @@ CallEvalErrorHandler (interp)
     /*
      * Check if the tclx_errorHandler function exists.  For backwards
      * compatibility with TclX 7.4 we check to see if there is a variable
-     * by the same name holding the name of a procedrure.  Build up the command
+     * by the same name holding the name of a procedure.  Build up the command
      * based on what we found.  The variable functionality is deprectated and
-     * should be removed eventually. ????
+     * should be removed eventually. FIX: Delete.
      */
     if (!Tcl_GetCommandInfo (interp, ERROR_HANDLER, &cmdInfo)) {
-        errorHandler = Tcl_GetVar (interp, ERROR_HANDLER, TCL_GLOBAL_ONLY);
+        errorHandler = TclX_ObjGetVar2S (interp, ERROR_HANDLER, NULL,
+                                         TCL_GLOBAL_ONLY);
         if (errorHandler == NULL)
             return TCL_ERROR;  /* No handler specified */
     } else {
-        errorHandler = ERROR_HANDLER;
+        errorHandler = Tcl_NewStringObj (ERROR_HANDLER, -1);
     }
     command = Tcl_NewListObj (0, NULL);
-    Tcl_ListObjAppendElement (NULL, command,
-                              Tcl_NewStringObj (errorHandler,
-                                                -1));
+    Tcl_ListObjAppendElement (NULL, command, errorHandler);
     Tcl_ListObjAppendElement (NULL, command,
                               Tcl_GetObjResult (interp));
                               
@@ -1074,25 +1153,20 @@ TclX_SaveResultErrorInfo (interp)
     Tcl_Interp  *interp;
 {
     Tcl_Obj *saveObjv [3];
-    Tcl_Obj *nameObjPtr;
 
     saveObjv [0] = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
     
-    nameObjPtr = Tcl_NewStringObj (ERRORINFO, -1);
-    saveObjv [1] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL,
-                                   TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
+    saveObjv [1] = TclX_ObjGetVar2S (interp, ERRORINFO, NULL,
+                                     TCL_GLOBAL_ONLY);
     if (saveObjv [1] == NULL) {
         saveObjv [1] = Tcl_NewObj ();
     }
 
-    nameObjPtr = Tcl_NewStringObj (ERRORCODE, -1);
-    saveObjv [2] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL,
-                                   TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
+    saveObjv [2] = TclX_ObjGetVar2S (interp, ERRORCODE, NULL,
+                                     TCL_GLOBAL_ONLY);
     if (saveObjv [2] == NULL) {
         saveObjv [2] = Tcl_NewObj ();
     }
-
-    Tcl_DecrRefCount (nameObjPtr);
 
     return Tcl_NewListObj (3, saveObjv);
 }
@@ -1114,7 +1188,7 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
     Tcl_Interp *interp;
     Tcl_Obj    *saveObjPtr;
 {
-    Tcl_Obj **saveObjv, *nameObjPtr;
+    Tcl_Obj **saveObjv;
     int saveObjc;
 
     if ((Tcl_ListObjGetElements (NULL, saveObjPtr, &saveObjc,
@@ -1123,16 +1197,13 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
         panic ("invalid TclX result save object");
     }
 
-    nameObjPtr = Tcl_NewStringObj (ERRORINFO, -1);
-    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [1],
-                    TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
+    TclX_ObjSetVar2S (interp, ERRORINFO, NULL, saveObjv [1],
+                      TCL_GLOBAL_ONLY);
 
-    nameObjPtr = Tcl_NewStringObj (ERRORCODE, -1);
-    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [2], 
-                    TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
+    TclX_ObjSetVar2S (interp, ERRORCODE, NULL, saveObjv [2],
+                      TCL_GLOBAL_ONLY);
 
     Tcl_SetObjResult (interp, saveObjv [0]);
 
-    Tcl_DecrRefCount (nameObjPtr);
     Tcl_DecrRefCount (saveObjPtr);
 }

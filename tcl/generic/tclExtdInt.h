@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.15 1997/07/04 20:23:41 markd Exp $
+ * $Id: tclExtdInt.h,v 8.16 1997/07/04 22:43:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -217,6 +217,19 @@ typedef int
 /*
  * Prototypes for utility procedures.
  */
+Tcl_Obj *
+TclX_ObjGetVar2S _ANSI_ARGS_((Tcl_Interp *interp,
+                              char *part1Ptr,
+                              char *part2Ptr,
+                              int flags));
+
+extern Tcl_Obj *
+TclX_ObjSetVar2S _ANSI_ARGS_((Tcl_Interp *interp,
+                              char *part1Ptr,
+                              char *part2Ptr,
+                              Tcl_Obj *newValuePtr,
+                              int flags));
+
 extern int
 TclX_StrToOffset _ANSI_ARGS_((CONST char *string,
                               int         base,
