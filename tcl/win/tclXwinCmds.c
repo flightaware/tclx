@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 7.3 1996/08/04 07:30:02 markd Exp $
+ * $Id: tclXwinCmds.c,v 7.4 1996/08/06 07:15:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,20 +44,6 @@ Tcl_TimesCmd (ClientData  clientData,
               Tcl_Interp *interp,
               int         argc,
               char      **argv)
-{
-    return TclXNotAvailableError (interp, argv [0]);
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_DupCmd --
- *   Stub to return an error if the dup command is used on Windows.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_DupCmd (ClientData  clientData,
-            Tcl_Interp *interp,
-            int         argc,
-            char      **argv)
 {
     return TclXNotAvailableError (interp, argv [0]);
 }

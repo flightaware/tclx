@@ -308,6 +308,7 @@
 ./tcl/win/tcl.rc
 ./tcl/win/tclXAppInit.c
 ./tcl/win/tclXwinCmds.c
+./tcl/win/tclXwinDup.c
 ./tcl/win/tclXwinId.c
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 7.1 1996/07/26 05:56:19 markd Exp $
+# $Id: fstat.test,v 7.2 1996/08/02 10:59:53 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -23,7 +23,7 @@ set gorpFH [open gorp.file w]
 puts $gorpFH "Test string"
 close $gorpFH
 if ![cequal $tcl_platform(platform) windows] { ;# WIN32???
-chmod 0765 gorp.file
+    chmod 0765 gorp.file
 }
 
 set gorpFH [open gorp.file r+]
@@ -34,19 +34,29 @@ Test fstat-1.1 {array return} {
     lsort [array names stat]
 } 0 {atime ctime dev gid ino mode mtime nlink size tty type uid}
 
+if [cequal $tcl_platform(platform) windows] {
+    set expect {1 13 0 file 0}
+} else {
+    set expect {1 12 501 file 0}
+}
 Test fstat-1.2 {array return} {
     catch {unset stat}
     fstat $gorpFH stat stat
     list $stat(nlink) $stat(size) [expr $stat(mode)&0777] $stat(type) \
          $stat(tty)
-} 0 {1 12 501 file 0}
+} 0 $expect
 
+if [cequal $tcl_platform(platform) windows] {
+    set expect {0 0 13}
+} else {
+    set expect {1 1 12}
+}
 Test fstat-1.3 {array return} {
     catch {unset stat}
     fstat $gorpFH stat stat
     list [expr {[file mtime gorp.file] == $stat(mtime)}] \
 	    [expr {[file atime gorp.file] == $stat(atime)}] $stat(size)
-} 0 {1 1 12}
+} 0 $expect
 
 Test fstat-2.1 {keyed list returns} {
     catch {unset stat}
@@ -54,18 +64,28 @@ Test fstat-2.1 {keyed list returns} {
     lsort [keylkeys stat]
 } 0 {atime ctime dev gid ino mode mtime nlink size tty type uid}
 
+if [cequal $tcl_platform(platform) windows] {
+    set expect {1 13 0 file}
+} else {
+    set expect {1 12 501 file}
+}
 Test fstat-2.2 {keyed list returns} {
     set stat [fstat $gorpFH]
     list [keylget stat nlink] [keylget stat size] \
          [expr [keylget stat mode ]&0777] [keylget stat type]
-} 0 {1 12 501 file}
+} 0 $expect
 
+if [cequal $tcl_platform(platform) windows] {
+    set expect {0 0 13}  ;# Can't get times on open file.
+} else {
+    set expect {1 1 12}
+}
 Test fstat-2.3 {keyed list returns} {
     set stat [fstat $gorpFH]
     list [expr {[file mtime gorp.file] == [keylget stat mtime]}] \
 	    [expr {[file atime gorp.file] == [keylget stat atime]}] \
             [keylget stat size]
-} 0 {1 1 12}
+} 0 $expect
 
 
 Test fstat-3.1 {individual item returns} {
@@ -79,14 +99,30 @@ Test fstat-3.1 {individual item returns} {
     } else {
         error "Bad mtimes: old = $old, new = $new"
     }
-} 0 {OK}
+} 0 {OK} unixOnly
 
 Test fstat-3.2 {individual item returns} {
     set oldsize [fstat $gorpFH size]
     puts $gorpFH "More text"
     flush $gorpFH
     expr {[fstat $gorpFH size] - $oldsize}
-} 0 {8}
+} 0 8 unixOnly ;# PC doen't really write disk till end.
+
+if [cequal $tcl_platform(platform) windows] {
+    set expect 11
+} else {
+    set expect 10
+}
+Test fstat-3.3 {individual item returns} {
+    set fh [open fstat.tmp w]
+    set oldsize [fstat $fh size]
+    puts $fh "More text"
+    close $fh
+    set fh [open fstat.tmp]
+    set diff [expr {[fstat $fh size] - $oldsize}]
+    close $fh
+    set diff
+} 0 $expect
 
 Test fstat-4.1 {type return} {
     set fh [open .]
@@ -141,4 +177,4 @@ Test fstat-5.5 {error handling} {
 
 
 catch {close $gorpFH}
-unlink -nocomplain gorp.file
+unlink -nocomplain {gorp.file fstat.tmp}

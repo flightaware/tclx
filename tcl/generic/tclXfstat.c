@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 7.4 1996/08/19 07:42:53 markd Exp $
+ * $Id: tclXfstat.c,v 7.5 1996/08/20 03:49:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -33,10 +33,16 @@ static struct {
     {S_IFIFO,  "fifo"},
     {S_IFCHR,  "characterSpecial"},
     {S_IFDIR,  "directory"},
+#ifdef S_IFBLK
     {S_IFBLK,  "blockSpecial"},
+#endif
     {S_IFREG,  "file"},
+#ifdef S_IFLNK
     {S_IFLNK,  "link"},
+#endif
+#ifdef S_IFSOCK
     {S_IFSOCK, "socket"},
+#endif
     {0,        NULL}
 };
 

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.8 1996/08/09 04:12:33 markd Exp $
+ * $Id: tclXwinOS.c,v 7.9 1996/08/20 03:50:01 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -36,8 +36,8 @@ ChannelToHandle(Tcl_Channel channel,
                 int        *type);
 
 static SOCKET
-ChannelToSocket (Tcl_Interp  *interp
-                 Tcl_Channel  channel)
+ChannelToSocket (Tcl_Interp  *interp,
+                 Tcl_Channel  channel);
 
 static time_t
 ConvertToUnixTime (FILETIME fileTime);
@@ -184,11 +184,11 @@ ChannelToHandle (Tcl_Channel channel,
  *   o interp - An error is returned if the channel is not a socket.
  *   o channel - Channel to get file number for.
  * Returns:
- *   The socked number or -1 if an error occurs.
+ *   The socket number or INVALID_SOCKET if an error occurs.
  *-----------------------------------------------------------------------------
  */
 static SOCKET
-ChannelToSocket (Tcl_Interp  *interp
+ChannelToSocket (Tcl_Interp  *interp,
                  Tcl_Channel  channel)
 {
     Tcl_File file;
@@ -199,13 +199,13 @@ ChannelToSocket (Tcl_Interp  *interp
     if (file == NULL)
         file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
     sock = (SOCKET) Tcl_GetFileInfo (file, &type);
-    if (type != TCL_WIN_SOCK) {
+    if (type != TCL_WIN_SOCKET) {
         Tcl_AppendResult (interp, "channel \"", Tcl_GetChannelName (channel),
                           "\" is not a socket", (char *) NULL);
-        return -1;
-
+        return INVALID_SOCKET;
     }
-    return sock;}
+    return sock;
+}
 
 /*-----------------------------------------------------------------------------
  * ConvertToUnixTime --
@@ -652,6 +652,47 @@ TclXOSFstat (Tcl_Interp  *interp,
 }
 
 /*-----------------------------------------------------------------------------
+ * TclXOSSeakable --
+ *   System dependent interface to determine if a channel is seekable.
+ *
+ * Parameters:
+ *   o interp - Errors are returned in result.
+ *   o channel - Channel to get the status of.
+ *   o seekable - TRUE is return if seekable, FALSE if not.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSSeekable (interp, channel, seekablePtr)
+    Tcl_Interp  *interp;
+    Tcl_Channel  channel;
+    int         *seekablePtr;
+{
+    int type;
+
+    ChannelToHandle (channel, 0, &type);
+
+    switch (type) {
+      case TCL_WIN_PIPE:
+        *seekablePtr = FALSE;
+        break;
+      case TCL_WIN_FILE:
+        *seekablePtr = TRUE;
+        break;
+      case TCL_WIN_SOCKET:
+        *seekablePtr = FALSE;
+        break;
+      case TCL_WIN_CONSOLE:
+        *seekablePtr = FALSE;
+        break;
+      default:
+        panic ("TclXOSSeekable unknown file type %d", type);
+    }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
  * TclXOSWalkDir --
  *   System dependent interface to reading the contents of a directory.  The
  * specified directory is walked and a callback is called on each entry.
@@ -876,7 +917,7 @@ TclXOSGetFileSize (Tcl_Channel  channel,
  */
 int
 TclXOSftruncate (Tcl_Interp  *interp,
-                 Tcl_channel  channel,
+                 Tcl_Channel  channel,
                  off_t        newSize,
                  char        *funcName)
 {
@@ -986,7 +1027,7 @@ TclXOSgetpeername (Tcl_Interp *interp,
     SOCKET sock;
 
     sock = ChannelToSocket (interp, channel);
-    if (sock == -1)
+    if (sock == INVALID_SOCKET)
         return TCL_ERROR;
     if (getpeername (sock, (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
         Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
@@ -1018,7 +1059,7 @@ TclXOSgetsockname (Tcl_Interp *interp,
     SOCKET sock;
 
     sock = ChannelToSocket (interp, channel);
-    if (sock == -1)
+    if (sock == INVALID_SOCKET)
         return TCL_ERROR;
 
     if (getsockname (sock, (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
@@ -1053,7 +1094,7 @@ TclXOSgetsockopt (interp, channel, option, valuePtr)
     SOCKET sock;
 
     sock = ChannelToSocket (interp, channel);
-    if (sock == -1)
+    if (sock == INVALID_SOCKET)
         return TCL_ERROR;
 
     if (getsockopt (sock, SOL_SOCKET, option, 
@@ -1089,7 +1130,7 @@ TclXOSsetsockopt (interp, channel, option, value)
     SOCKET sock;
 
     sock = ChannelToSocket (interp, channel);
-    if (sock == -1)
+    if (sock == INVALID_SOCKET)
         return TCL_ERROR;
 
     if (setsockopt (sock, SOL_SOCKET, option,
@@ -1120,7 +1161,7 @@ TclXOSchmod (interp, fileName, mode)
     int         mode;
 {
 #if 0
-  FIX:
+    /*FIX:*/
     if (chmod (fileName, (unsigned short) mode) < 0) {
         Tcl_AppendResult (interp, "chmod failed on \"", fileName, "\": ",
                           Tcl_PosixError (interp), (char *) NULL);
@@ -1128,7 +1169,7 @@ TclXOSchmod (interp, fileName, mode)
     }
     return TCL_OK;
 #else
-    Tcl_AppendResult (interp, funcName, " is not available on this system",
+    Tcl_AppendResult (interp, "chmod is not available on this system",
                       (char *) NULL);
     return TCL_ERROR;
 #endif
@@ -1256,7 +1297,7 @@ TclXOSGetSelectFnum (Tcl_Interp *interp,
                      int        *writeFnumPtr)
 {
     Tcl_File file;
-    int fnum, type;
+    int type;
 
     file = Tcl_GetChannelFile (channel, TCL_READABLE);
     if (file != NULL) {
@@ -1276,9 +1317,204 @@ TclXOSGetSelectFnum (Tcl_Interp *interp,
     }
     return TCL_OK;
     
-  badType:
+  badFileType:
     Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
                       " is not a socket; select only works on sockets on ",
                       "Windows", (char *) NULL);
     return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFlock --
+ *   System dependent interface to locking a file.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o lockInfoPtr - Lock specification, gotLock will be initialized.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFlock (interp, lockInfoPtr)
+    Tcl_Interp     *interp;
+    TclX_FlockInfo *lockInfoPtr;
+{
+/*FIX: Implement*/
+#ifdef F_SETLKW
+    int fnum, stat;
+    struct flock flockInfo;
+    
+    flockInfo.l_start = lockInfoPtr->start;
+    flockInfo.l_len = lockInfoPtr->len;
+    flockInfo.l_type =
+        (lockInfoPtr->access == TCL_WRITABLE) ? F_WRLCK : F_RDLCK;
+    flockInfo.l_whence = lockInfoPtr->whence;
+
+    fnum = ChannelToFnum (lockInfoPtr->channel, lockInfoPtr->access);
+
+    stat = fcntl (fnum, lockInfoPtr->block ?  F_SETLKW : F_SETLK, 
+                  &flockInfo);
+
+    /*
+     * Handle status from non-blocking lock.
+     */
+    if ((stat < 0) && (!lockInfoPtr->block) &&
+        ((errno == EACCES) || (errno == EAGAIN))) {
+        lockInfoPtr->gotLock = FALSE;
+        return TCL_OK;
+    }
+    
+    if (stat < 0) {
+        lockInfoPtr->gotLock = FALSE;
+        Tcl_AppendResult (interp, "lock of \"",
+                          Tcl_GetChannelName (lockInfoPtr->channel),
+                          "\" failed: ", Tcl_PosixError (interp));
+        return TCL_ERROR;
+    }
+
+    lockInfoPtr->gotLock = TRUE;
+    return TCL_OK;
+#else
+    return TclXNotAvailableError (interp,
+                                  "file locking");
+#endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFunlock --
+ *   System dependent interface to unlocking a file.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o lockInfoPtr - Lock specification.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFunlock (interp, lockInfoPtr)
+    Tcl_Interp     *interp;
+    TclX_FlockInfo *lockInfoPtr;
+{
+#ifdef F_SETLKW
+    int fnum, stat;
+    struct flock flockInfo;
+    
+    flockInfo.l_start = lockInfoPtr->start;
+    flockInfo.l_len = lockInfoPtr->len;
+    flockInfo.l_type = F_UNLCK;
+    flockInfo.l_whence = lockInfoPtr->whence;
+
+    fnum = ChannelToFnum (lockInfoPtr->channel, lockInfoPtr->access);
+
+    stat = fcntl (fnum, F_SETLK, &flockInfo);
+    if (stat < 0) {
+        Tcl_AppendResult (interp, "lock of \"",
+                          Tcl_GetChannelName (lockInfoPtr->channel),
+                          "\" failed: ", Tcl_PosixError (interp));
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+#else
+    return TclXNotAvailableError (interp,
+                                  "file locking");
+#endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSGetAppend --
+ *   System dependent interface determine if a channel is in force append mode.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o valuePtr - TRUE is returned if in append mode, FALSE if not.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSGetAppend (interp, channel, valuePtr)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int        *valuePtr;
+{
+    return TclXNotAvailableError (interp,
+                                  "append mode");
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSSetAppend --
+ *   System dependent interface set force append mode on a channel.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o value - TRUE to enable, FALSE to disable.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSSetAppend (interp, channel, value)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int         value;
+{
+    return TclXNotAvailableError (interp,
+                                  "append mode");
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSGetCloseOnExec --
+ *   System dependent interface determine if a channel has close-on-exec set.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o valuePtr - TRUE is close-on-exec, FALSE if not.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSGetCloseOnExec (interp, channel, valuePtr)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int        *valuePtr;
+{
+    /* FIX: Implement */
+    return TclXNotAvailableError (interp,
+                                  "close-on-exec mode");
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSSetCloseOnExec --
+ *   System dependent interface set close-on-exec on a channel.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o channel - Channel to get mode for.  The write file is used.
+ *   o value - TRUE to enable, FALSE to disable.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSSetCloseOnExec (interp, channel, value)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int         value;
+{
+    /* FIX: Implement */
+    return TclXNotAvailableError (interp,
+                                  "close-on-exec mode");
 }

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.5 1996/07/28 00:39:12 markd Exp $
+# $Id: makefile.vc,v 7.6 1996/08/06 07:15:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -82,9 +82,12 @@ TCLXTESTOBJS = \
 
 TCLXOBJS = \
         $(TMPDIR)\tclXbsearch.obj \
+        $(TMPDIR)\tclXchmod.obj \
         $(TMPDIR)\tclXcmdInit.obj \
         $(TMPDIR)\tclXcmdloop.obj \
         $(TMPDIR)\tclXdebug.obj \
+        $(TMPDIR)\tclXdup.obj \
+        $(TMPDIR)\tclXfcntl.obj \
         $(TMPDIR)\tclXfilecmds.obj \
         $(TMPDIR)\tclXfilescan.obj \
         $(TMPDIR)\tclXflock.obj \
@@ -108,8 +111,9 @@ TCLXOBJS = \
         $(TMPDIR)\tclXstring.obj \
         $(TMPDIR)\tclXutil.obj \
         $(TMPDIR)\tclXwinId.obj \
-        $(TMPDIR)\tclXwinOS.obj \
         $(TMPDIR)\tclXwinCmds.obj \
+        $(TMPDIR)\tclXwinDup.obj \
+        $(TMPDIR)\tclXwinOS.obj \
         $(TMPDIR)\random.obj \
         $(TMPDIR)\getopt.obj
 

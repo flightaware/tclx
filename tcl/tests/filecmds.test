@@ -12,16 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 7.0 1996/06/16 05:32:09 markd Exp $
+# $Id: filecmds.test,v 7.1 1996/07/26 05:56:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
-
-if [cequal $tcl_platform(platform) windows] {
-    echo "    * The filecmds tests have not been ported to Win32" 
-    return
-}
 
 #
 # Fork without exec will not work under Tk, skip this test
@@ -34,6 +29,22 @@ if ![lempty [info commands button]] {
     puts ""
     return
 }
+
+#
+# Compare the contents of two files.  Return 1 if the same, 0 if different.
+#
+proc TestCompareFiles {fn1 fn2} {
+    set fh1 [open $fn1]
+    fconfigure $fh1 -translation binary
+    set data1 [read $fh1]
+    close $fh1
+    set fh2 [open $fn2]
+    fconfigure $fh2 -translation binary
+    set data2 [read $fh2]
+    close $fh2
+    return [cequal $data1 $data2]
+}
+
 
 # Create a test file
 
@@ -56,13 +67,13 @@ if {$testFileSize != [file size IOTEST.TMP]} {
 }
 
 Test filecmds-3.1 {copyfile tests} {
-    set testFH [open IOTEST.TMP r]
+    set testFH1 [open IOTEST.TMP r]
     set testFH2 [open IOTEST2.TMP w]
-    copyfile $testFH $testFH2
-    close $testFH
+    copyfile $testFH1 $testFH2
+    close $testFH1
     close $testFH2
-    system "diff IOTEST.TMP IOTEST2.TMP >/dev/null 2>&1"
-} 0 0
+    TestCompareFiles IOTEST.TMP IOTEST2.TMP
+} 0 1
 
 Test filecmds-3.1.1 {copyfile tests} {
     # Source/target open read-write.
@@ -72,8 +83,8 @@ Test filecmds-3.1.1 {copyfile tests} {
     copyfile $testFH $testFH2
     close $testFH
     close $testFH2
-    system "diff IOTEST.TMP IOTEST2.TMP >/dev/null 2>&1"
-} 0 0
+    TestCompareFiles IOTEST.TMP IOTEST2.TMP
+} 0 1
 
 Test filecmds-3.2 {copyfile tests} {
     set testFH [open IOTEST3.TMP w]
@@ -111,17 +122,8 @@ foreach flag {-bytes -maxbytes} {
         copyfile $flag $copySize $testFH $testFH2
         close $testFH
         close $testFH2
-
-        set testFH [open IOTEST.TMP r]
-        set testData [read $testFH $copySize]
-        close $testFH
-
-        set testFH2 [open IOTEST2.TMP r]
-        set testData2 [read $testFH2]
-        close $testFH2
-
         list [expr [file size IOTEST2.TMP] == $copySize] \
-             [string compare $testData $testData2]
+             [TestCompareFiles IOTEST.TMP IOTEST2.TMP]
     } 0 {1 0}
 
     catch {unset testData testData2}
@@ -148,35 +150,39 @@ Test filecmds-3.7 {copyfile tests} {
     list $stat $msg
 } 0 [list 0 $testFileSize]
 
-pipe readPF writePF
+# FIX: Need win95 tests for pipe.
 
-flush stdout  ;# Not going to exec, must clean up the buffers.
-flush stderr
-set sonPid [fork]
+if [cequal $tcl_platform(platform) unix] {
+    pipe readPF writePF
 
-if {$sonPid == 0} {
-    for {set cnt 0} {$cnt < 50} {incr cnt} {
-        Test filecmds-4.1 {pipe tests} {
-            if {![gets $readPF msgBuf]} {
-               set msgBuf "Premature eof on pipe"
-            }
-            set msgBuf
-        } 0 [GenRec $cnt]
+    flush stdout  ;# Not going to exec, must clean up the buffers.
+    flush stderr
+    set sonPid [fork]
+
+    if {$sonPid == 0} {
+        for {set cnt 0} {$cnt < 50} {incr cnt} {
+            Test filecmds-4.1 {pipe tests} {
+                if {![gets $readPF msgBuf]} {
+                   set msgBuf "Premature eof on pipe"
+                }
+                set msgBuf
+            } 0 [GenRec $cnt]
+        }
+        close $readPF
+        exit 0
     }
+
+    for {set cnt 0} {$cnt < 50} {incr cnt} {
+        puts $writePF [GenRec $cnt]
+    }
+    flush $writePF
+    Test filecmds-4.2 {pipe tests} {
+        wait $sonPid
+    } 0 "$sonPid EXIT 0"
+
     close $readPF
-    exit 0
+    close $writePF
 }
-
-for {set cnt 0} {$cnt < 50} {incr cnt} {
-    puts $writePF [GenRec $cnt]
-}
-flush $writePF
-Test filecmds-4.2 {pipe tests} {
-    wait $sonPid
-} 0 "$sonPid EXIT 0"
-
-close $readPF
-close $writePF
 
 Test filecmds-5.1 {frename tests} {
     frename
@@ -276,6 +282,10 @@ if [infox have_truncate] {
     } 0 {1000 0}
 }
 
+Test filecmds-7.7.1 {ftruncate tests} {
+    ftruncate NOTHERE.TMP 10
+} 1 {truncating files by path is not available on this system} pcOnly
+
 if [infox have_ftruncate] {
     Test filecmds-7.8 {ftruncate tests} {
         ftruncate -fileid TRUNCATE.TMP 1000
@@ -306,6 +316,13 @@ if [infox have_ftruncate] {
     } 0 {1000 1000 0 0}
 }
 
+Test filecmds-7.10.1 {ftruncate tests} {
+    set fh [open TRUNCATE.TMP w]
+    set result [list [catch {ftruncate -fileid $fh 0} msg] $msg]
+    close $fh
+    set result
+} 0 {1 {-fileid option is not available on MS Windows}} pcOnly
+
 rename CreateTmpFile {}
-system {rm -rf *.TMP}
+unlink -nocomplain [glob -nocomplain *.TMP]
 

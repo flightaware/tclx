@@ -12,16 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 7.3 1996/08/08 01:52:24 markd Exp $
+# $Id: fcntl.test,v 7.4 1996/08/09 04:12:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
-
-if [cequal $tcl_platform(platform) windows] {
-    echo "    * The fcntl command has not been ported to Win32" 
-    return
-}
 
 close [open FCNTL1.TMP w]
 close [open FCNTL2.TMP w]
@@ -99,12 +94,16 @@ Test fcntl-1.15 {fcntl tests} {
 Test fcntl-2.1 {fcntl tests} {
     fcntl $testRWFH CLOEXEC 1
     fcntl $testRWFH CLOEXEC
-} 0 1
+} 0 1 unixOnly
 
 Test fcntl-2.2 {fcntl tests} {
     fcntl $testRWFH CLOEXEC 0
     fcntl $testRWFH CLOEXEC
-} 0 0
+} 0 0 unixOnly
+
+Test fcntl-2.2.1 {fcntl tests} {
+    fcntl $testRWFH CLOEXEC 0
+} 1 {close-on-exec mode is not available on MS Windows} pcOnly
 
 Test fcntl-2.3 {fcntl tests} {
     fcntl $testRPH NONBLOCK 1
@@ -114,12 +113,16 @@ Test fcntl-2.3 {fcntl tests} {
 Test fcntl-2.4 {fcntl tests} {
     fcntl $testRWFH append 1
     fcntl $testRWFH append
-} 0 1
+} 0 1 unixOnly
 
 Test fcntl-2.5 {fcntl tests} {
     fcntl $testRWFH APPEND 0
     fcntl $testRWFH append
-} 0 0
+} 0 0 unixOnly
+
+Test fcntl-2.5.1 {fcntl tests} {
+    fcntl $testRWFH APPEND 0
+} 1 {append mode is not available on MS Windows} pcOnly
 
 Test fcntl-3.1 {fcntl tests} {
     fcntl $testRPH NONBLOCK 0
@@ -167,21 +170,28 @@ close $testWPH
 #
 # Tests for socket related controls.
 #
-if [catch {
-    close [socket [id host] echo]
-} msg] {
-    puts "*************************************************************"
-    puts "Unable to connect to the \"echo\" server ($msg)."
-    puts "Some tests skipped."
-    puts "*************************************************************"
-} else {
+set doSocketTests 0
+# FIX: Should be an explict test for NT.
+if {[cequal $tcl_platform(platform) unix] ||
+    ![cequal $tcl_platform(os) "Windows 95"]} {
+    if [catch {
+        close [socket [id host] echo]
+        set doSocketTests 1
+    } msg] {
+        puts "*************************************************************"
+        puts "Unable to connect to the \"echo\" server ($msg)."
+        puts "Some tests skipped."
+        puts "*************************************************************"
+    }
+}
+if $doSocketTests {
     set sockFH [socket [id host] echo]
 
     Test fcntl-6.1 {fcntl socket tests} {
         fcntl $sockFH KEEPALIVE 1
         fcntl $sockFH KEEPALIVE
     } 0 1
-        
+
     Test fcntl-6.2 {fcntl socket tests} {
         fcntl $sockFH KEEPALIVE 0
         fcntl $sockFH KEEPALIVE
@@ -189,6 +199,4 @@ if [catch {
 
     close $sockFH
 }
-
-
 unlink {FCNTL1.TMP FCNTL2.TMP FCNTL3.TMP}

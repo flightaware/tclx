@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.4 1996/08/03 02:12:20 markd Exp $
+ * $Id: tclXlib.c,v 7.5 1996/08/21 06:56:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -238,16 +238,6 @@ EvalFilePart (interp, fileName, offset, length)
     if (channel == NULL)
         goto errorExit;
 
-    /*
-     * Must disable translation, as the length is an absolute byte count and
-     * value passed to Tcl_Read is the number of bytes to transfer. If the
-     * file has crlf EOLs, they count as only one byte to Tcl_Read when
-     * it does translation.
-     */
-    if (TclX_SetChannelOption (interp, channel, TCLX_COPT_TRANSLATION,
-                               TCLX_TRANSLATE_BINARY) == TCL_ERROR)
-        goto errorExit;
-    
     if (TclXOSGetFileSize (channel, TCL_READABLE, &fileSize) == TCL_ERROR)
         goto posixError;
 

@@ -12,18 +12,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 7.3 1996/08/02 10:59:55 markd Exp $
+ * $Id: tclXwinPort.h,v 7.4 1996/08/03 02:12:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #ifndef TCLXWINPORT_H
 #define TCLXWINPORT_H
-
-/*
- * FIX:  Needs to be passed in from makefile, but I can't figure out the
- * correct syntax for nmake and passing strings.
- */
-#define TCLX_LIBRARY "C:/markd/tcl/tclX7.5.2/tcl/win"
 
 #include "tclWinPort.h"
 
@@ -33,7 +27,8 @@
  * Types needed for fstat, but are not directly supported (we emulate).  If
  * defined before tclWinPort.h is include, it will define the access macros.
  */
-#define	S_IFSOCK 0140000		/* socket */
+#define S_IFIFO  _S_IFIFO               /* pipe */
+#define S_IFSOCK 0140000                /* socket */
 
 
 /*
@@ -46,10 +41,9 @@
 #define NO_RANDOM  /* uses compat */
 #define NO_SIGACTION
 #define NO_SYS_SELECT_H
-#define NO_TRUNCATE
+#define NO_TRUNCATE    /* FIX: Are we sure there is no way to truncate???*/
+#define NO_FTRUNCATE
 #define RETSIGTYPE void
-#define NO_BZERO
-#define NO_BCOPY
 
 #include <math.h>
 #include <limits.h>
@@ -63,6 +57,8 @@
  */
 #define TCLX_WAITPID(pid, status, options) Tcl_WaitPid (pid, status, options)
 
+#define bcopy(from, to, length)    memmove((to), (from), (length))
+
 /*
  * Compaibility functions.
  */
@@ -74,7 +70,7 @@ srandom (unsigned int x);
 
 extern int
 getopt (int           nargc,
-	char * const *nargv,
-	const char   *ostr);
+        char * const *nargv,
+        const char   *ostr);
 
 #endif
