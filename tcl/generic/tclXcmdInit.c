@@ -5,7 +5,7 @@
  * Tcl commands.  It is is a seperate file so that an application may create
  * the interpreter and add in only a subset of the Extended Tcl commands.
  *-----------------------------------------------------------------------------
- * Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcreate.c,v 2.0 1992/10/16 04:50:33 markd Rel markd $
+ * $Id: tclXcreate.c,v 2.1 1993/02/17 03:00:50 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

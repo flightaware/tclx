@@ -3,7 +3,7 @@
  *
  * Extended Tcl pipe, copyfile and fstat commands.
  *-----------------------------------------------------------------------------
- * Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.0 1992/10/16 04:50:41 markd Rel markd $
+ * $Id: tclXfilecmds.c,v 2.1 1993/03/06 21:42:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

@@ -3,7 +3,7 @@
  *
  * Tcl commands to load libraries of Tcl code.
  *-----------------------------------------------------------------------------
- * Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.0 1992/10/16 04:50:55 markd Rel markd $
+ * $Id: tclXlib.c,v 2.1 1992/11/19 06:01:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

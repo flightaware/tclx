@@ -3,7 +3,7 @@
  *
  * Tcl regular expression pattern matching utilities.
  *-----------------------------------------------------------------------------
- * Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 2.0 1992/10/16 04:51:08 markd Rel markd $
+ * $Id: tclXregexp.c,v 2.1 1993/02/13 02:48:16 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

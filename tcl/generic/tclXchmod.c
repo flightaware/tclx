@@ -3,7 +3,7 @@
  *
  *    Chmod, chown and chgrp Tcl commands.
  *-----------------------------------------------------------------------------
- * Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 1.3 1992/10/05 21:35:56 markd Exp markd $
+ * $Id: tclXchmod.c,v 2.0 1992/10/16 04:50:26 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
