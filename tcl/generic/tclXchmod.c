@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 2.3 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXchmod.c,v 2.4 1993/07/27 07:42:35 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -298,10 +298,12 @@ ConvertGroupId (interp, strId, groupIdPtr)
         if ((int) (*groupIdPtr) != tmpId)
             goto unknownGroup;
     }
+    endpwent ();
     return TCL_OK;
 
   unknownGroup:
     Tcl_AppendResult (interp, "unknown group id: ", strId, (char *) NULL);
+    endpwent ();
     return TCL_ERROR;
 }
 
@@ -344,20 +346,34 @@ ConvertUserGroup (interp, userGroupList, ownerInfoPtr)
             goto unknownUser;
     }
 
-    ownerInfoPtr->groupId = passwdPtr->pw_gid;
     if (ownerInfoPtr->changeGroup && (ownArgv [1][0] != '\0')) {
         if (ConvertGroupId (interp, ownArgv [1],
                             &ownerInfoPtr->groupId) != TCL_OK)
             goto errorExit;
+    } else {
+        if (passwdPtr != NULL) {
+            ownerInfoPtr->groupId = passwdPtr->pw_gid;
+        } else {
+            passwdPtr = getpwuid (ownerInfoPtr->userId);
+            if (passwdPtr == NULL)
+                goto noUserForGroup;
+        }
     }
     ckfree (ownArgv);
+    endpwent ();
     return TCL_OK;
 
   unknownUser:
     Tcl_AppendResult (interp, "unknown user id: ", ownArgv [0], (char *) NULL);
+    goto errorExit;
+
+  noUserForGroup:
+    Tcl_AppendResult (interp, "can't find group for user id: ", ownArgv [0],
+                      (char *) NULL);
 
   errorExit:
     ckfree (ownArgv);
+    endpwent ();
     return TCL_ERROR;
 }
 
