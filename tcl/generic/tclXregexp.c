@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.4 1997/06/12 21:08:29 markd Exp $
+ * $Id: tclXregexp.c,v 8.5 1997/06/25 16:58:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -442,8 +442,7 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
 /*FIX: Not binary clean */
     expression = Tcl_GetStringFromObj (expressionObj, &expressionLen);
     if (expressionLen == 0) {
-        TclX_StringAppendObjResult (interp, 
-				    "Null regular expression", (char *) NULL);
+        TclX_AppendResult (interp, "Null regular expression", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -498,9 +497,8 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
             panic ("scanmatch preparse bug");
         
         if (regExpPtr->progPtr == NULL) {
-            TclX_StringAppendObjResult (interp, 
-				        "error in regular expression: ", 
-                                        TclGetRegError (), (char *) NULL);
+            TclX_AppendResult (interp, "error in regular expression: ", 
+                               TclGetRegError (), (char *) NULL);
             if (flags & TCLX_REXP_NO_CASE)
                 ckfree (expBuf);
             TclX_RegExpClean (regExpPtr);

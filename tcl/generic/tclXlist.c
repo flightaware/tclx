@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.3 1997/06/25 09:07:52 markd Exp $
+ * $Id: tclXlist.c,v 8.4 1997/06/30 01:26:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -436,10 +436,9 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
         } else if (STREQU (modeStr, "-regexp")) {
             mode = REGEXP;
         } else {
-            TclX_StringAppendObjResult (interp,
-                                        "bad search mode \"", modeStr,
-                                        "\": must be -exact, -glob, or ",
-                                        "-regexp", (char *) NULL);
+            TclX_AppendResult (interp, "bad search mode \"", modeStr,
+                               "\": must be -exact, -glob, or -regexp",
+                               (char *) NULL);
             return TCL_ERROR;
         }
     } else if (objc != 3) {

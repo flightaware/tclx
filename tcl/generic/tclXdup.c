@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 8.2 1997/06/12 21:08:15 markd Exp $
+ * $Id: tclXdup.c,v 8.3 1997/06/25 16:58:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -135,10 +135,9 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
     }
     channelType = Tcl_GetChannelType (srcChannel);
     if (STREQU (channelType->typeName, "pipe")) {
-        TclX_StringAppendObjResult (interp,
-                                    "can not \"dup\" a Tcl command pipeline ",
-                                    " created with the \"open\" command",
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "can not \"dup\" a Tcl command pipeline ",
+                           "created with the \"open\" command",
+                           (char *) NULL);
         return NULL;
     }
     
@@ -179,9 +178,8 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
 
   posixError:
     Tcl_ResetResult (interp);
-    TclX_StringAppendObjResult (interp, "dup of \"", srcChannelId,
-                                " failed: ",
-                                Tcl_PosixError (interp), (char *) NULL);
+    TclX_AppendResult (interp, "dup of \"", srcChannelId, " failed: ",
+                       Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
     if (newChannel != NULL) {
@@ -255,18 +253,16 @@ TclX_DupObjCmd (clientData, interp, objc, objv)
 
   badFnum:
     Tcl_ResetResult (interp);
-    TclX_StringAppendObjResult (interp,
-                                "invalid integer file number \"",
-                                Tcl_GetStringFromObj (objv [1], NULL),
-                                "\", expected unsigned integer ",
-                                "or Tcl file id", (char *) NULL);
+    TclX_AppendResult (interp, "invalid integer file number \"",
+                       Tcl_GetStringFromObj (objv [1], NULL),
+                       "\", expected unsigned integer ",
+                       "or Tcl file id", (char *) NULL);
     return TCL_ERROR;
 
   bind2ndArg:
-    TclX_StringAppendObjResult (interp,
-                                "the second argument, targetChannelId, ",
-                                "is not allow when binding a file number to ",
-                                "a Tcl channel", (char *) NULL);
+    TclX_AppendResult (interp, "the second argument, targetChannelId, ",
+                       "is not allow when binding a file number to ",
+                       "a Tcl channel", (char *) NULL);
     return TCL_ERROR;
 }
 

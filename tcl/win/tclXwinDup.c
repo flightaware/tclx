@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXwinDup.c,v 8.2 1997/04/17 04:59:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,13 +47,13 @@ ConvertChannelName (Tcl_Interp *interp,
             *handleIdPtr = STD_ERROR_HANDLE;
     } else if (STRNEQU (channelName, "file", 4) ||
                STRNEQU (channelName, "sock", 4)) {
-        TclX_StringAppendObjResult (interp, "on MS Windows, only stdin, ",
-                                    "stdout, or stderr maybe the dup target",
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "on MS Windows, only stdin, ",
+                           "stdout, or stderr maybe the dup target",
+                           (char *) NULL);
         return TCL_ERROR;
     } else {
-        TclX_StringAppendObjResult (interp, "invalid channel id: ",
-                                    channelName, (char *) NULL);
+        TclX_AppendResult (interp, "invalid channel id: ",
+                           channelName, (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -112,8 +112,8 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
                           0, FALSE,
                           DUPLICATE_SAME_ACCESS)) {
 	TclWinConvertError (GetLastError ());
-        TclX_StringAppendObjResult (interp, "dup failed: ",
-                                    Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendResult (interp, "dup failed: ",
+                           Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.6 1997/06/25 16:58:52 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.7 1997/06/30 03:55:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -130,11 +130,8 @@ TclX_PipeObjCmd (clientData, interp, objc, objv)
     channelNames [1] = Tcl_GetChannelName (channels [1]);
     
     if (objc == 1) {
-        TclX_StringAppendObjResult (interp,
-                                    channelNames [0], 
-				    " ",
-                                    channelNames [1],
-                                    (char *) NULL);
+        TclX_AppendResult (interp, channelNames [0], " ",
+                           channelNames [1], (char *) NULL);
     } else {
         if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
                             Tcl_NewStringObj (channelNames [0], -1),
@@ -253,9 +250,9 @@ TclX_CopyfileObjCmd (clientData, interp, objc, objv)
             copyMode = TCLX_COPY_BYTES;
             objIdx++;
             if (objIdx >= objc) {
-                TclX_StringAppendObjResult (interp,
-                                       "argument required for -bytes option",
-                                        (char *) NULL);
+                TclX_AppendResult (interp,
+                                   "argument required for -bytes option",
+                                   (char *) NULL);
                 return TCL_ERROR;
             }
 	    if (Tcl_GetLongFromObj (interp, objv [objIdx],
@@ -265,7 +262,7 @@ TclX_CopyfileObjCmd (clientData, interp, objc, objv)
             copyMode = TCLX_COPY_MAX_BYTES;
             objIdx++;
             if (objIdx >= objc) {
-                TclX_StringAppendObjResult (interp,
+                TclX_AppendResult (interp,
                                   "argument required for -maxbytes option",
                                   (char *) NULL);
                 return TCL_ERROR;
@@ -276,8 +273,8 @@ TclX_CopyfileObjCmd (clientData, interp, objc, objv)
         } else if (STREQU (switchString, "-translate")) {
             translate = TRUE;
         } else {
-            TclX_StringAppendObjResult (interp, 
-			      "invalid argument \"", objv [objIdx],
+            TclX_AppendResult (interp, "invalid argument \"", 
+                               Tcl_GetStringFromObj (objv [objIdx], NULL),
                               "\", expected \"-bytes\", \"-maxbytes\", or ",
                               "\"-translate\"", (char *) NULL);
             return TCL_ERROR;
@@ -377,11 +374,9 @@ TclX_CopyfileObjCmd (clientData, interp, objc, objv)
 	sprintf (bytesToReadString, "%ld", totalBytesToRead);
 	sprintf (totalBytesReadString, "%ld", totalBytesRead);
 
-	TclX_StringAppendObjResult (interp, "premature EOF, ",
-	    bytesToReadString, " bytes expected, ",
-	    totalBytesReadString, " bytes actually read",
-	    (char *)NULL);
-
+	TclX_AppendResult (interp, "premature EOF, ", bytesToReadString,
+                           " bytes expected, ", totalBytesReadString,
+                           " bytes actually read", (char *)NULL);
         goto errorExit;
     }
 
@@ -704,10 +699,10 @@ TclX_LgetsObjCmd (notUsed, interp, objc, objv)
     }
     Tcl_DStringFree (&buffer);
     return TCL_OK;
-
+    
   readError:
-    TclX_StringAppendObjResult (interp, "error reading list from file: ",
-                                Tcl_PosixError (interp), (char *) NULL);
+    TclX_AppendResult (interp, "error reading list from file: ",
+                       Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
     /*
@@ -777,9 +772,8 @@ TruncateByPath (interp, filePath, newSize)
         return TCL_ERROR;
     }
     if (truncate (filePath, newSize) != 0) {
-        TclX_StringAppendObjResult (interp, filePath, ": ", 
-				    Tcl_PosixError (interp),
-				    (char *) NULL);
+        TclX_AppendResult (interp, filePath, ": ", Tcl_PosixError (interp),
+                           (char *) NULL);
         Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
@@ -825,10 +819,9 @@ TclX_FtruncateObjCmd (clientData, interp, objc, objv)
         if (STREQU (switchString, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
-            TclX_StringAppendObjResult (interp, 
-					"Invalid option \"", switchString,
-					"\", expected \"", FILE_ID_OPT, "\"",
-					(char *) NULL);
+            TclX_AppendResult (interp, "Invalid option \"", switchString,
+                               "\", expected \"", FILE_ID_OPT, "\"",
+                               (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -916,9 +909,9 @@ TclX_ReaddirObjCmd (clientData, interp, objc, objv)
     } else {
         switchString = Tcl_GetStringFromObj (objv [1], NULL);
         if (!STREQU (switchString, "-hidden")) {
-            TclX_StringAppendObjResult (interp, 
-		"expected option of \"-hidden\", got \"",
-                              switchString, "\"", (char *) NULL);
+            TclX_AppendResult (interp,
+                               "expected option of \"-hidden\", got \"",
+                               switchString, "\"", (char *) NULL);
             return TCL_ERROR;
         }
         dirPath = Tcl_GetStringFromObj (objv [2], NULL);

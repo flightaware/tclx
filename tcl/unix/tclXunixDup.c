@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixDup.c,v 8.1 1997/04/17 04:59:47 markd Exp $
+ * $Id: tclXunixDup.c,v 8.2 1997/06/12 21:08:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -57,8 +57,8 @@ ConvertFileHandle (interp, handle)
            TclX_StrToInt (&handle [4], 10, &fileId);
     }
     if (fileId < 0)
-        TclX_StringAppendObjResult (interp, "invalid channel id: ", handle,
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "invalid channel id: ", handle,
+                           (char *) NULL);
     return fileId;
 }
 
@@ -121,9 +121,8 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
         if (chkFileNum < 0)
             goto posixError;
         if (chkFileNum != newFileNum) {
-            TclX_StringAppendObjResult (interp,
-                                        "dup: desired file number not ",
-                                        "returned", (char *) NULL);
+            TclX_AppendResult (interp, "dup: desired file number not ",
+                               "returned", (char *) NULL);
             close (newFileNum);
             return NULL;
         }
@@ -143,10 +142,8 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
 
   posixError:
     Tcl_ResetResult (interp);
-    TclX_StringAppendObjResult (interp, "dup of \"",
-                                Tcl_GetChannelName (srcChannel),
-                                " failed: ",
-                                Tcl_PosixError (interp), (char *) NULL);
+    TclX_AppendResult (interp, "dup of \"", Tcl_GetChannelName (srcChannel),
+                       " failed: ", Tcl_PosixError (interp), (char *) NULL);
     return NULL;
 }
 
@@ -225,9 +222,9 @@ TclXOSBindOpenFile (interp, fileNum)
         Tcl_ResetResult (interp);
 
         sprintf (numBuf, "%d", fileNum);
-        TclX_StringAppendObjResult (interp, "file number \"", numBuf,
-                                    "\" is already bound to a Tcl file ",
-                                    "channel", (char *) NULL);
+        TclX_AppendResult (interp, "file number \"", numBuf,
+                           "\" is already bound to a Tcl file ",
+                           "channel", (char *) NULL);
         return NULL;
     }
     Tcl_ResetResult (interp);
@@ -267,10 +264,10 @@ TclXOSBindOpenFile (interp, fileNum)
         Tcl_ResetResult (interp);
         sprintf (numBuf, "%d", fileNum);
 
-        TclX_StringAppendObjResult (interp, "binding open file ", numBuf,
-                                    " to Tcl channel failed: ",
-                                    Tcl_PosixError (interp),
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "binding open file ", numBuf,
+                           " to Tcl channel failed: ",
+                           Tcl_PosixError (interp),
+                           (char *) NULL);
     }
         
   errorExit:

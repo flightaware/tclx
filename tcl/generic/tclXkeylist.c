@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.4 1997/06/30 01:29:03 markd Exp $
+ * $Id: tclXkeylist.c,v 8.5 1997/06/30 03:55:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -999,9 +999,9 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
      */
     if (status == TCL_BREAK) {
         if (objc == 3) {
-            TclX_StringAppendObjResult (interp, "key \"",  key,
-                                        "\" not found in keyed list",
-                                        (char *) NULL);
+            TclX_AppendResult (interp, "key \"",  key,
+                               "\" not found in keyed list",
+                               (char *) NULL);
             return TCL_ERROR;
         } else {
             Tcl_SetBooleanObj (Tcl_GetObjResult (interp), FALSE);
@@ -1139,8 +1139,8 @@ TclX_KeyldelObjCmd (clientData, interp, objc, objv)
         status = TclX_KeyedListDelete (interp, keylPtr, key);
         switch (status) {
           case TCL_BREAK:
-            TclX_StringAppendObjResult (interp, "key not found: \"",
-                                        key, "\"", (char *) NULL);
+            TclX_AppendResult (interp, "key not found: \"",
+                               key, "\"", (char *) NULL);
             return TCL_ERROR;
           case TCL_ERROR:
             return TCL_ERROR;
@@ -1192,8 +1192,8 @@ TclX_KeylkeysObjCmd (clientData, interp, objc, objv)
     status = TclX_KeyedListGetKeys (interp, keylPtr, key, &listObjPtr);
     switch (status) {
       case TCL_BREAK:
-        TclX_StringAppendObjResult (interp, "key not found: \"",
-                                    key, "\"", (char *) NULL);
+        TclX_AppendResult (interp, "key not found: \"", key, "\"",
+                           (char *) NULL);
         return TCL_ERROR;
       case TCL_ERROR:
         return TCL_ERROR;

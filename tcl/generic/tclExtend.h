@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.1 1997/04/17 04:58:32 markd Exp $
+ * $Id: tclExtend.h,v 8.2 1997/06/12 21:08:11 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -147,21 +147,6 @@ EXTERN char *
 TclX_DownShift _ANSI_ARGS_((char       *targetStr,
                             CONST char *sourceStr));
 
-EXTERN int 
-TclX_GetLong _ANSI_ARGS_((Tcl_Interp  *interp,
-                          CONST char *string,
-                          long        *longPtr));
-
-EXTERN int 
-TclX_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
-                              CONST char *string,
-                              unsigned   *unsignedPtr));
-
-EXTERN int
-TclX_StrToLong _ANSI_ARGS_((CONST char *string,
-                            int          base,
-                            long        *longPtr));
-
 EXTERN int
 TclX_StrToInt _ANSI_ARGS_((CONST char *string,
                            int         base,
@@ -171,10 +156,6 @@ EXTERN int
 TclX_StrToUnsigned _ANSI_ARGS_((CONST char *string,
                                 int         base,
                                 unsigned   *unsignedPtr));
-
-EXTERN int
-TclX_StrToDouble _ANSI_ARGS_((CONST char  *string,
-                              double      *doublePtr));
 
 EXTERN char * 
 TclX_UpShift _ANSI_ARGS_((char       *targetStr,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.5 1997/06/12 21:08:26 markd Exp $
+ * $Id: tclXprofile.c,v 8.6 1997/06/25 16:58:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -904,10 +904,9 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
         } else if (STREQU (argStr, "-eval")) {
             evalMode = TRUE;
         } else {
-            TclX_StringAppendObjResult (interp,
-                                        "expected one of \"-commands\", or ",
-                                        "\"-eval\", got \"", argStr, "\"",
-                                        (char *) NULL);
+            TclX_AppendResult (interp, "expected one of \"-commands\", or ",
+                               "\"-eval\", got \"", argStr, "\"",
+                               (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -927,9 +926,8 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
             goto wrongArgs;
 
         if (infoPtr->traceHandle != NULL) {
-            TclX_StringAppendObjResult (interp,
-                                        "profiling is already enabled",
-                                        (char *) NULL);
+            TclX_AppendResult (interp, "profiling is already enabled",
+                               (char *) NULL);
             return TCL_ERROR; 
         }
 
@@ -946,17 +944,16 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
             goto wrongArgs;
 
         if (commandMode || evalMode) {
-            TclX_StringAppendObjResult (interp, "option \"",
-                                        commandMode ? "-command" : "-eval",
-                                        "\" not valid when turning off ",
-                                        "profiling", (char *) NULL);
+            TclX_AppendResult (interp, "option \"",
+                               commandMode ? "-command" : "-eval",
+                               "\" not valid when turning off ",
+                               "profiling", (char *) NULL);
             return TCL_ERROR;
         }
 
         if (infoPtr->traceHandle == NULL) {
-            TclX_StringAppendObjResult (interp,
-                                        "profiling is not currently enabled",
-                                        (char *) NULL);
+            TclX_AppendResult (interp, "profiling is not currently enabled",
+                               (char *) NULL);
             return TCL_ERROR;
         }
             
@@ -970,9 +967,8 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
     /*
      * Not a valid subcommand.
      */
-    TclX_StringAppendObjResult (interp,
-                                "expected one of \"on\" or \"off\", got \"",
-                                argStr, "\"", (char *) NULL);
+    TclX_AppendResult (interp, "expected one of \"on\" or \"off\", got \"",
+                       argStr, "\"", (char *) NULL);
     return TCL_ERROR;
 
   wrongArgs:

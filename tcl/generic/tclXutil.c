@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.6 1997/06/30 06:07:38 markd Exp $
+ * $Id: tclXutil.c,v 8.7 1997/06/30 06:53:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,9 +27,6 @@
  * Prototypes of internal functions.
  */
 static int
-ReturnOverflow _ANSI_ARGS_((Tcl_Interp *interp));
-
-static int
 CallEvalErrorHandler _ANSI_ARGS_((Tcl_Interp  *interp));
 
 static int
@@ -43,86 +40,6 @@ FormatTranslationOption _ANSI_ARGS_((int value));
  */
 char *tclXWrongArgs = "wrong # args: ";
 
-/*-----------------------------------------------------------------------------
- * ReturnOverflow --
- *    
- *   Return an error message about an numeric overflow.
- *
- * Parameters:
- *   o interp (O) - Interpreter to set the error message in.
- * Returns:
- *   TCL_ERROR;
- *-----------------------------------------------------------------------------
- */
-static int
-ReturnOverflow (interp)
-    Tcl_Interp *interp;
-{
-    interp->result = "integer value too large to represent";
-    Tcl_SetErrorCode(interp, "ARITH", "IOVERFLOW",
-                     interp->result, (char *) NULL);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_StrToLong --
- *      Convert an Ascii string to an long number of the specified base.
- *
- * Parameters:
- *   o string (I) - String containing a number.
- *   o base (I) - The base to use for the number 8, 10 or 16 or zero to decide
- *     based on the leading characters of the number.  Zero to let the number
- *     determine the base.
- *   o longPtr (O) - Place to return the converted number.  Will be 
- *     unchanged if there is an error.
- *
- * Returns:
- *      Returns 1 if the string was a valid number, 0 invalid.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_StrToLong (string, base, longPtr)
-    CONST char *string;
-    int         base;
-    long       *longPtr;
-{
-    char *end, *p;
-    long  i;
-
-    /*
-     * Note: use strtoul instead of strtol for integer conversions
-     * to allow full-size unsigned numbers, but don't depend on strtoul
-     * to handle sign characters;  it won't in some implementations.
-     */
-
-    errno = 0;
-    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
-        /* Empty loop body. */
-    }
-    if (*p == '-') {
-        p++;
-        i = -(long) strtoul(p, &end, base);
-    } else if (*p == '+') {
-        p++;
-        i = strtoul(p, &end, base);
-    } else {
-        i = strtoul(p, &end, base);
-    }
-    if (end == p) {
-        return FALSE;
-    }
-    if (errno == ERANGE) {
-        return FALSE;
-    }
-    while ((*end != '\0') && isspace(UCHAR(*end))) {
-        end++;
-    }
-    if (*end != '\0') {
-        return FALSE;
-    }
-    *longPtr = i;
-    return TRUE;
-}
 
 /*-----------------------------------------------------------------------------
  * TclX_StrToInt --
@@ -138,6 +55,7 @@ TclX_StrToLong (string, base, longPtr)
  *
  * Returns:
  *      Returns 1 if the string was a valid number, 0 invalid.
+ * FIX: Delete when done with objs.
  *-----------------------------------------------------------------------------
  */
 int
@@ -227,37 +145,6 @@ TclX_StrToUnsigned (string, base, unsignedPtr)
         return FALSE;
     }
     *unsignedPtr = i;
-    return TRUE;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_StrToDouble --
- *   Convert a string to a double percision floating point number.
- *
- * Parameters:
- *   string (I) - Buffer containing double value to convert.
- *   doublePtr (O) - The convert floating point number.
- * Returns:
- *   TRUE if the number is ok, FALSE if it is illegal.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_StrToDouble (string, doublePtr)
-    CONST char *string;
-    double     *doublePtr;
-{
-    char   *end, *p;
-    double  i;
-
-    errno = 0;
-    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
-        /* Empty loop body. */
-    }
-    i = strtod (string, &end);
-    if (end == p) {
-        return FALSE;
-    }
-    *doublePtr = i;
     return TRUE;
 }
 
@@ -370,7 +257,8 @@ TclX_DownShift (targetStr, sourceStr)
  *   o sourceStr (I) - The string to up-shift.
  *
  * Returns:
- *   A pointer to the up-shifted string
+ *   A pointer to the up-shifted string.
+ * FIX: Get strcasecmp and replace this with it.
  *-----------------------------------------------------------------------------
  */
 char *
@@ -390,114 +278,6 @@ TclX_UpShift (targetStr, sourceStr)
     }
     *targetStr = '\0';
     return targetStr;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_GetLong --
- *
- *      Given a string, produce the corresponding long value.
- *
- * Results:
- *      The return value is normally TCL_OK;  in this case *longPtr
- *      will be set to the integer value equivalent to string.  If
- *      string is improperly formed then TCL_ERROR is returned and
- *      an error message will be left in interp->result.
- *
- * Side effects:
- *      None.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_GetLong(interp, string, longPtr)
-    Tcl_Interp *interp;
-    CONST char *string;
-    long       *longPtr;
-{
-    char *end, *p;
-    long i;
-
-    errno = 0;
-    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
-        /* Empty loop body. */
-    }
-    i = strtol(p, &end, 0);
-    if (end == p) {
-        badInteger:
-        Tcl_AppendResult(interp, "expected integer but got \"", string,
-                "\"", (char *) NULL);
-        return TCL_ERROR;
-    }
-    if (errno == ERANGE) {
-        return ReturnOverflow (interp);
-    }
-    while ((*end != '\0') && isspace(UCHAR(*end))) {
-        end++;
-    }
-    if (*end != '\0') {
-        goto badInteger;
-    }
-    *longPtr = i;
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_GetUnsigned --
- *
- *      Given a string, produce the corresponding unsigned integer value.
- *
- * Results:
- *      The return value is normally TCL_OK;  in this case *unsignedPtr
- *      will be set to the integer value equivalent to string.  If
- *      string is improperly formed then TCL_ERROR is returned and
- *      an error message will be left in interp->result.
- *
- * Side effects:
- *      None.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_GetUnsigned(interp, string, unsignedPtr)
-    Tcl_Interp *interp;
-    CONST char *string;
-    unsigned   *unsignedPtr;
-{
-    char          *end, *p;
-    unsigned long  i;
-
-    /*
-     * Since some strtoul functions don't detect negative numbers, check
-     * in advance.
-     */
-    errno = 0;
-    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
-        /* Empty loop body. */
-    }
-    if (*p == '-')
-        goto badUnsigned;
-    if (*p == '+') {
-        p++;
-    }
-    i = strtoul(p, &end, 0);
-    if (end == p) {
-        goto badUnsigned;
-    }
-    if (errno == ERANGE) {
-        return ReturnOverflow (interp);
-    }
-    while ((*end != '\0') && isspace(UCHAR(*end))) {
-        end++;
-    }
-    if (*end != '\0') {
-        goto badUnsigned;
-    }
-
-    *unsignedPtr = i;
-    return TCL_OK;
-
-  badUnsigned:
-    Tcl_AppendResult (interp, "expected unsigned integer but got \"", 
-                      string, "\"", (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -656,13 +436,13 @@ TclX_GetOpenChannelObj (interp, handleObj, chanAccess)
         return NULL;
     }
     if ((chanAccess & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
-        TclX_StringAppendObjResult (interp, "channel \"", handle,
-                "\" wasn't opened for reading", (char *) NULL);
+        TclX_AppendResult (interp, "channel \"", handle,
+                           "\" wasn't opened for reading", (char *) NULL);
         return NULL;
     }
     if ((chanAccess & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
-        TclX_StringAppendObjResult (interp, "channel \"", handle,
-                "\" wasn't opened for writing", (char *) NULL);
+        TclX_AppendResult (interp, "channel \"", handle,
+                           "\" wasn't opened for writing", (char *) NULL);
         return NULL;
     }
 
@@ -1164,7 +944,7 @@ TclX_WrongArgs (interp, commandNameObj, string)
 
 
 /*-----------------------------------------------------------------------------
- * TclX_StringAppendObjResult --
+ * TclX_AppendResult --
  *
  *   Append a variable number of strings onto the object result already
  * present for an interpreter.
@@ -1175,7 +955,7 @@ TclX_WrongArgs (interp, commandNameObj, string)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_StringAppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
+TclX_AppendResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
 {
     Tcl_Interp *interp;
     Tcl_Obj *resultPtr;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.5 1997/06/12 21:08:22 markd Exp $
+ * $Id: tclXlib.c,v 8.6 1997/06/30 03:56:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1587,13 +1587,8 @@ TclX_LibraryInit (interp)
 
     Tcl_CreateCommand (interp, "auto_load_pkg", TclX_Auto_load_pkgCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
-#if  FIX_AUTO_LOAD_HACK
-    Tcl_CreateCommand (interp, "tclx_auto_load", TclX_Auto_loadCmd,
-                      (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
-#else
     Tcl_CreateCommand (interp, "auto_load", TclX_Auto_loadCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
-#endif
     Tcl_CreateCommand (interp, "loadlibindex", TclX_LoadlibindexCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 

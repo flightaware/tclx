@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 8.2 1997/06/12 21:08:16 markd Exp $
+ * $Id: tclXfcntl.c,v 8.3 1997/06/30 03:55:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -118,11 +118,9 @@ XlateFcntlAttr (interp, attrName, modify)
     for (idx = 0; attrNames [idx].name != NULL; idx++) {
         if (STREQU (attrNameUp, attrNames [idx].name)) {
             if (modify && !attrNames [idx].modifiable) {
-                TclX_StringAppendObjResult (interp, 
-					    "Attribute \"", 
-					    attrName,
-                                            "\" may not be altered after open",
-                                            (char *) NULL);
+                TclX_AppendResult (interp, "Attribute \"", attrName,
+                                   "\" may not be altered after open",
+                                   (char *) NULL);
                 return ATTR_ERROR;
             }
             return attrNames [idx].id;
@@ -133,22 +131,13 @@ XlateFcntlAttr (interp, attrName, modify)
      * Invalid attribute.
      */
   invalidAttrName:
-    TclX_StringAppendObjResult (interp, 
-				"unknown attribute name \"",
-				attrName,
-                                "\", expected one of ", 
-				(char *) NULL);
+    TclX_AppendResult (interp, "unknown attribute name \"", attrName,
+                       "\", expected one of ", (char *) NULL);
 
     for (idx = 0; attrNames [idx + 1].name != NULL; idx++) {
-        TclX_StringAppendObjResult (interp, 
-				    attrNames [idx].name,
-				    ", ",
-				    (char *) NULL);
+        TclX_AppendResult (interp, attrNames [idx].name, ", ", (char *) NULL);
     }
-    TclX_StringAppendObjResult (interp, 
-				"or ", 
-				attrNames [idx].name,
-				(char *) NULL);
+    TclX_AppendResult (interp, "or ", attrNames [idx].name, (char *) NULL);
     return ATTR_ERROR;
 }
 

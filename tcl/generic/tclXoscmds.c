@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 8.3 1997/06/25 16:58:54 markd Exp $
+ * $Id: tclXoscmds.c,v 8.4 1997/06/30 03:56:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -126,11 +126,10 @@ TclX_LinkObjCmd (clientData, interp, objc, objv)
         char *argv1String = Tcl_GetStringFromObj (objv [1], NULL);
 
         if (!STREQU (argv1String, "-sym")) {
-            TclX_StringAppendObjResult (
-                interp,
-                "invalid option, expected: \"-sym\", got: ",
-                Tcl_GetStringFromObj (objv [1], NULL),
-                (char *) NULL);
+            TclX_AppendResult (interp,
+                               "invalid option, expected: \"-sym\", got: ",
+                               Tcl_GetStringFromObj (objv [1], NULL),
+                               (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -261,7 +260,6 @@ TclX_SyncObjCmd (clientData, interp, objc, objv)
     Tcl_Obj   *CONST objv[];
 {
     Tcl_Channel  channel;
-    char        *fileHandle;
 
     if ((objc < 1) || (objc > 2))
 	return TclX_WrongArgs (interp, objv [0], "?filehandle?");
@@ -271,8 +269,7 @@ TclX_SyncObjCmd (clientData, interp, objc, objv)
 	return TCL_OK;
     }
 
-    fileHandle = Tcl_GetStringFromObj (objv [1], NULL);
-    channel = TclX_GetOpenChannel (interp, fileHandle, TCL_WRITABLE);
+    channel = TclX_GetOpenChannelObj (interp, objv [1], TCL_WRITABLE);
     if (channel == NULL)
         return TCL_ERROR;
 
@@ -352,11 +349,9 @@ TclX_UmaskObjCmd (clientData, interp, objc, objv)
     } else {
 	umaskString = Tcl_GetStringFromObj (objv [1], NULL);
         if (!TclX_StrToInt (umaskString, 8, &mask)) {
-            TclX_StringAppendObjResult (interp, 
-                                        "Expected octal number got: ",
-                                        Tcl_GetStringFromObj (objv [1],
-                                                              NULL),
-                                        (char *) NULL);
+            TclX_AppendResult (interp, "Expected octal number got: ",
+                               Tcl_GetStringFromObj (objv [1], NULL),
+                               (char *) NULL);
             return TCL_ERROR;
         }
 

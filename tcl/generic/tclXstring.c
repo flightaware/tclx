@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.3 1997/06/25 08:46:49 markd Exp $
+ * $Id: tclXstring.c,v 8.4 1997/06/25 16:58:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -234,8 +234,7 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
         
     if (isRange) {
         if (subLen < first) {
-            TclX_StringAppendObjResult (interp, " last is before first", 
-                                        (char *) NULL);
+            TclX_AppendResult (interp, " last is before first", (char *) NULL);
             return TCL_ERROR;
         }
         subLen = subLen - first +1;
@@ -281,10 +280,8 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     if (objc == 4) {
         optionString = Tcl_GetStringFromObj (objv [1], NULL);
         if (!STREQU (optionString, "-local")) {
-            TclX_StringAppendObjResult (interp, "Invalid option \"",
-                                        optionString,
-                                        "\", expected \"-local\"",
-                                        (char *) NULL);
+            TclX_AppendResult (interp, "Invalid option \"", optionString,
+                               "\", expected \"-local\"", (char *) NULL);
             return TCL_ERROR;
         }
         local = TRUE;
@@ -502,15 +499,15 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
 
     fromString = Tcl_GetStringFromObj (objv[1], &fromStringLen);
     if (!ExpandString ((unsigned char *) fromString, from)) {
-        TclX_StringAppendObjResult (interp, "inrange expansion too long",
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "inrange expansion too long",
+                           (char *) NULL);
         return TCL_ERROR;
     }
 
     toString = Tcl_GetStringFromObj (objv[2], &toStringLen);
     if (!ExpandString ((unsigned char *) toString, to)) {
-        TclX_StringAppendObjResult (interp, "outrange expansion too long",
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "outrange expansion too long",
+                           (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -524,8 +521,8 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
             break;
     }
     if (to [idx] != '\0') {
-        TclX_StringAppendObjResult (interp, "inrange longer than outrange", 
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "inrange longer than outrange", 
+                           (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -590,11 +587,9 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
             failIndex = TRUE;
         } else {
             int len;
-            TclX_StringAppendObjResult (interp,
-                                        "invalid option \"",
-                                        Tcl_GetStringFromObj (objv [1], &len),
-                                        "\", must be -failindex",
-                                        NULL);
+            TclX_AppendResult (interp, "invalid option \"",
+                               Tcl_GetStringFromObj (objv [1], &len),
+                               "\", must be -failindex", (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -625,9 +620,8 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
         if (Tcl_GetLongFromObj (interp, stringObj, &number) != TCL_OK)
             return TCL_ERROR;
         if ((number < 0) || (number > 255)) {
-            TclX_StringAppendObjResult (interp,
-                                    "number must be in the range 0..255", 
-                                     NULL);
+            TclX_AppendResult (interp, "number must be in the range 0..255", 
+                               NULL);
             return TCL_ERROR;
         }
 
@@ -715,13 +709,12 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
                 break;
         }
     } else {
-        TclX_StringAppendObjResult (interp,
-                                    "unrecognized class specification: \"",
-                                    class,
-                                    "\", expected one of: alnum, alpha, ascii, ",
-                                    "char, cntrl, digit, graph, lower, ord, ",
-                                    "print, punct, space, upper or xdigit",
-                                    (char *) NULL);
+        TclX_AppendResult (interp, "unrecognized class specification: \"",
+                           class,
+                           "\", expected one of: alnum, alpha, ascii, ",
+                           "char, cntrl, digit, graph, lower, ord, ",
+                           "print, punct, space, upper or xdigit",
+                           (char *) NULL);
         return TCL_ERROR;
     }
     
@@ -753,9 +746,8 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     return TclX_WrongArgs (interp, objv[0], "?-failindex var? class string");
     
   failInvalid:
-    TclX_StringAppendObjResult (interp, 
-                                "-failindex option is invalid for class \"",
-                                class, "\"", (char *) NULL);
+    TclX_AppendResult (interp, "-failindex option is invalid for class \"",
+                       class, "\"", (char *) NULL);
     return TCL_ERROR;
 }
 

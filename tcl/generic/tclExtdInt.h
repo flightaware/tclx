@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.8 1997/06/30 06:07:36 markd Exp $
+ * $Id: tclExtdInt.h,v 8.9 1997/06/30 06:53:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -307,9 +307,7 @@ TclX_WrongArgs _ANSI_ARGS_((Tcl_Interp *interp,
 			    char       *string));
 
 extern void
-TclX_StringAppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
-/*FIX: NewName */
-#define TclX_AppendResult TclX_StringAppendObjResult
+TclX_AppendResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
 
 extern int
 TclX_IsNullObj _ANSI_ARGS_((Tcl_Obj *objPtr));

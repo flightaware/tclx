@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 8.1 1997/04/17 04:58:41 markd Exp $
+ * $Id: tclXhandles.c,v 8.2 1997/06/12 21:08:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -267,16 +267,11 @@ HandleDecodeObj (interp, tblHdrPtr, handle)
     unsigned entryIdx;
 
     if ((strncmp (tblHdrPtr->handleBase, (char *) handle, 
-             tblHdrPtr->baseLength) != 0) ||
-             !TclX_StrToUnsigned (&handle [tblHdrPtr->baseLength], 10, 
-                                 &entryIdx)) {
-        TclX_StringAppendObjResult (interp, 
-				    "invalid ",
-				    tblHdrPtr->handleBase,
-                                    " handle \"",
-				    handle, 
-				    "\"", 
-				    (char *) NULL);
+                  tblHdrPtr->baseLength) != 0) ||
+        !TclX_StrToUnsigned (&handle [tblHdrPtr->baseLength], 10, 
+                             &entryIdx)) {
+        TclX_AppendResult (interp, "invalid ", tblHdrPtr->handleBase,
+                           " handle \"", handle, "\"", (char *) NULL);
         return -1;
     }
     return entryIdx;
@@ -482,13 +477,12 @@ TclX_HandleXlateObj (interp, headerPtr, handleObj)
 
     if ((entryIdx >= tblHdrPtr->tableSize) ||
             (entryHdrPtr->freeLink != ALLOCATED_IDX)) {
-        TclX_StringAppendObjResult (interp, tblHdrPtr->handleBase, 
-				    " is not open", (char *) NULL);
+        TclX_AppendResult (interp, tblHdrPtr->handleBase, 
+                           " is not open", (char *) NULL);
         return NULL;
     }     
 
     return USER_AREA (entryHdrPtr);
- 
 }
 
 /*=============================================================================

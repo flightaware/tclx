@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.3 1997/06/25 16:58:53 markd Exp $
+ * $Id: tclXgeneral.c,v 8.4 1997/06/30 03:55:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -268,16 +268,14 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
 	    Tcl_SetIntObj (resultPtr, 0);
         return TCL_OK;
     }
-    TclX_StringAppendObjResult (interp, 
-                                "illegal option \"",
-                                optionPtr,
-                                "\", expect one of: version, patchlevel, ",
-                                "have_fchown, have_fchmod, have_flock, ",
-                                "have_fsync, have_ftruncate, have_msgcats, ",
-                                "have_symlink, have_truncate, ",
-                                "have_posix_signals, have_waitpid, appname, ",
-                                "applongname, appversion, or apppatchlevel",
-                                (char *) NULL);
+    TclX_AppendResult (interp, "illegal option \"", optionPtr,
+                       "\", expect one of: version, patchlevel, ",
+                       "have_fchown, have_fchmod, have_flock, ",
+                       "have_fsync, have_ftruncate, have_msgcats, ",
+                       "have_symlink, have_truncate, ",
+                       "have_posix_signals, have_waitpid, appname, ",
+                       "applongname, appversion, or apppatchlevel",
+                       (char *) NULL);
     return TCL_ERROR;
 }
 
