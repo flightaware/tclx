@@ -21,7 +21,13 @@
 #ifndef NO_SYS_SOCKET_H
 #    include <sys/socket.h>
 #endif
-#include <sys/uio.h>
+/*
+ * Some version of Linux have <linix/uio.h> (included by <sys/socket.h>) that
+ * defines struct iovec.  Its also defined in <sys/uio.h>.  Kind of broken.
+ */
+#ifndef __LINUX_UIO_H
+#    include <sys/uio.h>
+#endif
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
