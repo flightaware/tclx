@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 4.1 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclXsignal.c,v 4.2 1995/01/01 19:49:38 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -962,7 +962,7 @@ Tcl_ProcessSignals (clientData, interp, cmdResultCode)
     if (result != TCL_ERROR) {
         RestoreErrorState (sigInterp, errStatePtr);
     } else {
-        ckfree (errStatePtr);
+        ckfree ((char *) errStatePtr);
         cmdResultCode = TCL_ERROR;
     }
 
