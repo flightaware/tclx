@@ -1,0 +1,32 @@
+#
+# sync.test
+#
+# Tests for the sync command.
+#---------------------------------------------------------------------------
+# Copyright 1993 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: 
+#------------------------------------------------------------------------------
+#
+
+if {[info procs test] != "test"} then {source testlib.tcl}
+
+Test sync-1.1 {sync tests} {
+    sync
+} 0 {}
+
+Test sync-1.2 {sync tests} {
+    sync a b
+} 1 {wrong # args: sync ?filehandle?}
+
+Test sync-1.3 {sync tests} {
+    sync stdout
+} 0 {}
+
