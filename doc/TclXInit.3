@@ -1,7 +1,7 @@
 .\"
-.\" Startup.man
+.\" TclXInit.3
 .\"
-.\" Extended Tcl binary file search command.
+.\" Extended Tcl initialization functions.
 .\"----------------------------------------------------------------------------
 .\" Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 .\"
@@ -12,13 +12,13 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Startup.3,v 2.6 1993/07/19 15:30:04 markd Exp markd $
+.\" $Id: TclXInit.3,v 2.7 1993/07/20 08:35:45 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
-.TH "Tcl_Startup" TCL "" "Tcl"
+.TH "TclXInit" TCL "" "Tcl"
 .ad b
 .SH NAME
-Tcl_ShellEnvInit, Tcl_Startup, Tcl_ProcessInitFile - Extended Tcl Shell startup facilities.
+TclX_AppInit, TclX_Init, TclXCmd_Init, TclXLib_Init - Extended Tcl initialization.
 '
 .SH SYNOPSIS
 .nf
@@ -30,75 +30,75 @@ extern char *tclAppLongname;
 extern char *tclAppVersion;
 
 int
-Tcl_ShellEnvInit (Tcl_Interp  *interp,
-                  unsigned     options);
-
-void
-Tcl_Startup (Tcl_Interp  *interp,
-             unsigned     options);
-             int          argc,
-             const char **argv);
+TclX_AppInit (Tcl_Interp *interp);
 
 int
-Tcl_ProcessInitFile (Tcl_Interp *interp,
-                     char       *dirEnvVar,
-                     char       *dir,
-                     char       *version1,
-                     char       *version2,
-                     char       *initFile);
+TclX_Init (Tcl_Interp *interp);
+
+int
+TclXCmd_Init (Tcl_Interp *interp);
+
+int
+TclXLib_Init (Tcl_Interp *interp);
+
 .ft R
 .fi
 .SH DESCRIPTION
-These functions control the startup of the Extended Tcl shell and related
-applications.
+These functions are used to initialize Extended Tcl and applications based
+on Extended Tcl.
 '
 .SS tclAppName
 The application name to be returned by the \fBinfox\fR
-command. This should be a short mnemonic.  If a special value is
-desired, it must be set before one of the startup procedures are called.
+command. This should be a short mnemonic.  This value maybe altered from
+the default by the application.
 '
 .SS tclAppLongname
 The application long name to be returned by the \fBinfox\fR command.
-This should be a natural language string.  If a special value is desired, it
-must be set before one of the startup procedures are called.
+This should be a natural language string.  This value maybe altered from
+the default by the application.
 '
 .SS tclAppVersion
-The application version string to be returned by the \fBinfox\fR command.  If
-a special value is desired, it must be set before one of the startup
-procedures are called.
+The application version string to be returned by the \fBinfox\fR command.
+procedures are called.  This value maybe altered from
+the default by the application.
 '
-.SS Tcl_ShellEnvInit
+.SS TclX_AppInit
 .PP
-Initialize the Tcl shell environment.  Including evaluating the standard
-TclX init file and setting various variable and values for infox to access.
-If this is an interactive Tcl session, SIGINT is set to generate a Tcl
-error.  This routine is provided for the wishx shell or similar
-environments where the Tcl_Startup command line parsing is not desired.
+This function is used to initialize an TclX based application.
+It is intended to
+the the only file that is modified for most applications.
+There are two versions of this function, one for applications built on
+just TclX and the other for applications built on TclX and Tk.
 .PP
-Parameters:
+The TclX version of this function is found in \fBtclXAppInit.c\fR and the 
+Tk version is found in \fBtkXAppInit.c\fR.  It should be modified according to
+the instructions in these files to initialize a TclX based application.
+.PP
+A custom application is then linked in a manner similar to:
+.sp
+.nf
+.ft CW
+  cc tclXAppInit.o mystuff.a libtclx.a libtcl.a ${SYSLIBS} -o myapp
+.ft R
+.fi
+.sp
+or
+.sp
+.nf
+.ft CW
+  cc tkXAppInit.o mystuff.a libtkx.a libtk.a libtclx.a libtcl.a \\
+     ${SYSLIBS} -o myapp
+.ft R
+.fi
+'
+.SS TclX_Init
+.PP
+Initializes Extended Tcl, adding the extended command set to the interpreter.
+This is called from \fBTclX_AppInit\fR.
+.PP
+Parameters
 .RS 2
-\fBo \fIinterp\fR - A pointer to the interpreter.
-.br
-\fBo \fIoptions\fR - Flags to control the behavior of this routine, the
-following option is supported:
-.RE
-.br
-.RS 5
-.br
-\fB- TCLSH_INTERACTIVE\fR - Set interactiveSession to 1.
-.br
-\fB- TCLSH_QUICK_STARTUP\fR - Don't source the Tcl inititialization file.
-.br
-\fB- TCLSH_ABORT_STARTUP_ERR\fR - If set, abort the process if an error occurs.
-.br
-\fB- TCLSH_NO_STACK_DUMP\fR - If an error occurs, don't dump out the procedure
-call stack, just print an error message.
-.RE
-.PP
-Notes:
-.RS 2
-The variables \fBtclAppName\fR, \fBtclAppLongname\fR, \fBtclAppVersion\fR 
-must be set before calling thus routine if special values are desired.
+\fBo \fIinterp\fR - A pointer to the interpreter to add the commands to.
 .RE
 .PP
 Returns:
@@ -106,50 +106,31 @@ Returns:
 \fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS Tcl_Startup
+.SS TclXCmd_Init
 .PP
-Initializes the Tcl extended environment.  This function processes the
-standard command line arguments and locates the Tcl initialization file.
-It then sources the initialization file.
-Either an interactive command loop is created or a Tcl script file
-is executed depending on the command line.  This functions calls
-Tcl_ShellEnvInit, so it should not be called separately.
+Add the TclX command set to the interpreter, with the exception of the
+TclX library management commands.  This is normally called by
+\fBTclX_Init\fR and should only be used if you don't want the TclX library
+handling.
 .PP
 Parameters
 .RS 2
-\fBo \fIinterp\fR - A pointer to the interpreter.
-.br
-\fBo \fIoptions\fR - Options that control startup behavior.  None are currently
-defined.
-.br
-\fBo \fIargc, argv\fR - Arguments passed to main for the command line.
+\fBo \fIinterp\fR - A pointer to the interpreter to add the commands to.
 .RE
 .PP
-Notes:
+Returns:
 .RS 2
-The variables \fBtclAppName\fR, \fBtclAppLongname\fR, \fBtclAppVersion\fR
-must be set before calling thus routine if special values are desired.
+\fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS Tcl_ProcessInitFile
+.SS TclXLib_Init
 .PP
-Find and evaludate a Tcl init file.  This assumes that the init file
-lives in a master directory and appends the directory name to the 
-"auto_path" variable.
+Add the TclX library management commands to the interpreter.
+This is normally called by \fBTclX_Init\fR.
 .PP
-Parameters:
+Parameters
 .RS 2
-\fBo \fIinterp\fR - A pointer to the interpreter
-.br
-\fBo dirEnvVar (I) - Environment variable used to override the directory path.
-.br
-\fBo dir\fR (I) - The directory name.
-\fBo version1, version2\fR - Two part version number forming a directory under
-dir.  Either maybe NULL.
-.br
-\fBo initFile (I) - The name of the init file, which is found either in the
-directory pointed to by envVar or by the directory formed from dir1,
-dir2 & dir3.
+\fBo \fIinterp\fR - A pointer to the interpreter to add the commands to.
 .RE
 .PP
 Returns:
