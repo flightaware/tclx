@@ -428,15 +428,17 @@ SUN:
    o See note on flock tests hanging under the "general" section.
 
 SOLARIS:
-   o message-cat-1.3 test fails due to broken catopen.  This is should not
-     affect actual use of this command.
-   o tcllib-4.1 test fails.
    o glob & library test failures observed on SunOS 5.3. Doing a "glob *"
      in either the tclX shell or tclsh produces a mangled listing of the
-     directory.  Recompiling with gcc instead of the cc fixed the problem.
-     Cause unknown, but a trivial program to opendir/readdir a directory
-     fails.  Remember to set CC=gcc environment variable, make clean, and
-     reconfigure before going a "make CC=gcc"
+     directory.  This is caused by a mismatch between the the dirent.h
+     include file and C library that is being used.  We have been told
+     that this can be fixed either by making sure /usr/ucb is not in your
+     path or by compiling with the "ucbcc" command.  If you chose to use
+     ucbcc, remember to set CC=ucbcc environment variable, make clean, and
+     reconfigure before going a "make CC=ucbcc". Using gcc is another
+     solution.
+   o message-cat-1.3 test fails due to broken catopen.  This is should not
+     affect actual use of this command.
    o Using SIGCHLD to detect the termination of processes created by "exec" or
     "open" has been observed to cause core dumps on Solaris 2.3.  Either use
      the TclX fork and execl commands to start the process or change
