@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 5.1 1996/02/12 18:16:24 markd Exp $
+ * $Id: tclXstring.c,v 5.2 1996/02/20 09:10:31 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -57,11 +57,11 @@ Tcl_CindexCmd (clientData, interp, argc, argv)
     len = strlen (argv [1]);
     if (Tcl_RelativeExpr (interp, argv[2], len, &index) != TCL_OK)
         return TCL_ERROR;
-    if (index >= len)
+    if ((index < 0) || (index >= len))
         return TCL_OK;
 
     interp->result [0] = argv[1][index];
-    interp->result [1] = 0;
+    interp->result [1] = '\0';
     return TCL_OK;
 
 }
@@ -137,7 +137,7 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
     if (Tcl_RelativeExpr (interp, argv[2], fullLen, &first) != TCL_OK)
         return TCL_ERROR;
 
-    if (first >= fullLen)
+    if ((first < 0) || (first >= fullLen))
         return TCL_OK;
 
     if (Tcl_RelativeExpr (interp, argv[3], fullLen, &subLen) != TCL_OK)

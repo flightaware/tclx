@@ -1159,4 +1159,8 @@
  4 May 96:
   o Fix bug where manual pages were not installed.
 -------------------------------------------------------------------------------
+ 6 May 96:
+  o Fixed lindex and lrange indexing out of bounds memory when negative indexes
+    are used.
+-------------------------------------------------------------------------------
 
