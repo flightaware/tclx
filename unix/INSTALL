@@ -221,20 +221,29 @@ Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
     o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.1a directory.  The tests require a tcl shell with added commands
-      (tcltest in the tcl7.1 distribution).  Because the Extended TCL shell
-      (tcl) does not have these commands, the following tests will not run:
+      tclX7.1a directory.  The some of the UCB tests require a tcl shell with
+      added commands (tcltest in the tcl7.1 distribution).  Because the
+      Extended TCL shell (tcl) does not have these commands, the you will
+      receive warnings about not having the following commands:
 
-	cmdinfo.test
-	dcall.test
-	link.test
+        testasync
+        testcmdinfo
+        testdcall
+        testdstring
+        testlink
+
+      Your will also receive warning about not having the following math
+      functions:
+
+        T1
+        T2
 
     o To run the Tk tests with wishx, type "make tktest".  The tests require
       a tcl shell with added commands (tcltest in the tcl7.1 distribution).
       Because the Extended TCL shell (tcl) does not have these commands, the
       following tests will not run:
 
-	raise.test
+        raise.test
 
     o The Extended Tcl tests may be run by themselves with "make extdtests".
 
