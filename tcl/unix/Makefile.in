@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.19 1996/03/05 02:11:43 markd Exp $
+# $Id: Makefile.in,v 5.20 1996/03/11 05:53:53 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -382,7 +382,7 @@ install-exec:
 clean:
 	-rm -f tclXAppInit.o ${OBJS} libtclx.a tcl checkup.done
 	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
-	-rm -f SHLIB_YES SHLIB_NO
+	-rm -f SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_BASE_NAME}
 	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
 
 #------------------------------------------------------------------------------
