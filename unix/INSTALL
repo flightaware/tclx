@@ -375,7 +375,7 @@ TkPixmap:
 PORTING NOTES
 =============
 
-General:
+General Porting Notes:
    o Flock tests hanging:  Problems have been encountered on some Sun
      systems with the flock tests.  This might occur on other systems as
      well.  These are probably due to an incorrectly configured NFS lockd.
@@ -390,6 +390,8 @@ General:
 
 DEC Ultrix:
    o Several tests fail when Tcl is run on an NFS mounted file system.
+   o flock tests have been reported.  See `General Porting Notes' section
+     above.
 
 SUN:
    o Seen not on flock tests hanging under the "general" section.
