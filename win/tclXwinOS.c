@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 8.12 2000/06/14 21:56:27 wart Exp $
+ * $Id: tclXwinOS.c,v 1.1 2001/10/24 23:31:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -50,8 +50,8 @@ int
 TclXNotAvailableError (Tcl_Interp *interp,
                        char       *funcName)
 {
-    TclX_AppendObjResult (interp, funcName, " is not available on MS Windows",
-                          (char *) NULL);
+    Tcl_AppendResult(interp, funcName, " is not available on MS Windows",
+	    (char *) NULL);
     return TCL_ERROR;
 }
 int
@@ -60,8 +60,8 @@ TclXNotAvailableObjError (Tcl_Interp *interp,
 {
     char *funcName = Tcl_GetStringFromObj(obj, NULL);
 
-    TclX_AppendObjResult (interp, funcName, " is not available on MS Windows",
-                          (char *) NULL);
+    Tcl_AppendResult(interp, funcName, " is not available on MS Windows",
+	    (char *) NULL);
     return TCL_ERROR;
 }
 
