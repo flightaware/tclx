@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.5 1992/12/19 05:24:25 markd Exp markd $
+# $Id: Config.mk,v 2.6 1992/12/19 06:42:52 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -135,7 +135,7 @@ TCL_OWNER=bin
 TCL_GROUP=bin
 
 # o TCL_DEFAULT - Base name of Tcl default file.  This name will have a
-#   version number appended.
+#   version number appended.  The MUST be a full path name!
 #
 #TCL_DEFAULT=/etc/default/tcl
 TCL_DEFAULT=/usr/local/lib/tcldefault
