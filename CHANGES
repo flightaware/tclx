@@ -1173,3 +1173,7 @@
 18 May 96:
   o Fixed problem in initialization code that caused Tk send.test to hang.
 -------------------------------------------------------------------------------
+23 May 96:
+  o Fixed bug that caused panic when doing a copyfile to/from a file that is 
+    open read/write.
+-------------------------------------------------------------------------------

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.18 1996/03/20 06:57:49 markd Exp $
+ * $Id: tclExtdInt.h,v 6.0 1996/05/10 16:15:11 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -111,13 +111,23 @@ typedef struct {
 #define TCLX_BUFFERING_LINE     1
 #define TCLX_BUFFERING_NONE     2
 
-#define TCLX_COPT_TRANSLATION   3
-#define TCLX_TRANSLATE_AUTO     0
-#define TCLX_TRANSLATE_LF       1
-#define TCLX_TRANSLATE_BINARY   1  /* same as LF */
-#define TCLX_TRANSLATE_CR       2
-#define TCLX_TRANSLATE_CRLF     3
-#define TCLX_TRANSLATE_PLATFORM 4
+/*
+ * Two values are always returned for translation, one for the read side and
+ * one for the write.  They are returned masked into one word.
+ */
+
+#define TCLX_COPT_TRANSLATION      3
+#define TCLX_TRANSLATE_READ_SHIFT  8
+#define TCLX_TRANSLATE_READ_MASK   0xFF00
+#define TCLX_TRANSLATE_WRITE_MASK  0x00FF
+
+#define TCLX_TRANSLATE_UNSPECIFIED 0 /* For only one direction specified */
+#define TCLX_TRANSLATE_AUTO        1
+#define TCLX_TRANSLATE_LF          2
+#define TCLX_TRANSLATE_BINARY      2  /* same as LF */
+#define TCLX_TRANSLATE_CR          3
+#define TCLX_TRANSLATE_CRLF        4
+#define TCLX_TRANSLATE_PLATFORM    5
 
 /*
  * Used to return argument messages by most commands.

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.13 1996/03/18 08:49:49 markd Exp $
+ * $Id: tclXutil.c,v 6.0 1996/05/10 16:16:11 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,8 +32,11 @@ ReturnOverflow _ANSI_ARGS_((Tcl_Interp *interp));
 static int
 CallEvalErrorHandler _ANSI_ARGS_((Tcl_Interp  *interp));
 
-static Tcl_ChannelType *
-UnixFileChannelType _ANSI_ARGS_((Tcl_Interp *interp));
+static int
+ParseTranslationOption _ANSI_ARGS_((char *strValue));
+
+static char *
+FormatTranslationOption _ANSI_ARGS_((int value));
 
 /*
  * Used to return argument messages by most commands.
@@ -955,6 +958,70 @@ TclX_WriteStr (channel, str)
 }
 
 /*-----------------------------------------------------------------------------
+ * ParseTranslationOption --
+ *
+ *   Parse the string that represents the translation value for one channel
+ * direction.
+ *
+ * Parameters:
+ *   o strValue (I) - Channel translation value.
+ * Returns:
+ *   The integer option value.
+ *----------------------------------------------------------------------------- */
+static int
+ParseTranslationOption (strValue)
+    char *strValue;
+{
+    if (STREQU (strValue, "auto")) {
+        return TCLX_TRANSLATE_AUTO;
+    } else if (STREQU (strValue, "lf")) {
+        return TCLX_TRANSLATE_LF;
+    } else if (STREQU (strValue, "binary")) {
+        return TCLX_TRANSLATE_BINARY;
+    } else if (STREQU (strValue, "cr")) {
+        return TCLX_TRANSLATE_CR;
+    } else if (STREQU (strValue, "crlf")) {
+        return TCLX_TRANSLATE_CRLF;
+    } else if (STREQU (strValue, "platform")) {
+        return TCLX_TRANSLATE_PLATFORM;
+    }
+    panic ("ParseTranslationOption bug");
+}
+
+/*-----------------------------------------------------------------------------
+ * FormatTranslationOption --
+ *
+ *   Format the string that represents the translation value for one channel
+ * direction.
+ *
+ * Parameters:
+ *   o value (I) - Integer channel translation value.
+ * Returns:
+ *   The string option value.
+ *----------------------------------------------------------------------------
+ */
+static char *
+FormatTranslationOption (value)
+    int value;
+{
+    switch (value) {
+      case TCLX_TRANSLATE_AUTO:
+        return "auto";
+      case TCLX_TRANSLATE_LF:  /* Also binary */
+        return "lf";
+      case TCLX_TRANSLATE_CR:
+        return "cr";
+      case TCLX_TRANSLATE_CRLF:
+        return "crlf";
+      case TCLX_TRANSLATE_PLATFORM:
+        return "platform";
+      default:
+        panic ("FormatTranslationOption bug");
+    }
+}
+
+
+/*-----------------------------------------------------------------------------
  * TclX_GetChannelOption --
  *
  *   C-friendly front end to Tcl_GetChannelOption.
@@ -963,7 +1030,7 @@ TclX_WriteStr (channel, str)
  *   o channel (I) - Channel to get the option for.
  *   o optionName (I) - One of the TCLX_COPT_* defines.
  * Returns:
- *   The interger option value define.
+ *   The integer option value define by TclX.
  *-----------------------------------------------------------------------------
  */
 int
@@ -1018,23 +1085,36 @@ TclX_GetChannelOption (channel, option)
         }
         break;
 
-      case TCLX_COPT_TRANSLATION:
-        if (STREQU (strValue.string, "auto")) {
-            value = TCLX_TRANSLATE_AUTO;
-        } else if (STREQU (strValue.string, "lf")) {
-            value = TCLX_TRANSLATE_LF;
-        } else if (STREQU (strValue.string, "binary")) {
-            value = TCLX_TRANSLATE_BINARY;
-        } else if (STREQU (strValue.string, "cr")) {
-            value = TCLX_TRANSLATE_CR;
-        } else if (STREQU (strValue.string, "crlf")) {
-            value = TCLX_TRANSLATE_CRLF;
-        } else if (STREQU (strValue.string, "platform")) {
-            value = TCLX_TRANSLATE_PLATFORM;
+      case TCLX_COPT_TRANSLATION: {
+        /*
+         * The value returned is strange.  Its either a single word, or
+         * a list with a word for each file in the channel.  However, in
+         * Tcl 7.5, its actually retuned a list of a list, which is a bug.
+         * Handle this and code for working with a fixed version.  Hack
+         * the list rather than doing, since we know the possible values
+         * and this is much faster and easy to support both formats.
+         * ???Clean up once Tcl fixes the return.???
+         */
+        char *strValue1, *strValue2, *strScan;
+          
+        strValue1 = strValue.string;
+        if (strValue1 [0] == '{')
+            strValue1++;  /* Skip { if list of list */
+        strValue2 = strchr (strValue1, ' ');
+        if (strValue2 != NULL) {
+            strValue2 [0] = '\0';  /* Split into two strings. */
+            strValue2++;
+            strScan = strchr (strValue2, '}');
+            if (strScan != NULL)
+                *strScan = '\0';
         } else {
-            goto fatalError;
+            strValue2 = strValue1;
         }
+        value =
+          (ParseTranslationOption (strValue1) << TCLX_TRANSLATE_READ_SHIFT) |
+            ParseTranslationOption (strValue2);
         break;
+      }
     }
     Tcl_DStringFree (&strValue);
     return value;
@@ -1052,7 +1132,9 @@ TclX_GetChannelOption (channel, option)
  *   o interp (I) - Errors returned in result.
  *   o channel (I) - Channel to set the option for.
  *   o option (I) - One of the TCLX_COPT_* defines.
- *   o value (I) - Value to set the option too (integer define).
+ *   o value (I) - Value to set the option to (integer define).  Note, if
+ *     this is translation, it can either be the read and write directions
+ *     masked together or a single value.
  * Result:
  *   TCL_OK or TCL_ERROR;
  *-----------------------------------------------------------------------------
@@ -1065,6 +1147,8 @@ TclX_SetChannelOption (interp, channel, option, value)
     int          value;
 {
     char *strOption, *strValue;
+    int readValue, writeValue;
+    char valueList [64];
 
     switch (option) {
       case TCLX_COPT_BLOCKING:
@@ -1099,26 +1183,29 @@ TclX_SetChannelOption (interp, channel, option, value)
         break;
 
       case TCLX_COPT_TRANSLATION:
+        /*
+         * Hack a list together rather than allocate memory.  If values for
+         * read or write were not specified, specify both the same.
+         */
+        readValue = (value & TCLX_TRANSLATE_READ_MASK) >>
+            TCLX_TRANSLATE_READ_SHIFT;
+        writeValue = (value & TCLX_TRANSLATE_WRITE_MASK);
+        if (readValue == TCLX_TRANSLATE_UNSPECIFIED)
+            readValue = writeValue;
+        if (writeValue == TCLX_TRANSLATE_UNSPECIFIED)
+            writeValue = readValue;
+
         strOption = "-translation";
-        switch (value) {
-          case TCLX_TRANSLATE_AUTO:
-            strValue = "auto";
-            break;
-          case TCLX_TRANSLATE_LF:  /* Also binary */
-            strValue = "lf";
-            break;
-          case TCLX_TRANSLATE_CR:
-            strValue = "cr";
-            break;
-          case TCLX_TRANSLATE_CRLF:
-            strValue = "crlf";
-            break;
-          case TCLX_TRANSLATE_PLATFORM:
-            strValue = "platform";
-            break;
-          default:
+
+        valueList [0] = '\0';
+        valueList [sizeof (valueList) - 1] = '\0';  /* Overflow check */
+        strValue = valueList;
+
+        strcat (valueList, FormatTranslationOption (readValue));
+        strcat (valueList, " ");
+        strcat (valueList, FormatTranslationOption (writeValue));
+        if (valueList [sizeof (valueList) - 1] != '\0')
             goto fatalError;
-        }
         break;
 
       default:

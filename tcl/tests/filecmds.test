@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 5.5 1996/03/20 06:57:58 markd Exp $
+# $Id: filecmds.test,v 6.0 1996/05/10 16:17:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -50,6 +50,17 @@ if {$testFileSize != [file size IOTEST.TMP]} {
 Test filecmds-3.1 {copyfile tests} {
     set testFH [open IOTEST.TMP r]
     set testFH2 [open IOTEST2.TMP w]
+    copyfile $testFH $testFH2
+    close $testFH
+    close $testFH2
+    system "diff IOTEST.TMP IOTEST2.TMP >/dev/null 2>&1"
+} 0 0
+
+Test filecmds-3.1.1 {copyfile tests} {
+    # Source/target open read-write.
+    set testFH [open IOTEST.TMP r+]
+    set testFH2 [open IOTEST2.TMP r+]
+    seek $testFH2 0
     copyfile $testFH $testFH2
     close $testFH
     close $testFH2
