@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.tcl,v 8.4 1997/08/30 22:29:59 markd Exp $
+# $Id: convlib.tcl,v 8.5 1997/10/06 04:48:14 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -39,15 +39,17 @@ namespace eval TclX {
         # Open and validate the file.
 
         set tclIndexFH [open $tclIndex r]
-        set hdr [gets $tclIndexFH]
-        if {!([cequal $hdr {# Tcl autoload index file, version 2.0}] ||
-              [cequal $hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}])} {
-            error "can only convert version 2.0 Tcl auto-load files"
+        try_eval {
+            set hdr [gets $tclIndexFH]
+            if {!([cequal $hdr {# Tcl autoload index file, version 2.0}] ||
+                [cequal $hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}])} {
+                    error "can only convert version 2.0 Tcl auto-load files"
+                }
+            set dir [file dirname $tclIndex]  ;# Expected by the script.
+            eval [read $tclIndexFH]
+        }  {} {
+            close $tclIndexFH
         }
-        set dir [file dirname $tclIndex]  ;# Expected by the script.
-        eval [read $tclIndexFH]
-        close $tclIndexFH
-
         foreach procName [array names auto_index] {
             if ![string match "source *" $auto_index($procName)] {
                 puts stderr "WARNING: Can't convert load command for\
@@ -58,7 +60,7 @@ namespace eval TclX {
             set filePath [lindex $auto_index($procName) 1]
             set fileName [file tail $filePath] 
             if {[lsearch $ignore $fileName] >= 0} continue
-
+            
             lappend fileTbl($filePath) $procName
         }
         if ![info exists fileTbl] {

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfile.tcl,v 8.1 1997/04/17 04:59:10 markd Exp $
+# $Id: stringfile.tcl,v 8.2 1997/08/23 18:55:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -26,29 +26,22 @@ proc read_file {fileName args} {
         set flag {}
     }
     set fp [open $fileName]
-    set stat [catch {
-        eval read $flag $fp $args
-    } result]
-    close $fp
-    if {$stat != 0} {
-        global errorInfo errorCode
-        error $result $errorInfo $errorCode
+    try_eval {
+        set result [eval read $flag $fp $args]
+    } {} {
+        close $fp
     }
     return $result
 } 
 
 proc write_file {fileName args} {
     set fp [open $fileName w]
-    
-    set stat [catch {
+    try_eval {
         foreach string $args {
             puts $fp $string
         }
-    } result]
-    close $fp
-    if {$stat != 0} {
-        global errorInfo errorCode
-        error $result $errorInfo $errorCode
+    } {} {
+        close $fp
     }
 }
 

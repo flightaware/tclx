@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 8.6 1997/08/23 18:55:22 markd Exp $
+# $Id: help.tcl,v 8.7 1997/10/19 02:02:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 # FIX: Convert this to use namespaces.
@@ -212,13 +212,16 @@ namespace eval TclXHelp {
     proc DisplayPage filePath {
 
         set inFH [open $filePath r]
-        while {[gets $inFH fileBuf] >= 0} {
-            if {![Display $fileBuf]} {
-                break
+        try_eval {
+            while {[gets $inFH fileBuf] >= 0} {
+                if {![Display $fileBuf]} {
+                    break
+                }
             }
+        } {} {
+            close $inFH
         }
-        close $inFH
-    }    
+    }
 
     #--------------------------------------------------------------------------
     # Display a list of file names in a column format. This use columns of 14 
@@ -343,8 +346,11 @@ proc apropos {regexp} {
     foreach dir [TclXHelp::RootDirs] {
         foreach brief [glob -nocomplain $dir/*.brf] {
             set briefFH [open $brief]
-            scanfile $ch $briefFH
-            close $briefFH
+            try_eval {
+                scanfile $ch $briefFH
+            } {} {
+                close $briefFH
+            }
             if $stop break
         }
         if $stop break

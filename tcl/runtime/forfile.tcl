@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.tcl,v 8.1 1997/04/17 04:59:04 markd Exp $
+# $Id: forfile.tcl,v 8.2 1997/08/23 18:55:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -21,13 +21,16 @@
 proc for_file {var filename cmd} {
     upvar $var line
     set fp [open $filename r]
-    set code 0
-    set result {}
-    while {[gets $fp line] >= 0} {
-        set code [catch {uplevel 1 $cmd} result]
-        if {$code != 0 && $code != 4} break
+    try_eval {
+        set code 0
+        set result {}
+        while {[gets $fp line] >= 0} {
+            set code [catch {uplevel 1 $cmd} result]
+            if {$code != 0 && $code != 4} break
+        }
+    } {} {
+        close $fp
     }
-    close $fp
 
     if {$code == 0 || $code == 3 || $code == 4} {
         return $result

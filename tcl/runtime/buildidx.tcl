@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 8.3 1997/07/10 10:50:30 markd Exp $
+# $Id: buildidx.tcl,v 8.4 1997/08/23 18:55:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -76,9 +76,6 @@ namespace eval TclX {
         set idxName "[file root $libName].tndx"
 
         catch {file delete $idxName}
-        set libFH [open $libName r]
-        set idxFH [open $idxName w]
-        set packageCnt 0
 
         set contectHdl [scancontext create]
 
@@ -114,24 +111,26 @@ namespace eval TclX {
             }
         }
 
-        set pkgInfo {}
-        if {[catch {
+        try_eval {
+            set libFH [open $libName r]
+            set idxFH [open $idxName w]
+            set packageCnt 0
+            set pkgInfo {}
+            
             scanfile $contectHdl $libFH
             if {$packageCnt == 0} {
                 error "No \"#@package:\" definitions found in $libName"
             }   
-        } msg] != 0} {
-            global errorInfo errorCode
-            close $libFH
-            close $idxFH
-            catch {file delete idxName}
-            error $msg $errorInfo $errorCode
+            if ![lempty $pkgInfo] {
+                TclX::PutIdxEntry $idxFH $pkgInfo
+            }
+        } {
+            catch {file delete $idxName}
+            error $errorResult $errorInfo $errorCode
+        } {
+            catch {close $libFH}
+            catch {close $idxFH}
         }
-        if ![lempty $pkgInfo] {
-            TclX::PutIdxEntry $idxFH $pkgInfo
-        }
-        close $libFH
-        close $idxFH
 
         scancontext delete $contectHdl
 
