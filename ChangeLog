@@ -1,5 +1,8 @@
 2004-11-23  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* generic/tclXfilescan.c (TclX_ScanfileObjCmd): watch for scanfile
+	closing the open channel. [Bug 1045190] (hellstroem)
+
 	* configure.in, configure: add check for NO_UNION_WAIT for
 	Solaris, HP and related systems
 

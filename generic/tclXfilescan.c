@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXfilescan.c,v 1.2 2002/11/03 21:07:43 karll Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -838,17 +838,18 @@ TclX_ScanfileObjCmd (clientData, interp, objc, objv)
 
     /*
      * Scan the file, protecting it with a close handler.
+     * Watch for case where ScanFile may close the file during scan.
+     * [Bug 1045190]
      */
     contextPtr->fileOpen = TRUE;
     Tcl_CreateCloseHandler (channel,
                             ScanFileCloseHandler,
                             (ClientData) contextPtr);
-    status = ScanFile (interp,
-                       contextPtr,
-                       channel);
-    Tcl_DeleteCloseHandler (channel,
-                            ScanFileCloseHandler,
-                            (ClientData) contextPtr);
+    status = ScanFile(interp, contextPtr, channel);
+    if (contextPtr->fileOpen == TRUE) {
+	Tcl_DeleteCloseHandler(channel, ScanFileCloseHandler,
+		(ClientData) contextPtr);
+    }
 
     /*
      * If we set the copyfile, disassociate it from the context.
