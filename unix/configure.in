@@ -13,12 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.11 1996/02/17 08:44:19 markd Exp $
+dnl $Id: configure.in,v 5.12 1996/02/20 03:52:55 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.11 $),)dnl
-
-AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.12 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -53,18 +51,40 @@ if test ! -d ../tk ; then
 fi
 
 #------------------------------------------------------------------------------
-# Check command line looking for the --arch= option.
+# Check command line looking for the --with-tk=YES/NO option.
+#------------------------------------------------------------------------------
+
+AC_ARG_WITH(tk,
+    [  --with-tk=YES|NO         build Tk specific code and wishx],
+    [TKX_BUILD=$withval],
+    [TKX_BUILD=YES])
+
+case "$TKX_BUILD" in
+    YES|yes)
+        AC_MSG_RESULT(Will build Tk specific code and wishx)
+        TKX_BUILD=YES
+        ;;
+    NO|no)
+        AC_MSG_RESULT(Will not build Tk specific code and wishx)
+        TKX_BUILD=NO
+        ;;
+     *)
+        AC_MSG_ERROR(Invalid argument to --with-tk=, expected YES or NO)
+        ;;
+esac
+AC_SUBST(TKX_BUILD)
+
+#------------------------------------------------------------------------------
+# Check command line looking for the --with-arch= option.
 #------------------------------------------------------------------------------
 
 AC_ARG_WITH(arch,
-         [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
-                          and lib directory names],
-         [TCLX_ARCH=.$withval])
-if test "X$TCLX_ARCH" = "X" ; then
-    AC_MSG_RESULT("No architecture suffix will be used")
-else
-    AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
-fi
+    [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
+                      and lib directory names],
+    [TCLX_ARCH=.$withval
+     AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
+    ],
+    [AC_MSG_RESULT("No architecture suffix will be used")])
 AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
@@ -72,29 +92,27 @@ AC_SUBST(TCLX_ARCH)
 #------------------------------------------------------------------------------
 
 AC_ARG_ENABLE(master,
-         [  --enable-master         enable master directory installation model],
-         [master="YES"], [master="NO"])
-if test "X$master" = "XYES" ; then
-    AC_MSG_RESULT("Master installation model")
-    TCLX_INST_BIN='${TCLX_INST_RUNTIME}/bin${ARCH}'
-    TCLX_INST_LIB='${TCLX_INST_RUNTIME}/lib${ARCH}'
-    TCLX_INST_INCL='${TCLX_INST_RUNTIME}/include'
-    TCLX_INST_MAN='${TCLX_INST_RUNTIME}/man'
-    TKX_INST_BIN='${TKX_INST_RUNTIME}/bin${ARCH}'
-    TKX_INST_LIB='${TKX_INST_RUNTIME}/lib${ARCH}'
-    TKX_INST_INCL='${TKX_INST_RUNTIME}/include'
-    TKX_INST_MAN='${TKX_INST_RUNTIME}/man'
-else
-    AC_MSG_RESULT("Standard installation model")
-    TCLX_INST_BIN='${TCLX_BIN}'
-    TCLX_INST_LIB='${TCLX_LIB}'
-    TCLX_INST_INCL='${TCLX_INCL}'
-    TCLX_INST_MAN='${TCLX_MAN}'
-    TKX_INST_BIN='${TCLX_BIN}'
-    TKX_INST_LIB='${TCLX_LIB}'
-    TKX_INST_INCL='${TCLX_INCL}'
-    TKX_INST_MAN='${TCLX_MAN}'
-fi
+    [  --enable-master         enable master directory installation model],
+    [AC_MSG_RESULT("Master installation model")
+     TCLX_INST_BIN='${TCLX_INST_RUNTIME}/bin${ARCH}'
+     TCLX_INST_LIB='${TCLX_INST_RUNTIME}/lib${ARCH}'
+     TCLX_INST_INCL='${TCLX_INST_RUNTIME}/include'
+     TCLX_INST_MAN='${TCLX_INST_RUNTIME}/man'
+     TKX_INST_BIN='${TKX_INST_RUNTIME}/bin${ARCH}'
+     TKX_INST_LIB='${TKX_INST_RUNTIME}/lib${ARCH}'
+     TKX_INST_INCL='${TKX_INST_RUNTIME}/include'
+     TKX_INST_MAN='${TKX_INST_RUNTIME}/man'
+    ], 
+    [AC_MSG_RESULT("Standard installation model")
+     TCLX_INST_BIN='${TCLX_BIN}'
+     TCLX_INST_LIB='${TCLX_LIB}'
+     TCLX_INST_INCL='${TCLX_INCL}'
+     TCLX_INST_MAN='${TCLX_MAN}'
+     TKX_INST_BIN='${TCLX_BIN}'
+     TKX_INST_LIB='${TCLX_LIB}'
+     TKX_INST_INCL='${TCLX_INCL}'
+     TKX_INST_MAN='${TCLX_MAN}'])
+
 AC_SUBST(TCLX_INST_BIN)
 AC_SUBST(TCLX_INST_LIB)
 AC_SUBST(TCLX_INST_INCL)
@@ -105,11 +123,89 @@ AC_SUBST(TKX_INST_INCL)
 AC_SUBST(TKX_INST_MAN)
 
 #------------------------------------------------------------------------------
-# Check for various programs used during the build.
+# Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
+# tree.
 #------------------------------------------------------------------------------
 
-AC_PROG_CC
-AC_PROG_RANLIB
+srcbasedir=`cd $srcdir/..; pwd`
+AC_SUBST(srcbasedir)
+bldbasedir=`cd ..; pwd`
+AC_SUBST(bldbasedir)
+
+#------------------------------------------------------------------------------
+# Extract the version information out of tclExtend.h so it can be assigned
+# to macros.
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING(TclX versions)
+
+eval `egrep '^#define T.*_FULL_VERSION' $srcbasedir/tcl/generic/tclExtend.h | \
+      sed -e 's/#define //' -e 's/ *"/="/'`
+AC_MSG_RESULT($TCLX_FULL_VERSION)
+AC_SUBST(TCLX_FULL_VERSION)
+AC_SUBST(TKX_FULL_VERSION)
+
+#------------------------------------------------------------------------------
+# Generate tmp makefile that outputs macro values in Config.mk as shell
+# variables.  Validate that we can find Tcl and Tk files.  Note, we have to
+# deal with 3 parsings by the shell plus a parsing by make, use care in
+# changing this.
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING(macro values from Config.mk)
+cat Config.mk >confmakefile
+echo "srcbasedir=$srcbasedir" >>confmakefile
+echo "bldbasedir=$bldbasedir" >>confmakefile
+echo "all:" >>confmakefile
+echo '	@echo TCL_CONFIG=\"${TCL_CONFIG}\"' >>confmakefile
+echo '	@echo TK_CONFIG=\"${TK_CONFIG}\"' >>confmakefile
+
+eval `${MAKE-make} -f confmakefile`
+rm confmakefile
+
+if test ! -e "$TCL_CONFIG" ; then
+    AC_MSG_ERROR(Config.mk does not set TCL_CONFIG to a valid path to tclConfig.sh)
+fi
+if test "$TKX_BUILD" = "YES"; then
+    if test ! -e "$TK_CONFIG" ; then
+        AC_MSG_ERROR(Config.mk does not set TK_CONFIG to a valid path to tkConfig.sh)
+    fi
+fi
+AC_MSG_RESULT(ok)
+
+# Get defines from tclConfig.sh
+. $TCL_CONFIG
+
+LIBS=$TCL_LIBS   # Need for tests.
+
+AC_SUBST(TCL_DEFS)
+AC_SUBST(TCL_LIBS)
+AC_SUBST(TCL_DL_LIBS)
+AC_SUBST(TCL_LD_FLAGS)
+AC_SUBST(TCL_RANLIB)
+
+# Get defines from tkConfig.sh
+if test "$TKX_BUILD" = "YES"; then
+   . $TK_CONFIG
+fi
+AC_SUBST(TK_DEFS)
+AC_SUBST(TK_LIBS)
+AC_SUBST(TK_XINCLUDES)
+AC_SUBST(TK_XLIBSW)
+
+#------------------------------------------------------------------------------
+# Check for various programs used during the build.  If the CC environment
+# variable is not set, the compiler used to build Tcl is used.
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING(which C compiler to use)
+if test "X$CC" = "X"; then
+    CC=$TCL_CC
+    AC_MSG_RESULT(using C compiler specified in tclConfig.sh)
+else
+    AC_MSG_RESULT(using C compiler specified in by CC env var)
+fi
+AC_SUBST(CC)
 
 #------------------------------------------------------------------------------
 # Determine if we have symbolic links on the filesystem we are building
@@ -125,15 +221,14 @@ fi
 AC_SUBST(HAVE_SYML)
 
 #------------------------------------------------------------------------------
-#       Some make programs require includes to be 
-#         .include "file"
-#     others...
-#         include file
-#     Checks the MAKE environment variable for the name of the make command
-#     to use.
+# Some make programs require includes to be 
+#     .include "file"
+# others...
+#     include file
+# Checks the MAKE environment variable for the name of the make command to use.
 #------------------------------------------------------------------------------
 
-AC_MSG_CHECKING(how make handles includes)
+AC_MSG_CHECKING("how make handles includes")
 cat > confmakeinc <<EOF
 
 EOF
@@ -158,14 +253,13 @@ AC_SUBST(MAKEINCLUDE)
 AC_SUBST(MAKEQUOTE)
 
 #------------------------------------------------------------------------------
-#       Check for system header files.
+# Check for system header files.
 #------------------------------------------------------------------------------
 
-AC_HEADER_CHECK(values.h, , AC_DEFINE(NO_VALUES_H))
-AC_HEADER_CHECK(sys/socket.h, , AC_DEFINE(NO_SYS_SOCKET_H))
+AC_HEADER_CHECK(limits.h, , AC_DEFINE(NO_LIMITS_H))
 
 #------------------------------------------------------------------------------
-#       Check for missing typedefs.
+# Check for missing typedefs.
 #------------------------------------------------------------------------------
 
 AC_CHECK_TYPE(clock_t, long)
@@ -173,48 +267,16 @@ AC_CHECK_TYPE(time_t, long)
 AC_CHECK_TYPE(off_t, long)
 
 #------------------------------------------------------------------------------
-#       What type do signals return?
+# What type do signals return?
 #------------------------------------------------------------------------------
 
 AC_RETSIGTYPE
 
 #------------------------------------------------------------------------------
-#       Find out all about time handling differences.
+# Test to see if "times" returns a status or the amount of elapsed real time.
 #------------------------------------------------------------------------------
 
-AC_HEADER_TIME
-AC_STRUCT_TIMEZONE
-
-AC_MSG_CHECKING([tm_tzadj in struct tm])
-AC_TRY_COMPILE([#include <time.h>], [struct tm tm; tm.tm_tzadj;],
-        [AC_DEFINE(HAVE_TM_TZADJ)
-         AC_MSG_RESULT(yes)],
-        AC_MSG_RESULT(no))
-
-AC_MSG_CHECKING([tm_gmtoff in struct tm])
-AC_TRY_COMPILE([#include <time.h>], [struct tm tm; tm.tm_gmtoff;],
-        [AC_DEFINE(HAVE_TM_GMTOFF)
-         AC_MSG_RESULT(yes)],
-        AC_MSG_RESULT(no))
-
-#
-# Its important to include time.h in this check, as some systems (like convex)
-# have timezone functions, etc.
-#
-AC_MSG_CHECKING([timezone variable])
-AC_TRY_COMPILE([#include <time.h>],
-        [timezone += 1;
-         exit (0);],
-        [AC_DEFINE(HAVE_TIMEZONE_VAR)
-         AC_MSG_RESULT(yes)],
-        AC_MSG_RESULT(no))
-
-#------------------------------------------------------------------------------
-#     Test to see if "times" returns a status or the amount of
-#     elapsed real time.
-#------------------------------------------------------------------------------
-
-echo "checking to see if 'times' returns the elapsed real time"
+AC_MSG_CHECKING(checking to see what 'times' returns)
 AC_TRY_RUN([
 #include <sys/types.h>
 #include <sys/times.h>
@@ -227,23 +289,10 @@ if (times (&cpu) > 0)
 else 
      exit (1);
 }
-], AC_DEFINE(TIMES_RETS_REAL_TIME), ,AC_DEFINE(TIMES_RETS_REAL_TIME))
-
-#------------------------------------------------------------------------------
-# Determine various socket related options:
-#   o Does struct msghdr contain the msg_accrights fields?
-#------------------------------------------------------------------------------
-
-AC_MSG_CHECKING([struct msghdr for msg_accrights])
-AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/socket.h>],
-        [struct msghdr msgHeader;
-         msgHeader.msg_accrights = (void*) 0;
-         msgHeader.msg_accrightslen = 0;
-         exit (0);],
-        [AC_DEFINE(HAVE_MSG_ACCRIGHTS)
-         AC_MSG_RESULT(yes)],
-        AC_MSG_RESULT(no))
+], [AC_MSG_RESULT(elapsed real time)],
+   [AC_MSG_RESULT(a status)
+    AC_DEFINE(TIMES_RETS_STATUS)],
+   [AC_MSG_ERROR(cross-compiling not supported)])
 
 #------------------------------------------------------------------------------
 #     Determine if "." is used as separator for the manual directory
@@ -290,563 +339,52 @@ fi
 AC_SUBST(MAN_DIR_SEPARATOR)
 
 #------------------------------------------------------------------------------
-# Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
-# tree.
-#------------------------------------------------------------------------------
-
-srcbasedir=`cd $srcdir/..; pwd`
-AC_SUBST(srcbasedir)
-bldbasedir=`cd ..; pwd`
-AC_SUBST(bldbasedir)
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-#                      Begin code from Tcl configure.in
-#------------------------------------------------------------------------------
-
-#--------------------------------------------------------------------
-#	SGI systems don't use the BSD form of the gettimeofday function,
-#	but they have a BSDgettimeofday function that can be used instead.
-#	Other systems have not gettimeofday at all.  Figure out which
-#	of these cases applies.
-#--------------------------------------------------------------------
-
-AC_CHECK_FUNC(BSDgettimeofday, AC_DEFINE(HAVE_BSDGETTIMEOFDAY),
-	AC_CHECK_FUNC(gettimeofday, , AC_DEFINE(NO_GETTOD)))
-
-#--------------------------------------------------------------------
-#	On a few very rare systems, all of the libm.a stuff is
-#	already in libc.a.  Set compiler flags accordingly.
-#	Also, Linux requires the "ieee" library for math to work
-#	right.
-#--------------------------------------------------------------------
-
-AC_FUNC_CHECK(sin, MATH_LIBS="", MATH_LIBS="-lm")
-AC_SUBST(MATH_LIBS)
-AC_CHECK_LIB(ieee, main, [MATH_LIBS="$MATH_LIBS -lieee"])
-
-#--------------------------------------------------------------------
-#       Supply substitutes for missing POSIX header files.  Special
-#       notes:
-#           - Sprite's dirent.h exists but is bogus.
-#           - stdlib.h doesn't define strtol, strtoul, or
-#             strtod insome versions of SunOS
-#           - some versions of string.h don't declare procedures such
-#             as strstr
-#--------------------------------------------------------------------
-
-AC_HAVE_HEADERS(unistd.h)
-AC_MSG_CHECKING(dirent.h)
-AC_TRY_LINK([#include <sys/types.h>
-#include <dirent.h>], [
-#ifndef _POSIX_SOURCE
-#   ifdef __Lynx__
-	/*
-	 * Generate compilation error to make the test fail:  Lynx headers
-	 * are only valid if really in the POSIX environment.
-	 */
-
-	missing_procedure();
-#   endif
-#endif
-DIR *d;
-struct dirent *entryPtr;
-char *p;
-d = opendir("foobar");
-entryPtr = readdir(d);
-p = entryPtr->d_name;
-closedir(d);
-], tcl_ok=yes, tcl_ok=no)
-AC_HEADER_EGREP([Sprite version.* NOT POSIX], tcl_ok=no)
-if test $tcl_ok = no; then
-    AC_DEFINE(NO_DIRENT_H)
-fi
-AC_MSG_RESULT($tcl_ok)
-AC_HEADER_CHECK(errno.h, , AC_DEFINE(NO_ERRNO_H))
-AC_HEADER_CHECK(float.h, , AC_DEFINE(NO_FLOAT_H))
-AC_HEADER_CHECK(limits.h, , AC_DEFINE(NO_LIMITS_H))
-AC_HEADER_CHECK(stdlib.h, tcl_ok=1, tcl_ok=0)
-AC_HEADER_EGREP(strtol, stdlib.h, , tcl_ok=0)
-AC_HEADER_EGREP(strtoul, stdlib.h, , tcl_ok=0)
-AC_HEADER_EGREP(strtod, stdlib.h, , tcl_ok=0)
-if test $tcl_ok = 0; then
-    AC_DEFINE(NO_STDLIB_H)
-fi
-AC_HEADER_CHECK(string.h, tcl_ok=1, tcl_ok=0)
-AC_HEADER_EGREP(strstr, string.h, , tcl_ok=0)
-AC_HEADER_EGREP(strerror, string.h, , tcl_ok=0)
-if test $tcl_ok = 0; then
-    AC_DEFINE(NO_STRING_H)
-fi
-AC_HEADER_CHECK(sys/time.h, , AC_DEFINE(NO_SYS_TIME_H))
-AC_HEADER_CHECK(sys/wait.h, , AC_DEFINE(NO_SYS_WAIT_H))
-
-#--------------------------------------------------------------------
-#       Check for various typedefs and provide substitutes if
-#       they don't exist.
-#--------------------------------------------------------------------
-
-AC_MODE_T
-AC_PID_T
-AC_SIZE_T
-AC_UID_T
-
-#--------------------------------------------------------------------
-#       If a system doesn't have an opendir function (man, that's old!)
-#       then we have to supply a different version of dirent.h which
-#       is compatible with the substitute version of opendir that's
-#       provided.  This version only works with V7-style directories.
-#--------------------------------------------------------------------
-
-AC_FUNC_CHECK(opendir, , AC_DEFINE(USE_DIRENT2_H))
-
-#--------------------------------------------------------------------
-#       The check below checks whether <sys/wait.h> defines the type
-#       "union wait" correctly.  It's needed because of weirdness in
-#       HP-UX where "union wait" is defined in both the BSD and SYS-V
-#       environments.  Checking the usability of WIFEXITED seems to do
-#       the trick.
-#--------------------------------------------------------------------
-
-AC_MSG_CHECKING([union wait])
-AC_TRY_LINK([#include <sys/types.h> 
-#include <sys/wait.h>], [
-union wait x;
-WIFEXITED(x);		/* Generates compiler error if WIFEXITED
-			 * uses an int. */
-], tcl_ok=yes, tcl_ok=no)
-AC_MSG_RESULT($tcl_ok)
-if test $tcl_ok = no; then
-    AC_DEFINE(NO_UNION_WAIT)
-fi
-
-#--------------------------------------------------------------------
-#	The statements below define a collection of symbols related to
-#	dynamic loading and shared libraries:
-#
-#	SHLIB_CFLAGS -	Flags to pass to cc when compiling the components
-#			of a shared library (may request position-independent
-#			code, among other things).
-#	SHLIB_LD -	Base command to use for combining object files
-#			into a shared library.
-#	SHLIB_SUFFIX -	Suffix to use for the name of the shared library.  An
-#			empty string means we don't know how to use shared
-#			libraries on this platform.
-#	DL_OBJS -	Name of the object file that implements dynamic
-#			loading for Tcl on this system.
-#	DL_LIBS -	Library file(s) to include in tclsh and other base
-#			applications in order for the "load" command to work.
-#	LD_FLAGS -	Flags to pass to the compiler when linking object
-#			files into an executable application binary such
-#			as tclsh.
-#	LD_SEARCH_FLAGS-Flags to pass to ld, such as "-R /usr/local/tcl/lib",
-#			that tell the run-time dynamic linker where to look
-#			for shared libraries such as libtcl.so.  Depends on
-#			the variable LIB_INSTALL_DIR in the Makefile.
-#--------------------------------------------------------------------
-
-# Step 1: set the variable "system" to hold the name and version number
-# for the system.  This can usually be done via the "uname" command, but
-# there are a few systems, like Next, where this doesn't work.
-
-AC_MSG_CHECKING([system version (for dynamic loading)])
-if test -f /usr/lib/NextStep/software_version; then
-  system=NEXTSTEP-`awk '/3/,/3/' /usr/lib/NextStep/software_version`
-else
-    system=`uname -s`-`uname -r`
-    if test "$status" = 1 ; then
-	AC_MSG_RESULT([unknown (can't find uname command)])
-	system=unknown
-    else
-	# Special check for weird MP-RAS system (uname returns weird
-	# results, and the version is kept in special file).
-    
-	if test -r /etc/.relid -a "X`uname -n`" = "X`uname -s`" ; then
-	    system=MP-RAS-`awk '{print $3}' /etc/.relid'`
-	fi
-	AC_MSG_RESULT($system)
-    fi
-fi
-
-# Step 2: check for existence of -ldl library.  This is needed because
-# Linux can use either -ldl or -ldld for dynamic loading.
-
-AC_CHECK_LIB(dl, dlopen, have_dl=yes, have_dl=no)
-
-# Step 3: disable dynamic loading if requested via a command-line switch.
-
-AC_ARG_ENABLE(load, [  --disable-load          disallow dynamic loading and "load" command],
-    [tcl_ok=$enableval], [tcl_ok=yes])
-if test "$tcl_ok" = "no"; then
-    system=unknown
-fi
-
-# Step 4: set configuration options based on system name and version.
-
-case $system in
-    AIX-*)
-	# Warning:  the AIX definitions have never been tested and I'm
-	# pretty sure that they don't work as is.  This code is just
-	# a starting point for a real implementation.
-	# SHLIB_CFLAGS=""
-	# SHLIB_LD="/bin/ld -e _nostart -berok  -bM:SRE -bE:lib$(LIBNAME).exp -H512 -T512"
-	# SHLIB_SUFFIX=".so"
-	# DL_OBJS="tclLoadNone.o"
-	# DL_LIBS=""
-	# LD_FLAGS=""
-	# LD_SEARCH_FLAGS=""
-	echo "Dynamic loading isn't available yet under AIX."
-	echo "Want to volunteer?"
-	;;
-    HP-UX-*.08.*|HP-UX-*.09.*|HP-UX-*.10.*)
-	SHLIB_CFLAGS="+z"
-	SHLIB_LD="ld -b"
-	SHLIB_SUFFIX=".sl"
-	DL_OBJS="tclLoadShl.o"
-	DL_LIBS="-ldld"
-	LD_FLAGS="-Wl,-E"
-	LD_SEARCH_FLAGS=""
-	;;
-    IRIX-4.*)
-	SHLIB_CFLAGS="-G 0"
-	SHLIB_SUFFIX="..o"
-	SHLIB_LD="echo tclLdAout $CC $SHLIB_SUFFIX {$SHLIB_CFLAGS} | tclsh -r -G 0"
-	DL_OBJS="tclLoadAout.o"
-	DL_LIBS=""
-	LD_FLAGS="-Wl,-D,08000000"
-	LD_SEARCH_FLAGS='-rpath ${LIB_INSTALL_DIR}'
-	;;
-    IRIX-5.*)
-	SHLIB_CFLAGS=""
-	SHLIB_LD="ld -shared -rdata_shared"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS=""
-	LD_FLAGS=""
-	LD_SEARCH_FLAGS=""
-	;;
-    Linux*)
-	SHLIB_CFLAGS="-fPIC"
-	SHLIB_SUFFIX=".so"
-	if test "$have_dl" = yes; then
-	    SHLIB_LD="${CC} -shared"
-	    DL_OBJS="tclLoadDl.o"
-	    DL_LIBS="-ldl"
-	    LD_FLAGS="-rdynamic"
-	    LD_SEARCH_FLAGS=""
-	else
-	    SHLIB_LD="ld -shared"
-	    DL_OBJS="tclLoadDld.o"
-	    DL_LIBS="-ldld"
-	    LD_FLAGS=""
-	    LD_SEARCH_FLAGS=""
-	fi
-	;;
-    MP-RAS-02*)
-	SHLIB_CFLAGS="-K PIC"
-	SHLIB_LD="cc -G"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS="-ldl"
-	LD_FLAGS=""
-	LD_SEARCH_FLAGS=""
-	;;
-    MP-RAS-*)
-	SHLIB_CFLAGS="-K PIC"
-	SHLIB_LD="cc -G"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS="-ldl"
-	LD_FLAGS="-Wl,-Bexport"
-	LD_SEARCH_FLAGS=""
-	;;
-    NetBSD-*|FreeBSD-*)
-	# Not available on all versions:  check for include file.
-	if test -f /usr/include/dlfcn.h; then
-	    SHLIB_CFLAGS="-fpic"
-	    SHLIB_LD="ld -Bshareable"
-	    SHLIB_SUFFIX=".so"
-	    DL_OBJS="tclLoadDl2.o"
-	    DL_LIBS=""
-	    LD_FLAGS=""
-	    LD_SEARCH_FLAGS=""
-	else
-	    SHLIB_CFLAGS=""
-	    SHLIB_SUFFIX="..o"
-	    SHLIB_LD="echo tclLdAout $CC $SHLIB_SUFFIX {$SHLIB_CFLAGS} | tclsh -r -G 0"
-	    DL_OBJS="tclLoadAout.o"
-	    DL_LIBS=""
-	    LD_FLAGS=""
-	    LD_SEARCH_FLAGS=""
-	fi
-	;;
-    NEXTSTEP-*)
-	SHLIB_CFLAGS=""
-	SHLIB_LD="cc -nostdlib -r"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadNext.o"
-	DL_LIBS=""
-	LD_FLAGS=""
-	LD_SEARCH_FLAGS=""
-	;;
-    OSF-1.*)
-	SHLIB_CFLAGS="-fpic"
-	SHLIB_LD='ld -shared -expect_unresolved "*"'
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS=""
-	LD_FLAGS=""
-	LD_SEARCH_FLAGS=""
-	;;
-    OSF1-V*)
-	SHLIB_CFLAGS=""
-	SHLIB_LD='ld -shared -expect_unresolved "*"'
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS=""
-	LD_FLAGS=""
-	LD_SEARCH_FLAGS=""
-	;;
-    RISCos-*)
-	SHLIB_CFLAGS="-G 0"
-	SHLIB_SUFFIX="..o"
-	SHLIB_LD="echo tclLdAout $CC $SHLIB_SUFFIX {$SHLIB_CFLAGS} | tclsh -r -G 0"
-	DL_OBJS="tclLoadAout.o"
-	DL_LIBS=""
-	LD_FLAGS="-Wl,-D,08000000"
-	LD_SEARCH_FLAGS=""
-	;;
-    SCO_SV-3.2*)
-        # Note, dlopen is available only on SCO 3.2.5 and greater.  However,
-        # this test works, since "uname -s" was non-standard in 3.2.4 and
-        # below.
-	SHLIB_CFLAGS="-Kpic -belf"
-	SHLIB_LD="ld -G -z text"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS=""
-	LD_FLAGS="-belf -Wl,-Bexport"
-	LD_SEARCH_FLAGS=""
-	;;
-    SunOS-4*)
-	SHLIB_CFLAGS="-PIC"
-	SHLIB_LD="ld -assert pure-text"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS="-ldl"
-	LD_FLAGS=""
-	LD_SEARCH_FLAGS=""
-	;;
-    SunOS-5*)
-	SHLIB_CFLAGS="-K PIC"
-	SHLIB_LD="/usr/ccs/bin/ld -G -z text"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS="-ldl"
-	LD_FLAGS=""
-	LD_SEARCH_FLAGS='-R ${LIB_INSTALL_DIR}'
-	;;
-    ULTRIX-4.*)
-	SHLIB_CFLAGS="-G 0"
-	SHLIB_SUFFIX="..o"
-	SHLIB_LD="echo tclLdAout $CC $SHLIB_SUFFIX {$SHLIB_CFLAGS} | tclsh -r -G 0"
-	DL_OBJS="tclLoadAout.o"
-	DL_LIBS=""
-	LD_FLAGS="-Wl,-D,08000000"
-	LD_SEARCH_FLAGS=""
-	;;
-    UNIX_SV*)
-	SHLIB_CFLAGS="-K PIC"
-	SHLIB_LD="cc -G"
-	SHLIB_SUFFIX=".so"
-	DL_OBJS="tclLoadDl.o"
-	DL_LIBS="-ldl"
-	LD_FLAGS="-Wl,-Bexport"
-	LD_SEARCH_FLAGS=""
-	;;
-esac
-
-AC_SUBST(LD_FLAGS)
-AC_SUBST(DL_LIBS)
-
-#------------------------------------------------------------------------------
-#                       End code from Tcl configure.in
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-#                      Begin code from Tk configure.in
-#------------------------------------------------------------------------------
-AC_HAVE_HEADERS(limits.h)
-
-#--------------------------------------------------------------------
-#	Include sys/select.h if it exists and if it supplies things
-#	that appear to be useful and aren't already in sys/types.h.
-#	This appears to be true only on the RS/6000 under AIX.  Some
-#	systems like OSF/1 have a sys/select.h that's of no use, and
-#	other systems like SCO UNIX have a sys/select.h that's
-#	pernicious.  If "fd_set" isn't defined anywhere then set a
-#	special flag.
-#--------------------------------------------------------------------
-
-AC_MSG_CHECKING([fd_set and sys/select])
-AC_TRY_COMPILE([#include <sys/types.h>],
-	[fd_set readMask, writeMask;], tk_ok=yes, tk_ok=no)
-if test $tk_ok = no; then
-    AC_HEADER_EGREP(fd_mask, sys/select.h, tk_ok=yes)
-    if test $tk_ok = yes; then
-	AC_DEFINE(HAVE_SYS_SELECT_H)
-    fi
-fi
-AC_MSG_RESULT($tk_ok)
-if test $tk_ok = no; then
-    AC_DEFINE(NO_FD_SET)
-fi
-
-#--------------------------------------------------------------------
-#	Locate the X11 header files and the X11 library archive.  Try
-#	the ac_path_x macro first, but if it doesn't find the X stuff
-#	(e.g. because there's no xmkmf program) then check through
-#	a list of possible directories.  Under some conditions the
-#	autoconf macro will return an include directory that contains
-#	no include files, so double-check its result just to be safe.
-#--------------------------------------------------------------------
-
-AC_PATH_X
-not_really_there=""
-if test "$no_x" = ""; then
-    if test "$x_includes" = ""; then
-	AC_TRY_CPP([#include <X11/XIntrinsic.h>], , not_really_there="yes")
-    else
-	if test ! -r $x_includes/X11/Intrinsic.h; then
-	    not_really_there="yes"
-	fi
-    fi
-fi
-if test "$no_x" = "yes" -o "$not_really_there" = "yes"; then
-    echo checking for X11 header files
-    XINCLUDES="# no special path needed"
-    AC_TRY_CPP([#include <X11/Intrinsic.h>], , XINCLUDES="nope")
-    if test "$XINCLUDES" = nope; then
-        dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include /usr/sww/include"
-        for i in $dirs ; do
-	    if test -r $i/X11/Intrinsic.h; then
-	        XINCLUDES=" -I$i"
-	    fi
-        done
-    fi
-else
-    if test "$x_includes" != ""; then
-	XINCLUDES=-I$x_includes
-    else
-	XINCLUDES="# no special path needed"
-    fi
-fi
-if test "$XINCLUDES" = nope; then
-  echo "Warning:  couldn't find any X11 include files."
-  XINCLUDES="# no include files found"
-fi
-AC_SUBST(XINCLUDES)
-
-if test "$no_x" = yes; then
-    XLIBSW=nope
-    if test "$XLIBSW" = nope; then
-	dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib /usr/sww/X11/lib"
-	for i in $dirs ; do
-	    if test -r $i/libX11.a; then
-		XLIBSW="-L$i -lX11"
-	    fi
-	done
-    fi
-else
-    if test "$x_libraries" = ""; then
-	XLIBSW=-lX11
-    else
-	XLIBSW="-L$x_libraries -lX11"
-    fi
-fi
-if test "$XLIBSW" = nope ; then
-    AC_CHECK_LIB(Xwindow, XCreateWindow, XLIBSW=-lXwindow)
-fi
-if test "$XLIBSW" = nope ; then
-    echo "Warning:  couldn't find the X11 library archive.  Using -lX11."
-    XLIBSW=-lX11
-fi
-AC_SUBST(XLIBSW)
-
-#--------------------------------------------------------------------
-#	Check for the existence of various libraries.  The order here
-#	is important, so that then end up in the right order in the
-#	command line generated by make.  The -lsocket and -lnsl libraries
-#	require a couple of special tricks:
-#	1. Use "connect" and "accept" to check for -lsocket, and
-#	   "gethostbyname" to check for -lnsl.
-#	2. Use each function name only once:  can't redo a check because
-#	   autoconf caches the results of the last check and won't redo it.
-#	3. Use -lnsl and -lsocket only if they supply procedures that
-#	   aren't already present in the normal libraries.  This is because
-#	   IRIX 5.2 has libraries, but they aren't needed and they're
-#	   bogus:  they goof up name resolution if used.
-#	4. On some SVR4 systems, can't use -lsocket without -lnsl too.
-#	   To get around this problem, check for both libraries together
-#	   if -lsocket doesn't work by itself.
-#--------------------------------------------------------------------
-
-AC_CHECK_LIB(Xbsd, main, [LIBS="$LIBS -lXbsd"])
-
-tk_checkBoth=0
-AC_CHECK_FUNC(connect, tk_checkSocket=0, tk_checkSocket=1)
-if test "$tk_checkSocket" = 1; then
-    AC_CHECK_LIB(socket, main, LIBS="$LIBS -lsocket", tk_checkBoth=1)
-fi
-if test "$tk_checkBoth" = 1; then
-    tk_oldLibs=$LIBS
-    LIBS="$LIBS -lsocket -lnsl"
-    AC_CHECK_FUNC(accept, tk_checkNsl=0, [LIBS=$tk_oldLibs])
-fi
-AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [LIBS="$LIBS -lnsl"]))
-
-
-#------------------------------------------------------------------------------
-#                       End code from Tk configure.in
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-#------------------------------------------------------------------------------
-#       Check for additional libraries the Tcl/Tk does not check for.
+# Check for additional libraries the Tcl/Tk does not check for.
 #------------------------------------------------------------------------------
 
 # This is needed for DEC Alphas
-AC_CHECK_LIB(dnet_stub, main, [LIBS="$LIBS -ldnet_stub"])
+AC_CHECK_LIB(dnet_stub, main, [TCLX_LIBS="$TCLX_LIBS -ldnet_stub"])
 
 #------------------------------------------------------------------------------
-# Older SCO systems don't have truncate, but have chsize in libx.  Newer
+# Older SCO systems don't have ftruncate, but have chsize in libx.  Newer
 # versions have both.  Only check for chsize in libx if we don't have
 # truncate.
 #------------------------------------------------------------------------------
 
-AC_CHECK_FUNC(truncate, 
-        [AC_DEFINE(HAVE_TRUNCATE)],
-        [AC_CHECK_LIB(x, chsize,
+AC_CHECK_FUNC(ftruncate, ,
+        [AC_DEFINE(NO_FTRUNCATE)
+         AC_CHECK_LIB(x, chsize,
                 [AC_DEFINE(HAVE_CHSIZE)
-                 [LIBS="$LIBS -lx"]])])
+                 [TCLX_LIBS="$TCLX_LIBS -lx"]])])
 
 #------------------------------------------------------------------------------
-#       Check for various Unix or library functions that can be used by TclX.
-#       These must be after the library checks.
+# Check for various Unix or library functions that can be used by TclX.
+# These must be after the library checks.
 #------------------------------------------------------------------------------
 
-AC_HAVE_FUNCS(getcwd select setitimer sigaction setpgid getgroups)
-AC_HAVE_FUNCS(bzero bcopy fsync getpriority strcoll tzset gettimeofday)
-AC_HAVE_FUNCS(fchown fchmod ftruncate waitpid)
+AC_CHECK_FUNC(select, , AC_DEFINE(NO_SELECT))
+AC_CHECK_FUNC(setitimer, , AC_DEFINE(NO_SETITIMER))
+AC_CHECK_FUNC(sigaction, , AC_DEFINE(NO_SIGACTION))
+AC_CHECK_FUNC(setpgid, , AC_DEFINE(NO_SETPGID))
+AC_CHECK_FUNC(getgroups, , AC_DEFINE(NO_GETGROUPS))
+AC_HAVE_FUNCS(bzero, , AC_DEFINE(NO_BZERO))
+AC_CHECK_FUNC(bcopy, , AC_DEFINE(NO_BCOPY))
+AC_CHECK_FUNC(fsync, , AC_DEFINE(NO_FSYNC))
+AC_CHECK_FUNC(getpriority, , AC_DEFINE(NO_GETPRIORITY))
+AC_CHECK_FUNC(strcoll, , AC_DEFINE(NO_STRCOLL))
+AC_CHECK_FUNC(fchown, , AC_DEFINE(NO_FCHOWN))
+AC_CHECK_FUNC(fchmod, , AC_DEFINE(NO_FCHMOD))
+AC_CHECK_FUNC(truncate, , AC_DEFINE(NO_TRUNCATE))
+AC_CHECK_FUNC(waitpid, , AC_DEFINE(NO_WAITPID))
 
 #------------------------------------------------------------------------------
 # Test for socket related functions.  Note that "socket" is just used to
-# determine if we have sockets at all.  We can't use "connect" or
-# "gethostbyname" because the Tk test that checks for socket related libraries
-# by set a cache value indicating we don't have them, even if we eventually
-# find libraries containing these functions.
+# determine if we have sockets at all.
 #------------------------------------------------------------------------------
 
-AC_HAVE_FUNCS(socket inet_aton gethostname sendmsg)
+AC_CHECK_FUNC(socket, , AC_DEFINE(NO_SOCKET))
+AC_CHECK_FUNC(inet_aton, , AC_DEFINE(NO_INET_ATON))
+AC_CHECK_FUNC(gethostname, , AC_DEFINE(NO_GETHOSTNAME))
 
 #------------------------------------------------------------------------------
 # Check for catgets.  Not the some systems (NetBSD 1.0) have catclose declared
@@ -854,23 +392,21 @@ AC_HAVE_FUNCS(socket inet_aton gethostname sendmsg)
 #------------------------------------------------------------------------------
 
 AC_CHECK_FUNC(catgets,
-        [AC_DEFINE(HAVE_CATGETS)
-         AC_MSG_CHECKING([catclose return value])
-         AC_TRY_COMPILE([#include <nl_types.h>], [
-                if (catclose ((nl_catd) 0) == 0) exit (0);],
-                AC_MSG_RESULT(ok), [
-                AC_MSG_RESULT([broken catclose return type])
-                AC_DEFINE(BAD_CATCLOSE)])])
-
+    [AC_MSG_CHECKING([catclose return value])
+     AC_TRY_COMPILE([#include <nl_types.h>], [
+        if (catclose ((nl_catd) 0) == 0) exit (0);],
+        AC_MSG_RESULT(ok), [
+        AC_MSG_RESULT([broken catclose return type])
+        AC_DEFINE(BAD_CATCLOSE)])]
+    [AC_DEFINE(NO_CATGETS)])
 
 #------------------------------------------------------------------------------
 # Check for missing functions that we need.  Must be done after library checks.
 #------------------------------------------------------------------------------
 
 AC_CHECK_FUNC(random, ,[LIBOBJS="$LIBOBJS random.o"]
-        AC_DEFINE(NO_RANDOM))
+              AC_DEFINE(NO_RANDOM))
 AC_CHECK_FUNC(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
-
 AC_SUBST(LIBOBJS)
 
 #------------------------------------------------------------------------------
@@ -894,6 +430,10 @@ fi
 #------------------------------------------------------------------------------
 # Generate the make files.
 #------------------------------------------------------------------------------
+
+AC_SUBST(TCLX_LIBS)
+TCLX_DEFS=$DEFS
+AC_SUBST(TCLX_DEFS)
 
 AC_SUBST(prefix)
 AC_SUBST(execprefix)

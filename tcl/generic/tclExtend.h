@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.10 1996/02/16 07:51:13 markd Exp $
+ * $Id: tclExtend.h,v 5.11 1996/02/20 01:13:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -23,20 +23,23 @@
 #include "tcl.h"
 
 /*
- * Version suffix for extended Tcl, this is appended to the standard Tcl
- * version to form the actual extended Tcl version.
+ * The version for TclX and TkX.  This is based on the version of Tcl and Tk
+ * that TclX was released against.  Its possible that TclX maybe running with a
+ * different version of Tcl or Tk.  The full version includes the patchlevel
+ * if its greater than zero.
  */
 
-#define TCL_EXTD_VERSION_SUFFIX "a-b1"   /* 7.5a-b1 */
-
-typedef void *void_pt;
+#define TCLX_VERSION_SUFFIX "a-b2"
+#define TCLX_PATCHLEVEL      0
+#define TCLX_VERSION        "7.5a-b2"
+#define TKX_VERSION         "4.1a-b2"
+#define TCLX_FULL_VERSION   "7.5a-b2"
+#define TKX_FULL_VERSION    "4.1a-b2"
 
 /*
- * TclX version and patch level.
+ * Generic void pointer.
  */
-
-extern char *tclxVersion;        /* Extended Tcl version number.            */
-extern int   tclxPatchlevel;     /* Extended Tcl patch level.               */
+typedef void *void_pt;
 
 /*
  * Used to override the init file name, which is either library relative or

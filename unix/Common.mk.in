@@ -12,30 +12,51 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.5 1996/02/16 18:05:08 markd Exp $
+# $Id: Common.mk.in,v 5.6 1996/02/17 08:44:10 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 SHELL = /bin/sh
 
 #------------------------------------------------------------------------------
+# TclX version information extracted from tclExtend.h.
+#
+TCLX_FULL_VERSION = @TCLX_FULL_VERSION@
+TKX_FULL_VERSION  = @TKX_FULL_VERSION@
+
+#------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk.
 #
-CC          = @CC@
-CFLAGS      = @CFLAGS@
-RANLIB      = @RANLIB@
-srcbasedir  = @srcbasedir@
-bldbasedir  = @bldbasedir@
-VPATH       = ${srcdir}
-prefix      = @prefix@
-exec_prefix = @exec_prefix@
-ARCH        = @TCLX_ARCH@
-LIBS        = @LIBS@ @MATH_LIBS@
-XINCLUDES   = @XINCLUDES@
-XLIBSW      = @XLIBSW@
+CC           = @CC@
+CFLAGS       = @CFLAGS@
+RANLIB       = @TCL_RANLIB@
+srcbasedir   = @srcbasedir@
+bldbasedir   = @bldbasedir@
+VPATH        = ${srcdir}
+prefix       = @prefix@
+exec_prefix  = @exec_prefix@
+ARCH         = @TCLX_ARCH@
 
-LD_FLAGS = @LD_FLAGS@
-DL_LIBS  = @DL_LIBS@
+#------------------------------------------------------------------------------
+# TclX configuration information determined by configure.
+#
+TKX_BUILD    = @TKX_BUILD@
+TCLX_DEFS    = @TCLX_DEFS@
+TCLX_LIBS    = @TCLX_LIBS@
+
+#------------------------------------------------------------------------------
+# Configuration information from tclConfig.sh and tkConfig.sh.
+#
+TCL_DEFS     = @TCL_DEFS@
+TCL_LIBS     = @TCL_LIBS@
+TCL_LD_FLAGS = @TCL_LD_FLAGS@
+TCL_DL_LIBS  = @TCL_DL_LIBS@
+
+TK_DEFS      = @TK_DEFS@
+TK_LIBS      = @TK_LIBS@
+TK_XINCLUDES = @TK_XINCLUDES@
+TK_XLIBSW    = @TK_XLIBSW@
+
 
 #------------------------------------------------------------------------------
 # Location of directories.
@@ -57,9 +78,6 @@ COMPAT_DIR         = ${srcbasedir}/tcl/compat
 #------------------------------------------------------------------------------
 # Programs run during the build.
 #
-TCLX_VERSION       = `${bldbasedir}/unix/tools/tclxversion`
-TKX_VERSION        = `${bldbasedir}/unix/tools/tkxversion`
-
 TCLX_TMP_RUNTIME   = ${bldbasedir}/tcl/unix
 TKX_TMP_RUNTIME    = ${bldbasedir}/tk/unix
 

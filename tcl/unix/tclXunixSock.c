@@ -15,7 +15,7 @@
 
 #include "tclExtdInt.h"
 
-#ifdef HAVE_SOCKET
+#ifndef NO_SOCKET
 
 /*
  * Some version of Linux have <linix/uio.h> (included by <sys/socket.h>) that
@@ -29,11 +29,11 @@
 #    define INADDR_NONE  ((long) -1)
 #endif
 
-#ifndef HAVE_BCOPY
+#ifdef NO_BCOPY
 #    define bcopy(from, to, length)    memmove((to), (from), (length))
 #endif
 
-#ifndef HAVE_BZERO
+#ifdef NO_BZERO
 #    define bzero(to, length)          memset((to), '\0', (length))
 #endif
 
@@ -147,7 +147,7 @@ InetAtoN (interp, strAddress, inAddress)
 {
     int result = TCL_OK;
 
-#ifdef HAVE_INET_ATON
+#ifndef NO_INET_ATON
     if (!inet_aton (strAddress, inAddress))
         result = TCL_ERROR;
 #else
@@ -907,4 +907,4 @@ Tcl_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_cntl", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
 }
-#endif /* HAVE_SOCKET */
+#endif /* NO_SOCKET */

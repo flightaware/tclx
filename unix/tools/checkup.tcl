@@ -5,10 +5,15 @@
 # are problems that are known and can be confusing to the user, so we check
 # during the compile phase.
 #
-# Currently detects broken glob and readdir command.  This is a common problem
-# encountered when building Tcl & TclX on Solaris systems.  If you compile with
-# /usr/ucb/cc you get readdir entries that don't match the include file.  This
-# program *MUST* be run in the src directory where TclX was built.
+# Problems checked for:
+#   o Detects broken glob and readdir command.  This is a common problem
+#     encountered when building Tcl & TclX on Solaris systems.  If you compile
+#     with /usr/ucb/cc you get readdir entries that don't match the include
+#     file.  This program *MUST* be run in the src directory where TclX was
+#     built.
+#   o Checks for modern functionality that is missing from the version of
+#     Unix we are compiled on.  Hopefully this will alert people to improper
+#     configuration.
 #------------------------------------------------------------------------------
 # Copyright 1995-1996 Karl Lehenbauer and Mark Diekhans.
 #
@@ -19,7 +24,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: checkup.tcl,v 5.0 1995/07/25 05:59:42 markd Rel $
+# $Id: checkup.tcl,v 5.1 1996/02/12 18:17:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -58,3 +63,11 @@ proc CheckDirList {dirlist cmd} {
 
 CheckDirList [glob *] glob
 CheckDirList [readdir .] readdir
+
+#
+# Print a message about missing functionality.  If its the first time, print
+# a header.
+#
+proc MissingMsg {msg} {
+    
+}

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.4 1996/02/12 18:15:42 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.5 1996/02/18 22:03:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -680,7 +680,7 @@ TruncateByPath (interp, filePath, newSize)
     char        *filePath;
     off_t        newSize;
 {
-#if defined(HAVE_TRUNCATE)
+#ifndef NO_TRUNCATE
     Tcl_DString  tildeBuf;
 
     Tcl_DStringInit (&tildeBuf);
@@ -725,14 +725,14 @@ TruncateByHandle (interp, fileHandle, newSize)
     char        *fileHandle;
     off_t        newSize;
 {
-#if defined(HAVE_FTRUNCATE) || defined(HAVE_CHSIZE)
+#if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE)
     int fileNum, stat;
 
     fileNum = TclX_GetOpenFnum (interp, fileHandle, TCL_WRITABLE);
     if (fileNum < 0)
         return TCL_ERROR;
 
-#ifdef HAVE_FTRUNCATE
+#ifndef NO_FTRUNCATE
     stat = ftruncate (fileNum, newSize);
 #else
     stat = chsize (fileNum, newSize);

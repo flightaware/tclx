@@ -36,7 +36,6 @@
 ./tcl/generic/tclXlist.c
 ./tcl/generic/tclXmath.c
 ./tcl/generic/tclXmsgcat.c
-./tcl/generic/tclXpatchl.h
 ./tcl/generic/tclXprocess.c
 ./tcl/generic/tclXprofile.c
 ./tcl/generic/tclXregexp.c
@@ -299,7 +298,6 @@
 ./tcl/tests/testlib.tcl
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
-./tcl/unix/tclXconf.h.in
 ./tcl/unix/tclxlibs.mk.in
 ./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c
@@ -363,7 +361,6 @@
 ./unix/Common.mk.in
 ./unix/Config.mk
 ./unix/Makefile.in
-./unix/acconfig.h
 ./unix/configure
 ./unix/configure.in
 ./unix/tools/Makefile.in
@@ -373,7 +370,6 @@
 ./unix/tools/cphelpdir.sh
 ./unix/tools/cpmanpages.tcl
 ./unix/tools/genindex.tcl
-./unix/tools/getversion.c
 ./unix/tools/instcopy.tcl
 ./unix/tools/libconvert.tcl
 ./unix/tools/symlinkext.sh

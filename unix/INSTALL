@@ -160,13 +160,26 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 
     o If you are going to be using Tk and want to build an Extended Tcl wish
       shell (wishx), configure, compile and install Tk 4.1.
-      it.
 
     o cd to tclX7.5a/unix
+
+    o Edit Config.mk in the build directory following the instructions in the
+      file.  You normally don't need to do this, only if special configuration
+      options are required.  If the --srcdir option to configure is used, it is
+      copied from the source directory to the build directory.  This file is
+      used to specify values that can't be figured out by the configure script.
+      This includes the location of the Tcl and Tk distributions.  It's also
+      used to specify the sections that the Tcl manual pages are to be
+      installed in.  This must be done before running configure, as 
+      configure uses this file to fine tclConfig.sh and tkConfig.sh.
 
     o Enter ./configure to run the configure script.  If you are going to
       be compiling with gcc, set the environment variable CC to "gcc".
       The following options are recognized by the TclX configure script:
+
+        o --with-tk=YES|NO
+          If "YES" compile Tk specific code and wishx, if "NO", not Tk code
+          will be compiled.  Default is "YES".
  
         o --srcdir=DIR
           If you are using a make that supports VPATH (e.g. GNU make) you can
@@ -200,21 +213,6 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       just rerun configure and make.  The dependencies will cause the
       correct files to be built.
  
-    o Edit Config.mk in the build directory following the instructions in the
-      file.  You normally don't need to do this, only if special configuration
-      options are required.  If the --srcdir option to configure is used, it is
-      copied from the source directory to the build directory.  This file is
-      used to specify values that can't be figured out by the configure script.
-      This includes the location of the Tcl and Tk distributions.  It's also
-      used to specify the sections that the Tcl manual pages are to be
-      installed in.
-
-    o Note that the site specific installation options should be set in
-      Config.mk before compiling. 
-
-    o Config.mk can be used to override several values that configure might
-      have gotten wrong or that you desire to be change (like gcc vs cc).
-
     o Now do a "make" to compile Tcl.  The following variables maybe passed
       to on the make command line to override values set by configure or in
       Config.mk:

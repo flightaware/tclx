@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 5.0 1995/07/25 05:42:34 markd Rel $
+ * $Id: tclXid.c,v 5.1 1996/02/12 18:15:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -322,7 +322,7 @@ IdProcess (interp, argc, argv)
                               " process group ?set?", (char *) NULL);
             return TCL_ERROR;
         }
-#ifdef HAVE_SETPGID
+#ifndef NO_SETPGID
         pid = getpid ();
         setpgid (pid, pid);
 #else
@@ -347,7 +347,7 @@ IdGroupids (interp, argc, argv, symbolic)
     char      **argv;
     int         symbolic;
 {
-#ifdef HAVE_GETGROUPS
+#ifndef NO_GETGROUPS
     gid_t         groups [NGROUPS];
     int           nGroups;
     char          numText [12];
@@ -400,7 +400,7 @@ IdHost (interp, argc, argv)
     int         argc;
     char      **argv;
 {
-#ifdef HAVE_GETHOSTNAME
+#ifndef NO_GETHOSTNAME
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " host", (char *) NULL);

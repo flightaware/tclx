@@ -13,13 +13,13 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 5.0 1995/07/25 05:42:49 markd Rel $
+ * $Id: tclXmsgcat.c,v 5.1 1996/02/12 18:16:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-#ifdef HAVE_CATGETS
+#ifndef NO_CATGETS
 
 #include <nl_types.h>
 
@@ -27,7 +27,7 @@
 
 typedef int nl_catd;
 
-#endif /* HAVE_CATGETS */
+#endif /* NO_CATGETS */
 
 static int
 ParseFailOption _ANSI_ARGS_((Tcl_Interp *interp,
@@ -48,14 +48,13 @@ MsgCatCleanUp _ANSI_ARGS_((ClientData  clientData,
  */
 static void_pt msgCatTblPtr = NULL;
 
-#ifndef HAVE_CATGETS
+#ifdef NO_CATGETS
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * catopen --
  *
- *   A stub to use when message catalogs are not available.  Always returns
- * the default string.
+ *   A stub to use when message catalogs are not available.   Always returns
+ * -1.
  *-----------------------------------------------------------------------------
  */
 static nl_catd
@@ -66,11 +65,11 @@ catopen (name, oflag)
     return (nl_catd) -1;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * catgets --
  *
- *   A stub to use when message catalogs are not available. Always returns -1.
+ *   A stub to use when message catalogs are not available.  Always returns
+ * the default string.
  *-----------------------------------------------------------------------------
  */
 static char *
@@ -82,8 +81,7 @@ catgets (catd, set_num, msg_num, defaultStr)
     return defaultStr;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * catclose --
  *
  *   A stub to use when message catalogs are not available. Always returns -1.
@@ -95,10 +93,9 @@ catclose (catd)
 {
     return -1;
 }
-#endif /* HAVE_CATGETS */
+#endif /* NO_CATGETS */
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * ParseFailOption --
  *
  *   Parse the -fail/-nofail option, if specified.
@@ -123,8 +120,7 @@ ParseFailOption (interp, optionStr, failPtr)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * CatOpFailed --
  *
  *    Handles failures of catopen and catclose.  If message catalogs are
@@ -139,22 +135,19 @@ CatOpFailed (interp, errorMsg)
     Tcl_Interp *interp;
     CONST char *errorMsg;
 {
-#ifdef HAVE_CATGETS
-
+#ifndef NO_CATGETS
     Tcl_AppendResult (interp, errorMsg, (char *) NULL);
 
 #else
-
     Tcl_AppendResult (interp, "the message catalog facility is not available,",
                       " default string is always returned", (char *) NULL);
 
-#endif /* HAVE_CATGETS */
+#endif /* NO_CATGETS */
 
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_CatopenCmd --
  *
  *    Implements the TCL echo command:
@@ -194,8 +187,7 @@ Tcl_CatopenCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_CatgetsCmd --
  *
  *    Implements the TCL echo command:
@@ -233,8 +225,7 @@ Tcl_CatgetsCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_CatcloseCmd --
  *
  *    Implements the TCL echo command:
@@ -281,8 +272,7 @@ Tcl_CatcloseCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * MsgCatCleanUp --
  *
  *    Called at interpreter deletion.  Releases all resources when no more
@@ -311,8 +301,7 @@ MsgCatCleanUp (clientData, interp)
     msgCatTblPtr = NULL;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_InitMsgCat --
  *
  *   Initialize the Tcl XPG/3 message catalog support faility.

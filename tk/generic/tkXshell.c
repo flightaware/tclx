@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.6 1996/02/16 07:51:39 markd Exp $
+ * $Id: tkXshell.c,v 5.7 1996/02/20 01:13:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -38,7 +38,6 @@ static char sccsid[] = "@(#) tkMain.c 1.136 96/01/17 09:32:28";
 #include <ctype.h>
 #include <stdio.h>
 #include <tclExtdInt.h>
-#include "tclXpatchl.h"
 #include <tk.h>
 
 /*
@@ -118,19 +117,12 @@ TkX_Main(argc, argv, appInitProc)
     int code;
     size_t length;
     Tcl_Channel inChannel, outChannel, errChannel, chan;
-    char *tkxVersion;
-
-    tkxVersion = ckalloc (strlen (TK_VERSION) + 
-                           strlen (TCL_EXTD_VERSION_SUFFIX) + 1);
-    strcpy (tkxVersion, TK_VERSION);
-    strcat (tkxVersion, TCL_EXTD_VERSION_SUFFIX);
 
     TclX_SetAppInfo (TRUE,
                      "wishx",
                      "Extended Wish",
-                     tkxVersion,
+                     TKX_VERSION,
                      TCLX_PATCHLEVEL);
-
 
     Tcl_FindExecutable(argv[0]);
     interp = Tcl_CreateInterp();

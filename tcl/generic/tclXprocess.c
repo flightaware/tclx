@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 5.3 1996/02/09 18:43:03 markd Exp $
+ * $Id: tclXprocess.c,v 5.4 1996/02/12 18:16:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -232,7 +232,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     /*
      * Versions that don't have real waitpid have limited functionality.
      */
-#ifndef HAVE_WAITPID
+#ifdef NO_WAITPID
     if ((options != 0) || pgroup) {
         Tcl_AppendResult (interp, "The \"-nohang\", \"-untraced\" and ",
                           "\"-pgroup\" options are not available on this ",

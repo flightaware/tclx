@@ -14,44 +14,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.5 1996/02/16 07:51:16 markd Exp $
+ * $Id: tclXcmdInit.c,v 5.6 1996/02/20 01:13:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-#include "tclXpatchl.h"
-
-/*
- * Prototypes of internal functions.
- */
-static void
-InitTclXGlobals _ANSI_ARGS_(());
-
-
-/*-----------------------------------------------------------------------------
- * InitTclXGlobals --
- *
- *   Initialize global variables used by the infox command.
- *-----------------------------------------------------------------------------
- */
-static void
-InitTclXGlobals ()
-{
-    /*
-     * Initialized the variables used by infox, these can be overriden later.
-     */
-    tclxVersion = ckalloc (strlen (TCL_VERSION) + 
-                           strlen (TCL_EXTD_VERSION_SUFFIX) + 1);
-    strcpy (tclxVersion, TCL_VERSION);
-    strcat (tclxVersion, TCL_EXTD_VERSION_SUFFIX);
-    tclxPatchlevel = TCLX_PATCHLEVEL;
-
-    TclX_SetAppInfo (TRUE,
-                     "TclX",
-                     "Extended Tcl",
-                     tclxVersion,
-                     tclxPatchlevel);
-}
 
 
 /*-----------------------------------------------------------------------------
@@ -192,7 +159,12 @@ int
 Tclxcmd_SafeInit (interp)
     Tcl_Interp *interp;
 {
-    InitTclXGlobals ();
+    TclX_SetAppInfo (TRUE,
+                     "TclX",
+                     "Extended Tcl",
+                     TCLX_VERSION,
+                     TCLX_PATCHLEVEL);
+
 
     /*
      * from tclXbsearch.c

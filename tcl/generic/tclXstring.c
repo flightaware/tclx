@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 5.0 1995/07/25 05:58:56 markd Rel $
+ * $Id: tclXstring.c,v 5.1 1996/02/12 18:16:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -204,7 +204,7 @@ Tcl_CcollateCmd (clientData, interp, argc, argv)
     argIndex = argc - 2;
     
     if (local) {
-#if HAVE_STRCOLL
+#ifndef NO_STRCOLL
         result = strcoll (argv [argIndex], argv [argIndex + 1]);
 #else
         result = strcmp (argv [argIndex], argv [argIndex + 1]);

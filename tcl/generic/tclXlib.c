@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 5.1 1996/02/09 18:43:00 markd Exp $
+ * $Id: tclXlib.c,v 5.2 1996/02/12 18:15:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -151,8 +151,7 @@ static void
 TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
                            Tcl_Interp *interp));
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * EvalFilePart --
  *
  *   Read in a byte range of a file and evaulate it.
@@ -252,8 +251,7 @@ EvalFilePart (interp, fileName, offset, length)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * MakeAbsFile --
  *
  * Convert a file name to an absolute path.  This handles tilde substitution
@@ -300,17 +298,10 @@ MakeAbsFile (interp, fileName, absNamePtr)
      * Otherwise its relative to the current directory, get the directory
      * and go from here.
      */
-#ifdef HAVE_GETCWD
     if (getcwd (curDir, MAXPATHLEN) == NULL) {
         Tcl_AppendResult (interp, "error getting working directory name: ",
                           Tcl_PosixError (interp), (char *) NULL);
     }
-#else
-    if (getwd (curDir) == NULL) {
-        Tcl_AppendResult (interp, "error getting working directory name: ",
-                          curDir, (char *) NULL);
-    }
-#endif
     Tcl_DStringAppend (absNamePtr, curDir,   -1);
     Tcl_DStringAppend (absNamePtr, "/",      -1);
     Tcl_DStringAppend (absNamePtr, fileName, -1);
@@ -318,8 +309,7 @@ MakeAbsFile (interp, fileName, absNamePtr)
     return Tcl_DStringValue (absNamePtr);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * SetPackageIndexEntry --
  *
  * Set a package entry in the auto_pkg_index array in the form:
@@ -363,8 +353,7 @@ SetPackageIndexEntry (interp, packageName, fileName, offset, length)
     return (setResult == NULL) ? TCL_ERROR : TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * GetPackageIndexEntry --
  *
  * Get a package entry from the auto_pkg_index array.
@@ -440,8 +429,7 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * SetProcIndexEntry --
  *
  * Set the proc entry in the auto_index array.  These entry contains a command
@@ -477,8 +465,7 @@ SetProcIndexEntry (interp, procName, package)
     return (result == NULL) ? TCL_ERROR : TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * AddLibIndexErrorInfo --
  *
  * Add information to the error info stack about index that just failed.
@@ -505,8 +492,7 @@ AddLibIndexErrorInfo (interp, indexName)
 }
 
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * ProcessIndexFile --
  *
  * Open and process a package library index file (.tndx).  Creates entries
@@ -612,8 +598,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * BuildPackageIndex --
  *
  * Call the "buildpackageindex" Tcl procedure to rebuild a package index.
@@ -650,8 +635,7 @@ BuildPackageIndex (interp, tlibFilePath)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * LoadPackageIndex --
  *
  * Load a package .tndx file.  Rebuild .tlib if non-existant or out of
@@ -710,8 +694,7 @@ LoadPackageIndex (interp, tlibFilePath)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * LoadOusterIndex --
  *
  * Load a standard Tcl index (tclIndex).  A special proc is used so that the
@@ -770,8 +753,7 @@ LoadOusterIndex (interp, indexFilePath)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * LoadDirIndexes --
  *
  *     Load the indexes for all package library (.tlib) or a Ousterhout
@@ -849,8 +831,7 @@ LoadDirIndexes (interp, dirName)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * LoadPackageIndexes --
  *
  * Loads the all indexes for all package libraries (.tlib) or a Ousterhout
@@ -909,8 +890,7 @@ LoadPackageIndexes (interp, infoPtr, path)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_Auto_load_pkgCmd --
  *
  *   Implements the command:
@@ -947,8 +927,7 @@ Tcl_Auto_load_pkgCmd (dummy, interp, argc, argv)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * AddInProgress --
  *
  *   An a command to the table of in progress commands.  If the command is
@@ -980,8 +959,7 @@ AddInProgress (interp, infoPtr, command)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * RemoveInProgress --
  *
  *   Remove a command from the in progress table.
@@ -1007,8 +985,7 @@ RemoveInProgress (interp, infoPtr, command)
     Tcl_DeleteHashEntry (entryPtr);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * LoadChangedPathPackageIndexes --
  *
  *   Determine what part of the path has changed and load the package indexes
@@ -1064,8 +1041,7 @@ LoadChangedPathPackageIndexes (interp, infoPtr, oldPath, path)
 
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * LoadAutoPath --
  *
  *   Load all indexs on the auto_path variable.  If auto_path has not changed
@@ -1118,8 +1094,7 @@ LoadAutoPath (interp, infoPtr)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * LoadCommand --
  *
  *   Check the "auto_index" array for code to load a command and eval it.
@@ -1158,8 +1133,7 @@ LoadCommand (interp, command)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_LoadlibindexCmd --
  *
  *   This procedure is invoked to process the "Loadlibindex" Tcl command:
@@ -1224,8 +1198,7 @@ Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
     return TCL_ERROR;;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * Tcl_auto_loadCmd --
  *
  *   This procedure is invoked to process the "auto_load" Tcl command:
@@ -1312,8 +1285,7 @@ Tcl_Auto_loadCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TclLibCleanUp --
  *
  *   Release the client data area when the interpreter is deleted.
@@ -1339,8 +1311,7 @@ TclLibCleanUp (clientData, interp)
     ckfree ((char *) infoPtr);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TclX_LibraryInit --
  *
  *   Initialize the Extended Tcl library facility commands.

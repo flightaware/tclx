@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 5.1 1995/08/04 05:56:17 markd Exp $
+ * $Id: tclXsignal.c,v 5.2 1996/02/12 18:16:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -321,9 +321,7 @@ SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
                               Tcl_Interp *interp));
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * GetSignalState --
  *     Get the current state of the specified signal.
  * Parameters:
@@ -338,7 +336,7 @@ GetSignalState (signalNum, sigProcPtr)
     int              signalNum;
     signalProcPtr_t *sigProcPtr;
 {
-#ifdef HAVE_SIGACTION
+#ifndef NO_SIGACTION
     struct sigaction currentState;
 
     if (sigaction (signalNum, NULL, &currentState) < 0)
@@ -361,9 +359,7 @@ GetSignalState (signalNum, sigProcPtr)
 #endif
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SetSignalState --
  *     Set the state of a signal.
  * Parameters:
@@ -378,7 +374,7 @@ SetSignalState (signalNum, sigFunc)
     int             signalNum;
     signalProcPtr_t sigFunc;
 {
-#ifdef HAVE_SIGACTION
+#ifndef NO_SIGACTION
     struct sigaction newState;
     
     newState.sa_handler = sigFunc;
@@ -397,9 +393,7 @@ SetSignalState (signalNum, sigFunc)
 #endif
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * BlockSignals --
  *     
  *    Block or unblock the specified signals.  Returns an error if not a Posix
@@ -420,7 +414,7 @@ BlockSignals (interp, action, signals)
     int            action;
     unsigned char  signals [];
 {
-#ifdef HAVE_SIGACTION
+#ifndef NO_SIGACTION
     int      signalNum;
     sigset_t sigBlockSet;
 
@@ -444,9 +438,7 @@ BlockSignals (interp, action, signals)
 #endif
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SignalBlocked --
  *     
  *    Determine if a signal is blocked.  On non-Posix systems, always returns
@@ -465,7 +457,7 @@ SignalBlocked (interp, signalNum)
     Tcl_Interp  *interp;
     int          signalNum;
 {
-#ifdef HAVE_SIGACTION
+#ifndef NO_SIGACTION
     sigset_t sigBlockSet;
 
     if (sigprocmask (SIG_BLOCK, NULL, &sigBlockSet)) {
@@ -478,9 +470,7 @@ SignalBlocked (interp, signalNum)
 #endif
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SigNameToNum --
  *    Converts a UNIX signal name to its number, returns -1 if not found.
  * the name may be upper or lower case and may optionally have the leading
@@ -530,9 +520,7 @@ SigNameToNum (interp, sigName, sigNumPtr)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ParseSignalSpec --
  *  
  *   Parse a signal specified as either a name or a number.
@@ -570,9 +558,7 @@ ParseSignalSpec (interp, signalStr, allowZero)
     return signalNum;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TclSignalTrap --
  *
  *   Trap handler for UNIX signals.  Sets tells all registered interpreters
@@ -603,7 +589,7 @@ TclSignalTrap (signalNum)
         if (tclErrorSignalProc != NULL)
             (*tclErrorSignalProc) (signalNum);
     }
-#ifndef HAVE_SIGACTION
+#ifdef NO_SIGACTION
     /*
      * For old-style Unix signals, the signal must be explictly re-enabled.
      * Not done for SIGCHLD, as we would continue to the signal until the
@@ -617,9 +603,7 @@ TclSignalTrap (signalNum)
 #endif
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SaveErrorState --
  *  
  *   Save the error state of the interpreter (result, errorInfo and errorCode).
@@ -674,9 +658,7 @@ SaveErrorState (interp)
     return errStatePtr;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * RestoreErrorState --
  *  
  *   Restore the error state of the interpreter that was saved by
@@ -707,9 +689,7 @@ RestoreErrorState (interp, errStatePtr)
     ckfree ((char *) errStatePtr);
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * FormatTrapCode --
  *     Format the signal name into the signal trap command.  Replacing %S with
  * the signal name.
@@ -783,9 +763,7 @@ FormatTrapCode (interp, signalNum, command)
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * EvalTrapCode --
  *     Run code as the result of a signal.  The symbolic signal name is
  * formatted into the command replacing %S with the symbolic signal name.
@@ -836,9 +814,7 @@ EvalTrapCode (interp, signalNum)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ProcessASignal --
  *  
  *   Do processing on the specified signal.
@@ -890,9 +866,7 @@ ProcessASignal (interp, signalNum)
     return result;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ProcessSignals --
  *  
  *   Called by Tcl_Eval, etc to process pending signals in a safe state
@@ -996,9 +970,7 @@ Tcl_ProcessSignals (clientData, interp, cmdResultCode)
     return cmdResultCode;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ParseSignalList --
  *  
  *   Parse a list of signal names or numbers.  Also handles the special case
@@ -1077,9 +1049,7 @@ ParseSignalList (interp, signalListStr, signals)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SetSignalActions --
  *     
  *    Set the signal state for the specified signals.  
@@ -1125,9 +1095,7 @@ SetSignalActions (interp, signals, actionFunc, command)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * FormatSignalListEntry --
  *     
  *    Retrieve a signal's state and format a keyed list entry used to describe
@@ -1187,9 +1155,7 @@ FormatSignalListEntry (interp, signalNum)
     return NULL;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * ProcessSignalListEntry --
  *     
  *    Parse a keyed list entry used to describe a signal state and set the
@@ -1267,7 +1233,7 @@ ProcessSignalListEntry (interp, signalEntry)
      * system.  If the signal is to be blocked, we do it before setting up
      * the handler.  If its to be unblocked, we do it after.
      */
-#ifdef HAVE_SIGACTION
+#ifndef NO_SIGACTION
     if (blocked) {
         if (BlockSignals (interp, SIG_BLOCK, signals) != TCL_OK)
             goto errorExit;
@@ -1276,7 +1242,7 @@ ProcessSignalListEntry (interp, signalEntry)
     if (SetSignalActions (interp, signals, actionFunc,
                         sigState [2]) != TCL_OK)
         goto errorExit;
-#ifdef HAVE_SIGACTION
+#ifndef NO_SIGACTION
     if (!blocked) {
         if (BlockSignals (interp, SIG_UNBLOCK, signals) != TCL_OK)
             goto errorExit;
@@ -1302,9 +1268,7 @@ ProcessSignalListEntry (interp, signalEntry)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * GetSignalStates --
  *     
  *    Return a keyed list containing the signal states for the specified
@@ -1352,9 +1316,7 @@ GetSignalStates (interp, signals)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SetSignalStates --
  *     
  *    Set signal states from keyed list in the format returned by
@@ -1391,9 +1353,7 @@ SetSignalStates (interp, signalKeyedList)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_SignalCmd --
  *     Implements the TCL signal command:
  *         signal action siglist ?command?
@@ -1505,9 +1465,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_KillCmd --
  *     Implements the TCL kill command:
  *        kill ?-pgroup? ?signal? idlist
@@ -1586,9 +1544,7 @@ Tcl_KillCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * SignalCmdCleanUp --
  *
  *   Clean up the signal data structure when an interpreter is deleted. If
@@ -1632,9 +1588,7 @@ SignalCmdCleanUp (clientData, interp)
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_SetupSigInt --
  *    Set up SIGINT to the "error" state if the current state is default.
  * This is done because shells set SIGINT to ignore for background processes
@@ -1652,9 +1606,7 @@ Tcl_SetupSigInt ()
         SetSignalState (SIGINT, TclSignalTrap);
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_InitSignalHandling --
  *      Initializes singal handling for a interpreter.
  *-----------------------------------------------------------------------------

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.6 1996/02/16 18:05:11 markd Exp $
+# $Id: Makefile.in,v 5.7 1996/02/17 08:44:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -33,17 +33,17 @@ PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}" "LDFLAGS=${LDFLAGS}"
 
 #------------------------------------------------------------------------------
 
-all: COMP_TCLX COMP_${TK_BUILD}
+all: TCLX TKX_${TKX_BUILD}
 
-COMP_TCLX: COMP_TOOLS runtcl
+TCLX: TOOLS runtcl
 	cd ../tcl/unix; ${MAKE} all
 
-COMP_WISHX: COMP_TOOLS runwishx
+TKX_YES: TOOLS runwishx
 	cd ../tk/unix; ${MAKE} ${PASS_FLAGS} all
 
-COMP_:
+TKX_NO:
 
-COMP_TOOLS:
+TOOLS:
 	cd tools; ${MAKE} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
@@ -84,15 +84,10 @@ runwishx: Makefile
 # Relink using shared libraries.  The libraries must be built and installed
 # by hand.
 
-shlink: TCL_SHLINK SHLINK_${TK_BUILD}
-
-TCL_SHLINK:
-	cd src; ${MAKE} shlink
-
-SHLINK_WISHX:
-	cd tksrc; ${MAKE} shlink
-
-SHLINK_:
+shlink:
+	echo "**** shlink target is not currently working."
+	echo "**** this will be automatic soon."
+	exit 1
 
 #------------------------------------------------------------------------------
 # Run the tests.
@@ -120,29 +115,24 @@ buildhelp:
 #------------------------------------------------------------------------------
 # Install Extended Tcl.
 #
-install: all TCLXINSTALL INST_${TK_BUILD}
+install: all TCLX_INSTALL TKX_INSTALL_${TKX_BUILD}
 
-install-exec: all TCLXINSTALL_EXEC INST_EXEC_${TK_BUILD}
+install-exec: all TCLX_INSTALL_EXEC  TKX_INSTALL_EXEC_${TKX_BUILD}
 
-TCLXINSTALL:
+TCLX_INSTALL:
 	cd ../tcl/unix; ${MAKE} install
 
-TCLXINSTALL_EXEC:
+TCLX_INSTALL_EXEC:
 	cd ../tcl/unix; ${MAKE} install-exec
 
-TKXINSTALL:
+TKX_INSTALL_YES:
 	cd ../tk/unix; ${MAKE} install
 
-TKXINSTALL_EXEC:
+TKX_INSTALL_EXEC_YES:
 	cd ../tk/unix; ${MAKE} install-exec
 
-# Targets to decide if we install wishx or not.
-
-INST_WISHX: TKXINSTALL
-INST_EXEC_WISHX: TKXINSTALL_EXEC
-
-INST_:
-INST_EXEC_:
+TKX_INSTALL_NO:
+TKX_INSTALL_EXEC_NO:
 
 #------------------------------------------------------------------------------
 # Clean up all files that were built by make.

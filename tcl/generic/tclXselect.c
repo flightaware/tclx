@@ -12,15 +12,15 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 5.1 1996/02/09 18:43:05 markd Exp $
+ * $Id: tclXselect.c,v 5.2 1996/02/12 18:16:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-#ifdef HAVE_SELECT
+#ifndef NO_SELECT
 
-#ifdef HAVE_SYS_SELECT_H
+#ifndef NO_SYS_SELECT_H
 #   include <sys/select.h>
 #endif
 
@@ -39,7 +39,7 @@ double floor ();
  * in the X library that we don't use, but the select macros use bzero.
  * Make them use memset with this magic.
  */
-#ifndef HAVE_BZERO
+#ifndef NO_BZERO
 #    define bzero(to,length)    memset(to,'\0',length)
 #endif
 

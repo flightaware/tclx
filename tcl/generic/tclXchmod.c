@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 5.1 1996/02/09 18:42:39 markd Exp $
+ * $Id: tclXchmod.c,v 5.2 1996/02/12 18:15:31 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -315,7 +315,7 @@ ChmodFileId (interp, modeInfo, fileId)
     modeInfo_t   modeInfo;
     char        *fileId;
 {
-#ifdef HAVE_FCHMOD
+#ifndef NO_FCHMOD
     int fnum;
     struct stat fileStat;
     int newMode;
@@ -594,7 +594,7 @@ ChownFileId (interp, ownerInfo, fileId)
     ownerInfo_t  ownerInfo;
     char        *fileId;
 {
-#ifdef HAVE_FCHOWN
+#ifndef NO_FCHOWN
     int fnum;
     struct stat fileStat;
 
@@ -753,7 +753,7 @@ ChgrpFileId (interp, groupId, fileId)
     gid_t        groupId;
     char        *fileId;
 {
-#ifdef HAVE_FCHOWN
+#ifndef NO_FCHOWN
     int fnum;
     struct stat fileStat;
 

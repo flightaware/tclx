@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.5 1996/02/09 18:44:11 markd Exp $
+# $Id: Makefile.in,v 5.6 1996/02/16 08:10:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -25,24 +25,8 @@ srcdir = @srcdir@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
-# Local macros.
-#
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${TCLX_GENERIC_DIR} \
-	      -I${TCL_GENERIC_DIR} -I${TK_GENERIC_DIR}
 
-#------------------------------------------------------------------------------
-
-all: tclxversion ${TK_BUILD} instcopy bldmanhelp cpmanpages cphelpdir \
-     symlinkext
-
-tclxversion: getversion.c Makefile
-	${CC} ${CC_SWITCHES} ${srcdir}/getversion.c -o tclxversion ${LIBS}
-
-WISHX: tkxversion
-
-tkxversion: getversion.c Makefile
-	${CC} ${CC_SWITCHES} ${XINCLUDES} -DTK_GET_VERSION \
-	   ${srcdir}/getversion.c -o tkxversion ${LIBS}
+all: instcopy bldmanhelp cpmanpages cphelpdir symlinkext
 
 instcopy: instcopy.tcl buildutil.tcl
 	rm -f instcopy
@@ -71,7 +55,6 @@ symlinkext: symlinkext.sh
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclxversion tkxversion *.o
 	-rm -f instcopy bldmanhelp cpmanpages cphelpdir symlinkext
 
 #------------------------------------------------------------------------------

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.7 1996/02/16 18:05:10 markd Exp $
+# $Id: Config.mk,v 5.8 1996/02/17 08:44:11 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -43,27 +43,27 @@
 #     ${bldbasedir}/../tk4.0/libtk.a
 #
 # Other macros used in file paths:
-#   o TCLX_VERSION runs a program that returns the TclX version.
-#   o TKX_VERSION runs a program that returns the Tclx version.
+#   o TCLX_FULL_VERSION is the full TclX version, including patchlevel.
+#   o TKX_FULL_VERSION is the full TkX version, including patchlevel.
 #   o ARCH is either ".arch", as specified to configure, or empty.
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# The Tcl source distribution directory and the path to the Tcl library
-# (libtcl.a),  Note, access is required to tclInt.h which is not installed
-# by Tcl.
+# The Tcl source distribution directory, the path to tclConfig.sh, and the Tcl
+# library (libtcl.a),  Note, access is required to tclInt.h which is not
+# installed by Tcl.
 
 TCL_SRC=${srcbasedir}/../tcl7.5b1
+TCL_CONFIG=${srcbasedir}/../tcl7.5b1/unix/tclConfig.sh
 TCL_LIB=${bldbasedir}/../tcl7.5b1/unix/libtcl7.5.a
 
 #------------------------------------------------------------------------------
-# If you are a Tk user and would like to build a version "wish", the Tk shell,
-# that includes the TclX command set, define TK_BUILD=WISHX.  Also define the
-# the directory containing the Tk source distribution and the path to the Tk
-# library (libtk.a).
+# Unless configure is going to be run with --with-tk=NO, these defines must be
+# set.  They define the directory containing the Tk source distribution, the
+# path to tkCOnfig.sh, and the path to the Tk library (libtk.a).
 
-TK_BUILD = WISHX
 TK_SRC=${srcbasedir}/../tk4.1b1
+TK_CONFIG=${srcbasedir}/../tk4.1b1/unix/tkConfig.sh
 TK_LIB=${bldbasedir}/../tk4.1b1/unix/libtk4.1.a
 
 #------------------------------------------------------------------------------
@@ -124,13 +124,13 @@ INSTALL_ROOT =
 # The TclX runtime directory that the Extended Tcl runtime files are installed
 # into.
 
-TCLX_INST_RUNTIME=${prefix}/tclX/${TCLX_VERSION}
+TCLX_INST_RUNTIME=${prefix}/tclX/${TCLX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 # The TkX runtimes that the Tk runtime files are installed into.  A directory
 # whose name is the TkX version number will be built in this directory.
 
-TKX_INST_RUNTIME=${prefix}/tkX/${TKX_VERSION}
+TKX_INST_RUNTIME=${prefix}/tkX/${TKX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 # The directory to install the tcl, wishx and tclhelp binaries in when the
@@ -161,7 +161,7 @@ TCLX_INCL=${prefix}/include
 # o TCLX_MAN - Base manual directory where all of the man* and cat*
 #   directories live.
 
-TCLX_MAN_DIR=${prefix}/man
+TCLX_MAN=${prefix}/man
 
 #------------------------------------------------------------------------------
 # o TCLX_MAN_CMD_SECTION - Section for Tcl command manual pages.

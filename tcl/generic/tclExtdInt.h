@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.6 1996/02/12 18:15:24 markd Exp $
+ * $Id: tclExtdInt.h,v 5.7 1996/02/16 07:51:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,17 +20,16 @@
 #define TCLEXTDINT_H
 
 #include "tclExtend.h"
-#include "tclXconf.h"
 #include "tclInt.h"
 
 #include <sys/param.h>
 
 #include <math.h>
 
-#ifdef NO_VALUES_H
-#    include <limits.h>
-#else
+#ifdef NO_LIMITS_H
 #    include <values.h>
+#else
+#    include <limits.h>
 #endif
 
 #ifndef MAXDOUBLE

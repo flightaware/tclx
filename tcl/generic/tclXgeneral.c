@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 5.4 1996/02/16 07:51:19 markd Exp $
+ * $Id: tclXgeneral.c,v 5.5 1996/02/20 01:13:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -149,7 +149,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_fchown", argv [1])) {
-#       ifdef HAVE_FCHOWN
+#       ifndef NO_FCHOWN
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -157,7 +157,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_fchmod", argv [1])) {
-#       ifdef HAVE_FCHMOD
+#       ifndef NO_FCHMOD
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -173,7 +173,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_fsync", argv [1])) {
-#       ifdef HAVE_FSYNC
+#       ifndef NO_FSYNC
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -181,7 +181,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_ftruncate", argv [1])) {
-#       if defined(HAVE_FTRUNCATE) || defined(HAVE_CHSIZE)
+#       if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE)
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -189,7 +189,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_msgcats", argv [1])) {
-#       ifdef HAVE_CATGETS
+#       ifndef NO_CATGETS
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -197,7 +197,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_posix_signals", argv [1])) {
-#       ifdef HAVE_SIGACTION
+#       ifndef NO_SIGACTION
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -205,7 +205,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_sockets", argv [1])) {
-#       ifdef HAVE_SOCKET
+#       ifndef NO_SOCKET
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -213,7 +213,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_truncate", argv [1])) {
-#       ifdef HAVE_TRUNCATE
+#       ifndef NO_TRUNCATE
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -221,7 +221,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_waitpid", argv [1])) {
-#       ifdef HAVE_WAITPID
+#       ifndef NO_WAITPID
         interp->result = "1";
 #       else
         interp->result = "0";

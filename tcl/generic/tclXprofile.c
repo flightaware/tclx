@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 5.0 1995/07/25 05:42:52 markd Rel $
+ * $Id: tclXprofile.c,v 5.1 1996/02/12 18:16:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -134,7 +134,7 @@ static void
 ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
                             Tcl_Interp *interp));
 
-#ifdef TIMES_RETS_REAL_TIME
+#ifdef TIMES_RETS_STATUS
 
 /*
  *-----------------------------------------------------------------------------
@@ -202,7 +202,7 @@ GetTimes (cpuTimePtr)
     *cpuTimePtr = Tcl_TicksToMS (cpuTimes.tms_utime + cpuTimes.tms_stime);
     return realTime;
 }
-#endif /* TIMES_RETS_REAL_TIME */
+#endif /* TIMES_RETS_STATUS */
 
 /*
  *-----------------------------------------------------------------------------

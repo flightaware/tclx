@@ -1085,4 +1085,6 @@
     (* potential incompatibility *)
   o Use a function to set appname values returned by infox instead of global
     variables. (* potential incompatibility *)
+  o Changed configure to use tclConfig.sh and tkConfig.sh for most
+    configuration information.
 -------------------------------------------------------------------------------

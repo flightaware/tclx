@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.9 1996/02/16 07:51:43 markd Exp $
+# $Id: Makefile.in,v 5.10 1996/02/17 08:44:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -31,12 +31,13 @@ srcdir = @srcdir@
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LDLIBS = libtkx.a ${TK_LIB} ${XLIBSW} ${LIBTCLX} ${TCL_LIB} ${LIBS} \
-         ${DL_LIBS} ${XLDLIBS}
+LDLIBS = libtkx.a ${TK_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_LIB} ${TK_LIBS} \
+	 ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
 
 SHLDLIBS = ${TKX_SHLIBS} ${XLIBSW} ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
 CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+	      ${TK_DEFS} \
 	      -I${TKX_GENERIC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \

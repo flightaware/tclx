@@ -12,13 +12,13 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 5.3 1996/02/09 18:43:12 markd Exp $
+ * $Id: tclXunixcmds.c,v 5.4 1996/02/12 18:16:27 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-#ifdef HAVE_GETPRIORITY
+#ifndef NO_GETPRIORITY
 #include <sys/resource.h>
 #endif
 
@@ -41,9 +41,7 @@ double ceil ();
 #endif
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_AlarmCmd --
  *     Implements the TCL Alarm command:
  *         alarm seconds
@@ -60,26 +58,8 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-#ifndef HAVE_SETITIMER
-    double            seconds;
-    unsigned          useconds;
-
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " seconds", 
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    if (Tcl_GetDouble (interp, argv[1], &seconds) != TCL_OK)
-        return TCL_ERROR;
-
-    useconds = ceil (seconds);
-    sprintf (interp->result, "%d", alarm (useconds));
-
-    return TCL_OK;
-#else
-
-    double            seconds, secFloor;
+#ifndef NO_SETITIMER
+    double seconds, secFloor;
     struct itimerval  timer, oldTimer;
 
     if (argc != 2) {
@@ -110,13 +90,27 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
     sprintf (interp->result, "%g", seconds);
 
     return TCL_OK;
-#endif
+#else
+    double seconds;
+    unsigned useconds;
 
+    if (argc != 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " seconds", 
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDouble (interp, argv[1], &seconds) != TCL_OK)
+        return TCL_ERROR;
+
+    useconds = ceil (seconds);
+    sprintf (interp->result, "%d", alarm (useconds));
+
+    return TCL_OK;
+#endif
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_ChrootCmd --
  *     Implements the TCL chroot command:
  *         chroot path
@@ -146,9 +140,7 @@ Tcl_ChrootCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_NiceCmd --
  *     Implements the TCL nice command:
  *         nice ?priorityincr?
@@ -177,7 +169,7 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
      * Return the current priority if an increment is not supplied.
      */
     if (argc == 1) {
-#ifdef HAVE_GETPRIORITY
+#ifndef NO_GETPRIORITY
         priority = getpriority (PRIO_PROCESS, 0);
 #else
         priority = nice (0);
@@ -194,7 +186,7 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
 
     errno = 0;  /* Old priority might be -1 */
 
-#ifdef HAVE_GETPRIORITY
+#ifndef NO_GETPRIORITY
     priority = getpriority (PRIO_PROCESS, 0) + priorityIncr;
     if (errno == 0) {
         setpriority (PRIO_PROCESS, 0, priority);
@@ -211,9 +203,7 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_SleepCmd --
  *     Implements the TCL sleep command:
  *         sleep seconds
@@ -246,9 +236,7 @@ Tcl_SleepCmd (clientData, interp, argc, argv)
 
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_SyncCmd --
  *     Implements the TCL sync command:
  *         sync
@@ -289,7 +277,7 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
     if (Tcl_Flush (channel) < 0)
         goto posixError;
 
-#ifdef HAVE_FSYNC
+#ifndef NO_FSYNC
     if (fsync (fileNum) < 0)
         goto posixError;
 #else
@@ -302,9 +290,7 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_SystemCmd --
  *     Implements the TCL system command:
  *     system command
@@ -405,9 +391,7 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_TimesCmd --
  *     Implements the TCL times command:
  *     times
@@ -441,9 +425,7 @@ Tcl_TimesCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_UmaskCmd --
  *     Implements the TCL umask command:
  *     umask ?octalmask?
@@ -485,9 +467,7 @@ Tcl_UmaskCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LinkCmd --
  *     Implements the TCL link command:
  *         link ?-sym? srcpath destpath
@@ -559,9 +539,7 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_UnlinkCmd --
  *     Implements the TCL unlink command:
  *         unlink ?-nocomplain? fileList
@@ -630,9 +608,7 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_MkdirCmd --
  *     Implements the TCL Mkdir command:
  *         mkdir ?-path? dirList
@@ -718,9 +694,7 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_RmdirCmd --
  *     Implements the TCL Rmdir command:
  *         rmdir ?-nocomplain?  dirList
