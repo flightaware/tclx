@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.22 1995/07/17 03:24:58 markd Exp markd $
+# $Id: Makefile.in,v 5.0 1995/07/25 05:42:48 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -44,12 +44,11 @@ LIBS        = @LIBS@ @MATH_LIBS@
 
 #------------------------------------------------------------------------------
 
-LIBTCL        = ${TCL_UCB_LIB}/libtcl.a
 INST_MASTER   = ${TCL_MASTERDIR}/`../tools/tclxversion`
 INSTCOPY      = ../runtcl ../tools/instcopy
 SYMLINKEXT    = ../tools/symlinkext
 
-LDLIBS = -L. -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS} ${XLDLIBS}
+LDLIBS = libtclx.a ${TCL_UCB_LIB} ${LIBS} ${XLDLIBS}
 
 SHLDLIBS = ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
@@ -86,7 +85,7 @@ OBJS= \
 
 all: made.tmp tcl TCLXX_${TCLXX}
 
-tcl: tclXAppInit.o libtclx.a ${LIBTCL} made.tmp 
+tcl: tclXAppInit.o libtclx.a ${TCL_UCB_LIB} made.tmp 
 	${CC} ${LD_FLAGS} tclXAppInit.o ${LDLIBS} -o tcl || \
 	    (rm -f tcl; exit 1)
 
@@ -172,7 +171,7 @@ install-master: install-master-exec
 install-master-exec:
 	${INSTCOPY} tcl ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}
 	${STRIP} ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}/tcl
-	${INSTCOPY} ${LIBTCL} libtclx.a \
+	${INSTCOPY} ${TCL_UCB_LIB} libtclx.a \
 	    ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
 	${RANLIB} ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}/*.a
 	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}

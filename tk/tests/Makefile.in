@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.12 1995/07/19 02:22:39 markd Exp markd $
+# $Id: Makefile.in,v 5.0 1995/07/25 06:00:40 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -40,13 +40,11 @@ XLIBSW      = @XLIBSW@
 
 #------------------------------------------------------------------------------
 
-LIBTK        = ${TK_UCB_LIB}/libtk.a
-LIBTKX       = ../tksrc/libtkx.a
-LIBTCL       = ${TCL_UCB_LIB}/libtcl.a
-LIBTCLX      = ../src/libtclx.a
+LIBTKX  = ../tksrc/libtkx.a
+LIBTCLX = ../src/libtclx.a
 
-LDLIBS = -L../tksrc -ltkx -L${TK_UCB_LIB} -ltk ${XLIBSW} \
-	 -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS} ${XLDLIBS}
+LDLIBS = ${LIBTKX} ${TK_UCB_LIB} ${XLIBSW} ${LIBTCLX} \
+	 ${TCL_UCB_LIB} ${LIBS} ${XLDLIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
@@ -68,7 +66,8 @@ OBJS= tktest.o tkSquare.o
 
 all: tktest runtest
 
-tktest: tktest.o tkSquare.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A}
+tktest: tktest.o tkSquare.o ${LIBTKX} ${TK_UCB_LIB} ${LIBTCLX} \
+        ${TK_UCB_LIB}
 	${CC} ${LD_FLAGS} tktest.o tkSquare.o ${LDLIBS} -o tktest || \
 	    (rm -f tktest; exit 1)
 
