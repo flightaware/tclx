@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 5.0 1995/07/25 06:00:45 markd Rel markd $
+ * $Id: tkXinit.c,v 5.1 1995/08/04 05:54:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -113,4 +113,20 @@ TkX_Init (interp)
     return TclX_Eval(interp,
                      TCLX_EVAL_GLOBAL | TCLX_EVAL_ERR_HANDLER,
                      initCmd);
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tkx_Init --
+ *
+ *   Interface to TkX_Init that follows the Tcl dynamic loading naming
+ * conventions. 
+ *-----------------------------------------------------------------------------
+ */
+int
+Tkx_Init (interp)
+    Tcl_Interp *interp;
+{
+    return Tkx_Init (interp);
 }

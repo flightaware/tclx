@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.2 1995/09/05 07:55:47 markd Exp markd $
+ * $Id: tclXinit.c,v 5.3 1995/09/11 05:00:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -247,6 +247,22 @@ TclX_Init (interp)
     Tcl_AddErrorInfo (interp,
                      "\n    (while initializing TclX)");
     return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tclx_Init --
+ *
+ *   Interface to TclX_Init that follows the Tcl dynamic loading naming
+ * conventions.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tclx_Init (interp)
+    Tcl_Interp *interp;
+{
+    return TclX_Init (interp);
 }
 
 /*

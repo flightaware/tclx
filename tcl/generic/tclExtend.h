@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.0 1995/07/25 05:58:52 markd Rel $
+ * $Id: tclExtend.h,v 5.1 1995/09/30 18:06:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -88,6 +88,9 @@ TclX_Main _ANSI_ARGS_((int              argc,
 
 EXTERN int
 TclX_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
+EXTERN int
+Tclx_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN int
 TclXCmd_Init _ANSI_ARGS_((Tcl_Interp *interp));
@@ -232,6 +235,9 @@ extern char *tkX_libraryEnv;
 
 EXTERN int
 TkX_Init _ANSI_ARGS_((Tcl_Interp  *interp));
+
+EXTERN int
+Tkx_Init _ANSI_ARGS_((Tcl_Interp  *interp));
 
 EXTERN void
 TkX_Main _ANSI_ARGS_((int               argc,
