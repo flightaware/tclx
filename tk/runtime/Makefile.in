@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.6 1995/06/30 18:02:52 markd Exp markd $
+# $Id: Makefile.in,v 4.7 1995/06/30 22:39:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -155,3 +155,6 @@ clean:
 
 distclean: clean
 	rm -f Makefile
+
+# Disable Sun's parallel make, it doesn't get the dependencies right.
+.NO_PARALLEL:

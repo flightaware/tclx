@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.12 1995/05/26 05:21:06 markd Exp markd $
+# $Id: Makefile.in,v 4.13 1995/06/26 06:21:08 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -259,3 +259,5 @@ distclean: clean
 	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	rm -f Makefile config.status config.cache config.log
 
+# Disable Sun's parallel make, it doesn't get the dependencies right.
+.NO_PARALLEL:
