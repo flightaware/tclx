@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.7 1997/07/05 08:00:30 markd Exp $
+ * $Id: tclXdebug.c,v 8.8 1997/07/18 16:38:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -159,7 +159,7 @@ PrintStr (channel, string, numChars, quoted)
  *
  *   Print an argument string, truncating and adding "..." if its longer
  * then ARG_TRUNCATE_SIZE.  If the string contains white spaces, quote
- * it with angle brackets.
+ * it with braces.
  *-----------------------------------------------------------------------------
  */
 static void
