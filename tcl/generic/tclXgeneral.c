@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 4.2 1995/01/01 19:49:37 markd Exp markd $
+ * $Id: tclXgeneral.c,v 4.3 1995/04/15 19:49:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -101,6 +101,22 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
         return TCL_OK;
     }
+    if (STREQU ("have_fchown", argv [1])) {
+#       ifdef HAVE_FCHOWN
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
+    if (STREQU ("have_fchmod", argv [1])) {
+#       ifdef HAVE_FCHMOD
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
     if (STREQU ("have_flock", argv [1])) {
 #       ifdef F_SETLKW
         interp->result = "1";
@@ -163,7 +179,8 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     }
 
     Tcl_AppendResult (interp, "illegal option \"", argv [1], 
-                      "\" expect one of: version, patchlevel, have_flock, ",
+                      "\" expect one of: version, patchlevel, ",
+                      "have_fchown, have_fchmod, have_flock, ",
                       "have_fsync, have_msgcats, have_posix_signals, ",
                       "have_sockets, ",
                       "appname, applongname, appversion, or apppatchlevel",

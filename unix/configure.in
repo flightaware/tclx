@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.24 1995/05/01 05:35:02 markd Exp markd $
+dnl $Id: configure.in,v 4.25 1995/05/07 16:05:57 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.24 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.25 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -607,6 +607,7 @@ AC_CHECK_LIB(dnet_stub, main, [LIBS="$LIBS -ldnet_stub"])
 
 AC_HAVE_FUNCS(getcwd select setitimer setvbuf sigaction setpgid getgroups)
 AC_HAVE_FUNCS(bzero bcopy fsync getpriority strcoll tzset gettimeofday)
+AC_HAVE_FUNCS(fchown fchmod truncate ftruncate chsize)
 
 #------------------------------------------------------------------------------
 # Test for socket related functions.  Note that "socket" is just used to

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.15 1995/04/17 01:24:02 markd Exp markd $
+.\" $Id: TclX.n,v 4.16 1995/04/30 05:46:07 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -136,6 +136,14 @@ the documentation for version \fB7.4a\fR.
 .TP
 .B patchlevel
 Return the patchlevel for Extended Tcl.
+.TP
+.B have_fchown
+Return \fB1\fR if the \fBfchown\fR system call is available.  This supports
+the \fB-fileid\fR option on the \fBchown\fR and \fBchgrp\fR commands.
+.TP
+.B have_fchmod
+Return \fB1\fR if the \fBfchmod\fR system call is available.  This supports
+the \fB-fileid\fR option on the \fBchmod\fR command.
 .TP
 .B have_flock
 Return \fB1\fR if the \fBflock\fR command defined,  \fB0\fR if it is not
@@ -461,12 +469,17 @@ system call, \fIseconds\fR is rounded up to an even number of seconds.
 '\"@help: tcl/files/chgrp
 '\"@brief: Change file group.
 .TP
-.B chgrp \fIgroup\fR \fIfilelist\fR
+.B chgrp \fR[\fB-fileid\fR] \fIgroup\fR \fIfilelist\fR
 .br
 Set the
 group id of each file in the list \fIfilelist\fR to \fIgroup\fR, which can
 be either a
 group name or a numeric group id.
+.sp
+If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+file identifiers rather than a list of file names.  This option is not
+available on all Unix systems.  Use the \fBinfox have_fchown\fR command
+to determine if this functionallity is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -474,12 +487,17 @@ group name or a numeric group id.
 '\"@help: tcl/files/chmod
 '\"@brief: Set file permissions.
 .TP
-.B chmod \fImode\fR \fIfilelist\fR
+.B chmod \fR[\fB-fileid\fR] \fImode\fR \fIfilelist\fR
 .br
 Set permissions of each of the files in the list \fIfilelist\fR to \fImode\fR,
 where \fImode\fR is an absolute numeric mode or symbolic permissions as in the
 UNIX \fBchmod(1)\fR command.  To specify a mode as octal, it should be
 prefixed with a "0" (e.g. 0622).
+.sp
+If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+file identifiers rather than a list of file names.  This option is not
+available on all Unix systems.  Use the \fBinfox have_fchmod\fR command
+to determine if this functionallity is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -487,7 +505,7 @@ prefixed with a "0" (e.g. 0622).
 '\"@help: tcl/files/chown
 '\"@brief: Change file owner and/or group.
 .TP
-.B chown \fIowner\fR|{\fIowner group\fR} \fIfilelist\fR
+.B chown \fR[\fB-fileid\fR] \fIowner\fR|{\fIowner group\fR} \fIfilelist\fR
 .br
 Set owner of each file in the list \fIfilelist\fR to \fIowner\fR, which can
 be a user
@@ -496,6 +514,11 @@ owner is set to the first element of the list and the group is set to the
 second element.  \fIGroup\fR can be a group name or numeric group id.
 If \fIgroup\fR is {}, then the file group will be set to the login
 group of the specified user.
+.sp
+If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+file identifiers rather than a list of file names.  This option is not
+available on all Unix systems.  Use the \fBinfox have_fchown\fR command
+to determine if this functionallity is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
