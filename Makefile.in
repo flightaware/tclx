@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.4 2002/04/04 07:57:25 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.5 2002/11/12 21:35:30 karll Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -264,6 +264,13 @@ shell: binaries libraries
 
 gdb:
 	$(TCLSH_ENV) gdb $(TCLSH_PROG) $(SCRIPT)
+
+#VALGRINDFLAGS=--logfile-fd=9
+#TESTFLAGS=9> valgrind.log
+valgrindtest: binaries libraries
+	$(TCLSH_ENV) valgrind --num-callers=12 --leak-resolution=high -v --leak-check=yes --show-reachable=yes $(VALGRINDFLAGS) $(TCLSH_PROG) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS)
+valgrind: binaries libraries
+	$(TCLSH_ENV) valgrind --num-callers=12 --leak-resolution=high -v --leak-check=yes --show-reachable=yes $(VALGRINDFLAGS) $(TCLSH_PROG) $(SCRIPT)
 
 depend:
 
