@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 2.5 1993/09/16 03:30:19 markd Exp markd $
+# $Id: flock.test,v 2.6 1993/09/22 04:46:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -127,9 +127,11 @@ Test flock-2.8 {funlock argument checking} {
 # a file and only locking part of it will cause this test to fail rather
 # than hang on a confused system.
 #
+alarm 10
 puts $writeFH "This is some silly text to help prevent hangs"
 flush $writeFH
 if {[catch {flock $writeFH 0 8} msg] != 0} {
+    alarm 0
     puts stderr "*************************************************************"
     puts stderr "Error acquiring file lock.  This is probably caused by an"
     puts stderr "incorrectly configured system or bug in the system software."
@@ -143,6 +145,7 @@ if {[catch {flock $writeFH 0 8} msg] != 0} {
     unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
     return
 }
+alarm 0
 funlock $writeFH
 
 #
