@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 8.8 1997/07/01 02:58:03 markd Exp $
+ * $Id: tclXcmdloop.c,v 8.9 1997/07/04 20:23:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -89,6 +89,8 @@ static int
 IsSetVarCmd (command)
     char  *command;
 {
+#if 0
+  FIX: NEED to port to new parser.
     char *nextPtr, *lastChar;
     int wordCnt;
 
@@ -109,6 +111,9 @@ IsSetVarCmd (command)
         wordCnt++;
     }
     return wordCnt > 2 ? TRUE : FALSE;
+#else
+    return FALSE;
+#endif
 }
 
 /*-----------------------------------------------------------------------------

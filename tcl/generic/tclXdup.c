@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 8.6 1997/07/04 20:23:44 markd Exp $
+ * $Id: tclXdup.c,v 8.7 1997/08/08 10:04:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -57,7 +57,8 @@ DupChannelOptions (interp, srcChannel, targetChannel)
     Tcl_Channel  targetChannel;
 {
     Tcl_DString strValues;
-    char *scanPtr, *option, *value;
+    CONST char *scanPtr;
+    char *option, *value;
     int size, result;
 
     Tcl_DStringInit (&strValues);
@@ -74,13 +75,13 @@ DupChannelOptions (interp, srcChannel, targetChannel)
     scanPtr = strValues.string;
 
     while (*scanPtr != '\0') {
-        result = TclFindElement (interp, scanPtr, strlen (scanPtr), &option, 
-                                 &scanPtr, &size, NULL);
+        result = TclFindElement (interp, scanPtr, strlen (scanPtr),
+                                 (CONST char **)&option, &scanPtr, &size, NULL);
         if ((result != TCL_OK) || (*scanPtr == '\0'))
             goto fatalError;
         option [size] = '\0';
-        result = TclFindElement (interp, scanPtr, strlen (scanPtr), &value,
-                                 &scanPtr, &size, NULL);
+        result = TclFindElement (interp, scanPtr, strlen (scanPtr), 
+                                 (CONST char **)&value, &scanPtr, &size, NULL);
         if (result != TCL_OK)
             goto fatalError;
         value [size] = '\0';

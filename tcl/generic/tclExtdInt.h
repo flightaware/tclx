@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.21 1997/12/14 18:25:08 markd Exp $
+ * $Id: tclExtdInt.h,v 8.22 1998/01/24 17:30:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -83,29 +83,6 @@
 #    define TRUE   (1)
 #    define FALSE  (0)
 #endif
-
-/*
- * Structure to hold a regular expression, plus a Boyer-Moore compiled
- * pattern.  Also structure to return submatch info.
- */
-
-typedef struct {
-    Tcl_RegExp *progPtr;
-    char   *boyerMoorePtr;
-    int     noCase;
-    int     numSubExprs;
-} TclX_regexp;
-
-typedef struct {
-    int start;
-    int end;
-} Tcl_SubMatchInfo [NSUBEXP];
-
-/*
- * Flags used by TclX_RegExpCompileObj:
- */
-#define TCLX_REXP_NO_CASE         1   /* Do matching regardless of case    */
-#define TCLX_REXP_BOTH_ALGORITHMS 2   /* Use boyer-moore along with regexp */
 
 /*
  * Flags used by TclX_Eval and friends.
@@ -219,19 +196,6 @@ typedef int
 /*
  * Prototypes for utility procedures.
  */
-Tcl_Obj *
-TclX_ObjGetVar2S _ANSI_ARGS_((Tcl_Interp *interp,
-                              char *part1Ptr,
-                              char *part2Ptr,
-                              int flags));
-
-extern Tcl_Obj *
-TclX_ObjSetVar2S _ANSI_ARGS_((Tcl_Interp *interp,
-                              char *part1Ptr,
-                              char *part2Ptr,
-                              Tcl_Obj *newValuePtr,
-                              int flags));
-
 extern int
 TclX_StrToOffset _ANSI_ARGS_((CONST char *string,
                               int         base,
@@ -282,23 +246,6 @@ extern int
 TclX_GetOffsetFromObj _ANSI_ARGS_((Tcl_Interp *interp,
                                    Tcl_Obj    *objPtr,
                                    off_t      *offsetPtr));
-
-extern void
-TclX_RegExpClean _ANSI_ARGS_((TclX_regexp *regExpPtr));
-
-extern int
-TclX_RegExpCompileObj _ANSI_ARGS_((Tcl_Interp   *interp,
-                                   TclX_regexp  *regExpPtr,
-                                   Tcl_Obj      *expression,
-                                   int          flags));
-
-extern int
-TclX_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
-                                TclX_regexp      *regExpPtr,
-                                char             *matchStrIn,
-                                char             *matchStrLower,
-                                Tcl_SubMatchInfo  subMatchInfo));
-
 
 extern int
 TclX_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.12 1997/07/04 21:17:35 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.13 1997/07/08 06:35:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -87,12 +87,11 @@ TclX_PipeObjCmd (clientData, interp, objc, objv)
         TclX_AppendObjResult (interp, channelNames [0], " ",
                               channelNames [1], (char *) NULL);
     } else {
-        if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
-                            Tcl_NewStringObj (channelNames [0], -1),
+        if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj (objv [1], NULL), NULL, Tcl_NewStringObj (channelNames [0], -1),
                             TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
-        if (Tcl_ObjSetVar2 (interp, objv [2], (Tcl_Obj *) NULL,
+        if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj (objv [2], NULL), NULL,
                             Tcl_NewStringObj (channelNames [1], -1),
                             TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;

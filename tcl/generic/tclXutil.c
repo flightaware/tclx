@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.20 1997/08/16 16:25:58 markd Exp $
+ * $Id: tclXutil.c,v 8.21 1998/01/23 03:18:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,82 +42,6 @@ static char *ERRORCODE = "errorCode";
  * Used to return argument messages by most commands.
  */
 char *tclXWrongArgs = "wrong # args: ";
-
-
-/*-----------------------------------------------------------------------------
- * TclX_ObjGetVar2S --
- *    Front-end to Tcl_ObjGetVar2 that takes strings for that name parts.
- * FIX: Should be in base Tcl.
- *-----------------------------------------------------------------------------
- */
-Tcl_Obj *
-TclX_ObjGetVar2S (interp, part1Ptr, part2Ptr, flags)
-    Tcl_Interp *interp;
-    char *part1Ptr;
-    char *part2Ptr;
-    int flags;
-{
-    Tcl_Obj *part1ObjPtr;
-    Tcl_Obj *part2ObjPtr;
-    Tcl_Obj *varValuePtr;
-
-    part1ObjPtr = Tcl_NewStringObj (part1Ptr, -1);
-    Tcl_IncrRefCount (part1ObjPtr);
-    if (part2Ptr == NULL) {
-        part2ObjPtr = NULL;
-    } else {
-        part2ObjPtr = Tcl_NewStringObj (part2Ptr, -1);
-        Tcl_IncrRefCount (part2ObjPtr);
-    }
-    
-    varValuePtr = Tcl_ObjGetVar2 (interp, part1ObjPtr, part2ObjPtr, flags);
-
-    Tcl_DecrRefCount (part1ObjPtr);
-    if (part2ObjPtr != NULL) {
-        Tcl_DecrRefCount (part2ObjPtr);
-    }
-    
-    return varValuePtr;
-}
-
-
-/*-----------------------------------------------------------------------------
- * TclX_ObjSetVar2S --
- *    Front-end to Tcl_ObjSetVar2 that takes strings for that name parts.
- * FIX: Should be in base Tcl.
- *-----------------------------------------------------------------------------
- */
-Tcl_Obj *
-TclX_ObjSetVar2S (interp, part1Ptr, part2Ptr, newValuePtr, flags)
-    Tcl_Interp *interp;
-    char *part1Ptr;
-    char *part2Ptr;
-    Tcl_Obj *newValuePtr;
-    int flags;
-{
-    Tcl_Obj *part1ObjPtr;
-    Tcl_Obj *part2ObjPtr;
-    Tcl_Obj *varValuePtr;
-
-    part1ObjPtr = Tcl_NewStringObj (part1Ptr, -1);
-    Tcl_IncrRefCount (part1ObjPtr);
-    if (part2Ptr == NULL) {
-        part2ObjPtr = NULL;
-    } else {
-        part2ObjPtr = Tcl_NewStringObj (part2Ptr, -1);
-        Tcl_IncrRefCount (part2ObjPtr);
-    }
-    
-    varValuePtr = Tcl_ObjSetVar2 (interp, part1ObjPtr, part2ObjPtr,
-                                  newValuePtr, flags);
-
-    Tcl_DecrRefCount (part1ObjPtr);
-    if (part2ObjPtr != NULL) {
-        Tcl_DecrRefCount (part2ObjPtr);
-    }
-    
-    return varValuePtr;
-}
 
 
 /*-----------------------------------------------------------------------------
@@ -589,8 +513,8 @@ CallEvalErrorHandler (interp)
      * should be removed eventually. FIX: Delete.
      */
     if (!Tcl_GetCommandInfo (interp, ERROR_HANDLER, &cmdInfo)) {
-        errorHandler = TclX_ObjGetVar2S (interp, ERROR_HANDLER, NULL,
-                                         TCL_GLOBAL_ONLY);
+        errorHandler = Tcl_GetObjVar2 (interp, ERROR_HANDLER, NULL,
+                                       TCL_GLOBAL_ONLY);
         if (errorHandler == NULL)
             return TCL_ERROR;  /* No handler specified */
     } else {
@@ -601,7 +525,7 @@ CallEvalErrorHandler (interp)
     Tcl_ListObjAppendElement (NULL, command,
                               Tcl_GetObjResult (interp));
                               
-    result = Tcl_GlobalEvalObj (interp, command);
+    result = Tcl_EvalObj (interp, command, TCL_EVAL_GLOBAL);
     if (result == TCL_ERROR) {
         Tcl_AddErrorInfo (interp,
                           "\n    (while processing tclx_errorHandler)");
@@ -1160,14 +1084,12 @@ TclX_SaveResultErrorInfo (interp)
 
     saveObjv [0] = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
     
-    saveObjv [1] = TclX_ObjGetVar2S (interp, ERRORINFO, NULL,
-                                     TCL_GLOBAL_ONLY);
+    saveObjv [1] = Tcl_GetObjVar2 (interp, ERRORINFO, NULL, TCL_GLOBAL_ONLY);
     if (saveObjv [1] == NULL) {
         saveObjv [1] = Tcl_NewObj ();
     }
 
-    saveObjv [2] = TclX_ObjGetVar2S (interp, ERRORCODE, NULL,
-                                     TCL_GLOBAL_ONLY);
+    saveObjv [2] = Tcl_GetObjVar2 (interp, ERRORCODE, NULL, TCL_GLOBAL_ONLY);
     if (saveObjv [2] == NULL) {
         saveObjv [2] = Tcl_NewObj ();
     }
@@ -1210,11 +1132,8 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
         panic ("invalid TclX result save object");
     }
 
-    TclX_ObjSetVar2S (interp, ERRORCODE, NULL, saveObjv[2],
-		      TCL_GLOBAL_ONLY);
-
-    TclX_ObjSetVar2S (interp, ERRORINFO, NULL, saveObjv[1],
-		      TCL_GLOBAL_ONLY);
+    Tcl_SetObjVar2 (interp, ERRORCODE, NULL, saveObjv[2], TCL_GLOBAL_ONLY);
+    Tcl_SetObjVar2 (interp, ERRORINFO, NULL, saveObjv[1], TCL_GLOBAL_ONLY);
 
     Tcl_SetObjResult (interp, saveObjv[0]);
 
@@ -1267,8 +1186,8 @@ TclX_ShellExit (interp, exitCode)
      * interpreter.
      */
     deleteInterp = FALSE;
-    varValue = TclX_ObjGetVar2S (interp, "TCLXENV", "deleteInterpAtShellExit",
-                                 TCL_GLOBAL_ONLY);
+    varValue = Tcl_GetObjVar2 (interp, "TCLXENV", "deleteInterpAtShellExit",
+                               TCL_GLOBAL_ONLY);
     if (varValue != NULL) {
         Tcl_GetBooleanFromObj (NULL, varValue, &deleteInterp);
     }

@@ -13,11 +13,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.7 1997/07/04 20:23:48 markd Exp $
+ * $Id: tclXfilescan.c,v 8.8 1997/07/05 08:00:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+#include "tclRegexp.h"
 
 /*
  * FIX: Does not support binary data.  Can't fix until the regexp facility
@@ -33,7 +34,8 @@
 #define MATCH_CASE_INSENSITIVE_FLAG 4
 
 typedef struct matchDef_t {
-    TclX_regexp         regExpInfo;
+    TclRegexp          *regExp;
+    Tcl_Obj            *regExpObj;
     Tcl_Obj            *command;
     struct matchDef_t  *nextMatchDefPtr;
     short               matchflags;
@@ -63,9 +65,6 @@ typedef struct {
     long              lineNum;      /* Current scanned line in the file. */
     matchDef_t       *matchPtr;     /* The current match, or NULL for the
                                        default. */
-    Tcl_SubMatchInfo  subMatchInfo; /* Information about the subexpressions
-                                       that matched, or NULL if this is the
-                                       default match. */
 } scanData_t;
 
 /*
@@ -151,7 +150,7 @@ CleanUpContext (scanTablePtr, contextPtr)
     matchDef_t  *matchPtr, *oldMatchPtr;
 
     for (matchPtr = contextPtr->matchListHead; matchPtr != NULL;) {
-        TclX_RegExpClean (&matchPtr->regExpInfo);
+        Tcl_DecrRefCount(matchPtr->regExpObj);
         if (matchPtr->command != NULL)
             Tcl_DecrRefCount (matchPtr->command);
         oldMatchPtr = matchPtr;
@@ -424,14 +423,14 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
 {
     scanContext_t  *contextPtr, **tableEntryPtr;
     matchDef_t     *newmatch;
-    int             compFlags = TCLX_REXP_BOTH_ALGORITHMS;
+    int             regExpFlags = 0;
     int             firstArg = 1;
 
     if (objc < 3)
         goto argError;
 
     if (STREQU (Tcl_GetStringFromObj (objv[1], NULL), "-nocase")) {
-        compFlags |= TCLX_REXP_NO_CASE;
+        regExpFlags |= REG_ICASE;
         firstArg = 2;
     }
       
@@ -456,9 +455,9 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
     if (objc == 3) {
         if (contextPtr->defaultAction) {
             Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-		Tcl_GetStringFromObj (objv[0], NULL),
-		": default match already specified in this scan context", 
-		(char *) NULL);
+                                    Tcl_GetStringFromObj (objv[0], NULL),
+                                    ": default match already specified in this scan context", 
+                                    (char *) NULL);
             return TCL_ERROR;
         }
 	Tcl_IncrRefCount (objv [2]);
@@ -474,17 +473,19 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
     newmatch = (matchDef_t *) ckalloc(sizeof (matchDef_t));
     newmatch->matchflags = 0;
 
-    if (compFlags & TCLX_REXP_NO_CASE) {
-        newmatch->matchflags |= MATCH_CASE_INSENSITIVE_FLAG;
+    if (regExpFlags & REG_ICASE) {
+        /*FIX: This is probably not needed unless BM is fixed*/
         contextPtr->flags |= CONTEXT_A_CASE_INSENSITIVE_FLAG;
     }
-
-    if (TclX_RegExpCompileObj (interp, &newmatch->regExpInfo,
-              objv [firstArg + 1], compFlags) != TCL_OK) {
+    
+    newmatch->regExp = (TclRegexp*)TclRegCompObj(interp, objv[firstArg + 1],
+                                                  regExpFlags);
+    if (newmatch->regExp == NULL) {
         ckfree ((char *) newmatch);
-        return (TCL_ERROR);
+	return TCL_ERROR;
     }
 
+    newmatch->regExpObj = objv[firstArg + 1],
     Tcl_IncrRefCount (objv [firstArg + 2]);
     newmatch->command = objv [firstArg + 2];
 
@@ -542,8 +543,8 @@ SetMatchInfoVar (interp, scanData)
             return TCL_ERROR;
 
         valueObjPtr = Tcl_NewLongObj ((long) scanData->offset);
-        if (TclX_ObjSetVar2S (interp, MATCHINFO, "offset", valueObjPtr,
-                              TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_SetObjVar2 (interp, MATCHINFO, "offset", valueObjPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
         }
@@ -555,15 +556,15 @@ SetMatchInfoVar (interp, scanData)
          * disabled.
          */
         valueObjPtr = Tcl_NewLongObj ((long) scanData->bytesRead);
-        if (TclX_SetVar2S (interp, MATCHINFO, "bytesread", valueObjPtr,
-                           TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_SetObjVar2 (interp, MATCHINFO, "bytesread", valueObjPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
         }
 #endif
         valueObjPtr = Tcl_NewIntObj ((long) scanData->lineNum);
-        if (TclX_ObjSetVar2S (interp, MATCHINFO, "linenum", valueObjPtr,
-                              TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_SetObjVar2 (interp, MATCHINFO, "linenum", valueObjPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
         }
@@ -582,37 +583,33 @@ SetMatchInfoVar (interp, scanData)
 
     if (scanData->contextPtr->copyFileChannel != NULL) {
         if (Tcl_SetVar2 (interp, MATCHINFO, "copyHandle", 
-                Tcl_GetChannelName (scanData->contextPtr->copyFileChannel),
-                TCL_LEAVE_ERR_MSG) == NULL)
+                         Tcl_GetChannelName (scanData->contextPtr->copyFileChannel),
+                         TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
     }
 
     if (scanData->matchPtr == NULL)
         return TCL_OK;
 
-    for (idx = 0; idx < scanData->matchPtr->regExpInfo.numSubExprs; idx++) {
-        start = scanData->subMatchInfo [idx].start;
-        end = scanData->subMatchInfo [idx].end;
+    for (idx = 0; idx < scanData->matchPtr->regExp->re.re_nsub; idx++) {
+        start = scanData->matchPtr->regExp->matches[idx].startp - scanData->line;
+        end = scanData->matchPtr->regExp->matches[idx].endp - scanData->line;
 
         sprintf (key, "subindex%d", idx);
         indexObjv [0] = Tcl_NewIntObj (start);
         indexObjv [1] = Tcl_NewIntObj (end);
         valueObjPtr = Tcl_NewListObj (2, indexObjv);
-        if (TclX_ObjSetVar2S (interp, "matchInfo", key, valueObjPtr,
-                              TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_SetObjVar2 (interp, "matchInfo", key, valueObjPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
         }
 
         sprintf (key, "submatch%d", idx);
-        if (start < 0) {
-            valueObjPtr = Tcl_NewStringObj ("", 0);
-        } else {
-            valueObjPtr = Tcl_NewStringObj (scanData->line + start,
-                                            (end - start) + 1);
-        }
-        if (TclX_ObjSetVar2S (interp, "matchInfo", key, valueObjPtr,
-                              TCL_LEAVE_ERR_MSG) == NULL) {
+        valueObjPtr = Tcl_NewStringObj (scanData->line + start,
+                                        (end - start) + 1);
+        if (Tcl_SetObjVar2 (interp, "matchInfo", key, valueObjPtr,
+                            TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             return TCL_ERROR;
         }
@@ -632,7 +629,7 @@ ScanFile (interp, contextPtr, channel)
     scanContext_t *contextPtr;
     Tcl_Channel    channel;
 {
-    Tcl_DString buffer, lowerBuffer;
+    Tcl_DString buffer;
     int result, matchedAtLeastOne;
     scanData_t data;
     
@@ -649,7 +646,6 @@ ScanFile (interp, contextPtr, channel)
     data.lineNum = 0;
     
     Tcl_DStringInit (&buffer);
-    Tcl_DStringInit (&lowerBuffer);
 
     result = TCL_OK;
     while (TRUE) {
@@ -672,21 +668,13 @@ ScanFile (interp, contextPtr, channel)
         data.storedLine = FALSE;
         matchedAtLeastOne = FALSE;
 
-        if (contextPtr->flags & CONTEXT_A_CASE_INSENSITIVE_FLAG) {
-            Tcl_DStringSetLength (&lowerBuffer, 0);
-            Tcl_DStringAppend (&lowerBuffer, buffer.string, -1);
-            TclX_DownShift (lowerBuffer.string, lowerBuffer.string);
-        }
-
         for (data.matchPtr = contextPtr->matchListHead; 
              data.matchPtr != NULL; 
              data.matchPtr = data.matchPtr->nextMatchDefPtr) {
 
-            if (!TclX_RegExpExecute (interp,
-                                     &(data.matchPtr->regExpInfo),
-                                     buffer.string,
-                                     lowerBuffer.string,
-                                     data.subMatchInfo))
+            if (!TclRegExpMatchObj(interp,
+                                   data.line,
+                                   data.matchPtr->regExpObj))
                 continue;  /* Try next match pattern */
 
             matchedAtLeastOne = TRUE;
@@ -696,7 +684,7 @@ ScanFile (interp, contextPtr, channel)
             if (result != TCL_OK)
                 goto scanExit;
 
-            result = Tcl_EvalObj (interp, data.matchPtr->command);
+            result = Tcl_EvalObj (interp, data.matchPtr->command, 0);
             if (result == TCL_ERROR) {
                 Tcl_AddObjErrorInfo (interp, 
                     "\n    while executing a match command", -1);
@@ -728,7 +716,7 @@ ScanFile (interp, contextPtr, channel)
             if (result != TCL_OK)
                 goto scanExit;
 
-            result = Tcl_EvalObj (interp, contextPtr->defaultAction);
+            result = Tcl_EvalObj (interp, contextPtr->defaultAction, 0);
             if (result == TCL_ERROR) {
                 Tcl_AddObjErrorInfo (interp, 
                     "\n    while executing a match default command", -1);
@@ -756,7 +744,6 @@ ScanFile (interp, contextPtr, channel)
 
   scanExit:
     Tcl_DStringFree (&buffer);
-    Tcl_DStringFree (&lowerBuffer);
     if (result == TCL_ERROR)
         return TCL_ERROR;
     return TCL_OK;

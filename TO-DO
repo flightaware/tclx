@@ -1,4 +1,9 @@
                          TclX bug, idea and task list
+
+*** Porting to 8.1 ***
+o Is Tcl_EvalObjv useful to us?
+o Boyer-Moore is not being used.
+
 *** Serious Bugs ***
 
 o cmdtrace usage message includes garbage after args: .

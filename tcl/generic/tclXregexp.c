@@ -16,12 +16,16 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.8 1997/07/04 20:24:00 markd Exp $
+ * $Id: tclXregexp.c,v 8.9 1997/09/18 15:57:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+/*FIX: Disable Boyer-Moore until ported to 8.1 */
+#undef USE_BM
+
+#ifdef USE_BM
 /*
  * Structure used to return pre-parse infomation about a regular expression.
  */
@@ -481,7 +485,7 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
                 BoyerMooreCompile (preParseInfo.largestNonMeta,
                                    preParseInfo.largestNonMetaLen);
     }
-    
+
     /*
      * Compile meta-character containing regular expression or ones with
      * errors to generate a useful error message.
@@ -611,3 +615,4 @@ exitPoint:
 }
 
 
+#endif

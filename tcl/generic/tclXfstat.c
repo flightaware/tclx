@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.5 1997/07/04 20:23:50 markd Exp $
+ * $Id: tclXfstat.c,v 8.6 1997/08/08 10:04:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -171,86 +171,72 @@ ReturnStatArray (interp, ttyDev, statBufPtr, arrayObj)
     struct stat  *statBufPtr;
     Tcl_Obj      *arrayObj;
 {
-    Tcl_Obj *idxObj = Tcl_NewObj ();
+    char *varName = Tcl_GetStringFromObj (arrayObj, NULL);
 
-    Tcl_SetStringObj (idxObj, "dev", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "dev",
                          Tcl_NewIntObj ((int) statBufPtr->st_dev),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "ino", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "ino",
                          Tcl_NewIntObj ((int) statBufPtr->st_ino),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "mode", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "mode",
                          Tcl_NewIntObj ((int) statBufPtr->st_mode),
                       TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "nlink", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "nlink",
                          Tcl_NewIntObj ((int) statBufPtr->st_nlink),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "uid", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "uid",
                          Tcl_NewIntObj ((int) statBufPtr->st_uid),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "gid", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "gid",
                          Tcl_NewIntObj ((int) statBufPtr->st_gid),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "size", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "size",
                          Tcl_NewLongObj ((long) statBufPtr->st_size),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "atime", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "atime",
                          Tcl_NewLongObj ((long) statBufPtr->st_atime),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "mtime", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName, "mtime",
                          Tcl_NewLongObj ((long) statBufPtr->st_mtime),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "ctime", -1);
-    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if  (Tcl_SetObjVar2 (interp, varName,  "ctime",
                          Tcl_NewLongObj ((long) statBufPtr->st_ctime),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "tty", -1);
-    if (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if (Tcl_SetObjVar2 (interp, varName, "tty",
                         Tcl_NewBooleanObj (ttyDev),
                         TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_SetStringObj (idxObj, "type", -1);
-    if (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+    if (Tcl_SetObjVar2 (interp, varName, "type",
                         Tcl_NewStringObj (StrFileType (statBufPtr), -1),
                         TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    Tcl_DecrRefCount (idxObj);
     return TCL_OK;
 
   errorExit:
-    Tcl_DecrRefCount (idxObj);
-    goto errorExit;
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------

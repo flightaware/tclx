@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 8.7 1997/07/04 20:23:41 markd Exp $
+ * $Id: tclXbsearch.c,v 8.8 1997/08/08 10:04:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -353,7 +353,8 @@ TclX_BsearchObjCmd (clientData, interp, objc, objv)
 
         valPtr = Tcl_NewStringObj (Tcl_DStringValue (&searchCB.lineBuf),
                                    -1);
-        if (Tcl_ObjSetVar2 (interp, objv [3], NULL, valPtr,
+        if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj (objv [3], NULL), NULL,
+                            valPtr,
                             TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valPtr);
             goto errorExit;
