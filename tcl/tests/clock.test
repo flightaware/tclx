@@ -1,7 +1,7 @@
 #
 # clock.test
 #
-# Tests for the getclock and fmtclock commands.
+# Tests for the getclock, fmtclock and convertclock commands.
 #---------------------------------------------------------------------------
 # Copyright 1992 Karl Lehenbauer and Mark Diekhans.
 #
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: clock.test,v 2.0 1992/10/16 04:49:30 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -56,4 +56,14 @@ test clock-3.3 {convertclock tests} {
 test clock-3.5 {convertclock tests} {
     fmtclock [convertclock "Feb 14, 1992 12:20 PM" {GMT} 319363200] {%D %r} GMT
 } {02/14/92 12:20:00 PM}
+
+test clock-3.6 {convertclock tests} {
+    set clock [convertclock "Oct 23,1992 15:00"]
+    fmtclock $clock {%b %d,%Y %H.%M}
+} {Oct 23,1992 15.00}
+
+test clock-3.7 {convertclock tests} {
+    set clock [convertclock "Oct 23,1992 15:00 GMT"]
+    fmtclock $clock {%b %d,%Y %H.%M GMT} GMT
+} {Oct 23,1992 15.00 GMT}
 
