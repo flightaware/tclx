@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.3 1995/01/01 19:49:16 markd Exp markd $
+# $Id: Makefile.in,v 1.4 1995/01/19 06:53:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -99,7 +99,7 @@ ucbtests: all
 
 extdtests: all
 	./runtest all
-	
+
 #------------------------------------------------------------------------------
 
 clean:
