@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.19 1995/05/26 05:32:31 markd Exp markd $
+.\" $Id: TclX.n,v 4.20 1995/05/28 18:54:38 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -664,8 +664,8 @@ Valid field descriptors are:
 .sp
 If format is not specified, "%a %b %d %H:%M:%S %Z %Y" is used.  If \fBGMT\fR
 is specified, the time will be formated as Greenwich Mean Time. If the
-argument is not specified or is empty, then the local timezone will be used as
-defined by the TIMEZONE environment variable.
+argument is not specified or is empty, then the local timezone will be used
+as defined by the operating environment.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
