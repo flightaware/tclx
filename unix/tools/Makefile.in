@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.0 1995/07/25 05:59:24 markd Rel $
+# $Id: Makefile.in,v 5.1 1995/09/26 06:40:33 markd Exp $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -35,7 +35,7 @@ LIBS        = @LIBS@ -lm
 #------------------------------------------------------------------------------
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
-           ${XINCLUDES} -I${TK_UCB_SRC}/generic -I${TCL_UCB_SRC}/generic
+           -I${TK_UCB_SRC}/generic -I${TCL_UCB_SRC}/generic ${XINCLUDES}
 
 .c.o:
 	${CC} ${CC_FLAGS} -c $<
