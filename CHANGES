@@ -1332,3 +1332,7 @@
   o Integrated several build fixes from Jan Nijtmans' <nijtmans@nici.kun.nl>
     TclX plus patch.
 -------------------------------------------------------------------------------
+17 Aug 97:
+  o Added patch to tcl8.0/generic/tclCmdAH.c to fix memory corruption caused
+    by the format command.
+-------------------------------------------------------------------------------
