@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.6 1997/06/12 21:08:42 markd Exp $
+# $Id: Makefile.in,v 8.7 1997/06/21 16:45:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -54,7 +54,7 @@ GENERIC_OBJS = \
     tclXlibInit.o    tclXprocess.o    tclXprofile.o    tclXregexp.o   \
     tclXselect.o     tclXunixSock.o   tclXsignal.o     tclXshell.o    \
     tclXstring.o     tclXsocket.o     tclXunixCmds.o   tclXutil.o     \
-    tclXunixOS.o     tclXoscmds.o     tclXunixDup.o
+    tclXunixOS.o     tclXoscmds.o     tclXunixDup.o    tclXlgets.o
 
 GENERIC_SOBJS = \
     tclXbsearch@SHOBJ_SUFFIX@    tclXchmod@SHOBJ_SUFFIX@    \
@@ -74,7 +74,7 @@ GENERIC_SOBJS = \
     tclXstring@SHOBJ_SUFFIX@     tclXsocket@SHOBJ_SUFFIX@   \
     tclXunixCmds@SHOBJ_SUFFIX@   tclXutil@SHOBJ_SUFFIX@     \
     tclXunixOS@SHOBJ_SUFFIX@     tclXoscmds@SHOBJ_SUFFIX@   \
-    tclXunixDup@SHOBJ_SUFFIX@
+    tclXunixDup@SHOBJ_SUFFIX@    tclXlgets@SHOBJ_SUFFIX@
 
 COMPAT_OBJS = @LIBOBJS@
 
@@ -187,6 +187,9 @@ tclXinit.o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
 
 tclXkeylist.o: ${TCLX_GENERIC_DIR}/tclXkeylist.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXkeylist.c
+
+tclXlgets.o: ${TCLX_GENERIC_DIR}/tclXlgets.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXlgets.c
 
 tclXlib.o: ${TCLX_GENERIC_DIR}/tclXlib.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXlib.c
@@ -355,6 +358,12 @@ tclXkeylist..o: ${TCLX_GENERIC_DIR}/tclXkeylist.c
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
 	    ${TCLX_GENERIC_DIR}/tclXkeylist.c
+	@OBJ_RESTORE@
+
+tclXlgets..o: ${TCLX_GENERIC_DIR}/tclXlgets.c
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXlgets.c
 	@OBJ_RESTORE@
 
 tclXlib..o: ${TCLX_GENERIC_DIR}/tclXlib.c

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.10 1997/06/30 07:57:40 markd Exp $
+ * $Id: tclExtdInt.h,v 8.11 1997/06/30 15:35:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -354,6 +354,9 @@ TclX_IdInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 extern void
 TclX_KeyedListInit _ANSI_ARGS_((Tcl_Interp *interp));
+
+extern void
+TclX_LgetsInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 extern void
 TclX_ListInit _ANSI_ARGS_((Tcl_Interp *interp));

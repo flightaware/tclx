@@ -35,6 +35,7 @@
 ./tcl/generic/tclXhandles.c
 ./tcl/generic/tclXinit.c
 ./tcl/generic/tclXkeylist.c
+./tcl/generic/tclXlgets.c
 ./tcl/generic/tclXlib.c
 ./tcl/generic/tclXlibInit.c
 ./tcl/generic/tclXlist.c

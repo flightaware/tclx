@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 8.5 1997/06/30 01:29:02 markd Exp $
+ * $Id: tclXcmdInit.c,v 8.6 1997/06/30 03:55:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -85,6 +85,7 @@ Tclxcmd_SafeInit (interp)
     TclX_GeneralInit (interp);
     TclX_IdInit (interp);
     TclX_KeyedListInit (interp);
+    TclX_LgetsInit (interp);
     TclX_ListInit (interp);
     TclX_MathInit (interp);
     TclX_ProfileInit (interp);

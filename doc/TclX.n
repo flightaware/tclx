@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.0.4.1 1997/04/14 02:01:32 markd Exp $
+.\" $Id: TclX.n,v 8.4 1997/04/17 04:58:27 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1386,7 +1386,8 @@ The \fB\-fileid\fR option is not available on \fBWindows 95/NT\fR.
 Reads the next Tcl list from the file given by \fIfileId\fR and discards
 the terminating newline character.  This command differs from the \fBgets\fR
 command, in that it reads Tcl lists rather than lines.  If the list
-contains a newline, then that newline will be returned as part of the result.
+contains newlines or binary data, then that newline or bytes of zero will be
+returned as part of the result.
 Only a newline not quoted as part of the list indicates the end of the list.
 There is no corresponding command for outputting lists, as \fBputs\fR will
 do this correctly.
@@ -1408,14 +1409,11 @@ An empty string will also be returned if a line contains no characters
 except the newline, so \fBeof\fR may have to be used to determine
 what really happened.
 .sp
-If \fBlgets\fR is used on a non-blocking file, blocking will be temporarily
-enabled for the duration of the \fBlgets\fR command.  This is required by
-the current implementation of the underlying Tcl I/O system.  In most
-cases, this will not cause any problems, as the process writing the
-file should be writing entire lists in one write operation.   The only
-difficulty that might arise is if non-blocking I/O was being used to
-keep two processes from deadlocking while exchanging large amounts of
-data.
+The \fBlgets\fR command maybe used to read and write lists containing
+binary data, however translation must be set to \fBlf\fR or the
+data maybe corrupted.
+.sp
+If \fBlgets\fR is currently supported on non-blocking files.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

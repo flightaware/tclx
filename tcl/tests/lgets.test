@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lgets.test,v 8.0.4.1 1997/04/14 02:02:28 markd Exp $
+# $Id: lgets.test,v 8.1 1997/04/17 04:59:27 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -62,7 +62,7 @@ Test lgets-1.7 {lgets command with EOF in list element} {
     close $f
     set f [open test2.tmp]
     lgets $f
-} 1 {eof encountered while reading list from channel}
+} 1 {EOF encountered before newline while reading list from channel}
 
 catch {close $f}
 
@@ -78,7 +78,7 @@ Test lgets-1.8 {lgets command with EOF in list} {
     lappend x [catch {lgets $f y} r] $r $y
     close $f
     set x
-} 0 {5 Test1 1 {eof encountered while reading list from channel} Test2}
+} 0 {5 Test1 1 {EOF encountered before newline while reading list from channel} Test2}
 
 Test lgets-2.1 {lgets command} {
     catch {unset data}
@@ -98,7 +98,7 @@ nypq}]
     set data(9) [list [replicate "AAA\n \{B \"BB" 100]]
 
     set fh [open test1.tmp w]
-    loop idx 0 10 {
+    foreach idx [lsort -integer [array names data]] {
         puts $fh $data($idx)
     }
     close $fh
@@ -157,7 +157,7 @@ catch {close $fh}
 unset data
 
 # Make sure odd lists work.
-set data "ERR_REQUEST_PROCESSOR_FAILURE \\ {sc\\ ...\""
+set data [list ERR_REQUEST_PROCESSOR_FAILURE " {sc ...\""]
 
 Test lgets-3.1 {lgets command} {
     set fh [open test1.tmp w+]
@@ -184,18 +184,101 @@ Test lgets-4.1 {lgets on non-blocked channel} {
     puts $wpipe $data
     flush $wpipe
     lgets $rpipe
-} 0 $data {tempNotPc}
+} 1 {channel is non-blocking; not currently supported by the lgets command} {tempNotPc}
 
 Test lgets-4.2 {lgets on non-blocked channel} {
     puts $wpipe $data
     flush $wpipe
     catch {unset x}
     list [lgets $rpipe x] $x
-} 0 [list 41 $data] {tempNotPc}
+} 1 {channel is non-blocking; not currently supported by the lgets command}        {tempNotPc}
 
 catch {close $rpipe}
 catch {close $wpipe}
 unset data
+
+
+#
+# Binary data 
+#
+
+Test lgets-5.1 {lgets with binary data} {
+    catch {unset data}
+    set data(0) [list aaa b cc\0cc]
+    set data(1) [list aaaa \" \0\0  ccc]
+    set data(2) [list aaaaa \" cc]
+    set data(3) [list aaaaa \"\" \} [replicate \0\1\0 5] \{ \n c]
+    set data(4) [list bcad \n defg \n nypq]
+    set data(5) [list BCAD  "AAA
+\0
+BBB
+CCC" "
+defg
+\0\0\0" nypq]
+    set data(6) [list [replicate ABD 200]  "\n" [replicate XYZ 100]]
+    set data(7) [list [replicate ABD 255]  "\n" [replicate XYZ 100]]
+    set data(8) [list [replicate ABD 256]  "\n" [replicate XYZ 100]]
+    set data(9) [list [replicate "AAA\n \{B \"BB" 100]]
+
+    set fh [open test1.tmp w]
+    foreach idx [lsort -integer [array names data]] {
+        puts $fh $data($idx)
+    }
+    close $fh
+    set fh [open test1.tmp]
+    concat {}
+} 0 {}
+
+Test lgets-5.2 {lgets with binary data} {
+    lgets $fh
+} 0 $data(0)
+
+Test lgets-5.3 {lgets with binary data} {
+    lgets $fh retvar
+    set retvar
+} 0 $data(1)
+
+Test lgets-5.4 {lgets with binary data} {
+    lgets $fh
+} 0 $data(2)
+
+Test lgets-5.5 {lgets with binary data} {
+    lgets $fh retvar
+    set retvar
+} 0 $data(3)
+
+Test lgets-5.6 {lgets with binary data} {
+    lgets $fh
+} 0 $data(4)
+
+Test lgets-5.7 {lgets with binary data} {
+    lgets $fh retvar
+    set retvar
+} 0 $data(5)
+
+Test lgets-5.8 {lgets with binary data} {
+    lgets $fh retvar
+    set retvar
+} 0 $data(6)
+
+Test lgets-5.9 {lgets with binary data} {
+    lgets $fh retvar
+    set retvar
+} 0 $data(7)
+
+Test lgets-5.10 {lgets with binary data} {
+    lgets $fh retvar
+    set retvar
+} 0 $data(8)
+
+Test lgets-5.11 {lgets with binary data} {
+    lgets $fh retvar
+    set retvar
+} 0 $data(9)
+
+catch {close $fh}
+unset data
+
 
 TestRemove test1.tmp test2.tmp
 
