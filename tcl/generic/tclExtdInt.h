@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.29 1993/09/25 05:09:17 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.30 1993/10/07 06:35:45 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -346,6 +346,9 @@ Tcl_CopyfileCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
 Tcl_LgetsCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_FrenameCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
  * from tclXfstat.c

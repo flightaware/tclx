@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.40 1993/10/07 06:51:11 markd Exp markd $
+.\" $Id: TclX.n,v 2.41 1993/10/07 15:15:12 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1303,6 +1303,20 @@ what really happened.
 '@:
 '@:This command is provided by Extended Tcl.
 '@endhelp
+'
+'@help: tcl/files/frename
+'@brief: Renames a file.
+.TP
+.B frename \fIoldPath newPath\fR
+.br
+Renames \fIoldPath\fR to \fInewPath\fR.  This command does not support
+renaming across file systems unless the \fBrename\fR system call supports
+them.  If renaming accross file systems is desired, \fBexec\fR the \fBmv\fR
+command.
+'@:
+'@:This command is provided by Extended Tcl.
+'@endhelp
+'
 '
 '@help: tcl/files/pipe
 '@brief: Create a pipe.

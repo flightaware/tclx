@@ -1,7 +1,7 @@
 #
 # filecmds.test
 #
-# Tests for the copyfile, and pipe commands.
+# Tests for the copyfile, pipe, and frename commands.
 #---------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
+# $Id: filecmds.test,v 2.4 1993/08/18 05:23:56 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -147,6 +147,23 @@ Test filecmds-4.2 {pipe tests} {
 close $readPF
 close $writePF
 
-unlink -nocomplain {IOTEST.TMP IOTEST2.TMP IOTEST3.TMP}
+Test filecmds-5.1 {frename tests} {
+    frename
+} 1 {wrong # args: frename oldPath newPath}
+
+Test filecmds-5.2 {frename tests} {
+    frename a b c
+} 1 {wrong # args: frename oldPath newPath}
+
+Test filecmds-5.3 {frename tests} {
+    frename IOTEST.TMP IOTEST4.TMP
+} 0 {}
+
+Test filecmds-5.4 {frename tests} {
+    unlink -nocomplain IOTEST5.TMP
+    list [catch {frename IOTEST5.TMP IOTEST6.TMP} msg] [string tolower $msg]
+} 0 {1 {rename "iotest5.tmp" to "iotest6.tmp" failed: no such file or directory}}
+
+unlink -nocomplain {IOTEST.TMP IOTEST2.TMP IOTEST3.TMP IOTEST4.TMP}
 
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.9 1993/09/03 08:05:37 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.10 1993/10/07 06:35:45 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -47,6 +47,12 @@
  * Prototypes of internal functions.
  */
 static int
+CopyOpenFile _ANSI_ARGS_((Tcl_Interp *interp,
+                          long        maxBytes,
+                          FILE       *inFilePtr,
+                          FILE       *outFilePtr));
+
+static int
 GetsListElement _ANSI_ARGS_((Tcl_Interp    *interp,
                              FILE          *filePtr,
                              Tcl_DString   *bufferPtr,
@@ -61,10 +67,6 @@ GetsListElement _ANSI_ARGS_((Tcl_Interp    *interp,
  *
  * Results:
  *      Standard TCL result.
- *
- * Side effects:
- *      Locates and creates entries in the file table
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -74,9 +76,8 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    Interp    *iPtr = (Interp *) interp;
-    int        fileNums [2];
-    char       fileIds [12];
+    int   fileNums [2];
+    char  fileIds [12];
 
     if (!((argc == 1) || (argc == 3))) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
@@ -118,6 +119,65 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
+ * CopyOpenFile --
+ * 
+ *  Utility function to copy an open file to another open file.
+ *
+ * Parameters:
+ *   o interp (I) - Error messages are returned in the interpreter.
+ *   o maxBytes (I) - Maximum number of bytes to copy.
+ *   o inFilePtr (I) - Input file.
+ *   o outFilePtr (I) - Output file.
+ * Returns:
+ *    The number of bytes transfered or -1 on an error.
+ *
+ *-----------------------------------------------------------------------------
+ */
+static int
+CopyOpenFile (interp, maxBytes, inFilePtr, outFilePtr)
+    Tcl_Interp *interp;
+    long        maxBytes;
+    FILE       *inFilePtr;
+    FILE       *outFilePtr;
+{
+    char   buffer [2048];
+    long   bytesToRead, bytesRead, totalBytesRead, bytesLeft;
+
+    bytesLeft = maxBytes;
+    totalBytesRead = 0;
+
+    while (bytesLeft > 0) {
+        bytesToRead = sizeof (buffer);
+        if (bytesToRead > bytesLeft)
+            bytesToRead = bytesLeft;
+
+        bytesRead = fread (buffer, sizeof (char), bytesToRead, inFilePtr);
+        if (bytesRead <= 0) {
+            if (feof (inFilePtr))
+                break;
+            else
+                goto unixError;
+        }
+        if (fwrite (buffer, sizeof (char), bytesRead, outFilePtr) != bytesRead)
+            goto unixError;
+
+        bytesLeft -= bytesRead;
+        totalBytesRead += bytesRead;
+    }
+
+    if (fflush (outFilePtr) != 0)
+        goto unixError;
+
+    return totalBytesRead;
+
+  unixError:
+    interp->result = Tcl_PosixError (interp);
+    return -1;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
  * Tcl_CopyfileCmd --
  *     Implements the copyfile TCL command:
  *         copyfile ?-bytes num|-maxbytes num? fromFileId toFileId
@@ -138,8 +198,7 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
 #define TCL_COPY_BYTES      1
 #define TCL_COPY_MAX_BYTES  2
 
-    FILE  *fromFilePtr, *toFilePtr;
-    char   buffer [2048];
+    FILE  *inFilePtr, *outFilePtr;
     long   bytesToRead, bytesRead, totalBytesToRead, totalBytesRead, bytesLeft;
     int    copyMode;
 
@@ -156,44 +215,28 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
 
         if (Tcl_GetLong (interp, argv [2], &totalBytesToRead) != TCL_OK)
             return TCL_ERROR;
-        bytesLeft = totalBytesToRead;
     } else {
         copyMode = TCL_COPY_ALL;
-        bytesLeft = MAXLONG;
+        totalBytesToRead = MAXLONG;
     }
-    totalBytesRead = 0;
 
     if (Tcl_GetOpenFile (interp, argv [argc - 2],
                          FALSE,  /* Read access  */
                          TRUE,   /* Check access */  
-                         &fromFilePtr) != TCL_OK)
+                         &inFilePtr) != TCL_OK)
         return TCL_ERROR;
 
     if (Tcl_GetOpenFile (interp, argv [argc - 1],
                          TRUE,   /* Write access */
                          TRUE,   /* Check access */
-                         &toFilePtr) != TCL_OK)
+                         &outFilePtr) != TCL_OK)
         return TCL_ERROR;
 
-    while (bytesLeft > 0) {
-        bytesToRead = sizeof (buffer);
-        if (bytesToRead > bytesLeft)
-            bytesToRead = bytesLeft;
+    totalBytesRead = CopyOpenFile (interp, totalBytesToRead,
+                                   inFilePtr, outFilePtr);
+    if (totalBytesRead < 0)
+        return TCL_ERROR;
 
-        bytesRead = fread (buffer, sizeof (char), bytesToRead, fromFilePtr);
-        if (bytesRead <= 0) {
-            if (feof (fromFilePtr))
-                break;
-            else
-                goto unixError;
-        }
-        if (fwrite (buffer, sizeof (char), bytesRead, toFilePtr) != bytesRead)
-            goto unixError;
-
-        bytesLeft -= bytesRead;
-        totalBytesRead += bytesRead;
-    }
-    
     /*
      * Return an error if -bytes were specified and not that many were
      * available.
@@ -209,10 +252,6 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
 
     sprintf (interp->result, "%ld", totalBytesRead);
     return TCL_OK;
-
-  unixError:
-    interp->result = Tcl_PosixError (interp);
-    return TCL_ERROR;
 
   wrongArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -517,3 +556,37 @@ errorExit:
 
 }
 
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_fenameCmd --
+ *     Implements the rename TCL command:
+ *         frename oldPath newPath
+ *
+ * Results:
+ *      Standard TCL result.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_FrenameCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    if (argc != 3) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
+                          " oldPath newPath", (char*) NULL);
+        return TCL_ERROR;
+    }
+
+    if (rename (argv [1], argv [2]) != 0) {
+        Tcl_AppendResult (interp, "rename \"", argv [1], "\" to \"", argv [2],
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}

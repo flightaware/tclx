@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 2.8 1993/09/16 05:37:54 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 2.9 1993/10/23 23:33:57 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -116,6 +116,8 @@ TclXCmd_Init (interp)
     Tcl_CreateCommand (interp, "copyfile", Tcl_CopyfileCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "lgets", Tcl_LgetsCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "frename", Tcl_FrenameCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 
     /*
