@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.12 1997/08/17 04:08:41 markd Exp $
+# $Id: Makefile.in,v 8.13 1997/08/30 22:30:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -109,7 +109,9 @@ ${TKX_STLIB_NAME}: ${OBJS}
 
 ${TKX_SHLIB_NAME}: ${SOBJS}
 	rm -f ${TKX_SHLIB_NAME}
-	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
+	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} \
+	    ${TK_BUILD_LIB_SPEC} ${TCLX_BUILD_LIB_SPEC} \
+	    ${TCL_BUILD_LIB_SPEC} ${TCL_SHLIB_LD_LIBS}
 
 #------------------------------------------------------------------------------
 # We need the "help" directory here so that the help command will work before
