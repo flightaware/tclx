@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.27 1993/10/31 16:55:57 markd Exp markd $
+# $Id: Makefile.in,v 2.28 1993/10/31 17:17:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -238,6 +238,7 @@ TCLXINSTALL:
 TCLXINSTALL-EXEC:
 	${INSTCOPY} tclmaster/bin/tcl ${TCL_BINDIR}
 	${INSTCOPY} tclmaster/lib/libtclx.a ${TCL_LIBDIR}
+	${RANLIB} ${TCL_LIBDIR}/libtclx.a
 
 TKXINSTALL:
 	rm -rf ${TK_INST_MASTER}
@@ -249,6 +250,7 @@ TKXINSTALL-EXEC:
 	${INSTCOPY} tkmaster/bin/wishx ${TCL_BINDIR}
 	${INSTCOPY} tkmaster/bin/tclhelp ${TCL_BINDIR}
 	${INSTCOPY} tkmaster/lib/libtkx.a ${TCL_LIBDIR}
+	${RANLIB} ${TCL_LIBDIR}/libtkx.a
 
 # Fake targets to decide if we install wishx or not.
 
@@ -280,6 +282,7 @@ TCLXMINSTALL:
 	@echo ""
 	rm -rf ${TCL_INST_MASTER}
 	${INSTCOPY} tclmaster/* ${TCL_INST_MASTER}
+	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} "${MAN_DIR_SEPARATOR}" \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} "" \
 	    ${TCL_UCB_SRC}/doc ${TCL_INST_MASTER}/man
@@ -295,6 +298,7 @@ TCLXMINSTALL-EXEC:
 	@echo ""
 	${INSTCOPY} tclmaster/bin${ARCH} ${TCL_INST_MASTER}
 	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
+	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	if test ! -d ${TCL_BINDIR} ; then mkdir ${TCL_BINDIR}; fi
 	rm -f ${TCL_BINDIR}/tcl
 	ln -s ${TCL_INST_MASTER}/bin${ARCH}/tcl ${TCL_BINDIR}/tcl
@@ -306,6 +310,7 @@ TKXMINSTALL:
 	@echo ""
 	rm -rf ${TK_INST_MASTER}
 	${INSTCOPY} tkmaster/* ${TK_INST_MASTER}
+	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} "${MAN_DIR_SEPARATOR}" \
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} "" \
 	    ${TK_UCB_SRC}/doc ${TK_INST_MASTER}/man
@@ -321,6 +326,7 @@ TKXMINSTALL-EXEC:
 	@echo ""
 	${INSTCOPY} tkmaster/bin${ARCH} ${TK_INST_MASTER}
 	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
+	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	if test ! -d ${TCL_BINDIR} ; then mkdir ${TCL_BINDIR}; fi
 	rm -f ${TCL_BINDIR}/wishx
 	ln -s ${TK_INST_MASTER}/bin${ARCH}/wishx ${TCL_BINDIR}/wishx
