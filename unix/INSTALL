@@ -114,9 +114,9 @@ to the files in the master directory.
    /usr/local/bin/wishx -> /usr/local/tkX/3.6a/bin/wishx
 
 
-If the --arch=ARCH option was specified to configure (see below), the bin and
-lib files are stored in architecture-dependent directories with the specified
-architecture as a suffix to the directory name:
+If the --with-arch=ARCH option was specified to configure (see below), the bin
+and lib files are stored in architecture-dependent directories with the
+specified architecture as a suffix to the directory name:
 
    o ${prefix}/tclX/7.3a/bin.arch
    o ${prefix}/tclX/7.3a/lib.arch
@@ -151,7 +151,7 @@ HOW TO BUILD EXTENDED TCL
           Note: The source directory must be clean, it can't contain a built
           copy of TclX.
 
-        o --arch=ARCH
+        o --with-arch=ARCH
           If your are using the master directory installation model, this
           specifies the a suffix to use for the architecture-dependent
           directories under the master directory.  Use the --execprefix
@@ -415,6 +415,6 @@ BSDI:
    o Also seee the 386BSD/BSDI section below.
 
 386BSD/BSDI
-   o There is some problem in the configure parsing of the --arch option.  
+   o There is some problem in the configure parsing of the --with-arch option.
      The syntax "./configure --arch=XXX" will not work, use
      "./configure --arch XXX" instead.

@@ -129,27 +129,19 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 3.5 
+# From configure.in Revision: 3.6 
 
 
 
 #------------------------------------------------------------------------------
-#     Rescan command line looking for the --arch= option.
+#      command line looking for the --arch= option.
 #------------------------------------------------------------------------------
 
-for arg in $configure_args
-do
-  # Handle --arch with a space before the argument.
-  if test x$next_arch = xyes; then TCL_ARCH=.$arg; next_arch=
-  else
-    case $arg in
-     --arch=*)
-	TCL_ARCH=.`echo $arg | sed 's/[-a-z_]*=//'` ;;
-     --arch)
-	next_arch=yes ;;
-    esac
-  fi
-done
+# check whether --with-arch was given
+withval="$with_arch"
+if test -n "$withval"; then
+  TCL_ARCH=.$withval
+fi
 
 if test x$TCL_ARCH = x
 then

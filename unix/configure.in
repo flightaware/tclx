@@ -13,39 +13,24 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 3.5 1994/02/09 06:08:15 markd Exp markd $
+dnl $Id: configure.in,v 3.6 1994/02/09 06:53:02 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 3.5 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 3.6 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
 #------------------------------------------------------------------------------
-#     Rescan command line looking for the --arch= option.
+#      command line looking for the --arch= option.
 #------------------------------------------------------------------------------
 
-changequote(,)dnl
-for arg in $configure_args
-do
-  # Handle --arch with a space before the argument.
-  if test x$next_arch = xyes; then TCL_ARCH=.$arg; next_arch=
-  else
-    case $arg in
-     --arch=*)
-	TCL_ARCH=.`echo $arg | sed 's/[-a-z_]*=//'` ;;
-     --arch)
-	next_arch=yes ;;
-    esac
-  fi
-done
-
+AC_WITH(arch, [TCL_ARCH=.$withval])
 if test x$TCL_ARCH = x
 then
   echo "No architecture suffix will be used"
 else
   echo "An architecture suffix of \"$TCL_ARCH\" will be appended to bin and lib directories."
 fi
-changequote([,])dnl
 AC_SUBST(TCL_ARCH)
 
 #------------------------------------------------------------------------------
