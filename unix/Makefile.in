@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.26 1993/10/29 14:36:38 markd Exp markd $
+# $Id: Makefile.in,v 2.27 1993/10/31 16:55:57 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -142,9 +142,9 @@ runtcl:
 	@echo "export TCL_LIBRARY TCL_PROGRAM"                    >>runtcl
 	@echo "if [ \$$# = 0 ]"                                   >>runtcl
 	@echo "then"                                              >>runtcl
-	@echo "    exec $$TCL_PROGRAM"                            >>runtcl
+	@echo "    exec \$$TCL_PROGRAM"                           >>runtcl
 	@echo "else"                                              >>runtcl
-	@echo "    exec $$TCL_PROGRAM \"\$$@\""                   >>runtcl
+	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                  >>runtcl
 	@echo "fi"                                                >>runtcl
 	chmod a+rx runtcl
 
@@ -157,9 +157,9 @@ runwishx:
 	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"         >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx
-	@echo "    exec $$TCL_PROGRAM"                            >>runwishx
+	@echo "    exec \$$TCL_PROGRAM"                           >>runwishx
 	@echo "else"                                              >>runwishx
-	@echo "    exec $$TCL_PROGRAM \"\$$@\""                   >>runwishx
+	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                  >>runwishx
 	@echo "fi"                                                >>runwishx
 	chmod a+rx runwishx
 
