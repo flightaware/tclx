@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXutil.c,v 4.0 1994/07/16 05:28:07 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -604,15 +604,17 @@ Tcl_CloseForError (interp, fileNum)
 {
     static char *ERROR_CODE = "errorCode";
     int          saveErrNo = errno;
+    Interp      *iPtr = (Interp *) interp;
     char        *saveResult, *errorCode, *saveErrorCode, *argv [2], buf [32];
 
     saveResult = ckstrdup (interp->result);
 
-    errorCode = Tcl_GetVar (interp, ERROR_CODE, TCL_GLOBAL_ONLY);
-    if (errorCode != NULL)
+    if (iPtr->flags & ERROR_CODE_SET) {
+        errorCode = Tcl_GetVar (interp, ERROR_CODE, TCL_GLOBAL_ONLY);
         saveErrorCode = ckstrdup (errorCode);
-    else
+    } else {
         saveErrorCode = NULL;
+    }
 
     sprintf (buf, "file%d", fileNum);
 
@@ -623,10 +625,10 @@ Tcl_CloseForError (interp, fileNum)
 
     if (saveErrorCode != NULL) {
         Tcl_SetVar (interp, ERROR_CODE, saveErrorCode, TCL_GLOBAL_ONLY);
+        iPtr->flags |= ERROR_CODE_SET;
         free (saveErrorCode);
     }
-    Tcl_SetResult (interp, saveResult, TCL_VOLATILE);
-    free (saveResult);
+    Tcl_SetResult (interp, saveResult, TCL_DYNAMIC);
 
     close (fileNum);  /* In case Tcl didn't have it open */
     
