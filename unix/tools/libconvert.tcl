@@ -5,7 +5,7 @@
 # mechanism.  This helps if something is broken with auto-load so the
 # build at least completes.
 #------------------------------------------------------------------------------
-# Copyright 1992-1997 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1999 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: libconvert.tcl,v 8.1 1997/04/17 05:00:30 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 

@@ -4,7 +4,7 @@
  *    Tcl_AppInit function for Extended Tcl Tk test program on Unix.
  *
  *-----------------------------------------------------------------------------
- * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1999 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXunixTest.c,v 8.3 1997/08/23 18:56:19 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 

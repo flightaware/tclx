@@ -3,7 +3,7 @@
  *
  * Dummy version of Tclx_InitStandalone for shared libraries.
  *-----------------------------------------------------------------------------
- * Copyright 1997-1997 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1997-1999 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  *-----------------------------------------------------------------------------
  * This file donated bu Jan Nijtman <nijtmans@worldaccess.nl>
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 #include "tclExtend.h"

@@ -3,7 +3,7 @@
  *
  * Standalone TclX initialization.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1999 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinitSA.c,v 8.1 1997/08/30 22:29:56 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 

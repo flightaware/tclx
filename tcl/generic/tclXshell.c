@@ -3,7 +3,7 @@
  *
  * Support code for the Extended Tcl shell.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1999 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 8.4 1997/07/04 21:08:52 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 

@@ -9,7 +9,7 @@
  * modules and work on more file types.  However, right now, I don't see a
  * good way to do this on Win32.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1999 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.7 1997/07/08 06:35:28 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
