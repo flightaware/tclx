@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 2.4 1993/03/06 21:42:30 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 2.5 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,25 +43,37 @@ static int
 GetTimeZone (currentTime)
     time_t  currentTime;
 {
+    struct tm  *timeDataPtr = localtime (&currentTime);
+    int         timeZone;
+
 #ifdef TCL_USEGETTOD
     struct timeval tv;
     struct timezone tz;
 
     gettimeofday( &tv, &tz );
-    return tz.tz_minuteswest;
-#else
-    struct tm  *timeDataPtr = localtime (&currentTime);
+    timeZone = tz.tz_minuteswest;
+    if (timeDataPtr->tm_isdst)
+        timeZone += 60;
+#endif
 
 #ifdef TCL_TM_GMTOFF
-    return -(timeDataPtr->tm_gmtoff / 60);
+    timeZone = -(timeDataPtr->tm_gmtoff / 60);
+    if (timeDataPtr->tm_isdst)
+        timeZone += 60;
 #endif
+
 #ifdef TCL_TIMEZONE_VAR 
-    return timezone / 60;
+    timeZone = timezone / 60;
+    if (timeDataPtr->tm_isdst)
+        timeZone += 60;
 #endif
+
 #if !defined(TCL_TM_GMTOFF) && !defined(TCL_TIMEZONE_VAR)
-    return timeDataPtr->tm_tzadj  / 60;
+    timeZone = timeDataPtr->tm_tzadj  / 60;
+    if (timeDataPtr->tm_isdst)
+        timeZone += 60;
 #endif
-#endif
+    return timeZone;
 }
 
 /*
