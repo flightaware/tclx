@@ -1,12 +1,14 @@
 #
 # Modified version of the standard Tcl auto_load_index proc that calls a TclX
-# command load TclX .tndx library indices.
+# command load TclX .tndx library indices. 
+#
+
 # init.tcl --
 #
 # Default system startup file for Tcl-based applications.  Defines
 # "unknown" procedure and auto-load facilities.
 #
-# SCCS: @(#) init.tcl 1.8 98/07/20 16:24:45
+# RCS: @(#) $Id: init.tcl,v 1.22 1998/11/12 05:54:02 welch Exp $
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.
@@ -14,6 +16,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
+
 
 # auto_load_index --
 # Loads the contents of tclIndex files on the auto_path directory
@@ -40,8 +43,8 @@ proc auto_load_index {} {
     set issafe [interp issafe]
     for {set i [expr {[llength $auto_path] - 1}]} {$i >= 0} {incr i -1} {
 	set dir [lindex $auto_path $i]
-	set f ""
         tclx_load_tndxs $dir
+	set f ""
 	if {$issafe} {
 	    catch {source [file join $dir tclIndex]}
 	} elseif {[catch {set f [open [file join $dir tclIndex]]}]} {
@@ -77,3 +80,4 @@ proc auto_load_index {} {
     }
     return 1
 }
+

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 8.6.2.1 1998/08/10 09:26:40 markd Exp $
+# $Id: common.vc,v 8.6.2.2 1998/09/22 02:53:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -112,10 +112,10 @@ TK_SALIB         = $(TK_BUILD_DIR)\tk80sa.dll
 TCLX_WIN_DIR      = $(ROOT)\tcl\win
 TCLX_GENERIC_DIR  = $(ROOT)\tcl\generic
 TCLX_RUNTIME_DIR  = $(ROOT)\tcl\runtime
-TCLX_DLL_NAME     = tclx803.dll
+TCLX_DLL_NAME     = tclx804.dll
 TCLX_DLL          = $(TCLX_WIN_DIR)\$(TCLX_DLL_NAME)
-TCLX_LIB          = $(TCLX_WIN_DIR)\tclx803.lib
-TCLX_SALIB        = $(TCLX_WIN_DIR)\tclx803sa.lib
+TCLX_LIB          = $(TCLX_WIN_DIR)\tclx804.lib
+TCLX_SALIB        = $(TCLX_WIN_DIR)\tclx804sa.lib
 TCLX_INST_BIN     = $(PREFIX)\bin
 TCLX_INST_INCL    = $(PREFIX)\include
 TCLX_INST_LIB     = $(PREFIX)\lib
@@ -129,10 +129,10 @@ TCLX_INST_RUNTIMEU= $(TCLX_INST_LIBU)/tclX$(TCLX_VERSION)
 TKX_WIN_DIR      = $(ROOT)\tk\win
 TKX_GENERIC_DIR  = $(ROOT)\tk\generic
 TKX_RUNTIME_DIR  = $(ROOT)\tk\runtime
-TKX_DLL_NAME     = tkx803.dll
+TKX_DLL_NAME     = tkx804.dll
 TKX_DLL          = $(TKX_WIN_DIR)\$(TKX_DLL_NAME)
-TKX_LIB          = $(TKX_WIN_DIR)\tkx803.lib
-TKX_SALIB        = $(TKX_WIN_DIR)\tkx803sa.dll
+TKX_LIB          = $(TKX_WIN_DIR)\tkx804.lib
+TKX_SALIB        = $(TKX_WIN_DIR)\tkx804sa.dll
 TKX_INST_BIN     = $(PREFIX)\bin
 TKX_INST_INCL    = $(PREFIX)\include
 TKX_INST_LIB     = $(PREFIX)\lib
