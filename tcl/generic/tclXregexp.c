@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.8 1997/07/04 20:24:00 markd Exp $
+ * $Id: tclXregexp.c,v 8.9 1997/09/18 15:57:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -342,8 +342,9 @@ PreParseRegExp (expression, infoPtr)
             while ((*scanPtr != '\0') && (*scanPtr != ']')) {
                 scanPtr++;
             }
-            if (*scanPtr == '\0')
+            if (*scanPtr == '\0') {
                 return FALSE;
+            }
             scanPtr++;
             break;
           case '(':
@@ -353,8 +354,9 @@ PreParseRegExp (expression, infoPtr)
             while (parenNest > 0 && *scanPtr != '\0') {
                 switch (*scanPtr++) {
                   case '\\':
-                    if (scanPtr == '\0')
+                    if (scanPtr == '\0') {
                         return FALSE;
+                    }
                     scanPtr++;
                     break;
                   case '(':
@@ -364,21 +366,35 @@ PreParseRegExp (expression, infoPtr)
                   case ')':
                     parenNest--;
                     break;
+                  case '[':
+                    /* Handle [] inside of () */
+                    if (*scanPtr == ']')
+                        scanPtr++;  /* ] as first character. */
+                    while ((*scanPtr != '\0') && (*scanPtr != ']')) {
+                        scanPtr++;
+                    }
+                    if (*scanPtr == '\0') {
+                        return FALSE;
+                    }
+                    scanPtr++;
                 }
             }
-            if ((*scanPtr == '\0') && (parenNest > 0))
+            if ((*scanPtr == '\0') && (parenNest > 0)) {
                 return FALSE;
+            }
             break;
           case '\\':
             gotMeta = TRUE;
-            if (*scanPtr == '\0')
+            if (*scanPtr == '\0') {
                 return FALSE;
+            }
             scanPtr++;
             break;
           default:
             gotMeta = FALSE;
-            if (nonMetaCnt == 0)
+            if (nonMetaCnt == 0) {
                 nonMetaStart = scanPtr - 1;
+            }
             nonMetaCnt++;
         }
         /*
