@@ -5,7 +5,7 @@
 # functions.  These procs provide compatibility with older versions of TclX and
 # are also generally useful.
 #------------------------------------------------------------------------------
-# Copyright 1993-1994 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1993-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fmath.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: fmath.tcl,v 4.0 1994/07/16 05:30:03 markd Rel markd $
 #------------------------------------------------------------------------------
 
 #@package: TclX-fmath acos asin atan ceil cos cosh exp fabs floor log log10 \

@@ -13,7 +13,7 @@
 #       make -k CC=gcc CFLAGS=-O
 #
 #------------------------------------------------------------------------------
-# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.2 1994/12/28 05:17:24 markd Exp markd $
+# $Id: Config.mk,v 4.3 1994/12/29 06:19:36 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------

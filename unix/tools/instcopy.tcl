@@ -6,7 +6,7 @@
 # functionallity.
 #
 #------------------------------------------------------------------------------
-# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: instcopy.tcl,v 4.0 1994/07/16 05:29:04 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:

@@ -4,7 +4,7 @@
  *      Contains commands for accessing XPG/3 message catalogs.  If real XPG/3
  * message catalogs are not available, the default string is returned.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 4.0 1994/07/16 05:27:33 markd Rel markd $
+ * $Id: tclXmsgcat.c,v 4.1 1995/01/01 19:25:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

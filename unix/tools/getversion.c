@@ -5,7 +5,7 @@
  * add to the master directory name.  This can be compiled to get either the
  * TclX or TkX version depending on if TK_GET_VERSION is defined.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: getversion.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: getversion.c,v 4.0 1994/07/16 05:29:06 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 

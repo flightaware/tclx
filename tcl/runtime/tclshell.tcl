@@ -5,7 +5,7 @@
 # not called directly, but from the "unknown" command.  Much of this code
 # is taken directly from the UCB Tcl library/init.tcl file.
 #------------------------------------------------------------------------------
-# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -34,7 +34,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tclshell.tcl,v 4.0 1994/07/16 05:30:00 markd Rel markd $
+# $Id: tclshell.tcl,v 4.1 1994/12/06 04:37:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

@@ -6,7 +6,7 @@
  *      the UCB Tk file tkAppInit.c
  *
  *-----------------------------------------------------------------------------
- * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -15,27 +15,8 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 4.2 1994/11/25 19:00:41 markd Exp markd $
+ * $Id: tkXAppInit.c,v 4.3 1995/01/01 19:25:18 markd Exp markd $
  *-----------------------------------------------------------------------------
- * Copyright (c) 1993 The Regents of the University of California.
- * All rights reserved.
- *
- * Permission is hereby granted, without written agreement and without
- * license or royalty fees, to use, copy, modify, and distribute this
- * software and its documentation for any purpose, provided that the
- * above copyright notice and the following two paragraphs appear in
- * all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  */
 
 #include "tclExtend.h"
@@ -72,8 +53,8 @@ int (*tclDummyMathPtr)() = (int (*)()) matherr;
 
 int
 main(argc, argv)
-    int argc;			/* Number of command-line arguments. */
-    char **argv;		/* Values of command-line arguments. */
+    int argc;
+    char **argv;
 {
     Tk_Main(argc, argv);
     return 0;			/* Needed only to prevent compiler warning. */

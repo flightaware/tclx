@@ -3,7 +3,7 @@
 #
 # Proc to execute code on every line of a file.
 #------------------------------------------------------------------------------
-# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.tcl,v 4.0 1994/07/16 05:29:47 markd Rel markd $
+# $Id: forfile.tcl,v 4.1 1994/11/17 06:08:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

@@ -3,7 +3,7 @@
 #
 # Tests for the keylget, keylkeys, keylset, and keyldel commands.
 #---------------------------------------------------------------------------
-# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 4.0 1994/07/16 05:25:19 markd Rel markd $
+# $Id: keylist.test,v 4.1 1994/10/22 05:16:05 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

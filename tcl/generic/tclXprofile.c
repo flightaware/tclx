@@ -3,7 +3,7 @@
  *
  * Tcl performance profile monitor.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 4.1 1994/12/28 05:17:24 markd Exp markd $
+ * $Id: tclXprofile.c,v 4.2 1995/01/01 19:25:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

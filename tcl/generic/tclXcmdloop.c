@@ -3,7 +3,7 @@
  *
  *   Interactive command loop, C and Tcl callable.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 3.4 1994/07/09 01:35:42 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 4.0 1994/07/16 05:26:34 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 

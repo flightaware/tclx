@@ -3,7 +3,7 @@
  *
  * Extended Tcl fstat command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 3.3 1994/05/30 16:00:03 markd Exp markd $
+ * $Id: tclXfstat.c,v 4.0 1994/07/16 05:28:32 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"

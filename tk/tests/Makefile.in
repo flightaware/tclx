@@ -1,7 +1,7 @@
 #
-# tests/Makefile.in  --
+# tktests/Makefile.in  --
 #
-# Makefile for Extended Tcl tests.
+# Makefile for Extended Tcl Tk tests.
 # 
 #------------------------------------------------------------------------------
 # Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.2 1994/12/31 23:28:51 markd Exp markd $
+# $Id: Makefile.in,v 4.3 1994/12/29 06:21:39 markd Exp $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -28,7 +28,9 @@ bldbasedir  = @bldbasedir@
 VPATH       = @srcdir@
 prefix      = @prefix@
 exec_prefix = @exec_prefix@
+XINCLUDES   = @XINCLUDES@
 LIBS        = @LIBS@ @MATH_LIBS@
+XLIBSW      = @XLIBSW@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -37,49 +39,61 @@ LIBS        = @LIBS@ @MATH_LIBS@
 
 #------------------------------------------------------------------------------
 
-LIBTCL_A      = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
-LIBTCLX_A     = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
+LIBTCL_A     = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
+LIBTCLX_A    = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
+LIBTK_A      = ${bldbasedir}/tkmaster/lib${ARCH}/libtk.a
+LIBTKX_A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
 
-LDLIBS = ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
+LDLIBS = ${LIBTKX_A} ${LIBTK_A} ${XLIBSW} ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
 
-CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
-           -I${bldbasedir}/src -I${TCL_UCB_SRC}
+CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+           -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
+           -I${TK_UCB_SRC} -I${TCL_UCB_SRC} ${XINCLUDES}
 
 .c.o:
 	${CC} ${CC_FLAGS} -c $<
 
 #------------------------------------------------------------------------------
 
-OBJS= tclXtest.o
+OBJS= tkXtest.o tkSquare.o
 
 #------------------------------------------------------------------------------
-# Compile the test proram.  It is generated from the Tcl test program with 
+# Compile the test proram.  It is generated from the Tk test program with 
 # a sed script.
 #
 
-all: tclxtest runtest
+all: tkXtest runtest
 
-tclxtest: tclXtest.o ${LIBTCLX_A} ${LIBTCL_A}
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXtest.o ${LDLIBS} ${XLDLIBS} \
-	      -o tclxtest || (rm -f tclxtest; exit 1)
+tkXtest: tkXtest.o tkSquare.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A}
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXtest.o tkSquare.o ${LDLIBS} \
+	    ${XLDLIBS} -o tkXtest || (rm -f tkXtest; exit 1)
 
-tclXtest.o: tclXtest.c
+tkXtest.o: tkXtest.c
 
-tclXtest.c: ${TCL_UCB_SRC}/tclTest.c
-	rm -f tclXtest.c	
-	echo '#include "../src/tclXconfig.h"' >tclXtest.c
+tkSquare.o: tkSquare.c
+
+tkXtest.c: ${TK_UCB_SRC}/tkTest.c
+	rm -f tkXtest.c	
+	echo '#include "../src/tclXconfig.h"' >tkXtest.c
 	sed -e 's/Tcl_Init(/TclX_Init(/' \
-	    -e '/tcl_RcFileName =/d' ${TCL_UCB_SRC}/tclTest.c >>tclXtest.c
+	    -e 's/Tk_Init(/TkX_Init(/' \
+	    -e '/tcl_RcFileName =/d' ${TK_UCB_SRC}/tkTest.c >>tkXtest.c
+
+tkSquare.c: ${TK_UCB_SRC}/tkSquare.c
+	rm -f tkSquare.c	
+	echo '#include "../src/tclXconfig.h"' >tkSquare.c
+	cat ${TK_UCB_SRC}/tkSquare.c >>tkSquare.c
 
 #------------------------------------------------------------------------------
-# Generate scripts to point the TCL_LIBRARY environment variable at
-# the local master directories so tclxtest can be run.
+# Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
+# the local master directories so tkXtest can be run.
 
 runtest:
 	@echo ':'                                                   >runtest
 	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"                >>runtest
-	@echo "TCL_PROGRAM=${bldbasedir}/tests/tclxtest"           >>runtest
-	@echo "export TCL_LIBRARY TCL_PROGRAM"                     >>runtest
+	@echo "TCL_PROGRAM=${bldbasedir}/tktests/tkXtest"          >>runtest
+	@echo "TK_LIBRARY=${bldbasedir}/tkmaster"                  >>runtest
+	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"          >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
 	@echo "    exec \$$TCL_PROGRAM"                            >>runtest
@@ -91,18 +105,15 @@ runtest:
 #------------------------------------------------------------------------------
 # Run the UCB and Extended Tcl tests.
 
-test: ucbtests extdtests
+test: all
+	echo "cd ${TK_UCB_SRC}/tests; source all; exit" | ./runtest -n tktest
 
-ucbtests: all
-	./runtest -c "cd ${TCL_UCB_SRC}/tests;source ${srcbasedir}/tests/all"
+tktest: test
 
-extdtests: all
-	./runtest all
-	
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f ${OBJS} tclXtest.c tclxtest runtest
+	-rm -f ${OBJS} tkXtest.c tkSquare.c tkXtest runtest
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

@@ -7,7 +7,7 @@
 #   $1-n - directory to build the symbolic links in.
 #   $m - full paths of files to symbolic link.
 #------------------------------------------------------------------------------
-# Copyright 1993-1994 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1993-1995 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: symlinkext.sh,v 1.1 1994/07/15 04:41:32 markd Exp markd $
+# $Id: symlinkext.sh,v 4.0 1994/07/16 05:29:23 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
