@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.2 1996/08/03 01:50:28 markd Exp $
+.\" $Id: TclX.n,v 7.3 1996/08/08 01:52:18 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -563,6 +563,9 @@ command to abort Tk applications after an \fBexecl\fR failure:
     kill [id process]
 .ft R
 .fi
+.br
+On \fBWindows 95/NT\fR systems, where the \fBfork\fR command is not available,
+\fBexecl\fR starts a new process and returns the process id.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -599,6 +602,8 @@ and child processes.
 Note: If you are \fBfork\fRing in a Tk based apllication you must \fBexecl\fR
 before doing any window operations in the child or you will receive a
 \fBBadWindow\fR error from the X server.
+.br
+The \fBfork\fR command is not available on \fBWindows 95/NT\fR systems.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -679,6 +684,9 @@ Set the process group ID of the current process to its process ID.
 .br
 Returns the standard host name of the machine the process is executing on.
 .RE
+.br
+On \fBWindows 95/NT\fR systems, only the \fBhost\fR and \fBprocess\fR options
+are implemented.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1134,7 +1142,9 @@ The argument ?\fItargetFileId\fR? is not valid with this operation.
 .br
 This command either sets or clears a file option or returns its current
 value.  If \fIvalue\fR are not specified, then the current value of
-\fBattribute\fR is returned. The following attributes may be specified:
+\fBattribute\fR is returned.  All values are boolean. Some attributes maybe
+only be gotten, not modified.
+The following attributes may be specified:
 .IP
 \fBRDONLY\fR - The file is opened for reading only. (Get only)
 .sp
@@ -1147,7 +1157,7 @@ value.  If \fIvalue\fR are not specified, then the current value of
 \fBWRITE\fR - If the file is writable. (Get only).
 .sp
 \fBAPPEND\fR - The file is opened for append-only writes.  All writes will
-be forced to the end of the file.
+be forced to the end of the file. (Get or set).
 .sp
 \fBNONBLOCK\fR - The file is to be accessed with non-blocking I/O.  See the
 \fBread\fR system call for a description of how it affects the behavior of
@@ -1155,8 +1165,7 @@ file reads.
 .sp
 \fBCLOEXEC\fR - Close the file on an process exec.  If the \fBexecl\fR
 command or some other mechanism causes the process to do an
-exec, the file will
-be closed if this option is set.
+exec, the file will be closed if this option is set.
 .sp
 \fBNOBUF\fR - The file is not buffered. If set, then there no buffering
 for the file.
@@ -1166,16 +1175,16 @@ be flushed when a newline is written, when the buffer is full,
 or when input is requested.
 .sp
 \fBKEEPALIVE\fR - Keep a socket connection alive.
-If SIGPIPE is enabled, then it
-is sent if connection is broken and data is written to the socket.
-Note that SIGPIPE is set to be ignored by the Tcl library to
-support pipes to processes in the \fBexec\fR and \fBopen\fR commands.
-If SIGPIPE is ignored, an error is returned on the write.  This attribute
-is valid only on sockets.
+If SIGPIPE is enabled, then it is sent if connection is broken and data is
+written to the socket.
+If SIGPIPE is ignored, an error is returned on the write.  This attribute is
+valid only on sockets.
+By default, SIGPIPE is ignored in Tcl.
 .sp
-The \fBAPPEND\fR, \fBNONBLOCK\fR, and \fBCLOEXEC\fR attributes may be set or
-cleared by specifying the attribute name and a value \fB1\fR to set the
-attribute and \fB0\fR to clear it.
+The \fBNONBLOCK\fR, \fBNOBUF\fR and \fBLINEBUF\fR are provided for
+compatibility with older scripts.
+The\fBfconfigure\fR command is preferred method of getting and setting these
+attributes.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

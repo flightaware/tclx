@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.6 1996/08/06 07:15:33 markd Exp $
+ * $Id: tclXunixOS.c,v 7.7 1996/08/08 01:52:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -215,25 +215,37 @@ TclXOSincrpriority (interp, priorityIncr, priority, funcName)
 
 /*-----------------------------------------------------------------------------
  * TclXOSpipe --
- *   Portability interface to pipe.
+ *   Portability interface to create a pipes for the pipe command.
  *
  * Parameters:
  *   o interp - Errors returned in result.
- *   o fildes - Array to return file descriptors in.
+ *   o channels - Two element array to return read and write channels in.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSpipe (interp, fildes)
-    Tcl_Interp *interp;
-    int        *fildes;
+TclXOSpipe (interp, channels)
+    Tcl_Interp  *interp;
+    Tcl_Channel *channels;
 {
-    if (pipe (fildes) < 0) {
+    int fileNums [2];
+
+    if (pipe (fileNums) < 0) {
         Tcl_AppendResult (interp, "pipe creation failed: ",
-                          Tcl_PosixError (interp));
+                          Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
+    channels [0] = Tcl_MakeFileChannel ((ClientData) fileNums [0],
+                                        (ClientData) -1,
+                                        TCL_READABLE);
+    Tcl_RegisterChannel (interp, channels [0]);
+
+    channels [1] = Tcl_MakeFileChannel ((ClientData) -1,
+                                        (ClientData) fileNums [1],
+                                        TCL_WRITABLE);
+    Tcl_RegisterChannel (interp, channels [1]);
+
     return TCL_OK;
 }
 
@@ -1408,8 +1420,8 @@ TclXOSGetSelectFnum (interp, channel, readFnumPtr, writeFnumPtr)
         *readFnumPtr = -1;
     file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
     if (file != NULL)
-        *readFnumPtr = (int) Tcl_GetFileInfo (file, NULL);
+        *writeFnumPtr = (int) Tcl_GetFileInfo (file, NULL);
     else
-        *readFnumPtr = -1;
+        *writeFnumPtr = -1;
     return TCL_OK;
 }

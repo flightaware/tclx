@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.2 1996/07/22 17:10:01 markd Exp $
+ * $Id: tclXfilecmds.c,v 7.3 1996/08/04 07:29:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -91,9 +91,7 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     int fileNums [2];
-    Tcl_Channel chans [2];
-
-    chans [0] = chans [1] = NULL;
+    Tcl_Channel channels [2];
 
     if (!((argc == 1) || (argc == 3))) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
@@ -101,27 +99,22 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (TclXOSpipe (interp, fileNums) != TCL_OK)
+    if (TclXOSpipe (interp, channels) != TCL_OK)
         return TCL_ERROR;
-
-    chans [0] = TclX_SetupFileEntry (interp,  fileNums [0], TCL_READABLE,
-                                     FALSE);
-    chans [1] = TclX_SetupFileEntry (interp,  fileNums [1], TCL_WRITABLE,
-                                     FALSE);
 
     if (argc == 1)
         Tcl_AppendResult (interp,
-                          Tcl_GetChannelName (chans [0]), " ",
-                          Tcl_GetChannelName (chans [1]),
+                          Tcl_GetChannelName (channels [0]), " ",
+                          Tcl_GetChannelName (channels [1]),
                           (char *) NULL);
     else {
         if (Tcl_SetVar (interp, argv[1], 
-                        Tcl_GetChannelName (chans [0]),
+                        Tcl_GetChannelName (channels [0]),
                         TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
         if (Tcl_SetVar (interp, argv[2], 
-                        Tcl_GetChannelName (chans [1]),
+                        Tcl_GetChannelName (channels [1]),
                         TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
     }
@@ -129,14 +122,8 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     return TCL_OK;
 
   errorExit:
-    if (chans [0] != NULL) 
-        Tcl_Close (NULL, chans [0]);
-    else
-        close (fileNums [0]);
-    if (chans [1] != NULL) 
-        Tcl_Close (NULL, chans [1]);
-    else
-        close (fileNums [1]);
+    Tcl_Close (NULL, channels [0]);
+    Tcl_Close (NULL, channels [1]);
     return TCL_ERROR;
 }
 

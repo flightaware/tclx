@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: msgcat.test,v 6.0 1996/05/10 16:17:53 markd Exp $
+# $Id: msgcat.test,v 7.0 1996/06/16 05:32:37 markd Exp $
 #------------------------------------------------------------------------------
 
 if {[info procs test] != "test"} then {source testlib.tcl}
@@ -45,7 +45,7 @@ Test message-cat-1.3 {catopen tests} {
         default {concat "Bad catopen return: $msg"}
     }
     #
-    # This will fail on Linux and FreeBSD, were the catopen libc function
+    # This will fail on Linux and FreeBSD, where the catopen libc function
     # exhibits non-standard behavior.  This is should not be a problem for
     # most developers.
     #

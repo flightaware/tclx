@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.6 1996/08/04 18:21:22 markd Exp $
+ * $Id: tclExtdInt.h,v 7.7 1996/08/08 01:52:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -597,7 +597,7 @@ TclXOSincrpriority _ANSI_ARGS_((Tcl_Interp *interp,
 
 extern int
 TclXOSpipe _ANSI_ARGS_((Tcl_Interp *interp,
-                        int        *fildes));
+                        Tcl_Channel *channels));
 
 extern int
 TclXOSsetitimer _ANSI_ARGS_((Tcl_Interp *interp,

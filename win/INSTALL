@@ -67,7 +67,8 @@ In the alpha 1 release, the following restrictions apply:
     o No wishx is built, but you should able to load the TclX DLL into a
       standard wish.
 
-    o The fork command is not available.
+    o The following commands are not supported:
+       o fork
 
     o The following commands are not yet implemented:
        o chmod
@@ -81,8 +82,8 @@ In the alpha 1 release, the following restrictions apply:
       not been ported.
         o signal
         o dup
-        o pipe
-        o select
+
+    o The select command only works on sockets.
       
     o The id command is limited, only the host and process options are
       implemented

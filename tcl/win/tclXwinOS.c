@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.6 1996/08/04 18:21:26 markd Exp $
+ * $Id: tclXwinOS.c,v 7.7 1996/08/08 01:52:26 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -272,27 +272,46 @@ TclXOSincrpriority (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclXOSpipe --
- *   Portability interface to pipe.
+ *   Portability interface to create a pipes for the pipe command.
  *
  * Parameters:
  *   o interp - Errors returned in result.
- *   o fildes - Array to return file descriptors in.
+ *   o channels - Two element array to return read and write channels in.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSpipe (Tcl_Interp *interp,
-            int        *fildes)
+TclXOSpipe (interp, channels)
+    Tcl_Interp  *interp;
+    Tcl_Channel *channels;
 {
-    if (_pipe (fildes, 16384, 0) < 0) {
+    HANDLE readHandle, writeHandle;
+    SECURITY_ATTRIBUTES sec;
+
+    sec.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sec.lpSecurityDescriptor = NULL;
+    sec.bInheritHandle = FALSE;
+
+    if (!CreatePipe (&readHandle, &writeHandle, &sec, 0)) {
+	TclWinConvertError (GetLastError ());
         Tcl_AppendResult (interp, "pipe creation failed: ",
-                          Tcl_PosixError (interp));
+                          Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
+
+    channels [0] = Tcl_MakeFileChannel ((ClientData) readHandle,
+                                        (ClientData) -1,
+                                        TCL_READABLE);
+    Tcl_RegisterChannel (interp, channels [0]);
+
+    channels [1] = Tcl_MakeFileChannel ((ClientData) -1,
+                                        (ClientData) writeHandle,
+                                        TCL_WRITABLE);
+    Tcl_RegisterChannel (interp, channels [1]);
+
     return TCL_OK;
 }
-
 
 /*-----------------------------------------------------------------------------
  * TclXOSsetitimer --

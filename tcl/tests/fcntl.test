@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 7.2 1996/08/06 07:15:32 markd Exp $
+# $Id: fcntl.test,v 7.3 1996/08/08 01:52:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -124,11 +124,11 @@ Test fcntl-2.5 {fcntl tests} {
 Test fcntl-3.1 {fcntl tests} {
     fcntl $testRPH NONBLOCK 0
     list [fcntl $testRPH nonBlock] [fconfigure $testRPH -blocking]
-} 0 {0 0}
+} 0 {0 1}
 
 Test fcntl-3.2 {fcntl tests} {
     fcntl $testRWFH NOBUF 1
-    list [fcntl $testRWFH NObuf] [fconfigure $testRPH -buffering]
+    list [fcntl $testRWFH NObuf] [fconfigure $testRWFH -buffering]
 } 0 {1 none}
 
 close $testRWFH
@@ -140,7 +140,7 @@ set testRWFH [open FCNTL1.TMP w]
 
 Test fcntl-4.1 {fcntl tests} {
     fcntl $testRWFH LINEBUF 1
-    list [fcntl $testRWFH LINEBUF] [fconfigure $testRPH -buffering]
+    list [fcntl $testRWFH LINEBUF] [fconfigure $testRWFH -buffering]
 } 0 {1 line}
 
 Test fcntl-5.1 {fcntl tests} {
@@ -163,4 +163,32 @@ Test fcntl-5.4 {fcntl tests} {
 
 close $testRPH
 close $testWPH
+
+#
+# Tests for socket related controls.
+#
+if [catch {
+    close [socket [id host] echo]
+} msg] {
+    puts "*************************************************************"
+    puts "Unable to connect to the \"echo\" server ($msg)."
+    puts "Some tests skipped."
+    puts "*************************************************************"
+} else {
+    set sockFH [socket [id host] echo]
+
+    Test fcntl-6.1 {fcntl socket tests} {
+        fcntl $sockFH KEEPALIVE 1
+        fcntl $sockFH KEEPALIVE
+    } 0 1
+        
+    Test fcntl-6.2 {fcntl socket tests} {
+        fcntl $sockFH KEEPALIVE 0
+        fcntl $sockFH KEEPALIVE
+    } 0 0
+
+    close $sockFH
+}
+
+
 unlink {FCNTL1.TMP FCNTL2.TMP FCNTL3.TMP}

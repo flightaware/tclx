@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 7.2 1996/08/06 07:15:27 markd Exp $
+ * $Id: tclXfcntl.c,v 7.3 1996/08/08 01:52:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -198,6 +198,7 @@ GetFcntlAttr (interp, channel, mode, attrib)
       case ATTR_KEEPALIVE:
         if (TclXOSgetsockopt (interp, channel, SO_KEEPALIVE, &value) != TCL_OK)
             return TCL_ERROR;
+        break;
       default:
         panic ("fcntl get attrib");
     }

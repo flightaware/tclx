@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 7.3 1996/07/26 05:55:58 markd Exp $
+ * $Id: tclXutil.c,v 7.4 1996/08/06 07:15:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -731,9 +731,7 @@ TclX_ChannelFnum (channel, direction)
  * FILE structure.
  *
  * Parameters:
- *   o interp (I) - Current interpreter.  The file handle is NOT returned
- *     in result, it is cleared.  This is done because the file handles
- *     are often returned in different ways.
+ *   o interp (I) - Current interpreter.
  *   o fileNum (I) - File number to set up the entry for.
  *   o mode (I) - Flags consisting of TCL_READABLE, TCL_WRITABLE.
  *   o isSocket (I) - TRUE if its a socket, FALSE otherwise.
