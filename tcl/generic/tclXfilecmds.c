@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.3 1996/08/04 07:29:59 markd Exp $
+ * $Id: tclXfilecmds.c,v 7.4 1996/08/09 04:12:27 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -90,7 +90,6 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int fileNums [2];
     Tcl_Channel channels [2];
 
     if (!((argc == 1) || (argc == 3))) {
