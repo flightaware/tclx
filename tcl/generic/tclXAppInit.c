@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 4.1 1994/11/25 19:00:41 markd Exp markd $
+ * $Id: tclXAppInit.c,v 4.2 1995/01/01 19:49:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -40,14 +40,6 @@ int (*tclDummyMathPtr)() = (int (*)()) matherr;
  * main --
  *
  *	This is the main program for the application.
- *
- * Results:
- *	None: Tcl_Main never returns here, so this procedure never
- *	returns either.
- *
- * Side effects:
- *	Whatever the application does.
- *
  *----------------------------------------------------------------------
  */
 
@@ -56,7 +48,7 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-    Tcl_Main(argc, argv);
+    TclX_Main(argc, argv);
     return 0;			/* Needed only to prevent compiler warning. */
 }
 

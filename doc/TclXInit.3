@@ -12,18 +12,17 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 4.1 1994/11/29 16:16:52 markd Exp markd $
+.\" $Id: TclXInit.3,v 4.2 1995/01/01 19:46:29 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
 .ad b
 .SH NAME
-TclX_Init, TclXCmd_Init, TclXLib_Init, Tcl_Main - Extended Tcl initialization.
+TclX_Init, TclXCmd_Init, TclXLib_Init, TclX_Main - Extended Tcl initialization.
 '
 .SH SYNOPSIS
 .nf
 .ft CW
-
 -ltclx -ltcl
 
 #include "tclExtend.h"
@@ -32,6 +31,9 @@ extern char *tclAppName;
 extern char *tclAppLongname;
 extern char *tclAppVersion;
 extern int   tclAppPatchlevel;
+
+extern char *tclX_library;
+extern char *tclX_libraryEnv;
 
 int
 Tcl_AppInit (Tcl_Interp *interp);
@@ -46,8 +48,8 @@ int
 TclXLib_Init (Tcl_Interp *interp);
 
 void
-Tcl_Main (int    argc,
-          char **argv);
+TclX_Main (int    argc,
+           char **argv);
 .ft R
 .fi
 .SH DESCRIPTION
@@ -77,6 +79,31 @@ the default by the application.
 The application patchlevel to be returned by the \fBinfox\fR command.
 procedures are called.  This value maybe altered from
 the default by the application.
+'
+.SS tclX_library
+The path to the TclX runtime library.
+This directory contains the initialization file evaluated by TclX_Init and is
+also appended to auto_path.
+This variable is initialized to the compile-time specified install location.
+The value maybe modified before TclX_Init or TclXLib_Init are called to
+use another library in a particular application.
+If its set to NULL, no library will be used unless override by tclX_libraryEnv.
+Setting tclX_libraryEnv and this variable to NULL causes no library directory
+or initialization file to be used.
+'
+.SS tclX_libraryEnv
+Environment variable used to override the path stored in tclX_library.
+The value maybe modified before TclX_Init or TclXLib_Init are called to
+use another environment variable for a particular application.
+If its set to NULL, no environment variable will allow to override.
+Defaults to "TCL_LIBRARY".
+'
+.SS tclX_initFile
+The initialization file for TclX_Init to source.
+By default the file "TclInit.tcl" in the TclX library directory is sourced.
+If set to an absolute path, it is not assumed to be in the TclX library
+directory and is independent of a library path being specified.
+If set to NULL, not initialization file is evaluated.
 '
 .SS Tcl_AppInit
 .PP
@@ -142,7 +169,8 @@ Returns:
 .SS TclXLib_Init
 .PP
 Add the TclX library management commands to the interpreter.
-This is normally called by \fBTclX_Init\fR.
+This is normally called by \fBTclX_Init\fR.  It also sets the Tcl variable
+"tclx_library" to TclX library directory.
 .PP
 Parameters
 .RS 2
@@ -154,7 +182,7 @@ Returns:
 \fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS Tcl_Main
+.SS TclX_Main
 .PP
 This function parses the command line according to the TclX shell
 specification.  It creates an interpreter and calls the function

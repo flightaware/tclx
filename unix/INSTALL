@@ -340,10 +340,11 @@ To integrate applications following the Tcl_AppInit conventions with TclX,
 including the TclX library handling and shell:
 
     o Replace the call to "Tcl_Init" with a call to "TclX_Init" in the
-      Tcl_AppInit function.
+      Tcl_AppInit function.  Call TclX_Main instead of Tcl_Main.
 
     o In Tk based application, replace the call to "TK_Init" with a call to
-      "TkX_Init" in the Tcl_AppInit function.
+      "TkX_Init" in the Tcl_AppInit function.  Call TclX_Main instead of
+      Tcl_Main.
 
     o Link with "-ltkx -ltk -ltclx -ltcl" in that order.  If you get strange
       behavior, such as no shell prompt, check this order.

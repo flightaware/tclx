@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.5 1994/12/27 01:31:22 markd Exp markd $
+.\" $Id: TclX.n,v 4.6 1995/01/01 19:46:29 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2512,6 +2512,11 @@ interactive invocation of Tcl.
 Path to search to locate Tcl scripts.  Used by the 
 \fBauto_load\fR command and the TclX unknown command handler.
 The path is a Tcl list of directory names.
+.TP
+.B tclx_library
+Path to the TclX runtime library.  If your running the TclX shell or
+an appilcation based on it (like wishx), this is the same value returned by
+"info library".
 .TP
 .B tcl_prompt1
 Contains code to run to output the prompt used when interactively prompting

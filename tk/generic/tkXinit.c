@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 4.0 1994/07/16 05:30:58 markd Rel markd $
+ * $Id: tkXinit.c,v 4.1 1995/01/01 19:51:00 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,13 +46,22 @@ int
 TkX_Init (interp)
     Tcl_Interp  *interp;
 {
+    static char initCmd[] =
+	"if [file exists $tk_library/tk.tcl] {\n\
+	    source $tk_library/tk.tcl\n\
+	} else {\n\
+	    set msg \"can't find $tk_library/tk.tcl; perhaps you \"\n\
+	    append msg \"need to\\ninstall TkX (from TclX) or set your \"\n\
+	    append msg \"TK_LIBRARY environment variable?\"\n\
+	    error $msg\n\
+	}";
+
     char  *value;
 
     /*
      * Make sure main window exists, or Tk_Init will fail in a confusing
      * way.
      */
-
     if (Tk_MainWindow (interp) == NULL) {
         Tcl_AppendResult (interp,
                           "TkX_Init called before calling Tk_CreateMainWindow",
@@ -72,7 +81,7 @@ TkX_Init (interp)
         Tcl_SetupSigInt ();
 
     /*
-     * Run the initialization that comes with standard Tk.
+     * Find and run the Tk initialization file.
      */
-    return Tk_Init (interp);
+    return Tcl_Eval(interp, initCmd);
 }

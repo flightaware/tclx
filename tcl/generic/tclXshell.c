@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 4.2 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclXshell.c,v 4.3 1995/01/01 19:49:23 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,6 +20,13 @@
 
 extern char *optarg;
 extern int   optind, opterr;
+
+/*
+ * If this variable is non-zero, the TclX shell will delete the interpreter
+ * at the end of a script instead of evaluating the "exit" command.  This is
+ * for applications that want to track down memory leaks.
+ */
+int tclDeleteInterpAtEnd = FALSE;
 
 static char  exitCmd [] = "exit";
 static char *TCLXENV = "TCLXENV";
@@ -204,7 +211,7 @@ ParseCmdLine (interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_Main --
+ * TclX_Main --
  *
  *   This function runs the TclX shell, including parsing the command line and
  * calling the Tcl_AppInit function at the approriate place.  It either enters
@@ -218,7 +225,7 @@ ParseCmdLine (interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_Main (argc, argv)
+TclX_Main (argc, argv)
     int    argc;
     char **argv;
 {

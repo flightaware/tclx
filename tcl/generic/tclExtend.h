@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 4.3 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclExtend.h,v 4.4 1995/01/01 19:49:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,6 +45,16 @@ extern char *tclAppVersion;      /* Version number of the application       */
 extern int   tclAppPatchlevel;   /* Patchlevel of the application           */
 
 /*
+ * Used to override the library and library environment variable used to
+ * find the TclX startup file and runtime library.  Also the init file name,
+ * which is either library relative or absolute.  The values of these
+ * fields must be changed before TclX_Init or TclXLib_Init is called.
+ */
+extern char *tclX_library;     /* Library directory to use.        */
+extern char *tclX_libraryEnv;  /* Override environment variable.   */
+extern char *tclX_initFile;    /* Init file name or absolute path. */
+
+/*
  * Flag user to indicate that a signal that was setup to return an error
  * occured (it may not have been processed yet).  This is used by interactive
  * command loops to flush input.  It should be explictly cleared by any routine
@@ -60,7 +70,6 @@ extern void (*tclErrorSignalProc) _ANSI_ARGS_((int signalNum));
  */
 extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
 
-
 /*
  * If this variable is non-zero, the TclX shell will delete the interpreter
  * at the end of a script instead of evaluating the "exit" command.  This is
@@ -69,9 +78,14 @@ extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
  */
 extern int tclDeleteInterpAtEnd;
 
+
 /*
- * Exported Tcl initialization functions.
+ * Exported TclX initialization functions.
  */
+EXTERN void
+TclX_Main _ANSI_ARGS_((int    argc,
+                       char **argv));
+
 EXTERN int
 TclX_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
@@ -209,7 +223,11 @@ Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
 /*
  * Tk with TclX initialization.
  */
-int
+EXTERN void
+TkX_Main _ANSI_ARGS_((int    argc,
+                      char **argv));
+
+EXTERN int
 TkX_Init _ANSI_ARGS_((Tcl_Interp  *interp));
 
 #endif

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.2 1994/12/31 23:28:51 markd Exp markd $
+ * $Id: tkXshell.c,v 4.3 1995/01/01 19:50:58 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -102,7 +102,7 @@ static void		SignalProc _ANSI_ARGS_((int signalNum));
 /*
  *----------------------------------------------------------------------
  *
- * Tk_Main --
+ * TkX_Main --
  *
  *	Main program for Wish.
  *

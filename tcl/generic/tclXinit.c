@@ -12,19 +12,16 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 4.2 1994/12/31 23:28:51 markd Exp markd $
+ * $Id: tclXinit.c,v 4.3 1995/01/01 19:49:38 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
- * If this variable is non-zero, the TclX shell will delete the interpreter
- * at the end of a script instead of evaluating the "exit" command.  This is
- * for applications that want to track down memory leaks.
+ * The init file name, which is either library relative or absolute.
  */
-int tclDeleteInterpAtEnd = FALSE;
-
+char *tclX_initFile = "TclInit.tcl";
 
 /*
  * The following is used to force the version of tclCmdIL.c that was compiled
@@ -32,20 +29,15 @@ int tclDeleteInterpAtEnd = FALSE;
  */
 int *tclxDummyInfoCmdPtr = (int *) Tcl_InfoCmd;
 
-static char *tclLibraryEnv = "TCL_LIBRARY";
-
 /*
  * Prototypes of internal functions.
  */
 static int
-ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *initFile,
-                             char       *overrideEnv));
+ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp));
 
 
 /*
  *-----------------------------------------------------------------------------
- *
  * TclX_ErrorExit --
  *
  * Display error information and abort when an error is returned in the
@@ -99,49 +91,85 @@ TclX_ErrorExit (interp, exitCode)
  *-----------------------------------------------------------------------------
  * ProcessInitFile --
  *
- *   Evaluate the specified init file.
+ *   Evaluate the TclX initialization file (normally TclInit.tcl in the
+ * library directory.  But all of this can be overridden by changing global
+ * definitions before this procedure is called.
  *
  * Parameters:
  *   o interp  (I) - A pointer to the interpreter.
- *   o initFile (I) - The path to the init file.
- *   o overrideEnv (I) - Directory override environment variable for error msg.
  * Returns:
  *   TCL_OK if all is ok, TCL_ERROR if an error occured.
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessInitFile (interp, initFile, overrideEnv)
+ProcessInitFile (interp)
     Tcl_Interp *interp;
-    char       *initFile;
-    char       *overrideEnv;
 {
-    struct stat  statBuf;
+    Tcl_DString  initFile;
+    char        *value;
+    int          absFilePath = (tclX_initFile [0] == '/');
+
+    Tcl_DStringInit (&initFile);
 
     /*
-     * Check for file before evaling it so we can return a helpful error.
+     * Get the variable containing the path to the Tcl library if its needed.
      */
-    if (stat (initFile, &statBuf) < 0) {
+    if (!absFilePath) {
+        value = Tcl_GetVar (interp, "tclx_library",  
+                            TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
+        if (value == NULL) {
+            Tcl_AppendResult (interp, "can't find variable \"tclx_library\", "
+                              "should have been set by TclXLib_Init",
+                              (char *) NULL);
+            goto errorExit;
+        }
+
+        /*
+         * If there is no path in tclx_library, just return without doing
+         * anything.
+         */
+        if (value [0] == '\0')
+            goto exitPoint;
+    }
+
+    /*
+     * Build path to file and eval.  Check for file being readable before
+     * evaling it so we can return a helpful error.
+     */
+    if (!absFilePath) {
+        Tcl_DStringAppend (&initFile, value, -1);
+        Tcl_DStringAppend (&initFile, "/", -1);
+    }
+    Tcl_DStringAppend (&initFile, tclX_initFile, -1);
+
+    if (access (initFile.string, R_OK) < 0) {
         Tcl_AppendResult (interp,
                           "Can't access initialization file \"",
-                          initFile, "\".\n", 
-                          "  Override directory containing this file with ",
-                          "the environment variable: \"",
-                          overrideEnv, "\" (",
-                          Tcl_PosixError (interp), ")", (char *) NULL);
+                          initFile.string, "\" (", Tcl_PosixError (interp),
+                          ")", (char *) NULL);
+ 
+        if ((tclX_libraryEnv != NULL) && (!absFilePath)) {
+            Tcl_AppendResult (interp,
+                              "\n  Override directory containing this ",
+                              "file with the environment variable: \"",
+                              tclX_libraryEnv, "\"", (char *) NULL);
+        }
         goto errorExit;
     }
 
-    if (Tcl_EvalFile (interp, initFile) != TCL_OK)
+    if (Tcl_EvalFile (interp, initFile.string) != TCL_OK)
         goto errorExit;
-        
+
+  exitPoint:        
+    Tcl_DStringFree (&initFile);
     Tcl_ResetResult (interp);
     return TCL_OK;
 
   errorExit:
+    Tcl_DStringFree (&initFile);
     Tcl_AddErrorInfo (interp,
                      "\n    (while processing TclX initialization file)");
     return TCL_ERROR;
-
 }
 
 /*
@@ -157,11 +185,6 @@ int
 TclX_Init (interp)
     Tcl_Interp *interp;
 {
-    char        *value;
-    Tcl_DString  libDir;
-
-    Tcl_DStringInit (&libDir);
-
     if (TclXCmd_Init (interp) == TCL_ERROR)
         goto errorExit;
 
@@ -169,39 +192,16 @@ TclX_Init (interp)
         goto errorExit;
 
     /*
-     * Get the path to the master (library) directory.
-     */
-    value = Tcl_GetVar2 (interp, "env", tclLibraryEnv, TCL_GLOBAL_ONLY);
-    if (value != NULL)
-        Tcl_DStringAppend (&libDir, value, -1);
-    else
-        Tcl_DStringAppend (&libDir, TCL_MASTERDIR, -1);
-
-    /*
-     * Set auto_path.
-     */
-    if (Tcl_SetVar (interp, "auto_path", libDir.string,
-                    TCL_GLOBAL_ONLY  | TCL_APPEND_VALUE |
-                    TCL_LIST_ELEMENT | TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    /*
      * Evaluate the init file unless the quick flag is set.
      */
     if (Tcl_GetVar2 (interp, "TCLXENV", "quick", TCL_GLOBAL_ONLY) == NULL) {
-        Tcl_DStringAppend (&libDir, "/", -1);
-        Tcl_DStringAppend (&libDir, "TclInit.tcl", -1);
-
-        if (ProcessInitFile (interp, libDir.string,
-                             tclLibraryEnv) == TCL_ERROR)
+        if (ProcessInitFile (interp) == TCL_ERROR)
             goto errorExit;
     }
 
-    Tcl_DStringFree (&libDir);
     return TCL_OK;
 
   errorExit:
-    Tcl_DStringFree (&libDir);
     Tcl_AddErrorInfo (interp,
                      "\n    (while initializing TclX)");
     return TCL_ERROR;

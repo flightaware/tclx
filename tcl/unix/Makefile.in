@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.3 1994/12/29 06:21:39 markd Exp markd $
+# $Id: Makefile.in,v 4.4 1995/01/01 19:49:33 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -63,7 +63,7 @@ OBJS= \
     tclXfcntl.o      tclXfilecmds.o   tclXfilescan.o   tclXflock.o   \
     tclXfstat.o      tclXgeneral.o    tclXgetdate.o    tclXhandles.o \
     tclXid.o         tclXinit.o       tclXkeylist.o    tclXlib.o     \
-    tclXlist.o       tclXmath.o       tclXmsgcat.o  \
+    tclXlist.o       tclXmath.o       tclXmsgcat.o     tclXlibInit.o \
     tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
     tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
     tclXunixcmds.o   tclXutil.o       tclXdata.o
@@ -94,10 +94,10 @@ tclCmdIL.c: ${TCL_UCB_SRC}/tclCmdIL.c
 	rm -f tclCmdIL.c
 	cp ${TCL_UCB_SRC}/tclCmdIL.c tclCmdIL.c
 
-tclXinit.o: tclXinit.c
+tclXlibInit.o: tclXlibInit.c
 	MASTER=${TCL_MASTERDIR}/`../tools/tclxversion` ;\
 	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"$$MASTER\" \
-	    ${srcdir}/tclXinit.c
+	    ${srcdir}/tclXlibInit.c
 
 tclXcmdInit.o: tclXcmdInit.c tclXpatchl.h
 

@@ -48,6 +48,7 @@
 ./src/tclXinit.c
 ./src/tclXkeylist.c
 ./src/tclXlib.c
+./src/tclXlibInit.c
 ./src/tclXlist.c
 ./src/tclXmath.c
 ./src/tclXmsgcat.c

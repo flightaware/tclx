@@ -1,7 +1,7 @@
 /*
  * tclXcmdInit.c
  *
- * Function to add the Extented Tcl command into an interpreter.  The TclX
+ * Function to add the Extented Tcl commands into an interpreter.  The TclX
  * library commands are not added here, to make it easier to build applications
  * that don't use the extended libraries.
  *-----------------------------------------------------------------------------
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 4.1 1994/08/11 03:49:41 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 4.2 1995/01/01 19:49:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
