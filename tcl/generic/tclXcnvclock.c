@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 4.2 1995/04/02 16:48:16 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 4.3 1995/04/03 20:19:39 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -41,7 +41,15 @@ int
 Tcl_GetTimeZone (currentTime)
     long  currentTime;
 {
-#ifdef TCL_USE_TM_TZADJ
+/*
+ * Determine how a timezone is obtained from "struct tm".  If there is no time
+ * zone in this struct (very lame) then use the timezone variable.  This is
+ * done in a way to make the timezone variable the method of last resort, as
+ * some systems have it in addition to a field in "struct tm".  The
+ * gettimeofday system call can also be used to determine the time zone.
+ */
+#if defined(HAVE_TM_TZADJ)
+#   define TCL_GOT_TIMEZONE
     time_t      curTime = (time_t) currentTime;
     struct tm  *timeDataPtr = localtime (&curTime);
     int         timeZone;
@@ -53,7 +61,8 @@ Tcl_GetTimeZone (currentTime)
     return timeZone;
 #endif
 
-#ifdef TCL_USE_TM_GMTOFF
+#if defined(HAVE_TM_GMTOFF) && !defined (TCL_GOT_TIMEZONE)
+#   define TCL_GOT_TIMEZONE
     time_t     curTime = (time_t) currentTime;
     struct tm *timeDataPtr = localtime (&currentTime);
     int        timeZone;
@@ -65,7 +74,22 @@ Tcl_GetTimeZone (currentTime)
     return timeZone;
 #endif
 
-#ifdef TCL_USE_TIMEZONE_VAR
+#if defined(HAVE_GETTIMEOFDAY) && !defined (TCL_GOT_TIMEZONE)
+#   define TCL_GOT_TIMEZONE
+    struct timeval  tv;
+    struct timezone tz;
+    int             timeZone;
+
+    gettimeofday (&tv, &tz);
+    timeZone = tz.tz_minuteswest;
+    if (tz.tz_dsttime)
+        timeZone += 60;
+
+    return timeZone;
+#endif
+
+#if defined(HAVE_TIMEZONE_VAR) && !defined (TCL_GOT_TIMEZONE)
+#   define TCL_GOT_TIMEZONE
     static int setTZ = FALSE;
     int        timeZone;
 
@@ -74,17 +98,6 @@ Tcl_GetTimeZone (currentTime)
         setTZ = TRUE;
     }
     timeZone = timezone / 60;
-
-    return timeZone;
-#endif
-
-#ifdef TCL_USE_GETTIMEOFDAY
-    struct timeval  tv;
-    struct timezone tz;
-    int             timeZone;
-
-    gettimeofday (&tv, &tz);
-    timeZone = tz.tz_minuteswest;
 
     return timeZone;
 #endif
