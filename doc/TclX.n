@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.50 1993/11/09 15:57:52 markd Exp markd $
+.\" $Id: TclX.n,v 2.51 1993/11/10 06:47:40 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2105,6 +2105,17 @@ for tokens in the string.
 All leading separators are skipped and the first token is returned.
 The variable \fIstrvar\fR will be modified to contain the remainder of
 the string following the token.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/strings/cexpand
+'\"@brief: Expand backslash sequences in a character string.
+.TP
+.B cexpand \fIstring\fR
+.br
+Expand backslash sequences in \fIstring\fR to there actual characters.
+No other substitution takes place.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

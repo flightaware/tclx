@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.9 1993/09/25 18:26:04 markd Exp markd $
+ * $Id: tclXstring.c,v 2.10 1993/11/09 06:35:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -259,6 +259,60 @@ Tcl_CtokenCmd (clientData, interp, argc, argv)
     Tcl_SetResult (interp, startPtr, TCL_VOLATILE);
     Tcl_DStringFree (&string);
 
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_CexpandCmd --
+ *     Implements the cindex TCL command:
+ *         cexpand string
+ *
+ * Results:
+ *   Returns the character with backslash sequences expanded into actual
+ * characters.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_CexpandCmd (clientData, interp, argc, argv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          argc;
+    char       **argv;
+{
+    Tcl_DString    expanded;
+    register char *scanPtr, *lastPtr;
+    char           buf [1];
+    int            count;
+
+    if (argc != 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                          " string", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    Tcl_DStringInit (&expanded);
+    scanPtr = lastPtr = argv [1];
+
+    while (*scanPtr != '\0') {
+        if (*scanPtr != '\\') {
+            scanPtr++;
+            continue;
+        }
+        /*
+         * Found a backslash.
+         */
+        Tcl_DStringAppend (&expanded, lastPtr, scanPtr - lastPtr);
+        buf [0] = Tcl_Backslash (scanPtr, &count);
+        Tcl_DStringAppend (&expanded, buf, 1);
+        scanPtr += count;
+        lastPtr = scanPtr;
+    }
+    Tcl_DStringAppend (&expanded, lastPtr, scanPtr - lastPtr);
+    
+    Tcl_DStringResult (interp, &expanded);
     return TCL_OK;
 }
 

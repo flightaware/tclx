@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 2.11 1993/11/05 07:08:46 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 2.12 1993/11/09 07:50:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -247,6 +247,8 @@ TclXCmd_Init (interp)
     Tcl_CreateCommand (interp, "ctype", Tcl_CtypeCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "ctoken", Tcl_CtokenCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "cexpand", Tcl_CexpandCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 
     /*

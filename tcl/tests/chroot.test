@@ -54,6 +54,7 @@ if {$pid < 0} {
 #
 if {$pid > 0} {
     wait $pid
+    exec rm -rf CHROOTDIR
     return
 }
 

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 1.2 1993/11/09 05:42:59 markd Exp markd $
+ * $Id: tkXAppInit.c,v 1.3 1993/11/17 15:16:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,11 +39,12 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.2 1993/11/09 05:42:59 markd Exp markd $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.3 1993/11/17 15:16:25 markd Exp markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"
 #include "tk.h"
+#include <math.h>
 
 /*
  * The following variable is a special hack that allows applications
@@ -52,16 +53,20 @@ static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppIn
  * be brought in from the library (and all of Tk and Tcl with it).
  */
 
-extern int main();
+EXTERN int main _ANSI_ARGS_((int     argc,
+                             char  **argv));
 int *tclDummyMainPtr = (int *) main;
 
 /*
  * The following variable is a special hack that insures the tcl
  * version of matherr() is used when linking against shared libraries
+ * Only define if the matherr if it seems to be in math.h.
  */
 
-extern int matherr();
+#if defined(DOMAIN) && defined(SING)
+EXTERN int matherr _ANSI_ARGS_((struct exception *));
 int *tclDummyMathPtr = (int *) matherr;
+#endif
 
 
 /*

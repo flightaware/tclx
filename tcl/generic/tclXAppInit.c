@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 1.2 1993/11/09 05:42:59 markd Exp markd $
+ * $Id: tclXAppInit.c,v 1.3 1993/11/17 15:16:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,6 +39,7 @@
  */
 
 #include "tclExtend.h"
+#include <math.h>
 
 /*
  * The following variable is a special hack that allows applications
@@ -47,16 +48,20 @@
  * be brought in from the library (and all of Tcl with it).
  */
 
-extern int main();
+EXTERN int main _ANSI_ARGS_((int     argc,
+                             char  **argv));
 int *tclXDummyMainPtr = (int *) main;
 
 /*
  * The following variable is a special hack that insures the tcl
- * version of matherr() is used when linking against shared libraries
+ * version of matherr() is used when linking against shared libraries.
+ * Only define if the matherr if it seems to be in math.h.
  */
 
-extern int matherr();
+#if defined(DOMAIN) && defined(SING)
+EXTERN int matherr _ANSI_ARGS_((struct exception *));
 int *tclDummyMathPtr = (int *) matherr;
+#endif
 
 
 /*

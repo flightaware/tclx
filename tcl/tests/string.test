@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
+# $Id: string.test,v 2.4 1993/07/25 00:56:25 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -200,3 +200,23 @@ Test string-7.3 {ctoken tests} {
           "a"     "   test   " \
           "test"  "   " \
           ""      ""]
+
+Test string-8.1 {cexpand tests} {
+    cexpand
+} 1 {wrong # args: cexpand string}
+
+Test string-8.2 {cexpand tests} {
+    cexpand x y
+} 1 {wrong # args: cexpand string}
+
+Test string-8.3 {cexpand tests} {
+    cexpand {\n\n\t}
+} 0 "\n\n\t"
+
+Test string-8.4 {cexpand tests} {
+    cexpand {xxxxxxx\nx\nxxx\ta}
+} 0 "xxxxxxx\nx\nxxx\ta"
+
+Test string-8.5 {cexpand tests} {
+    cexpand "[replicate a 100]$\\n\\t$\\\[[replicate b 100]"
+} 0 "[replicate a 100]$\n\t$\[[replicate b 100]"
