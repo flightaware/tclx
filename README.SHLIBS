@@ -221,7 +221,8 @@ TCLX
 ----
 
     (1) run configure
-    (2) make CFLAGS="-fPIC -O" (or -PIC for Sun cc)
+    (2) make -k CFLAGS="-fPIC -O" CXXFLAGS="-fPIC -O"
+        or -PIC for Sun cc.  CXXFLAGS is passed to the C++ compiler.
     (3) % cd src/lib
         % mkdir shared
         % cd shared
