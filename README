@@ -1,16 +1,6 @@
                            Extended Tcl (TclX) 7.5.0
                            =========================
 
-TclX 7.5.0 Beta 3 Release
-=========================
-
-This is the third TclX beta release that is compatible with the Tcl 7.5 /
-Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 3 releases
-and will probably work the the final Tcl 7.5 release.
-
-Shared library support has been added.  It needs a lot of testing
-on different platforms.  Please try it (configure --enable-shared).
-
 INTRODUCTION
 ============
 
@@ -39,7 +29,9 @@ commercial use and resale.
 MS WINDOWS 95/NT
 ================
   A port of TclX to MS Windows 95 & NT is under way, contact us at 
-tcl-project@neosoft.com if you would like to be an alpha tester.
+tcl-project@neosoft.com if you would like to be an alpha tester. The code
+as of this release is included in the distribution, but it does not currently
+build.
 
 BUILDING TCLX
 =============
@@ -53,18 +45,18 @@ CHANGES IN TCLX 7.5.0
   o The TclX runtime is no longer independent of the standard Tcl and
     Tk runtimes.  Tcl_Init must now be called before TclX_Init and Tk_Init
     before TkX_Init.
+    (* Potential Incompatibility for C code *)
 
   o Dropped support for the C++ interfaces in tcl++.h.   This file was
     outdated, not documented and of limited usefulness.  It was often
     a source of portability problems.  If you need this support,
     tcl++.h and tcl++.C from a previous release should work.  Contact
     us if this causes you problems.
+    (* Potential Incompatibility for C code *)
 
   o Added support for building shared libraries on systems where shared
     library support is implemented by Tcl.  The TclX library (libtclx.so)
     is now dynamically loadable using the load command.
-
-  o Added support for doing event driven programming in the TclX shell.
 
   o Deprecated server_* commands in favor of new Tcl socket command.
     The server_info command has been renamed to host_info and the
@@ -73,10 +65,10 @@ CHANGES IN TCLX 7.5.0
     to work.
 
   o Modified the commandloop command to support event based command input.
+    (* Potential Incompatibility for Tcl code *)
 
   o Added a procedure, mainloop, which makes it easy to build event oriented
-    programs in the TclX shell (tcl Unix command) in a manner similar to 
-    wish.
+    programs in the TclX shell in a manner similar to wish.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -112,9 +104,9 @@ Tcl, see the manual page man/TclX.man.
 
     o Online help on Tcl, TclX and Tk commands.
 
-    o A simple interface for accessing and building TCP/IP based servers.
-
     o X/PG based internationalization commands.
+
+    o Support for event-oriented programming in non-Tk applications.
 
 ON-LINE HELP
 ============

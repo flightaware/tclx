@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.14 1996/03/11 08:14:13 markd Exp $
+# $Id: Config.mk,v 5.15 1996/03/21 06:34:25 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -54,11 +54,11 @@
 # library (libtcl7.4.so).  Note, access is required to tclInt.h which is not
 # installed by Tcl.
 
-TCL_SRC=${srcbasedir}/../tcl7.5b3
-TCL_CONFIG=${srcbasedir}/../tcl7.5b3/unix/tclConfig.sh
-TCL_LIB=${bldbasedir}/../tcl7.5b3/unix/libtcl7.5.a
-TCL_SHLIB_DIR=${bldbasedir}/../tcl7.5b3/unix
-TCL_SHLIB=-L${TCL_SHLIB_DIR} -ltcl7.5
+TCL_SRC=${srcbasedir}/../tcl7.5
+TCL_CONFIG=${srcbasedir}/../tcl7.5/unix/tclConfig.sh
+TCL_LIB=${bldbasedir}/../tcl7.5/unix/libtcl75.a
+TCL_SHLIB_DIR=${bldbasedir}/../tcl7.5/unix
+TCL_SHLIB=-L${TCL_SHLIB_DIR} -ltcl75
 
 #------------------------------------------------------------------------------
 # Unless configure is going to be run with --with-tk=NO, these defines must be
@@ -66,11 +66,11 @@ TCL_SHLIB=-L${TCL_SHLIB_DIR} -ltcl7.5
 # path to tkConfig.sh, the path to the Tk library (libtk4.1.a) and the flags
 # neccessary to link with the Tk shared library (libtk4.1.so).
 
-TK_SRC=${srcbasedir}/../tk4.1b3
-TK_CONFIG=${srcbasedir}/../tk4.1b3/unix/tkConfig.sh
-TK_LIB=${bldbasedir}/../tk4.1b3/unix/libtk4.1.a
-TK_SHLIB_DIR=${bldbasedir}/../tk4.1b3/unix
-TK_SHLIB=-L${TK_SHLIB_DIR} -ltk4.1
+TK_SRC=${srcbasedir}/../tk4.1
+TK_CONFIG=${srcbasedir}/../tk4.1/unix/tkConfig.sh
+TK_LIB=${bldbasedir}/../tk4.1/unix/libtk41.a
+TK_SHLIB_DIR=${bldbasedir}/../tk4.1/unix
+TK_SHLIB=-L${TK_SHLIB_DIR} -ltk41
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,

@@ -1139,4 +1139,7 @@
   o Added guidelines for creating a pkgIndex.tcl file for use with TclX.  Build
     a prototype file, pkgIndex.proto, that can be merged with other
     pkgIndex.tcl files.
--------------------------------------------------------------------------------
+===============================================================================
+23 Apr 96: Released TclX 7.5.0
+===============================================================================
+
