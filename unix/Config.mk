@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.4 1995/01/01 19:51:02 markd Exp markd $
+# $Id: Config.mk,v 4.5 1995/01/22 20:22:59 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ TK_UCB_LIB=${bldbasedir}/../tk4.0b2
 TK_UCB_SRC=${srcbasedir}/../tk4.0b2
 
 #------------------------------------------------------------------------------
-# Compiler debug/optimization/profiling flag to use.  Nromally specified on
+# Compiler debug/optimization/profiling flag to use.  Normally specified on
 # the make command line (make CFLAGS=-g).
 
 #CFLAGS=
