@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.3 2005/02/04 01:41:35 hobbs Exp $
+ * $Id: tclXkeylist.c,v 1.4 2005/02/07 17:05:58 andreas_kupries Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -122,11 +122,6 @@ FindKeyedListEntry _ANSI_ARGS_((keylIntObj_t *keylIntPtr,
 				char	     *key,
 				int	     *keyLenPtr,
 				char	    **nextSubKeyPtr));
-
-static int
-ObjToKeyedListEntry _ANSI_ARGS_((Tcl_Interp  *interp,
-				 Tcl_Obj     *objPtr,
-				 keylEntry_t *entryPtr));
 
 static void
 DupKeyedListInternalRep _ANSI_ARGS_((Tcl_Obj *srcPtr,
@@ -358,16 +353,17 @@ DeleteKeyedListEntry (keylIntPtr, entryIdx)
 	if (entryPtr != NULL) {
 	    idx = (int) Tcl_GetHashValue(entryPtr);
 	    Tcl_DeleteHashEntry(entryPtr);
-	}
-	/*
-	 * In order to maintain consistency, we have to iterate over
-	 * the entire hash table to find and decr relevant idxs.
-	 */
-	for (entryPtr = Tcl_FirstHashEntry(keylIntPtr->hashTbl, &search);
-	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
-	    nidx = (int) Tcl_GetHashValue(entryPtr);
-	    if (nidx > idx) {
-		Tcl_SetHashValue(entryPtr, nidx - 1);
+
+	    /*
+	     * In order to maintain consistency, we have to iterate over
+	     * the entire hash table to find and decr relevant idxs.
+	     */
+	    for (entryPtr = Tcl_FirstHashEntry(keylIntPtr->hashTbl, &search);
+		 entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
+		nidx = (int) Tcl_GetHashValue(entryPtr);
+		if (nidx > idx) {
+		    Tcl_SetHashValue(entryPtr, nidx - 1);
+		}
 	    }
 	}
     }
