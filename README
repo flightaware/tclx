@@ -9,10 +9,8 @@ with tcl7.0 and tk3.3.  Please forward questions/bugs/suggestions to
 tcl-project@NeoSoft.com.  This releases is not complete.  The following
 functionality is not complete:
 
-   o installation - "make install" only partially works.  The master
-     directories installed by symbolic links are only made to the bin
-     files.  If you need links to include or man files, you must build them
-     by hand.
+   o installation - "make install-master" only sets up symbolic links from
+     the standard installation locations.
 
    o A few other minor changes.
 
