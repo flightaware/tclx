@@ -12,52 +12,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loadouster.tcl,v 8.1 1997/04/17 04:59:07 markd Exp $
+# $Id: loadouster.tcl,v 8.2 1997/08/17 04:08:30 markd Exp $
 #------------------------------------------------------------------------------
 #
-
-proc auto_load_ouster_index fn {
-    global auto_index
-    set dir [file dirname $fn]
-
-    if [catch {set f [open [file join $dir tclIndex]]}] {
-        return
-    }
-    set error [catch {
-        set id [gets $f]
-        if {($id == {# Tcl autoload index file, version 2.0}) ||
-            ($id == {# Tcl autoload index file, version 2.0 for [incr Tcl]})} {
-            eval [read $f]
-        } elseif {$id == "# Tcl autoload index file: each line identifies a Tcl"} {
-            while {[gets $f line] >= 0} {
-                if {([string index $line 0] == "#")
-                        || ([llength $line] != 2)} {
-                    continue
-                }
-                set name [lindex $line 0]
-                if {![info exists auto_index($name)]} {
-                    set auto_index($name) "source [join $dir [lindex $line 1]]"
-                }
-            }
-        } else {
-            error "[file join $dir tclIndex] isn't a proper Tcl index file"
-        }
-    } msg]
-    if {$f != ""} {
-        close $f
-    }
-    if $error {
-        global errorInfo errorCode
-        error $msg $errorInfo $errorCode
-    }
-}
 
 #
 # Body of code taken from init.tcl auto_load proc.  Indentation maintained.
 #
 
 proc auto_load_ouster_index dir {
-    global auto_index
+    global auto_index errorInfo errorCode
 
     # Check if we are a safe interpreter. In that case, we support only
     # newer format tclIndex files.
@@ -68,7 +32,7 @@ proc auto_load_ouster_index dir {
 	if {$issafe} {
 	    catch {source [file join $dir tclIndex]}
 	} elseif [catch {set f [open [file join $dir tclIndex]]}] {
-	    continue
+	    return
 	} else {
 	    set error [catch {
 		set id [gets $f]
