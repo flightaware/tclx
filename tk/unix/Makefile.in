@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.15 1996/03/01 05:12:01 markd Exp $
+# $Id: Makefile.in,v 5.16 1996/03/01 17:59:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -44,7 +44,7 @@ LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 LDLIBS = libtkx.a ${TK_USE_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_USE_LIB} \
          ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
 
-SHLDLIBS = -L. -ltkx ${TK_USE_LIB} ${TK_XLIBSW} -L ../../tcl/unix -ltclx \
+SHLDLIBS = -L. -ltkx ${TK_USE_LIB} ${TK_XLIBSW} -L../../tcl/unix -ltclx \
            ${TCL_USE_LIB} ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
            ${XLDLIBS}
 
