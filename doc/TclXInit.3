@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id$
+.\" $Id: Startup.man,v 1.1 1992/09/20 23:09:23 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Tcl_Startup" TCL "" "Tcl"
@@ -43,7 +43,8 @@ void
 Tcl_Startup (Tcl_Interp  *interp,
              int          argc,
              const char **argv,
-             const char  *defaultFile);
+             const char  *defaultFile,
+             unsigned     options);
 
 void
 Tcl_CommandLoop (Tcl_Interp *interp,
@@ -152,6 +153,9 @@ Parameters
 \fBo \fIdefaultFile\fR (I) - The file name of the default file to use.  If
 NULL, then the standard Tcl default file is used, which is formed from a
 location specified at compile time and the Extended Tcl version number.
+.br
+\fBo \fIoptions\fR - Options that control startup behavior.  None are currently
+defined.
 .RE
 .PP
 Notes:
