@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.9 1997/07/01 02:58:06 markd Exp $
+ * $Id: tclXutil.c,v 8.10 1997/07/03 07:14:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1014,8 +1014,8 @@ TclX_IsNullObj (objPtr)
         stringType = Tcl_GetObjType ("string");
     }
 
-    if ((objPtr->typePtr == NULL) && (objPtr->bytes == NULL)) {
-        return TRUE;
+    if (objPtr->typePtr == NULL) {
+        return (objPtr->length == 0);
     } else {
         if (objPtr->typePtr == listType) {
             Tcl_ListObjLength (NULL, objPtr, &length);
@@ -1025,5 +1025,6 @@ TclX_IsNullObj (objPtr)
             return (length == 0);
         }
     }
-    return FALSE;
+    Tcl_GetStringFromObj (objPtr, &length);
+    return (length == 0);
 }

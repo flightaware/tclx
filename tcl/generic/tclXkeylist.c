@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.5 1997/06/30 03:55:59 markd Exp $
+ * $Id: tclXkeylist.c,v 8.6 1997/06/30 07:57:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,15 +48,6 @@ typedef struct {
  * Amount to increment array size by when it needs to grow.
  */
 #define KEYEDLIST_ARRAY_INCR_SIZE 16
-
-/*
- * Invalidate the string representation (FIX: should be in Tcl).
- */
-#define TclX_InvalidateStringRep(objPtr) \
-    if (objPtr->bytes != NULL) { \
-        ckfree ((char *) objPtr->bytes); \
-        keylPtr->bytes = NULL; \
-    }
 
 /*
  * Macro to duplicate a child entry of a keyed list if it is share by more
@@ -761,7 +752,7 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
         keylIntPtr->entries [findIdx].key [keyLen] = '\0';
         keylIntPtr->entries [findIdx].valuePtr = valuePtr;
         Tcl_IncrRefCount (valuePtr);
-        TclX_InvalidateStringRep (keylPtr);
+        Tcl_InvalidateStringRep (keylPtr);
 
         KEYL_REP_ASSERT (keylIntPtr);
         return TCL_OK;
@@ -780,7 +771,7 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
                                keylIntPtr->entries [findIdx].valuePtr,
                                nextSubKey, valuePtr);
         if (status == TCL_OK) {
-            TclX_InvalidateStringRep (keylPtr);
+            Tcl_InvalidateStringRep (keylPtr);
         }
 
         KEYL_REP_ASSERT (keylIntPtr);
@@ -800,7 +791,7 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
         keylIntPtr->entries [findIdx].key [keyLen] = '\0';
         keylIntPtr->entries [findIdx].valuePtr = newKeylPtr;
         Tcl_IncrRefCount (newKeylPtr);
-        TclX_InvalidateStringRep (keylPtr);
+        Tcl_InvalidateStringRep (keylPtr);
 
         KEYL_REP_ASSERT (keylIntPtr);
         return TCL_OK;
@@ -851,7 +842,7 @@ TclX_KeyedListDelete (interp, keylPtr, key)
      */
     if (nextSubKey == NULL) {
         DeleteKeyedListEntry (keylIntPtr, findIdx);
-        TclX_InvalidateStringRep (keylPtr);
+        Tcl_InvalidateStringRep (keylPtr);
 
         KEYL_REP_ASSERT (keylIntPtr);
         return TCL_OK;
@@ -873,7 +864,7 @@ TclX_KeyedListDelete (interp, keylPtr, key)
         if (subKeylIntPtr->numEntries == 0) {
             DeleteKeyedListEntry (keylIntPtr, findIdx);
         }
-        TclX_InvalidateStringRep (keylPtr);
+        Tcl_InvalidateStringRep (keylPtr);
     }
 
     KEYL_REP_ASSERT (keylIntPtr);
