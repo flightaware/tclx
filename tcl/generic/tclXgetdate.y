@@ -18,7 +18,7 @@
  *     University of North Carolina at Chapel Hill
  *     getdate.y    2.13    9/16/86
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXgetdate.y,v 1.1 1992/09/20 23:27:06 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -558,7 +558,11 @@ Tcl_GetDate (p, now, zone)
 }
 
 /*
- * Error message are not used, so discard with fake function.
+ * Error message are not used, so discard with dummy function.
  */
 
-#define yyerror(s)
+void
+yyerror(msg)
+    char *msg;
+{
+}
