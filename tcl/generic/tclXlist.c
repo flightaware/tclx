@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.2 1997/06/12 21:08:23 markd Exp $
+ * $Id: tclXlist.c,v 8.3 1997/06/25 09:07:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -312,6 +312,14 @@ TclX_LemptyObjCmd (clientData, interp, objc, objv)
     
     if (objc != 2) {
         return TclX_WrongArgs (interp, objv [0], "list");
+    }
+
+    /*
+     * A null object.
+     */
+    if ((objv [1]->typePtr == NULL) && (objv [1]->bytes == NULL)) {
+        Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
+        return TCL_OK;
     }
 
     /*
