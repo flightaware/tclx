@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.12 2005/03/25 00:50:09 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.13 2005/03/25 19:59:33 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -28,7 +28,7 @@
 #========================================================================
 
 PKG_SOURCES	= @PKG_SOURCES@
-PKG_OBJECTS	= @PKG_OBJECTS@
+PKG_OBJECTS	= @PKG_OBJECTS@ @LIBOBJS@
 
 #========================================================================
 # Identify the object files.  This replaces .c with .$(OBJEXT) for all

@@ -1,3 +1,8 @@
+2005-03-28  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* configure, configure.in:
+	* Makefile.in (PKG_OBJECTS): add @LIBOBJS@ to needed objects.
+
 2005-03-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* configure, configure.in: AC_PROG_LN_S no longer needed
