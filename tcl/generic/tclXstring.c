@@ -385,8 +385,8 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "strvar separators");
     
-    varValueObj = Tcl_GetObjVar2 (interp, Tcl_GetStringFromObj (objv [1], NULL), NULL,
-                                  TCL_LEAVE_ERR_MSG | TCL_PARSE_PART1);
+    varValueObj = Tcl_ObjGetVar2(interp, objv[1], NULL,
+                                  TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1);
 
     varValue = Tcl_GetStringFromObj (varValueObj, &varValueLen);
 
@@ -412,9 +412,9 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
 
     newVarValueObj = Tcl_NewStringObj (startPtr + tokenLen, -1);
 
-    if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj(objv [1], NULL), NULL,
-                        newVarValueObj,
-                        TCL_LEAVE_ERR_MSG | TCL_PARSE_PART1) == NULL) {
+    if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv [1], NULL), NULL,
+                      newVarValueObj,
+                      TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1) == NULL) {
         Tcl_DStringFree (&string);
         Tcl_DecrRefCount (newVarValueObj);
         return TCL_ERROR;
@@ -817,8 +817,8 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
         if (failIndex) {
             Tcl_Obj *iObj = Tcl_NewIntObj (idx);
 
-            if (Tcl_SetObjVar2 (interp, failVar, NULL, 
-                                iObj, TCL_LEAVE_ERR_MSG | TCL_PARSE_PART1) == NULL) {
+            if (Tcl_SetVar2Ex(interp, failVar, NULL, 
+                              iObj, TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1) == NULL) {
                 Tcl_DecrRefCount (iObj);
                 return TCL_ERROR;
             }

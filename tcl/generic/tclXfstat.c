@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.6 1997/08/08 10:04:22 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -173,64 +173,64 @@ ReturnStatArray (interp, ttyDev, statBufPtr, arrayObj)
 {
     char *varName = Tcl_GetStringFromObj (arrayObj, NULL);
 
-    if  (Tcl_SetObjVar2 (interp, varName, "dev",
-                         Tcl_NewIntObj ((int) statBufPtr->st_dev),
+    if  (Tcl_SetVar2Ex(interp, varName, "dev",
+                       Tcl_NewIntObj((int)statBufPtr->st_dev),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "ino",
+                       Tcl_NewIntObj((int)statBufPtr->st_ino),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "mode",
+                       Tcl_NewIntObj((int)statBufPtr->st_mode),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "nlink",
+                       Tcl_NewIntObj((int)statBufPtr->st_nlink),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "uid",
+                       Tcl_NewIntObj((int)statBufPtr->st_uid),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "gid",
+                       Tcl_NewIntObj((int)statBufPtr->st_gid),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "size",
+                       Tcl_NewLongObj((long)statBufPtr->st_size),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "atime",
+                       Tcl_NewLongObj((long)statBufPtr->st_atime),
+                       TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    if  (Tcl_SetVar2Ex(interp, varName, "mtime",
+                         Tcl_NewLongObj((long)statBufPtr->st_mtime),
                          TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    if  (Tcl_SetObjVar2 (interp, varName, "ino",
-                         Tcl_NewIntObj ((int) statBufPtr->st_ino),
-                         TCL_LEAVE_ERR_MSG) == NULL)
+    if  (Tcl_SetVar2Ex(interp, varName, "ctime",
+                       Tcl_NewLongObj((long)statBufPtr->st_ctime),
+                       TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    if  (Tcl_SetObjVar2 (interp, varName, "mode",
-                         Tcl_NewIntObj ((int) statBufPtr->st_mode),
+    if (Tcl_SetVar2Ex(interp, varName, "tty",
+                      Tcl_NewBooleanObj(ttyDev),
                       TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
-    if  (Tcl_SetObjVar2 (interp, varName, "nlink",
-                         Tcl_NewIntObj ((int) statBufPtr->st_nlink),
-                         TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if  (Tcl_SetObjVar2 (interp, varName, "uid",
-                         Tcl_NewIntObj ((int) statBufPtr->st_uid),
-                         TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if  (Tcl_SetObjVar2 (interp, varName, "gid",
-                         Tcl_NewIntObj ((int) statBufPtr->st_gid),
-                         TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if  (Tcl_SetObjVar2 (interp, varName, "size",
-                         Tcl_NewLongObj ((long) statBufPtr->st_size),
-                         TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if  (Tcl_SetObjVar2 (interp, varName, "atime",
-                         Tcl_NewLongObj ((long) statBufPtr->st_atime),
-                         TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if  (Tcl_SetObjVar2 (interp, varName, "mtime",
-                         Tcl_NewLongObj ((long) statBufPtr->st_mtime),
-                         TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if  (Tcl_SetObjVar2 (interp, varName,  "ctime",
-                         Tcl_NewLongObj ((long) statBufPtr->st_ctime),
-                         TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if (Tcl_SetObjVar2 (interp, varName, "tty",
-                        Tcl_NewBooleanObj (ttyDev),
-                        TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
-
-    if (Tcl_SetObjVar2 (interp, varName, "type",
-                        Tcl_NewStringObj (StrFileType (statBufPtr), -1),
-                        TCL_LEAVE_ERR_MSG) == NULL)
+    if (Tcl_SetVar2Ex(interp, varName, "type",
+                      Tcl_NewStringObj(StrFileType(statBufPtr), -1),
+                      TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;
 
     return TCL_OK;

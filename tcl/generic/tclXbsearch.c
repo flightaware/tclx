@@ -349,9 +349,8 @@ TclX_BsearchObjCmd (clientData, interp, objc, objv)
 
         valPtr = Tcl_NewStringObj (Tcl_DStringValue (&searchCB.lineBuf),
                                    -1);
-        if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj (objv [3], NULL), NULL,
-                            valPtr,
-                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_ObjSetVar2(interp, objv[3], NULL, valPtr,
+                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valPtr);
             goto errorExit;
         }

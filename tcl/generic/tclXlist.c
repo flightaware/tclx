@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.12 1997/12/14 21:32:59 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -98,7 +98,7 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
      * Get the variable that we are going to update.  Include it if it
      * exists.
      */
-    varObjPtr = Tcl_GetObjVar2 (interp, varName, NULL, TCL_PARSE_PART1);
+    varObjPtr = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
 
     if (varObjPtr != NULL) {
         catObjc = objc - 1;
@@ -125,8 +125,8 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
     if (catObjv != staticObjv)
         ckfree ((char *) catObjv);
 
-    if (Tcl_SetObjVar2 (interp, varName, NULL, newObjPtr,
-                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+    if (Tcl_SetVar2Ex(interp, varName, NULL, newObjPtr,
+                      TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
         Tcl_DecrRefCount (newObjPtr);
         return TCL_ERROR;
     }
@@ -156,8 +156,8 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
     }
     varName = Tcl_GetStringFromObj (objv [1], NULL);
 
-    listVarPtr = Tcl_GetObjVar2 (interp, varName, NULL, 
-                                 TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG);
+    listVarPtr = Tcl_GetVar2Ex(interp, varName, NULL, 
+                               TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG);
     if (listVarPtr == NULL) {
         return TCL_ERROR;
     }
@@ -207,8 +207,8 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
     /*
      * Update variable.
      */
-    if (Tcl_SetObjVar2 (interp, varName, NULL, listVarPtr,
-                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+    if (Tcl_SetVar2Ex(interp, varName, NULL, listVarPtr,
+                      TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
         goto errorExit;
     }
 
@@ -252,7 +252,7 @@ TclX_LvarpushObjCmd (clientData, interp, objc, objv)
     }
     varName = Tcl_GetStringFromObj (objv [1], NULL);
 
-    listVarPtr = Tcl_GetObjVar2 (interp, varName, NULL, TCL_PARSE_PART1);
+    listVarPtr = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
     if ((listVarPtr == NULL) || (Tcl_IsShared (listVarPtr))) {
         if (listVarPtr == NULL) {
             listVarPtr = Tcl_NewListObj (0, NULL);
@@ -289,8 +289,8 @@ TclX_LvarpushObjCmd (clientData, interp, objc, objv)
                             1, &(objv [2])) != TCL_OK)
         goto errorExit;
 
-    if (Tcl_SetObjVar2 (interp, varName, NULL, listVarPtr,
-                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+    if (Tcl_SetVar2Ex(interp, varName, NULL, listVarPtr,
+                      TCL_PARSE_PART1| TCL_LEAVE_ERR_MSG) == NULL) {
         goto errorExit;
     }
     return TCL_OK;
@@ -389,8 +389,8 @@ TclX_LassignObjCmd (clientData, interp, objc, objv)
             }
             elemPtr = nullObjPtr;
         }
-        if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj (objv [idx], NULL), NULL,
-                            elemPtr, TCL_PARSE_PART1) == NULL)
+        if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv [idx], NULL), NULL,
+                          elemPtr, TCL_PARSE_PART1) == NULL)
             goto error_exit;
     }
 

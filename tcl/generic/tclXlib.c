@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.21 1998/01/28 17:34:15 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -353,8 +353,8 @@ SetPackageIndexEntry (interp, packageName, fileName, offset, length)
     pkgDataObjv [2] = Tcl_NewIntObj ((int) length);
     pkgDataPtr = Tcl_NewListObj (3, pkgDataObjv);
 
-    if (Tcl_SetObjVar2 (interp, AUTO_PKG_INDEX, packageName, pkgDataPtr,
-                        TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL) {
+    if (Tcl_SetVar2Ex(interp, AUTO_PKG_INDEX, packageName, pkgDataPtr,
+                      TCL_GLOBAL_ONLY|TCL_LEAVE_ERR_MSG) == NULL) {
         Tcl_DecrRefCount (pkgDataPtr);
         return TCL_ERROR;
     }
@@ -392,8 +392,8 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
     /*
      * Look up the package entry in the array.
      */
-    pkgDataPtr = Tcl_GetObjVar2 (interp, AUTO_PKG_INDEX, packageName,
-                                 TCL_GLOBAL_ONLY);
+    pkgDataPtr = Tcl_GetVar2Ex(interp, AUTO_PKG_INDEX, packageName,
+                               TCL_GLOBAL_ONLY);
     if (pkgDataPtr == NULL) {
         TclX_AppendObjResult (interp, "entry not found in \"auto_pkg_index\"",
                               " for package \"", packageName, "\"",

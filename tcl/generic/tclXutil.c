@@ -513,8 +513,8 @@ CallEvalErrorHandler (interp)
      * should be removed eventually. FIX: Delete.
      */
     if (!Tcl_GetCommandInfo (interp, ERROR_HANDLER, &cmdInfo)) {
-        errorHandler = Tcl_GetObjVar2 (interp, ERROR_HANDLER, NULL,
-                                       TCL_GLOBAL_ONLY);
+        errorHandler = Tcl_GetVar2Ex(interp, ERROR_HANDLER, NULL,
+                                     TCL_GLOBAL_ONLY);
         if (errorHandler == NULL)
             return TCL_ERROR;  /* No handler specified */
     } else {
@@ -526,7 +526,7 @@ CallEvalErrorHandler (interp)
     Tcl_ListObjAppendElement (NULL, command,
                               Tcl_GetObjResult (interp));
                               
-    result = Tcl_EvalObj (interp, command, TCL_EVAL_GLOBAL);
+    result = Tcl_EvalObjEx (interp, command, TCL_EVAL_GLOBAL);
     if (result == TCL_ERROR) {
         Tcl_AddErrorInfo (interp,
                           "\n    (while processing tclx_errorHandler)");
@@ -1091,12 +1091,12 @@ TclX_SaveResultErrorInfo (interp)
 
     saveObjv [0] = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
     
-    saveObjv [1] = Tcl_GetObjVar2 (interp, ERRORINFO, NULL, TCL_GLOBAL_ONLY);
+    saveObjv [1] = Tcl_GetVar2Ex(interp, ERRORINFO, NULL, TCL_GLOBAL_ONLY);
     if (saveObjv [1] == NULL) {
         saveObjv [1] = Tcl_NewObj ();
     }
 
-    saveObjv [2] = Tcl_GetObjVar2 (interp, ERRORCODE, NULL, TCL_GLOBAL_ONLY);
+    saveObjv [2] = Tcl_GetVar2Ex(interp, ERRORCODE, NULL, TCL_GLOBAL_ONLY);
     if (saveObjv [2] == NULL) {
         saveObjv [2] = Tcl_NewObj ();
     }
@@ -1139,8 +1139,8 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
         panic ("invalid TclX result save object");
     }
 
-    Tcl_SetObjVar2 (interp, ERRORCODE, NULL, saveObjv[2], TCL_GLOBAL_ONLY);
-    Tcl_SetObjVar2 (interp, ERRORINFO, NULL, saveObjv[1], TCL_GLOBAL_ONLY);
+    Tcl_SetVar2Ex(interp, ERRORCODE, NULL, saveObjv[2], TCL_GLOBAL_ONLY);
+    Tcl_SetVar2Ex(interp, ERRORINFO, NULL, saveObjv[1], TCL_GLOBAL_ONLY);
 
     Tcl_SetObjResult (interp, saveObjv[0]);
 
@@ -1193,8 +1193,8 @@ TclX_ShellExit (interp, exitCode)
      * interpreter.
      */
     deleteInterp = FALSE;
-    varValue = Tcl_GetObjVar2 (interp, "TCLXENV", "deleteInterpAtShellExit",
-                               TCL_GLOBAL_ONLY);
+    varValue = Tcl_GetVar2Ex(interp, "TCLXENV", "deleteInterpAtShellExit",
+                             TCL_GLOBAL_ONLY);
     if (varValue != NULL) {
         Tcl_GetBooleanFromObj (NULL, varValue, &deleteInterp);
     }

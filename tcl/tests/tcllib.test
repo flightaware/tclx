@@ -19,7 +19,6 @@
 
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
-echo CMDTRACE ON:;cmdtrace on [open cmd.log w ]
 eval $SAVED_UNKNOWN
 
 auto_load auto_reset  ;# Make sure we have this before changing path.
@@ -109,7 +108,6 @@ Test tcllib-2.1 {bogus path test} {
     set auto_path [list /bogus/dir/path/no/work $tclx_library]
     TclLibAAA
 } 1 {invalid command name "TclLibAAA"}
-echo CMDTRACE OFF:;cmdtrace off
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.12 1998/01/28 17:34:12 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -322,7 +322,7 @@ SetLoopCounter (interp, varName, idx)
 {
     Tcl_Obj *iObj, *newVarObj;
 
-    iObj = Tcl_GetObjVar2 (interp, varName, NULL, TCL_PARSE_PART1);
+    iObj = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
         iObj = newVarObj = Tcl_NewLongObj (idx);
     } else {
@@ -330,8 +330,8 @@ SetLoopCounter (interp, varName, idx)
     }
 
     Tcl_SetLongObj (iObj, idx);
-    if (Tcl_SetObjVar2 (interp, varName, NULL, iObj,
-                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+    if (Tcl_SetVar2Ex(interp, varName, NULL, iObj,
+                      TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
         if (newVarObj != NULL) {
             Tcl_DecrRefCount (newVarObj);
         }
@@ -390,7 +390,7 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
         if (SetLoopCounter(interp, varName, idx) == TCL_ERROR)
             return TCL_ERROR;
 
-        result = Tcl_EvalObj (interp, command, 0);
+        result = Tcl_EvalObj (interp, command);
         if (result == TCL_CONTINUE) {
             result = TCL_OK;
         } else if (result != TCL_OK) {
@@ -504,7 +504,7 @@ TclX_Try_EvalObjCmd (dummy, interp, objc, objv)
     /*
      * Evaluate the command.  If not error and no finally command, we are done.
      */
-    code = Tcl_EvalObj (interp, objv [1], 0);
+    code = Tcl_EvalObj (interp, objv [1]);
     if ((code != TCL_ERROR) && !haveFinally) {
         return code;
     }
@@ -520,13 +520,13 @@ TclX_Try_EvalObjCmd (dummy, interp, objc, objv)
 
         code = GlobalImport (interp);
         if (code != TCL_ERROR) {
-            if (Tcl_SetObjVar2 (interp, "errorResult", NULL, 
-                                resultObjPtr, TCL_LEAVE_ERR_MSG) == NULL) {
+            if (Tcl_SetVar2Ex(interp, "errorResult", NULL, 
+                              resultObjPtr, TCL_LEAVE_ERR_MSG) == NULL) {
                 code = TCL_ERROR;
             }
         }
         if (code != TCL_ERROR) {
-            code = Tcl_EvalObj (interp, objv [2], 0);
+            code = Tcl_EvalObj (interp, objv [2]);
         }
         Tcl_DecrRefCount (resultObjPtr);
    }
@@ -539,7 +539,7 @@ TclX_Try_EvalObjCmd (dummy, interp, objc, objv)
         savedResultsPtr = TclX_SaveResultErrorInfo (interp);
         Tcl_ResetResult (interp);
     
-        code2 = Tcl_EvalObj (interp, objv [3], 0);
+        code2 = Tcl_EvalObj (interp, objv [3]);
         if (code2 == TCL_ERROR) {
             Tcl_DecrRefCount (savedResultsPtr);  /* Don't restore results */
             code = code2;

@@ -546,8 +546,8 @@ SetMatchInfoVar (interp, scanData)
             goto errorExit;
 
         valueObjPtr = Tcl_NewLongObj ((long) scanData->offset);
-        if (Tcl_SetObjVar2 (interp, MATCHINFO, "offset", valueObjPtr,
-                            TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_SetVar2Ex(interp, MATCHINFO, "offset", valueObjPtr,
+                          TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             goto errorExit;
         }
@@ -566,8 +566,8 @@ SetMatchInfoVar (interp, scanData)
         }
 #endif
         valueObjPtr = Tcl_NewIntObj ((long) scanData->lineNum);
-        if (Tcl_SetObjVar2 (interp, MATCHINFO, "linenum", valueObjPtr,
-                            TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_SetVar2Ex(interp, MATCHINFO, "linenum", valueObjPtr,
+                          TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             goto errorExit;
         }
@@ -608,7 +608,7 @@ SetMatchInfoVar (interp, scanData)
             indexObjv [1] = Tcl_NewIntObj (end-1);
         }
         valueObjPtr = Tcl_NewListObj (2, indexObjv);
-        if (Tcl_SetObjVar2 (interp, MATCHINFO, key, valueObjPtr,
+        if (Tcl_SetVar2Ex(interp, MATCHINFO, key, valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             goto errorExit;
@@ -620,7 +620,7 @@ SetMatchInfoVar (interp, scanData)
                                        &valueBuf);
         valueObjPtr = Tcl_NewStringObj(value, (end - start));
 
-        if (Tcl_SetObjVar2 (interp, MATCHINFO, key, valueObjPtr,
+        if (Tcl_SetVar2Ex(interp, MATCHINFO, key, valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
             goto errorExit;
@@ -718,7 +718,7 @@ ScanFile (interp, contextPtr, channel)
             if (result != TCL_OK)
                 goto scanExit;
 
-            result = Tcl_EvalObj (interp, data.matchPtr->command, 0);
+            result = Tcl_EvalObj (interp, data.matchPtr->command);
             if (result == TCL_ERROR) {
                 Tcl_AddObjErrorInfo (interp, 
                     "\n    while executing a match command", -1);
@@ -750,7 +750,7 @@ ScanFile (interp, contextPtr, channel)
             if (result != TCL_OK)
                 goto scanExit;
 
-            result = Tcl_EvalObj (interp, contextPtr->defaultAction, 0);
+            result = Tcl_EvalObj (interp, contextPtr->defaultAction);
             if (result == TCL_ERROR) {
                 Tcl_AddObjErrorInfo (interp, 
                     "\n    while executing a match default command", -1);

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 8.14 1998/12/20 07:55:30 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -56,8 +56,8 @@
 # to ${TCL_LIB_SPEC}.
 # 
 
-TCL_SRC=${srcbasedir}/../tcl8.1b1
-TCL_BUILD=${bldbasedir}/../tcl8.1b1
+TCL_SRC=${srcbasedir}/../tcl8.1b2
+TCL_BUILD=${bldbasedir}/../tcl8.1b2
 TCL_CONFIG=${TCL_BUILD}/unix/tclConfig.sh
 TCL_LIB=${TCL_BUILD_LIB_SPEC}
 
@@ -68,8 +68,8 @@ TCL_LIB=${TCL_BUILD_LIB_SPEC}
 # neccessary to link with the Tk shared library (libtk8.1.so).  If you want to
 # use the installed Tk library, set TK_LIB to ${TK_LIB_SPEC}.
 
-TK_SRC=${srcbasedir}/../tk8.1b1
-TK_BUILD=${bldbasedir}/../tk8.1b1
+TK_SRC=${srcbasedir}/../tk8.1b2
+TK_BUILD=${bldbasedir}/../tk8.1b2
 TK_CONFIG=${TK_BUILD}/unix/tkConfig.sh
 TK_LIB=${TK_BUILD_LIB_SPEC}
 

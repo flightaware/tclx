@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlgets.c,v 8.5 1997/09/25 03:56:36 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -473,9 +473,8 @@ TclX_LgetsObjCmd (clientData, interp, objc, objv)
     } else {
         int resultLen;
 
-        if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj (objv[2], NULL), NULL,
-                            dataObj,
-                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+        if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
+                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
             goto errorExit;
         }
 
@@ -516,9 +515,8 @@ TclX_LgetsObjCmd (clientData, interp, objc, objv)
          * instead of original error.
          * FIX: Need functions to save/restore error state.
          */
-        if (Tcl_SetObjVar2 (interp, Tcl_GetStringFromObj (objv[2], NULL), NULL,
-                            dataObj,
-                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) != NULL) {
+        if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
+                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) != NULL) {
             Tcl_SetObjResult (interp, saveResult);  /* Restore old message */
         }
         Tcl_DecrRefCount (saveResult);
