@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.19 1996/03/04 01:27:06 markd Exp $
+# $Id: Makefile.in,v 5.20 1996/03/04 23:12:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -43,9 +43,11 @@ LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 LDLIBS = libtkx.a ${TK_USE_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_USE_LIB} \
          ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
 
-SHLDLIBS = -L. -ltkx ${TK_USE_LIB} ${TK_XLIBSW} -L../../tcl/unix -ltclx \
-           ${TCL_USE_LIB} ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
-           ${XLDLIBS}
+SHLIBLIBS = ${TK_USE_LIB} ${TK_XLIBSW} -L../../tcl/unix -ltclx ${TCL_USE_LIB} \
+	    ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
+            ${XLDLIBS}
+
+SHLDLIBS = -L. -ltkx ${SHLIBLIBS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -88,7 +90,7 @@ SHLIB_YES: ${TKX_SHLIB_NAME}
 
 ${TKX_SHLIB_NAME}: ${OBJS}
 	rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME}
-	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${OBJS} ${SHLDLIBS}
+	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${OBJS} ${SHLIBLIBS}
 	if test "${TKX_SHLIB_NAME}" != "${TKX_SHLIB_BASE_NAME}"; then \
 	    ln ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME} ;\
 	fi
