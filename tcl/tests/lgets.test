@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lgets.test,v 8.2 1997/07/01 02:26:17 markd Exp $
+# $Id: lgets.test,v 8.3 1997/08/23 18:55:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -278,6 +278,16 @@ Test lgets-5.11 {lgets with binary data} {
 
 catch {close $fh}
 unset data
+
+Test lgets-6.0 {lgets corner cases} {
+    set fh [open test2.tmp w+]
+    puts $fh [list {\\server} {\home} {foo\}}]
+    seek $fh 0
+    lgets $fh inlist
+    close $fh
+    set inlist
+} 0 [list {\\server} {\home} {foo\}}]
+
 
 
 TestRemove test1.tmp test2.tmp

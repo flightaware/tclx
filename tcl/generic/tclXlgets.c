@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlgets.c,v 8.3 1997/07/04 20:23:53 markd Exp $
+ * $Id: tclXlgets.c,v 8.4 1997/07/08 06:35:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -150,7 +150,7 @@ ReadListInit (interp, channel, dataPtr)
         return rstat;
 
     /*
-     * Add Advance to the first non-whitespace.
+     * Advance to the first non-whitespace.
      */
     p =  Tcl_DStringValue (&dataPtr->buffer);
     limit = p + Tcl_DStringLength (&dataPtr->buffer);
@@ -208,7 +208,7 @@ ReadListElement (interp, dataPtr, elemObjPtr)
 
     /*
      * Check for an opening brace or quote. We treat embedded NULLs in the
-     * list as bytes belonging to * a list element.
+     * list as bytes belonging to a list element.
      */
 
     if (*p == '{') {
@@ -279,16 +279,22 @@ ReadListElement (interp, dataPtr, elemObjPtr)
 	     * Backslash:  skip over everything up to the end of the
 	     * backslash sequence.  Copy the character to the output obj
              * and reset the location of the rest of the string to copy.
+             * If in braces, include backslash and character as-is, otherwise
+             * drop it.
 	     */
 
 	    case '\\': {
 		char bsChar;
 
-                Tcl_AppendToObj (elemObjPtr, cpStart, (p - cpStart));
                 bsChar = Tcl_Backslash(p, &numChars);
-                Tcl_AppendToObj (elemObjPtr, &bsChar, 1);
-		p += (numChars - 1);
-                cpStart = p + 1;  /* already stored character */
+                if (openBraces > 0) {
+                    p += (numChars - 1);  /* Advanced again at end of loop */
+                } else {
+                    Tcl_AppendToObj (elemObjPtr, cpStart, (p - cpStart));
+                    Tcl_AppendToObj (elemObjPtr, &bsChar, 1);
+                    p += (numChars - 1);
+                    cpStart = p + 1;  /* already stored character */
+                }
 		break;
 	    }
 
