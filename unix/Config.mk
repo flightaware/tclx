@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.2 1992/11/09 05:59:46 markd Exp markd $
+# $Id: Config.mk,v 2.3 1992/11/09 07:33:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -36,9 +36,9 @@ TCL_CONFIG_FILE=scoodt2.0
 
 #------------------------------------------------------------------------------
 # Location of the UCB Tcl distribution relative to this directory.  TclX works
-# with Tcl 6.3 and Tcl 6.4.
+# with Tcl 6.4 and Tcl 6.5.
 #
-TCL_UCB_DIR=../tcl6.4
+TCL_UCB_DIR=../tcl6.5
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -51,7 +51,7 @@ TCL_UCB_DIR=../tcl6.4
 # install script.
 #
 #TCL_TK_SHELL=wish
-TCL_TK_DIR=../tk2.3
+TCL_TK_DIR=../tk3.0
 TK_LIBRARY=/usr/local/lib/tk
 
 #------------------------------------------------------------------------------
