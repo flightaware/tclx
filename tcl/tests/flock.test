@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: flock.test,v 1.2 1992/10/03 22:37:39 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -137,10 +137,16 @@ Test flock-2.8 {funlock argument checking} {
 # If problems with acquiring locks, bail out now, as some tests may hang.
 #
 if {[catch {flock $writeFH} msg] != 0} {
-   puts stderr "*****************************************************"
-   puts stderr "Error acquiring file lock, rest of lock tests skipped"
-   puts stderr "    $msg"
-   return
+    puts stderr "*************************************************************"
+    puts stderr "Error acquiring file lock, may be system configuration"
+    puts stderr "rest of lock tests skipped"
+    puts stderr "    $msg"
+    puts stderr "*************************************************************"
+    catch {close $writeFH}
+    catch {close $readFH}
+    catch {close $rdwrFH}
+    unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
+    return
 }
 funlock $writeFH
 
