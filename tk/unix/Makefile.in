@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.18 1997/10/06 04:50:40 markd Exp $
+# $Id: Makefile.in,v 8.19 1997/10/09 20:57:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -126,7 +126,7 @@ tkx.tcl: ${RUNTIME_DIR}/tkx.tcl
 	rm -f tkx.tcl
 	cp ${RUNTIME_DIR}/tkx.tcl tkx.tcl
 
-tclhelp: ${srcdir}/../runtime/tclhelp.tcl
+tclhelp: ${RUNTIME_DIR}/tclhelp.tcl
 	rm -f tclhelp
 	echo Creating tclhelp script
 	@echo "#!/bin/sh"       			 >tclhelp
@@ -136,8 +136,8 @@ tclhelp: ${srcdir}/../runtime/tclhelp.tcl
 	@echo "package require Tk ${TK_VERSION}"	>>tclhelp
 	@echo "package require Tclx ${TCLX_VERSION}"	>>tclhelp
 	@echo ""					>>tclhelp
-	@cat ${srcdir}/../runtime/tclhelp.tcl 		>>tclhelp
-	@chmod +rx tclhelp
+	@cat ${RUNTIME_DIR}/tclhelp.tcl 		>>tclhelp
+	@chmod a+rx,a-w tclhelp
 
 help.tmp:
 	if [ "@HAVE_SYML@" = "YES" ]; then \
@@ -290,7 +290,7 @@ tkXunixTest.o: ${TKX_UNIX_SRC_DIR}/tkXunixTest.c
 tkXunixTestDA.o: ${TKX_UNIX_SRC_DIR}/tkXunixTestSA.c
 	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXunixTestSA.c
 
-tkXunixTestSA.c: tkXunixTest.c Makefile
+tkXunixTestSA.c: ${TKX_UNIX_SRC_DIR}/tkXunixTest.c Makefile
 	rm -f tkXinitSA.c
 	sed -e s/Tclx_Init/Tclx_InitStandAlone/ \
 	    -e s/Tcl_Init/Tcl_InitStandAlone/ \
