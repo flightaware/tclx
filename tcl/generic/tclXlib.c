@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 5.5 1996/03/15 07:35:53 markd Exp $
+ * $Id: tclXlib.c,v 5.6 1996/03/19 07:52:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -799,7 +799,7 @@ LoadDirIndexes (interp, dirName)
     dirNameLen = strlen (dirName) + 1;  /* Include `/' */
 
     while (TRUE) {
-        status = TclX_OSreaddir (interp, handle, &fileName);
+        status = TclX_OSreaddir (interp, handle, FALSE, &fileName);
         if (status == TCL_ERROR)
             goto errorExit;
         if (status == TCL_BREAK)
