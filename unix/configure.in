@@ -13,16 +13,19 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.6 1996/10/19 19:04:38 markd Exp $
+dnl $Id: configure.in,v 7.7 1996/10/19 19:53:10 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.6 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.7 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
-# unset.
+# unset, but at least set these to empty values.
 #
-unset MFLAGS MAKEFLAGS 2>/dev/null
+MFLAGS=
+MAKEFLAGS=
+MAKELEVEL=
+unset MFLAGS MAKEFLAGS MAKELEVEL 2>/dev/null
 
 #------------------------------------------------------------------------------
 # Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
