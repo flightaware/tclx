@@ -72,7 +72,7 @@ NEW FEATURES IN THIS RELEASE
       as arguments.  Floating point numbers will not be demoted to integers
       or lose precision.
 
-    o The standard Tcl expr command is patch so that floating point numbers
+    o The standard Tcl expr command is patched so that floating point numbers
       do not get demoted to integers or lose precision.  This patch has been
       submitted to John Ousterhout.
 
@@ -107,7 +107,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and the
-extensions in the directory extended/man.  Start with the TclX.man manual.
+extensions in the directory tclX6.4c/man.  Start with the TclX.man manual.
 
 EXTENDED TCL VERSION NAMING
 ===========================
@@ -131,13 +131,13 @@ Here is an overview of the directory hierarchy:
 
                              top_level_directory
 
-                          tcl6.4    extended   tk2.3
+                          tcl6.4    tclX6.4c   tk2.3
 
 The tcl6.4 directory contains Berkeley Tcl, unmodified and tk2.3 contains
 unmodified tk2.3, if you plan to use Tk  These locations are only suggested,
-they maybe changed by editing extended/Config.mk.
+they maybe changed by editing tclX6.4c/Config.mk.
 
-The following directories are included under the extended directory:
+The following directories are included under the tclX6.4c directory:
 
     o config - Configuration files for various Unix versions.
 
@@ -171,13 +171,13 @@ The following directories are included under the extended directory:
 HOW TO BUILD IT
 ===============
 
-   Please read TclX.man in the extended/man directory before starting the
+   Please read TclX.man in the tclX6.4c/man directory before starting the
 engine or working under the hood.
 
     Configure and build Berkeley Tcl as described in that distribution.  Don't
 forget to do a "csh config" before running make for the first time.
 
-    Cd to the "extended" directory, which contains this distribution.  Edit the
+    Cd to the "tclX6.4c" directory, which contains this distribution.  Edit the
 file "Config.mk" to configure Extended Tcl for your Unix version and your
 preferences.  The first part of this file contains user preference options,
 including the location of the Berkeley Tcl source and, optionally, the Tk 2.3
@@ -189,7 +189,7 @@ please send it to us at the address below.
 
     Now do a "make".  If all goes well, this will augment the tcl.a library
 will all of the functions defined by both Berkeley and Extended Tcl, and
-create an executable version of tcl in the "extended" directory called, simply
+create an executable version of tcl in the "tclX6.4c" directory called, simply
 enough, "tcl".  A "wish" executable will be also built if it was requested.
 
     Until the Extended Tcl runtime files are installed, "tcl" and "wish" can't
@@ -201,7 +201,7 @@ greeted by a tcl prompt:
 tcl>
 
    Note that until Extended Tcl is installed, it will only run while in the
-extended directory.
+tclX6.4c directory.
 
 RUN TESTS TO INSURE THAT TCL IS WORKING PROPERLY
 ================================================
@@ -240,9 +240,9 @@ exit Tcl and restart it.
 INSTALLING EXTENDED TCL
 =======================
 
-    To install Extended Tcl, edit the extended/Config.mk installation
+    To install Extended Tcl, edit the tclX6.4c/Config.mk installation
 configuration section to match your preferences. Read the information in the
-Makefile carefully before configuring it. Cd to the extended directory and do
+Makefile carefully before configuring it. Cd to the tclX6.4c directory and do
 a "make install" (normally as root).  This will install include files and
 manual pages for Berkeley Tcl and TclX, as well as the TclX binary and
 library.
@@ -338,7 +338,7 @@ CAVEATS
 System V/3.2.4, Xenix System V/386, and SunOS, it has not had much use under
 Xenix System V/386.
 
-    Previous versions of Extended Tcl have also run under Berkeley BSD, HP-UX
+comp    Previous versions of Extended Tcl have also run under Berkeley BSD, HP-UX
 and Xenix/286.  This release, however, has not been tested on these machines,
 although there is configuration information in the makefile for BSD and HP-UX,
 and Extended Tcl should come up fairly easily on these machines.
@@ -350,7 +350,7 @@ to be plugged first.
 MAILING LISTS AND NEWSGROUPS FOR TCL
 ====================================
 
-    A Usenet newsgroup, comp.lang.tcl, is dedicated to discussing Tcl, Tk and
+    A Usenet newsgroup, .lang.tcl, is dedicated to discussing Tcl, Tk and
 the applications that embed it.
 
 WHERE TO GET IT
