@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 7.1 1996/07/18 19:36:14 markd Exp $
+ * $Id: tclXcmdInit.c,v 7.2 1996/07/22 17:10:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -148,10 +148,10 @@ Tclxcmd_Init (interp)
      * from tclXsocket.c
      */
     Tcl_CreateCommand (interp, "host_info", Tcl_HostInfoCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
     /*
-     * from tclXunixSock.c and stubbed in tclXwinCmds.
+     * from tclXunixSock.c and stubbed in tclXwinCmds.c.
      */
     TclX_ServerInit (interp);
 

@@ -16,11 +16,6 @@
 #------------------------------------------------------------------------------
 #
 
-if [cequal $tcl_platform(platform) windows] { ;# WIN32???
-    echo chroot win32 work not completed
-    return
-}
-
 if {[info procs test] != "test"} then {source testlib.tcl}
 
 #

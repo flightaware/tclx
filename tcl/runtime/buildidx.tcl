@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 6.0 1996/05/10 16:16:25 markd Exp $
+# $Id: buildidx.tcl,v 7.0 1996/06/16 05:31:12 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -29,10 +29,12 @@
 #------------------------------------------------------------------------------
 # Write a line to the index file describing the package.
 #
-proc TCLSH:PutIdxEntry {outfp pkgInfo endOffset} {
+proc TCLSH:PutIdxEntry {outfp pkgInfo nextOffset} {
+    set len [expr {$nextOffset - [keylget pkgInfo offset] - 1}]
+    set len [expr $nextOffset - [keylget pkgInfo offset]]
     puts $outfp [concat [keylget pkgInfo name] \
                         [keylget pkgInfo offset] \
-                        [expr {$endOffset - [keylget pkgInfo offset] - 1}] \
+                        $len \
                         [keylget pkgInfo procs]]
 }
 
@@ -50,8 +52,8 @@ proc TCLSH:ParsePkgHeader matchInfoVar {
     }
 
     keylset pkgInfo name   [lindex $line 1]
-    keylset pkgInfo offset [tell $matchInfo(handle)]
-    keylset pkgInfo procs  [lrange $line  2 end]
+    keylset pkgInfo offset $matchInfo(offset)
+    keylset pkgInfo procs  [lrange $line 2 end]
     return $pkgInfo
 }
 
@@ -59,7 +61,6 @@ proc TCLSH:ParsePkgHeader matchInfoVar {
 # Do the actual work of creating a package library index from a library file.
 #
 proc TCLSH:CreateLibIndex {libName} {
-
     if {[file extension $libName] != ".tlib"} {
         error "Package library `$libName' does not have the extension `.tlib'"
     }
@@ -73,7 +74,8 @@ proc TCLSH:CreateLibIndex {libName} {
     set contectHdl [scancontext create]
 
     scanmatch $contectHdl "^#@package: " {
-        if {[llength $matchInfo(line)] < 2} {
+        if {[catch {llength $matchInfo(line)}] || 
+            ([llength $matchInfo(line)] < 2)} {
             error "invalid package header \"$matchInfo(line)\""
         }
         if ![lempty $pkgInfo] {
@@ -115,6 +117,10 @@ proc TCLSH:CreateLibIndex {libName} {
     # Set mode and ownership of the index to be the same as the library.
     # Ignore errors if you can't set the ownership.
 
+    # FIX: WIN32, when chmod/chown work.
+    global tcl_platform
+    if ![cequal $tcl_platform(platform) "unix"] return
+
     file stat $libName statInfo
     chmod $statInfo(mode) $idxName
     catch {
@@ -127,10 +133,9 @@ proc TCLSH:CreateLibIndex {libName} {
 #
 proc buildpackageindex {libfilelist} {
     foreach libfile $libfilelist {
-        set status [catch {
+        if [catch {
             TCLSH:CreateLibIndex $libfile
-        } errmsg]
-        if {$status != 0} {
+        } errmsg] {
             global errorInfo errorCode
             error "building package index for `$libfile' failed: $errmsg" \
                 $errorInfo $errorCode

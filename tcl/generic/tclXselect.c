@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 7.1 1996/07/18 19:36:24 markd Exp $
+ * $Id: tclXselect.c,v 7.2 1996/07/22 17:10:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -338,8 +338,8 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
         }
         seconds = floor (timeout);
         microseconds = (timeout - seconds) * 1000000.0;
-        timeoutRec.tv_sec = seconds;
-        timeoutRec.tv_usec = microseconds;
+        timeoutRec.tv_sec = (long) seconds;
+        timeoutRec.tv_usec = (long) microseconds;
         timeoutRecPtr = &timeoutRec;
     }
 

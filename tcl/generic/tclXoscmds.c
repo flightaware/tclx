@@ -13,11 +13,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 7.1 1996/07/18 19:36:22 markd Exp $
+ * $Id: tclXoscmds.c,v 7.2 1996/07/22 17:10:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * Prototypes of internal functions.
+ */
+static int
+MkdirPath _ANSI_ARGS_((Tcl_Interp *interp,
+                       char       *path));
 
 
 /*-----------------------------------------------------------------------------
@@ -119,6 +126,62 @@ Tcl_LinkCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
+ * MkdirPath --
+ *    Make a directory path, creating all elements that don't exist. Its not
+ * an error it the full target directory exists.
+ * Parameters:
+ *   o interp (I) - Errors are returned in result.
+ *   o path (I) - Path to make.  Should already be translated.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+MkdirPath (interp, path)
+    Tcl_Interp *interp;
+    char       *path;
+{
+    int pathArgc, idx;
+    char **pathArgv = NULL;
+    struct stat  statBuf;
+    Tcl_DString pathBuf, prevPathBuf;
+    
+    Tcl_DStringInit (&pathBuf);
+    Tcl_DStringInit (&prevPathBuf);
+
+    Tcl_SplitPath (path, &pathArgc, &pathArgv);
+
+    for (idx = 0; idx < pathArgc; idx++) {
+        Tcl_DStringSetLength (&prevPathBuf, 0);
+        Tcl_DStringAppend (&prevPathBuf, pathBuf.string, -1);
+        Tcl_DStringSetLength (&pathBuf, 0);
+        path = TclX_JoinPath (prevPathBuf.string, pathArgv [idx], &pathBuf);
+
+        /*
+         * FIX: Handle if it exists but is a file, should just try in this
+         * case.
+         */
+        if (stat (path, &statBuf) < 0) {
+            if (TclXOSmkdir (interp, path) == TCL_ERROR)
+                goto errorExit;
+        }
+    }
+
+    Tcl_DStringFree (&pathBuf);
+    Tcl_DStringFree (&prevPathBuf);
+    if (pathArgv != NULL)
+        ckfree ((char *) pathArgv);
+    return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&pathBuf);
+    Tcl_DStringFree (&prevPathBuf);
+    if (pathArgv != NULL)
+        ckfree ((char *) pathArgv);
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
  * Tcl_MkdirCmd --
  *     Implements the TCL Mkdir command:
  *         mkdir ?-path? dirList
@@ -140,8 +203,6 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
     struct stat   statBuf;
     Tcl_DString   pathBuf;
 
-    Tcl_DStringInit (&pathBuf);
-
     if ((argc < 2) || (argc > 3) || 
         ((argc == 3) && !STREQU (argv [1], "-path"))) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -152,9 +213,7 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
     if (Tcl_SplitList (interp, argv [argc - 1], &dirArgc, &dirArgv) != TCL_OK)
         return TCL_ERROR;
 
-    /*
-     * Make all the directories, optionally making directories along the path.
-     */
+    Tcl_DStringInit (&pathBuf);
 
     for (idx = 0; idx < dirArgc; idx++) {
         dirName = Tcl_TranslateFileName (interp, dirArgv [idx], &pathBuf);
@@ -162,33 +221,19 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
            goto errorExit;
 
         /*
-         * If -path is specified, make; directories that don't exist.  Also,
-         * its not an error it the target directory exists.
+         * If -path is specified, make; directories that don't exist.
          */
         if (argc == 3) {
-            scanPtr = dirName;
-            result = TCL_OK;  /* Start out ok, for dirs that are skipped */
-
-            while (*scanPtr != '\0') {
-                scanPtr = strchr (scanPtr+1, '/');
-                if ((scanPtr == NULL) || (*(scanPtr+1) == '\0'))
-                    break;
-                *scanPtr = '\0';
-                if (stat (dirName, &statBuf) < 0)
-                    result = TclXOSmkdir (interp, dirName);
-                *scanPtr = '/';
-                if (result != TCL_OK)
-                   goto errorExit;
-            }
-            if (stat (dirName, &statBuf) < 0)
-                result = TclXOSmkdir (interp, dirName);
+            if (MkdirPath (interp, dirName) != TCL_OK)
+                goto errorExit;
         } else {
             if (TclXOSmkdir (interp, dirName) != TCL_OK)
                 goto errorExit;
         }
-        Tcl_DStringFree (&pathBuf);
+        Tcl_DStringSetLength (&pathBuf, 0);
     }
 
+    Tcl_DStringFree (&pathBuf);
     ckfree ((char *) dirArgv);
     return TCL_OK;
 
@@ -216,6 +261,7 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     int priorityIncr, priority;
+    char numBuf [32];
 
     if (argc > 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?priorityincr?",
@@ -227,8 +273,10 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
      * Return the current priority if an increment is not supplied.
      */
     if (argc == 1) {
-        TclXOSgetpriority (interp, &priority, argv [0]);
-        sprintf (interp->result, "%d", priority);
+        if (TclXOSgetpriority (interp, &priority, argv [0]) != TCL_OK)
+            return TCL_ERROR;
+        sprintf (numBuf, "%d", priority);
+        Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
         return TCL_OK;
     }
 
@@ -241,7 +289,8 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
     if (TclXOSincrpriority (interp, priorityIncr, &priority,
                              argv [0]) != TCL_OK)
         return TCL_ERROR;
-    sprintf (interp->result, "%d", priority);
+    sprintf (numBuf, "%d", priority);
+    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
     return TCL_OK;
 }
 

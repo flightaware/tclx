@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 7.0 1996/06/16 05:33:02 markd Exp $
+# $Id: tcllib.test,v 7.1 1996/07/18 19:36:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -25,12 +25,20 @@ set save_auto_path $auto_path
 set auto_path {}
 catch {unset auto_path}
 
-if {[id user] == "root"} {
-    puts "*************************************************************"
-    puts "You are running as `root', certain tcllib tests will be"
-    puts "skipped"
-    puts "*************************************************************"
+if {[cequal $tcl_platform(platform) "unix"] && [cequal [id user] "root"]} {
+    puts "    * You are running as `root', certain tcllib tests will be"
+    puts "    * skipped"
+    set rootSkip 1
+} else {
+    set rootSkip 0
 }
+
+# FIX: We need chmod to do access tests.
+if ![cequal $tcl_platform(platform) "unix"] {
+    puts "    * Some tcllib tests are skip on Win32, since they need chmod"
+    set rootSkip 1
+}
+
 
 #
 # Test library directories.
@@ -133,7 +141,7 @@ set auto_path [list [pwd]/tcllib1.dir $tclx_library]
 
 TestReg tcllib-3.1 {bogus package library index} {
     TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": format error in library index "/.*test1.tndx" \(bogus\)$}
+} 1 {^error while autoloading "TclLibAAB": format error in library index "....+test1.tndx" \(bogus\)$}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
@@ -142,7 +150,7 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.2 {bogus package library index} {
     TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "/.*test1.tlib", index file probably corrupt$}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "....+test1.tlib", index file probably corrupt$}
 
 
 PutFile tcllib1.dir/test1.tndx \
@@ -150,7 +158,7 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.3 {bogus package library index} {
     TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "/.*test1.tlib", index file probably corrupt$}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "...+test1.tlib", index file probably corrupt$}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
@@ -159,12 +167,12 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.4 {bogus package library index} {
     TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "/}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "...+test1.tlib", index file probably corrupt}
 
 TclLibReset
 set auto_path [list [pwd]/tcllib2.dir $tclx_library]
 
-if {[id user] != "root"} {
+if !$rootSkip {
     Test tcllib-4.1 {bad rebuild package library index} {
         BuildTestLib tcllib2.dir/test1.tlib TclLibAB
         chmod -w tcllib2.dir
@@ -201,10 +209,10 @@ TestReg tcllib-5.2 {missing file found with Ousterhout library index} {
     nukearray
 } 1 {^error while autoloading "nukearray": couldn't read file}
 
-PutFile tcllib1.dir/nukearray.tmp {proc nukearray {} {}}
-chmod 000 tcllib1.dir/nukearray.tmp
+if !$rootSkip {
+    PutFile tcllib1.dir/nukearray.tmp {proc nukearray {} {}}
+    chmod 000 tcllib1.dir/nukearray.tmp
 
-if {[id user] != "root"} {
     TestReg tcllib-5.3 {missing file found with Ousterhout library index} {
         nukearray
     } 1 {^error while autoloading "nukearray": couldn't read file}
@@ -298,12 +306,12 @@ TclLibCleanUp
 set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir $tclx_library]
 
 PutFile tcllib1.dir/test1.tlib \
-    {#@package: test-pkg procAAA \\} \
-    {           procBBB \\         } \
-    {           procCCC            } \
-    {proc procAAA {} {return {AAA}}} \
-    {proc procBBB {} {return {BBB}}} \
-    {proc procCCC {} {return {CCC}}}
+   "#@package: test-pkg procAAA \\" \
+   "           procBBB \\" \
+   "           procCCC" \
+   "proc procAAA {} {return {AAA}}" \
+   "proc procBBB {} {return {BBB}}" \
+   "proc procCCC {} {return {CCC}}"
 
 Test tcllib-8.1 {backslash parsing in package headers} {
     TclLibReset

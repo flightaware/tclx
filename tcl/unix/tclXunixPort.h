@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 7.1 1996/07/18 19:36:33 markd Exp $
+ * $Id: tclXunixPort.h,v 7.2 1996/07/22 17:10:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,6 +35,9 @@
 
 #include <sys/times.h>
 #include <grp.h>
+
+extern int h_errno;
+
 
 /*
  * Included the tcl file tclUnixPort.h after other system files, as it checks

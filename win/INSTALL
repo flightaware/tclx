@@ -1,22 +1,93 @@
                         Building TclX on Windows 95/NT
 
-To build the alpha 1 release:
+Welcome to the alpha 1 release of TclX 7.3
+
+  This is an early alpha release, the code is nor production quality.  A
+lot of work is left to do.  It is being made available for those who
+want to contribute to the porting effort.
+
+Please send mail to the authors of this port to tcl-project@neosoft.com.
+There is also a mailing list, which can be used for the discussion of
+issues and announcements.  To subscribe to the mailing list, send a mail
+message to majordomo@grizzly.com with the body of the message containing:
+
+        subscribe tclx-win
+
+To send mail to the list, user tclx-win@grizzly.com.
+
+
+To build the release:
+   o You need Visual C++ 4.0 (per standard Tcl instructions).  Contributions
+     of a Borland C++ makefile would be welcome (and a donation of a licensed
+     copy of the current Borland C++ even more welcome).
+     
    o The patch win/tclWinSock.c.diff must be applied to the Tcl 7.5
-     distribution and Tcl 7.5 recompiled and installed.
+     distribution and Tcl 7.5 recompiled and the DLL reinstalled.
     
+   o Tcl 7.5 should be in a directory adjacent to the tclX7.5.3a1 directory
+     or the paths in makefile.vc need to be changed.
+
+   o Edit win/tclXwinPort.h to set TCLX_LIBRARY to full path to
+     tclX7.5.3a1/tcl/win.  If anyone can tell me how to pass a string
+     #define on the command line using nmake, this can be moved to
+     makefile.vc.  This is a short term hack. The runtime environment
+     is generate in this directory and should remain here for all
+     testing.
+        
+   o To compile, cd to tclX7.5.3a1/tcl/win and enter the command:
+
+        nmake -f makefile.vc
+
+   o If you want to debug under MS Developer Studio, its easy to wrap a
+     workspace around the existing makefile.vc:
+        o Select File->Open
+        o In the Open dialog:
+            o Set the "Files of Type" field to be "All Files (*.*)"
+            o Set the "Open As" field to be "Makefile"
+            o Now select "tclX7.5.3a1/tcl/win/makefile.vc" using the
+              standard open dialog.
+        o A warning dialog will come up asking if you want to wrap a
+          workspace around the makefile.  Answer "Yes'.
+        o A Save As dialog will appear with the "File name" field
+          default to "makefile1.mak".  Change this to be "tclx.mak".
+        o Press "Save".
+        o You can now use File->Open Workspace to open "tclx.mdp".
 
 In the alpha 1 release, the following restrictions apply:
 
     o Support is only provided for Visual C++ 4.0.
 
+    o No wishx is built, but you should able to load the TclX DLL into a
+      standard wish.
+
+    o The fork command is not available.
+
+    o The following commands are not yet implemented:
+       o chmod
+       o chown
+       o chgrp
+       o fcntl
+       o link
+       o kill
+
+    o The following commands are there, but not tested, since the tests have
+      not been ported.
+        o signal
+        o dup
+        o pipe
+        o select
+      
     o The id command is limited, only the host and process options are
       implemented
 
-    o The chmod, chown, chgrp, fcntl commands are not yet implemented.
-
-    o There are probably several problems with using open sockets with commands
-      that operate on open files.
+    o There are probably problems with using open sockets and pipes with
+      commands that operate on open files.
     
-    o The select command probably does nothing useful.
+    o No support for installing TclX or setting the runtime path.  You
+        
+    o No 16 bit support.
 
-    o No support for installing TclX, the runtime.
+    o Documentation has not been updated to indicate windows differences.
+
+    o fork does not work, but execl creates a process and returns its
+      process id.

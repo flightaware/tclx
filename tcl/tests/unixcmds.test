@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 7.0 1996/06/16 05:33:05 markd Exp $
+# $Id: unixcmds.test,v 7.1 1996/07/18 19:36:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -113,7 +113,7 @@ Test unixcmds-2.4 {link and unlink tests} {
 # Test the times command (the best we can).
 
 if [cequal $tcl_platform(platform) windows] { ;# WIN32???
-    echo times win32 work not completed
+    echo "    * The times command has not been ported to Win32" 
 } else {
 
 Test unixcmds-3.1 {times tests} {
@@ -144,7 +144,7 @@ Test unixcmds-4.3 {umask tests} {
 } 1 {wrong # args: umask ?octalmask?}
 
 if [cequal $tcl_platform(platform) windows] { ;# WIN32???
-    echo system win32 work not completed
+    echo "    * The system command has not been ported to Win32" 
 } else {
 
 # Test the system command

@@ -13,20 +13,26 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 6.0 1996/05/10 16:17:38 markd Exp $
+# $Id: help.test,v 7.0 1996/06/16 05:32:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The help tests have not been ported to Win32" 
+    return
+}
+
 #
 # Only run help test if help has been installed.
 #
-set helpdir $tclx_library/help
-if [cequal [glob -nocomplain $helpdir/*] ""] {
-    echo "****"
-    echo "**** No help pages in $helpdir - help test not run"
-    echo "****"
+set helpdir [file join $tclx_library help]
+if [cequal [glob -nocomplain [file join $helpdir *]] ""] {
+    echo "*****************************************************************"
+    echo "No help pages in $helpdir"
+    echo "Help tests will be skipped."
+    echo "*****************************************************************"
     return
 }
 

@@ -18,6 +18,11 @@
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The nice command has not been ported to Win32" 
+    return
+}
+
 #
 # Fork without exec will not work under Tk, skip this test
 #

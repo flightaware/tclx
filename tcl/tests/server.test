@@ -15,12 +15,17 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 6.0 1996/05/10 16:18:04 markd Exp $
+# $Id: server.test,v 7.0 1996/06/16 05:32:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 eval $SAVED_UNKNOWN
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The server tests have not been ported to Win32" 
+    return
+}
 
 #
 # Do all argument and error checking.  We can at least test this, even
@@ -45,7 +50,7 @@ Test server-4.3 {host_info argument checking} {
 
 #
 # Determine if we are at a development site we know is good.  If we are, we
-# do more checking
+# do more checking.  
 #
 switch -glob -- [id host] {
     {*.neosoft.com} {set safeHost 1}

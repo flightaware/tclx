@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 7.0 1996/06/16 05:32:01 markd Exp $
+# $Id: cmdtrace.test,v 7.1 1996/07/18 19:36:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -208,15 +208,12 @@ Test cmdtrace-3.1 {command trace argument error checking} {
 ERRORINFO \
 ERRORCODE]
 
-if ![cequal $tcl_platform(platform) windows] {
-        # Exec doesn't appear to pass -c correctly, just get the first word.
 Test cmdtrace-3.2 {command trace argument error checking} {
     exec $TCL_PROGRAM -qc {cmdtrace on command {foo $NOTDEFINED};set i 0}
 } 1 {cmdtrace callback command error: errorCode = NONE
 can't read "NOTDEFINED": no such variable
     while executing
 "foo $NOTDEFINED..."
-    ("cmdtrace" callback command)}
-}
+    ("cmdtrace" callback command)} {tempNotPc}
 
 unlink CMDTRACE.OUT

@@ -12,11 +12,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 6.0 1996/05/10 16:17:59 markd Exp $
+# $Id: profile.test,v 7.0 1996/06/16 05:32:42 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The profile command has not been ported to Win32" 
+    return
+}
 
 # Make sure we that real time is not zero.  If so, suggest compiling with a
 # different parameter.

@@ -12,11 +12,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 6.1 1996/05/23 22:38:55 markd Exp $
+# $Id: filecmds.test,v 7.0 1996/06/16 05:32:09 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The filecmds tests have not been ported to Win32" 
+    return
+}
 
 #
 # Fork without exec will not work under Tk, skip this test
@@ -40,6 +45,9 @@ for {set cnt 0} {$cnt < 100} {incr cnt} {
      set rec [GenRec $cnt]
      puts $testFH $rec
      incr testFileSize [expr [clength $rec]+1]
+     if [cequal $tcl_platform(platform) windows] {
+        incr testFileSize  ;# for <cr>
+     }
 }
 close $testFH
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.1 1996/07/18 19:36:20 markd Exp $
+ * $Id: tclXlib.c,v 7.2 1996/07/22 17:10:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -198,6 +198,22 @@ Tcl_Auto_loadCmd _ANSI_ARGS_((ClientData   clientData,
 static void
 TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
                            Tcl_Interp *interp));
+
+/*
+ * FIX: (actually report to John).
+ *   TclX auto package indexes consist of a byte offset and length of the
+ * package.  On Windoz, with <cr><lf> pairs, this causes grief.  If translation
+ * is enabled, the byte count that is passed to Tcl_Read is a value after
+ * translation, so this gets us off by one.  Fine, so we don't do translation
+ * and just read in the the <cr><lf> pairs and eval it.  However, this
+ * breaks backslash continunation of comments, because the don't absorbe the
+ * <cr>.  Backslash continunation works in other places.  This is believed
+ * to be a bug in Tcl.  The short term solution is to read a line at a time
+ * with Tcl_Gets, and count the bytes we know are actually in the file,
+ * based on the translation.
+ */
+#define TCL_COMMENT_CONT_BUF
+
 
 /*-----------------------------------------------------------------------------
  * EvalFilePart --
@@ -208,7 +224,7 @@ TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o fileName (I) - The file to evaulate.
  *   o offset (I) - Byte offset into the file of the area to evaluate
- *   o length (I) - Number of bytes to evaulate..
+ *   o length (I) - Number of bytes to evaulate.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -221,12 +237,15 @@ EvalFilePart (interp, fileName, offset, length)
     Interp *iPtr = (Interp *) interp;
     int result;
     off_t fileSize;
-    Tcl_DString pathBuf;
-    char *oldScriptFile, *cmdBuffer, *buf;
+    Tcl_DString pathBuf, cmdBuf;
+    char *oldScriptFile, *buf;
     Tcl_Channel channel = NULL;
-
+#ifdef TCL_COMMENT_CONT_BUF
+    int byteCnt, got;
+#endif
     Tcl_ResetResult (interp);
     Tcl_DStringInit (&pathBuf);
+    Tcl_DStringInit (&cmdBuf);
 
     fileName = Tcl_TranslateFileName (interp, fileName, &pathBuf);
     if (fileName == NULL)
@@ -234,6 +253,16 @@ EvalFilePart (interp, fileName, offset, length)
 
     channel = Tcl_OpenFileChannel (interp, fileName, "r", 0);
     if (channel == NULL)
+        goto errorExit;
+
+    /*
+     * Must disable translation, as the length is an absolute byte count and
+     * value passed to Tcl_Read is the number of bytes to transfer. If the
+     * file has crlf EOLs, they count as only one byte to Tcl_Read when
+     * it does translation.
+     */
+    if (TclX_SetChannelOption (interp, channel, TCLX_COPT_TRANSLATION,
+                               TCLX_TRANSLATE_BINARY) == TCL_ERROR)
         goto errorExit;
     
     if (TclXOSGetFileSize (channel, TCL_READABLE, &fileSize) == TCL_ERROR)
@@ -249,11 +278,37 @@ EvalFilePart (interp, fileName, offset, length)
     if (Tcl_Seek (channel, offset, SEEK_SET) < 0)
         goto posixError;
 
-    cmdBuffer = ckalloc (length + 1);
-    if (Tcl_Read (channel, cmdBuffer, length) != length)
-        goto posixError;
-
-    cmdBuffer [length] = '\0';
+#ifdef TCL_COMMENT_CONT_BUF
+    for (byteCnt = 0; byteCnt < length;) {
+        got = Tcl_Gets (channel, &cmdBuf);
+        if (got < 0) {
+            if (Tcl_Eof (channel))
+                goto prematureEof;
+            else
+                goto posixError;
+        }
+        byteCnt += (got + 1);  /* include <nl *.
+        
+        /*
+         * If the last character is a <cr> strip it out.  Seperate lines
+         * with <nl>.
+         */
+        if (cmdBuf.string [cmdBuf.length-1] == '\r') {
+            cmdBuf.string [cmdBuf.length-1] = '\n';
+        } else {
+            Tcl_DStringAppend (&cmdBuf, "\n", -1);
+        }
+    }
+#else
+    Tcl_DStringSetLength (&cmdBuf, length + 1);
+    if (Tcl_Read (channel, cmdBuf.string, length) != length) {
+        if (Tcl_Eof (channel))
+            goto prematureEof;
+        else
+            goto posixError;
+    }
+    cmdBuf.string [length] = '\0';
+#endif
 
     if (Tcl_Close (NULL, channel) != 0)
         goto posixError;
@@ -261,14 +316,12 @@ EvalFilePart (interp, fileName, offset, length)
 
     oldScriptFile = iPtr->scriptFile;
     iPtr->scriptFile = fileName;
-
-    result = Tcl_GlobalEval (interp, cmdBuffer);
-
+    result = Tcl_GlobalEval (interp, cmdBuf.string);
     iPtr->scriptFile = oldScriptFile;
-    ckfree (cmdBuffer);
                          
     if (result != TCL_ERROR) {
         Tcl_DStringFree (&pathBuf);
+        Tcl_DStringFree (&cmdBuf);
         return TCL_OK;
     }
 
@@ -289,11 +342,17 @@ EvalFilePart (interp, fileName, offset, length)
   posixError:
     Tcl_AppendResult (interp, "error accessing: ", fileName, ": ",
                       Tcl_PosixError (interp), (char *) NULL);
+    goto errorExit;
+
+  prematureEof:
+    Tcl_AppendResult (interp, "premature EOF on: ", fileName, (char *) NULL);
+    goto errorExit;
 
   errorExit:
     if (channel != NULL)
         Tcl_Close (NULL, channel);
     Tcl_DStringFree (&pathBuf);
+    Tcl_DStringFree (&cmdBuf);
     return TCL_ERROR;
 }
 
@@ -306,7 +365,8 @@ EvalFilePart (interp, fileName, offset, length)
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o fileName (I) - File name (should not start with a "/").
- *   o absNamePtr (O) - The name is returned in this dynamic string.
+ *   o absNamePtr (O) - The name is returned in this dynamic string.  It
+ *     should be initialized.
  * Returns:
  *   A pointer to the file name in the dynamic string or NULL if an error
  * occured.
@@ -319,40 +379,43 @@ MakeAbsFile (interp, fileName, absNamePtr)
     Tcl_DString *absNamePtr;
 {
     char  *curDir;
+    Tcl_DString joinBuf;
 
-    Tcl_DStringFree (absNamePtr);
+    Tcl_DStringSetLength (absNamePtr, 1);
 
-    /*
-     * If its already absolute, just copy the name.
-     */
-    if (fileName [0] == '/') {
-        Tcl_DStringAppend (absNamePtr, fileName, -1);
-        return Tcl_DStringValue (absNamePtr);
-    }
+    fileName = Tcl_TranslateFileName (interp, fileName, absNamePtr);
+    if (fileName == NULL)
+        goto errorExit;
 
     /*
-     * If it starts with a tilde, the substitution will make it
-     * absolute. **WIN-BUG**
+     * If its already absolute.  If name translation didn't actually
+     * copy the name to the buffer, we must do it now.
      */
-    if (fileName [0] == '~') {
-        if (Tcl_TranslateFileName (interp, fileName, absNamePtr) == NULL)
-            return NULL;
+    if (Tcl_GetPathType (fileName) == TCL_PATH_ABSOLUTE) {
+        if (fileName != absNamePtr->string) {
+            Tcl_DStringAppend (absNamePtr, fileName, -1);
+        }
         return Tcl_DStringValue (absNamePtr);
     }
 
     /*
      * Otherwise its relative to the current directory, get the directory
-     * and go from here.
+     * and join into a path.
      */
     curDir = TclGetCwd (interp);
     if (curDir == NULL)
-        return NULL;
+        goto errorExit;
 
-    Tcl_DStringAppend (absNamePtr, curDir,   -1);
-    Tcl_DStringAppend (absNamePtr, "/",      -1);
-    Tcl_DStringAppend (absNamePtr, fileName, -1);
+    Tcl_DStringInit (&joinBuf);
+    TclX_JoinPath (curDir, fileName, &joinBuf);
+    Tcl_DStringSetLength (absNamePtr, 0);
+    Tcl_DStringAppend (absNamePtr, joinBuf.string, -1);
+    Tcl_DStringFree (&joinBuf);
 
     return Tcl_DStringValue (absNamePtr);
+
+  errorExit:
+    return NULL;
 }
 
 /*-----------------------------------------------------------------------------
@@ -499,9 +562,8 @@ SetProcIndexEntry (interp, procName, package)
     char        *result;
 
     Tcl_DStringInit (&command);
-    Tcl_DStringAppend (&command, "auto_load_pkg {", -1);
-    Tcl_DStringAppend (&command, package, -1);
-    Tcl_DStringAppend (&command, "}", -1);
+    Tcl_DStringAppendElement (&command, "auto_load_pkg");
+    Tcl_DStringAppendElement (&command, package);
 
     result = Tcl_SetVar2 (interp, AUTO_INDEX, procName, command.string,
                           TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
@@ -703,7 +765,8 @@ LoadPackageIndex (interp, tlibFilePath, indexNameClass)
     char             *tlibFilePath;
     indexNameClass_t  indexNameClass;
 {
-    Tcl_DString  tndxFilePath;
+    Tcl_DString tndxFilePath;
+
     struct stat  tlibStat;
     struct stat  tndxStat;
 
@@ -834,32 +897,42 @@ LoadDirIndexCallback (interp, path, fileName, caseSensitive, clientData)
 {
     int *indexErrorPtr = (int *) clientData;
     int nameLen;
+    char *chkName;
     indexNameClass_t indexNameClass;
-    Tcl_DString filePath;
+    Tcl_DString chkNameBuf, filePath;
+
+    /*
+     * If the volume not case sensitive, convert the name to lower case.
+     */
+    Tcl_DStringInit (&chkNameBuf);
+    chkName = fileName;
+    if (!caseSensitive) {
+        chkName = Tcl_DStringAppend (&chkNameBuf, fileName, -1);
+        Tcl_DownShift (chkName, chkName);
+    }
 
     /*
      * Figure out if its an index file.
      */
-    
-    nameLen = strlen (fileName);
-    if ((nameLen > 5) && STREQU (fileName + nameLen - 5, ".tlib")) {
+    nameLen = strlen (chkName);
+    if ((nameLen > 5) && STREQU (chkName + nameLen - 5, ".tlib")) {
         indexNameClass = TCLLIB_TNDX;
-    } else if ((nameLen > 4) && STREQU (fileName + nameLen - 4, ".tli")) {
+    } else if ((nameLen > 4) && STREQU (chkName + nameLen - 4, ".tli")) {
         indexNameClass = TCLLIB_TND;
-    } else if ((caseSensitive && STREQU (fileName, "tclIndex")) ||
-               ((!caseSensitive) && STREQU (fileName, "tclindex"))) {
+    } else if ((caseSensitive && STREQU (chkName, "tclIndex")) ||
+               ((!caseSensitive) && STREQU (chkName, "tclindex"))) {
         indexNameClass = TCLLIB_OUSTER;
     } else {
+        Tcl_DStringFree (&chkNameBuf);
         return TCL_OK;  /* Not an index, skip */
     }
+    Tcl_DStringFree (&chkNameBuf);
 
     /*
      * Assemble full path to library file.
      */
     Tcl_DStringInit (&filePath);
-    Tcl_DStringAppend (&filePath, path, -1);
-    Tcl_DStringAppend (&filePath, "/", -1);
-    Tcl_DStringAppend (&filePath, fileName, -1);
+    TclX_JoinPath (path, fileName, &filePath);
 
     /*
      * Skip index it can't be accessed.

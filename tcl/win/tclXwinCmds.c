@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixCmds.c,v 7.1 1996/07/18 19:36:32 markd Exp $
+ * $Id: tclXwinCmds.c,v 7.1 1996/07/25 04:42:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,7 +37,7 @@ Tcl_ChrootCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    return TclXNotAvailableError (interp, funcName);
+    return TclXNotAvailableError (interp, argv [0]);
 }
 
 /*-----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    Tcl_AppendResult (interp, "the ", argv [1], " command has not yet been ",
+    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
                       "ported to Windows 95/NT", (char *) NULL);
     return TCL_ERROR;
 }
@@ -84,7 +84,7 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    Tcl_AppendResult (interp, "the ", argv [1], " command has not yet been ",
+    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
                       "ported to Windows 95/NT", (char *) NULL);
     return TCL_ERROR;
 }
@@ -96,7 +96,7 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    Tcl_AppendResult (interp, "the ", argv [1], " command has not yet been ",
+    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
                       "ported to Windows 95/NT", (char *) NULL);
     return TCL_ERROR;
 }
@@ -108,7 +108,7 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    Tcl_AppendResult (interp, "the ", argv [1], " command has not yet been ",
+    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
                       "ported to Windows 95/NT", (char *) NULL);
     return TCL_ERROR;
 }

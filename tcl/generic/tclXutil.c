@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 7.1 1996/07/18 19:36:27 markd Exp $
+ * $Id: tclXutil.c,v 7.2 1996/07/22 17:10:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -101,7 +101,7 @@ Tcl_StrToLong (string, base, longPtr)
     }
     if (*p == '-') {
         p++;
-        i = -strtoul(p, &end, base);
+        i = -(long) strtoul(p, &end, base);
     } else if (*p == '+') {
         p++;
         i = strtoul(p, &end, base);
@@ -161,7 +161,7 @@ Tcl_StrToInt (string, base, intPtr)
     }
     if (*p == '-') {
         p++;
-        i = -strtoul(p, &end, base);
+        i = -(int) strtoul(p, &end, base);
     } else if (*p == '+') {
         p++;
         i = strtoul(p, &end, base);
@@ -298,7 +298,7 @@ Tcl_StrToOffset (string, base, offsetPtr)
     }
     if (*p == '-') {
         p++;
-        i = -strtoul(p, &end, base);
+        i = -(off_t) strtoul(p, &end, base);
     } else if (*p == '+') {
         p++;
         i = strtoul(p, &end, base);
@@ -1093,7 +1093,7 @@ TclX_GetChannelOption (channel, option)
          * Handle this and code for working with a fixed version.  Hack
          * the list rather than doing, since we know the possible values
          * and this is much faster and easy to support both formats.
-         * ???Clean up once Tcl fixes the return.???
+         * FIX: ???Clean up once Tcl fixes the return.???
          */
         char *strValue1, *strValue2, *strScan;
           
@@ -1216,4 +1216,32 @@ TclX_SetChannelOption (interp, channel, option, value)
 
   fatalError:
     panic ("TclX_SetChannelOption bug");
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_JoinPath --
+ *
+ *   Interface to Tcl_Join path to join only two files.
+ *
+ * Parameters:
+ *   o path1, path2 (I) - File paths to join.
+ *   o joinedPath (O) - DString buffere that joined path is returned in.
+ *     must be initialized.
+ * Returns:
+ *   A pointer to joinedPath->string.
+ *-----------------------------------------------------------------------------
+ */
+char *
+TclX_JoinPath (path1, path2, joinedPath)
+    char        *path1;
+    char        *path2;
+    Tcl_DString *joinedPath;
+{
+    char *joinArgv [2];
+
+    joinArgv [0] = path1;
+    joinArgv [1] = path2;
+    Tcl_JoinPath (2, joinArgv, joinedPath);
+
+    return joinedPath->string;
 }

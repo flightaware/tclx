@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 7.0 1996/06/16 05:33:30 markd Exp $
+ * $Id: tclXsocket.c,v 1.1 1996/07/25 04:12:27 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,8 +29,6 @@
 #ifndef NO_DATA
 #   define NO_DATA NO_ADDRESS
 #endif
-
-extern int h_errno;
 
 /*
  * Prototypes of internal functions.

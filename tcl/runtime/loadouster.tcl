@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loadouster.tcl,v 7.1 1996/07/07 02:31:56 markd Exp $
+# $Id: loadouster.tcl,v 7.2 1996/07/17 09:06:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -20,7 +20,7 @@ proc auto_load_ouster_index fn {
     global auto_index
     set dir [file dirname $fn]
 
-    if [catch {set f [open $dir/tclIndex]}] {
+    if [catch {set f [open [file join $dir tclIndex]]}] {
         return
     }
     set error [catch {
@@ -36,11 +36,11 @@ proc auto_load_ouster_index fn {
                 }
                 set name [lindex $line 0]
                 if {![info exists auto_index($name)]} {
-                    set auto_index($name) "source $dir/[lindex $line 1]"
+                    set auto_index($name) "source [join $dir [lindex $line 1]]"
                 }
             }
         } else {
-            error "$dir/tclIndex isn't a proper Tcl index file"
+            error "[file join $dir tclIndex] isn't a proper Tcl index file"
         }
     } msg]
     if {$f != ""} {

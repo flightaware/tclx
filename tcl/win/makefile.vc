@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.2 1996/07/22 17:10:19 markd Exp $
+# $Id: makefile.vc,v 7.3 1996/07/25 04:42:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -29,15 +29,14 @@
 #           library
 #
 
-ROOT    = ..
+ROOT    = ..\..
 TMPDIR  = .
 TOOLS32 = c:\msdev
 TOOLS16 = c:\msdev
 TCLDIR  = ..\..\..\tcl7.5
 TKDIR   = ..\..\..\tk4.1
 
-#TCLX_LIBRARY = \"\\usr\\lib\\tclX\\7.5\"
-TCLX_LIBRARY =\"C:\\markd\\tcl\\tclX7.5.2\\tcl\\win\"
+#TCLX_LIBRARY="C:/markd/tcl/tclX7.5.2/tcl/win"
 
 # Comment the following line to compile with symbols
 #NODEBUG=1
@@ -48,9 +47,9 @@ TCLX_LIBRARY =\"C:\\markd\\tcl\\tclX7.5.2\\tcl\\win\"
 # Make sure the VC++ tools are at the head of the path
 PATH=$(TOOLS32)\bin;$(PATH)
 
-WINDIR          = $(ROOT)\win
-GENERICDIR      = $(ROOT)\generic
-RUNTIME_DIR     = $(ROOT)\runtime
+WINDIR          = $(ROOT)\tcl\win
+GENERICDIR      = $(ROOT)\tcl\generic
+RUNTIME_DIR     = $(ROOT)\tcl\runtime
 
 cc32 = $(TOOLS32)\bin\cl -I$(TOOLS32)\include
 rc32 = $(TOOLS32)\bin\rc
@@ -69,22 +68,17 @@ INCLUDE=$(TOOLS32)\INCLUDE;$(TOOLS32)\MFC\include
 LIB=$(TOOLS32)\LIB;\$(TOOLS32)\MFC\lib
 !ENDIF
 
-TCLX_INCLUDES = -I$(TOOLS32)\include -I$(ROOT)\win -I$(ROOT)\generic \
+TCLX_INCLUDES = -I$(TOOLS32)\include -I$(ROOT)\tcl\win -I$(ROOT)\tcl\generic \
         -I$(TCLDIR)\generic -I$(TCLDIR)\win
 
 TCLX_DEFINES = \
-    -nologo $(DEBUGDEFINES) -DTCLX_LIBRARY=$(TCLX_LIBRARY)
+    -nologo $(DEBUGDEFINES)
 
 TCLOBJS = \
         $(TMPDIR)\tclXAppInit.obj
 
 TCLXTESTOBJS = \
         $(TMPDIR)\tclXTest.obj
-
-#        $(TMPDIR)\tclXchmod.obj ???
-#        $(TMPDIR)\tclXfcntl.obj ???
-#        $(TMPDIR)\tclXserver.obj 
-#        $(TMPDIR)\tclXunixcmds.obj
 
 TCLXOBJS = \
         $(TMPDIR)\tclXbsearch.obj \
@@ -112,10 +106,12 @@ TCLXOBJS = \
         $(TMPDIR)\tclXselect.obj \
         $(TMPDIR)\tclXshell.obj \
         $(TMPDIR)\tclXsignal.obj \
+        $(TMPDIR)\tclXsocket.obj \
         $(TMPDIR)\tclXstring.obj \
         $(TMPDIR)\tclXutil.obj \
         $(TMPDIR)\tclXwinId.obj \
         $(TMPDIR)\tclXwinOS.obj \
+        $(TMPDIR)\tclXwinCmds.obj \
         $(TMPDIR)\random.obj \
         $(TMPDIR)\getopt.obj
 
@@ -159,7 +155,8 @@ CP=copy
 # Targets
 #
 
-all:  $(DUMPEXTS) $(TCLXDLL) $(TCL) tcl.tlib
+all:  $(DUMPEXTS) $(TCLXDLL) $(TCL) RUNTIME
+
 release: $(DUMPEXTS) $(TCLXDLL) $(TCLX16DLL) $(TCL)
 test:  $(DUMPEXTS) $(TCLXDLL) $(TCLXTEST)
 
@@ -197,7 +194,7 @@ CODE PRELOAD MOVEABLE DISCARDABLE
 DATA PRELOAD MOVEABLE SINGLE
 HEAPSIZE 1024
 <<
-        $(rc16) -i $(ROOT)\generic tclX16.rc $@
+        $(rc16) -i $(ROOT)\tcl\generic tclX16.rc $@
 
 
 $(TCL): $(TCLOBJS) $(TCLXLIB) $(TMPDIR)\tcl.res
@@ -212,17 +209,47 @@ $(TCLXTEST): $(TCLXTESTOBJS) $(TCLXLIB)
                 $(TCLXTESTOBJS) $(TCLXLIB) $(conlibsdll) \
                 -out:$(TCLXTEST)
 
-$(ROOT)\generic\patchlvl.h: $(ROOT)\generic\patchlevel.h
-        $(CP) $(ROOT)\generic\patchlevel.h $(ROOT)\generic\patchlvl.h
+$(ROOT)\tcl\generic\patchlvl.h: $(ROOT)\tcl\generic\patchlevel.h
+        $(CP) $(ROOT)\tcl\generic\patchlevel.h $(ROOT)\tcl\generic\patchlvl.h
 
-tcl.tlib: $(TLIB_SRCS)
-	cat $(TLIB_SRCS) >tcl.tlib
+#------------------------------------------------------------------------------
+# Generate the runtime .tlib library in the current directory.  Copy other
+# runtime files into this directory so it can be used as a temporary runtime
+# directory before installation.
+#
+RUNTIME: tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
+
+tcl.tlib: $(TLIB_SRCS) cattcl.exe
+        -del tcl.tlib
+	cattcl $(TLIB_SRCS) >tcl.tlib
+
+tcl.tndx: tcl.tlib tclx.tcl buildidx.tcl
+        -del tcl.tndx
+	.\tcl -q $(ROOT)\unix\tools\genindex.tcl tcl.tlib
+
+tclx.tcl: $(RUNTIME_DIR)\tclx.tcl
+        -del tclx.tcl
+	copy $(RUNTIME_DIR)\tclx.tcl tclx.tcl
+
+buildidx.tcl: $(RUNTIME_DIR)\buildidx.tcl
+	-del buildidx.tcl
+	copy $(RUNTIME_DIR)\buildidx.tcl buildidx.tcl
+
+loadouster.tcl: $(RUNTIME_DIR)\loadouster.tcl
+	-del loadouster.tcl
+	copy $(RUNTIME_DIR)\loadouster.tcl loadouster.tcl
+
+cattcl.exe: $(TMPDIR)\cattcl.obj
+        set LIB=$(LIB)
+        $(link) $(conlflags) -out:cattcl.exe  $(TMPDIR)\cattcl.obj \
+                $(guilibs) $(libc)
+
 
 #
 # Special case object file targets
 #
 
-$(TMPDIR)\testMain.obj: $(ROOT)\win\tclAppInit.c
+$(TMPDIR)\testMain.obj: $(ROOT)\tcl\win\tclAppInit.c
         $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCL_INCLUDES) \
                 $(TCLX_DEFINES) -DTCL_TEST -Fo$(TMPDIR)\testMain.obj $?
 
@@ -230,32 +257,36 @@ $(TMPDIR)\winDumpExts.obj: $(TCLDIR)\win\winDumpExts.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
                 $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
 
-$(TMPDIR)\tclXlibInit.obj: $(ROOT)\generic\tclXlibInit.c
+$(TMPDIR)\cattcl.obj: $(ROOT)\tcl\win\cattcl.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
+                $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
+
+$(TMPDIR)\tclXlibInit.obj: $(ROOT)\tcl\generic\tclXlibInit.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
             -DTCLX_LIBRARY=$(TCLX_LIBRARY) \
                 $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
 
-$(TMPDIR)\tclWin16.obj: $(ROOT)\win\tclWin16.c
+$(TMPDIR)\tclWin16.obj: $(ROOT)\tcl\win\tclWin16.c
         $(cc16) -c -Fo$(TMPDIR)\ $?
 
 #
 # Implicit rules
 #
 
-{$(ROOT)\generic}.c{$(TMPDIR)}.obj:
+{$(ROOT)\tcl\generic}.c{$(TMPDIR)}.obj:
     $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
           $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
 
-{$(ROOT)\win}.c{$(TMPDIR)}.obj:
+{$(ROOT)\tcl\win}.c{$(TMPDIR)}.obj:
     $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
           $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
 
-{$(ROOT)\compat}.c{$(TMPDIR)}.obj:
+{$(ROOT)\tcl\compat}.c{$(TMPDIR)}.obj:
     $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
           $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
 
-{$(ROOT)\win}.rc{$(TMPDIR)}.res:
-        $(rc32) -fo $@ -r -i $(ROOT)\generic -i $(ROOT)\win $<
+{$(ROOT)\tcl\win}.rc{$(TMPDIR)}.res:
+        $(rc32) -fo $@ -r -i $(ROOT)\tcl\generic -i $(ROOT)\tcl\win $<
 
 clean:
         -del *.exp
@@ -265,3 +296,7 @@ clean:
         -del $(TMPDIR)\*.obj
         -del *.def
         -del *.res
+        -del tcl.tndx
+        -del tclx.tcl
+	-del buildidx.tcl
+	-del loadouster.tcl

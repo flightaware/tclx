@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 7.0 1996/06/16 05:33:03 markd Exp $
+# $Id: testlib.tcl,v 7.1 1996/07/18 19:36:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -55,18 +55,19 @@ set testConfig(unixOrPc) [expr $testConfig(unixOnly) || $testConfig(pcOnly)]
 
 #
 # Save path to Tcl program to exec, use it when running children in the
-# tests.
+# tests.  Order of checking:
+#   o Environment variable TCL_PROGRAM
+#   o If $argv0 can be found, use it.  Generate an absolute path.
+#   o Use a name "tcl", hopefully on the path.
 #
 if ![info exists TCL_PROGRAM] {
     if [info exists env(TCL_PROGRAM)] {
        set TCL_PROGRAM $env(TCL_PROGRAM)
     } else {
-       puts stderr ""
-       puts stderr {WARNING: No environment variable TCL_PROGRAM,}
-       puts stderr {         assuming "tcl" as program to use for}
-       puts stderr {         running subprocesses in the tests.}
-       puts stderr ""
-       set TCL_PROGRAM tcl
+        set TCL_PROGRAM [info nameofexecutable]
+        puts "    * WARNING: No environment variable TCL_PROGRAM, Using the"
+        puts "    * command \"$TCL_PROGRAM\""
+        puts "    * as the program to use for running subprocesses in the tests."
     }
 }
 
@@ -172,30 +173,47 @@ proc GenRec {id} {
 
 # Proc to fork and exec child that loops until it gets a signal.
 # Can optionally set its pgroup.  Wait till child has actually execed or
-# kill breaks on some systems (i.e. AIX).
+# kill breaks on some systems (i.e. AIX).  Windows is a drag, since the
+# command line parsing is really dumb.  Pass it in a file instead.
 
 proc ForkLoopingChild {{setPGroup 0}} {
-    global TCL_PROGRAM
-    close [open CHILD.RUN w]
+    global TCL_PROGRAM tcl_platform
+
+    set childProg {unlink CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}
+
+    # Create semaphore (it also contains the program to run for windows).
+    set fh [open CHILD.RUN w]
+    puts $fh $childProg
+    close $fh
     flush stdout
     flush stderr
-    set newPid [fork]
-    if {$newPid != 0} {
-        # Wait till the child is actually running.
-        while {[file exists CHILD.RUN]} {
-            sleep 1
+
+    if [cequal $tcl_platform(platform) unix] {
+        set newPid [fork]
+        if {$newPid == 0} {
+            if $setPGroup {
+                id process group set
+            }
+            catch {
+                execl $TCL_PROGRAM [list -qc $childProg]
+            } msg
+            puts stderr "execl failed (ForkLoopingChild): $msg"
+            exit 1
         }
-        return $newPid
     }
-    if $setPGroup {
-        id process group set
+    if [cequal $tcl_platform(platform) windows] {
+        if $setPGroup {
+            error "setpgroup not supported on windows"
+        }
+        set newPid [execl $TCL_PROGRAM [list -q CHILD.RUN]]
     }
-    catch {
-        execl $TCL_PROGRAM \
-            {-qc {unlink CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}}
-    } msg
-    puts stderr "execl failed (ForkLoopingChild): $msg"
-    exit 1
+        
+        
+    # Wait till the child is actually running.
+    while {[file exists CHILD.RUN]} {
+        sleep 1
+    }
+    return $newPid
 }
 
 #

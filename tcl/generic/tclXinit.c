@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.1 1996/07/18 19:36:19 markd Exp $
+ * $Id: tclXinit.c,v 7.2 1996/07/22 17:10:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -64,12 +64,12 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
     char       *libDir;
     char       *libEnvVar;
 {
-    Tcl_DString initFileBuf, initFilePath;
-    char *initFile;
+    Tcl_DString initFileBuf, initFilePathBuf;
+    char *initFile, *initFilePath;
     struct stat statInfo;
 
     Tcl_DStringInit (&initFileBuf);
-    Tcl_DStringInit (&initFilePath);
+    Tcl_DStringInit (&initFilePathBuf);
 
     /*
      * Get the name of the init file, either use the Tcl variable or the
@@ -111,23 +111,20 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
             goto errorExit;
         }
     }
-    Tcl_DStringAppend (&initFilePath, libDir, -1);
-    Tcl_DStringAppend (&initFilePath, "/", -1);
-
-      
-    Tcl_DStringAppend (&initFilePath, initFile, -1);
+    
+    initFilePath = TclX_JoinPath (libDir, initFile, &initFilePathBuf);
 
     /*
      * Check for file existing before evaling it so we can return a helpful
      * error.
      */
-    if (stat (initFilePath.string, &statInfo) < 0) {
-        Tcl_AppendResult (interp,
-                          "Can't access initialization file \"",
-                          initFilePath.string, "\" (", Tcl_PosixError (interp),
+    if (stat (initFilePath, &statInfo) < 0) {
+        Tcl_AppendResult (interp, "Can't access initialization file \"",
+                          initFilePath, "\" (", Tcl_PosixError (interp),
                           ")", (char *) NULL);
  
-        if ((libEnvVar != NULL) && (initFile [0] != '/')) {
+        if ((libEnvVar != NULL) && 
+            (Tcl_GetPathType (initFile) != TCL_PATH_ABSOLUTE)) {
             Tcl_AppendResult (interp,
                               "\n  Override directory containing this ",
                               "file with the environment variable: \"",
@@ -138,17 +135,17 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
 
     if (TclX_Eval (interp,
                    TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE | TCLX_EVAL_ERR_HANDLER,
-                   initFilePath.string) == TCL_ERROR)
+                   initFilePath) == TCL_ERROR)
         goto errorExit;
 
     Tcl_DStringFree (&initFileBuf);
-    Tcl_DStringFree (&initFilePath);
+    Tcl_DStringFree (&initFilePathBuf);
     Tcl_ResetResult (interp);
     return TCL_OK;
 
   errorExit:
     Tcl_DStringFree (&initFileBuf);
-    Tcl_DStringFree (&initFilePath);
+    Tcl_DStringFree (&initFilePathBuf);
     Tcl_AddErrorInfo (interp,
                      "\n    (while processing initialization file)");
     return TCL_ERROR;

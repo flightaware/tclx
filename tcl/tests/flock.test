@@ -12,11 +12,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 6.0 1996/05/10 16:17:29 markd Exp $
+# $Id: flock.test,v 7.0 1996/06/16 05:32:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The flock and funlock commands have not been ported to Win32" 
+    return
+}
 
 if ![infox have_flock] {
     puts "File locking is not available on this system, tests skipped"

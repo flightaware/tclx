@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.1 1996/07/18 19:36:36 markd Exp $
+ * $Id: tclXwinOS.c,v 7.2 1996/07/22 17:10:20 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -685,6 +685,12 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
             continue;
 
         /*
+         * Skip "." and "..".
+         */
+        if (STREQU (data.cFileName, ".") || STREQU (data.cFileName, ".."))
+            continue;
+
+        /*
          * Call the callback with this file.
          */
         result = (*callback) (interp, path, data.cFileName,
@@ -745,7 +751,7 @@ TclXOSftruncate (interp, fileHandle, newSize)
     off_t        newSize;
 {
     Tcl_AppendResult (interp,
-                      "the -fileid option is not available on MS Windows";
+                      "the -fileid option is not available on MS Windows",
                       (char *) NULL);
     return TCL_ERROR;
 }
@@ -823,7 +829,8 @@ TclXOSInetAtoN (interp, strAddress, inAddress)
     char           *strAddress;
     struct in_addr *inAddress;
 {
-    if (inet_aton (strAddress, inAddress))
+    inAddress->s_addr = inet_addr (strAddress);
+    if (inAddress->s_addr != INADDR_NONE)
         return TCL_OK;
     if (interp != NULL) {
         Tcl_AppendResult (interp, "malformed address: \"",

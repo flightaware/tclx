@@ -12,9 +12,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.2 1996/07/22 17:10:01 markd Exp $
+ * $Id: cattcl.c,v 7.1 1996/07/25 04:42:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
+
+#include <stdio.h>
+#include <windows.h>
 
 
 /*-----------------------------------------------------------------------------
@@ -53,7 +56,7 @@ TclX_SplitWinCmdLine (argcPtr, argvPtr)
             }
         }
     }
-    argvlist = (char **) ckalloc ((unsigned) (size * sizeof (char *)));
+    argvlist = (char **) malloc ((unsigned) (size * sizeof (char *)));
     *argvPtr = argvlist;
 
     /*
@@ -95,7 +98,7 @@ TclX_SplitWinCmdLine (argcPtr, argvPtr)
  */
 int
 main (int    argc,
-      char **argv);
+      char **argv)
 {
     FILE *fh;
     int idx, c;
@@ -104,14 +107,14 @@ main (int    argc,
 
 
     for (idx = 1; idx < argc; idx++) {
-        fh = fopen (argv [i], "r");
+        fh = fopen (argv [idx], "r");
         if (fh == NULL) {
             fprintf (stderr, "error opening \"%s\": %s\n",
-                     argv [i], strerror (errno));
+                     argv [idx], strerror (errno));
             exit (1);
         }
         while ((c = fgetc (fh)) != EOF) {
-            if (fputc (c, stdout)) {
+            if (fputc (c, stdout) == EOF) {
                 fprintf (stderr, "error writing stdout: %s\n", 
                          strerror (errno));
                 exit (1);
@@ -119,9 +122,10 @@ main (int    argc,
         }
         if (ferror (fh)) {
             fprintf (stderr, "error reading \"%s\": %s\n",
-                     argv [i], strerror (errno));
+                     argv [idx], strerror (errno));
             exit (1);
         }
-        close (fh);
+        fclose (fh);
     }
+    return 0;
 }

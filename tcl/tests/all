@@ -5,12 +5,12 @@
 global errorInfo
 
 foreach i [lsort [glob *.test]] {
-    puts stdout $i
-    if {[catch {source $i} msg] != 0} {
-        puts stdout [replicate "=" 75]
-        puts stdout "Uncaught error in $i: $msg"
-        puts stdout $errorInfo
-        puts stdout [replicate "=" 75]
+    puts $i
+    if [catch {source $i} msg] {
+        puts [replicate "=" 75]
+        puts "Uncaught error in $i: $msg"
+        puts $errorInfo
+        puts [replicate "=" 75]
     }
 }
 

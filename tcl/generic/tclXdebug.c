@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 7.0 1996/06/16 05:30:11 markd Exp $
+ * $Id: tclXdebug.c,v 7.1 1996/07/18 19:36:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -139,7 +139,7 @@ PrintStr (channel, string, numChars, quoted)
             Tcl_Write (channel, &(string [idx]), 1);
         }
     }
-    if (numChars < strlen (string))
+    if (numChars < (int) strlen (string))
         Tcl_Write (channel, "...", 3);
     if (quoted) 
         Tcl_Write (channel, "}", 1);

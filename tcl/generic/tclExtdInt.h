@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.1 1996/07/18 19:36:13 markd Exp $
+ * $Id: tclExtdInt.h,v 7.2 1996/07/22 17:09:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -175,6 +175,12 @@ Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
                                Tcl_Channel channel,
                                int         fileNum));
 
+extern Tcl_Channel
+TclX_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
+                                 int         fileNum,
+                                 int         mode,
+                                 int         isSocket));
+
 extern int
 Tcl_StrToOffset _ANSI_ARGS_((CONST char *string,
                              int         base,
@@ -256,11 +262,10 @@ TclX_SetChannelOption _ANSI_ARGS_((Tcl_Interp  *interp,
                                    int          option,
                                    int          value));
 
-extern Tcl_Channel
-TclX_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                 int         fileNum,
-                                 int         mode,
-                                 int         isSocket));
+extern char *
+TclX_JoinPath _ANSI_ARGS_((char        *path1,
+                           char        *path2,
+                           Tcl_DString *joinedPath));
 
 /*
  * Definitions required to initialize all extended commands.  These are either
@@ -561,6 +566,12 @@ Tcl_HostInfoCmd _ANSI_ARGS_((ClientData  clientData,
                              Tcl_Interp *interp,
                              int         argc,
                              char      **argv));
+
+/*
+ * from tclXunixSock.c and stubbed in tclXwinCmds.c.
+ */
+void
+TclX_ServerInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXxxxOS.c

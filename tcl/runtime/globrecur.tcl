@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.tcl,v 6.0 1996/05/10 16:16:36 markd Exp $
+# $Id: globrecur.tcl,v 7.0 1996/06/16 05:31:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -26,10 +26,11 @@ proc recursive_glob {dirlist globlist} {
             error "\"$dir\" is not a directory"
         }
         foreach pattern $globlist {
-            set result [concat $result [glob -nocomplain -- $dir/$pattern]]
+            set result [concat $result \
+                    [glob -nocomplain -- [file join $dir $pattern]]]
         }
         foreach file [readdir $dir] {
-            set file $dir/$file
+            set file [file join $dir $file]
             if [file isdirectory $file] {
                 set fileTail [file tail $file]
                 if {!(($fileTail == ".") || ($fileTail == ".."))} {
@@ -56,7 +57,7 @@ proc for_recursive_glob {var dirlist globlist cmd {depth 1}} {
         set code 0
         set result {}
         foreach pattern $globlist {
-            foreach file [glob -nocomplain -- $dir/$pattern] {
+            foreach file [glob -nocomplain -- [file join $dir $pattern]] {
                 set myVar $file
                 set code [catch {uplevel $depth $cmd} result]
                 if {$code != 0 && $code != 4} break
@@ -76,7 +77,7 @@ proc for_recursive_glob {var dirlist globlist cmd {depth 1}} {
         }
 
         foreach file [readdir $dir] {
-            set file $dir/$file
+            set file [file join $dir $file]
             if [file isdirectory $file] {
                 set fileTail [file tail $file]
                 if {!(($fileTail == ".") || ($fileTail == ".."))} {

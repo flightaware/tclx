@@ -12,10 +12,15 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: shell.test,v 6.0 1996/05/10 16:18:08 markd Exp $
+# $Id: shell.test,v 7.0 1996/06/16 05:32:51 markd Exp $
 #------------------------------------------------------------------------------
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The shell tests have not been ported to Win32" 
+    return
+}
 
 
 # Test tclx_errorHandler traping of errors.

@@ -12,12 +12,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 7.2 1996/07/19 03:53:33 markd Exp $
+# $Id: dup.test,v 7.2 1996/07/19 04:05:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The dup command has not been ported to Win32" 
+    return
+}
 
 # Create a test file
 

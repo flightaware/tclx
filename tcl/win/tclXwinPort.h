@@ -12,12 +12,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 7.0 1996/06/16 05:33:39 markd Exp $
+ * $Id: tclXwinPort.h,v 7.1 1996/07/18 19:36:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #ifndef TCLXWINPORT_H
 #define TCLXWINPORT_H
+
+/*
+ * FIX:  Needs to be passed in from makefile, but I can't figure out the
+ * correct syntax for nmake and passing strings.
+ */
+#define TCLX_LIBRARY "C:/markd/tcl/tclX7.5.2/tcl/win"
 
 #include "tclWinPort.h"
 
@@ -35,6 +41,8 @@
 #define NO_SYS_SELECT_H
 #define NO_TRUNCATE
 #define RETSIGTYPE void
+#define NO_BZERO
+#define NO_BCOPY
 
 #include <math.h>
 #include <limits.h>
@@ -51,10 +59,15 @@
 /*
  * Compaibility functions.
  */
-long
+extern long
 random (void);
 
-void
+extern void
 srandom (unsigned int x);
+
+extern int
+getopt (int           nargc,
+	char * const *nargv,
+	const char   *ostr);
 
 #endif

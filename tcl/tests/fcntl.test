@@ -12,11 +12,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 6.0 1996/05/10 16:17:24 markd Exp $
+# $Id: fcntl.test,v 7.0 1996/06/16 05:32:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The fcntl command has not been ported to Win32" 
+    return
+}
 
 close [open FCNTL1.TMP w]
 close [open FCNTL2.TMP w]

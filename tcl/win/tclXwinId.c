@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 7.0 1996/06/16 05:33:23 markd Exp $
+ * $Id: tclXwinId.c,v 7.1 1996/07/25 04:42:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -54,14 +54,15 @@ IdProcess (interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    pid_t  pid;
+    char numBuf [32];
 
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " process", (char *) NULL);
         return TCL_OK;
     }
-    sprintf (interp->result, "%d", getpid ());
+    sprintf (numBuf, "%d", getpid ());
+    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
     return TCL_OK;
 }
 
@@ -80,7 +81,8 @@ IdHost (interp, argc, argv)
         return TCL_ERROR;
     }
     if (gethostname (interp->result, TCL_RESULT_SIZE) < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendResult (interp, "failed to get host name: ",
+                          Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;

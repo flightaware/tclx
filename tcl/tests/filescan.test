@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 7.0 1996/06/16 05:32:11 markd Exp $
+# $Id: filescan.test,v 7.1 1996/07/18 19:36:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -448,6 +448,9 @@ loop cnt 1 101 2 {
         gets $testChk2FH
     } 0 "Line $cnt"
 }
+
+close $testChkFH
+close $testChk2FH
 
 unlink {TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP}
 rename GenScanRec {}
