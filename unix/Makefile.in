@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.11 1994/07/09 03:18:47 markd Exp markd $
+# $Id: Makefile.in,v 4.0 1994/07/16 05:31:16 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -289,8 +289,8 @@ TCLXMINSTALL:
 	@echo ""
 	rm -rf ${TCL_INST_MASTER}
 	${INSTCOPY} -dirname tclmaster ${TCL_INST_MASTER}
-	strip ${TCL_INST_MASTER}/bin/tcl
-	${MCS}  ${TCL_INST_MASTER}/bin/tcl
+	strip ${TCL_INST_MASTER}/bin${ARCH}/tcl
+	${MCS}  ${TCL_INST_MASTER}/bin${ARCH}/tcl
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
@@ -307,8 +307,8 @@ TCLXMINSTALL-EXEC:
 	@echo "   Install TclX executables only"
 	@echo ""
 	${INSTCOPY} tclmaster/bin${ARCH} ${TCL_INST_MASTER}
-	strip ${TCL_INST_MASTER}/bin/tcl
-	${MCS}  ${TCL_INST_MASTER}/bin/tcl
+	strip ${TCL_INST_MASTER}/bin${ARCH}/tcl
+	${MCS}  ${TCL_INST_MASTER}/bin${ARCH}/tcl
 	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
@@ -320,8 +320,8 @@ TKXMINSTALL:
 	@echo ""
 	rm -rf ${TK_INST_MASTER}
 	${INSTCOPY} -dirname tkmaster ${TK_INST_MASTER}
-	strip ${TK_INST_MASTER}/bin/wishx
-	${MCS}  ${TK_INST_MASTER}/bin/wishx
+	strip ${TK_INST_MASTER}/bin${ARCH}/wishx
+	${MCS}  ${TK_INST_MASTER}/bin${ARCH}/wishx
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
@@ -336,8 +336,8 @@ TKXMINSTALL-EXEC:
 	@echo "   Install TkX executables only"
 	@echo ""
 	${INSTCOPY} tkmaster/bin${ARCH} ${TK_INST_MASTER}
-	strip ${TK_INST_MASTER}/bin/wishx
-	${MCS}  ${TK_INST_MASTER}/bin/wishx
+	strip ${TK_INST_MASTER}/bin${ARCH}/wishx
+	${MCS}  ${TK_INST_MASTER}/bin${ARCH}/wishx
 	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
