@@ -1319,3 +1319,7 @@
   o Removed check for last being before first in crange and csubstr.  Now
     returns an empty string.
 -------------------------------------------------------------------------------
+ 7 Aug 97:
+  o Merged in port of 8.0.0 code to Win32.  Contributed by Viktor Dukhovni
+    <viktor@esm.com>.  Thanks Viktor!
+-------------------------------------------------------------------------------
