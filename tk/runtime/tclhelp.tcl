@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 4.2 1995/01/26 19:16:07 markd Exp markd $
+# $Id: tclhelp.tcl,v 4.3 1995/02/08 15:42:25 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ proc DisplayPage {page} {
 
     scrollbar $w.frame.yscroll -relief sunken \
         -command "$w.frame.page yview"
-    text $w.frame.page -yscroll "$w.frame.yscroll set" \
+    text $w.frame.page -yscrollcommand "$w.frame.yscroll set" \
         -width 80 -height 20 -relief sunken -wrap word
     pack $w.frame.yscroll -side right -fill y
     pack $w.frame.page -side top -expand 1 -fill both
@@ -182,8 +182,9 @@ proc AproposPanel {} {
     frame .apropos.canvasFrame
     set w .apropos.canvasFrame
 
-    canvas $w.canvas -yscroll "$w.yscroll set" -xscroll "$w.xscroll set" \
-        -width 15c -height 5c -relief sunken
+    canvas $w.canvas -yscrollcommand "$w.yscroll set" \
+            -xscrollcommand "$w.xscroll set" \
+            -width 15c -height 5c -relief sunken
 
     scrollbar $w.yscroll -relief sunken \
         -command "$w.canvas yview"
