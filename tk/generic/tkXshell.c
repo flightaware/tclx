@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 1.2 1993/11/17 15:16:25 markd Exp markd $
+ * $Id: tkXshell.c,v 3.0 1993/11/19 07:01:36 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -301,7 +301,6 @@ error:
     fprintf(stderr, "%s\n", msg);
     Tcl_GlobalEval(interp, errorExitCmd);
     exit (1);
-    return 1;   /* Needed only to prevent compiler warnings. */
 }
 
 /*
