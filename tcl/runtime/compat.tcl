@@ -13,11 +13,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 5.1 1996/02/09 18:43:21 markd Exp $
+# $Id: compat.tcl,v 5.2 1996/02/12 18:16:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-#@package: TclX-Compatibility assign_fields server_open cexpand
+#@package: TclX-GenCompat assign_fields cexpand
 
 proc assign_fields {list args} {
     puts stderr {**** Your program is using an obsolete TclX proc, "assign_fields".}
@@ -33,6 +33,13 @@ proc assign_fields {list args} {
     return [uplevel assign_fields [list $list] $args]
 }
 
+# Added TclX 7.4a
+proc cexpand str {subst -nocommands -novariables $str}
+
+#@package: TclX-ServerCompat assign_fields cexpand server_open server_send
+
+# Added TclX 7.4a
+
 proc server_open args {
     set cmd server_connect
 
@@ -46,17 +53,36 @@ proc server_open args {
         }
         lappend cmd $opt
     }
+    set handles [uplevel [concat $cmd $args]]
     if $buffered {
-        lappend cmd -twoids
+        lappend handles [dup $handles]
     }
-    set cmd [concat $cmd $args]
-
-    uplevel $cmd
+    return $handles
 }
 
-proc cexpand str {subst -nocommands -novariables $str}
+# Added TclX 7.5a
+
+proc server_send args {
+    set cmd puts
+
+    while {[string match -* [lindex $args 0]]} {
+        switch -- [set opt [lvarpop args]] {
+            {-dontroute} {
+                error "server_send if obsolete, -dontroute is not supported by the compatibility proc"
+            }
+            {-outofband} {
+                error "server_send if obsolete, -outofband is not supported by the compatibility proc"
+            }
+        }
+        lappend cmd $opt
+    }
+    uplevel [concat $cmd $args]
+    flush [lindex $args 0]
+}
 
 #@package: TclX-ClockCompat fmtclock convertclock getclock
+
+# Added TclX 7.5a
 
 proc fmtclock {clockval {format {}} {zone {}}} {
     lappend cmd clock format $clockval
@@ -69,6 +95,8 @@ proc fmtclock {clockval {format {}} {zone {}}} {
     return [eval $cmd]
 }
 
+# Added TclX 7.5a
+
 proc convertclock {dateString {zone {}} {baseClock {}}} {
     lappend cmd clock scan $dateString
     if ![lempty $zone] {
@@ -79,6 +107,8 @@ proc convertclock {dateString {zone {}} {baseClock {}}} {
     }
     return [eval $cmd]
 }
+
+# Added TclX 7.5a
 
 proc getclock {} {
     return [eval clock seconds]

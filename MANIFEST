@@ -193,7 +193,6 @@
 ./tcl/help/tcl/sockets/server_connect
 ./tcl/help/tcl/sockets/server_create
 ./tcl/help/tcl/sockets/server_info
-./tcl/help/tcl/sockets/server_send
 ./tcl/help/tcl/sockets/socket
 ./tcl/help/tcl/status/cd
 ./tcl/help/tcl/status/dirs

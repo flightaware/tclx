@@ -14,11 +14,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 5.1 1996/02/09 18:43:45 markd Exp $
+# $Id: server.test,v 5.2 1996/02/16 08:09:45 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
+eval $SAVED_UNKNOWN
 
 if ![infox have_sockets] {
     echo "NOTE: sockets were found on this system.  Is this correct?"
@@ -52,11 +53,11 @@ Test server-1.5 {server_connect argument checking} {
 
 Test server-1.6 {server_connect argument checking} {
     server_connect -badbuf localhost echo
-} 1 {expected one of "-buf", "-nobuf", "-twoids", "-myip" or "-myport", got "-badbuf"}
+} 1 {expected one of "-buf", "-nobuf", "-myip" or "-myport", got "-badbuf"}
 
 Test server-1.7 {server_connect argument checking} {
     server_connect -buf -badbuf localhost echo
-} 1 {expected one of "-buf", "-nobuf", "-twoids", "-myip" or "-myport", got "-badbuf"}
+} 1 {expected one of "-buf", "-nobuf", "-myip" or "-myport", got "-badbuf"}
 
 
 Test server-2.0 {server_create argument checking} {
@@ -110,11 +111,11 @@ Test server-3.5 {server_accept argument checking} {
 
 Test server-3.6 {server_accept argument checking} {
     server_accept -badbuf stdin
-} 1 {expected "-buf", "-nobuf" or "-twoids", got "-badbuf"}
+} 1 {expected "-buf" or "-nobuf", got "-badbuf"}
 
 Test server-3.7 {server_accept argument checking} {
     server_accept -buf -badbuf stdin
-} 1 {expected "-buf", "-nobuf" or "-twoids", got "-badbuf"}
+} 1 {expected "-buf" or "-nobuf", got "-badbuf"}
 
 Test server-4.0 {server_info argument checking} {
     server_info
@@ -131,26 +132,6 @@ Test server-4.2 {server_info argument checking} {
 Test server-4.3 {server_info argument checking} {
     server_info bad localhost
 } 1 {invalid option "bad", expected one of "addresses", "official_name" or "aliases"}
-
-Test server-5.1 {server_send argument checking} {
-    server_send
-} 1 {wrong # args: server_send [options] fileid message}
-
-Test server-5.2 {server_send argument checking} {
-    server_send x y z
-} 1 {wrong # args: server_send [options] fileid message}
-
-Test server-5.3 {server_send argument checking} {
-    server_send x y
-} 1 {can not find channel named "x"}
-
-Test server-5.4 {server_send argument checking} {
-    server_send -bad x y
-} 1 {expected one of "-nonewline", "-outofband", or "-dontroute" got "-bad"}
-
-Test server-5.5 {server_send argument checking} {
-    server_send -nonewline -bad x y
-} 1 {expected one of "-nonewline", "-outofband", or "-dontroute" got "-bad"}
 
 Test server-6.1 {server_cntl argument checking} {
     server_cntl
@@ -216,17 +197,20 @@ proc TalkToEcho {testId readFH writeFH buffered} {
     }
 
     Test $testId.3 {simple client interaction} {
-        server_send $writeFH "Test #8"
+        puts $writeFH "Test #8"
+        flush $writeFH
         list [gets $readFH result] $result
     } 0 {7 {Test #8}}
 
     Test $testId.4 {simple client interaction} {
-        server_send $writeFH "Test #9"
+        puts $writeFH "Test #9"
+        flush $writeFH
         read $readFH 8
     } 0 "Test #9\n"
 
     Test $testId.5 {simple client interaction} {
-        server_send -nonewline $writeFH "Test #10"
+        puts -nonewline $writeFH "Test #10"
+        flush $writeFH 
         read $readFH 8
     } 0 {Test #10}
 
@@ -239,7 +223,9 @@ proc TalkToEcho {testId readFH writeFH buffered} {
         } else {
             set read2FH $write2FH
         }
-        server_send $write2FH "Test #11"
+
+        puts $write2FH "Test #11"
+        flush $write2FH
         set stat [gets $read2FH result]
 
         close $write2FH
@@ -316,6 +302,17 @@ proc TalkToEcho {testId readFH writeFH buffered} {
         server_cntl $writeFH KEEPALIVE
     } 0 0
 
+    Test $testId.22 {server_send compatibility procs} {
+        set all {}
+        server_send $writeFH "Test 22.1"
+        lappend all [gets $readFH result] $result
+
+        server_send -nonewline $writeFH "Test 22.2\n"
+        lappend all [gets $readFH result] $result
+
+        set all
+    } 0 {9 {Test 22.1} 9 {Test 22.2}}
+
     close $readFH
     if ![cequal $readFH $writeFH] {
         close $writeFH
@@ -363,14 +360,9 @@ if [catch {
         TalkToEcho server-8.3 $fh $fh 1
     } 0 {}
 
-    Test server-8.4 {simple client interaction} {
-        set fhs [server_connect -twoids -buf $maybeIP echo]
+    Test server-8.4 {simple client interaction with compatibility interface} {
+        set fhs [server_open -buf $maybeIP echo]
         TalkToEcho server-8.4 [lindex $fhs 0] [lindex $fhs 1] 1
-    } 0 {}
-
-    Test server-8.5 {simple client interaction} {
-        set fhs [server_connect -twoids -nobuf $maybeIP echo]
-        TalkToEcho server-8.5 [lindex $fhs 0] [lindex $fhs 1] 0
     } 0 {}
 }
 
@@ -447,3 +439,5 @@ Test server-9.3 {Tcl server} {
     puts $fh "EXIT"
     lrange [wait $serverPID] 1 2
 } 0 {EXIT 0}
+
+rename unknown {}

@@ -49,7 +49,6 @@ extern int h_errno;
  */
 #define SERVER_BUF      1
 #define SERVER_NOBUF    2
-#define SERVER_TWOIDS   4
 
 /*
  * The maximum length of any attribute name.
@@ -72,13 +71,6 @@ static struct hostent *
 InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
                          int         argc,
                          char      **argv));
-
-static int
-SendMessage _ANSI_ARGS_((Tcl_Interp *interp,
-                         int         fileNum,
-                         int         flags,
-                         int         nonewline,
-                         char       *strmsg));
 
 static int
 XlateCntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -182,8 +174,6 @@ InetAtoN (interp, strAddress, inAddress)
  *   o options (I) - Options set controling buffering and handle allocation:
  *       o SERVER_BUF - Two file handle buffering.
  *       o SERVER_NOBUF - No buffering.
- *       o SERVER_TWOIDS - Allocate two file handles (ids), one for reading
- *         and one for writting.
  *   o socketFD (I) - File number of the socket that was opened.
  * Returns:
  *   TCL_OK or TCL_ERROR.
@@ -209,30 +199,8 @@ BindFileHandles (interp, options, socketFD)
             goto errorExit;
     }
 
-    if (options & SERVER_TWOIDS) {
-        socketFD2 = dup (socketFD);
-        if (socketFD2 < 0) {
-            interp->result = Tcl_PosixError (interp);
-            goto errorExit;
-        }
-
-        channel2 = TclX_SetupFileEntry (interp, socketFD2,
-                                        TCL_READABLE | TCL_WRITABLE, TRUE);
-        if (channel2 == NULL)
-            goto errorExit;
-
-        if (options & SERVER_NOBUF) {
-            if (Tcl_SetChannelOption (interp, channel2, "-unbuffered",
-                                      "1") == TCL_ERROR)
-                goto errorExit;
-        }
-        Tcl_AppendElement (interp, Tcl_GetChannelName (channel));
-        Tcl_AppendElement (interp, Tcl_GetChannelName (channel2));
-        return TCL_OK;
-    } else {
-        Tcl_AppendElement (interp, Tcl_GetChannelName (channel));
-        return TCL_OK;
-    }
+    Tcl_AppendElement (interp, Tcl_GetChannelName (channel));
+    return TCL_OK;
 
   errorExit:
     Tcl_CloseForError (interp, channel, socketFD);
@@ -248,12 +216,11 @@ BindFileHandles (interp, options, socketFD)
  *        server_connect ?options? host service
  *
  *  Opens a stream socket to the specified host (host name or IP address),
- *  service name or port number.  Options maybe -buf, or -nobuf, -twoids, and
+ *  service name or port number.  Options maybe -buf, or -nobuf, -myport, and
  *  -hostip hostname.
  *
  * Results:
- *   If successful, a pair Tcl fileids are returned for -buf or a single fileid
- * is returned for -nobuf.
+ *   If successful, a file id is returned in result.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -263,13 +230,14 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    unsigned            options;
-    char               *host, *service;
-    int                 socketFD = -1, nextArg;
-    struct hostent     *hostEntry;
-    struct sockaddr_in  server, local;
-    int                 idx, needBind = 0;
-    int                 myPort;
+    unsigned options;
+    char *host, *service;
+    int socketFD = -1, nextArg;
+    struct hostent *hostEntry;
+    struct sockaddr_in server, local;
+    int idx, needBind = 0;
+    int getReserved = FALSE;
+    int myPort;
 
     /*
      * Parse arguments.
@@ -288,8 +256,6 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
         } else if (STREQU ("-nobuf", argv [nextArg])) {
             options &= ~SERVER_BUF;
             options |= SERVER_NOBUF;
-        } else if (STREQU ("-twoids", argv [nextArg])) {
-            options |= SERVER_TWOIDS;
         } else if (STREQU ("-myip", argv [nextArg])) {
             if (nextArg >= argc - 1)
                 goto missingArg;
@@ -303,13 +269,17 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
             if (nextArg >= argc - 1)
                 goto missingArg;
             nextArg++;
-            if (Tcl_GetInt (interp, argv [nextArg], &myPort) != TCL_OK)
-                return TCL_ERROR;
-            local.sin_port = htons (myPort);
+            if (STREQU (argv [nextArg], "reserved")) {
+                getReserved = TRUE;
+            } else {
+                if (Tcl_GetInt (interp, argv [nextArg], &myPort) != TCL_OK)
+                    return TCL_ERROR;
+                local.sin_port = htons (myPort);
+            }
             needBind = 1;
         } else {
             Tcl_AppendResult (interp, "expected one of \"-buf\", \"-nobuf\", ",
-                              "\"-twoids\", \"-myip\" or \"-myport\", got \"",
+                              "\"-myip\" or \"-myport\", got \"",
                               argv [nextArg], "\"", (char *) NULL);
             return TCL_ERROR;
         }
@@ -359,6 +329,16 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
             return ReturnGetHostError (interp, host);
 
         server.sin_family = hostEntry->h_addrtype;
+    }
+
+    /*
+     * Allocate a reserved port if requested.
+     */
+    if (getReserved) {
+        int port;
+        if (rresvport (&port) < 0)
+            goto unixError;
+        local.sin_port = port;
     }
 
     /*
@@ -433,8 +413,8 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
  * (optionally specified by the caller), and starts the port listening 
  * for connections by calling listen (2).
  *
- *  Options may be "-myip ip_address", "-myport port_number", and
- * "-backlog backlog".
+ *  Options may be "-myip ip_address", "-myport port_number",
+ * "-myport reserved", and "-backlog backlog".
  *
  * Results:
  *   If successful, a Tcl fileid is returned.
@@ -452,6 +432,7 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     struct sockaddr_in  local;
     int myPort, value;
     int backlog = 5;
+    int getReserved = FALSE;
     Tcl_Channel channel = NULL;
 
     /*
@@ -474,9 +455,13 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
             if (nextArg >= argc - 1)
                 goto missingArg;
             nextArg++;
-            if (Tcl_GetInt (interp, argv [nextArg], &myPort) != TCL_OK)
-                return TCL_ERROR;
-            local.sin_port = htons (myPort);
+            if (STREQU (argv [nextArg], "reserved")) {
+                getReserved = TRUE;
+            } else {
+                if (Tcl_GetInt (interp, argv [nextArg], &myPort) != TCL_OK)
+                    return TCL_ERROR;
+                local.sin_port = htons (myPort);
+            }
         } else if (STREQU ("-backlog", argv [nextArg])) {
             if (nextArg >= argc - 1)
                 goto missingArg;
@@ -498,6 +483,16 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " ?options?", (char *) NULL);
         return TCL_ERROR;
+    }
+
+    /*
+     * Allocate a reserved port if requested.
+     */
+    if (getReserved) {
+        int port;
+        if (rresvport (&port) < 0)
+            goto unixError;
+        local.sin_port = port;
     }
 
     /*
@@ -549,11 +544,10 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
  *        server_accept ?options? file
  *
  *  Accepts an IP connection request to a socket created by server_create.
- *  Options maybe -buf or -nobuf and -twoids.
+ *  Options maybe -buf orr -nobuf.
  *
  * Results:
- *   If successful, a pair Tcl fileids are returned for -buf or a single fileid
- * is returned for -nobuf.
+ *   If successful, a Tcl fileid.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -581,12 +575,9 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
         } else if (STREQU ("-nobuf", argv [nextArg])) {
             options &= ~SERVER_BUF;
             options |= SERVER_NOBUF;
-        } else if (STREQU ("-twoids", argv [nextArg])) {
-            options |= SERVER_TWOIDS;
         } else {
-            Tcl_AppendResult (interp, "expected \"-buf\", \"-nobuf\" or ",
-                              "\"-twoids\", got \"", argv [nextArg],
-                              "\"", (char *) NULL);
+            Tcl_AppendResult (interp, "expected \"-buf\" or \"-nobuf\", ",
+                              "got \"", argv [nextArg], "\"", (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
@@ -757,158 +748,6 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * SendMessage --
- *
- *   Send a message on a socket.  There are two versions of this function,
- * one that uses sendmsg and takes advantage of gather-write to send the new
- * line. The other is for systems that don't have sendmsg (Linux).
- *
- * Parameters:
- *   o interp (O) - Error messages are returned in result.
- *   o fileNum (I) - File number of the socket.
- *   o flags (I) - Flags to pass to sendmsg/send.
- *   o nonewline (I) - TRUE if a newline should not be sent.
- *   o strmsg (I) - String message to send.
- * Returns:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-static int
-SendMessage (interp, fileNum, flags, nonewline, strmsg)
-    Tcl_Interp *interp;
-    int         fileNum;
-    int         flags;
-    int         nonewline;
-    char       *strmsg;
-{
-#ifdef HAVE_SENDMSG
-    struct msghdr msgHeader;
-    struct iovec dataVec [2];
-    int bytesAttempted;
-    int bytesSent;
-
-    /*
-     * Fill in the message header and write vector.  If a newline is
-     * to be included, its the second element in the vector.
-     */
-    msgHeader.msg_name = NULL;
-    msgHeader.msg_namelen = 0;
-    msgHeader.msg_iov = dataVec;
-    msgHeader.msg_iovlen = 1;
-#ifdef HAVE_MSG_ACCRIGHTS
-    msgHeader.msg_accrights = NULL;
-    msgHeader.msg_accrightslen = 0;
-#else
-    msgHeader.msg_control = NULL;
-    msgHeader.msg_controllen = 0;
-#endif    
-
-    bytesAttempted = strlen (strmsg);
-    dataVec [0].iov_base = strmsg;
-    dataVec [0].iov_len = bytesAttempted;
-
-    if (!nonewline) {
-        dataVec [1].iov_base = "\n";
-        dataVec [1].iov_len = 1;
-        msgHeader.msg_iovlen++;
-        bytesAttempted++;
-    }
-   
-    bytesSent = sendmsg (fileNum, &msgHeader, flags);
-    if (bytesSent < 0) {
-        interp->result = Tcl_PosixError (interp);
-        return TCL_ERROR;
-    }
-
-    if (bytesSent != bytesAttempted) {
-        Tcl_AppendResult (interp, "sent fewer bytes than requested",
-                          (char *)NULL);
-    }
-    return TCL_OK;
-#else /* HAVE_SENDMSG */
-    Tcl_DString  buffer;
-    char *message;
-    int bytesAttempted;
-    int bytesSent;
-
-
-    if (nonewline) {
-        message = strmsg;
-    } else {
-        Tcl_DStringInit (&buffer);
-        Tcl_DStringAppend (&buffer, strmsg, -1);
-        Tcl_DStringAppend (&buffer, "\n", -1);
-        message = Tcl_DStringValue (&buffer);
-    }
-    bytesAttempted = strlen (message);
-
-    bytesSent = send (fileNum, message, bytesAttempted, flags);
-    if (!nonewline) {
-        Tcl_DStringFree (&buffer);
-    }
-    if (bytesSent < 0) {
-        interp->result = Tcl_PosixError (interp);
-        return TCL_ERROR;
-    }
-
-    if (bytesSent != bytesAttempted) {
-        Tcl_AppendResult (interp, "sent fewer bytes than requested",
-                          (char *)NULL);
-    }
-    return TCL_OK;
-#endif /* HAVE_SENDMSG */
-}
-
-
-/*-----------------------------------------------------------------------------
- * Tcl_ServerSendCmd --
- *     Implements the TCL server_send command:
- *
- *        server_send [options] fileid message
- *
- * Options are:
- *          -nonewline -outofband -dontroute
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_ServerSendCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    int flags = 0, nonewline = 0, nextArg, fileNum;
-
-    nextArg = 1;
-    while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
-        if (STREQU (argv [nextArg], "-nonewline")) {
-            nonewline = 1;
-        } else if (STREQU (argv [nextArg], "-outofband")) {
-            flags |= MSG_OOB;
-        } else if (STREQU (argv [nextArg], "-dontroute")) {
-            flags |= MSG_DONTROUTE;
-        } else {
-            Tcl_AppendResult (interp, "expected one of \"-nonewline\",",
-                              " \"-outofband\", or \"-dontroute\" got \"",
-                              argv [nextArg], "\"", (char *) NULL);
-            return TCL_ERROR;
-        }
-        nextArg++;
-    }
-    if (nextArg != argc - 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " [options] fileid message", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    fileNum = TclX_GetOpenFnum (interp, argv [nextArg++], TCL_WRITABLE);
-    if (fileNum < 0)
-        return TCL_ERROR;
-
-    return SendMessage (interp, fileNum, flags, nonewline, argv [nextArg]);
-}
-
-/*-----------------------------------------------------------------------------
  * XlateCntlAttr --
  *    Translate a server_cntl  attribute.
  *
@@ -1023,8 +862,6 @@ Tcl_ServerInit (interp)
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_accept", Tcl_ServerAcceptCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "server_send", Tcl_ServerSendCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_cntl", Tcl_ServerCntlCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 }
@@ -1066,8 +903,6 @@ Tcl_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_create", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_accept", ServerNotAvailable,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "server_send", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_cntl", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);

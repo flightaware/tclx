@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.4 1996/02/12 07:21:02 markd Exp $
+.\" $Id: TclX.n,v 5.5 1996/02/16 08:08:49 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1304,18 +1304,32 @@ contains a newline, then that newline will be returned as part of the result.
 Only a newline not quoted as part of the list indicates the end of the list.
 There is no corresponding command for outputing lists, as \fBputs\fR will
 do this correctly.
+.sp
 If \fIvarName\fR is specified, then the line is placed in the variable
 by that name and the return value is a count of the number of characters
 read (not including the newline).
 If the end of the file is reached before reading
 any characters then \-1 is returned and \fIvarName\fR is set to an
 empty string.
+If \fIvarName\fR is specified and an error occurs, what ever data was
+read will be returned in the variable, however the resulting string
+may not be a valid list.
+.sp
 If \fIvarName\fR is not specified then the return value will be
 the line (minus the newline character) or an empty string if
 the end of the file is reached before reading any characters.
 An empty string will also be returned if a line contains no characters
 except the newline, so \fBeof\fR may have to be used to determine
 what really happened.
+.sp
+If \fBlgets\fR is used on a non-blocking file, blocking will be temporarily
+enabled for the duration of the \fBlgets\fR command.  This is required by
+the current implemention of the underlying Tcl I/O system.  In most
+cases, this will not cause any problems, as the process writing the
+file should be writing entire lists in one write operation.   The only
+difficulty that might arise is if non-blocking I/O was being used to
+keep two processes from deadlocking while exchanging large amounts of
+data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1439,8 +1453,7 @@ them.  It is easy to build servers using Extended Tcl that run under
 \fBinetd\fR, or even servers that run standalone and accept and manage
 multiple simultaneous connections.
 The socket file handles maybe be read using the either the
-\fBgets\fR or \fBread\fR command and written using either the \fBputs\fR or
-\fBserver_send\fR command.
+\fBgets\fR or \fBread\fR command and written using \fBputs\fR command.
 .PP
 The \fBfstat remotehost\fR and 
 \fBfstat localhost\fR requests are useful both for clients and servers.
@@ -1476,9 +1489,6 @@ the \fBflush\fR command must be used to force data in the buffer to
 be sent to the server.  Buffered access will result in 
 significantly better performance when reading data, and will also improve
 the performance of a series of writes done without intervening reads.
-The buffering is only used when accessing the file via
-the \fBgets\fR, \fBread\fR, and \fBputs\fR commands. The \fBserver_send\fR
-command does not use the buffer.
 .IP
 o\ \fB-nobuf\fR - The file is unbuffered. A single file id,
 open for both reading and writing, is returned.
@@ -1490,11 +1500,12 @@ corresponding to network interfaces on your machine may be used.
 If \fB-myip\fR is not specified, the operating system will assign the 
 IP number for you.
 .IP
-o\ \fB-myport\fR \fIportNumber\fR - Define the
+o\ \fB-myport\fR \fIportNumber\fR|\fBresvered\fR - Define the
 port number for your side of the connection.  If the port number is
 already in use, an error will be returned.  If the port number is in
 the privileged range, the Tcl program will have to be running as superuser,
-or an error will be returned.
+or an error will be returned.  If the string \fBresvered\fR is specified,
+a available reserved port number will be allocated.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1522,11 +1533,12 @@ corresponding to network interfaces on your machine may be used.
 If \fB-myip\fR is not specified, the operating system will assign the 
 IP number for you.
 .IP
-o\ \fB-myport\fR \fIportNumber\fR - Define the
+o\ \fB-myport\fR \fIportNumber\fR|\fBresvered\fR - Define the
 port number for your side of the connection.  If the port number is
 already in use, an error will be returned.  If the port number is in
 the privileged range, the Tcl program will have to be running as superuser,
-or an error will be returned.
+or an error will be returned.  If the string \fBresvered\fR is specified,
+a available reserved port number will be allocated.
 .IP
 o\ \fB-backlog\fR \fIcount\fR - Maximum length the queue of pending
 connections may grow to.  If a connection request arrives with the queue full,
@@ -1547,9 +1559,9 @@ default is 5.
 .br
 Accept a TCP/IP connection to the server socket associated with
 \fIfileid\fR.
-Options are \fB-buf\fR, \fB-nobuf\fR and \fB-twoids\fR.
+Options are \fB-buf\fR abd \fB-nobuf\fR.
 See the \fBserver_connect\fR command for a description of these options.
-A file handle (or a pair of file handles when \fB-twoids\fR) is return.
+A file handle is return.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1577,32 +1589,6 @@ o\ \fBaliases\fR - Return the list of aliases for \fIhost\fR.
 aliases. See \fIifconfig(2)\fR.)
 '\"@endhelp
 '
-'\"@help: tcl/sockets/server_send
-'\"@brief: Send a message to a TCP/IP socket.
-.TP
-.B server_send \fI?options?\fR \fIfileid\fR \fIstring\fR
-.br
-Send the specified string to the TCP/IP connection corresponding
-to \fIfileid\fR.  The\fBserver_send\fR command is provide as an option
-to \fBputs\fR for writing to a socket as it is better at detecting lost
-connections and other IP-related error conditions.  File buffering
-is ignored for \fBserver_send\fR. There is no need to \fBflush\fR after a
-\fBserver_send\fR.  The results of mixing \fBserver_send\fR with \fBputs\fR
-without flushing the \fBputs\fR output is indeterminate.
-.sp
-Options are:
-.IP
-o\ \fB-nonewline\fR - Don't append a newline character to the end of the
-message.  The default is to append a newline character.
-.IP
-o\ \fB-dontroute\fR - Requests that routing be bypassed and the direct
-interface used (usually used only by diagnostic or routing programs)
-.IP
-o\ \fB-outofband\fR - Send out-of-band data on the socket.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
 '\"@help: tcl/sockets/server_cntl
 '\"@brief: Set options on to a TCP/IP socket.
 .TP
@@ -1617,8 +1603,6 @@ is sent if connection is broken and data is written to the socket.
 Note that SIGPIPE is set to be ignored by the Tcl library to
 support pipes to processes in the \fBexec\fR and \fBopen\fR commands.
 If SIGPIPE is ignored, an error is returned on the write.
-Use server_send to detect dropped connections reliably,
-Boolean value.
 .sp
 If \fIvalue\fR is specifice, the options is set to that value.  Otherwise,
 the value is returned.

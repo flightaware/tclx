@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: math.test,v 5.1 1995/10/11 03:32:53 markd Exp $
+# $Id: math.test,v 5.2 1996/02/16 08:09:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -61,13 +61,21 @@ Test math-2.4.1 {max tests} {
     max -68.7
 } 0 -68.7
 
+Test math-2.4.2 {max tests} {
+    max -68.7 0x200 010
+} 0 0x200
+
+Test math-2.4.3 {max tests} {
+    max 668e7 0x200 010
+} 0 668e7
+
 Test math-2.5 {max tests} {
     max
 } 1 {wrong # args: max num1 ?..numN?}
 
 Test math-2.6 {max tests} {
     max 1 2 3 foo
-} 1 {expected floating-point number but got "foo"}
+} 1 {expected integer but got "foo"}
 
 Test math-3.1 {min tests} {
     min 1 2 4 3
@@ -85,13 +93,21 @@ Test math-3.3 {min tests} {
     min 5
 } 0 5
 
+Test math-3.3.1 {min tests} {
+    min 5 0x200 010
+} 0 5
+
+Test math-3.3.2 {min tests} {
+    min 5e10 0x200 010
+} 0 010
+
 Test math-3.4 {min tests} {
     min
 } 1 {wrong # args: min num1 ?..numN?}
 
 Test math-3.5 {min tests} {
     min 1 2 3 foo
-} 1 {expected floating-point number but got "foo"}
+} 1 {expected integer but got "foo"}
 
 
 Test math-4.1 {max function tests} {

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 5.1 1996/02/09 18:43:34 markd Exp $
+# $Id: fcntl.test,v 5.2 1996/02/16 08:09:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -106,7 +106,6 @@ Test fcntl-2.3 {fcntl tests} {
     fcntl $testRPH NONBLOCK
 } 0 1
 
-#????
 Test fcntl-2.4 {fcntl tests} {
     fcntl $testRWFH append 1
     fcntl $testRWFH append

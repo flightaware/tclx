@@ -1068,6 +1068,19 @@
     was outdated, not documented and of limited usefulness.  It was often
     a source of portability problems.
   o Cleaned-up the installation.  More parameterization is through macros.
-    The master installation model is not specified though the configure script,
+    The master installation model is now specified though the configure script,
     but symbolic links must be built by hand.
+  o Modified intersect3 to improve its performance, as suggested by
+    Ken Copeland <ken@pdsrc.hilco.com>.
+  o Changed lgets to return an error if the last line of a file doesn't have
+    a new line.  This is an error as in may indicate an incomplete list.
+  o Changed min and max commands to support hex and octal numbers.
+  o Deleted the -twoids option from server_connect and server_accept.  These
+    options were supplied for implementing procs that were compatibile with the
+    old TclX server_* commands.
+  o Removed the server_send command and made it a compatibility procedure.
+    Now that the Tcl I/O system uses send and recv, this function is
+    unnecessary.  Note: the comparibility procedure doesn't support the
+    -dontroute and -outofband options (which had never been tested anyway).
+    (* potential incompatibility *)
 -------------------------------------------------------------------------------
