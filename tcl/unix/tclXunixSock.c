@@ -126,7 +126,6 @@ ReturnGetHostError (interp, host)
  * InetAtoN --
  *
  *   Convert an internet address to an "struct in_addr" representation.
- * 
  *
  * Parameters:
  *   o interp (O) - If not NULL, an error message is return in the result.
