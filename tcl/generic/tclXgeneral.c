@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 4.4 1995/05/15 00:04:20 markd Exp markd $
+ * $Id: tclXgeneral.c,v 4.5 1995/05/24 05:27:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -247,7 +247,7 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
     }
 
     for (i = first;
-             (((i < limit) && (incr > 0)) || ((i > limit) && (incr < 0)));
+             (((i < limit) && (incr >= 0)) || ((i > limit) && (incr < 0)));
              i += incr) {
 
         sprintf (itxt,"%ld",i);
