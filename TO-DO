@@ -1,0 +1,7 @@
+                            TclX bug and idea list
+
+o Convert sleep command to use Tcl_Sleep.  Perhaps just convert it to
+  a proc that calls after.
+
+o Use cl_RegExpCompile and Tcl_RegExpExec.
+
