@@ -43,8 +43,12 @@ in the early stages from Peter da Silva (peter@NeoSoft.com).
    As with Berkeley Tcl, all of Extended Tcl is freely
 redistributable, including for commercial use and resale.
 
-   Please read the file INSTALL carefully before building and
-installing Extended Tcl.
+
+BUILDING TCLX
+=============
+
+   For instructions on how to build TclX on Unix and Unix-like systems,
+see unix/INSTALL.
 
 CHANGES IN TCLX 7.5a
 ====================
