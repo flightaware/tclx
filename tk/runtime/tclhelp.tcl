@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 8.0.4.1 1997/04/14 02:03:02 markd Exp $
+# $Id: tclhelp.tcl,v 8.1 1997/04/17 05:00:05 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ proc ButtonFrame {w title subject fileList} {
 
 proc DisplaySubject {subject} {
 
-    help:ListSubject $subject [help:ConvertPath $subject] subjects pages
+    TclXHelp::ListSubject $subject [TclXHelp::ConvertPath $subject] subjects pages
     if {$subject != "/"} {
         lvarpush subjects ".."
     }
@@ -149,7 +149,7 @@ proc DisplayPage {page} {
     pack $w.frame.page -side top -expand 1 -fill both
 
     if [catch {
-            set contents [read_file [help:ConvertPath $page]]
+            set contents [read_file [TclXHelp:ConvertPath $page]]
         } msg] {
         set contents $msg
     }
@@ -334,7 +334,7 @@ proc PerformAproposSearch {} {
     set referenceFrameItem \
         [$w.canvas create window 2 2 -window $aproposReferenceFrame -anchor nw]
 
-    set TCLXENV(help:lineCnt) 0
+    set TCLXENV(TclXHelp::lineCnt) 0
 
     # set up scan context
     set ch [scancontext create]
@@ -345,7 +345,7 @@ proc PerformAproposSearch {} {
     }
 
     # perform search
-    foreach dir [help:RootDirs] {
+    foreach dir [TclXHelp::RootDirs] {
         foreach brief [glob -nocomplain $dir/*.brf] {
             set briefFH [open $brief]
             scanfile $ch $briefFH
