@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.1 1992/09/20 22:55:24 markd Exp markd $
+# $Id: Config.mk,v 1.2 1992/09/21 07:11:03 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -50,7 +50,7 @@ TCL_UCB_DIR=../tcl6.4
 # source.  If TCL_TK_SHELL is define, Tk manual pages will be installed by the
 # install script.
 #
-TCL_TK_SHELL=wish
+#TCL_TK_SHELL=wish
 TCL_TK_DIR=../tk2.3
 TK_LIBRARY=/usr/local/lib/tk
 
@@ -82,7 +82,7 @@ AR=ar
 # C++ support code in the Tcl library. CCPLUS is the command to run your C++
 # compiler. CPLUSINCL is the location of your standard C++  include files.
 #
-CPLUSOBJS=tcl++.o
+#CPLUSOBJS=tcl++.o
 CCPLUS=CC
 CPLUSINCL=/usr/include/CC
 
