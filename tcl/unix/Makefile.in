@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.18 1997/11/11 05:33:21 markd Exp $
+# $Id: Makefile.in,v 8.19 1997/11/12 06:47:52 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -130,15 +130,15 @@ static:	tcl.static tclXtest.static
 
 standalone: tcl.standalone tclXtest.standalone hello
 
-tcl: tclXAppInit.o ${TCLX_SHLIB_BUILD} ${TCLX_STLIB_BUILD} Makefile
+tcl: tclXAppInit.o @TCLX_SHLIB_BUILD_REF@ @TCLX_STLIB_BUILD_REF@ Makefile
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
-tcl.static: tclXAppInit.o ${TCLX_STLIB_BUILD} Makefile
+tcl.static: tclXAppInit.o @TCLX_STLIB_BUILD_REF@ Makefile
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
-tcl.standalone: tclXAppInitSA.o ${TCLX_STLIB_BUILD} Makefile
+tcl.standalone: tclXAppInitSA.o @TCLX_STLIB_BUILD_REF@ Makefile
 	${CC} ${LD_SWITCHES} tclXAppInitSA.o ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -146,7 +146,7 @@ ${TCLX_STLIB_NAME}: ${OBJS}
 	${AR} cr ${TCLX_STLIB_NAME} ${OBJS}
 	${RANLIB} ${TCLX_STLIB_NAME}
 
-${TCLX_SHLIB_NAME}: ${SOBJS}
+@TCLX_SHLIB_BUILD_TARGET@: ${SOBJS}
 	rm -f ${TCLX_SHLIB_NAME}
 	PATH=${TCL_UNIX_DIR}:${PATH}; export PATH; \
 	TCL_LIBRARY=${TCL_UNIX_DIR}/../library; export TCL_LIBRARY; \
@@ -312,7 +312,7 @@ install-runtime:
 install-exec:
 	${INSTCOPY} tcl ${INSTALL_ROOT}${TCLX_INST_BIN}
 	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
-	if test "${TCLX_STLIB_BUILD}" != ""; then \
+	if test "X@TCLX_STLIB_BUILD_REF@" != "X"; then \
 	    ${INSTCOPY} ${TCLX_STLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB}; \
 	    ${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_STLIB_NAME}; \
 	fi

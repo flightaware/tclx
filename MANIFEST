@@ -337,6 +337,7 @@
 ./tcl/win/tclXwinPort.h
 ./tcl/win/tclXwinTest.c
 ./tcl/win/tclx.rc
+./tk/generic/hello.tcl
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXinitDSA.c
 ./tk/generic/tkXinitSA.c

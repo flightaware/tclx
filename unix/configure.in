@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.18 1997/09/06 05:40:36 markd Exp $
+dnl $Id: configure.in,v 8.19 1997/11/19 02:31:30 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.18 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.19 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -347,6 +347,8 @@ fi
 #
 # Determine the arguments for specifying the prefered TclX libraries on the
 # link lines.
+# A few system (AIX) have the same extension of shared and static libraries,
+# so shlib target must not be defined if not being build.
 #
 case "$BUILD_SHARED" in
     YES)
@@ -360,10 +362,12 @@ case "$BUILD_SHARED" in
         TCLX_LIB_SPEC="-L$TCLX_INST_LIB ${TCLX_LIB_FLAG}"
         TKX_BUILD_LIB_SPEC="-L$bldbasedir/tk/unix ${TKX_LIB_FLAG}"
         TKX_LIB_SPEC="-L$TCLX_INST_LIB ${TKX_LIB_FLAG}"
-        TCLX_STLIB_BUILD=$TCLX_STLIB_NAME
-        TKX_STLIB_BUILD=$TKX_STLIB_NAME
-        TCLX_SHLIB_BUILD=$TCLX_SHLIB_NAME
-        TKX_SHLIB_BUILD=$TKX_SHLIB_NAME
+        TCLX_STLIB_BUILD_REF=${TCLX_STLIB_NAME}
+        TKX_STLIB_BUILD_REF=${TKX_STLIB_NAME}
+        TCLX_SHLIB_BUILD_REF=${TCLX_SHLIB_NAME}
+        TKX_SHLIB_BUILD_REF=${TKX_SHLIB_NAME}
+        TCLX_SHLIB_BUILD_TARGET=${TCLX_SHLIB_NAME}
+        TKX_SHLIB_BUILD_TARGET=${TKX_SHLIB_NAME}
 	TCLX_LIB_NAME=${TCLX_SHLIB_NAME}
 	TKX_LIB_NAME=${TKX_SHLIB_NAME}
         ;;
@@ -374,10 +378,12 @@ case "$BUILD_SHARED" in
         TCLX_LIB_SPEC="$TCLX_INST_LIB/${TCLX_STLIB_NAME}"
         TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/${TKX_STLIB_NAME}"
         TKX_LIB_SPEC="$TCLX_INST_LIB/${TKX_STLIB_NAME}"
-        TCLX_STLIB_BUILD=${TCLX_STLIB_NAME}
-        TKX_STLIB_BUILD=${TKX_STLIB_NAME}
-        TCLX_SHLIB_BUILD=""
-        TKX_SHLIB_BUILD=""
+        TCLX_STLIB_BUILD_REF=${TCLX_STLIB_NAME}
+        TKX_STLIB_BUILD_REF=${TKX_STLIB_NAME}
+        TCLX_SHLIB_BUILD_REF=""
+        TKX_SHLIB_BUILD_REF=""
+        TCLX_SHLIB_BUILD_TARGET=NO_SHLIB
+        TKX_SHLIB_BUILD_TARGET=NO_SHLIB
  	TCLX_LIB_NAME=${TCLX_STLIB_NAME}
  	TKX_LIB_NAME=${TKX_STLIB_NAME}
         ;;
@@ -405,12 +411,14 @@ AC_SUBST(TCL_STLIB_NAME)
 AC_SUBST(TK_STLIB_NAME)
 AC_SUBST(TCLX_STLIB_NAME)
 AC_SUBST(TCLX_SHLIB_NAME)
-AC_SUBST(TCLX_STLIB_BUILD)
-AC_SUBST(TCLX_SHLIB_BUILD)
+AC_SUBST(TCLX_STLIB_BUILD_REF)
+AC_SUBST(TCLX_SHLIB_BUILD_REF)
+AC_SUBST(TCLX_SHLIB_BUILD_TARGET)
 AC_SUBST(TKX_STLIB_NAME)
 AC_SUBST(TKX_SHLIB_NAME)
-AC_SUBST(TKX_STLIB_BUILD)
-AC_SUBST(TKX_SHLIB_BUILD)
+AC_SUBST(TKX_STLIB_BUILD_REF)
+AC_SUBST(TKX_SHLIB_BUILD_REF)
+AC_SUBST(TKX_SHLIB_BUILD_TARGET)
 AC_SUBST(TCLX_BUILD_LIB_SPEC)
 AC_SUBST(TCLX_LIB_SPEC)
 AC_SUBST(TKX_BUILD_LIB_SPEC)

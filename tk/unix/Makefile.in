@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.20 1997/11/10 08:35:37 markd Exp $
+# $Id: Makefile.in,v 8.21 1997/11/19 02:31:28 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -91,7 +91,7 @@ static: wishx.static tktest.static
 
 standalone: wishx.standalone tktest.standalone
 
-wishx: tkXAppInit.o ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL} Makefile
+wishx: tkXAppInit.o @TKX_SHLIB_BUILD_REF@ @TKX_STLIB_BUILD_REF@ ${TCL} Makefile
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -107,7 +107,7 @@ ${TKX_STLIB_NAME}: ${OBJS}
 	${AR} cr ${TKX_STLIB_NAME} ${OBJS}
 	${RANLIB} ${TKX_STLIB_NAME}
 
-${TKX_SHLIB_NAME}: ${SOBJS}
+@TKX_SHLIB_BUILD_TARGET@: ${SOBJS}
 	rm -f ${TKX_SHLIB_NAME}
 	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} \
 	    ${TK_BUILD_LIB_SPEC} ${TCLX_BUILD_LIB_SPEC} \
@@ -153,15 +153,15 @@ help.tmp:
 # Generate the test program.
 #
 
-tktest: ${TEST_OBJS} ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
+tktest: ${TEST_OBJS} @TKX_SHLIB_BUILD_REF@ @TKX_STLIB_BUILD_REF@ ${TCL}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
-tktest.static: ${TEST_OBJS} ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
+tktest.static: ${TEST_OBJS} @TKX_STLIB_BUILD_REF@ ${TCL}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
-tktest.standalone: ${TEST_SAOBJS} ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
+tktest.standalone: ${TEST_SAOBJS} @TKX_STLIB_BUILD_REF@ ${TCL}
 	${CC} ${LD_SWITCHES} ${TEST_SAOBJS} ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -219,7 +219,7 @@ install-runtime:
 install-exec:
 	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_BIN}
 	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
-	if test "${TKX_STLIB_BUILD}" != ""; then \
+	if test "X@TKX_STLIB_BUILD_REF" != "X"; then \
 	    ${INSTCOPY} ${TKX_STLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB}; \
 	    ${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_STLIB_NAME}; \
 	fi
