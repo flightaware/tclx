@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.35 2000/02/05 17:14:48 markd Exp $
+# $Id: Makefile.in,v 8.36 2000/02/06 22:48:33 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -35,7 +35,7 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${SYSCFLAGS} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR} ${TK_XINCLUDES}
 
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} \
-	      ${TK_LD_SEARCH_FLAGS} ${TCL_LD_SEARCH_FLAGS} \
+	      ${TK_CC_SEARCH_FLAGS} ${TCL_CC_SEARCH_FLAGS} \
 	      ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 ALL_LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_BUILD_LIB_SPEC} \
