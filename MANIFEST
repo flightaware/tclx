@@ -252,6 +252,7 @@
 ./tcl/tests/chmod.test
 ./tcl/tests/chroot.test
 ./tcl/tests/clock.test
+./tcl/tests/cmdloop.test
 ./tcl/tests/cmdtrace.test
 ./tcl/tests/compat.test
 ./tcl/tests/convlib.test

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 5.2 1996/02/12 18:16:22 markd Exp $
+ * $Id: tclXsignal.c,v 5.3 1996/02/20 09:10:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -212,18 +212,13 @@ static int              interpTableSize  = 0;
 static int              numInterps  = 0;
 
 /*
- * A flag indicating that an "error" signal has occured.  This is used to
- * flush interactive input in commands and is only cleared there.  Also an
- * application-supplied function to call if a error signal occurs.  This
- * normally flushes command input.
+ * Application signal error handler.  Called after normal signal processing,
+ * when a signal results in an error.   Its main purpose in life is to allow
+ * interactive command loops to clear their input buffer on SIGINT.  This is
+ * not currently a generic interface, but should be. Only one maybe active.
  */
-int tclGotErrorSignal = FALSE;
-void (*tclErrorSignalProc) _ANSI_ARGS_((int signalNum)) = NULL;
-
-/*
- * Pointer to background error handler (normally NULL or Tk_BackgroundError).
- */
-void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp)) = NULL;
+static TclX_AppSignalErrorHandler appSigErrorHandler = NULL;
+static ClientData                 appSigErrorClientData = NULL;
 
 /*
  * Counters of signals that have occured but have not been processed.
@@ -287,6 +282,7 @@ EvalTrapCode _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 ProcessASignal _ANSI_ARGS_((Tcl_Interp *interp,
+                            int         background,
                             int         signalNum));
 
 static int
@@ -581,14 +577,6 @@ TclSignalTrap (signalNum)
     for (idx = 0; idx < numInterps; idx++)
         Tcl_AsyncMark (interpTable [idx].handler);
 
-    /*
-     * Flag used by command input functions to flush input.
-     */
-    if (signalTrapCmds [signalNum] == NULL) {
-        tclGotErrorSignal = TRUE;
-        if (tclErrorSignalProc != NULL)
-            (*tclErrorSignalProc) (signalNum);
-    }
 #ifdef NO_SIGACTION
     /*
      * For old-style Unix signals, the signal must be explictly re-enabled.
@@ -820,16 +808,19 @@ EvalTrapCode (interp, signalNum)
  *   Do processing on the specified signal.
  *
  * Parameters:
- *   o interp (O) - Result will contain the result of the signal handling
+ *   o interp (I) - Result will contain the result of the signal handling
  *     code that was evaled.
- *   o signalNum - The signal to process.
+ *   o background (I) - Signal handler was called from the event loop with
+ *     no current interp.
+ *   o signalNum (I) - The signal to process.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessASignal (interp, signalNum)
+ProcessASignal (interp, background, signalNum)
     Tcl_Interp *interp;
+    int         background;
     int         signalNum;
 {
     char *signalName;
@@ -855,6 +846,15 @@ ProcessASignal (interp, signalNum)
                           (char *)NULL);
         Tcl_SetVar (interp, "errorInfo", "", TCL_GLOBAL_ONLY);
         result = TCL_ERROR;
+
+        /*
+         * Let the application at signals that generate errors.
+         */
+        if (appSigErrorHandler != NULL)
+            result = (*appSigErrorHandler) (interp,
+                                            appSigErrorClientData,
+                                            background,
+                                            signalNum);
     } else {
         while (signalsReceived [signalNum] > 0) {
             (signalsReceived [signalNum])--;
@@ -885,11 +885,10 @@ ProcessASignal (interp, signalNum)
  *   o clientData (I) - Not used.
  *   o interp (I/O) - interp->result should contain the result for
  *     the command that just executed.  This will either be restored or
- *     replaced with a new result.  If this is NULL, the no interpreter
- *     is directly available (i.e. Tk event loop).  In this case, the first
- *     interpreter in internal interpreter table is used.  If an error occurs,
- *     it is handled via the error handler registerd in the global variable
- *     "tclSignalBackgroundError"
+ *     replaced with a new result.  If this is NULL, then no interpreter
+ *     is directly available (i.e. event loop).  In this case, the first
+ *     interpreter in internal interpreter table is used.  If an error results
+ *     from signal processing, it is handled via Tcl_BackgroundError.
  *   o cmdResultCode (I) - The integer result returned by the command that
  *     Tcl_Eval just completed.  Should be TCL_OK if not called from
  *     Tcl_Eval.
@@ -931,7 +930,9 @@ Tcl_ProcessSignals (clientData, interp, cmdResultCode)
     for (signalNum = 1; signalNum < MAXSIG; signalNum++) {
         if (signalsReceived [signalNum] == 0)
             continue;
-        result = ProcessASignal (sigInterp, signalNum);
+        result = ProcessASignal (sigInterp,
+                                 (interp == NULL),
+                                 signalNum);
         if (result == TCL_ERROR)
             break;
     }
@@ -960,13 +961,12 @@ Tcl_ProcessSignals (clientData, interp, cmdResultCode)
     }
 
     /*
-     * If we got an error and an interpreter was not supplied, call the
-     * background error handler (if available).  Otherwise, lose the error.
+     * If a signal handler returned an error and an interpreter was not
+     * supplied, call the background error handler.
      */
-    if ((result == TCL_ERROR) && (interp == NULL) &&
-        (tclSignalBackgroundError != NULL))
-        (*tclSignalBackgroundError) (sigInterp);
-
+    if ((result == TCL_ERROR) && (interp == NULL)) {
+        Tcl_BackgroundError (sigInterp);
+    }
     return cmdResultCode;
 }
 
@@ -1589,7 +1589,7 @@ SignalCmdCleanUp (clientData, interp)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SetupSigInt --
+ * TclX_SetupSigInt --
  *    Set up SIGINT to the "error" state if the current state is default.
  * This is done because shells set SIGINT to ignore for background processes
  * so that they don't die on signals generated by the user at the keyboard.
@@ -1597,13 +1597,33 @@ SignalCmdCleanUp (clientData, interp)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_SetupSigInt ()
+TclX_SetupSigInt ()
 {
     signalProcPtr_t  actionFunc;
 
     if ((GetSignalState (SIGINT, &actionFunc) == TCL_OK) &&
         (actionFunc == SIG_DFL))
         SetSignalState (SIGINT, TclSignalTrap);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_SetAppSignalErrorHandler --
+ *
+ *   Set the current application signal error handler.  This is kind of a
+ * hack.  It just saves the handler and client data in globals.
+ *
+ * Parameters:
+ *   o errorFunc (I) - Error handling function.
+ *   o clientData (I) - Client data to pass to function
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_SetAppSignalErrorHandler (errorFunc, clientData)
+    TclX_AppSignalErrorHandler errorFunc;
+    ClientData                 clientData;
+{
+    appSigErrorHandler = errorFunc;
+    appSigErrorClientData = clientData;
 }
 
 /*-----------------------------------------------------------------------------

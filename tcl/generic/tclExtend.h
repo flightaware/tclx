@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.15 1996/03/10 04:42:28 markd Exp $
+ * $Id: tclExtend.h,v 5.16 1996/03/11 08:14:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -53,30 +53,33 @@
 typedef void *void_pt;
 
 /*
- * Flag user to indicate that a signal that was setup to return an error
- * occured (it may not have been processed yet).  This is used by interactive
- * command loops to flush input.  It should be explictly cleared by any routine
- * that cares about it.  Also an application-supplied function to call if a
- * error signal occurs.  This normally flushes command input.
+ * Flags to command loop functions.
  */
-extern int tclGotErrorSignal;
-extern void (*tclErrorSignalProc) _ANSI_ARGS_((int signalNum));
-
-/*
- * Pointer to background error handler for signals handled while not in an
- * interpreter.
- */
-extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
+#define TCLX_CMDL_INTERACTIVE  (1<<0)
+#define TCLX_CMDL_EXIT_ON_EOF  (1<<1)
 
 /*
  * If this variable is non-zero, the TclX shell will delete the interpreter
- * at the end of a script instead of evaluating the "exit" command.  This is
- * for applications that want to track down memory leaks.  This does not
- * alter the behavior of explicit calls to exit.
+ * at the end of a script instead of exiting immediately.  This is for
+ * applications that want to track down memory leaks.  This does not alter the
+ * behavior of explicit calls to exit.
  */
 extern int tclDeleteInterpAtEnd;
 
-
+/*
+ * Application signal error handler.  Called after normal signal processing,
+ * when a signal results in an error.   Its main purpose in life is to allow
+ * interactive command loops to clear their input buffer on SIGINT.  This is
+ * not currently a generic interface, but should be. Only one maybe active.
+ * This is an undocumented interface.  Its in the external file in case
+ * someone needs this facility.  It might change in the future.  Let us
+ * know if you need this functionallity.
+ */
+typedef int
+(*TclX_AppSignalErrorHandler) _ANSI_ARGS_((Tcl_Interp *interp,
+                                           ClientData  clientData,
+                                           int         background,
+                                           int         signalNum));
 /*
  * Exported TclX initialization functions.
  */
@@ -108,16 +111,17 @@ EXTERN void
 TclX_EvalRCFile _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN void
-TclX_OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
-                               int         topLevel));
-
-EXTERN void
 TclX_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
                               int         intResult,
                               char       *checkCmd));
 
 EXTERN void
-Tcl_SetupSigInt _ANSI_ARGS_((void));
+TclX_SetupSigInt _ANSI_ARGS_((void));
+
+EXTERN void
+TclX_SetAppSignalErrorHandler _ANSI_ARGS_((
+    TclX_AppSignalErrorHandler errorFunc,
+    ClientData                 clientData));
 
 EXTERN void
 TclX_SetAppInfo _ANSI_ARGS_((int   defaultValues,
@@ -228,6 +232,22 @@ EXTERN void_pt
 Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              void_pt      headerPtr,
                              CONST  char *handle));
+/*
+ * Command loop functions.
+ */
+EXTERN int
+TclX_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
+                              int         options,
+                              char       *endCommand,
+                              char       *prompt1,
+                              char       *prompt2));
+
+EXTERN int
+TclX_AsyncCommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
+                                   int         options,
+                                   char       *endCommand,
+                                   char       *prompt1,
+                                   char       *prompt2));
 
 /*
  * Tk with TclX initialization.

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.9 1996/03/11 04:12:18 markd Exp $
+.\" $Id: TclX.n,v 5.10 1996/03/13 08:29:21 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -82,29 +82,55 @@ This procedure lists the directories in the directory stack.
 '\"@endhelp
 '
 '\"@help: tcl/control/commandloop
-'\"@brief: Create an interactive command loop.
-.TP
-.B commandloop ?\fIprompt1\fR? ?\fIprompt2\fR?
+'\"@brief: Create an interactive command loop or event based command reader.
+f.TP
+.B commandloop  ?\fB-async\fR? ?\fB-interactive \fBon|off|tty\fR? ?\fB-prompt1 \fIcmd\fR? ?\fB-prompt2 \fIcmd\fR? ?\fB-endcommand \fIcmd\fR?
 .br
-Create an interactive command loop for the current TCL interpreter.  This
-command receives commands from stdin and executes them.  It is
-useful TCL scripts that do not normally converse interactively with
-a user through a Tcl command interpreter, but which sometimes want
-to enter this mode.
+Create an interactive command loop reading commands from stdin and writing
+results to stdout.  Command loops are maybe either be blocking or event
+oriented.  This command is useful for Tcl scripts that do not normally
+converse interactively with a user through a Tcl command interpreter, but
+which sometimes want to enter this mode, perhaps for debugging or user
+configuration.  The command loop terminates on EOF.
 .sp
-\fIPrompt1\fR is a Tcl command  that is evaluated to output 
-a prompt string.  The old value of \fBtcl_prompt1\fR is
-saved and it is set to this value for the duration of the command loop.
-\fIPrompt2\fR is a command that is evaluated to output
-the ``downlevel prompt'', which is
-the prompt which is issued for continuation input.  The old value of
-\fBtcl_prompt2\fR is
-saved and it is set to this value for the duration of the command loop.
+The following options are available:
+.RS 5
+.TP \fB-async\fR
+A command handler will be associated with stdin.  When input is available
+on stdin, it will be read and accumulated until a full command is available.
+That command will then be evaluated.  An event loop must be entered to make
+for input to be processed.
+'
+.TP \fB-interactive on|off|tty\fR
+Enable or disable interactive command mode.  In interactive mode, commands
+are prompted for and the results of comments are printed.  The value maybe
+any boolean value or \fBtty\fR.  If \fBtty\fR is used, interactive mode
+is enabled if stdin is associated with a terminal or terminal emulator.
+The default is \fBtty\fR.
+'
+.TP \fB-prompt1 \fIcmd\fR
+If specified, \fIcmd\fR  is used is evaluate and its result used for the
+main command prompt.  If not specified, the command in \fBtcl_prompt1\fR
+is evaluated to output the prompt.  Note the difference in behavior,
+\fIcmd\fR results is used, while \fBtcl_prompt1\fR outputs.  This is to
+allow for future expansion to command loops that write to other than
+stdout.
+'
+.TP \fB-prompt2 \fIcmd\fR
+If specified, \fIcmd\fR is used is evaluate and its result used for the
+secondary (continuation) command prompt.  If not specified, the command in
+\fBtcl_prompt2\fR is evaluated to output the prompt.
+'
+.TP \fB-endcommand \fIcmd\fR
+If specified, \fIcmd\fR is evaluated when the command loop terminates.
+.RE
 .sp
-When the command
-terminates, the variables for the prompt hooks will be set to their old value.
-If these arguments are not specified, the prompt hooks use their current
-value.
+In interactive mode, the results of set commands with two arguments are
+not printed.
+.sp
+If \fBSIGINT\fR is configured to generate a Tcl error, it can be used to
+delete the current command being type without aborting the program in
+progress.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

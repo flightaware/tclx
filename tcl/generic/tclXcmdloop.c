@@ -12,11 +12,29 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 5.4 1996/03/11 06:15:55 markd Exp $
+ * $Id: tclXcmdloop.c,v 5.5 1996/03/12 07:52:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * Client data entry for asynchronous command reading.  This is associated
+ * with a given instance of a async command loop.  I allows for recursive
+ * commands loops on the same channel (and even multiple, but the results
+ * out be unpredicatable).
+ */
+typedef struct {
+    Tcl_Interp  *interp;       /* Interp for command eval.            */
+    Tcl_Channel  channel;      /* Input channel.                      */
+    int          options;      /* Command loop options.               */
+    Tcl_DString  command;      /* Buffer for command being read.      */
+    int          partial;      /* Partial command in buffer?          */
+    char        *endCommand;   /* Command to execute at end of loop.  */
+    char        *prompt1;      /* Prompts to use.                     */
+    char        *prompt2;
+} asyncLoopData_t;
+
 
 /*
  * Prototypes of internal functions.
@@ -24,21 +42,36 @@
 static int
 IsSetVarCmd _ANSI_ARGS_((char  *command));
 
+static void
+OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
+                          int         topLevel,
+                          char       *prompt1,
+                          char       *prompt2));
+
 static int
-SetPromptVar _ANSI_ARGS_((Tcl_Interp  *interp,
-                          char        *hookVarName,
-                          char        *newHookValue,
-                          char       **oldHookValuePtr));
+AsyncSignalErrorHandler _ANSI_ARGS_((Tcl_Interp *interp,
+                                     ClientData  clientData,
+                                     int         background,
+                                     int         signalNum));
+
+
+static void
+AsyncCommandHandler _ANSI_ARGS_((ClientData clientData,
+                                 int        mask));
+
+static void
+AsyncCommandHandlerDelete _ANSI_ARGS_((ClientData clientData));
 
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * IsSetVarCmd --
- *
  *    Determine if a command is a `set' command that sets a variable
- * (i.e. two arguments).  This routine should only be called if the command
- * returned TCL_OK.  Returns TRUE if it sets a variable, FALSE if its some
- * other command.
+ * (i.e. two arguments).
+ *
+ * Parameters:
+ *   o command (I) - Command to check.
+ * Returns:
+ *   TRUE if it is a set that sets a variable, FALSE if its some other command.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -66,11 +99,8 @@ IsSetVarCmd (command)
     return wordCnt > 2 ? TRUE : FALSE;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TclX_PrintResult --
- *
  *   Print the result of a Tcl_Eval.  It can optionally not echo "set" commands
  * that successfully set a variable.
  *
@@ -89,7 +119,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
     int         intResult;
     char       *checkCmd;
 {
-    Tcl_Channel stdoutChan;
+    Tcl_Channel stdoutChan,  stderrChan;
 
     /*
      * If the command was supplied and it was a successful set of a variable,
@@ -99,24 +129,26 @@ TclX_PrintResult (interp, intResult, checkCmd)
         return;
 
     stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
+    stderrChan = Tcl_GetStdChannel (TCL_STDERR);
 
     if (intResult == TCL_OK) {
         if (stdoutChan == NULL)
             return;
         if (interp->result [0] != '\0') {
+            if (stderrChan != NULL)
+                Tcl_Flush (stderrChan);
             TclX_WriteStr (stdoutChan, interp->result);
             TclX_WriteNL (stdoutChan);
+            Tcl_Flush (stdoutChan);
         }
     } else {
-        Tcl_Channel stderrChan;
-        char        msg [64];
+        char msg [64];
 
-        stderrChan = Tcl_GetStdChannel (TCL_STDERR);
         if (stderrChan == NULL)
             return;
-       
         if (stdoutChan != NULL)
             Tcl_Flush (stdoutChan);
+
         if (intResult == TCL_ERROR) {
             strcpy (msg, "Error: ");
         } else {
@@ -129,25 +161,37 @@ TclX_PrintResult (interp, intResult, checkCmd)
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * OutputPrompt --
+ *   Outputs a prompt by executing either the command string in tcl_prompt1 or
+ * tcl_prompt2 or a specified prompt string.  Also involkes any pending async
+ * handlers, as these need to be done before the eval of the prompt, or they
+ * might result in an error in the prompt.
  *
- * TclX_OutputPrompt --
- *     Outputs a prompt by executing either the command string in
- *     tcl_prompt1 or tcl_prompt2.
- *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o topLevel (I) - If TRUE, output the top level prompt (tcl_prompt1).
+ *   o prompt1 (I) - If not NULL, use this command instead of the value of
+ *     tcl_prompt1.  In this case, the result of the command is used rather
+ *     than the output.
+ *   o prompt2 (I) - If not NULL, use this command instead of the value of
+ *     tcl_prompt2.  In this case, the result of the command is used rather
+ *     than the output.
  *-----------------------------------------------------------------------------
  */
-void
-TclX_OutputPrompt (interp, topLevel)
+static void
+OutputPrompt (interp, topLevel, prompt1, prompt2)
     Tcl_Interp *interp;
     int         topLevel;
+    char       *prompt1;
+    char       *prompt2;
 {
-    char *hookName;
     char *promptHook;
-    int result;
-    int promptDone = FALSE;
-    Tcl_Channel stdoutChan;
+    int result, useResult, promptDone = FALSE;
+    Tcl_Channel stdoutChan, stderrChan;
+
+    stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
+    stderrChan = Tcl_GetStdChannel (TCL_STDERR);
 
     /*
      * If a signal came in, process it.  This prevents signals that are queued
@@ -157,81 +201,400 @@ TclX_OutputPrompt (interp, topLevel)
         Tcl_AsyncInvoke (interp, TCL_OK); 
     }
 
-    hookName = topLevel ? "tcl_prompt1" : "tcl_prompt2";
+    if (stderrChan != NULL)
+        Tcl_Flush (stderrChan);
 
-    promptHook = Tcl_GetVar (interp, hookName, 1);
+    /*
+     * Determine prompt command to evaluate.
+     */
+    if (topLevel) {
+        if (prompt1 != NULL) {
+            promptHook = prompt1;
+            useResult = TRUE;
+        } else {
+            promptHook = Tcl_GetVar (interp, "tcl_prompt1", TCL_GLOBAL_ONLY);
+            useResult = FALSE;
+        }
+    } else {
+        if (prompt2 != NULL) {
+            promptHook = prompt2;
+            useResult = TRUE;
+        } else {
+            promptHook = Tcl_GetVar (interp, "tcl_prompt2", TCL_GLOBAL_ONLY);
+            useResult = FALSE;
+        }
+    }
+
     if (promptHook != NULL) {
         result = Tcl_Eval (interp, promptHook);
         if (result == TCL_ERROR) {
-            Tcl_Channel stderrChan = Tcl_GetStdChannel (TCL_STDERR);
             if (stderrChan != NULL) {
                 TclX_WriteStr (stderrChan, "Error in prompt hook: ");
                 TclX_WriteStr (stderrChan, interp->result);
                 TclX_WriteNL (stderrChan);
             }
-            TclX_PrintResult (interp, result, NULL);
         } else {
+            if (useResult && (stdoutChan != NULL))
+                TclX_WriteStr (stdoutChan, interp->result);
             promptDone = TRUE;
         }
     } 
 
-    stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
     if (stdoutChan != NULL) {
-        if (!promptDone) {
-            if (topLevel)
-                Tcl_Write (stdoutChan, "%", 1);
-            else
-                Tcl_Write (stdoutChan, ">", 1);
-        }
+        if (!promptDone)
+            Tcl_Write (stdoutChan, topLevel ? "%" : ">", 1);
         Tcl_Flush (stdoutChan);
     }
     Tcl_ResetResult (interp);
 }
 
-/*
+/*-----------------------------------------------------------------------------
+ * AsyncSignalErrorHandler --
+ *   Handler for signals that generate errors.   If no code is currently
+ * executing (i.e, it the event loop), we want the input buffer to be
+ * cleared on SIGINT.
+ *
+ * Parameters:
+ *   o interp (I) - The interpreter used to process the signal.  The error
+ *     message is in the result.
+ *   o clientData (I) - Pointer to the asyncLoopData structure.
+ *   o background (I) - TRUE if signal was handled in the background (i.e
+ *     the event loop) rather than in an interp.
+ * Returns:
+ *  The Tcl result code to continue with.   TCL_OK if we have handled the
+ * signal, TCL_ERROR if not.
  *-----------------------------------------------------------------------------
+ */
+static int
+AsyncSignalErrorHandler (interp, clientData, background, signalNum)
+    Tcl_Interp *interp;
+    ClientData  clientData;
+    int         background;
+    int         signalNum;
+{
+    if (background & (signalNum == SIGINT)) {
+        asyncLoopData_t *dataPtr = (asyncLoopData_t *) clientData;
+        Tcl_Channel stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
+
+        Tcl_DStringFree (&dataPtr->command);
+        dataPtr->partial = FALSE;
+
+        Tcl_ResetResult (interp);
+        
+        if (dataPtr->options & TCLX_CMDL_INTERACTIVE) {
+            if (stdoutChan != NULL)
+                TclX_WriteNL (stdoutChan);
+            OutputPrompt (dataPtr->interp, !dataPtr->partial,
+                          dataPtr->prompt1, dataPtr->prompt2);
+        }
+        return TCL_OK;
+    }
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * AsyncCommandHandler --
+ *   Handler for async command reading. This procedure is invoked by the event
+ * dispatcher whenever the input becomes readable.  It grabs the next line of
+ * input characters, adds them to a command being assembled, and executes the
+ * command if it's complete.
  *
- * Tcl_CommandLoop --
+ * Parameters:
+ *   o clientData (I) - Pointer to the asyncLoopData structure.
+ *   o mask (I) - Not used.
+ *-----------------------------------------------------------------------------
+ */
+static void
+AsyncCommandHandler (clientData, mask)
+    ClientData clientData;
+    int        mask;
+{
+    asyncLoopData_t *dataPtr = (asyncLoopData_t *) clientData;
+    int code;
+    char *cmd;
+
+    /*
+     * Make sure that we are the current signal error handler.  This
+     * handles recusive event loop calls.
+     */
+    TclX_SetAppSignalErrorHandler (AsyncSignalErrorHandler, clientData);
+
+    if (Tcl_Gets (dataPtr->channel, &dataPtr->command) < 0) {
+        /*
+         * Handler EINTR error special.
+         */
+        if (!(Tcl_Eof (dataPtr->channel) ||
+              Tcl_InputBlocked (dataPtr->channel)) &&
+            (Tcl_GetErrno () == EINTR)) {
+            if (Tcl_AsyncReady ()) {
+                Tcl_AsyncInvoke (NULL, TCL_OK); 
+            }
+            return;  /* Let the event loop call us again. */
+        }
+
+        /*
+         * Handle EOF or error.
+         */
+        if (dataPtr->options & TCLX_CMDL_EXIT_ON_EOF) {
+            Tcl_Exit (0);
+        } else {
+            AsyncCommandHandlerDelete (clientData);
+        }
+        return;
+    }
+ 
+   cmd = Tcl_DStringAppend (&dataPtr->command, "\n", -1);
+    
+    if (!Tcl_CommandComplete (cmd)) {
+        dataPtr->partial = TRUE;
+        goto prompt;
+    }
+    dataPtr->partial = FALSE;
+
+    /*
+     * Disable the stdin channel handler while evaluating the command;
+     * otherwise if the command re-enters the event loop we might process
+     * commands from stdin before the current command is finished.  Among
+     * other things, this will trash the text of the command being evaluated.
+     */
+
+    Tcl_CreateChannelHandler (dataPtr->channel, 0,
+                              AsyncCommandHandler, clientData);
+    code = Tcl_RecordAndEval (dataPtr->interp, cmd, TCL_EVAL_GLOBAL);
+    Tcl_CreateChannelHandler (dataPtr->channel, TCL_READABLE,
+                              AsyncCommandHandler, clientData);
+    if (dataPtr->interp->result [0] != '\0') {
+        if (dataPtr->options & TCLX_CMDL_INTERACTIVE) {
+            TclX_PrintResult (dataPtr->interp, code, cmd);
+        }
+    }
+    Tcl_DStringFree (&dataPtr->command);
+
+    /*
+     * Output a prompt.
+     */
+  prompt:
+    if (dataPtr->options & TCLX_CMDL_INTERACTIVE) {
+        OutputPrompt (dataPtr->interp, !dataPtr->partial,
+                      dataPtr->prompt1, dataPtr->prompt2);
+    }
+    Tcl_ResetResult (dataPtr->interp);
+}
+
+/*-----------------------------------------------------------------------------
+ * AsyncCommandHandlerDelete --
+ *   Delete an async command handler.
  *
- *   Run a Tcl command loop.  The command loop interactively prompts for,
- * reads and executes commands. Two global variables, "tcl_prompt1" and
- * "tcl_prompt2" contain prompt hooks.  A prompt hook is Tcl code that is
- * executed and its result is used as the prompt string. If a error generating
- * signal occurs while in the command loop, it is reset and ignored.  EOF
- * terminates the loop.
+ * Parameters:
+ *   o clientData (I) - Pointer to the asyncLoopData structure for the
+ *     handler being deleted.
+ *-----------------------------------------------------------------------------
+ */
+static void
+AsyncCommandHandlerDelete (clientData)
+    ClientData clientData;
+{
+    asyncLoopData_t *dataPtr = (asyncLoopData_t *) clientData;
+
+    /*
+     * Remove handlers from system.
+     */
+    Tcl_DeleteChannelHandler (dataPtr->channel, AsyncCommandHandler, 
+                              clientData);
+    Tcl_DeleteCloseHandler (dataPtr->channel, AsyncCommandHandlerDelete,
+                            clientData);
+    TclX_SetAppSignalErrorHandler (NULL, NULL);
+    
+    /*
+     * If there is an end command, eval it.
+     */
+    if (dataPtr->endCommand != NULL) {
+        if (Tcl_GlobalEval (dataPtr->interp, dataPtr->endCommand) != TCL_OK)
+            Tcl_BackgroundError (dataPtr->interp);
+        Tcl_ResetResult (dataPtr->interp);
+    }
+
+    /*
+     * Free resources.
+     */          
+    Tcl_DStringFree (&dataPtr->command);
+    if (dataPtr->endCommand != NULL)
+        ckfree (dataPtr->endCommand);
+    if (dataPtr->prompt1 != NULL)
+        ckfree (dataPtr->prompt1);
+    if (dataPtr->prompt2 != NULL)
+        ckfree (dataPtr->prompt2);
+    ckfree (dataPtr);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_AsyncCommandLoop --
+ *   Establish an async command handler on stdin.
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter
- *   o interactive (I) - If TRUE print prompts and non-error results.
+ *   o options (I) - Async command loop options:
+ *     o TCLX_CMDL_INTERACTIVE - Print a prompt and the result of command
+ *       execution.
+ *     o TCLX_CMDL_EXIT_ON_EOF - Exit when an EOF is encountered.
+ *   o endCommand (I) - If not NULL, a command to evaluate when the command
+ *     handler is removed, either by closing the channel or hitting EOF.
+ *   o prompt1 (I) - If not NULL, the command to evalute get the main prompt.
+ *     If NULL, the current value of tcl_prompt1 is evaluted to output the
+ *     main prompt.  NOTE: prompt1 returns a result while tcl_prompt1
+ *     outputs a result.
+ *   o prompt2 (I) - If not NULL, the command to evalute get the secondary
+ *     prompt.  If NULL, the current value of tcl_prompt is evaluted to
+ *     output the secondary prompt.  NOTE: prompt2 returns a result while
+ *     tcl_prompt2 outputs a result.
  * Returns:
  *   TCL_OK or TCL_ERROR;
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_CommandLoop (interp, interactive)
+TclX_AsyncCommandLoop (interp, options, endCommand, prompt1, prompt2)
     Tcl_Interp *interp;
-    int         interactive;
+    int         options;
+    char       *endCommand;
+    char       *prompt1;
+    char       *prompt2;
 {
-    Tcl_DString cmdBuf;
-    int result, topLevel = TRUE;
     Tcl_Channel stdinChan;
+    asyncLoopData_t *dataPtr;
 
-    Tcl_DStringInit (&cmdBuf);
+    stdinChan = TclX_GetOpenChannel (interp, "stdin", TCL_READABLE);
+    if (stdinChan == NULL)
+        return TCL_ERROR;
+
+    dataPtr = (asyncLoopData_t *) ckalloc (sizeof (asyncLoopData_t));
+    
+    dataPtr->interp = interp;
+    dataPtr->channel = stdinChan;
+    dataPtr->options = options;
+    Tcl_DStringInit (&dataPtr->command);
+    dataPtr->partial = FALSE;
+    if (endCommand == NULL)
+        dataPtr->endCommand = NULL;
+    else
+        dataPtr->endCommand = ckstrdup (endCommand);
+    if (prompt1 == NULL)
+        dataPtr->prompt1 = NULL;
+    else
+        dataPtr->prompt1 = ckstrdup (prompt1);
+    if (prompt2 == NULL)
+        dataPtr->prompt2 = NULL;
+    else
+        dataPtr->prompt2 = ckstrdup (prompt2);
+
+    Tcl_DeleteCloseHandler (stdinChan, AsyncCommandHandlerDelete,
+                            (ClientData) dataPtr);
+    Tcl_CreateChannelHandler (stdinChan, TCL_READABLE,
+                              AsyncCommandHandler, (ClientData) dataPtr);
+    TclX_SetAppSignalErrorHandler (AsyncSignalErrorHandler,
+                                   (ClientData) dataPtr);
+
+    /*
+     * Output initial prompt.
+     */
+    if (dataPtr->options & TCLX_CMDL_INTERACTIVE) {
+        OutputPrompt (dataPtr->interp, !dataPtr->partial,
+                      dataPtr->prompt1, dataPtr->prompt2);
+    }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * SyncSignalErrorHandler --
+ *   Handler for signals that generate errors.  We want to clear the input
+ * buffer on SIGINT.
+ *
+ * Parameters:
+ *   o interp (I) - The interpreter used to process the signal.  The error
+ *     message is in the result.
+ *   o clientData (I) - Pointer to a int to set to TRUE if SIGINT occurs.
+ *   o background (I) - Ignored.
+ * Returns:
+ *  The Tcl result code to continue with.   TCL_OK if we have handled the
+ * signal, TCL_ERROR if not.
+ *-----------------------------------------------------------------------------
+ */
+static int
+SyncSignalErrorHandler (interp, clientData, background, signalNum)
+    Tcl_Interp *interp;
+    ClientData  clientData;
+    int         background;
+    int         signalNum;
+{
+    if (signalNum == SIGINT) {
+        *((int *) clientData) = TRUE;
+    }
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_CommandLoop --
+ *   Run a syncronous Tcl command loop.  EOF terminates the loop.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter
+ *   o options (I) - Command loop options:
+ *     o TCLX_CMDL_INTERACTIVE - Print a prompt and the result of command
+ *       execution.
+ *   o prompt1 (I) - If not NULL, the command to evalute get the main prompt.
+ *     If NULL, the current value of tcl_prompt1 is evaluted to output the
+ *     main prompt.  NOTE: prompt1 returns a result while tcl_prompt1
+ *     outputs a result.
+ *   o prompt2 (I) - If not NULL, the command to evalute get the secondary
+ *     prompt.  If NULL, the current value of tcl_prompt is evaluted to
+ *     output the secondary prompt.  NOTE: prompt2 returns a result while
+ *     tcl_prompt2 outputs a result.
+ * Returns:
+ *   TCL_OK or TCL_ERROR;
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
+    Tcl_Interp *interp;
+    int         options;
+    char       *endCommand;
+    char       *prompt1;
+    char       *prompt2;
+{
+    Tcl_DString command;
+    int result, partial = FALSE, gotSigIntError = FALSE;
+    Tcl_Channel stdinChan, stdoutChan;
+
+    Tcl_DStringInit (&command);
 
     while (TRUE) {
         /*
-         * If a signal came in, process it. Drop any pending command
-         * if a "error" signal occured since the last time we were
-         * through here.
+         * Always set signal error handler so recursive command loops work.
+         */
+        TclX_SetAppSignalErrorHandler (SyncSignalErrorHandler,
+                                       &gotSigIntError);
+
+        /*
+         * If a signal handlers are pending, process them.
          */
         if (Tcl_AsyncReady ()) {
-            Tcl_AsyncInvoke (interp, TCL_OK); 
+            result = Tcl_AsyncInvoke (interp, TCL_OK); 
+            if ((result != TCL_OK) && !gotSigIntError)
+                TclX_PrintResult (interp, result, NULL);
         }
-        if (tclGotErrorSignal) {
-            tclGotErrorSignal = FALSE;
-            Tcl_DStringFree (&cmdBuf);
-            topLevel = TRUE;
+
+        /*
+         * Drop any pending command if SIGINT occured since the last time we
+         * were through here, event if its already been processed.
+         */
+        if (gotSigIntError) {
+            gotSigIntError = FALSE;
+            Tcl_DStringFree (&command);
+            partial = FALSE;
+            stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
+            if (stdoutChan != NULL)
+                TclX_WriteNL (stdoutChan);
         }
+        gotSigIntError = FALSE;
 
         /*
          * Output a prompt and input a command.
@@ -240,20 +603,16 @@ Tcl_CommandLoop (interp, interactive)
         if (stdinChan == NULL)
             goto endOfFile;
 
-        if (interactive) {
-            TclX_OutputPrompt (interp, topLevel);
+        if (options & TCLX_CMDL_INTERACTIVE) {
+            OutputPrompt (interp, !partial, prompt1, prompt2);
         }
-        Tcl_SetErrno (0);
-        result = Tcl_Gets (stdinChan, &cmdBuf);
 
+        result = Tcl_Gets (stdinChan, &command);
         if (result < 0) {
             if (Tcl_Eof (stdinChan) || Tcl_InputBlocked (stdinChan))
                 goto endOfFile;
             if (Tcl_GetErrno () == EINTR) {
-                Tcl_Channel stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
-                if (stdoutChan != NULL)
-                    TclX_WriteNL (stdoutChan);
-                continue;  /* Next command */
+                continue;  /* Process signals above */
             }
             Tcl_AppendResult (interp, "command input error on stdin: ",
                               Tcl_PosixError (interp), (char *) NULL);
@@ -265,10 +624,10 @@ Tcl_CommandLoop (interp, interactive)
          * command-complete checking, add it back in.  If the command is
          * not complete, get the next line.
          */
-        Tcl_DStringAppend (&cmdBuf, "\n", 1);
+        Tcl_DStringAppend (&command, "\n", 1);
 
-        if (!Tcl_CommandComplete (cmdBuf.string)) {
-            topLevel = FALSE;
+        if (!Tcl_CommandComplete (command.string)) {
+            partial = TRUE;
             continue;  /* Next line */
         }
 
@@ -276,115 +635,116 @@ Tcl_CommandLoop (interp, interactive)
          * Finally have a complete command, go eval it and maybe output the
          * result.
          */
-        result = Tcl_RecordAndEval (interp, cmdBuf.string, 0);
+        result = Tcl_RecordAndEval (interp, command.string, 0);
 
-        if (interactive || result != TCL_OK)
-            TclX_PrintResult (interp, result, cmdBuf.string);
+        if ((options & TCLX_CMDL_INTERACTIVE) || (result != TCL_OK))
+            TclX_PrintResult (interp, result, command.string);
 
-        topLevel = TRUE;
-        Tcl_DStringFree (&cmdBuf);
+        partial = FALSE;
+        Tcl_DStringFree (&command);
     }
   endOfFile:
-    Tcl_DStringFree (&cmdBuf);
-    return TCL_OK;
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
- * SetPromptVar --
- *     Set one of the prompt hook variables, saving a copy of the old
- *     value, if it exists.
- *
- * Parameters:
- *   o hookVarName (I) - The name of the global variable containing prompt
- *     hook.
- *   o newHookValue (I) - The new value for the prompt hook.
- *   o oldHookValuePtr (O) - If not NULL, then a pointer to a copy of the
- *     old prompt value is returned here.  NULL is returned if there was not
- *     old value.  This is a pointer to a malloc-ed string that must be
- *     freed when no longer needed.
- * Result:
- *   TCL_OK if the hook variable was set ok, TCL_ERROR if an error occured.
- *-----------------------------------------------------------------------------
- */
-static int
-SetPromptVar (interp, hookVarName, newHookValue, oldHookValuePtr)
-    Tcl_Interp *interp;
-    char       *hookVarName;
-    char       *newHookValue;
-    char      **oldHookValuePtr;
-{
-    char *hookValue;    
-    char *oldHookPtr = NULL;
-
-    if (oldHookValuePtr != NULL) {
-        hookValue = Tcl_GetVar (interp, hookVarName, TCL_GLOBAL_ONLY);
-        if (hookValue != NULL)
-            oldHookPtr =  ckstrdup (hookValue);
+    Tcl_DStringFree (&command);
+    if (endCommand != NULL) {
+        if (Tcl_Eval (interp, endCommand) == TCL_ERROR) {
+            return TCL_ERROR;
+        }
     }
-    if (Tcl_SetVar (interp, hookVarName, newHookValue, 
-                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL) {
-        if (oldHookPtr != NULL)
-            ckfree (oldHookPtr);
-        return TCL_ERROR;
-    }    
-    if (oldHookValuePtr != NULL)
-        *oldHookValuePtr = oldHookPtr;
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_CommandloopCmd --
- *     Implements the TCL commandloop command:
- *       commandloop ?prompt1? ?prompt2?
- *
+ *    Implements the commandloop command:
+ *       commandloop -async -interactive on|off|tty -prompt1 cmd
+ *                   -prompt2 cmd -endcommand cmd
  * Results:
- *     Standard TCL results.
- *
+ *   Standard TCL results.
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_CommandloopCmd(clientData, interp, argc, argv)
+Tcl_CommandloopCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;
 {
-    char *oldTopLevelHook  = NULL;
-    char *oldDownLevelHook = NULL;
-    int   result = TCL_ERROR;
+    int options = 0, async = FALSE, argIdx, interactive;
+    char *endCommand = NULL;
+    char *prompt1 = NULL, *prompt2 = NULL;
 
-    if (argc > 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " ?prompt1? ?prompt2?", (char *) NULL);
-        return TCL_ERROR;
+    interactive = isatty (0);
+    for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
+        if (STREQU (argv [argIdx], "-async")) {
+            async = TRUE;
+        } else if (STREQU (argv [argIdx], "-prompt1")) {
+            if (argIdx == argc - 1)
+                goto argRequired;
+            prompt1 = argv [++argIdx];
+        } else if (STREQU (argv [argIdx], "-prompt2")) {
+            if (argIdx == argc - 1)
+                goto argRequired;
+            prompt2 = argv [++argIdx];
+        } else if (STREQU (argv [argIdx], "-interactive")) {
+            if (argIdx == argc - 1)
+                goto argRequired;
+            argIdx++;
+            if (STREQU (argv [argIdx], "tty")) {
+                interactive = TRUE;
+            } else {
+                if (Tcl_GetBoolean (interp, argv [argIdx],
+                                    &interactive) != TCL_OK)
+                    return TCL_ERROR;
+            }
+        } else if (STREQU (argv [argIdx], "-endcommand")) {
+            if (argIdx == argc - 1)
+                goto argRequired;
+            endCommand = argv [++argIdx];
+        } else {
+            goto unknownOption;
+        }
     }
-    if (argc > 1) {
-        if (SetPromptVar (interp, "tcl_prompt1", argv[1],
-                          &oldTopLevelHook) != TCL_OK)
-            goto exitPoint;
-    }
-    if (argc > 2) {
-        if (SetPromptVar (interp, "tcl_prompt2", argv[2], 
-                          &oldDownLevelHook) != TCL_OK)
-            goto exitPoint;
+    if (argIdx != argc)
+        goto wrongArgs;
+
+    if (interactive)
+        options |= TCLX_CMDL_INTERACTIVE;
+
+    if (async) {
+        return TclX_AsyncCommandLoop (interp,
+                                      options,
+                                      endCommand,
+                                      prompt1,
+                                      prompt2);
+    } else {
+        return TclX_CommandLoop (interp,
+                                 options,
+                                 endCommand,
+                                 prompt1,
+                                 prompt2);
     }
 
-    Tcl_CommandLoop (interp, TRUE);
 
-    if (oldTopLevelHook != NULL)
-        SetPromptVar (interp, "topLevelPromptHook", oldTopLevelHook, NULL);
-    if (oldDownLevelHook != NULL)
-        SetPromptVar (interp, "downLevelPromptHook", oldDownLevelHook, NULL);
-        
-    result = TCL_OK;
-  exitPoint:
-    if (oldTopLevelHook != NULL)
-        ckfree (oldTopLevelHook);
-    if (oldDownLevelHook != NULL)
-        ckfree (oldDownLevelHook);
-    return result;
+    /*
+     * Argument error message generation.  argv [argIdx] should contain the
+     * option being processed.
+     */
+  argRequired:
+    Tcl_AppendResult (interp, "argument required for ", argv [argIdx],
+                      " option", (char *) NULL);
+    return TCL_ERROR;
+
+  unknownOption:
+    Tcl_AppendResult (interp, "unknown option \"", argv [argIdx],
+                      "\", expected one of \"-async\", ",
+                      "\"-interactive\", \"-prompt1\", \"-prompt2\", "
+                      " or \"-endcommand\"", (char *) NULL);
+    return TCL_ERROR;
+    
+  wrongArgs:
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?-async? ",
+                      "?-interactive on|off|tty? ?-prompt1 cmd? ",
+                      "?-prompt2 cmd? ?-endcommand cmd?",
+                      (char *) NULL);
+    return TCL_ERROR;
 }

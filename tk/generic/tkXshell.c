@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.9 1996/03/11 05:43:59 markd Exp $
+ * $Id: tkXshell.c,v 5.10 1996/03/11 06:16:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -50,29 +50,6 @@
 
 extern char *		strrchr _ANSI_ARGS_((CONST char *string, int c));
 
-/*
- * Global variables used by the main program:
- */
-
-static Tcl_Interp *interp;	/* Interpreter for this application. */
-static Tcl_DString command;	/* Used to assemble lines of terminal input
-				 * into Tcl commands. */
-static Tcl_DString line;	/* Used to read the next line from the
-                                 * terminal input. */
-static int tty;			/* Non-zero means standard input is a
-				 * terminal-like device.  Zero means it's
-				 * a file. */
-static int gotPartial = 0;
-
-
-/*
- * Forward declarations for procedures defined later in this file.
- */
-
-static void		StdinProc _ANSI_ARGS_((ClientData clientData,
-			    int mask));
-static void		SignalProc _ANSI_ARGS_((int  signalNum));
-
 
 /*
  *----------------------------------------------------------------------
@@ -107,6 +84,8 @@ TkX_Main(argc, argv, appInitProc)
     int code;
     size_t length;
     Tcl_Channel inChannel, outChannel, errChannel, chan;
+    Tcl_Interp *interp;
+    int tty;
 
     TclX_SetAppInfo (TRUE,
                      "wishx",
@@ -174,7 +153,7 @@ TkX_Main(argc, argv, appInitProc)
 	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
 
     if ((fileName == NULL) && tty)
-        Tcl_SetupSigInt ();
+        TclX_SetupSigInt ();
 
     /*
      * Invoke application-specific initialization.
@@ -212,24 +191,20 @@ TkX_Main(argc, argv, appInitProc)
 	 * Establish a channel handler for stdin.
 	 */
 
-        tclErrorSignalProc = SignalProc;
 	inChannel = Tcl_GetStdChannel(TCL_STDIN);
 	if (inChannel) {
-	    Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
-		    (ClientData) inChannel);
-	}
-	if (tty) {
-	    TclX_OutputPrompt (interp, 1);
-	}
+            if (TclX_AsyncCommandLoop (interp,
+                                       tty ? (TCLX_CMDL_INTERACTIVE |
+                                              TCLX_CMDL_EXIT_ON_EOF) : 0,
+                                       NULL, NULL, NULL) == TCL_ERROR)
+                goto error;
+        }
     }
 
-    tclSignalBackgroundError = Tk_BackgroundError;
     outChannel = Tcl_GetStdChannel(TCL_STDOUT);
     if (outChannel) {
 	Tcl_Flush(outChannel);
     }
-    Tcl_DStringInit(&command);
-    Tcl_DStringInit(&line);
     Tcl_ResetResult(interp);
 
     /*
@@ -256,115 +231,4 @@ error:
         Tcl_DeleteInterp (interp);
         Tcl_Exit(1);
     }
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * SignalProc --
- *
- *	Function called on a signal generating an error to clear the stdin
- *   	buffer.
- *----------------------------------------------------------------------
- */
-
-static void
-SignalProc (signalNum)
-    int  signalNum;
-{
-    Tcl_Channel stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
-    tclGotErrorSignal = 0;
-    Tcl_DStringFree (&command);
-    gotPartial = 0;
-    if (tty) {
-        if (stdoutChan != NULL) {
-            Tcl_Write (stdoutChan, "\n", 1);
-        }
-        TclX_OutputPrompt (interp, !gotPartial);
-    }
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * StdinProc --
- *
- *	This procedure is invoked by the event dispatcher whenever
- *	standard input becomes readable.  It grabs the next line of
- *	input characters, adds them to a command being assembled, and
- *	executes the command if it's complete.
- *
- * Results:
- *	None.
- *
- * Side effects:
- *	Could be almost arbitrary, depending on the command that's
- *	typed.
- *
- *----------------------------------------------------------------------
- */
-
-    /* ARGSUSED */
-static void
-StdinProc(clientData, mask)
-    ClientData clientData;		/* Not used. */
-    int mask;				/* Not used. */
-{
-    char *cmd;
-    int code, count;
-    Tcl_Channel chan = (Tcl_Channel) clientData;
-
-    count = Tcl_Gets(chan, &line);
-
-    if (count < 0) {
-	if (!gotPartial) {
-	    if (tty) {
-		Tcl_Exit(0);
-	    } else {
-		Tcl_DeleteChannelHandler(chan, StdinProc, (ClientData) chan);
-	    }
-	    return;
-	} else {
-	    count = 0;
-	}
-    }
-
-    (void) Tcl_DStringAppend(&command, Tcl_DStringValue(&line), -1);
-    cmd = Tcl_DStringAppend(&command, "\n", -1);
-    Tcl_DStringFree(&line);
-    
-    if (!Tcl_CommandComplete(cmd)) {
-        gotPartial = 1;
-        goto prompt;
-    }
-    gotPartial = 0;
-
-    /*
-     * Disable the stdin channel handler while evaluating the command;
-     * otherwise if the command re-enters the event loop we might
-     * process commands from stdin before the current command is
-     * finished.  Among other things, this will trash the text of the
-     * command being evaluated.
-     */
-
-    Tcl_CreateChannelHandler(chan, 0, StdinProc, (ClientData) chan);
-    code = Tcl_RecordAndEval(interp, cmd, TCL_EVAL_GLOBAL);
-    Tcl_CreateChannelHandler(chan, TCL_READABLE, StdinProc,
-	    (ClientData) chan);
-    Tcl_DStringFree(&command);
-    if (*interp->result != 0) {
-	if ((code != TCL_OK) || (tty)) {
-            TclX_PrintResult (interp, code, cmd);
-	}
-    }
-
-    /*
-     * Output a prompt.
-     */
-
-    prompt:
-    if (tty) {
-        TclX_OutputPrompt (interp, !gotPartial);
-    }
-    Tcl_ResetResult(interp);
 }

@@ -1122,4 +1122,6 @@
 ===============================================================================
 14 Mar 96:
   o Added support for ITcl 2.0 from earlier TclX 7.4 based patch.
+  o Modified the commandloop command to support event based command input.
+   (* potential incompatibility *)
 -------------------------------------------------------------------------------

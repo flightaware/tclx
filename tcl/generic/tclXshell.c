@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 5.5 1996/03/11 06:16:00 markd Exp $
+ * $Id: tclXshell.c,v 5.6 1996/03/14 05:04:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -284,13 +284,14 @@ TclX_Main (argc, argv, appInitProc)
      * so user may interrupt with out killing program.
      */
     TclX_EvalRCFile (interp);
-    Tcl_SetupSigInt ();
+    TclX_SetupSigInt ();
 
-    if (Tcl_CommandLoop (interp, isatty (0)) == TCL_ERROR)
+    if (TclX_CommandLoop (interp, 
+                          isatty (0) ? TCLX_CMDL_INTERACTIVE : 0,
+                          NULL, NULL, NULL))
         goto errorExit;
 
   evalComplete:
-
     /*
      * If any event sources have been set up, process events until no more
      * sources remain.  This can be disabled by setting an Tcl variable.

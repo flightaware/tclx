@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.12 1996/03/13 08:30:14 markd Exp $
+ * $Id: tclExtdInt.h,v 5.13 1996/03/15 07:35:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -184,8 +184,6 @@ typedef struct {
 #define TCLX_TRANSLATE_CRLF     3
 #define TCLX_TRANSLATE_PLATFORM 4
 
-
-
 /*
  * Used to return argument messages by most commands.
  */
@@ -214,8 +212,6 @@ extern char *tclXWrongArgs;
 #define ckstrdup(sourceStr) \
   (strcpy (ckalloc (strlen (sourceStr) + 1), sourceStr))
 
-
-
 /*
  * Prototypes for utility procedures.
  */
@@ -223,10 +219,6 @@ extern void
 Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
                                Tcl_Channel channel,
                                int         fileNum));
-
-extern int
-Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
-                             int         interactive));
 
 extern int
 Tcl_StrToOffset _ANSI_ARGS_((CONST char *string,
