@@ -1,5 +1,5 @@
 .\"
-.\" TclX.man
+.\" TclX.n
 .\"
 .\" Extended command set and environment for Tcl.
 .\"----------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.9 1996/10/08 07:18:52 markd Exp $
+.\" $Id: TclX.n,v 7.10 1996/11/04 16:29:00 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -23,12 +23,24 @@ TclX - Extended Tcl: Extended command set for Tcl
 .SH "INTRODUCTION"
 .PP
 This man page contains the documentation for all of the extensions that are
-added to Tcl 7.4 by Extended Tcl (TclX 7.4a).
-These extensions provide extend Tcl's
+added to Tcl 7.5 by Extended Tcl (TclX 7.5).
+TclX extends Tcl's
 capabilities by adding new commands to it, without changing the syntax of
 standard Tcl.  Extended Tcl is a superset of standard Tcl and is built
-alongside
-the standard Tcl sources.  Extended Tcl has three basic functional areas:
+alongside the standard Tcl sources.
+.PP
+Extended Tcl was created by Karl Lehenbauer (karl@neosoft.com) and
+Mark Diekhans (markd@grizzly.com) and is freely redistributable for
+any use without license or fee.
+.PP
+Available over the Internet since 1989, Extended Tcl, also
+known as TclX, not only adds capabilities to Tcl, but has also been the
+source of many of the capabilities of the baseline
+Tcl release, including arrays, files, sockets, file events, and date
+and time handling, among others.
+.PP
+Extended Tcl has three basic functional 
+areas:
 A set of new commands, a Tcl shell (i.e. a Unix shell-style command line
 and interactive environment),  and a user-extensible library of useful
 Tcl procedures, any of which can be automatically loaded on the first
