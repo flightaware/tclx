@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.12.2.7 1998/12/10 00:05:43 surles Exp $
+ * $Id: tclExtend.h,v 8.12.2.8 1999/01/06 04:11:10 rjohnson Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,6 +46,13 @@
  *   7.5.0           7.5.0     7.5.0
  *   7.5.1 beta 1    7.5.1     7.5.1b1
  *   7.5.1 patch 1   7.5.1.1   7.5.1p1
+ *
+ * When upgrading the version number please check for version
+ * numbers in the following places:
+ *  - this file, just below here
+ *  - unix/Config.mk
+ *  - win/common.vc
+ *  - win/common.bc
  */
 
 #define TCLX_PATCHLEVEL      0
