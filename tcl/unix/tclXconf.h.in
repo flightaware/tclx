@@ -3,9 +3,6 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef gid_t
 
-/* Define if you have the strftime function.  */
-#undef HAVE_STRFTIME
-
 /* Define if your struct tm has tm_zone.  */
 #undef HAVE_TM_ZONE
 
@@ -242,6 +239,9 @@
 
 /* Define if you have the tzset function.  */
 #undef HAVE_TZSET
+
+/* Define if you have the waitpid function.  */
+#undef HAVE_WAITPID
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H

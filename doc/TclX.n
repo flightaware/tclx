@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.27 1995/07/20 02:31:23 markd Exp markd $
+.\" $Id: TclX.n,v 5.0 1995/07/25 05:40:25 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -177,6 +177,11 @@ and \fBfstat\fR \fBlocalhost\fR and \fBremotehost\fR options).
 .B have_truncate
 Return \fB1\fR if the \fBtruncate\fR system call is available.
 If it is, the \fBftruncate\fR command may truncate by file path.
+.TP
+.B have_waitpid
+Return \fB1\fR if the \fBwaitpid\fR system call is available and the
+\fBwait\fR command has full functionality.  \fB0\fR if the \fBwait\fR
+command has limited functionality.
 .TP
 .B appname
 Return the symbolic application name of the current application linked with
@@ -1114,6 +1119,11 @@ in the background with the \fBexec\fR command.  However, if any other
 \fBexec\fR command is executed after the process terminates, then the
 process status will be reaped by the \fBexec\fR command and will not be
 available to the \fBwait\fR command.  
+.sp
+On systems without the \fBwaitpid\fR system call, the \fB-nohang\fR,
+\fB-untraced\fR and \fB-pgroup\fR options are not available.
+The \fBinfox have_waitpid\fR command maybe use to determine if this
+functionality is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

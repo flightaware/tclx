@@ -403,7 +403,7 @@ else
 fi
 
 
-# From configure.in Revision: 5.0 dnl
+# From configure.in Revision: 5.1 dnl
 
 
 
@@ -3514,7 +3514,7 @@ else
 fi
 done
 
-for ac_func in fchown fchmod ftruncate
+for ac_func in fchown fchmod ftruncate waitpid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
