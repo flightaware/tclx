@@ -1364,5 +1364,8 @@
     (*POTENTIAL INCOMPATIBILITY*)     
   o Removed restriction on keyedlist key containing white spaces.  Keys really
     shouldn't,  but this check broke compatibility.
+===============================================================================
+11 Nov 97: Released TclX 8.0.1
+===============================================================================
 -------------------------------------------------------------------------------
   
