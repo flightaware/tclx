@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.3 1994/12/29 06:21:39 markd Exp $
+# $Id: Makefile.in,v 1.1 1995/01/01 19:50:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -77,6 +77,7 @@ tkXtest.c: ${TK_UCB_SRC}/tkTest.c
 	echo '#include "../src/tclXconfig.h"' >tkXtest.c
 	sed -e 's/Tcl_Init(/TclX_Init(/' \
 	    -e 's/Tk_Init(/TkX_Init(/' \
+	    -e 's/Tk_Main(/TkX_Main(/' \
 	    -e '/tcl_RcFileName =/d' ${TK_UCB_SRC}/tkTest.c >>tkXtest.c
 
 tkSquare.c: ${TK_UCB_SRC}/tkSquare.c
