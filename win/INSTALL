@@ -92,7 +92,5 @@ In this release, the following restrictions apply:
     
     o No 16 bit support.
 
-    o Documentation has not been updated to indicate windows differences.
-
     o The fork command is not implemented, but the execl command creates a
       process and returns its process id.
