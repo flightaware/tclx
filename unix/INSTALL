@@ -349,12 +349,10 @@ If you need more details on how to initialize TclX, see the TclXInit(3) manual
 page.
 
 TkPixmap:
-    o Build Tk with TkPixmap as directed.
+    o Build Tk with TkPixmap as directed.  You should have TkPixmap 3.6e or
+      greater.
 
-    o If TclX is already built, do a "make clean".
-
-    o Change the XCFLAGS line in Config.mk to:
-        XCFLAGS=-DUSE_PINFO
+    o If TclX is already built, do a "rm -rf tkmaster".
 
     o Change the XLDLIBS line in Config.mk to:
         XLDLIBS=/full/path/to/libXpm.a
@@ -366,6 +364,7 @@ TkPixmap:
 
         o Added the line:
             {pinfo.n        tk/control/pinfo}
+            {uxpm.n         tk/control/uxpm}
           to the list in tools/tkmanpages.
 
         o Do a "make buildtkhelp".
