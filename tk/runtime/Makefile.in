@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.9 1995/07/01 16:57:47 markd Exp markd $
+# $Id: Makefile.in,v 4.10 1995/07/17 00:33:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -65,6 +65,11 @@ made.tmp:
 	if [ ! -d ${TMPMASTER} ] ; then mkdir ${TMPMASTER} ; else exit 0; fi
 	touch made.tmp
 
+#
+# Update tk.tcl to autoload from our library rather than explictly source
+# the files.  We pick an entry point in each file to force it to be brought
+# in.
+#
 ${TKTCL}: ${TK_UCB_SRC}/library/tk.tcl made.tmp
 	rm -f ${TKTCL}
 	sed -f ${srcdir}/tk.tcl.sed ${TK_UCB_SRC}/library/tk.tcl >${TKTCL}
