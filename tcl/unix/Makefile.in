@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.4 1995/01/01 19:49:33 markd Exp markd $
+# $Id: Makefile.in,v 4.5 1995/01/16 07:39:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -142,7 +142,7 @@ tcl++: tclXAppInit++.o tcl++.o made.tmp
            ${LDLIBS} ${XLDLIBS} -o tcl++
 
 tclXAppInit++.o: tcl++.h tclXAppInit++.C
-	${CCPLUS} -c ${CC_FLAGS} tclX++.C
+	${CCPLUS} -c ${CC_FLAGS} tclXAppInit++.C
 
 tclXAppInit++.C: tclXAppInit.c
 	rm -f tclXAppInit++.C

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.3 1994/12/29 06:21:39 markd Exp markd $
+# $Id: Makefile.in,v 4.4 1995/01/01 19:51:00 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -108,7 +108,7 @@ ${SYSLIBS}: SYSLIBS
 TCL_PLUS: wishx++
 
 wishx++: tkXAppInit++.o made.tmp
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit++.o ${LDLIBS} ${XLDLIBS} \
 	    -o wishx++ || (rm -f wishx++; exit 1)
 
 tkXAppInit++.o: tkXAppInit++.C

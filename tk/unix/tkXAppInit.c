@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 4.3 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tkXAppInit.c,v 4.4 1995/01/01 19:51:01 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -40,23 +40,20 @@ int (*tclDummyMathPtr)() = (int (*)()) matherr;
  * main --
  *
  *	This is the main program for the application.
- *
- * Results:
- *	None: Tk_Main never returns here, so this procedure never
- *	returns either.
- *
- * Side effects:
- *	Whatever the application does.
- *
  *----------------------------------------------------------------------
  */
-
+#ifdef __cplusplus
 int
-main(argc, argv)
-    int argc;
+main (int    argc,
+      char **argv)
+#else
+int
+main (argc, argv)
+    int    argc;
     char **argv;
+#endif
 {
-    Tk_Main(argc, argv);
+    TkX_Main(argc, argv);
     return 0;			/* Needed only to prevent compiler warning. */
 }
 
@@ -72,16 +69,16 @@ main(argc, argv)
  * Results:
  *	Returns a standard Tcl completion code, and leaves an error
  *	message in interp->result if an error occurs.
- *
- * Side effects:
- *	Depends on the startup script.
- *
  *----------------------------------------------------------------------
  */
-
+#ifdef __cplusplus
 int
-Tcl_AppInit(interp)
-    Tcl_Interp *interp;		/* Interpreter for application. */
+Tcl_AppInit (Tcl_Interp *interp)
+#else
+int
+Tcl_AppInit (interp)
+    Tcl_Interp *interp;
+#endif
 {
     Tk_Window main;
 
