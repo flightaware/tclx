@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.1 1994/11/25 19:00:41 markd Exp markd $
+# $Id: Config.mk,v 4.2 1994/12/28 05:17:24 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -149,35 +149,25 @@ TCL_INCLUDEDIR=${prefix}/include
 TCL_MAN_BASEDIR=${prefix}/man
 
 #------------------------------------------------------------------------------
-# o TCL_MAN_CMD_SECTION - Section for Tcl command  manual pages. Normal `1' or
-#   `C'.  You might perfer TCL since there are some many.
+# o TCL_MAN_CMD_SECTION - Section for Tcl command manual pages.
 #
 # o TCL_MAN_FUNC_SECTION - Section for Tcl C level function manual pages.
-#   In some cases it might be desirable install all manual pages in one
-#   section. In this case, the value should be the same as TCL_MAN_CMD_SECTION.
+#
 
-TCL_MAN_CMD_SECTION=TCL
-TCL_MAN_FUNC_SECTION=TCL
-#TCL_MAN_CMD_SECTION=1
-#TCL_MAN_FUNC_SECTION=3
+TCL_MAN_CMD_SECTION=n
+TCL_MAN_FUNC_SECTION=3
 
 #------------------------------------------------------------------------------
-# o TK_MAN_CMD_SECTION - Section for Tk command  manual pages. Normal `1' or
-#   `C'.  You might perfer TK since there are some many.
+# o TK_MAN_CMD_SECTION - Section for Tk command  manual pages.
 #
 # o TK_MAN_UNIXCMD_SECTION - Section for Tk Unix commands (the wish program)
-#    manual pages. Normal `1' or `C'.
+#   manual pages.
 #
 # o TK_MAN_FUNC_SECTION - Section for Tk C level function manual pages.
-#   In some cases it might be desirable install all manual pages in one
-#   section. In this case, the value should be the same as TK_MAN_CMD_SECTION.
-
-TK_MAN_CMD_SECTION=TK
-TK_MAN_UNIXCMD_SECTION=TK
-TK_MAN_FUNC_SECTION=TK
-#TK_MAN_CMD_SECTION=1
-#TK_MAN_UNIXCMD_SECTION=1
-#TK_MAN_FUNC_SECTION=3
+#
+TK_MAN_CMD_SECTION=n
+TK_MAN_UNIXCMD_SECTION=1
+TK_MAN_FUNC_SECTION=3
 
 
 #------------------------------------------------------------------------------
