@@ -417,8 +417,6 @@ TclX_LassignObjCmd (clientData, interp, objc, objv)
  * TclX_LmatchObjCmd --
  *   Implements the TclX lmatch command:
  *       lmatch ?-exact|-glob|-regexp? list pattern
- *
- * FIX: Only binary-clean for -exact option.
  *-----------------------------------------------------------------------------
  */
 static int

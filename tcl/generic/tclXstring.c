@@ -658,53 +658,59 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     Tcl_Obj    *CONST objv[];
 {
     int failIndex = FALSE;
-    char *optStr, *class, *scanPtr;
-    int scanStrLen, cnt, idx;
+    char *optStr, *class, *charStr;
+    int charStrLen, cnt, idx;
     char *failVar = NULL;
     Tcl_Obj *classObj, *stringObj;
     int number;
     char charBuf[TCL_UTF_MAX];
+    Tcl_UniChar uniChar;
+
+#define IS_8BIT_UNICHAR(c) (c <= 255)
 
     if (TCL_UTF_MAX > sizeof(number)) {
         panic("TclX_CtypeObjCmd: UTF character longer than a int");
     }
 
-    /*FIX:  UTF-safe not finished.(FIXUTF) */
     /*FIX: Split into multiple procs */
 
-    if (objc < 3)
+    if (objc < 3) {
         goto wrongNumArgs;
+    }
 
-    optStr = Tcl_GetStringFromObj (objv [1], NULL);
+    optStr = Tcl_GetStringFromObj(objv[1], NULL);
     if (*optStr == '-') {
-        if (STREQU (optStr, "-failindex")) {
+        if (STREQU(optStr, "-failindex")) {
             failIndex = TRUE;
         } else {
-            TclX_AppendObjResult (interp, "invalid option \"",
-                                  Tcl_GetStringFromObj (objv [1], NULL),
-                                  "\", must be -failindex", (char *) NULL);
+            TclX_AppendObjResult(interp, "invalid option \"",
+                                 Tcl_GetStringFromObj (objv [1], NULL),
+                                 "\", must be -failindex", (char *) NULL);
             return TCL_ERROR;
         }
     }
     if (failIndex) {
-        if (objc != 5) 
+        if (objc != 5) {
             goto wrongNumArgs;
-        failVar = Tcl_GetStringFromObj(objv [2], NULL);
-        classObj = objv [3];
-        stringObj = objv [4];
+        }
+        failVar = Tcl_GetStringFromObj(objv[2], NULL);
+        classObj = objv[3];
+        stringObj = objv[4];
     } else {
-        if (objc != 3) 
+        if (objc != 3) {
             goto wrongNumArgs;
-        classObj = objv [1];
-        stringObj = objv [2];
+        }
+        classObj = objv[1];
+        stringObj = objv[2];
     }
-    scanPtr = Tcl_GetStringFromObj (stringObj, &scanStrLen);
-    class = Tcl_GetStringFromObj (classObj, NULL);
+    charStr = Tcl_GetStringFromObj(stringObj, &charStrLen);
+    charStrLen = Tcl_NumUtfChars(charStr, charStrLen);
+    class = Tcl_GetStringFromObj(classObj, NULL);
 
     /*
      * Handle conversion requests.
      */
-    if (STREQU (class, "char")) {
+    if (STREQU(class, "char")) {
         if (failIndex) {
           goto failInvalid;
         }
@@ -717,12 +723,11 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
         return TCL_OK;
     }
 
-    if (STREQU (class, "ord")) {
-        Tcl_UniChar uniChar;
+    if (STREQU(class, "ord")) {
         if (failIndex) {
           goto failInvalid;
         }
-        Tcl_UtfToUniChar(scanPtr, &uniChar);
+        Tcl_UtfToUniChar(charStr, &uniChar);
         Tcl_SetIntObj(Tcl_GetObjResult(interp), (int)uniChar);
         return TCL_OK;
     }
@@ -732,65 +737,98 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
      * fails.  The value of `index' after the loops indicating if it succeeds
      * or fails and where it fails.
      */
-    if (STREQU (class, "alnum")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isalnum (UCHAR (*(scanPtr + idx))))
+    if (STREQU(class, "alnum")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            if (!Tcl_UniCharIsAlnum(Tcl_UniCharAtIndex(charStr, idx))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "alpha")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isalpha (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "alpha")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            if (!Tcl_UniCharIsAlpha(Tcl_UniCharAtIndex(charStr, idx))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "ascii")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isascii (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "ascii")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            uniChar = Tcl_UniCharAtIndex(charStr, idx);
+            if (!IS_8BIT_UNICHAR(uniChar)
+                || !isascii(UCHAR(uniChar))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "cntrl")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!iscntrl (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "cntrl")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            uniChar = Tcl_UniCharAtIndex(charStr, idx);
+            /* Only accepts ascii controls */
+            if (!IS_8BIT_UNICHAR(uniChar)
+                || !iscntrl(UCHAR(uniChar))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "digit")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isdigit (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "digit")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            if (!Tcl_UniCharIsDigit(Tcl_UniCharAtIndex(charStr, idx))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "graph")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isgraph (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "graph")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            uniChar = Tcl_UniCharAtIndex(charStr, idx);
+            if (!IS_8BIT_UNICHAR(uniChar)) {
+                goto notSupportedUni;
+            }
+            if (!isgraph(UCHAR(uniChar))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "lower")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!islower (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "lower")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            if (!Tcl_UniCharIsLower(Tcl_UniCharAtIndex(charStr, idx))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "print")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isprint (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "print")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            uniChar = Tcl_UniCharAtIndex(charStr, idx);
+            if (!IS_8BIT_UNICHAR(uniChar)) {
+                goto notSupportedUni;
+            }
+            if (!isprint(UCHAR(uniChar))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "punct")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!ispunct (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "punct")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            uniChar = Tcl_UniCharAtIndex(charStr, idx);
+            if (!IS_8BIT_UNICHAR(uniChar)) {
+                goto notSupportedUni;
+            }
+            if (!ispunct(UCHAR(uniChar))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "space")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isspace (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "space")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            if (!Tcl_UniCharIsSpace(Tcl_UniCharAtIndex(charStr, idx))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "upper")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isupper (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "upper")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            if (!Tcl_UniCharIsUpper(Tcl_UniCharAtIndex(charStr, idx))) {
                 break;
+            }
         }
-    } else if (STREQU (class, "xdigit")) {
-        for (idx = 0; idx < scanStrLen; idx++) {
-            if (!isxdigit (UCHAR (*(scanPtr + idx))))
+    } else if (STREQU(class, "xdigit")) {
+        for (idx = 0; idx < charStrLen; idx++) {
+            uniChar = Tcl_UniCharAtIndex(charStr, idx);
+            if (!IS_8BIT_UNICHAR(uniChar)) {
+                goto notSupportedUni;
+            }
+            if (!isxdigit(UCHAR(uniChar))) {
                 break;
+            }
         }
     } else {
         TclX_AppendObjResult (interp, "unrecognized class specification: \"",
@@ -807,7 +845,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
      * false for a null string.  Optionally return the failed index if there
      * is no match.
      */
-    if ((idx != 0) && (idx == scanStrLen)) {
+    if ((idx != 0) && (idx == charStrLen)) {
         Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
     } else {
         /*
@@ -831,6 +869,11 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     
   failInvalid:
     TclX_AppendObjResult (interp, "-failindex option is invalid for class \"",
+                          class, "\"", (char *) NULL);
+    return TCL_ERROR;
+
+ notSupportedUni:
+    TclX_AppendObjResult (interp, "unicode characters not supported for class \"",
                           class, "\"", (char *) NULL);
     return TCL_ERROR;
 }
