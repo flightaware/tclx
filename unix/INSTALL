@@ -427,6 +427,11 @@ CONVEX:
 LINUX:
    o Linux 1.1.59 has a bad strftime function, which causes clock tests to
      fail.
+   o If shell scripts run in make file exit with exit code 127, a new
+     version of Bash is needed.
+   o Receive error:  ld: Output file requires shared library `libc.so.4'
+     gcc: Internal compiler error: program ld got fatal signal 6:
+     Recompile without -g.
 
 CRAY:
    o catgets does not return the default string, causing failure of 
