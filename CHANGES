@@ -1151,4 +1151,9 @@
   o Added *LIB_SPEC variables to tclx/tkxConfig.sh. 
   o Removed explicit support for master installation model.  The same affect
     can be achieved with --prefix.
--------------------------------------------------------------------------------
+  o Its no longer a requirement to use --enabled-shared with Tcl & Tk to use it
+    with TclX.
+===============================================================================
+ 2 May 96: Released TclX 7.5.0 patch 1
+===============================================================================
+

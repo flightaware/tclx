@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.17 1996/04/25 14:32:42 markd Exp $
+# $Id: Config.mk,v 5.18 1996/04/30 07:13:06 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -52,7 +52,9 @@
 # The Tcl source distribution directory, the path to tclConfig.sh, the Tcl
 # library (libtcl7.4.a) and the flags neccessary to link with the Tcl shared
 # library (libtcl7.4.so).  Note, access is required to tclInt.h which is not
-# installed by Tcl.
+# installed by Tcl.  If you want to use the installed Tcl library, set TCL_LIB
+# to ${TCL_LIB_SPEC}.
+# 
 
 TCL_SRC=${srcbasedir}/../tcl7.5
 TCL_CONFIG=${srcbasedir}/../tcl7.5/unix/tclConfig.sh
@@ -62,7 +64,8 @@ TCL_LIB=${TCL_BUILD_LIB_SPEC}
 # Unless configure is going to be run with --with-tk=NO, these defines must be
 # set.  They define the directory containing the Tk source distribution, the
 # path to tkConfig.sh, the path to the Tk library (libtk4.1.a) and the flags
-# neccessary to link with the Tk shared library (libtk4.1.so).
+# neccessary to link with the Tk shared library (libtk4.1.so).  If you want to
+# use the installed Tk library, set TK_LIB to ${TK_LIB_SPEC}.
 
 TK_SRC=${srcbasedir}/../tk4.1
 TK_CONFIG=${srcbasedir}/../tk4.1/unix/tkConfig.sh

@@ -25,9 +25,6 @@ then the following steps will build, test and installed TclX:
     make tktest        # Run Tk tests with wishx
     make install
 
-If you build with --enable-shared, Tcl and Tk must be built with
---enable-shared.
-    
 If you have a failure, check the "Porting Notes" section at the end of
 this file.  If you still have problems, try to debug it as much as
 possible and then contact us at tcl-project@neosoft.com.
@@ -209,7 +206,7 @@ SHARED LIBRARIES
 
    Shared libraries can be build for all systems that Tcl supports shared
 libraries on.  The --enable-shared flag to configure generates TclX shared
-libraries and links the TclX shells with shared libraries.
+libraries.  
 
 INTEGRATING WITH OTHER EXTENSIONS AND APPLICATIONS
 ==================================================

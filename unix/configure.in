@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.32 1996/04/30 07:13:14 markd Exp $
+dnl $Id: configure.in,v 5.33 1996/05/02 15:32:39 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.32 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.33 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -98,6 +98,19 @@ esac
 AC_SUBST(TKX_BUILD)
 
 #------------------------------------------------------------------------------
+# Check command line looking for the --with-arch= option.
+#------------------------------------------------------------------------------
+
+AC_ARG_WITH(arch,
+    [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
+                      and lib directory names],
+    [TCLX_ARCH=.$withval
+     AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
+    ],
+    [AC_MSG_RESULT("No architecture suffix will be used")])
+AC_SUBST(TCLX_ARCH)
+
+#------------------------------------------------------------------------------
 # Handle the --enable-shared option.
 #------------------------------------------------------------------------------
 
@@ -121,7 +134,7 @@ case "$BUILD_SHARED" in
         TCL_USE_SHLIB_CFLAGS=TCL_NO_SHLIB_CFLAGS  # Not actually defined
         TCLX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/libtclx.a"
         TCLX_LIB_SPEC="$TCLX_LIB/libtclx.a"
-        TKX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/libtkx.a"
+        TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/libtkx.a"
         TKX_LIB_SPEC="$TCLX_LIB/libtkx.a"
         ;;
      *)

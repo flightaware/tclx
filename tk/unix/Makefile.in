@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.31 1996/04/30 06:37:16 markd Exp $
+# $Id: Makefile.in,v 5.32 1996/04/30 07:18:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -44,7 +44,7 @@ LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 LDLIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
 	 ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS}\
 	 ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-	 @TCL_LD_SEARCH_FLAGS@ @TK_LD_SEARCH_FLAGS@ @TCLX_LD_SEARCH_FLAGS@
+	 ${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
 
 
 #------------------------------------------------------------------------------
@@ -204,13 +204,13 @@ install: install-exec install-runtime
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
 
 install-runtime:
-	${INSTCOPY} tkx.tcl ${INSTALL_ROOT}${TKX_INST_RUNTIME}
+	${INSTCOPY} tkx.tcl ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 
 install-exec:
-	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_BIN}
-	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
-	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TKX_INST_LIB}
-	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/libtkx.a
+	${INSTCOPY} wishx ${INSTALL_ROOT}${TCLX_INST_BIN}
+	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/wishx
+	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TCLX_INST_LIB}
+	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/libtkx.a
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
 	    if test "${TKX_SHLIB_NAME}" != "${TKX_SHLIB_BASE_NAME}"; then \
@@ -219,8 +219,8 @@ install-exec:
 		   ${INSTALL_ROOT}${TCLX_INST_LIB}/${TKX_SHLIB_BASE_NAME} ;\
 	    fi ;\
 	fi
-	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
-	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
+	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
+	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TCLX_INST_BIN}
 
 #------------------------------------------------------------------------------
 clean:

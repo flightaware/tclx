@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.35 1996/04/30 06:37:06 markd Exp $
+# $Id: Makefile.in,v 5.36 1996/04/30 07:18:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -35,8 +35,8 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_USE_SHLIB_CFLAGS} \
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 LDLIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
-	 ${TCL_DL_LIBS} ${XLDLIBS} @TCL_LD_SEARCH_FLAGS@ \
-	 @TCLX_LD_SEARCH_FLAGS@
+	 ${TCL_DL_LIBS} ${XLDLIBS} ${TCL_LD_SEARCH_FLAGS} \
+	 ${TCLX_LD_SEARCH_FLAGS}
 
 
 #------------------------------------------------------------------------------
