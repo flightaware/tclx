@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.12 1995/03/30 05:25:51 markd Exp markd $
+.\" $Id: TclX.n,v 4.13 1995/03/30 19:14:04 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1543,8 +1543,11 @@ If a TclX script is setup to run under \fBinetd\fR, it is launched with its
 stdin, stdout and stderr associated with the client socket.  The standard
 Tcl file ids \fBstdin\fR, \fBstdout\fR and \fBstderr\fR maybe then be used
 to communicate with the client.
+'
+'\"@help: tcl/server/server_connect
+'\"@brief: Connect to a TCP/IP based server.
 .TP
-.B server_connect ?\fIoption\fR? \fIhost service\fR
+.B server_connect ?\fIoptions\fR? \fIhost service\fR
 .br
 Open a TCP/IP connection to a server of \fIhost\fR on the port specified by
 \fIservice\fR.  The server is then accessed using the standard Tcl
@@ -1596,7 +1599,7 @@ or an error will be returned.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-'\"@help: tcl/files/server_create
+'\"@help: tcl/server/server_create
 '\"@brief: Create a TCP/IP server socket that can accept multiple connections.
 .TP
 .B server_create ?\fIoptions\fR?
@@ -1637,7 +1640,7 @@ default is 5.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-'\"@help: tcl/files/server_accept
+'\"@help: tcl/server/server_accept
 '\"@brief: Accept a client connection to a TCP/IP server socket.
 .TP
 .B server_accept ?\fIoptions\fR? \fIfileid\fR
@@ -1651,7 +1654,7 @@ A file handle (or a pair of file handles when \fB-twoids\fR) is return.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-'\"@help: tcl/files/server_info
+'\"@help: tcl/server/server_info
 '\"@brief: Obtain information about a TCP/IP server.
 .TP
 .B server_info \fBaddresses\fR \fIhost\fR
@@ -1674,7 +1677,7 @@ o\ \fBaliases\fR - Return the list of aliases for \fIhost\fR.
 aliases. See \fIifconfig(2)\fR.)
 '\"@endhelp
 '
-'\"@help: tcl/files/server_send
+'\"@help: tcl/server/server_send
 '\"@brief: Send a message to a TCP/IP socket.
 .TP
 .B server_send \fI?options?\fR \fIfileid\fR \fIstring\fR
