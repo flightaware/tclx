@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.10 1995/07/05 01:17:36 markd Exp markd $
+# $Id: Makefile.in,v 1.11 1995/07/16 23:57:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -94,7 +94,7 @@ tkSquare.c: ${TK_UCB_SRC}/tkSquare.c
 # at the local master directories so tktest can be run.
 
 runtest:
-	@echo ':'                                                   >runtest
+	@echo '#!/bin/sh'                                           >runtest
 	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"               >>runtest
 	@echo "TKX_LIBRARY=${bldbasedir}/tkmaster"                 >>runtest
 	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runtest

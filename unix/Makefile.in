@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.17 1995/07/15 18:54:41 markd Exp markd $
+# $Id: Makefile.in,v 4.18 1995/07/16 23:57:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -87,7 +87,7 @@ COMP_:
 # at the local master directories so tcl & wishx can be run before installing.
 
 runtcl:
-	@echo ':'                                                   >runtcl
+	@echo '#!/bin/sh'                                           >runtcl
 	@echo '# script for testing Tcl before installation'       >>runtcl
 	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"               >>runtcl
 	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runtcl
@@ -101,7 +101,7 @@ runtcl:
 	chmod a+rx runtcl
 
 runwishx:
-	@echo ':'                                                  >runwishx
+	@echo '#!/bin/sh'                                          >runwishx
 	@echo '# script for testing wishx before installation'    >>runwishx
 	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"              >>runwishx
 	@echo "TKX_LIBRARY=${bldbasedir}/tkmaster"                >>runwishx
