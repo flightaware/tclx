@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 2.5 1993/08/03 06:50:36 markd Exp markd $
+# $Id: process.test,v 2.6 1993/09/09 06:07:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -25,7 +25,8 @@ Test process-1.1 {fork, execl, wait tests} {
     set newPid [fork]
     if {$newPid == 0} {
         execl ../tclmaster/bin/tcl {-qc {sleep 1;exit 12}}
-        error "Should never make it here"
+        puts stderr "execl failed"
+        exit 1
     }
     lrange [wait $newPid] 1 end
 } 0 {EXIT 12}
