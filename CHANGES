@@ -871,9 +871,13 @@
   o Modified tests to include the special test commands use in the Tcl and Tk
     tests.
 -------------------------------------------------------------------------------
+ 15 Jan 95:
   o Increased flexibility in including TclX in applications without using
     the Tcl runtime.
   o Added the tclx_library Tcl variable.
   o Added the C variables tclX_library, tclX_libraryEnv and tclX_initFile to
     give custom applications more control over the TclX runtime.
+-------------------------------------------------------------------------------
+  o Added check for catclose having a return type of void, as found in NetBSD
+    1.0.
 -------------------------------------------------------------------------------
