@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.6 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -453,8 +453,8 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
                 if ((scanPtr == NULL) || (*(scanPtr+1) == '\0'))
                     break;
                 *scanPtr = '\0';
-                if (stat (dirArgv [idx], &statBuf) < 0)
-                    result = mkdir (dirArgv [idx], S_IFDIR | 0777);
+                if (stat (dirName, &statBuf) < 0)
+                    result = mkdir (dirName, S_IFDIR | 0777);
                 *scanPtr = '/';
                 if (result < 0)
                    goto mkdirError;
