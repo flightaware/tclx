@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.19 2001/08/02 00:10:24 hobbs Exp $
+.\" $Id: TclX.n,v 8.20 2002/04/03 02:46:35 hobbs Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -765,8 +765,6 @@ If \fB\-pgroup\fR is specified, the numbers in \fIidlist\fR are take
 as process group ids and the signal is sent to all of the process in that
 process group.  A process group id of \fB0\fR specifies the current process
 group.
-.IP
-The \fBkill\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
