@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixId.c,v 8.5 1997/07/01 02:58:14 markd Exp $
+ * $Id: tclXunixId.c,v 8.6 1997/07/04 20:24:27 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -434,13 +434,11 @@ IdGroupids (interp, objc, objv, symbolic)
             Tcl_ListObjAppendElement (interp, 
 				      resultObj,
 				      newObj);
-	    Tcl_DecrRefCount (newObj);
         } else {
 	    newObj = Tcl_NewIntObj(groups[groupIndex]);
             Tcl_ListObjAppendElement (interp, 
 				      resultObj,
 				      newObj);
-	    Tcl_DecrRefCount (newObj);
         }
     }
     if (symbolic)
