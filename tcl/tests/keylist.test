@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 2.0 1992/10/16 04:49:55 markd Rel markd $
+# $Id: keylist.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -123,6 +123,12 @@ Test keylist-1.21 {keylget tests} {
 Test keylist-1.22 {keylget tests} {
     keylget
 } 1 {wrong # args: keylget listvar ?key? ?retvar | {}?}
+
+Test keylist-1.23 {keylget tests} {
+    unset keyedlist
+    keylset keyedlist keyA aaa"bbb
+    keylget keyedlist keyA
+} 0 {aaa"bbb}
 
 
 Test keylist-2.1 {keylkeys tests} {
