@@ -30,7 +30,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 7.1 1996/10/04 04:25:27 markd Exp $
+# $Id: bldmanhelp.tcl,v 7.2 1996/10/04 15:30:33 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -72,7 +72,7 @@ proc CopyManPage {manPage outFH} {
         return
     }
     while {[gets $fh line] >= 0} {
-        switch -- $line {
+        switch -glob -- $line {
             .so* {
                 CopyManPage [lindex $line 1] $outFH
             }
@@ -83,7 +83,7 @@ proc CopyManPage {manPage outFH} {
                     puts $outFH $line
                 }
             }
-            .HS* - .BS* - .BE* - .VS* - .VE* - .TH {
+            .HS* - .BS* - .BE* - .VS* - .VE* - .TH* {
             }
             default {
                 if !$skipSection {
