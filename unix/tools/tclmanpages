@@ -54,6 +54,7 @@ return {
     {source.n       tcl/control/source}
     {split.n        tcl/lists/split}
     {string.n       tcl/strings/string}
+    {subst.n        tcl/strings/subst}
     {switch.n       tcl/control/switch}
     {tell.n         tcl/files/tell}
     {time.n         tcl/time/time}
