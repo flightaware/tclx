@@ -11,11 +11,11 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.3 1993/08/13 04:20:13 markd Exp markd $
+dnl $Id: configure.in,v 1.4 1993/08/25 03:15:47 markd Exp markd $
 dnl----------------------------------------------------------------------------
 
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.3 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.4 $),)dnl
 
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
@@ -28,7 +28,7 @@ AC_PROG_YACC
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_RANLIB
-AC_PROGRAM_CHECK(MCS_CMD, "mcs", "mcs", "touch")
+AC_PROGRAM_CHECK(MCS_CMD, "mcs", [mcs -d], touch)
 
 #------------------------------------------------------------------------------
 #       Some make programs require includes to be 
@@ -340,6 +340,17 @@ for i in $DEFS; do
 done
 DEFS=$newDefs
 
-AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile
-tksrc/Makefile tktclsrc/Makefile tkucbsrc/Makefile tools/Makefile
-ucbsrc/Makefile)
+#------------------------------------------------------------------------------
+# Define srcbasedir and bldbasedir as absolute paths.
+#------------------------------------------------------------------------------
+
+srcbasedir=`cd $srcdir;pwd`
+AC_SUBST(srcbasedir)
+bldbasedir=`pwd`
+AC_SUBST(bldbasedir)
+
+#------------------------------------------------------------------------------
+# Generate the make files.
+#------------------------------------------------------------------------------
+
+AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tkucbsrc/Makefile tools/Makefile ucbsrc/Makefile)

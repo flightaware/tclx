@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.13 1993/08/13 15:01:21 markd Exp markd $
+# $Id: Makefile.in,v 2.14 1993/08/25 03:15:47 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -21,18 +21,20 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-RANLIB    = @RANLIB@
-MCS       = @MCS_CMD@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-XINCLUDES = @XINCLUDES@
-LIBS      = @LIBS@
-XLIBSW    = @XLIBSW@
+RANLIB     = @RANLIB@
+MCS        = @MCS_CMD@
+srcdir     = @srcdir@
+srcbasedir = @srcbasedir@
+bldbasedir = @bldbasedir@
+VPATH      = @srcdir@
+XINCLUDES  = @XINCLUDES@
+LIBS       = @LIBS@
+XLIBSW     = @XLIBSW@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@$(srcdir)/../Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
@@ -48,8 +50,8 @@ LIBTCLX.A = ../tclmaster/lib/libtclx.a
 LDLIBS = ${LIBTKX.A} ${XLIBSW} ${LIBTCLX.A} -lm ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
-           -I../$(srcdir)/src  -I../$(srcdir)/tksrc -I../${TK_UCB_SRC} \
-           -I../${TCL_UCB_SRC} ${XINCLUDES}
+           -I${srcbasedir}/src  -I${srcbasedir}/tksrc -I${TK_UCB_SRC} \
+           -I${TCL_UCB_SRC} ${XINCLUDES}
  
 .c.o:
 	${CC} ${CC_FLAGS} -c $<

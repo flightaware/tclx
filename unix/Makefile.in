@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.13 1993/08/13 15:01:21 markd Exp markd $
+# $Id: Makefile.in,v 2.14 1993/08/18 06:39:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -21,14 +21,16 @@ SHELL=/bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-RANLIB = @RANLIB@
-srcdir = @srcdir@
-VPATH  = @srcdir@
+RANLIB     = @RANLIB@
+srcdir     = @srcdir@
+srcbasedir = @srcbasedir@
+bldbasedir = @bldbasedir@
+VPATH      = @srcdir@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@$(srcdir)/Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to

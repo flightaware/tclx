@@ -22,28 +22,44 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.27 1993/08/18 06:12:37 markd Exp markd $
+# $Id: Config.mk,v 2.28 1993/08/18 14:34:24 markd Exp markd $
 #------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+#              READ THIS FIRST: FILE PATH SPECIFICATION RULES.
+#------------------------------------------------------------------------------
+# All paths to files outside of the distribution MUST follow these rules.
+# The rules make it easy to specify locations of files either relative to
+# the source or build directories or or as absolute directories.  If these
+# rules are not followed, it will not build.  All values are defaulted to
+# reasonable locations.  If UCB tcl and Tk are in directories that are
+# siblings of the TclX source directory, things will probably work just find.
 #
+# File paths MUST be one of:
+#
+#   o Absolute paths (starting with /), e.g.  /usr/local/lib/libtcl.a
+#   o Paths relative to the source directory make macro ${srcbasedir}, e.g.
+#     $(srcbasedir)/../tk3.3
+#   o Paths relative to the build directory make macro ${bldbasedir}, e.g.
+#     ${bldbasedir}/../tk3.3/libtk.a
+#------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # The directory containing the UCB Tcl library (libtcl.a) and the UCB Tcl 
-# source distribution directory relative to this directory (not an absolute
-# path).
+# source distribution directory.  They default to the same directory.
 
-TCL_UCB_LIB=../tcl7.0b2
-TCL_UCB_SRC=$(srcdir)/$(TCL_UCB_LIB)
+TCL_UCB_LIB=${bldbasedir}/../tcl7.0b2
+TCL_UCB_SRC=${srcbasedir}/../tcl7.0b2
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
 # that includes the TclX command set, define TK_BUILD=WISHX.  Also define the
 # the directory containing the UCB Tk library (libtk.a) and the UCB Tk source
-# distribution directory relative to this directory (not an absolute path).
-# If you do not want a "wishx" compiled, don't define TK_BUILD.
+# distribution directory.
 
 TK_BUILD=WISHX
-TK_UCB_LIB=../tk3.3b2
-TK_UCB_SRC=$(srcdir)/$(TK_UCB_LIB)
+TK_UCB_LIB=${bldbasedir}/../tk3.3b2
+TK_UCB_SRC=${srcbasedir}/../tk3.3b2
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Also a macro that
@@ -165,6 +181,6 @@ TK_MAN_FUNC_SECTION=TK
 # o MAN_DIR_SEPARATOR - The separator character used in the directory name
 #   of the cat* and man* manual directories.  This is usually empty or 
 #   a period. i.e "/usr/man/man1" or "/usr/man/man.1".  Autoconf attempts to
-#   determine it but it can be overriden here.
+#   determine it but it can be overridden here.
 
 #MAN_DIR_SEPARATOR=.

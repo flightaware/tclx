@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.12 1993/08/13 15:01:21 markd Exp markd $
+# $Id: Makefile.in,v 2.13 1993/08/18 06:39:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -22,15 +22,16 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-srcdir = @srcdir@
-VPATH  = @srcdir@
-
+srcdir            = @srcdir@
+srcbasedir        = @srcbasedir@
+bldbasedir        = @bldbasedir@
+VPATH             = @srcdir@
 MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@$(srcdir)/../Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
@@ -41,9 +42,9 @@ BUILDIDX.TCL   = ../tclmaster/buildidx.tcl
 LOADOUSTER.TCL = ../tclmaster/loadouster.tcl
 MAN            = ../tclmaster/man
 HELP           = ../tclmaster/help
-CPMANPAGES     = $(srcdir)/../tools/cpmanpages.tcl
-BLDMANHELP     = $(srcdir)/../tools/bldmanhelp.tcl
-TCLMANPAGES    = $(srcdir)/../tools/tclmanpages
+CPMANPAGES     = ${srcbasedir}/tools/cpmanpages.tcl
+BLDMANHELP     = ${srcbasedir}/tools/bldmanhelp.tcl
+TCLMANPAGES    = ${srcbasedir}/tools/tclmanpages
 
 #------------------------------------------------------------------------------
 
@@ -52,7 +53,7 @@ TCL_SRCS = arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
            profrep.tcl      pushd.tcl        setfuncs.tcl     showproc.tcl    \
            stringfile.tcl   tcllib.tcl       fmath.tcl        tclshell.tcl    \
            buildhelp.tcl    \
-           parray.tcl       ../${TCL_UCB_SRC}/library/parray.tcl
+           parray.tcl       ${TCL_UCB_SRC}/library/parray.tcl
 
 #------------------------------------------------------------------------------
 
@@ -78,9 +79,9 @@ ${TCL.TLIB}: ${TCL_SRCS} ${BUILDIDX.TCL} ${TCLINIT.TCL}
 
 ${MAN}: ${TCLINIT.TCL} ${TCL.TLIB}
 	if [ ! -d ${MAN} ] ; then \
-	    ../runtcl ${CPMANPAGES} TCL ../${TCL_UCB_SRC}/doc \
+	    ../runtcl ${CPMANPAGES} TCL ${TCL_UCB_SRC}/doc \
                       ${MAN_DIR_SEPARATOR} ;\
-	    ../runtcl ${CPMANPAGES} TCLX ${srcdir}/../man \
+	    ../runtcl ${CPMANPAGES} TCLX ${srcbasedir}/man \
                       ${MAN_DIR_SEPARATOR} ;\
 	else \
 	    exit 0 ;\
@@ -94,7 +95,7 @@ buildtclhelp: ${TCLINIT.TCL} ${TCL.TLIB}
 	mkdir ${HELP}
 	../runtcl ${BLDMANHELP} ${TCL_UCB_SRC}/doc ${TCLMANPAGES} \
                   ${HELP} Tcl.brf
-	../runtcl -c "buildhelp ${HELP} TclX.brf $(srcdir)/man/TclX.man"
+	../runtcl -c "buildhelp ${HELP} TclX.brf ${srcbasedir}/man/TclX.man"
 
 #------------------------------------------------------------------------------
 # Clean up everything but the manual pages that we copied to the master
