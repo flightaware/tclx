@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.11 1997/10/22 08:07:44 markd Exp $
+ * $Id: tclXkeylist.c,v 8.12 1997/11/02 18:13:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -238,12 +238,6 @@ ValidateKey (interp, key, keyLen, isPath)
                                     "keyed list key may not contain a \".\"; ",
                                     "it is used as a separator in key paths",
                                     (char *) NULL);
-            return TCL_ERROR;
-        }
-        if (isspace (*keyp)) {
-            Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-                                    "keyed list key may not contain ",
-                                    "white-space characters", (char *) NULL);
             return TCL_ERROR;
         }
     }

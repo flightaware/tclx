@@ -1362,5 +1362,7 @@
     rather than defining its own command.  Done to track changes in the 8.0p1
     release.  The loadlibindex commands can no longer handle tclIndex files.
     (*POTENTIAL INCOMPATIBILITY*)     
+  o Removed restriction on keyedlist key containing white spaces.  Keys really
+    shouldn't,  but this check broke compatibility.
 -------------------------------------------------------------------------------
   

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 8.3 1997/07/26 02:01:08 markd Exp $
+# $Id: keylist.test,v 8.4 1997/08/23 18:55:42 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -126,11 +126,6 @@ Test keylist-1.21 {keylget tests} {
     set keyedlist {{{} valueA} {keyB valueB} {keyD valueD}}
     keylget keyedlist keyB
 } 1 {keyed list key may not be an empty string}
-
-Test keylist-1.22 {keylget tests} {
-    set keyedlist {{{keyA } valueA} {keyB valueB} {keyD valueD}}
-    keylget keyedlist keyB
-} 1 {keyed list key may not contain white-space characters}
 
 Test keylist-1.23 {keylget tests} {
     set keyedlist [list [list "Key\0A" valueA] {keyB valueB} {keyD valueD}]
@@ -272,11 +267,6 @@ Test keylist-3.8.1 {keylset tests} {
     catch {unset keyedlist}
     keylset keyedlist {} valueA
 } 1 {keyed list key may not be an empty string}
-
-Test keylist-3.8.2 {keylset tests} {
-    catch {unset keyedlist}
-    keylset keyedlist "Key A" valueA
-} 1 {keyed list key may not contain white-space characters}
 
 Test keylist-3.8.3 {keylset tests} {
     catch {unset keyedlist}

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.17 1997/10/01 02:35:44 markd Exp $
+# $Id: Makefile.in,v 8.18 1997/11/11 05:33:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -174,8 +174,8 @@ checkup.done: tcl tcl.tlib tcl.tndx tclx.tcl buildidx.tcl autoload.tcl
 #
 RUNTIME: tcl.tlib tcl.tndx tclx.tcl buildidx.tcl autoload.tcl help.tmp \
          dltest.tmp checkup
-
-tcl.tlib: ${TLIB_SRCS}
+ 
+tcl.tlib: ${TLIB_SRCS} autoload.tcl
 	-rm -f tcl.tlib tcl.tndx
 	cat ${TLIB_SRCS} | grep -v '^#[^@].*' | grep -v '#$$' > $@
 
