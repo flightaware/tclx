@@ -1005,3 +1005,25 @@
 ===============================================================================
 24 Jul 95: Released TclX 7.4a.
 ===============================================================================
+  o The auto-path variable was not being correctly set for Tk.  This
+    caused tclhelp to not find the Tk help files and the standard Tk
+    runtime to be used.
+===============================================================================
+26 Jul 95: Released TclX 7.4a patch1.
+===============================================================================
+ 3 Aug 95:
+  o Portability chages for Encore Multimax UMAX (and probably other older SVR3
+    systems).
+-------------------------------------------------------------------------------
+10 Aug 95:
+  o Fixed server connect so -myport will work without -myip.
+-------------------------------------------------------------------------------
+29 Aug 95:
+  o Don't use -L to find libraries (except for the shlink target).  This
+    was causing old libtcl.a files to be picked up from their installed
+    location.
+-------------------------------------------------------------------------------
+ 8 Sep 95:
+  o Changed Makefiles to pass MAKEFLAGS via the environment, since GNU make
+    can't handle passing them on the command line (unlike most other makes).
+-------------------------------------------------------------------------------
