@@ -15,8 +15,8 @@ message to majordomo@grizzly.com with the body of the message containing:
 
 To send mail to the list, user tclx-win@grizzly.com.
 
-This alpha release is available in:
-        ftp://ftp.neosoft.com/pub/tcl/tclx-distrib/tclX7.5.3a1.tar.gz
+The alpha release is available in:
+        ftp://ftp.neosoft.com/pub/tcl/tclx-distrib/tclX7.5.3-a1.tar.gz
 
 To build the release:
    o You need Visual C++ 4.0 (per standard Tcl instructions).  Contributions
