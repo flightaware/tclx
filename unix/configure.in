@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.27 1995/07/05 04:00:59 markd Exp markd $
+dnl $Id: configure.in,v 4.28 1995/07/15 05:36:44 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.27 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.28 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -54,11 +54,16 @@ fi
 
 AC_PROG_RANLIB
 
+#------------------------------------------------------------------------------
+# Check for C++ compiler.  Autoconf defaults C++ to gcc if its not found, so
+# make sure we have gcc.
+#------------------------------------------------------------------------------
+
 AC_PROG_CXX
-if test -n "$CXX"; then
-    TCLXX="YES"
+if test "$CXX" = "gcc"; then
+   AC_CHECK_PROG(TCLXX, gcc, "YES", "NO")
 else
-    TCLXX="NO"
+   TCLXX="YES"
 fi
 AC_SUBST(TCLXX)
 
