@@ -12,12 +12,82 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXlist.c,v 1.1 1992/09/20 23:19:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_LvarcatCmd --
+ *     Implements the TCL lvarpop command:
+ *         lvarcat var string string string
+ *
+ * Results:
+ *      Standard TCL results.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_LvarcatCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    int        listArgc, idx, listIdx;
+    char     **listArgv;
+    char      *staticArgv [12];
+    char      *varContents, *newStr, *result;
+
+    if (argc < 3) {
+        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+                          " var string [string...]", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    varContents = Tcl_GetVar (interp, argv[1], 0);
+
+    if (varContents != NULL)
+        listArgc = argc - 1;
+    else
+        listArgc = argc - 2;
+
+    if (listArgc < (sizeof (staticArgv) / sizeof (char *))) {
+        listArgv = staticArgv;
+    } else {
+        listArgv = (char **) ckalloc (listArgc * sizeof (char *));
+    }
+    
+    if (varContents != NULL) {
+        listArgv [0] = varContents;
+        listIdx = 1;
+    } else {
+        listIdx = 0;
+    }
+    for (idx = 2; idx < argc; idx++, listIdx++)
+        listArgv [listIdx] = argv [idx];
+
+    newStr = Tcl_Concat (listArgc, listArgv);
+    result = Tcl_SetVar (interp, argv [1], newStr, TCL_LEAVE_ERR_MSG);
+
+    ckfree (newStr);
+    if (listArgv != staticArgv)
+        ckfree ((char *) listArgv);
+
+    /*
+     * If all is ok, return the variable contents as a "static" result.
+     */
+    if (result != NULL) {
+        interp->result = result;
+        return TCL_OK;
+    } else {
+        return TCL_ERROR;
+    }
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -38,11 +108,9 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int        listArgc;
+    int        listArgc, listIdx, idx;
     char     **listArgv;
-    char      *varcontents;
-    int        listIdx, idx;
-    char      *resultList, *returnElement;
+    char      *varContents, *resultList, *returnElement;
 
     if ((argc < 2) || (argc > 4)) {
         Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
@@ -50,11 +118,11 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    varcontents = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
-    if (varcontents == NULL)
+    varContents = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
+    if (varContents == NULL)
         return TCL_ERROR;
 
-    if (Tcl_SplitList (interp, varcontents, &listArgc, &listArgv) == TCL_ERROR)
+    if (Tcl_SplitList (interp, varContents, &listArgc, &listArgv) == TCL_ERROR)
         return TCL_ERROR;
 
     if (argc == 2) 
@@ -116,11 +184,9 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int        listArgc;
+    int        listArgc, listIdx, idx;
     char     **listArgv;
-    char      *varcontents;
-    int        listIdx, idx;
-    char      *resultList;
+    char      *varContents, *resultList;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
@@ -128,11 +194,11 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    varcontents = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
-    if (varcontents == NULL)
-        return TCL_ERROR;
+    varContents = Tcl_GetVar (interp, argv[1], TCL_LEAVE_ERR_MSG);
+    if (varContents == NULL)
+        varContents = "";
 
-    if (Tcl_SplitList (interp, varcontents, &listArgc, &listArgv) == TCL_ERROR)
+    if (Tcl_SplitList (interp, varContents, &listArgc, &listArgv) == TCL_ERROR)
         return TCL_ERROR;
 
     if (argc == 3) 
@@ -147,8 +213,9 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
      */
     if (listIdx < 0)
         listIdx = 0;
-    else if (listIdx > listArgc)
-        listIdx = listArgc;
+    else
+        if (listIdx > listArgc)
+            listIdx = listArgc;
 
     /*
      * This code takes advantage of the fact that a NULL entry is always
