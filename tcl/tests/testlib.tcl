@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 7.5 1996/11/07 01:09:46 markd Exp $
+# $Id: testlib.tcl,v 8.0 1996/11/21 00:25:07 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -24,10 +24,16 @@
 # that variable.  Don't do this more than once.
 
 global SAVED_UNKNOWN TCL_PROGRAM env TEST_ERROR_INFO tcl_platform testXConfig
+global TEST_VERBOSE
 
 if [info exists env(TEST_ERROR_INFO)] {
     set TEST_ERROR_INFO 1
 }
+
+if [info exists env(TEST_VERBOSE)] {
+    set TEST_VERBOSE 1
+}
+
 # Check configuration information that will determine which tests
 # to run.  To do this, create an array testXConfig.  Each element
 # has a 0 or 1 value, and the following elements are defined:
@@ -125,7 +131,7 @@ proc OutTestError {test_name test_description contents_of_test
 #
 proc Test {test_name test_description contents_of_test passing_int_result
            passing_result {constraints {}}} {
-    global testXConfig
+    global testXConfig TEST_VERBOSE
 
     # Check constraints to see if we should run this test.
     foreach constraint $constraints {
@@ -133,6 +139,9 @@ proc Test {test_name test_description contents_of_test passing_int_result
             !$testXConfig($constraint)} {
                 return
         }
+    }
+    if [info exists TEST_VERBOSE] {
+        puts "$test_name $test_description"
     }
 
     set int_result [catch {uplevel $contents_of_test} result]
