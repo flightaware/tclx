@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.14 1993/05/16 15:37:45 markd Exp markd $
+# $Id: Config.mk,v 2.15 1993/05/28 04:13:13 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -51,7 +51,7 @@ TCL_UCB_DIR=../tcl6.7
 # TK_INSTALL_DEMO is set 1.  If you don't want the demo installed, set it
 # to 0.
 
-#TCL_TK_SHELL=wishx
+TCL_TK_SHELL=wishx
 TCL_TK_DIR=../tk3.2
 TK_INSTALL_DEMO=1
 
@@ -136,11 +136,18 @@ TCL_GROUP=bin
 
 
 #
-# The master Tcl directory that the Tcl runtime files are installed into.
-# The Tcl initiaization file (TclInit.tcl) is found in this directory.  The
-# directory name will have the TclX version number appended to it.
+# The master Tcl directory that the Extended Tcl runtime files are installed
+# into.  The Tcl initialization file (TclInit.tcl) and tcl.tlib file are found
+# in this directory. The directory name will have the TclX version number
+# appended to it.
 #
 TCL_MASTERDIR=/usr/local/tclX
+
+#
+# The master Tk directory that the Tk runtime files are installed into.
+# The directory name will have the TkX version number appended to it.
+#
+TK_MASTERDIR=/usr/local/tkX
 
 #
 # The directory to install Tcl binary into.
