@@ -124,7 +124,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.12 
+# From configure.in Revision: 1.14 
 
 
 
@@ -1427,17 +1427,26 @@ rm -f conftest*
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 #--------------------------------------------------------------------
-#       Include sys/select.h if it exists and if it supplies things
-#       that appear to be useful.  This appears to be true only on
-#       the RS/6000 under AIX.  Some systems like OSF/1 have a
-#       sys/select.h that's of no use, and other systems like SCO
-#       UNIX have a sys/select.h that's pernicious.  If there isn't
-#       a sys/select.h, then make sure that "fd_set" is defined in
-#       sys/types.h.
+#	Include sys/select.h if it exists and if it supplies things
+#	that appear to be useful and aren't already in sys/types.h.
+#	This appears to be true only on the RS/6000 under AIX.  Some
+#	systems like OSF/1 have a sys/select.h that's of no use, and
+#	other systems like SCO UNIX have a sys/select.h that's
+#	pernicious.  If "fd_set" isn't defined anywhere then set a
+#	special flag.
 #--------------------------------------------------------------------
 
 echo checking for sys/select.h
-echo '#include <sys/select.h>' > conftest.c
+echo checking for fd_set
+cat > conftest.c <<EOF
+#include <sys/types.h>
+int main() { exit(0); }
+int t() { fd_set readMask, writeMask; }
+EOF
+if eval $compile; then
+  :
+else
+  echo '#include <sys/select.h>' > conftest.c
 eval "$CPP \$DEFS conftest.c > conftest.out 2>&1"
 if egrep "fd_mask" conftest.out >/dev/null 2>&1; then
   
@@ -1451,15 +1460,6 @@ SEDDEFS="${SEDDEFS}\${SEDdA}HAVE_SYS_SELECT_H\${SEDdB}HAVE_SYS_SELECT_H\${SEDdC}
 "
 }
 
-else
-  echo checking for fd_set
-cat > conftest.c <<EOF
-#include <sys/types.h>
-int main() { exit(0); }
-int t() { fd_set readMask, writeMask; }
-EOF
-if eval $compile; then
-  :
 else
   
 {
@@ -1521,6 +1521,9 @@ EOF
 fi
 
 fi
+if test "$XINCLUDE_DIR" != ""; then
+     x_includes="$XINCLUDE_DIR"
+fi
 if test "$x_includes" = /usr/include; then
     XINCLUDES="# no special path needed"
 elif test "$x_includes" != ""; then
@@ -1539,7 +1542,7 @@ else
 fi
 rm -f conftest*
     if test "$XINCLUDES" = nope; then
-        dirs=${XINCLUDE_DIR-"/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include"}
+        dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include"
         for i in $dirs ; do
 	    if test -r $i/X11/Intrinsic.h; then
 	        XINCLUDES=" -I$i"
@@ -1553,6 +1556,9 @@ if test "$XINCLUDES" = nope; then
 fi
 
 
+if test "$XLIBRARY_DIR" != ""; then
+    x_libraries="$XLIBRARY_DIR"
+fi
 if test "$x_libraries" = /usr/lib; then
     XLIBSW=-lX11
 elif test "$x_libraries" != ""; then
@@ -1602,8 +1608,7 @@ fi
 
     fi
     if test "$XLIBSW" = nope; then
-	dirs=${XLIBRARY_DIR-"/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"}
-	for i in $dirs ; do
+	dirs=${XLIBRARY_DIR-"/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"}	for i in $dirs ; do
 	    if test -r $i/libX11.a; then
 		XLIBSW="-L$i -lX11"
 	    fi
