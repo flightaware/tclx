@@ -94,8 +94,24 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
         return TCL_OK;
     }
-    if (STREQU ("posix_signals", argv [1])) {
+    if (STREQU ("have_msgcats", argv [1])) {
+#       ifdef HAVE_CATGETS
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
+    if (STREQU ("have_posix_signals", argv [1])) {
 #       ifdef HAVE_SIGACTION
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
+    if (STREQU ("have_sockets", argv [1])) {
+#       ifdef HAVE_GETHOSTBYNAME
         interp->result = "1";
 #       else
         interp->result = "0";
@@ -124,7 +140,8 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     }
 
     Tcl_AppendResult (interp, "illegal option \"", argv [1], 
-                      "\" expect one of: version, patchlevel, posix_signals, ",
+                      "\" expect one of: version, patchlevel, ",
+                      "have_msgcats, have_posix_signals, have_sockets, ",
                       "appname, applongname, appversion, or apppatchlevel",
                       (char *) NULL);
     return TCL_ERROR;
