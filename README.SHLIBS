@@ -1,7 +1,6 @@
                Building Shared Libraries for Tcl, Tk and TclX.
-                             Dr. Joseph E. Sacco
-                                jsacco@ssl.com
-
+                     Dr. Joseph E. Sacco <jsacco@ssl.com>
+                 Updated by Mark Diekhans <markd@grizzly.com>
 
 The following is a discussion of the construction and use of shared libraries
 for building TCL applications. The principal source of information for this 
@@ -54,7 +53,7 @@ Building Shared Libraries
 -------------------------
 
 What follows are instructions for *manually* constructing shared libraries for 
-Tcl, Tk and TclX on a SUN system with *minimal* changes to the existing
+Tcl, Tk and TclX on a various system with *minimal* changes to the existing
 code. Other systems may follow different procedures so consult your local 
 system manuals for specifics.
 
@@ -67,178 +66,519 @@ SUN system. Xiaokun Zhu [xiaokun@stats.gla.ac.uk] has done an excellent job
 of this for Tcl and Tk. However, such modifications are SUN-specific and are 
 of limited value for non-SUN platforms.
 
+In most implementations of shared libraries, the library with the highest
+minor version number is chosen at run time.  The following examples use both
+the major and minor number of Tcl/Tk as the major library number.  Thus the
+Tcl 7.4 library is named libtcl.so.74.0.  For TclX we translate the version
+letter to another number.  Thus TclX 7.4a is libtclx.so.741.0.  This prevents
+library mismatch when new Tcl minor versions are released, as they are often
+not compatible at the C interface level.
 
-TCL
+===============================================================================
+SunOS:
+-------------------------------------------------------------------------------
+
+Tcl
 ---
-Do the following:
 
-    (1) run configure
+    (1) Run configure.
 
-    (2) edit the makefile. add the appropriate position-independent-code 
-        flag for your compiler to CFLAGS:
+    (2) Compile with the appropriate position-independent-code flag.
 
-	CFLAGS = -O -PIC         <--- SUN cc
-	CFLAGS = -O -fPIC        <--- GNU gcc
+        make CFLAGS="-O -PIC"         <--- SUN cc
+        make CFLAGS="-O -fPIC"        <--- GNU gcc
 
-        Note that "PIC" rather than "pic" is used. Libtcl does not need
-        the larger global offset table created when using PIC but libtk does.
-
-    (3) Patch tclAppInit.c [explanation will follow]
-
-        Note that this file is used to build tclsh and is not 
-        included in the tcl library.
-       
-
-    *** tclAppInit.c.dist   Mon Nov  8 21:54:21 1993
-    --- tclAppInit.c        Mon Nov  8 22:02:09 1993
-    ***************
-    *** 39,44 ****
-    --- 39,53 ----
-      
-      extern int main();
-      int *tclDummyMainPtr = (int *) main;
-    + 
-    + /*
-    +  * The following variable is a special hack that insures the tcl
-    +  * version of matherr() is used when linking against shared libraries
-    +  */
-    + 
-    + extern int matherr();
-    + int *tclDummyMathPtr = (int *) matherr;
-    + 
-      
-     
-      /*
-       *----------------------------------------------------------------------
-
-    (4) % make
-
-    (5) create a directory named ./shared and move to it.
+    (3) Create a directory named ./shared and extract all of the library
+        .o files into it.
 
         % mkdir ./shared
         % cd ./shared
-
-    (6) extract the objects from libtcl.a into ./shared
-
         % ar xv ../libtcl.a
 
-    (7) remove tclMtherr.o 
+    (4) Create the .sa part of the shared library, then remove tclMtherr.o.
 
-    (8) create the .so part of the shared library
+        % ar rcv libtcl.sa.74.0 tclMtherr.o
+        % rm tclMtherr.o
 
-	% ld -o libtcl.so.7.4 *.o -assert pure-text   <--- there should be
-							   no complaints from
-							   the assertion
-        % cp libtcl.so.7.4 ../
+    (5) Create the .so part of the shared library.
 
-    (9) create the .sa part of the shared library
+        % ld -o libtcl.so.74.0 *.o -assert pure-text
 
-	% cd ../
-	% ar rcv libtcl.sa.7.4 tclMtherr.o
-	% ranlib libtcl.sa.7.4
+        There should be no complaints from the assertion.
 
-   (10) build a version of tclsh using shared libraries
+    (6) Copy the library to it's final location.
 
-	    % gcc -O -o tclsh.shared tclAppInit.o -L./ -ltcl -lm
+        % cp libtcl.so.74.0 libtcl.sa.74.0 /usr/local/lib
+        % ranlib  /usr/local/lib/libtcl.sa.74.0
 
-        check out dynamic dependencies
+    (7) Build a version of tclsh using shared libraries.
+        
+        % cd ..
+        % gcc -O -o tclsh tclAppInit.o -L/usr/local/lib -ltcl -lm
 
-            % ldd tclsh.shared
+    (8) Verify the dynamic dependencies.
 
-		-ltcl.7 => .//libtcl.so.7.4
-		-lc.1 => /usr/lib/libc.so.1.8
-		-ldl.1 => /usr/lib/libdl.so.1.0
-
-        check out its size
-
-            % ls -l tclsh.shared
-
-	    -rwxr-xr-x   1 root     daemon      57344 Nov 14 10:39 tclsh.shared
-
-            [compare to the statically linked version and smile]
-
-   (11) Copy the .so and .sa pieces of the library to their destination.
-        Run "ranlib -t" on the .sa piece once it has been installed.
+        % ldd tclsh
+          -ltcl.74 => /usr/local/lib/libtcl.so.74.0
+          -lc.1 => /usr/lib/libc.so.1.9
+          -ldl.1 => /usr/lib/libdl.so.1.0
 
 
-The reason for the patch to tclAppInit.c is to guarantee the tcl-version of
-matherr() is used rather than the system version contained in the math library,
-libm.a. The dummy reference to matherr() creates a demand that is resolved 
-at link time by the tcl-version of matherr() contained in the [static] 
-archive libtcl.sa.7.4. Note that this is a hack since tclMtherr.c contains
-no exported, initialized data items. To see see the consequences of these
-actions try :
+The reason for tcllib.sa.740.0.c is to guarantee the tcl-version of matherr()
+is used rather than the system version contained in the math library, libm.a.
+The dummy reference to matherr(), that is a standard part of tclAppInit.c
+creates a demand that is resolved at link time by the tcl-version of matherr()
+contained in the [static] archive libtcl.sa.740.0. To see see the consequences
+of these actions try :
 
-          % tclsh.shared
-          % catch {acos(-2)}
+          % tclsh
+          % catch {expr acos(-2)}
             1
 
 Without this hack, the system version of matherr() would be used and catch
 would fail to "catch" the acos domain error.
 
-TK
----
-Do the following:
+Tk
+--
 
-    (1) run configure
-    (2) Edit the makfile: add the PIC flag to CFLAGS
-    (3) patch tkAppInit.c
+    (1) Run configure.
 
-    *** tkAppInit.c.dist    Tue Nov  9 00:10:15 1993
-    --- tkAppInit.c Tue Nov  9 00:11:04 1993
-    ***************
-    *** 40,45 ****
-    --- 40,53 ----
-      
-      extern int main();
-      int *tclDummyMainPtr = (int *) main;
-    + 
-    + /*
-    +  * The following variable is a special hack to insure that the tcl
-    +  * version of matther() is used when linking against shared libraries
-    +  */
-    + extern int matherr();
-    + int *tclDummyMathPtr = (int *) matherr;
-    + 
-      
+    (2) make CFLAGS="-O -PIC"         <--- SUN cc
+        make CFLAGS="-O -fPIC"        <--- GNU gcc
      
-      /*
-       *----------------------------------------------------------------------
-
-    (4) run make
-    (5) % mkdir ./shared
+    (3) % mkdir ./shared
         % cd ./shared
+        % ar xv ../libtk.a
 
-    (6) % ar xv ../libtk.a
-        % ld -o libtk.so.3.4 *.o -assert pure-text
-        % cp libtk.so.3.4 ../
+    (4) % ld -o libtk.so.40.0 *.o -assert pure-text
 
-    (7) build a version of wish using shared libaries
+    (5) Copy the library to it's final location.
 
-        % gcc -O -o wish.shared tkAppInit.o -L./ -ltk -L../tcl7.4 -ltcl -lX11 -lm
+        % cp libtk.so.40.0 /usr/local/lib
+        
+    (6) Build a version of wish using shared libaries.
 
-TCLX
+        % cd ..
+        % gcc -O -o wish tkAppInit.o -L/usr/local/lib -ltk -ltcl -lX11 -lm
+
+    (7) Verify the dynamic dependencies.
+
+        % ldd wish
+
+          -ltk.40 => /usr/local/lib/libtk.so.40.0
+          -ltcl.74 => /usr/local/lib/libtcl.so.74.0
+          -lc.1 => /usr/lib/libc.so.1.9
+          -ldl.1 => /usr/lib/libdl.so.1.0
+          -lX11.4 => /usr/lib/libX11.so.4.10
+  
+TclX
 ----
 
-    (1) run configure
-    (2) make -k CFLAGS="-fPIC -O" CXXFLAGS="-fPIC -O"
-        or -PIC for Sun cc.  CXXFLAGS is passed to the C++ compiler.
-    (3) % cd src/lib
+    (1) Run configure.
+
+    (2) make CFLAGS="-O -PIC"  CXXFLAGS="-O -PIC"         <--- SUN cc
+        make CFLAGS="-O -fPIC" CXXFLAGS="-O -fPIC"        <--- GNU gcc
+
+        CXXFLAGS is passed to the C++ compiler.
+
+    (3) Create the TclX shared library.
+
+        % cd src
         % mkdir shared
         % cd shared
         % ar xv ../libtclx.a
-        % ld -o libtclx.so.7.4 *.o -assert pure-text
-        % cp libtclx.so.7.4 ../
+        % ld -o libtclx.so.740.0 *.o -assert pure-text
+
+    (4) Copy the library to it's final location.
+
+        % cp libtclx.so.740.0 /usr/local/lib
+
+    (5) Create the TkX shared library.
+
+        % cd ../../tksrc
+        % mkdir shared
+        % cd shared 
+        % ar xv ../libtkx.a
+        % ld -o libtkx.so.400.0 *.o -assert pure-text
+        
+    (6) Copy the library to its final location.
+
+        % cp libtkx.so.400.0 /usr/local/lib
+
+    (7) TclX provides a special target to rebuild the programs with shared
+        libraries.
+
+        % cd ../..
+        % make shlink
+        
+    (8) Verify the dependencies.
+
+        % ldd src/tcl
+          -ltclx.740 => /usr/local/lib/libtclx.so.740.0
+          -ltcl.74 => /usr/local/lib/libtcl.so.74.0
+          -ldl.1 => /usr/lib/libdl.so.1.0
+          -lc.1 => /usr/lib/libc.so.1.9
+
+        % ldd tksrc/wishx
+          -ltkx.400 => /usr/local/lib/libtkx.so.400.0
+          -ltk.40 => /usr/local/lib/libtk.so.40.0
+          -lX11.4 => /usr/local/X11R5/lib/libX11.so.4.10
+          -ltclx.740 => /usr/local/lib/libtclx.so.740.0
+          -ltcl.74 => /usr/local/lib/libtcl.so.74.0
+          -ldl.1 => /usr/lib/libdl.so.1.0
+          -lc.1 => /usr/lib/libc.so.1.9
+
+===============================================================================
+Solaris:
+-------------------------------------------------------------------------------
+
+Tcl
+---
+
+    (1) Run configure.
+
+    (2) Compile with the appropriate position-independent-code flag.
+
+        make CFLAGS="-O -K PIC"       <--- SPARCcompiler C
+        make CFLAGS="-O -fPIC"        <--- GNU gcc
+
+    (3) Create a directory named ./shared and extract all of the library
+        .o files into it.
+
+        % mkdir ./shared
+        % cd ./shared
+        % ar xv ../libtcl.a
+
+    (4) Create the the shared library.
+
+        % ld -o libtcl.so.74.0 *.o -G -ztext
+
+    (5) Copy the library to it's final location.
+
+        % cp libtcl.so.74.0 /usr/local/lib
+        % ln -s libtcl.so.74.0 /usr/local/lib/libtcl.so
+
+    (6) Build a version of tclsh using shared libraries.
+        
         % cd ..
-        % rm tcl
-        % make
-    (4) % cd tksrc/lib
+        % gcc -O -o tclsh tclAppInit.o -L/usr/local/lib -R/usr/local/lib \
+              -ltcl -lm
+
+    (7) Verify the dynamic dependencies.
+
+        % ldd tclsh
+
+Tk
+--
+
+    (1) Run configure.
+
+    (2) make CFLAGS="-O -K PIC"       <--- SPARCcompiler C
+        make CFLAGS="-O -fPIC"        <--- GNU gcc
+
+    (3) % mkdir ./shared
+        % cd ./shared
+        % ar xv ../libtk.a
+
+    (4) % ld -o libtk.so.40.0 *.o -G -ztext
+
+    (5) Copy the library to it's final location.
+
+        % cp libtk.so.40.0 /usr/local/lib
+        % ln -s libtk.so.40.0 /usr/local/lib/libtk.so
+        
+    (5) Build a version of wish using shared libaries.
+
+        % cd ..
+        % gcc -O -o wish tkAppInit.o -L/usr/local/lib -R/usr/local/lib \
+              -ltk -ltcl -lX11 -lm
+
+    (6) Verify the dynamic dependencies.
+
+        % ldd wish
+  
+TclX
+----
+
+    (1) Run configure.
+
+    (2) make CFLAGS="-O -K PIC" CXXFLAGS="-O -K PIC"     <--- SPARCcompiler C
+        make CFLAGS="-O -fPIC"  CXXFLAGS="-O -fPIC"      <--- GNU gcc
+
+        CXXFLAGS is passed to the C++ compiler.
+
+    (3) Create the TclX shared library.
+
+        % cd src
         % mkdir shared
         % cd shared
-        % ar xv ../libtkx.a
-        % ld -o libtkx.so.3.4 *.o -assert pure-text
-        % cp libtkx.so.3.4 ../
-        % rm wishx
-        % make
+        % ar xv ../libtclx.a
+        % ld -o libtclx.so.740.0 *.o -G -ztext
 
-    (5) copy the two shared libaries to their final destination
+    (4) Copy the library to it's final location.
+
+        % cp libtclx.so.740.0 /usr/local/lib
+        % ln -s libtclx.so.740.0 /usr/local/lib/libtclx.so
+
+    (5) Create the TkX shared library.
+
+        % cd ../../tksrc
+        % mkdir shared
+        % cd shared 
+        % ar xv ../libtkx.a
+        % ld -o libtkx.so.400.0 *.o -G -ztext
+        
+    (6) Copy the library to it's final location.
+
+        % cp libtkx.so.400.0 /usr/local/lib
+        % ln -s libtk.so.400.0 /usr/local/lib/libtk.so
+
+    (7) TclX provides a special target to rebuild the programs with shared
+        libraries.  The -R flag is passed, pointing to the location the
+        libraries are installed.
+
+        % cd ../..
+        % make shlink LDFLAGS=-R/usr/local/lib
+        
+    (7) Verify the dependencies
+
+        % ldd src/tcl
+        % ldd tksrc/wishx
+
+===============================================================================
+FreeBSD 2.* (and probably others using GNU ld).
+-------------------------------------------------------------------------------
+
+Tcl
+---
+
+    (1) Run configure.
+
+    (2) Compile with the position-independent-code flag.
+
+        make CFLAGS="-O -fPIC"
+
+    (3) Create a directory named ./shared and extract all of the library
+        .o files into it.
+
+        % mkdir ./shared
+        % cd ./shared
+        % ar xv ../libtcl.a
+
+    (4) Create the the shared library.
+
+        % ld -Bshareable -o libtcl.so.74.0 *.o
+
+    (5) Copy the library to it's final location.
+
+        % cp libtcl.so.74.0 /usr/local/lib
+
+    (6) Update the run-time linker hints.  This must be doen as root.
+        You might wish to wait until all libraries have been installed.
+        
+        % ldconfig
+
+    (7) Build a version of tclsh using shared libraries.
+        
+        % cd ..
+        % gcc -O -o tclsh tclAppInit.o -L/usr/local/lib -ltcl -lm
+
+    (8) Verify the dynamic dependencies.
+
+        % ldd tclsh
+
+Tk
+--
+
+    (1) Run configure.
+
+    (2) make CFLAGS="-O -fPIC"
+
+    (3) % mkdir ./shared
+        % cd ./shared
+        % ar xv ../libtk.a
+
+    (4) % ld -Bshareable -o libtk.so.40.0 *.o
+
+    (5) Copy the library to it's final location.
+
+        % cp libtk.so.40.0 /usr/local/lib
+        
+    (6) Update the run-time linker hints.  This must be doen as root.
+        
+        % ldconfig
+
+    (7) Build a version of wish using shared libaries.
+
+        % cd ..
+        % gcc -O -o wish tkAppInit.o -L/usr/local/lib -ltk -ltcl -lX11 -lm
+
+    (8) Verify the dynamic dependencies.
+
+        % ldd wish
+  
+TclX
+----
+
+    (1) Run configure.
+
+    (2) make CFLAGS="-O -fPIC" CXXFLAGS="-O -fPIC"
+
+        CXXFLAGS is passed to the C++ compiler.
+
+    (3) Create the TclX shared library.
+
+        % cd src
+        % mkdir shared
+        % cd shared
+        % ar xv ../libtclx.a
+        % ld -Bshareable -o libtclx.so.740.0 *.o
+
+    (4) Copy the library to it's final location.
+
+        % cp libtclx.so.740.0 /usr/local/lib
+
+    (5) Create the TkX shared library.
+
+        % cd ../../tksrc
+        % mkdir shared
+        % cd shared 
+        % ar xv ../libtkx.a
+        % ld -Bshareable -o libtkx.so.400.0 *.o
+        
+    (6) Copy the library to it's final location.
+
+        % cp libtkx.so.400.0 /usr/local/lib
+
+    (7) Update the run-time linker hints.  This must be doen as root.
+        
+        % ldconfig
+
+    (8) TclX provides a special target to rebuild the programs with shared
+        libraries.
+
+        % cd ../..
+        % make shlink
+        
+    (9) Verify the dependencies.
+
+        % ldd src/tcl
+        % ldd tksrc/wishx
+
+===============================================================================
+SCO 5.0 (Dyanmic shared libraries are not available on earlier versions).
+-------------------------------------------------------------------------------
+
+Note, Tcl and TclX are part of SCO 5.0, use great care when installing new
+versions of the software, or you might break some system software.
+
+Tcl
+---
+
+    (1) Run configure.
+
+    (2) Compile with the position-independent-code flag.
+
+        make CFLAGS="-O -KPIC -belf"
+
+    (3) Create a directory named ./shared and extract all of the library
+        .o files into it.
+
+        % mkdir ./shared
+        % cd ./shared
+        % ar xv ../libtcl.a
+
+    (4) Create the the shared library.
+
+        % ld -o libtcl.so.74.0 *.o -G -ztext
+
+    (5) Copy the library to it's final location.
+
+        % cp libtcl.so.74.0 /usr/local/lib
+
+    (6) Build a version of tclsh using shared libraries.  Absolute paths
+        to the libraries are specified so that the Tcl 7.3 libraries that
+        are shipped with the ODT development system are not picked up
+        
+        % cd ..
+        % cc -O -belf -o tclsh tclAppInit.o /usr/local/lib/libtcl.so.74.0 -lm
+
+    (7) Verify the dynamic dependencies.
+
+        % ldd tclsh
+
+Tk
+--
+
+    (1) Run configure.
+
+    (2) make CFLAGS="-O -KPIC -belf"
+
+    (3) % mkdir ./shared
+        % cd ./shared
+        % ar xv ../libtk.a
+
+    (4) % ld -o libtk.so.40.0 *.o -G -ztext
+
+    (5) Copy the library to it's final location.
+
+        % cp libtk.so.40.0 /usr/local/lib
+        
+    (6) Build a version of wish using shared libaries.
+
+        % cd ..
+        % gcc -O -o wish tkAppInit.o /usr/local/lib/libtk.so.40.0  \
+            /usr/local/lib/libtcl.so.74.0 -lm
+
+    (7) Verify the dynamic dependencies.
+
+        % ldd wish
+  
+TclX
+----
+
+    (1) Run configure.
+
+    (2) make CFLAGS="-O -KPIC -belf"
+
+        CXXFLAGS is passed to the C++ compiler.
+
+    (3) Create the TclX shared library.
+
+        % cd src
+        % mkdir shared
+        % cd shared
+        % ar xv ../libtclx.a
+        % ld -o libtclx.so.740.0 *.o -G -ztext
+
+    (4) Copy the library to it's final location.
+
+        % cp libtclx.so.740.0 /usr/local/lib
+
+    (5) Create the TkX shared library.
+
+        % cd ../../tksrc
+        % mkdir shared
+        % cd shared 
+        % ar xv ../libtkx.a
+        % ld -o libtkx.so.400.0 *.o -G -ztext
+        
+    (6) Copy the library to it's final location.
+
+        % cp libtkx.so.400.0 /usr/local/lib
+
+    (7) Can't use TclX's special target, you must rebuild by hand to force the
+        libraries in front.
+
+        % cd ../../src
+        % cc -O -belf tclXAppInit.o /usr/local/lib/libtclx.so.740.0 \
+            /usr/local/lib/libtcl.so.74.0 -lintl  -lsocket -lnsl -lm -o tcl
+        % cd ../tksrc
+        % cc -O -belf tclXAppInit.o /usr/local/lib/libtkx.so.400.0 \
+            /usr/local/lib/libtk.so.40.0  /usr/local/lib/libtclx.so.740.0 \
+            /usr/local/lib/libtcl.so.74.0 -lintl  -lsocket -lnsl -lm -o tcl
+        
+    (8) Verify the dependencies.
+
+        % ldd src/tcl
+        % ldd tksrc/wishx
