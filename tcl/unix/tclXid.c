@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 2.4 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXid.c,v 2.5 1993/07/18 15:33:29 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -78,12 +78,11 @@ UseridToUsernameResult (interp, userId)
     Tcl_Interp *interp;
     int         userId;
 {
+    uid_t          uid = (uid_t) userId;
     struct passwd *pw = getpwuid (userId);
-    if (pw == NULL) {
-        char numBuf [32];
 
-        sprintf (numBuf, "%d", userId);
-        Tcl_AppendResult (interp, "unknown user id: ", numBuf, (char *) NULL);
+    if ((pw == NULL) || ((int) uid != userId)) {
+        sprintf (interp->result, "unknown user id: %d", userId);
         return TCL_ERROR;
     }
     strcpy (interp->result, pw->pw_name);
@@ -96,6 +95,7 @@ UsernameToUseridResult (interp, userName)
     char       *userName;
 {
     struct passwd *pw = getpwnam (userName);
+
     if (pw == NULL) {
         Tcl_AppendResult (interp, "unknown user id: ", userName, 
                           (char *) NULL);
@@ -110,12 +110,11 @@ GroupidToGroupnameResult (interp, groupId)
     Tcl_Interp *interp;
     int         groupId;
 {
+    gid_t         gid = (gid_t) groupId;
     struct group *grp = getgrgid (groupId);
-    if (grp == NULL) {
-        char numBuf [32];
 
-        sprintf (numBuf, "%d", groupId);
-        Tcl_AppendResult (interp, "unknown group id: ", numBuf, (char *) NULL);
+    if ((grp == NULL) || ((int) gid != groupId)) {
+        sprintf (interp->result, "unknown group id: %d", groupId);
         return TCL_ERROR;
     }
     strcpy (interp->result, grp->gr_name);
@@ -146,7 +145,8 @@ Tcl_IdCmd (clientData, interp, argc, argv)
 {
     struct passwd *pw;
     struct group *grp;
-    int uid, gid, pid;
+    int           uid, gid;
+    pid_t         pid;
 
     if (argc < 2) 
         goto bad_args;
@@ -174,7 +174,8 @@ Tcl_IdCmd (clientData, interp, argc, argv)
             return GroupnameToGroupidResult (interp, argv[3]);
 
         if (STREQU (argv[2], "groupid")) {
-            if (Tcl_GetInt (interp, argv[3], &gid) != TCL_OK) return TCL_ERROR;
+            if (Tcl_GetInt (interp, argv[3], &gid) != TCL_OK)
+                return TCL_ERROR;
             return GroupidToGroupnameResult (interp, gid);
 
         }
@@ -279,7 +280,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
         } else {
             if (Tcl_GetInt (interp, argv[2], &uid) != TCL_OK)
                 return TCL_ERROR;
-            if (setuid (uid) < 0) 
+            if (setuid ((uid_t) uid) < 0) 
                 goto cannot_set_name;
             return TCL_OK;
         }
@@ -305,7 +306,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
         } else {
             if (Tcl_GetInt (interp, argv[2], &gid) != TCL_OK)
                 return TCL_ERROR;
-            if (setgid (gid) < 0)
+            if (setgid ((gid_t) gid) < 0)
                 goto cannot_set_name;
             return TCL_OK;
         }

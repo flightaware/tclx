@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 2.2 1993/07/20 04:22:52 markd Exp markd $
+# $Id: chmod.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -390,7 +390,7 @@ Test chmod-6.4 {chown error tests} {
 
 Test chmod-6.5 {chown error tests} {
     chown
-} 1 {wrong # args: chown owner|{owner group} filelist}
+} 1 {wrong # args: chown user|{user group} filelist}
 
 Test chmod-7.1 {chgrp tests} {
     chgrp [id group]  {CHMOD.TMP CHMOD2.TMP}

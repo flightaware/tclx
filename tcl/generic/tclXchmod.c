@@ -12,11 +12,20 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 2.2 1993/05/28 04:43:03 markd Exp markd $
+ * $Id: tclXchmod.c,v 2.3 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * Type used for returning parsed owner informtion.
+ */
+typedef struct {
+    int    changeGroup;
+    uid_t  userId;
+    gid_t  groupId;
+} ownerInfo_t;
 
 /*
  * Prototypes of internal functions.
@@ -26,6 +35,15 @@ ConvSymMode _ANSI_ARGS_((Tcl_Interp  *interp,
                          char        *symMode,
                          int          modeVal));
 
+static int
+ConvertGroupId _ANSI_ARGS_((Tcl_Interp  *interp,
+                            char        *strId,
+                            gid_t       *groupIdPtr));
+
+static int
+ConvertUserGroup _ANSI_ARGS_((Tcl_Interp  *interp,
+                              char        *ownerGroupList,
+                              ownerInfo_t *ownerInfoPtr));
 
 /*
  *-----------------------------------------------------------------------------
@@ -257,10 +275,99 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
+ * ConvertGroupId --
+ *   Convert a group name of string id number to a group id.
+ *-----------------------------------------------------------------------------
+ */
+static int
+ConvertGroupId (interp, strId, groupIdPtr)
+    Tcl_Interp  *interp;
+    char        *strId;
+    gid_t       *groupIdPtr;
+{
+    int             tmpId;
+    struct group   *groupPtr;
+
+    groupPtr = getgrnam (strId);
+    if (groupPtr != NULL) {
+        *groupIdPtr = groupPtr->gr_gid;
+    } else {
+        if (!Tcl_StrToInt (strId, 10, &tmpId))
+            goto unknownGroup;
+        *groupIdPtr = tmpId;
+        if ((int) (*groupIdPtr) != tmpId)
+            goto unknownGroup;
+    }
+    return TCL_OK;
+
+  unknownGroup:
+    Tcl_AppendResult (interp, "unknown group id: ", strId, (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * ConvertUserGroup --
+ *   Convert the owner/group parameter for the chmod command.  If is one of
+ *   {owner}. {owner group} or {owner {}}
+ *-----------------------------------------------------------------------------
+ */
+static int
+ConvertUserGroup (interp, userGroupList, ownerInfoPtr)
+    Tcl_Interp  *interp;
+    char        *userGroupList;
+    ownerInfo_t *ownerInfoPtr;
+{
+    int             ownArgc, tmpId;
+    char          **ownArgv;
+    struct passwd  *passwdPtr;
+
+    if (Tcl_SplitList (interp, userGroupList, &ownArgc, &ownArgv) != TCL_OK)
+        return TCL_ERROR;
+
+    if ((ownArgc < 1) || (ownArgc > 2)) {
+        interp->result = "owner arg should be: user or {user group}";
+        goto errorExit;
+    }
+
+    ownerInfoPtr->changeGroup = (ownArgc == 2);
+
+    passwdPtr = getpwnam (ownArgv [0]);
+    if (passwdPtr != NULL) {
+        ownerInfoPtr->userId = passwdPtr->pw_uid;
+    } else {
+        if (!Tcl_StrToInt (ownArgv [0], 10, &tmpId))
+            goto unknownUser;
+        ownerInfoPtr->userId = tmpId;
+        if ((int) ownerInfoPtr->userId != tmpId)
+            goto unknownUser;
+    }
+
+    ownerInfoPtr->groupId = passwdPtr->pw_gid;
+    if (ownerInfoPtr->changeGroup && (ownArgv [1][0] != '\0')) {
+        if (ConvertGroupId (interp, ownArgv [1],
+                            &ownerInfoPtr->groupId) != TCL_OK)
+            goto errorExit;
+    }
+    ckfree (ownArgv);
+    return TCL_OK;
+
+  unknownUser:
+    Tcl_AppendResult (interp, "unknown user id: ", ownArgv [0], (char *) NULL);
+
+  errorExit:
+    ckfree (ownArgv);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
  * Tcl_ChownCmd --
  *     Implements the TCL chown command:
- *     chown owner filelist
- *     chown {owner group} filelist
+ *     chown user filelist
+ *     chown {user group} filelist
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -274,111 +381,52 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    int            idx, ownArgc, fileArgc;
-    char         **ownArgv, **fileArgv = NULL, *fileName;
+    int            idx, fileArgc;
+    char         **fileArgv, *fileName;
+    ownerInfo_t    ownerInfo;
     struct stat    fileStat;
-    int            useOwnerGrp, chGroup, ownerId, groupId;
-    struct passwd *passwdPtr;
-    struct group  *groupPtr;
-    int            result = TCL_ERROR;
     Tcl_DString    tildeBuf;
 
     Tcl_DStringInit (&tildeBuf);
 
     if (argc != 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " owner|{owner group} filelist", (char *) NULL);
+                          " user|{user group} filelist", (char *) NULL);
         return TCL_ERROR;
     }
-
-    if (Tcl_SplitList (interp, argv[1], &ownArgc, &ownArgv) != TCL_OK)
+    
+    if (ConvertUserGroup (interp, argv [1], &ownerInfo) != TCL_OK)
         return TCL_ERROR;
 
-    if ((ownArgc < 1) || (ownArgc > 2)) {
-        interp->result = "owner arg should be: owner or {owner group}";
-        goto exitPoint;
-    }
-    if (ownArgc == 2) {
-        useOwnerGrp = (ownArgv [1][0] == '\0');
-        chGroup = TRUE;
-    } else
-        chGroup = FALSE;
-
-    /*
-     * Get the owner id, either convert the name or use it as an integer.
-     */
-    passwdPtr = getpwnam (ownArgv [0]);
-    if (passwdPtr != NULL)
-        ownerId = passwdPtr->pw_uid;
-    else {
-        if (!Tcl_StrToInt (ownArgv [0], 10, &ownerId)) {
-            Tcl_AppendResult (interp, "unknown user id: ", ownArgv [0],
-                              (char *) NULL);
-            goto exitPoint;
-        }
-    }
-    /*
-     * Get the group id, this is either the specified id or name, or the
-     * if associated with the specified user.
-     */
-    if (chGroup) {
-        if (useOwnerGrp) {
-            if (passwdPtr == NULL) {
-                passwdPtr = getpwuid (ownerId);
-                if (passwdPtr != NULL) {
-                    Tcl_AppendResult (interp, "unknown user id: ", 
-                                      ownArgv [0], (char *) NULL);
-                    goto exitPoint;
-                }
-            }
-            groupId = passwdPtr->pw_gid;                        
-        } else {
-            groupPtr = getgrnam (ownArgv [1]);
-            if (groupPtr != NULL)
-                groupId = groupPtr->gr_gid;
-            else {
-                if (!Tcl_StrToInt (ownArgv [1], 10, &groupId)) {
-                    Tcl_AppendResult (interp, "unknown group id: ", 
-                                      ownArgv [1], (char *) NULL);
-                    goto exitPoint;
-                }
-            }
-        }
-    }
     if (Tcl_SplitList (interp, argv [2], &fileArgc, &fileArgv) != TCL_OK)
-        goto exitPoint;
+        return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
         fileName = Tcl_TildeSubst (interp, fileArgv [idx], &tildeBuf);
         if (fileName == NULL)
-            goto exitPoint;
+            goto errorExit;
         
-        if (!chGroup) {
-            if (stat (fileName, &fileStat) != 0) {
-                Tcl_AppendResult (interp, fileArgv [idx], ": ",
-                                  Tcl_PosixError (interp), (char *) NULL);
-                goto exitPoint;
-            }
-            groupId = fileStat.st_gid;
+        if (!ownerInfo.changeGroup) {
+            if (stat (fileName, &fileStat) != 0)
+                goto fileError;
+            ownerInfo.groupId = fileStat.st_gid;
         }
-
-        if (chown (fileName, ownerId, groupId) < 0) {
-            Tcl_AppendResult (interp, fileArgv [idx], ": ",
-                              Tcl_PosixError (interp), (char *) NULL);
-            goto exitPoint;
-        }
+        if (chown (fileName, ownerInfo.userId, ownerInfo.groupId) < 0)
+                goto fileError;
 
         Tcl_DStringFree (&tildeBuf);
     }
 
-    result = TCL_OK;
-exitPoint:
-    Tcl_DStringFree (&tildeBuf);
+    ckfree ((char *) fileArgv);
+    return TCL_OK;
 
-    ckfree ((char *) ownArgv);
-    if (fileArgv != NULL)
-        ckfree ((char *) fileArgv);
-    return result;
+  fileError:
+    Tcl_AppendResult (interp, fileArgv [idx], ": ",
+                      Tcl_PosixError (interp), (char *) NULL);
+  errorExit:
+    Tcl_DStringFree (&tildeBuf);
+    ckfree ((char *) fileArgv);
+    return TCL_ERROR;;
 }
 
 /*
@@ -400,10 +448,10 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    int            idx, fileArgc, groupId, result = TCL_ERROR;
+    int            idx, fileArgc;
+    gid_t          groupId;
     char         **fileArgv, *fileName;
     struct stat    fileStat;
-    struct group  *groupPtr;
     Tcl_DString    tildeBuf;
 
     Tcl_DStringInit (&tildeBuf);
@@ -414,37 +462,35 @@ Tcl_ChgrpCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    groupPtr = getgrnam (argv [1]);
-    if (groupPtr != NULL)
-        groupId = groupPtr->gr_gid;
-    else {
-        if (!Tcl_StrToInt (argv [1], 10, &groupId)) {
-            Tcl_AppendResult (interp, "unknown group id: ", argv [1],
-                              (char *) NULL);
-            return TCL_ERROR;
-        }
-    }
+    if (ConvertGroupId (interp, argv [1], &groupId) != TCL_OK)
+        return TCL_ERROR;
+
     if (Tcl_SplitList (interp, argv [2], &fileArgc, &fileArgv) != TCL_OK)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
         fileName = Tcl_TildeSubst (interp, fileArgv [idx], &tildeBuf);
         if (fileName == NULL)
-            goto exitPoint;
+            goto errorExit;
         
         if ((stat (fileName, &fileStat) != 0) ||
                 (chown (fileArgv[idx], fileStat.st_uid, groupId) < 0)) {
             Tcl_AppendResult (interp, fileArgv [idx], ": ",
                               Tcl_PosixError (interp), (char *) NULL);
-            goto exitPoint;
+            goto fileError;
         }
 
         Tcl_DStringFree (&tildeBuf);
     }
 
-    result = TCL_OK;
-exitPoint:
+    ckfree ((char *) fileArgv);
+    return TCL_OK;
+
+  fileError:
+    Tcl_AppendResult (interp, fileArgv [idx], ": ",
+                      Tcl_PosixError (interp), (char *) NULL);
+  errorExit:
     Tcl_DStringFree (&tildeBuf);
     ckfree ((char *) fileArgv);
-    return result;
+    return TCL_ERROR;;
 }
