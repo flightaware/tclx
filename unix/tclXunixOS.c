@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.3 2004/04/29 23:06:47 hobbs Exp $
+ * $Id: tclXunixOS.c,v 8.4 2004/05/24 22:55:38 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -318,7 +318,7 @@ void
 TclXOSsleep (seconds)
     unsigned seconds;
 {
-    sleep (seconds);
+    Tcl_Sleep (seconds*1000);
 }
 
 /*-----------------------------------------------------------------------------

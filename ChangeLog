@@ -1,3 +1,10 @@
+2005-01-21  Andreas Kupries <andreask@activestate.com>
+
+	* unix/tclXunixOS.c: Converted both implementations of TclXOSsleep
+	* win/tclXwinOS.c:   from direct access to native time functions
+	                     to the use of Tcl's more abstract interface
+	                     (Tcl_Sleep).
+
 2005-01-18  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclXfcntl.c: make attrNames static
