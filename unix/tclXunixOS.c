@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.1 2001/10/24 23:31:50 hobbs Exp $
+ * $Id: tclXunixOS.c,v 8.2 2002/09/26 00:23:30 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -952,69 +952,69 @@ TclXOSgetpeername (interp, channel, sockaddr, sockaddrSize)
 {
 
     if (getpeername (ChannelToFnum (channel, 0),
-                     (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
+		(struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
         TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
-                              Tcl_PosixError (interp), (char *) NULL);
-         return TCL_ERROR;
-     }
-     return TCL_OK;
- }
- 
- /*-----------------------------------------------------------------------------
-  * TclXOSgetsockname --
-  *   System dependent interface to getsockname functionality.
-  *
-  * Parameters:
-  *   o interp - Errors are returned in result.
-  *   o channel - Channel associated with the socket.
-  *   o sockaddr - Pointer to sockaddr structure.
-  *   o sockaddrSize - Size of the sockaddr struct.
-  * Results:
-  *   TCL_OK or TCL_ERROR, sets a posix error.
-  *-----------------------------------------------------------------------------
-  */
- int
- TclXOSgetsockname (interp, channel, sockaddr, sockaddrSize)
-     Tcl_Interp *interp;
-     Tcl_Channel channel;
-     void       *sockaddr;
-     int         sockaddrSize;
- {
-     if (getsockname (ChannelToFnum (channel, 0),
-                      (struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
-         TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
-                               Tcl_PosixError (interp), (char *) NULL);
-         return TCL_ERROR;
-     }
-     return TCL_OK;
- }
- 
- /*-----------------------------------------------------------------------------
-  * TclXOSgetsockopt --
-  *    Get the value of a integer socket option.
-  *     
-  * Parameters:
-  *   o interp - Errors are returned in the result.
-  *   o channel - Channel associated with the socket.
-  *   o option - Socket option to get.
-  *   o valuePtr -  Integer value is returned here.
-  * Returns:
-  *   TCL_OK or TCL_ERROR.
-  *-----------------------------------------------------------------------------
-  */
- int
- TclXOSgetsockopt (interp, channel, option, valuePtr)
-     Tcl_Interp  *interp;
-     Tcl_Channel  channel;
-     int          option;
-     int         *valuePtr;
- {
-     int valueLen = sizeof (*valuePtr);
+		Tcl_PosixError (interp), (char *) NULL);
+	return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSgetsockname --
+ *   System dependent interface to getsockname functionality.
+ *
+ * Parameters:
+ *   o interp - Errors are returned in result.
+ *   o channel - Channel associated with the socket.
+ *   o sockaddr - Pointer to sockaddr structure.
+ *   o sockaddrSize - Size of the sockaddr struct.
+ * Results:
+ *   TCL_OK or TCL_ERROR, sets a posix error.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSgetsockname (interp, channel, sockaddr, sockaddrSize)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    void       *sockaddr;
+    int         sockaddrSize;
+{
+    if (getsockname (ChannelToFnum (channel, 0),
+		(struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
+	TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+		Tcl_PosixError (interp), (char *) NULL);
+	return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSgetsockopt --
+ *    Get the value of a integer socket option.
+ *     
+ * Parameters:
+ *   o interp - Errors are returned in the result.
+ *   o channel - Channel associated with the socket.
+ *   o option - Socket option to get.
+ *   o valuePtr -  Integer value is returned here.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSgetsockopt (interp, channel, option, valuePtr)
+    Tcl_Interp  *interp;
+    Tcl_Channel  channel;
+    int          option;
+    int         *valuePtr;
+{
+    int valueLen = sizeof (*valuePtr);
 
-     if (getsockopt (ChannelToFnum (channel, 0), SOL_SOCKET, option, 
-                     (void*) valuePtr, &valueLen) != 0) {
-         TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
-                               Tcl_PosixError (interp), (char *) NULL);
+    if (getsockopt (ChannelToFnum (channel, 0), SOL_SOCKET, option, 
+		(void*) valuePtr, &valueLen) != 0) {
+	TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
+		Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
