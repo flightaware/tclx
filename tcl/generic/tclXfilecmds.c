@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.7 1993/08/18 05:23:56 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.8 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -104,6 +104,7 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
         sprintf (fileIds, "file%d", fileNums [1]);
         if (Tcl_SetVar (interp, argv[2], fileIds, TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
+        Tcl_ResetResult (interp);
     }
         
     return TCL_OK;

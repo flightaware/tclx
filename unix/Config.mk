@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.29 1993/08/26 04:55:13 markd Exp markd $
+# $Id: Config.mk,v 2.30 1993/08/31 23:03:20 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ YACC=yacc
 # X is often in strange places, override what configure figured out if
 # its wrong.
 
-#XINCLUDES=/usr/somewhere/include
+#XINCLUDES=-I/usr/somewhere/include
 #XLIBSW=-L/usr/somewhere/lib -lX11
 
 #------------------------------------------------------------------------------
