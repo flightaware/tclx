@@ -117,6 +117,46 @@ ReturnGetHostError (interp, host)
 /*
  *-----------------------------------------------------------------------------
  *
+ * InetAtoN --
+ *
+ *   Convert an internet address to an "struct in_addr" representation.
+ * 
+ *
+ * Parameters:
+ *   o interp (O) - If not NULL, an error message is return in the result.
+ *     If NULL, no error message is generated.
+ *   o strAddress (I) - String address to convert.
+ *   o inAddress (O) - Converted internet address is returned here.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+InetAtoN (interp, strAddress, inAddress)
+    Tcl_Interp     *interp;
+    char           *strAddress;
+    struct in_addr *inAddress;
+{
+    int result = TCL_OK;
+
+#ifdef HAVE_INET_ATON
+    if (!inet_aton (strAddress, inAddress))
+        result = TCL_ERROR;
+#else
+    inAddress->s_addr = inet_addr (strAddress);
+    if (inAddress->s_addr == INADDR_NONE)
+        result = TCL_ERROR;
+#endif
+    if ((result == TCL_ERROR) && (interp != NULL)) {
+        Tcl_AppendResult (interp, "malformed address: \"",
+                          strAddress, "\"", (char *) NULL);
+    }
+    return result;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
  * BindFileHandles --
  *
  *   Bind the file handles for a socket to one or two Tcl files and return
@@ -276,12 +316,9 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
             if (nextArg >= argc - 1)
                 goto missingArg;
             nextArg++;
-            local.sin_addr.s_addr = inet_addr (argv [nextArg]);
-            if (local.sin_addr.s_addr == INADDR_NONE) {
-                Tcl_AppendResult (interp, "malformed address: \"",
-                                  argv [nextArg], "\"", (char *) NULL);
+            if (InetAtoN (interp, argv [nextArg],
+                          &local.sin_addr) == TCL_ERROR)
                 return TCL_ERROR;
-            }
             local.sin_family = AF_INET;
             specifiedLocalIp = 1;
         } else if (STREQU ("-myport", argv [nextArg])) {
@@ -334,8 +371,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
     /*
      * Convert IP address or lookup host name.
      */
-    server.sin_addr.s_addr = inet_addr (host);
-    if (server.sin_addr.s_addr != INADDR_NONE) {
+    if (InetAtoN (NULL, host, &server.sin_addr) == TCL_OK) {
         server.sin_family = AF_INET;
         hostEntry = NULL;
     } else {
@@ -453,12 +489,9 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
             if (nextArg >= argc - 1)
                 goto missingArg;
             nextArg++;
-            local.sin_addr.s_addr = inet_addr (argv [nextArg]);
-            if (local.sin_addr.s_addr == INADDR_NONE) {
-                Tcl_AppendResult (interp, "malformed address: \"",
-                                  argv [nextArg], "\"", (char *) NULL);
+            if (InetAtoN (interp, argv [nextArg],
+                          &local.sin_addr) == TCL_ERROR)
                 return TCL_ERROR;
-            }
         } else if (STREQU ("-myport", argv [nextArg])) {
             if (nextArg >= argc - 1)
                 goto missingArg;
@@ -647,7 +680,7 @@ InfoGetHost (interp, argc, argv)
         return NULL;
     }
 
-    if (inet_aton (argv[2], &address)) {
+    if (InetAtoN (NULL, argv [2], &address) == TCL_OK) {
         hostEntry = gethostbyaddr ((const char *)&address,
                                    sizeof (address),
                                    AF_INET);
@@ -806,9 +839,14 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
     msgHeader.msg_namelen = 0;
     msgHeader.msg_iov = dataVec;
     msgHeader.msg_iovlen = 1;
+#ifdef HAVE_MSG_ACCRIGHTS
+    msgHeader.msg_accrights = NULL;
+    msgHeader.msg_accrightslen = 0;
+#else
     msgHeader.msg_control = NULL;
     msgHeader.msg_controllen = 0;
-    
+#endif    
+
     bytesAttempted = strlen (argv [nextArg]);
     dataVec [0].iov_base = argv [nextArg];
     dataVec [0].iov_len = bytesAttempted;
