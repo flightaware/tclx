@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.17 1993/06/21 06:15:01 markd Exp markd $
+# $Id: Config.mk,v 2.18 1993/07/18 15:52:26 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -227,10 +227,6 @@ TK_MAN_FUNC_SECTION=TK
 #
 #      o TCL_HAVE_SETLINEBUF - Define if the `setlinebuf' is available as part
 #        of stdio.
-#
-#      o TCL_32_BIT_RANDOM - Define if the `rand' function returns a value in
-#        the range 0..(2^31)-1, leave undefined if `rand' returns a value
-#        in the range 0..(2^15)-1.
 #
 #      o TCL_NO_SELECT - The select call is not available.
 #
