@@ -2,7 +2,6 @@
 ./INSTALL
 ./MANIFEST
 ./README
-./README.SHLIBS
 ./doc/CmdWrite.3
 ./doc/Handles.3
 ./doc/Keylist.3
