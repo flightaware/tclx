@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 2.4 1993/02/07 22:04:46 markd Exp markd $
+# $Id: clock.test,v 2.5 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -59,16 +59,22 @@ test clock-3.5 {convertclock tests} {
 
 test clock-3.6 {convertclock tests} {
     set clock [convertclock "Oct 23,1992 15:00"]
-    fmtclock $clock {%b %d,%Y %H.%M}
-} {Oct 23,1992 15.00}
+    fmtclock $clock {%b %d,%Y %H:%M}
+} {Oct 23,1992 15:00}
 
 test clock-3.7 {convertclock tests} {
     set clock [convertclock "Oct 23,1992 15:00 GMT"]
-    fmtclock $clock {%b %d,%Y %H.%M GMT} GMT
-} {Oct 23,1992 15.00 GMT}
+    fmtclock $clock {%b %d,%Y %H:%M GMT} GMT
+} {Oct 23,1992 15:00 GMT}
 
 
-test clock-3.7 {convertclock tests} {
+test clock-3.8 {convertclock tests} {
+    set clock [convertclock "Oct 23,1992 15:00" GMT]
+    fmtclock $clock {%b %d,%Y %H:%M GMT} GMT
+} {Oct 23,1992 15:00 GMT}
+
+
+test clock-3.9 {convertclock tests} {
     # Test if local timezone works when not explicitly specified.
 
     set clock [getclock]
@@ -84,11 +90,11 @@ set fmt {%m/%d/%y %I:%M:%S %p}
 foreach hour {01 02 03 04 05 06 07 08 09 10 11 12} {
    foreach min {00 01 59} {
        foreach med {AM PM} {
-           test clock-3.8 {convertclock tests} {
+           test clock-4.0 {convertclock tests} {
                 fmtclock [convertclock "1/1/72 $hour:$min:00 $med"] $fmt
            } "01/01/72 $hour:$min:00 $med"
 
-           test clock-3.9 {convertclock tests} {
+           test clock-4.1 {convertclock tests} {
                 fmtclock [convertclock "1/1/72 $hour:$min:00 $med" GMT] $fmt GMT
            } "01/01/72 $hour:$min:00 $med"
        }
