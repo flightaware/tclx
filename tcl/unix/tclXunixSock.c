@@ -406,8 +406,8 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
             goto unixError;
     } else {
         for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy (hostEntry->h_addr_list [idx],
-                   &server.sin_addr,
+            bcopy ((VOID *) hostEntry->h_addr_list [idx],
+                   (VOID *) &server.sin_addr,
                    hostEntry->h_length);
 
             if (connect (socketFD, (struct sockaddr *) &server,
@@ -681,7 +681,7 @@ InfoGetHost (interp, argc, argv)
     }
 
     if (InetAtoN (NULL, argv [2], &address) == TCL_OK) {
-        hostEntry = gethostbyaddr ((const char *)&address,
+        hostEntry = gethostbyaddr ((char *) &address,
                                    sizeof (address),
                                    AF_INET);
     } else {
@@ -731,7 +731,8 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
             return TCL_ERROR;
 
         for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy (hostEntry->h_addr_list [idx], &inAddr,
+            bcopy ((VOID *) hostEntry->h_addr_list [idx],
+                   (VOID *) &inAddr,
                    hostEntry->h_length);
             Tcl_AppendElement (interp, inet_ntoa (inAddr));
         }
@@ -744,7 +745,8 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
             return TCL_ERROR;
 
         for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy (hostEntry->h_addr_list [idx], &inAddr,
+            bcopy ((VOID *) hostEntry->h_addr_list [idx],
+                   (VOID *) &inAddr,
                    hostEntry->h_length);
             Tcl_AppendElement (interp, hostEntry->h_name);
         }
