@@ -5,6 +5,7 @@
 ./README.EXTD
 ./config/aux
 ./config/bsd
+./config/bsd-4.3
 ./config/hpux
 ./config/rs6000
 ./config/scoodt1.1
