@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.22 1995/06/27 04:32:27 markd Exp markd $
+.\" $Id: TclX.n,v 4.23 1995/06/29 16:26:53 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1686,6 +1686,8 @@ if the underlying protocol supports retransmission, the request may be ignored
 so that retries may succeed.  Note that on at least some BSD-based systems the
 backlog is silently limited to 5, regardless of the value specified.  The
 default is 5.
+.IP
+o\ \fB-reuseaddr\fR - Allow reuse of local addresses.
 .sp
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -1750,6 +1752,29 @@ o\ \fB-dontroute\fR - Requests that routing be bypassed and the direct
 interface used (usually used only by diagnostic or routing programs)
 .IP
 o\ \fB-outofband\fR - Send out-of-band data on the socket.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/server/server_cntl
+'\"@brief: Set options on to a TCP/IP socket.
+.TP
+.B server_cntl \fIfileid\fR \fIattribute\fR \fI[value]\fR
+.br
+Set or get the value of a socket attribute.
+.sp
+Attributes are:
+.IP
+o\ \fBKEEPALIVE\fR - Keep connection alive.  If SIGPIPE is enabled, then it
+is sent if connection is broken and data is written to the socket.
+Note that SIGPIPE is set to be ignored by the Tcl library to
+support pipes to processes in the \fBexec\fR and \fBopen\fR commands.
+If SIGPIPE is ignored, an error is returned on the write.
+Use server_send to detect dropped connections reliably,
+Boolean value.
+.sp
+If \fIvalue\fR is specifice, the options is set to that value.  Otherwise,
+the value is returned.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

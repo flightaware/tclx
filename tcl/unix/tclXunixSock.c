@@ -48,6 +48,11 @@ extern int h_errno;
 #define SERVER_TWOIDS   4
 
 /*
+ * The maximum length of any attribute name.
+ */
+#define MAX_ATTR_NAME_LEN  20
+
+/*
  * Prototypes of internal functions.
  */
 static int
@@ -70,6 +75,12 @@ SendMessage _ANSI_ARGS_((Tcl_Interp *interp,
                          int         flags,
                          int         nonewline,
                          char       *strmsg));
+
+static int
+XlateCntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
+                           char        *attrName,
+                           int         *attrPtr));
+
 
 /*
  *-----------------------------------------------------------------------------
@@ -446,7 +457,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
  * for connections by calling listen (2).
  *
  *  Options may be "-myip ip_address", "-myport port_number",
- *  and "-backlog backlog"
+ * "-backlog backlog" and -reuseaddr
  *
  * Results:
  *   If successful, a Tcl fileid is returned.
@@ -462,7 +473,8 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
 {
     int                 socketFD = -1, nextArg;
     struct sockaddr_in  local;
-    int                 myPort;
+    int                 myPort, value;
+    int                 reuseAddr = FALSE;
     int                 backlog = 5;
 
     /*
@@ -494,10 +506,13 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
             nextArg++;
             if (Tcl_GetInt (interp, argv [nextArg], &backlog) != TCL_OK)
                 return TCL_ERROR;
+        } else if (STREQU ("-reuseaddr", argv [nextArg])) {
+            reuseAddr = TRUE;
         } else {
-            Tcl_AppendResult (interp, "expected  ",
-                              " \"-myip\", \"-myport\" or \"-backlog\"",
-                              ", got \"", argv [nextArg], "\"", (char *) NULL);
+            Tcl_AppendResult (interp, "expected ",
+                              "\"-myip\", \"-myport\", \"-backlog\", or ",
+                              "\"-reuseaddr\", got \"", argv [nextArg],
+                              "\"", (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
@@ -516,6 +531,13 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     if (socketFD < 0)
         goto unixError;
 
+    if (reuseAddr) {
+        value = 1;
+        if (setsockopt (socketFD, SOL_SOCKET, SO_REUSEADDR,
+                        &value, sizeof (value)) < 0) {
+            goto unixError;
+        }
+    }
     if (bind (socketFD, (struct sockaddr *) &local, sizeof (local)) < 0) {
         goto unixError;
     }
@@ -890,6 +912,7 @@ SendMessage (interp, filePtr, flags, nonewline, strmsg)
  *
  *        server_send [options] fileid message
  *
+ * Options are:
  *          -nonewline -outofband -dontroute
  *-----------------------------------------------------------------------------
  */
@@ -937,6 +960,110 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
 
 /*
  *-----------------------------------------------------------------------------
+ * XlateCntlAttr --
+ *    Translate a server_cntl  attribute.
+ *
+ * Parameters:
+ *   o interp (I) - Tcl interpreter.
+ *   o attrName (I) - The attrbute name to translate, maybe upper or lower
+ *     case.
+ *   o attrPtr (O) - Attribute is returned here.
+ * Result:
+ *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
+ *-----------------------------------------------------------------------------
+ */
+static int
+XlateCntlAttr (interp, attrName, attrPtr)
+    Tcl_Interp  *interp;
+    char        *attrName;
+    int         *attrPtr;
+{
+    char attrNameUp [MAX_ATTR_NAME_LEN];
+
+    if (strlen (attrName) >= MAX_ATTR_NAME_LEN)
+        goto invalidAttrName;
+
+    Tcl_UpShift (attrNameUp, attrName);
+
+    if (STREQU (attrNameUp, "KEEPALIVE")) {
+        *attrPtr = SO_KEEPALIVE;
+        return TCL_OK;
+    }
+    /*
+     * Error return code.
+     */
+  invalidAttrName:
+    Tcl_AppendResult (interp, "unknown attribute name \"", attrName,
+                      "\", expected KEEPALIVE",
+                      (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_ServerCntlCmd --
+ *     Implements the TCL server_cntl command:
+ *
+ *        server_cntl fileid attribute [value]
+ *
+ * Attributes are:
+ *   o KEEPALIVE
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_ServerCntlCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    char  attrNameUp [MAX_ATTR_NAME_LEN];
+    FILE *filePtr;
+    int   attribute;
+    int   value, valueLen = sizeof (value);
+
+    if ((argc < 3) || (argc > 4)) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
+                          " fileid attribute [value]", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetOpenFile (interp, argv [1],
+                         FALSE, FALSE,   /* No access checking */
+                         &filePtr) != TCL_OK)
+        return TCL_ERROR;
+
+
+    if (XlateCntlAttr (interp, argv [2], &attribute) == TCL_ERROR)
+        return TCL_ERROR;
+
+    if (argc == 3) {
+        if (getsockopt (fileno (filePtr), SOL_SOCKET, attribute,
+                        &value, &valueLen) != 0)
+            goto socketError;
+        if (valueLen != sizeof (value)) {
+            Tcl_AppendResult (interp, "getsockopt returned value size wrong",
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
+        interp->result = value ? "1" : "0";
+    } else {
+        if (Tcl_GetBoolean (interp, argv [3], &value) != TCL_OK)
+            return TCL_ERROR;
+        if (setsockopt (fileno (filePtr), SOL_SOCKET, attribute,
+                        &value, valueLen) != 0)
+            goto socketError;
+    }
+    return TCL_OK;
+
+  socketError:
+    interp->result = Tcl_PosixError (interp);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
  *
  * Tcl_ServerInit --
  *     
@@ -956,6 +1083,8 @@ Tcl_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_accept", Tcl_ServerAcceptCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_send", Tcl_ServerSendCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "server_cntl", Tcl_ServerCntlCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 }
 #else
@@ -1002,6 +1131,8 @@ Tcl_ServerInit (interp)
     Tcl_CreateCommand (interp, "server_accept", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "server_send", ServerNotAvailable,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "server_cntl", ServerNotAvailable,
                        (ClientData) NULL, (void (*)()) NULL);
 }
 #endif /* HAVE_SOCKET */

@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 1.11 1995/04/30 05:46:07 markd Exp markd $
+# $Id: server.test,v 1.12 1995/07/02 20:30:31 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -69,7 +69,7 @@ Test server-2.1 {server_create argument checking} {
 
 Test server-2.2 {server_create argument checking} {
     server_create -myport 3 -buf
-} 1 {expected   "-myip", "-myport" or "-backlog", got "-buf"}
+} 1 {expected "-myip", "-myport", "-backlog", or "-reuseaddr", got "-buf"}
 
 Test server-2.3 {server_create argument checking} {
     server_create -myip 
@@ -152,6 +152,21 @@ Test server-5.5 {server_send argument checking} {
     server_send -nonewline -bad x y
 } 1 {expected one of "-nonewline", "-outofband", or "-dontroute" got "-bad"}
 
+Test server-6.1 {server_cntl argument checking} {
+    server_cntl
+} 1 {wrong # args: server_cntl fileid attribute [value]}
+
+Test server-6.2 {server_cntl argument checking} {
+    server_cntl stdin KEEPALIVE 1 1
+} 1 {wrong # args: server_cntl fileid attribute [value]}
+
+Test server-6.3 {server_cntl argument checking} {
+    server_cntl stdin XKEEPALIVE 1
+} 1 {unknown attribute name "XKEEPALIVE", expected KEEPALIVE}
+
+Test server-6.4 {server_cntl argument checking} {
+    server_cntl stdin KEEPALIVE XXX
+} 1 {expected boolean value but got "XXX"}
 
 #
 # Determine if we are at a development site we know is good.  If we are, we
@@ -289,6 +304,18 @@ proc TalkToEcho {testId readFH writeFH buffered} {
         fcntl $writeFH WRITE
     } 0 1
         
+    # Test server_cntl on the socket.
+
+    Test $testId.20 {server_cntl on a server connection} {
+        server_cntl $writeFH KEEPALIVE 1
+        server_cntl $writeFH KEEPALIVE
+    } 0 1
+        
+    Test $testId.21 {server_cntl on a server connection} {
+        server_cntl $writeFH KEEPALIVE 0
+        server_cntl $writeFH KEEPALIVE
+    } 0 0
+
     close $readFH
     if ![cequal $readFH $writeFH] {
         close $writeFH
@@ -320,30 +347,30 @@ if [catch {
     puts "*************************************************************"
 } else {
 
-    Test server-7.1 {simple client interaction} {
+    Test server-8.1 {simple client interaction} {
         set fh [server_connect [id host] echo]
-        TalkToEcho server-7.1 $fh $fh 1
+        TalkToEcho server-8.1 $fh $fh 1
     } 0 {}
 
-    Test server-7.2 {simple client interaction} {
+    Test server-8.2 {simple client interaction} {
         set ip [lindex [server_info addresses [id host]] 0]
         set fh [server_connect -nobuf $maybeIP echo]
-        TalkToEcho server-7.2 $fh $fh 0
+        TalkToEcho server-8.2 $fh $fh 0
     } 0 {}
 
-    Test server-7.3 {simple client interaction} {
+    Test server-8.3 {simple client interaction} {
         set fh [server_connect -buf $maybeIP echo]
-        TalkToEcho server-7.3 $fh $fh 1
+        TalkToEcho server-8.3 $fh $fh 1
     } 0 {}
 
-    Test server-7.4 {simple client interaction} {
+    Test server-8.4 {simple client interaction} {
         set fhs [server_connect -twoids -buf $maybeIP echo]
-        TalkToEcho server-7.4 [lindex $fhs 0] [lindex $fhs 1] 1
+        TalkToEcho server-8.4 [lindex $fhs 0] [lindex $fhs 1] 1
     } 0 {}
 
-    Test server-7.5 {simple client interaction} {
+    Test server-8.5 {simple client interaction} {
         set fhs [server_connect -twoids -nobuf $maybeIP echo]
-        TalkToEcho server-7.5 [lindex $fhs 0] [lindex $fhs 1] 0
+        TalkToEcho server-8.5 [lindex $fhs 0] [lindex $fhs 1] 0
     } 0 {}
 }
 
@@ -397,7 +424,7 @@ if {[gets $fromServer serverPort] < 0} {
 }
 close $fromServer
 
-Test server-8.1 {Tcl server} {
+Test server-9.1 {Tcl server} {
     set fh [server_connect -nobuf localhost $serverPort]
     puts $fh "Hello"
     set data [gets $fh]
@@ -405,7 +432,7 @@ Test server-8.1 {Tcl server} {
     set data
 } 0 {Got "Hello"}
 
-Test server-8.2 {Tcl server} {
+Test server-9.2 {Tcl server} {
     set fh [server_connect -nobuf localhost $serverPort]
     puts $fh "Are you still there?"
     set data [list [gets $fh]]
@@ -415,7 +442,7 @@ Test server-8.2 {Tcl server} {
     set data
 } 0 {{Got "Are you still there?"} {Got "Are you really still there?"}}
 
-Test server-8.3 {Tcl server} {
+Test server-9.3 {Tcl server} {
     set fh [server_connect -nobuf localhost $serverPort]
     puts $fh "EXIT"
     lrange [wait $serverPID] 1 2
