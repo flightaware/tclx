@@ -12,14 +12,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 7.2 1996/09/03 23:39:07 markd Exp $
+# $Id: readdir.tests,v 1.1 1996/09/28 16:25:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
-unlink -nocomplain [glob -nocomplain READDIR.TMP/*]
-rmdir -nocomplain READDIR.TMP
+catch {eval file delete [glob -nocomplain READDIR.TMP/*]}
+catch {file delete READDIR.TMP}
 
 Test readdir-1.1 {readdir tests} {
     readdir
@@ -33,10 +33,10 @@ Test readdir-1.2 {readdir tests} {
     readdir -x y
 } 1 {expected option of "-hidden", got "-x"}
 
-tcltouch READDIR.TMP/AAA
-tcltouch READDIR.TMP/BBB
-tcltouch READDIR.TMP/CCC
-tcltouch READDIR.TMP/DDD
+TestTouch READDIR.TMP/AAA
+TestTouch READDIR.TMP/BBB
+TestTouch READDIR.TMP/CCC
+TestTouch READDIR.TMP/DDD
 
 Test readdir-1.3 {readdir tests} {
     lsort [readdir READDIR.TMP]
@@ -46,5 +46,5 @@ Test readdir-1.4 {readdir tests} {
     lsort [readdir -hidden READDIR.TMP]
 } 0 {AAA BBB CCC DDD}
 
-unlink -nocomplain [glob -nocomplain READDIR.TMP/*]
-rmdir -nocomplain READDIR.TMP
+catch {eval file delete [glob -nocomplain READDIR.TMP/*]}
+catch {file delete READDIR.TMP}
