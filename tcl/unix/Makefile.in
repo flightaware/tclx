@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.21 1993/09/08 06:32:21 markd Exp markd $
+# $Id: Makefile.in,v 2.22 1993/09/16 05:37:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -28,7 +28,7 @@ srcdir     = @srcdir@
 srcbasedir = @srcbasedir@
 bldbasedir = @bldbasedir@
 VPATH      = @srcdir@
-LIBS       = @LIBS@
+LIBS       = @LIBS@ -lm
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -40,10 +40,12 @@ LIBS       = @LIBS@
 LIBTCL.A    = ../tclmaster/lib/libtcl.a
 LIBTCLX.A   = ../tclmaster/lib/libtclx.a
 TCL         = ../tclmaster/bin/tcl
-TCLEXTEND_H = ../tclmaster/include/tclExtend.h
+TCLEXTEND.H = ../tclmaster/include/tclExtend.h
 TCLPP_H     = ../tclmaster/include/tcl++.h
+APPINIT     = ../tclmaster/src/tclXAppInit.c
+SYSLIBS     = ../tclmaster/src/SYSLIBS
 
-LDLIBS = ${LIBTCLX.A} ${LIBTCL.A} -lm ${LIBS}
+LDLIBS = ${LIBTCLX.A} ${LIBTCL.A} ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${TCL_UCB_SRC}
@@ -65,12 +67,15 @@ OBJS= \
     tclXunixcmds.o   tclXutil.o
  
 #------------------------------------------------------------------------------
+# Compile the TclX library and link the shell.  If the link fails, purge
+# the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${TCL_PLUS_BUILD}
+all: made.tmp ${TCL} ${TCLEXTEND.H} ${TCLPP_H} ${APPINIT} ${SYSLIBS} \
+     ${TCL_PLUS_BUILD}
 
 ${TCL}: tclXAppInit.o ${LIBTCLX.A} ${LIBTCL.A} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
-	      -o ${TCL}
+	      -o ${TCL} || (rm -f ${TCL}; exit 1)
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
 	    ${MCS} ${TCL}; \
@@ -100,16 +105,22 @@ tcl++.o: tcl++.C tcl++.h
 	touch made.tmp
 
 #------------------------------------------------------------------------------
-# Copy include files to the master directory.
+# Copy include files, etc to the master directory.
 #
 
-${TCLEXTEND_H}: tclExtend.h
-	rm -f ${TCLEXTEND_H}
-	cp tclExtend.h ${TCLEXTEND_H}
+${TCLEXTEND.H}: tclExtend.h
+	rm -f ${TCLEXTEND.H}
+	cp tclExtend.h ${TCLEXTEND.H}
 
 ${TCLPP_H}: tcl++.h
 	rm -f ${TCLPP_H}
 	cp tcl++.h ${TCLPP_H}
+
+${APPINIT}: tclXAppInit.c
+	cp tclXAppInit.c ${APPINIT}
+
+${SYSLIBS}: SYSLIBS
+	cp SYSLIBS ${SYSLIBS}
 
 #------------------------------------------------------------------------------
 # Make sure tcl++.h compiles, plus force tcl++.o into the library.
