@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.8 1995/01/22 20:22:59 markd Exp markd $
+# $Id: Makefile.in,v 4.9 1995/02/25 02:54:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -22,6 +22,11 @@ SHELL = /bin/sh
 # Autoconfig defines that can be overridden in Config.mk
 
 CC          = @CC@
+CFLAGS      = @CFLAGS@
+CXX         = @CXX@
+CXXFLAGS    = @CXXFLAGS@
+TCLXX       = @TCLXX@
+YACC        = @YACC@
 RANLIB      = @RANLIB@
 srcdir      = @srcdir@
 srcbasedir  = @srcbasedir@
@@ -52,6 +57,9 @@ LDLIBS = ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${bldbasedir}/src -I${TCL_UCB_SRC}
 
+CXX_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CXXFLAGS} -I${srcbasedir}/src \
+           -I${bldbasedir}/src -I${TCL_UCB_SRC}
+
 .c.o:
 	${CC} ${CC_FLAGS} -c $<
 
@@ -75,14 +83,14 @@ UCBOBJS=tclCmdIL.o
 # the executable, as some systems leave invalid executables around.
 
 all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${APPINIT} ${SYSLIBS} \
-     ${TCL_PLUS_BUILD}
+     TCLXX_${TCLXX}
 
 ${TCL}: tclXAppInit.o ${LIBTCLX_A} ${LIBTCL_A} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	      -o ${TCL} || (rm -f ${TCL}; exit 1)
 
-made.tmp ${LIBTCLX_A}: ${OBJS} ${UCBOBJS} ${CPLUSOBJS}
-	${AR} cr ${LIBTCLX_A} ${OBJS} ${UCBOBJS} ${CPLUSOBJS}
+made.tmp ${LIBTCLX_A}: ${OBJS} ${UCBOBJS}
+	${AR} cr ${LIBTCLX_A} ${OBJS} ${UCBOBJS}
 	${RANLIB} ${LIBTCLX_A}
 	touch made.tmp
 
@@ -108,7 +116,7 @@ tclXgetdate.c: tclXgetdate.y
 	rm y.tab.c
 
 tcl++.o: tcl++.C tcl++.h
-	${CCPLUS} -c ${CC_FLAGS} ${srcdir}/tcl++.C
+	${CXX} -c ${CXX_FLAGS} ${srcdir}/tcl++.C
 	${AR} cr ${LIBTCLX_A} tcl++.o
 	${RANLIB} ${LIBTCLX_A}
 	touch made.tmp
@@ -134,16 +142,18 @@ ${SYSLIBS}: SYSLIBS
 	cp SYSLIBS ${SYSLIBS}
 
 #------------------------------------------------------------------------------
-# Make sure tcl++.h compiles, plus force tcl++.o into the library.
+# Make sure we can link a C++ program (the result is not install).  Target
+# also forces tcl++.o to be compiled and added to the library.
 
-TCL_PLUS: tcl++ tcl++.o
+TCLXX_YES: tcl++.o tcl++
+TCLXX_NO:
 
 tcl++: tclXAppInit++.o tcl++.o made.tmp
-	${CCPLUS} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit++.o \
+	${CXX} ${CXX_FLAGS} ${XLDFLAGS} tclXAppInit++.o \
            ${LDLIBS} ${XLDLIBS} -o tcl++
 
 tclXAppInit++.o: tcl++.h tclXAppInit++.C
-	${CCPLUS} -c ${CC_FLAGS} tclXAppInit++.C
+	${CXX} -c ${CXX_FLAGS} tclXAppInit++.C
 
 tclXAppInit++.C: tclXAppInit.c
 	rm -f tclXAppInit++.C

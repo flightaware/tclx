@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.5 1995/01/22 20:22:59 markd Exp markd $
+# $Id: Config.mk,v 4.6 1995/01/23 04:32:49 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -62,22 +62,23 @@ TK_UCB_LIB=${bldbasedir}/../tk4.0b2
 TK_UCB_SRC=${srcbasedir}/../tk4.0b2
 
 #------------------------------------------------------------------------------
-# Compiler debug/optimization/profiling flag to use.  Normally specified on
-# the make command line (make CFLAGS=-g).
-
-#CFLAGS=
-
-#------------------------------------------------------------------------------
-# Definition of the compiler, ar and yacc program you wish to use.
-#
+# C compiler and debug/optimization/profiling flag to use.  Set by configure,
+# and are normally overridden on the make command line (make CFLAGS=-g).  The
+# can also be overridden here.
 
 #CC=cc
-AR=ar
-YACC=yacc
-#YACC=bison -b y
+#CFLAGS=-O
 
-STRIP_CMD=strip
-#MCS_CMD= Normally set by configure, define this to override.
+#------------------------------------------------------------------------------
+# Definition of programs you wish to use. All but "ar" and "strip" are set by
+# configure in the Makefiles, but they can be overridden here.
+#
+
+#YACC=yacc
+#RANLIB=ranlib
+
+AR=ar
+STRIP=strip
 
 #------------------------------------------------------------------------------
 # X is often in strange places, override what configure figured out if
@@ -97,12 +98,19 @@ XLDFLAGS=
 XLDLIBS=
 
 #------------------------------------------------------------------------------
-# If C++ is to be used these should be set.  Specifying TCL_PLUS_BUILD
-# includes the C++ support code in the Tcl library. CCPLUS is the command to
-# run your C++ compiler.
+# If C++ is to be used to compile support for the class in tcl++.h, then
+# the variable TCLXX should be set to "YES", if support is not compiled in,
+# it should be set to "NO".   Normally this is set by configure based on
+# if a C++ compiler is found.  It can be overridden here.
+#
+# CXX is the C++ compiler to use and CXXFLAGS are the debug option flags.
+# These are set by configure, and are normally overridden on the make command
+# line, but can also be changed here.
+#
 
-#TCL_PLUS_BUILD=TCL_PLUS
-CCPLUS=CC
+#TCLCXX=YES
+#CXX=CC
+#CXXFLAGS=-O
 
 #------------------------------------------------------------------------------
 # The master Tcl directory that the Extended Tcl runtime files are installed

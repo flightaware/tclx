@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.7 1995/02/16 02:35:22 markd Exp markd $
+# $Id: Makefile.in,v 4.8 1995/03/13 06:12:11 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -22,6 +22,7 @@ SHELL = /bin/sh
 # Autoconfig defines that can be overridden in Config.mk
 
 CC          = @CC@
+CFLAGS      = @CFLAGS@
 RANLIB      = @RANLIB@
 srcdir      = @srcdir@
 srcbasedir  = @srcbasedir@
@@ -65,13 +66,13 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS=tkXinit.o tkXshell.o  tkXdata.o
+OBJS=tkXinit.o tkXshell.o tkXdata.o
 
 #------------------------------------------------------------------------------
 # Compile the TkX library and link wishx.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TCL_PLUS_BUILD}
+all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS}
 
 ${WISHX}: tkXAppInit.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
@@ -96,25 +97,8 @@ ${SYSLIBS}: SYSLIBS
 	cp SYSLIBS ${SYSLIBS}
 
 #------------------------------------------------------------------------------
-# Make sure tkXmain.c compiles and links with C++.
-
-TCL_PLUS: wishx++
-
-wishx++: tkXAppInit++.o made.tmp
-	${CCPLUS} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit++.o ${LDLIBS} ${XLDLIBS} \
-	    -o wishx++ || (rm -f wishx++; exit 1)
-
-tkXAppInit++.o: tkXAppInit++.C
-	${CCPLUS} -c ${CC_FLAGS} tkXAppInit++.C
-
-tkXAppInit++.C: tkXAppInit.c
-	rm -f tkXAppInit++.C
-	cp ${srcdir}/tkXAppInit.c tkXAppInit++.C
-
-#------------------------------------------------------------------------------
 clean:
-	-rm -f made.tmp tkXAppInit++.C tkXAppInit.o
-	-rm -f ${OBJS} tkXAppInit++.o ${WISHX} wishx++
+	-rm -f made.tmp tkXAppInit.o ${OBJS} ${WISHX}
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

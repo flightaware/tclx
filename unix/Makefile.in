@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.7 1995/01/01 20:31:05 markd Exp markd $
+# $Id: Makefile.in,v 4.8 1995/03/23 06:05:19 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -22,8 +22,11 @@ SHELL=/bin/sh
 # Autoconfig defines that can be overridden in Config.mk
 
 CC                = @CC@
-MCS               = @MCS_CMD@
+CFLAGS            = @CFLAGS@
+CXX               = @CXX@
+CXXFLAGS          = @CXXFLAGS@
 RANLIB            = @RANLIB@
+STRIP             = @STRIP@
 srcdir            = @srcdir@
 srcbasedir        = @srcbasedir@
 bldbasedir        = @bldbasedir@
@@ -53,9 +56,10 @@ SYMLINKEXT = ${bldbasedir}/tools/symlinkext
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
-# second level makes.
+# second level makes.  C++ flags are only passed to the src dir build.
 
-PASS_FLAGS = "CC=$(CC)" "CFLAGS=$(CFLAGS)"
+PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}"
+PASSXX_FLAGS = ${PASS_FLAGS} "CXX=${CXX}" "CXXFLAGS=${CXXFLAGS}"
 
 #------------------------------------------------------------------------------
 # The made.tmp files are used to indicate a makefile has successfully added
@@ -76,7 +80,7 @@ all: TCLX runtcl ${TK_BUILD}
 TCLX: TCLCOPY runtcl
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd src;       ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} all
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
@@ -217,8 +221,7 @@ TCLXINSTALL:
 
 TCLXINSTALL-EXEC:
 	${INSTCOPY} tclmaster/bin${ARCH}/tcl ${TCL_BINDIR}
-	strip ${TCL_BINDIR}/tcl
-	${MCS} ${TCL_BINDIR}/tcl
+	${STRIP} ${TCL_BINDIR}/tcl
 	${INSTCOPY} tclmaster/lib${ARCH}/libtclx.a ${TCL_LIBDIR}
 	${RANLIB} ${TCL_LIBDIR}/libtclx.a
 
@@ -229,8 +232,7 @@ TKXINSTALL:
 
 TKXINSTALL-EXEC:
 	${INSTCOPY} tkmaster/bin${ARCH}/wishx ${TCL_BINDIR}
-	strip ${TCL_BINDIR}/wishx
-	${MCS} ${TCL_BINDIR}/wishx
+	${STRIP} ${TCL_BINDIR}/wishx
 	${INSTCOPY} tkmaster/bin${ARCH}/tclhelp ${TCL_BINDIR}
 	${INSTCOPY} tkmaster/lib${ARCH}/libtkx.a ${TCL_LIBDIR}
 	${RANLIB} ${TCL_LIBDIR}/libtkx.a
@@ -264,8 +266,7 @@ TCLXMINSTALL:
 	@echo "   Install TclX master directory"
 	@echo ""
 	${INSTCOPY} -dirname tclmaster ${TCL_INST_MASTER}
-	strip ${TCL_INST_MASTER}/bin${ARCH}/tcl
-	${MCS}  ${TCL_INST_MASTER}/bin${ARCH}/tcl
+	${STRIP} ${TCL_INST_MASTER}/bin${ARCH}/tcl
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
@@ -282,8 +283,7 @@ TCLXMINSTALL-EXEC:
 	@echo "   Install TclX executables only"
 	@echo ""
 	${INSTCOPY} tclmaster/bin${ARCH} ${TCL_INST_MASTER}
-	strip ${TCL_INST_MASTER}/bin${ARCH}/tcl
-	${MCS}  ${TCL_INST_MASTER}/bin${ARCH}/tcl
+	${STRIP} ${TCL_INST_MASTER}/bin${ARCH}/tcl
 	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
@@ -294,8 +294,7 @@ TKXMINSTALL:
 	@echo "   Install TkX master directory"
 	@echo ""
 	${INSTCOPY} -dirname tkmaster ${TK_INST_MASTER}
-	strip ${TK_INST_MASTER}/bin${ARCH}/wishx
-	${MCS}  ${TK_INST_MASTER}/bin${ARCH}/wishx
+	${STRIP} ${TK_INST_MASTER}/bin${ARCH}/wishx
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
@@ -310,8 +309,7 @@ TKXMINSTALL-EXEC:
 	@echo "   Install TkX executables only"
 	@echo ""
 	${INSTCOPY} tkmaster/bin${ARCH} ${TK_INST_MASTER}
-	strip ${TK_INST_MASTER}/bin${ARCH}/wishx
-	${MCS}  ${TK_INST_MASTER}/bin${ARCH}/wishx
+	${STRIP} ${TK_INST_MASTER}/bin${ARCH}/wishx
 	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}

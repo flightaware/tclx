@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.7 1995/01/28 18:50:09 markd Exp markd $
+dnl $Id: configure.in,v 4.8 1995/02/25 02:54:53 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.7 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.8 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -36,11 +36,16 @@ AC_SUBST(TCL_ARCH)
 # Check for various programs used during the build.
 #------------------------------------------------------------------------------
 
+AC_PROG_CC
 AC_PROG_YACC
 AC_PROG_RANLIB
-CC=${CC-cc}
-AC_SUBST(CC)
-AC_PROGRAM_CHECK(MCS_CMD, "mcs", [mcs -d], touch)
+AC_PROG_CXX
+if test -n "$CXX"; then
+    TCLXX="YES"
+else
+    TCLXX="NO"
+fi
+AC_SUBST(TCLXX)
 
 #------------------------------------------------------------------------------
 # Purge the specific set of files that must be rebuild if the arch or prefix
@@ -493,7 +498,6 @@ AC_CHECK_FUNC(catgets,
 #------------------------------------------------------------------------------
 
 AC_FUNC_STRFTIME
-AC_CHECK_FUNC(strftime, ,[LIBOBJS="$LIBOBJS strftime.o"])
 AC_CHECK_FUNC(random, ,[LIBOBJS="$LIBOBJS random.o"]
         AC_DEFINE(NO_RANDOM))
 AC_CHECK_FUNC(rename, ,[LIBOBJS="$LIBOBJS rename.o"])

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.1 1994/12/29 06:21:39 markd Exp markd $
+# $Id: Makefile.in,v 4.2 1995/01/01 19:50:03 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -21,6 +21,7 @@ SHELL = /bin/sh
 # Autoconfig defines that can be overridden in Config.mk
 
 CC          = @CC@
+CFLAGS      = @CFLAGS@
 RANLIB      = @RANLIB@
 srcdir      = @srcdir@
 srcbasedir  = @srcbasedir@

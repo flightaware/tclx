@@ -40,14 +40,14 @@ The following directories are included under the tclX7.4a directory:
     o tools - Tools used for building and installing TclX.
 
     o tclmaster - Tcl master directory.  All files required to run TclX are
-      built or copied into this directory.  The entire contents of this
-      directory are installed.  This directory is created by the build, it is
-      not part of the distribution.
+      built or copied into this directory.  The part or all of the contents of
+      this directory are installed.  This directory is created by the build, it
+      is not part of the distribution.
 
-    o tkmaster - Tk master directory.  All files required to run Tk
-      are built or copied into this directory.  The entire contents of
-      this directory are installed.  This directory is created by the build,
-      it is not part of the distribution.
+    o tkmaster - Tk master directory.  All files required to run Tk are
+      built or copied into this directory.  The part or all of the contents of
+      this directory are installed.  This directory is created by the build, it
+      is not part of the distribution.
 
 THE EXTENDED TCL INSTALLATION MODELS
 ====================================
@@ -183,9 +183,6 @@ HOW TO BUILD EXTENDED TCL
       used to specify the sections that the Tcl manual pages are to be
       installed in.
 
-    o If you want to use the C++ classes provided in tcl++.h, edit Config.mk
-      to define TCL_PLUS_BUILD.
-
     o Note that the site specific installation options should be set in
       Config.mk before compiling.  It is especially important to set the value
       for TCL_MASTERDIR and TK_MASTERDIR in Config.mk before compiling TclX.
@@ -194,15 +191,22 @@ HOW TO BUILD EXTENDED TCL
     o Config.mk can be used to override several values that configure might
       have gotten wrong or that you desire to be change (like gcc vs cc).
 
-    o Now do a "make", if you want to use gcc (or another compiler), use
-      "make CC=gcc".  If all goes well, this will build an extended
-      "libtclx.a" and the "tcl" executable in the tclmaster directory.  If Tk
-      is requested, an extended "libtkx.a" and "wishx" executable will be
-      built in the tkmaster directory.
+    o Now do a "make" to compile Tcl.  The following variables maybe passed
+      to on the make command line to override values set by configure or in
+      Config.mk:
+
+         CC - The C compiler to use.
+         CFLAGS - The optimization flags to pass to the C compiler.
+         CXX - The C++ compiler to use to compile support for tcl++.h classes.
+         CXXFLAGS - The optimization flags to pass to the C++ compiler.
+
+     These variables are passed using a command line in the form:
+
+         make CC=gcc CFLAGS="-O =g"
 
     o Until the Extended Tcl runtime files are installed, "tcl" and "wishx"
-      can't be run directly.  To run them before installation, use "runtcl" or
-      "runwishx".
+      can't be run directly.  To run them before installation, use the
+      "runtcl" and "runwishx" scripts generated in the top level directory.
 
     o Extended Tcl comes with help pages that are built from the Tcl 7.4 and
       Tk 4.0 manual pages as well as the TclX manual page.  If you are building
@@ -283,13 +287,13 @@ Standard Installation Model
 To install Extended Tcl (and Tk if built) using the standard installation
 model, enter:
 
-   su use-to-own-files
+   su user-to-own-files
    make install
 
 to only install the executable and library files (useful for installing on
 a multi-architecture server that has the rest of TclX already installed):
 
-   su use-to-own-files
+   su user-to-own-files
    make install-exec
 
 Master Directory Installation Model
@@ -297,13 +301,13 @@ Master Directory Installation Model
 To install Extended Tcl (and Tk if built) using the master directory
 installation model, enter:
 
-   su use-to-own-files
+   su user-to-own-files
    make install-master
 
 to only install the executable and library files (useful for installing on
 a multi-architecture server that has the rest of TclX already installed):
 
-   su use-to-own-files
+   su user-to-own-files
    make install-master-exec
 
 SHARED LIBRARIES
