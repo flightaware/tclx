@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.6 1996/11/07 01:09:51 markd Exp $
+# $Id: makefile.vc,v 7.7 1996/11/07 02:28:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -26,7 +26,7 @@ TKX_INCLUDES = \
 	-I$(TCL_GENERIC_DIR) -I$(TCL_WIN_DIR)
 
 TKX_DEFINES = \
-    -nologo $(DEBUGDEFINES) -DTKX_LIBRARY=\"$(TKX_INST_RUNTIME)\"
+    -nologo $(DEBUGDEFINES) -DTKX_LIBRARY=\"$(TKX_INST_RUNTIMEU)\"
 
 WISHXOBJS = \
         $(TMP_DIR)\tkXAppInit.obj

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 1.6 1996/11/07 02:28:39 markd Exp $
+# $Id: common.vc,v 1.7 1996/11/16 20:38:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,9 +22,12 @@
 #
 
 #
-# Installation directory root.
+# Installation directory root.  They *MUST* point to the same location, only
+# PREFIX should use the DOS convention of \ for path seperator and PREFIXU
+# should use /.
 #
 PREFIX=C:\markd\tmp\tcl
+PREFIXU=C:/markd/tmp/tcl
 
 #
 # TclX and TkX versions.
@@ -87,7 +90,9 @@ TCLX_DLL          = $(TCLX_WIN_DIR)\tclx760.dll
 TCLX_INST_BIN     = $(PREFIX)\bin
 TCLX_INST_INCL    = $(PREFIX)\include
 TCLX_INST_LIB     = $(PREFIX)\lib
-TCLX_INST_RUNTIME = $(TCLX_INST_LIB)\tclX$(TCLX_VERSION)
+TCLX_INST_LIBU    = $(PREFIX)/lib
+TCLX_INST_RUNTIME = $(TCLX_INST_LIBU)/tclX$(TCLX_VERSION)
+TCLX_INST_RUNTIMEU= $(TCLX_INST_LIBU)/tclX$(TCLX_VERSION)
 
 #
 # TkX directories.
@@ -100,7 +105,9 @@ TKX_DLL          = $(TKX_WIN_DIR)\tkx420.dll
 TKX_INST_BIN     = $(PREFIX)\bin
 TKX_INST_INCL    = $(PREFIX)\include
 TKX_INST_LIB     = $(PREFIX)\lib
+TKX_INST_LIBU    = $(PREFIX)/lib
 TKX_INST_RUNTIME = $(TKX_INST_LIB)\tkX$(TKX_VERSION)
+TKX_INST_RUNTIMEU= $(TKX_INST_LIB)/tkX$(TKX_VERSION)
 
 #
 # Tools used during the build.

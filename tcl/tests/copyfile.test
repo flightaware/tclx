@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: copyfile.test,v 1.3 1996/10/04 15:30:18 markd Exp $
+# $Id: copyfile.test,v 1.4 1996/11/04 18:01:28 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -138,6 +138,6 @@ Test copyfile-1.7 {copyfile tests} {
     list $stat $msg
 } 0 [list 0 $testFileSize]
 
-# FIX: Need copy test on sockets.
+# FIX: Need copy test on sockets, binary files, translation.
 
 TestRemove COPYFILE1.TMP COPYFILE2.TMP COPYFILE3.TMP

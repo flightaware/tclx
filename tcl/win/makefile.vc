@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.15 1996/11/07 01:09:48 markd Exp $
+# $Id: makefile.vc,v 7.16 1996/11/07 02:28:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -24,7 +24,7 @@ TCLX_INCLUDES = \
         -I$(TCL_GENERIC_DIR) -I$(TCL_WIN_DIR)
 
 TCLX_DEFINES = \
-    -nologo $(DEBUGDEFINES) -DTCLX_LIBRARY=\"$(TCLX_INST_RUNTIME)\"
+    -nologo $(DEBUGDEFINES) -DTCLX_LIBRARY=\"$(TCLX_INST_RUNTIMEU)\"
 
 TCLOBJS = \
         $(TMP_DIR)\tclXAppInit.obj

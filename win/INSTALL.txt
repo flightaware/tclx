@@ -41,8 +41,9 @@ To build the release:
 
         nmake -f makefile.vc test
 
-   o To install, you must do it by hand.  The existing install target
-     ends up corrupting the binary files.
+   o To install:
+
+        nmake -f makefile.vc install
    
    o If you want to debug under MS Developer Studio, its easy to wrap a
      workspace around the existing makefile.vc:
