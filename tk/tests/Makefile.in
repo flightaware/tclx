@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.1 1995/08/30 05:07:18 markd Exp $
+# $Id: Makefile.in,v 5.2 1995/09/26 06:40:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -70,7 +70,7 @@ OBJS= tktest.o tkSquare.o tkXtest.o
 all: tktest runtest
 
 tktest: ${OBJS} ${LIBTKX} ${TK_UCB_LIB} ${LIBTCLX} \
-        ${TK_UCB_LIB}
+        ${TCL_UCB_LIB}
 	${CC} ${LD_FLAGS} ${OBJS} ${LDLIBS} -o tktest || \
 	    (rm -f tktest; exit 1)
 
@@ -88,7 +88,7 @@ tkSquare.c: ${TK_UCB_SRC}/generic/tkSquare.c
 # Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
 # at the local master directories so tktest can be run.
 
-runtest:
+runtest: Makefile
 	@echo '#!/bin/sh'                                           >runtest
 	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"               >>runtest
 	@echo "TKX_LIBRARY=${bldbasedir}/tkmaster"                 >>runtest
