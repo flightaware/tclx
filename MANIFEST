@@ -1,4 +1,3 @@
-./tclhelp/tcl/files/frename
 ./CHANGES
 ./Config.mk
 ./INSTALL
@@ -27,7 +26,6 @@
 ./osSupport/system.c
 ./src/Makefile.in
 ./src/SYSLIBS.in
-./src/tclXpatchl.h
 ./src/tcl++.C
 ./src/tcl++.h
 ./src/tclExtdInt.h
@@ -58,6 +56,7 @@
 ./src/tclXmain.c
 ./src/tclXmath.c
 ./src/tclXmsgcat.c
+./src/tclXpatchl.h
 ./src/tclXprocess.c
 ./src/tclXprofile.c
 ./src/tclXregexp.c
@@ -99,6 +98,7 @@
 ./tclhelp/tcl/files/chgrp
 ./tclhelp/tcl/files/chmod
 ./tclhelp/tcl/files/chown
+./tclhelp/tcl/files/chroot
 ./tclhelp/tcl/files/close
 ./tclhelp/tcl/files/copyfile
 ./tclhelp/tcl/files/dup
@@ -110,6 +110,7 @@
 ./tclhelp/tcl/files/flush
 ./tclhelp/tcl/files/for_file
 ./tclhelp/tcl/files/for_recursive_glob
+./tclhelp/tcl/files/frename
 ./tclhelp/tcl/files/fstat
 ./tclhelp/tcl/files/funlock
 ./tclhelp/tcl/files/gets
@@ -127,6 +128,7 @@
 ./tclhelp/tcl/files/seek
 ./tclhelp/tcl/files/select
 ./tclhelp/tcl/files/server_open
+./tclhelp/tcl/files/sync
 ./tclhelp/tcl/files/tell
 ./tclhelp/tcl/files/unlink
 ./tclhelp/tcl/files/write_file
@@ -185,6 +187,7 @@
 ./tclhelp/tcl/processes/execl
 ./tclhelp/tcl/processes/fork
 ./tclhelp/tcl/processes/kill
+./tclhelp/tcl/processes/nice
 ./tclhelp/tcl/processes/pid
 ./tclhelp/tcl/processes/system
 ./tclhelp/tcl/processes/wait
@@ -258,6 +261,7 @@
 ./tests/bsearch.test
 ./tests/chartype.test
 ./tests/chmod.test
+./tests/chroot.test
 ./tests/clock.test
 ./tests/cmdtrace.test
 ./tests/compat.test
@@ -280,6 +284,7 @@
 ./tests/loop.test
 ./tests/math.test
 ./tests/msgcat.test
+./tests/nice.test
 ./tests/process.test
 ./tests/profile.test
 ./tests/pushd.test
@@ -289,6 +294,7 @@
 ./tests/signal.test
 ./tests/string.test
 ./tests/stringfil.test
+./tests/sync.test
 ./tests/tcllib.test
 ./tests/testlib.tcl
 ./tests/unixcmds.test
