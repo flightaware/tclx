@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.38 1996/05/04 19:51:43 markd Exp $
+# $Id: Makefile.in,v 5.39 1996/05/09 07:10:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -85,8 +85,7 @@ TEST_OBJS = tclTest.o tclUnixTest.o tclXtest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtclx.a SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest runtest \
-     ${bldbasedir}/tcl/tests
+all: libtclx.a SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest runtest
 
 tcl: tclXAppInit.o libtclx.a SHLIB_@BUILD_SHARED@
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
@@ -292,7 +291,7 @@ dltest.tmp: dltest
 
 dltest:
 	if [ "@HAVE_SYML@" = "YES" ]; then \
-	    ln -s `cd ${TCL_SRC}/unix/dltest; pwd` dltest ;\
+	    ln -s `cd ${TCL_BUILD}/unix/dltest; pwd` dltest ;\
 	else \
 	    touch dltest ;\
 	fi
@@ -315,14 +314,6 @@ runtest: Makefile
 	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                   >>runtest
 	@echo "fi"                                                 >>runtest
 	chmod a+rx runtest
-
-#------------------------------------------------------------------------------
-# If test directory in not in build tree, copy it from the source tree.
-#
-${bldbasedir}/tcl/tests:
-	mkdir ${bldbasedir}/tcl/tests
-	cp ${srcbasedir}/tcl/tests/all ${srcbasedir}/tcl/tests/*.test \
-	  ${bldbasedir}/tcl/tests
 
 #------------------------------------------------------------------------------
 # Run the UCB and Extended Tcl tests.

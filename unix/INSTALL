@@ -211,7 +211,7 @@ libraries.
 INTEGRATING WITH OTHER EXTENSIONS AND APPLICATIONS
 ==================================================
 
-  See the manual page TclXInit.3 for details on how to add TclX to an
+  See the manual page TclX_Init.3 for details on how to add TclX to an
 existing application.
 
 PORTING NOTES
