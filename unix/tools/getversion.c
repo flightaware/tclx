@@ -14,11 +14,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: getversion.c,v 1.3 1993/08/13 15:01:21 markd Exp markd $
+ * $Id: getversion.c,v 3.0 1993/11/19 07:00:06 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtend.h"
+#include "tclXpatchl.h"
 
 #ifdef TK_GET_VERSION
 #include "tk.h"
@@ -30,9 +31,14 @@ main (argc, argv)
     char **argv;
 {
 #ifdef TK_GET_VERSION
-    printf ("%s%s\n", TK_VERSION, TCL_EXTD_VERSION_SUFFIX);
+    printf ("%s%s", TK_VERSION, TCL_EXTD_VERSION_SUFFIX);
 #else
-    printf ("%s%s\n", TCL_VERSION, TCL_EXTD_VERSION_SUFFIX);
+    printf ("%s%s", TCL_VERSION, TCL_EXTD_VERSION_SUFFIX);
 #endif
+#ifdef TCLX_PATCHLEVEL
+    if (TCLX_PATCHLEVEL != 0) 
+        printf ("p%d", TCLX_PATCHLEVEL);
+#endif    
+    printf ("\n");
     exit (0);
 }
