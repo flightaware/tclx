@@ -350,5 +350,46 @@
   o Added changes to fix problems with systems using IEEE floating point math
     error reporting.
 ===============================================================================
- 9 Oct 92: Extended Tcl 6.4c patch1 released
+ 9 Nov 92: Extended Tcl 6.4c patch1 released
 ===============================================================================
+14 Nov 92:
+  o Added a -n option to the command line that prevents the dumping of the
+    procedure call stack on an error.  This is also added as an option to
+    the C startup routines.
+-------------------------------------------------------------------------------
+16 Nov 92:
+  o Only set SIGINT to cause an error if the Tcl shell or wish is reading
+    commands from stdin.  (*POTENTIAL INCOMPATIBILITY*)
+-------------------------------------------------------------------------------
+18 Nov 92:
+  o Fixed bug were packages from libraries and other auto-loads were not
+    evaluate in the global environment.
+-------------------------------------------------------------------------------
+19 Nov 92:
+  o Made yyerror a static in tclXgetdate.y, as it conflicted with yyerror in
+    libraries on some systems.
+  o Modified Makefile so that main.o is not included in the library.
+-------------------------------------------------------------------------------
+25 Nov 92:
+  o Changed fcntl to handle stdio flags when both the BSD and System-V flags
+    are defined.
+-------------------------------------------------------------------------------
+ 1 Dec 92:
+  o Fix bug where table expansion copied more that the old size of the table.
+-------------------------------------------------------------------------------
+14 Dec 92:
+  o Fixed problem installing if target directory for Tcl code is not an 
+    absolute path.
+-------------------------------------------------------------------------------
+18 Dec 92:
+  o Added TCL_POSIX_SIG to Ultrix4.2 configure file.  Fixed problems in signal
+    tests.
+  o Recompile UCB file tclCmdIL.c to so that "info library" returns the library
+    directory specified in Config.mk.
+  o Renamed the Extended Tcl wish shell to "wishx", so both extended and
+    standard versions can be installed on the system.
+    (*POTENTIAL INCOMPATIBILITY*)
+  o Changed install program to handle new Tk manual page names.
+  o Added a library proc "tkdemo" to run the Tk demo program once wishx is
+    installed.
+------------------------------------------------------------------------------
