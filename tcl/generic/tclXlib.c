@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.20 1997/12/31 04:18:43 markd Exp $
+ * $Id: tclXlib.c,v 8.21 1998/01/28 17:34:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 

@@ -16,13 +16,13 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXregexp.c,v 8.11 1998/12/20 07:55:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-/*FIX: Disable Boyer-Moore until ported to 8.1 */
+/*FIX: Disable Boyer-Moore until ported to 8.1 unicode */
 #undef USE_BM
 
 #ifdef USE_BM
@@ -337,6 +337,7 @@ PreParseRegExp (expression, infoPtr)
           case '?':
           case '+':
           case '*':
+          case '|':
             gotMeta = TRUE;
             break;
           case '[':
@@ -346,8 +347,9 @@ PreParseRegExp (expression, infoPtr)
             while ((*scanPtr != '\0') && (*scanPtr != ']')) {
                 scanPtr++;
             }
-            if (*scanPtr == '\0')
+            if (*scanPtr == '\0') {
                 return FALSE;
+            }
             scanPtr++;
             break;
           case '(':
@@ -357,8 +359,9 @@ PreParseRegExp (expression, infoPtr)
             while (parenNest > 0 && *scanPtr != '\0') {
                 switch (*scanPtr++) {
                   case '\\':
-                    if (scanPtr == '\0')
+                    if (scanPtr == '\0') {
                         return FALSE;
+                    }
                     scanPtr++;
                     break;
                   case '(':
@@ -368,21 +371,35 @@ PreParseRegExp (expression, infoPtr)
                   case ')':
                     parenNest--;
                     break;
+                  case '[':
+                    /* Handle [] inside of () */
+                    if (*scanPtr == ']')
+                        scanPtr++;  /* ] as first character. */
+                    while ((*scanPtr != '\0') && (*scanPtr != ']')) {
+                        scanPtr++;
+                    }
+                    if (*scanPtr == '\0') {
+                        return FALSE;
+                    }
+                    scanPtr++;
                 }
             }
-            if ((*scanPtr == '\0') && (parenNest > 0))
+            if ((*scanPtr == '\0') && (parenNest > 0)) {
                 return FALSE;
+            }
             break;
           case '\\':
             gotMeta = TRUE;
-            if (*scanPtr == '\0')
+            if (*scanPtr == '\0') {
                 return FALSE;
+            }
             scanPtr++;
             break;
           default:
             gotMeta = FALSE;
-            if (nonMetaCnt == 0)
+            if (nonMetaCnt == 0) {
                 nonMetaStart = scanPtr - 1;
+            }
             nonMetaCnt++;
         }
         /*
@@ -472,6 +489,18 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
         preParseInfo.meta = TRUE;
         preParseInfo.largestNonMetaLen = -1;
     }
+
+#if 1
+    /* FIXME: there are still some problems with the pre-parser and
+     * finding the largest non-meta expression.  The only real way to
+     * to this is look at the compiled expression.  For now, if there are
+     * meta, just disable the boyer-moore is there is any meta.
+     */
+    if (preParseInfo.meta) {
+        preParseInfo.largestNonMeta = NULL;
+        preParseInfo.largestNonMetaLen = -1;
+    }
+#endif
     regExpPtr->numSubExprs = preParseInfo.numSubExprs;
 
     /*

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 8.4 1997/08/23 18:55:18 markd Exp $
+# $Id: buildidx.tcl,v 8.5 1997/11/12 07:20:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -44,7 +44,9 @@ namespace eval TclX {
 
     #--------------------------------------------------------------------------
     # Parse a package header found by a scan match.  Handle backslashed
-    # continuation lines.
+    # continuation lines.  Make a namespace reference out of the name
+    # that the Tcl auto_load function will like.  Global names have no
+    # leading :: (for historic reasons), all others are fully qualified.
     #
     proc ParsePkgHeader matchInfoVar {
         upvar $matchInfoVar matchInfo
@@ -57,9 +59,14 @@ namespace eval TclX {
             append line " " [string trimright $nextLine]
             incr length [expr [clength $nextLine] + 1]
         }
+        set procs {}
+        foreach p [lrange $line 2 end] {
+            lappend procs [auto_qualify $p ::]
+        }
+
         keylset pkgInfo name [lindex $line 1]
         keylset pkgInfo offset $matchInfo(offset)
-        keylset pkgInfo procs [lrange $line 2 end]
+        keylset pkgInfo procs $procs
         keylset pkgInfo length $length
         return $pkgInfo
     }

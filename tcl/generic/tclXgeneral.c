@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.11 1997/10/22 08:07:44 markd Exp $
+ * $Id: tclXgeneral.c,v 8.12 1998/01/28 17:34:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -236,6 +236,14 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
     }
     if (STREQU ("have_posix_signals", optionPtr)) {
 #       ifndef NO_SIGACTION
+        Tcl_SetBooleanObj (resultPtr, TRUE);
+#       else
+        Tcl_SetBooleanObj (resultPtr, FALSE);
+#       endif        
+        return TCL_OK;
+    }
+    if (STREQU ("have_signal_restart", optionPtr)) {
+#       ifndef NO_SIG_RESTART
         Tcl_SetBooleanObj (resultPtr, TRUE);
 #       else
         Tcl_SetBooleanObj (resultPtr, FALSE);

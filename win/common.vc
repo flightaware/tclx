@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: common.vc,v 8.7 1998/12/20 07:55:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,6 +41,7 @@ TKX_VERSION  = 8.1.0
 # o ROOT- Absolute path to the top of source tree.
 # o TMP_DIR - Location where .obj files should be stored during build.
 #   This maybe absolute or relative to the win build directories.
+#   (In practice any value other than "." may not yet work!)
 # o TOOLS32 - Location of VC++ 32-bit development tools. Note that the
 #   VC++ 2.0 header files are broken, so you need to use the ones that
 #   come with the developer network CD's, or later versions of VC++.
@@ -49,14 +50,34 @@ TKX_VERSION  = 8.1.0
 
 ROOT     = ..\..
 TMP_DIR  = .
-TOOLS32	= c:\Program Files\DevStudio\Vc
+TOOLS32	= c:\Program Files\DevStudio\VC
 IDE32	= c:\Program Files\DevStudio\SharedIDE
 
 # Comment the following line to compile with symbols
-#NODEBUG=1
+NODEBUG=1
+ 
+!IF "$(NODEBUG)" == "1"
+cdebug = -Ox -Oy- -Gs -GD
+!ELSE
+cdebug = -Z7 -Od -WX
+!ENDIF
 
 # uncomment the following two lines to compile with TCL_MEM_DEBUG
 #DEBUGDEFINES   =-DTCL_MEM_DEBUG
+
+
+# Tcl/Tk build directories and library extensions depend on NODEBUG.
+!IF "$(NODEBUG)" == "1"
+TCL_TMP_DIR     = Release
+TK_TMP_DIR	= Release
+TCL_DBGX        =
+TK_DBGX         =
+!ELSE
+TCL_TMP_DIR     = Debug
+TK_TMP_DIR	= Debug
+TCL_DBGX        = d
+TK_DBGX         = d
+!ENDIF
 
 #
 # Tcl build directories and files.
@@ -64,6 +85,7 @@ IDE32	= c:\Program Files\DevStudio\SharedIDE
 TCL_DIR          = $(ROOT)\..\tcl8.1
 TCL_GENERIC_DIR  = $(TCL_DIR)\generic
 TCL_WIN_DIR      = $(TCL_DIR)\win
+TCL_BUILD_DIR    = $(TCL_WIN_DIR)\$(TCL_TMP_DIR)
 TCL_RUNTIME_DIR  = $(TCL_DIR)\library
 TCL_TESTS_DIR    = $(TCL_DIR)\tests
 TCL_LIB          = $(TCL_WIN_DIR)\tcl81.lib
@@ -76,6 +98,7 @@ TCL_SALIB        = $(TCL_WIN_DIR)\tcl81sa.lib
 TK_DIR           = $(ROOT)\..\tk8.1
 TK_GENERIC_DIR   = $(TK_DIR)\generic
 TK_WIN_DIR       = $(TK_DIR)\win
+TK_BUILD_DIR     = $(TK_WIN_DIR)\$(TK_TMP_DIR)
 TK_XLIB_DIR      = $(TK_DIR)\xlib
 TK_RUNTIME_DIR   = $(TK_DIR)\library
 TK_TESTS_DIR     = $(TK_DIR)\tests
@@ -148,3 +171,7 @@ TARGETOS=BOTH
  
 # We need user32 in console mode for handling sockets.
 baselibs=$(baselibs) user32.lib
+
+# VC++ 5.0 complains if /MACHINE is not supplied.
+MACHINE = IX86
+lflags  = $(lflags) /MACHINE:$(MACHINE)

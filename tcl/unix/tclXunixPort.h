@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 8.1 1997/04/17 04:59:50 markd Exp $
+ * $Id: tclXunixPort.h,v 8.2 1997/07/08 06:15:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -107,6 +107,18 @@ extern long random ();
 #ifdef NO_FLOOR_PROTO_
 extern double floor ();
 #endif
+
+/*
+ * If sigaction is available, check for restartable signals.
+ */
+#ifndef NO_SIGACTION
+#    ifndef SA_RESTART
+#        define NO_SIG_RESTART
+#    endif
+#else
+#    define NO_SIG_RESTART
+#endif
+
 
 /*
  * Define a macro to call wait pid.  We don't use Tcl_WaitPid on Unix because

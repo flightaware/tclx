@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.20 1997/12/14 20:21:04 markd Exp $
+# $Id: Makefile.in,v 8.21 1997/12/14 20:25:57 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -298,7 +298,9 @@ buildhelp: tcl tcl.tndx
 
 #------------------------------------------------------------------------------
 
-install: install-runtime install-exec
+install: install-runtime install-exec install-misc
+
+install-misc:
 	${INSTCOPY} ${TCLX_GENERIC_DIR}/tclExtend.h \
 	    ${INSTALL_ROOT}${TCLX_INST_INCL}
 	${INSTCOPY} ${TCLX_UNIX_SRC_DIR}/tclXAppInit.c \
@@ -397,7 +399,7 @@ tclXhandles.o: ${TCLX_GENERIC_DIR}/tclXhandles.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXhandles.c
 
 tclXinit.o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
-	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
+	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_LIBRARY_PATH}\" \
 	    ${TCLX_GENERIC_DIR}/tclXinit.c
 
 tclXinitSA.o: ${TCLX_GENERIC_DIR}/tclXinitSA.c ${STANDALONE_SRCS}
@@ -577,7 +579,7 @@ tclXhandles..o: ${TCLX_GENERIC_DIR}/tclXhandles.c
 tclXinit..o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
-	    -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
+	    -DTCLX_LIBRARY=\"${TCLX_LIBRARY_PATH}\" \
 	    ${TCLX_GENERIC_DIR}/tclXinit.c
 	@OBJ_RESTORE@
 

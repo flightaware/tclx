@@ -1,12 +1,15 @@
 #
-# Modified version of the standard Tcl auto_load proc that calls a TclX
-# command load TclX .tndx library indices.
+# Modified version of the standard Tcl auto_load_index proc that calls a TclX
+# command load TclX .tndx library indices. 
+#
+# $Id$
+# from Tcl: init.tcl,v 1.22 1998/11/12 05:54:02 welch Exp 
+#
+
 # init.tcl --
 #
 # Default system startup file for Tcl-based applications.  Defines
 # "unknown" procedure and auto-load facilities.
-#
-# SCCS: @(#) init.tcl 1.95 97/11/19 17:16:34
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.
@@ -16,38 +19,19 @@
 #
 
 
-# auto_load --
-# Checks a collection of library directories to see if a procedure
-# is defined in one of them.  If so, it sources the appropriate
-# library file to create the procedure.  Returns 1 if it successfully
-# loaded the procedure, 0 otherwise.
+# auto_load_index --
+# Loads the contents of tclIndex files on the auto_path directory
+# list.  This is usually invoked within auto_load to load the index
+# of available commands.  Returns 1 if the index is loaded, and 0 if
+# the index is already loaded and up to date.
 #
 # Arguments: 
-# cmd -			Name of the command to find and load.
-# namespace (optional)  The namespace where the command is being used - must be
-#                       a canonical namespace as returned [namespace current]
-#                       for instance. If not given, namespace current is used.
+# None.
 
- proc auto_load {cmd {namespace {}}} {
-    global auto_index auto_oldpath auto_path env errorInfo errorCode
+proc auto_load_index {} {
+    global auto_index auto_oldpath auto_path errorInfo errorCode
 
-    if {[string length $namespace] == 0} {
-	set namespace [uplevel {namespace current}]
-    }
-    set nameList [auto_qualify $cmd $namespace]
-    # workaround non canonical auto_index entries that might be around
-    # from older auto_mkindex versions
-    lappend nameList $cmd
-    foreach name $nameList {
-	if [info exists auto_index($name)] {
-	    uplevel #0 $auto_index($name)
-	    return [expr {[info commands $name] != ""}]
-	}
-    }
-    if ![info exists auto_path] {
-	return 0
-    }
-    if [info exists auto_oldpath] {
+    if {[info exists auto_oldpath]} {
 	if {$auto_oldpath == $auto_path} {
 	    return 0
 	}
@@ -58,13 +42,13 @@
     # newer format tclIndex files.
 
     set issafe [interp issafe]
-    for {set i [expr [llength $auto_path] - 1]} {$i >= 0} {incr i -1} {
+    for {set i [expr {[llength $auto_path] - 1}]} {$i >= 0} {incr i -1} {
 	set dir [lindex $auto_path $i]
-	set f ""
         tclx_load_tndxs $dir
+	set f ""
 	if {$issafe} {
 	    catch {source [file join $dir tclIndex]}
-	} elseif [catch {set f [open [file join $dir tclIndex]]}] {
+	} elseif {[catch {set f [open [file join $dir tclIndex]]}]} {
 	    continue
 	} else {
 	    set error [catch {
@@ -90,18 +74,11 @@
 	    if {$f != ""} {
 		close $f
 	    }
-	    if $error {
+	    if {$error} {
 		error $msg $errorInfo $errorCode
 	    }
 	}
     }
-    foreach name $nameList {
-	if [info exists auto_index($name)] {
-	    uplevel #0 $auto_index($name)
-	    if {[info commands $name] != ""} {
-		return 1
-	    }
-	}
-    }
-    return 0
+    return 1
 }
+

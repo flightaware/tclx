@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 8.1 1997/04/17 04:59:36 markd Exp $
+# $Id: signal.test,v 8.2 1997/08/23 18:55:55 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -94,30 +94,30 @@ signal default SIGHUP
 Test signal-1.5 {signal tests} {
     signal default {SIGHUP SIGINT}
     signal get {SIGHUP SIGINT}
-} 0 {{SIGHUP {default 0}} {SIGINT {default 0}}}
+} 0 {{SIGHUP {default 0 {} 0}} {SIGINT {default 0 {} 0}}}
 
 Test signal-1.6 {signal tests} {
     signal default SIGHUP
     signal ignore  SIGINT
     signal get {SIGHUP SIGINT}
-} 0 {{SIGHUP {default 0}} {SIGINT {ignore 0}}}
+} 0 {{SIGHUP {default 0 {} 0}} {SIGINT {ignore 0 {} 0}}}
 
 Test signal-1.7 {signal tests} {
     signal trap {SIGHUP SIGINT} {error "Should not get this signal"}
     signal get {SIGHUP SIGINT}
-} 0 [list {SIGHUP {trap 0 {error "Should not get this signal"}}} \
-          {SIGINT {trap 0 {error "Should not get this signal"}}} ]
+} 0 [list {SIGHUP {trap 0 {error "Should not get this signal"} 0}} \
+          {SIGINT {trap 0 {error "Should not get this signal"} 0}} ]
 
 Test signal-1.8 {signal tests} {
     signal error {SIGHUP SIGINT}
     signal get {SIGHUP SIGINT}
-} 0 {{SIGHUP {error 0}} {SIGINT {error 0}}}
+} 0 {{SIGHUP {error 0 {} 0}} {SIGINT {error 0 {} 0}}}
 
 Test signal-1.8.1 {signal tests} {
     signal error {SIGHUP SIGINT}
     set sigkl [signal get *]
     list [keylget sigkl SIGHUP]  [keylget sigkl SIGINT]
-} 0 {{error 0} {error 0}}
+} 0 {{error 0 {} 0} {error 0 {} 0}}
 
 Test signal-1.8.2 {signal tests} {
     set sigkl [signal get *]
@@ -131,7 +131,14 @@ Test signal-1.8.3 {signal tests} {
     signal default {SIGHUP SIGINT}
     signal set $sigkl
     signal get {SIGHUP SIGINT}
-} 0 {{SIGHUP {error 0}} {SIGINT {error 0}}}
+} 0 {{SIGHUP {error 0 {} 0}} {SIGINT {error 0 {} 0}}}
+
+if [infox have_signal_restart] {
+    Test signal-1.8.4 {signal tests} {
+        signal -restart error {SIGHUP SIGINT}
+        signal get {SIGHUP SIGINT}
+    } 0 {{SIGHUP {error 0 {} 1}} {SIGINT {error 0 {} 1}}}
+}
 
 Test signal-1.9 {signal tests} {
     global errorInfo
@@ -159,7 +166,7 @@ Test signal-1.9 {signal tests} {
 
 Test signal-1.10 {signal tests} {
     signal
-} 1 {wrong # args: signal action signalList ?command?}
+} 1 {wrong # args: signal ?-restart? action signalList ?command?}
 
 Test signal-1.11 {signal tests} {
     signal ignore foo
@@ -201,9 +208,9 @@ proc ForkChild {exitCode} {
 }
 
 if [infox have_posix_signals] {
-    set expect {123 {{SIGCHLD {trap 0 {global G_gotChild;set G_gotChild 1;sleep 1}}}}}
+    set expect {123 {{SIGCHLD {trap 0 {global G_gotChild;set G_gotChild 1;sleep 1} 0}}}}
 } else {
-    set expect {123 {{SIGCHLD {default 0}}}}
+    set expect {123 {{SIGCHLD {default 0 {} 0}}}}
 }
 set expect 
 Test signal-1.15 {signal tests} {
@@ -259,18 +266,18 @@ if [infox have_posix_signals] {
         signal error SIGHUP
         signal block SIGHUP
         signal get SIGHUP
-    } 0 {{SIGHUP {error 1}}}
+    } 0 {{SIGHUP {error 1 {} 0}}}
 
     Test signal-1.19 {signal tests} {
         signal unblock SIGHUP
         signal get SIGHUP
-    } 0 {{SIGHUP {error 0}}}
+    } 0 {{SIGHUP {error 0 {} 0}}}
 
     Test signal-1.18 {signal tests} {
         signal block SIGHUP
         signal error SIGHUP
         signal get SIGHUP
-    } 0 {{SIGHUP {error 1}}}
+    } 0 {{SIGHUP {error 1 {} 0}}}
 
     signal unblock SIGHUP
     signal default SIGHUP
@@ -315,4 +322,35 @@ if [infox have_posix_signals] {
     } 0 {SIG SIGKILL}
 }
 
+# Check -restart
+if ![infox have_signal_restart] {
+    echo Notice: restarting of interrupted system calls is not available on this system.
+} else {
+    Test signal-3.0 {kill tests} {
+        # Start program on a pipe, but don't doing anything until we send it
+        # something to make timing issues smaller.
+        set fh [open sigprog.tmp w]
+        puts $fh "gets stdin; sleep 5; puts HELLO;flush stdout"
+        close $fh
 
+        set sp [open "|$TCL_PROGRAM sigprog.tmp" r+]
+        try_eval {
+            set resp BYE
+            fconfigure $sp -buffering none
+            set gotAlarm 0
+            signal -restart trap SIGALRM {set ::gotAlarm 1}
+            alarm 1
+            puts $sp "GO"
+            set resp [gets $sp]
+        } {} {
+            catch {close $sp}
+            alarm 0
+        }
+        list $resp $gotAlarm
+
+        # Note this this is somewhat timing dependent and might fail
+        # on a heavly loaded system.
+    } 0 {HELLO 1}
+}
+
+file delete sigprog.tmp

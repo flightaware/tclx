@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.11 1997/07/04 20:24:01 markd Exp $
+ * $Id: tclXsignal.c,v 8.12 1997/07/09 01:52:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -231,11 +231,13 @@ GetSignalName _ANSI_ARGS_((int signalNum));
 
 static int
 GetSignalState _ANSI_ARGS_((int              signalNum,
-                            signalProcPtr_t *sigProcPtr));
+                            signalProcPtr_t *sigProcPtr,
+                            int             *restart));
 
 static int
 SetSignalState _ANSI_ARGS_((int             signalNum,
-                            signalProcPtr_t sigFunc));
+                            signalProcPtr_t sigFunc,
+                            int             restart));
 
 static int
 BlockSignals _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -286,6 +288,7 @@ static int
 SetSignalActions _ANSI_ARGS_((Tcl_Interp      *interp,
                               unsigned char    signals [MAXSIG],
                               signalProcPtr_t  actionFunc,
+                              int              restart,
                               char            *command));
 
 static int
@@ -353,14 +356,16 @@ GetSignalName (signalNum)
  * Parameters:
  *   o signalNum - Signal number to query.
  *   o sigProcPtr - The signal function is returned here.
+ *   o restart - Restart systems calls on signal.
  * Results
  *   TCL_OK or TCL_ERROR (check errno).
  *-----------------------------------------------------------------------------
  */
 static int
-GetSignalState (signalNum, sigProcPtr)
+GetSignalState (signalNum, sigProcPtr, restart)
     int              signalNum;
     signalProcPtr_t *sigProcPtr;
+    int             *restart;
 {
 #ifndef NO_SIGACTION
     struct sigaction currentState;
@@ -368,6 +373,7 @@ GetSignalState (signalNum, sigProcPtr)
     if (sigaction (signalNum, NULL, &currentState) < 0)
         return TCL_ERROR;
     *sigProcPtr = currentState.sa_handler;
+    *restart = ((currentState.sa_flags & SA_RESTART) != 0);
     return TCL_OK;
 #else
     signalProcPtr_t  actionFunc;
@@ -384,6 +390,7 @@ GetSignalState (signalNum, sigProcPtr)
     if (actionFunc != SIG_DFL)
         signal (signalNum, actionFunc);  /* reset */
     *sigProcPtr = actionFunc;
+    restart = FALSE;
     return TCL_OK;
 #endif
 }
@@ -394,14 +401,16 @@ GetSignalState (signalNum, sigProcPtr)
  * Parameters:
  *   o signalNum - Signal number to query.
  *   o sigFunc - The signal function or SIG_DFL or SIG_IGN.
+ *   o restart - Restart systems calls on signal.
  * Results
  *   TCL_OK or TCL_ERROR (check errno).
  *-----------------------------------------------------------------------------
  */
 static int
-SetSignalState (signalNum, sigFunc)
+SetSignalState (signalNum, sigFunc, restart)
     int             signalNum;
     signalProcPtr_t sigFunc;
+    int             restart;
 {
 #ifndef NO_SIGACTION
     struct sigaction newState;
@@ -409,6 +418,9 @@ SetSignalState (signalNum, sigFunc)
     newState.sa_handler = sigFunc;
     sigfillset (&newState.sa_mask);
     newState.sa_flags = 0;
+    if (restart) {
+        newState.sa_flags |= SA_RESTART;
+    }
 
     if (sigaction (signalNum, &newState, NULL) < 0)
         return TCL_ERROR;
@@ -616,11 +628,11 @@ SignalTrap (signalNum)
      */
 #ifdef SIGCHLD
     if (signalNum != SIGCHLD) {
-        if (SetSignalState (signalNum, SignalTrap) == TCL_ERROR)
+        if (SetSignalState (signalNum, SignalTrap, FALSE) == TCL_ERROR)
             panic ("SignalTrap bug");
     }
 #else
-    if (SetSignalState (signalNum, SignalTrap) == TCL_ERROR)
+    if (SetSignalState (signalNum, SignalTrap, FALSE) == TCL_ERROR)
         panic ("SignalTrap bug");
 #endif /* SIGCHLD */
 #endif /* NO_SIGACTION */
@@ -998,6 +1010,7 @@ ParseSignalList (interp, signalListObjPtr, signals)
  *   o signals - Boolean array indexed by signal number that indicates
  *     the requested signals.
  *   o actionFunc - The function to run when the signal is received.
+ *   o restart - Restart systems calls on signal.
  *   o command - If the function is the "trap" function, this is the
  *     Tcl command to run when the trap occurs.  Otherwise, NULL.
  * Returns:
@@ -1005,10 +1018,11 @@ ParseSignalList (interp, signalListObjPtr, signals)
  *-----------------------------------------------------------------------------
  */
 static int
-SetSignalActions (interp, signals, actionFunc, command)
+SetSignalActions (interp, signals, actionFunc, restart, command)
     Tcl_Interp      *interp;
     unsigned char    signals [MAXSIG];
     signalProcPtr_t  actionFunc;
+    int              restart;
     char            *command;
 {
     int signalNum;
@@ -1024,7 +1038,7 @@ SetSignalActions (interp, signals, actionFunc, command)
         if (command != NULL)
             signalTrapCmds [signalNum] = ckstrdup (command);
 
-        if (SetSignalState (signalNum, actionFunc) == TCL_ERROR) {
+        if (SetSignalState (signalNum, actionFunc, restart) == TCL_ERROR) {
             TclX_AppendObjResult (interp, Tcl_PosixError (interp),
                                   " while setting ", Tcl_SignalId (signalNum),
                                   (char *) NULL);
@@ -1054,12 +1068,12 @@ FormatSignalListEntry (interp, signalNum, sigStatesObjPtr)
     int         signalNum;
     Tcl_Obj    *sigStatesObjPtr;
 {
-    Tcl_Obj *stateObjv [3], *stateObjPtr;
-    int stateObjc;
+    Tcl_Obj *stateObjv [4], *stateObjPtr;
     signalProcPtr_t  actionFunc;
     char *actionStr;
+    int restart;
 
-    if (GetSignalState (signalNum, &actionFunc) == TCL_ERROR)
+    if (GetSignalState (signalNum, &actionFunc, &restart) == TCL_ERROR)
         goto unixSigError;
     
     if (actionFunc == SIG_DFL) {
@@ -1082,11 +1096,12 @@ FormatSignalListEntry (interp, signalNum, sigStatesObjPtr)
     stateObjv [0] = Tcl_NewStringObj (actionStr, -1);
     if (signalTrapCmds [signalNum] != NULL) {
         stateObjv [2] = Tcl_NewStringObj (signalTrapCmds [signalNum], -1);
-        stateObjc = 3;
     } else {
-        stateObjc = 2;
+        stateObjv [2] = Tcl_NewStringObj ("", -1);
     }
-    stateObjPtr = Tcl_NewListObj (stateObjc, stateObjv);
+    stateObjv [3] = Tcl_NewBooleanObj(restart);
+
+    stateObjPtr = Tcl_NewListObj (4, stateObjv);
     Tcl_IncrRefCount (stateObjPtr);
 
     if (TclX_KeyedListSet (interp, sigStatesObjPtr, 
@@ -1132,7 +1147,8 @@ ProcessSignalListEntry (interp, signalName, stateObjPtr)
     char *actionStr, *cmdStr;
     int signalNum, blocked;
     signalProcPtr_t  actionFunc = NULL;
-    unsigned char    signals [MAXSIG];
+    int restart = FALSE;
+    unsigned char signals [MAXSIG];
 
     /*
      * Get state list.
@@ -1140,7 +1156,7 @@ ProcessSignalListEntry (interp, signalName, stateObjPtr)
     if (Tcl_ListObjGetElements (interp, stateObjPtr,
                                 &stateObjc, &stateObjv) != TCL_OK)
         return TCL_ERROR;
-    if (stateObjc < 2 || stateObjc > 3)
+    if (stateObjc < 2 || stateObjc > 4)
         goto invalidEntry;
     
     /*
@@ -1151,31 +1167,40 @@ ProcessSignalListEntry (interp, signalName, stateObjPtr)
     
     actionStr = Tcl_GetStringFromObj (stateObjv [0], NULL);
     cmdStr = NULL;
+    if (stateObjc > 2) {
+        cmdStr = Tcl_GetStringFromObj (stateObjv [2], NULL);
+        if (cmdStr[0] == '\0') {
+            cmdStr = NULL;
+        }
+    }
     if (STREQU (actionStr, SIGACT_DEFAULT)) {
         actionFunc = SIG_DFL;
-        if (stateObjc != 2)
+        if (cmdStr != NULL)
             goto invalidEntry;
     } else if (STREQU (actionStr, SIGACT_IGNORE)) {
         actionFunc = SIG_IGN;
-        if (stateObjc != 2)
+        if (cmdStr != NULL)
             goto invalidEntry;
     } else if (STREQU (actionStr, SIGACT_ERROR)) {
         actionFunc = SignalTrap;
-        if (stateObjc != 2)
+        if (cmdStr != NULL)
             goto invalidEntry;
     } else if (STREQU (actionStr, SIGACT_TRAP)) {
         actionFunc = SignalTrap;
-        if (stateObjc != 3)    /* Must have command */
+        if (cmdStr == NULL)    /* Must have command */
             goto invalidEntry;
-        cmdStr = Tcl_GetStringFromObj (stateObjv [2], NULL);
     } else if (STREQU (actionStr, SIGACT_UNKNOWN)) {
-        if (stateObjc != 2)
+        if (cmdStr != NULL)
             goto invalidEntry;
         return TCL_OK;  /* Ignore non-Tcl signals */
     }
 
     if (Tcl_GetBooleanFromObj (interp, stateObjv [1], &blocked) != TCL_OK)
         return TCL_ERROR;
+    if (stateObjc > 3) {
+        if (Tcl_GetBooleanFromObj (interp, stateObjv [3], &restart) != TCL_OK)
+            return TCL_ERROR;
+    }
     
     memset (signals, FALSE, sizeof (unsigned char) * MAXSIG);
     signals [signalNum] = TRUE;
@@ -1191,7 +1216,7 @@ ProcessSignalListEntry (interp, signalName, stateObjPtr)
             return TCL_ERROR;
     }
 #endif
-    if (SetSignalActions (interp, signals, actionFunc,
+    if (SetSignalActions (interp, signals, actionFunc, restart,
                           cmdStr) != TCL_OK)
         return TCL_ERROR;
 #ifndef NO_SIGACTION
@@ -1204,7 +1229,7 @@ ProcessSignalListEntry (interp, signalName, stateObjPtr)
     return TCL_OK;
 
   invalidEntry:
-    TclX_AppendObjResult (interp, "invalid signal keyed list entry form ",
+    TclX_AppendObjResult (interp, "invalid signal keyed list entry for ",
                           signalName, (char *) NULL);
     return TCL_ERROR;
 }
@@ -1302,32 +1327,58 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
     Tcl_Obj     *CONST objv[];
 {
     unsigned char signals [MAXSIG];
-    char *actionStr;
+    char *argStr, *actionStr;
+    int firstArg = 1;
+    int numArgs;
+    int restart = FALSE;
 
-    if ((objc < 3) || (objc > 4)) {
-        TclX_WrongArgs (interp, objv [0], "action signalList ?command?");
+    while (firstArg < objc) {
+        argStr = Tcl_GetStringFromObj (objv [firstArg], NULL);
+        if (argStr[0] != '-') {
+            break;
+        }
+        if (STREQU (argStr, "-restart")) {
+            restart = TRUE;
+        } else {
+            TclX_AppendObjResult(interp, "invalid option \"", argStr,
+                                 "\", expected -restart", NULL);
+            return TCL_ERROR;
+        }
+        firstArg++;
+    }
+    numArgs = objc - firstArg;
+
+    if ((numArgs < 2) || (numArgs > 3)) {
+        TclX_WrongArgs (interp, objv [0], "?-restart? action signalList ?command?");
         return TCL_ERROR;
     }
+#ifdef NO_SIG_RESTART
+    if (restart) {
+        TclX_AppendObjResult(interp, "restarting of system calls from signals is not available on this system",
+                             NULL);
+        return TCL_ERROR;
+    }
+#endif
 
-    actionStr = Tcl_GetStringFromObj (objv [1], NULL);
+    actionStr = Tcl_GetStringFromObj (objv [firstArg], NULL);
 
     /*
      * Do the specified action on the signals.  "set" has a special format
      * for the signal list, so do it first.
      */
     if (STREQU (actionStr, "set")) {
-        if (objc != 3)
+        if (numArgs != 2)
             goto cmdNotValid;
-        return SetSignalStates (interp, objv [2]);
+        return SetSignalStates (interp, objv [firstArg+1]);
     }
 
     if (ParseSignalList (interp,
-                         objv [2],
+                         objv [firstArg+1],
                          signals) != TCL_OK)
         return TCL_ERROR;
 
     if (STREQU (actionStr, SIGACT_TRAP)) {
-        if (objc != 4) {
+        if (numArgs != 3) {
             TclX_AppendObjResult (interp, "command required for ",
                                   "trapping signals", (char *) NULL);
             return TCL_ERROR;
@@ -1335,16 +1386,18 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
         return SetSignalActions (interp,
                                  signals,
                                  SignalTrap,
-                                 Tcl_GetStringFromObj (objv [3], NULL));
+                                 restart,
+                                 Tcl_GetStringFromObj (objv [firstArg+2], NULL));
     }
 
-    if (objc != 3)
+    if (numArgs != 2)
         goto cmdNotValid;
     
     if (STREQU (actionStr, SIGACT_DEFAULT)) {
         return SetSignalActions (interp,
                                  signals,
                                  SIG_DFL,
+                                 restart,
                                  NULL);
     }
 
@@ -1352,6 +1405,7 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
         return SetSignalActions (interp,
                                  signals,
                                  SIG_IGN,
+                                 restart,
                                  NULL);
     }
 
@@ -1359,6 +1413,7 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
         return SetSignalActions (interp,
                                  signals,
                                  SignalTrap,
+                                 restart,
                                  NULL);
     }
 
@@ -1536,10 +1591,12 @@ void
 TclX_SetupSigInt ()
 {
     signalProcPtr_t  actionFunc;
+    int restart;
 
-    if ((GetSignalState (SIGINT, &actionFunc) == TCL_OK) &&
-        (actionFunc == SIG_DFL))
-        SetSignalState (SIGINT, SignalTrap);
+    if ((GetSignalState (SIGINT, &actionFunc, &restart) == TCL_OK) &&
+        (actionFunc == SIG_DFL)) {
+        SetSignalState (SIGINT, SignalTrap, FALSE);
+    }
 }
 
 /*-----------------------------------------------------------------------------

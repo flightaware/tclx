@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclExtend.h,v 8.14 1998/12/20 07:55:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,6 +21,15 @@
 
 #include <stdio.h>
 #include "tcl.h"
+
+/*
+ * The following is needed on Windows to deal with export/import of DLL
+ * functions.  See tcl8.0.3+/win/README.
+ */
+#ifdef BUILD_TCLX
+# undef TCL_STORAGE_CLASS
+# define TCL_STORAGE_CLASS DLLEXPORT
+#endif
 
 /*
  * The versions for TclX and TkX.  This is based on the versions of Tcl and Tk
@@ -79,6 +88,22 @@ typedef int
                                            ClientData  clientData,
                                            int         background,
                                            int         signalNum));
+
+EXTERN void
+TclX_ShellExit _ANSI_ARGS_((Tcl_Interp *interp,
+                            int         exitCode));
+
+EXTERN int
+TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
+                       unsigned     options,
+                       char        *cmd));
+
+EXTERN int
+TclXRuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
+                             char       *which,
+                             char       *defaultLib,
+                             char       *version));
+
 /*
  * Exported TclX initialization functions.
  */
@@ -243,9 +268,18 @@ TclX_AsyncCommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
                                    char       *prompt1,
                                    char       *prompt2));
 
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLIMPORT
+
+
 /*
  * Tk with TclX initialization.
  */
+
+#ifdef BUILD_tkx
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLEXPORT
+#endif
 
 EXTERN int
 Tkx_Init _ANSI_ARGS_((Tcl_Interp  *interp));
@@ -270,6 +304,11 @@ TkX_ConsoleInit _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void
 TkX_Panic _ANSI_ARGS_(TCL_VARARGS_DEF(char *,fmt));
 
+/*
+ * Return storage class to default state see tcl8.0.3+/generic/tcl.h or
+ * tk8.0.3+/generic/tk.h
+ */
+#undef TCL_STORAGE_CLASS
+#define TCL_STORAGE_CLASS DLLIMPORT
+
 #endif
-
-

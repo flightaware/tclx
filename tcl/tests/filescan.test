@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 8.6 1998/04/04 21:04:21 markd Exp $
+# $Id: filescan.test,v 8.7 1998/04/25 19:28:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -401,7 +401,7 @@ set testCH [scancontext create]
 
 Test filescan-7.1 {filescan tests} {
     scanmatch $testCH {a[} {}
-} 1 {couldn't compile regular expression pattern: unmatched []}
+} 1 {couldn't compile regular expression pattern: brackets [] not balanced}
 
 #
 # Test the copy file manipulation by sorting a file of numbered lines into two
@@ -489,8 +489,32 @@ Test 9.1 {filescan tests} {
 Test 9.2 {filescan tests} {
     set ch [scancontext create]
     scanmatch -nocase $ch {^[a-z]} {echo foo}
+    scancontext delete $ch
 } 0 {}
 
+Test 9.3 {filescan tests} {
+    # Tuende Kriegl <tuende.kriegl@mch.sni.de> says this
+    # panics on NT but not unix! 
+    set ch [scancontext create]
+    scanmatch $ch {([^(]*).'([^']*).*%OpText %(.*)} {echo foo}
+    scancontext delete $ch
+} 0 {}
+
+Test 9.1 {filescan tests} {
+    set testFH [open TEST.TMP w]
+    puts $testFH "foo\nbar"
+    close $testFH
+
+    set linesMatched {}
+    set testCH [scancontext create]
+    scanmatch $testCH {foo|bar} {
+        lappend linesMatched $matchInfo(line)
+    }
+    set testFH [open TEST.TMP]
+    scanfile $testCH $testFH
+    close $testFH
+    set linesMatched
+} 0 {foo bar}
 
 TestRemove TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP
 

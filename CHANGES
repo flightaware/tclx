@@ -1385,3 +1385,30 @@
   o Added --with-tcl dir and --with-tk configure options.  Contributed by
     <Viktor-Dukhovni@deshaw.com>.
 -------------------------------------------------------------------------------
+22 Jan 98: 
+  o Added fixes for handling some corner cases in saving and restoring
+    interp state on signals. Debugged and submitted by the ever-helpful
+    <Viktor-Dukhovni@deshaw.com>.
+-------------------------------------------------------------------------------
+25 Apr 98:
+  o Fixed bug with .tndx libraries and references to commands in namespaces.
+-------------------------------------------------------------------------------
+7 Aug 98:
+  o Added -restart option to the signal command.
+===============================================================================
+8 Aug 98: Released TclX 8.0.3
+===============================================================================
+19 Sept 98:
+  o Fixed TclX copy of Tcl auto_load proc out of sync; this broken ITcl.
+-------------------------------------------------------------------------------
+20 Sept 98:
+  o Include several Windows build fixes from Viktor Dukhovni <viktor@nyc.deshaw.com>.
+  o Renamed --with-tk configure option to --enable-tk.
+    Supplied by Viktor Dukhovni <viktor@nyc.deshaw.com>.
+-------------------------------------------------------------------------------
+28 Sept 98:
+  o Handle systems that don't implement restart of system calls on signal.
+    Added infox have_signal_restart.
+===============================================================================
+6 Dec 98: Released TclX 8.0.4
+===============================================================================

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXunixTest.c,v 8.2 1997/08/18 00:04:12 markd Exp $
+ * $Id: tkXunixTest.c,v 8.3 1997/08/23 18:56:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,10 +29,8 @@ Tktest_Init _ANSI_ARGS_((Tcl_Interp *interp));
  * Even if matherr is not used on this system, there is a dummy version
  * in libtcl.
  */
-#ifndef __WIN32__
-EXTERN int matherr ();
+extern int matherr ();
 int (*tclDummyMathPtr)() = matherr;
-#endif
 
 
 /*

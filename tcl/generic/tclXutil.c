@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.22 1998/01/28 17:34:18 markd Exp $
+ * $Id: tclXutil.c,v 8.23 1998/02/27 06:38:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -521,6 +521,7 @@ CallEvalErrorHandler (interp)
         errorHandler = Tcl_NewStringObj (ERROR_HANDLER, -1);
     }
     command = Tcl_NewListObj (0, NULL);
+    Tcl_IncrRefCount (command);
     Tcl_ListObjAppendElement (NULL, command, errorHandler);
     Tcl_ListObjAppendElement (NULL, command,
                               Tcl_GetObjResult (interp));
@@ -1008,7 +1009,7 @@ TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
     resultPtr = Tcl_GetObjResult (interp);
 
     if (Tcl_IsShared(resultPtr)) {
-        resultPtr = Tcl_NewStringObj(0, NULL);
+        resultPtr = Tcl_NewStringObj((char *)NULL, 0);
         Tcl_SetObjResult(interp, resultPtr);
     }
 

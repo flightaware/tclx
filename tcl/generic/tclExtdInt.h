@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.22 1998/01/24 17:30:09 markd Exp $
+ * $Id: tclExtdInt.h,v 8.23 1998/01/28 17:34:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -207,11 +207,6 @@ TclX_GetUnsignedFromObj _ANSI_ARGS_((Tcl_Interp *interp,
                                      unsigned   *valuePtr));
 
 extern int
-TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
-                       unsigned     options,
-                       char        *cmd));
-
-extern int
 TclX_VarEval _ANSI_ARGS_(TCL_VARARGS(Tcl_Interp *, arg1));
 
 extern int
@@ -254,12 +249,6 @@ TclX_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
                                int         *exprResultPtr));
 
 extern int
-TclXRuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *which,
-                             char       *defaultLib,
-                             char       *version));
-
-extern int
 TclX_SetChannelOption _ANSI_ARGS_((Tcl_Interp  *interp,
                                    Tcl_Channel  channel,
                                    int          option,
@@ -281,9 +270,6 @@ TclX_AppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
 extern int
 TclX_IsNullObj _ANSI_ARGS_((Tcl_Obj *objPtr));
 
-void
-TclX_ShellExit _ANSI_ARGS_((Tcl_Interp *interp,
-                            int         exitCode));
 
 
 /*

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 8.3 1997/06/30 07:57:47 markd Exp $
+ * $Id: tclXhandles.c,v 8.4 1997/07/04 20:23:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -171,7 +171,7 @@ ExpandTable (tblHdrPtr, neededIdx)
             (tblHdrPtr->tableSize * tblHdrPtr->entrySize));
     LinkInNewEntries (tblHdrPtr, tblHdrPtr->tableSize, numNewEntries);
     tblHdrPtr->tableSize += numNewEntries;
-    ckfree (oldbodyPtr);
+    ckfree ((char *) oldbodyPtr);
     
 }
 
@@ -376,7 +376,7 @@ TclX_HandleTblRelease (headerPtr)
 
     tblHdrPtr->useCount--;
     if (tblHdrPtr->useCount <= 0) {
-        ckfree (tblHdrPtr->bodyPtr);
+        ckfree ((char *) tblHdrPtr->bodyPtr);
         ckfree ((char *) tblHdrPtr);
     }
 }

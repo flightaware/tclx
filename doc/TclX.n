@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.12 1997/11/11 05:33:11 markd Exp $
+.\" $Id: TclX.n,v 8.13 1998/02/02 22:33:00 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -209,6 +209,11 @@ catalogs, always returning the default string.
 .B have_posix_signals
 Return \fB1\fR if Posix signals are available (\fBblock\fR and \fBunblock\fR
 options available for the signal command).  \fB0\fR is returned if Posix
+signals are not available.
+.TP
+.B have_signal_restart
+Return \fB1\fR if restartable signals are available (\fB-restart\fR
+option available for the signal command).  \fB0\fR is returned if restartable
 signals are not available.
 .TP
 .B have_truncate
@@ -822,13 +827,23 @@ in the result.  This flag is ignored on Unix systems.
 '\"@help: tcl/signals/signal
 '\"@brief: Specify action to take when a signal is received.
 .TP
-.B signal \fIaction\fR \fIsiglist\fR ?\fIcommand\fR?
+.B signal ?-restart? \fIaction\fR \fIsiglist\fR ?\fIcommand\fR?
 .IP
-Warning:  The behavior of signals under Unix doesn't make signals a general
-event mechanism.  Interrupted system calls, caused by signals, can cause errors
-in code where they are not expected.  This can cause a program to behave in
-unexpected ways.  In general, the only safe usage for signals is to generate
-errors to terminate a blocked operation.
+Warning:  If signals are being used as an event source (a \fBtrap\fR
+action), rather than
+generating an error to terminate a task; one must use the \fB-restart\fR
+option.  This causes a blocked system call, such as \fBread\fR or
+\fBwaitpid\fR to be restarted rather than generate an error.  Failure
+to do this may results in unexpected errors when a signal arrives
+while in one of these system calls.
+When available, the \fB-restart\fR option can prevent this problem.
+.IP
+If \fB-restart\fR is specified, restart blocking system calls rather than
+generating an error.  The signal will be handled once the Tcl command 
+that issued the system call completes.
+The \fB-restart\fR options is not available on all operating systems and
+its use will generate an error when it is not supported.  
+Use \fBinfox have_signal_restart\fR to check for availability.
 .IP
 Specify the action to take when a Unix signal is received by Extended
 Tcl, or a program that embeds it.  \fISiglist\fR is a list
@@ -867,7 +882,8 @@ Retrieve the current settings of the specified signals.  A keyed
 list will be returned were the keys are one of the specified signals and the
 values are a list consisting of the action associated with the signal, a
 \fB0\fR if the signal may be delivered (not block) and a \fB1\fR if it is
-blocked. The actions maybe one of `\fBdefault\fR',`\fBignore\fR',
+blocked and a flag indicating if restarting of system calls is specified.
+The actions maybe one of `\fBdefault\fR',`\fBignore\fR',
 `\fBerror\fR' or `\fBtrap\fR'.  If the action is trap, the third element is the
 command associated with the action.  The action `\fBunknown\fR' is returned
 if a non-Tcl signal handler has been associated with the signal.

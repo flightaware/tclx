@@ -602,12 +602,16 @@ SetMatchInfoVar (interp, scanData)
     regExpPtr = (TclRegexp *) scanData->matchPtr->regExp;
 
     for (idx = 0; idx < regExpPtr->re.re_nsub; idx++) {
-	start = regExpPtr->matches[idx].rm_so;
-	end = regExpPtr->matches[idx].rm_eo;
+	start = regExpPtr->matches[idx+1].rm_so;
+	end = regExpPtr->matches[idx+1].rm_eo;
 
         sprintf (key, "subindex%d", idx);
         indexObjv [0] = Tcl_NewIntObj (start);
-        indexObjv [1] = Tcl_NewIntObj (end-1);
+        if (start < 0) {
+            indexObjv [1] = Tcl_NewIntObj (-1);
+        } else {
+            indexObjv [1] = Tcl_NewIntObj (end-1);
+        }
         valueObjPtr = Tcl_NewListObj (2, indexObjv);
         if (Tcl_SetObjVar2 (interp, MATCHINFO, key, valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {

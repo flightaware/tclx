@@ -18,13 +18,19 @@ or ftp.neosoft.com).
    Support is also included for building a Tk 8.1 wish shell (wishx)
 with the Extended Tcl command set and signal handling.
 
-   Extended Tcl runs on most Unix-like systems and Windows 95/NT.  However
-the Windows 95/NT work is not complete and should be considered alpha quality.
+   Extended Tcl runs on most Unix-like systems and Windows 95/NT.
+
+   While this TclX distribution is tested with Tcl 8.0.4 and Tk 8.0.4, it will
+probably work with newer versions of 8.0.*-series Tcl & Tk with little or no 
+changes. It is *not* compatible with the 8.1a* series.
 
    While this TclX distribution is tested with Tcl 8.1 and Tk 8.1, it will
 probably work with newer versions of 8.x-series Tcl & Tk with little or no 
 changes.  Please check the Extended Tcl homepage at www.neosoft.com/tclx
 for the latest release and information.
+
+   Please check the Extended Tcl homepage at www.neosoft.com/TclX for the
+latest release and information.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
 (karl@NeoSoft.com) and Mark Diekhans (markd@Grizzly.com), with help
@@ -34,50 +40,14 @@ in the earliest stages from Peter da Silva (peter@NeoSoft.com).
 commercial use and resale.
 
 
-
-PREFACE TO THE EIGHTH EDITION
-=============================
-
-When the first alpha release of Tcl 8.0 came out near the end of 1996, 
-we were excited by the possibilities that were present in the new system.  
-The on-the-fly bytecode compiler and internal object system promised major 
-performance improvements for Tcl.  Even though very few of the Tcl commands 
-had been converted to use the object system (which is still true in the 
-formal released version of Tcl 8.0), Tcl's performance was almost always at 
-least doubled, and many programs ran five, ten, and even hundreds of times
-faster than they did under Tcl 7.
-
-TclX 8.0.1 has been extensively integrated with Tcl 8's new features.
-One metric is that 95% of TclX's commands have been converted to use the 
-new object model.
-
-TclX commands that evaluate code repeatedly have been recoded to use Tcl 
-objects to contain the code to be eval'ed  (as opposed to simple strings), 
-allowing the bytecode compiler to compile the code and then reuse the 
-compiled version on each subsequent iteration -- a major performance win.
-These changes principally speed up file scanning, and the "try_eval" and 
-"loop" commands.
-
-Beyond the recoding of the command interfaces and adoption of the practice
-of executing code in objects instead of strings, another of our goals was
-to adopt the object system's capabilities throughout the extensions, rather 
-than just in their interfaces.  As a result, keyed lists, for example, 
-are now contained in a new object type, added to Tcl through the
-C-level new-object-type-registration functions now standard in Tcl 8.
-The performance improvement for programs that make extensive use of large 
-keyed lists can be as much as a thousandfold.
-
-Use of the new Tcl list objects to contain lists speeds TclX's keyed lists, 
-readdir, scanmatch, fstat, and lgets routines, package handling code, list 
-extensions such as lvarpop, lvarpush, lempty, lassign, lmatch, and lcontain, 
-plus a host of other commands.
-
 BUILDING TCLX
 =============
 
    For instructions on how to build TclX on Unix and Unix-like systems,
-see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.  A binary
-release for Windows 95/NT is also available.
+see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
+
+Tcl 8.0.4 and Tk 8.0.4 are required.  This version of TclX will not work with
+the Tcl8.1a series.
 
 CHANGES IN TCLX 8.1
 =====================
@@ -122,6 +92,11 @@ Tcl, see the manual page man/TclX.man.
     o Additional general programming commands.
 
     o Restricted use in a safe interpreter.
+
+    o Support for binary data in most commands.
+
+    o Built-in support for Jan Nijtmans' Plus patch.
+      http://home.wxs.nl/~nijtmans/plus.html
 
 ON-LINE HELP
 ============
@@ -213,7 +188,7 @@ Thanks to Michael E. Shorter <mike@globalware.com>, Christopher M. Sedore
 Kirk Benson <benson@healthcare.com> for their initial work on porting TclX
 to MS Windows.
 
-Thanks to Jan Nijtmans <nijtmans@worldaccess.nl> of Plus Patch fame for helping
+Thanks to Jan Nijtmans <nijtmans@wxs.nl> of Plus Patch fame for helping
 to get shared library support working for several system.
 
 NEOSOFT PROVIDES TCL SUPPORT, TRAINING, SOFTWARE, AND SERVICES

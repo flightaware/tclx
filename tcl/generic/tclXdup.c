@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 8.7 1997/08/08 10:04:21 markd Exp $
+ * $Id: tclXdup.c,v 8.8 1998/01/28 17:34:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -57,41 +57,37 @@ DupChannelOptions (interp, srcChannel, targetChannel)
     Tcl_Channel  targetChannel;
 {
     Tcl_DString strValues;
-    CONST char *scanPtr;
-    char *option, *value;
-    int size, result;
+    char *option, *value, **optArgv = NULL;
+    int optArgc, idx;
 
     Tcl_DStringInit (&strValues);
 
-    if (Tcl_GetChannelOption (interp, srcChannel, NULL, &strValues) != TCL_OK)
+    if (Tcl_GetChannelOption (interp, srcChannel, NULL, &strValues) != TCL_OK) {
         goto errorExit;
+    }
 
     /*
-     * Walk (rather than split) the list for each name/value pair and set
-     * the new channel.  Only modify blocking if its not the default, as
-     * setting blocking on standard files generates an error on some systems.
-     * Skip options that can't be set.
+     * Split the list for each name/value pair and set the new channel.
+     * Only modify blocking if its not the default, as setting blocking on
+     * standard files generates an error on some systems.  Skip options
+     * that can't be set.
      */
-    scanPtr = strValues.string;
+    if (Tcl_SplitList(interp, strValues.string, &optArgc, &optArgv) != TCL_OK) {
+        goto errorExit;
+    }
+    if ((optArgc % 2) != 0) {
+        panic("channel didn't return keyword/value pairs");
+    }
 
-    while (*scanPtr != '\0') {
-        result = TclFindElement (interp, scanPtr, strlen (scanPtr),
-                                 (CONST char **)&option, &scanPtr, &size, NULL);
-        if ((result != TCL_OK) || (*scanPtr == '\0'))
-            goto fatalError;
-        option [size] = '\0';
-        result = TclFindElement (interp, scanPtr, strlen (scanPtr), 
-                                 (CONST char **)&value, &scanPtr, &size, NULL);
-        if (result != TCL_OK)
-            goto fatalError;
-        value [size] = '\0';
-
-        if (STREQU (option, "-blocking") && (value [0] != '0'))
+    for (idx = 0; idx < optArgc; idx += 2) {
+        option = optArgv[idx];
+        value = optArgv[idx+1];
+        if (STREQU (option, "-blocking") && (value [0] != '0')) {
             continue;
-
-        if (STREQU (option, "-peername") || STREQU (option, "-sockname"))
+        }
+        if (STREQU (option, "-peername") || STREQU (option, "-sockname")) {
             continue;
-
+        }
         if (Tcl_SetChannelOption (interp, targetChannel, option,
                                   value) != TCL_OK) {
             goto errorExit;
@@ -99,15 +95,17 @@ DupChannelOptions (interp, srcChannel, targetChannel)
     }
 
     Tcl_DStringFree (&strValues);
+    if (optArgv != NULL) {
+        ckfree((char *)optArgv);
+    }
     return TCL_OK;
 
   errorExit:
     Tcl_DStringFree (&strValues);
+    if (optArgv != NULL) {
+        ckfree((char *)optArgv);
+    }
     return TCL_ERROR;
-
-  fatalError:
-    panic ("DupChannelOption bug");
-    return TCL_ERROR;  /* Not reached */
 }
 
 /*-----------------------------------------------------------------------------
