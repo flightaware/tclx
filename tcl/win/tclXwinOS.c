@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 8.4 1997/06/30 06:07:41 markd Exp $
+ * $Id: tclXwinOS.c,v 8.5 1997/07/04 20:24:36 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -146,21 +146,17 @@ ChannelToHandle (Tcl_Channel channel,
                  int         direction,
                  int        *type)
 {
-    Tcl_File file;
-    
+    ClientData handle;
+
     if (direction == 0) {
-        file = Tcl_GetChannelFile (channel, TCL_READABLE);
-        if (file == NULL)
-            file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+        if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_ERROR)
+            Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle);
     } else {
-        file = Tcl_GetChannelFile (channel, direction);
-        if (file == NULL) {
-            if (type != NULL)
-                *type = TCL_WIN_FILE;
-            return NULL;
-        }
+        if (Tcl_GetChannelHandle (channel, direction, &handle) == TCL_ERROR) {
+            return -1;
+	}
     }
-    return (HANDLE) Tcl_GetFileInfo (file, type);
+    return (HANDLE) handle;
 }
 
 /*-----------------------------------------------------------------------------
@@ -179,21 +175,22 @@ static SOCKET
 ChannelToSocket (Tcl_Interp  *interp,
                  Tcl_Channel  channel)
 {
-    Tcl_File file;
+    ClientData handle;
     SOCKET sock;
-    int type;
-    
-    file = Tcl_GetChannelFile (channel, TCL_READABLE);
-    if (file == NULL)
-        file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
-    sock = (SOCKET) Tcl_GetFileInfo (file, &type);
-    if (type != TCL_WIN_SOCKET) {
+
+    /*
+     * Channels are bidiretional, so it doesn't matter which one we get.
+     */
+    if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_ERROR)
+        Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle);
+
+    if (strcmp (Tcl_GetChannelType (channel)->typeName, "tcp") != 0) {
         TclX_AppendObjResult (interp, "channel \"",
                               Tcl_GetChannelName (channel),
                               "\" is not a socket", (char *) NULL);
         return INVALID_SOCKET;
     }
-    return sock;
+    return (SOCKET) handle;
 }
 
 /*-----------------------------------------------------------------------------
@@ -552,8 +549,9 @@ TclXOSFstat (Tcl_Interp  *interp,
     int type;
     FILETIME creation, access, modify;
 
-    /*FIX: More of this information is availiable from
-     * GetFileInformationByHandle */
+    /* FIX: More of this information is availiable from
+     *      GetFileInformationByHandle
+     */
 
     handle = ChannelToHandle (channel, direction, &type);
 
