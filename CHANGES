@@ -339,11 +339,14 @@
 27 Oct 92:
   o Added configure file for new version of Ultrix (4.2+).
 -------------------------------------------------------------------------------
-11 Nov 92:
+ 7 Nov 92:
   o Fixed problems with convertclock timezones on some machines.
   o Added config file for ultrix4.2
-  o If NO_MATH_ERROR is defined, don't compile in error return that uses
-    constants associated with the matherr functionality.
   o Deleted strtoul from osSupport directory and config files.  This is now
     compiled with UCB Tcl if needed.
+-------------------------------------------------------------------------------
+ 8 Nov 92:
+  o Use our own strftime for SGI since their's is broken.
+  o Added changes to fix problems with systems using IEEE floating point math
+    error reporting.
 -------------------------------------------------------------------------------
