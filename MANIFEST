@@ -12,8 +12,6 @@
 ./tcl.patch
 ./tcl/compat/random.c
 ./tcl/compat/rename.c
-./tcl/generic/tcl++.C
-./tcl/generic/tcl++.h
 ./tcl/generic/tclExtdInt.h
 ./tcl/generic/tclExtend.h
 ./tcl/generic/tclXAppInit.c
