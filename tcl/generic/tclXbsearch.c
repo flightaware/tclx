@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 8.0.4.1 1997/04/14 02:01:37 markd Exp $
+ * $Id: tclXbsearch.c,v 8.1 1997/04/17 04:58:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -116,8 +116,8 @@ TclProcKeyCompare (searchCBPtr)
     if (result == TCL_ERROR)
         return TCL_ERROR;
 
-    if (!Tcl_StrToInt (searchCBPtr->interp->result, 0, 
-                       &searchCBPtr->cmpResult)) {
+    if (!TclX_StrToInt (searchCBPtr->interp->result, 0, 
+                        &searchCBPtr->cmpResult)) {
         oldResult = ckstrdup (searchCBPtr->interp->result);
 
         Tcl_ResetResult (searchCBPtr->interp);
@@ -298,7 +298,7 @@ BinSearch (searchCBPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_BsearchCmd (clientData, interp, argc, argv)
+TclX_BsearchCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;

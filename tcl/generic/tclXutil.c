@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.0.4.1 1997/04/14 02:01:57 markd Exp $
+ * $Id: tclXutil.c,v 8.1 1997/04/17 04:58:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,7 +42,6 @@ FormatTranslationOption _ANSI_ARGS_((int value));
  * Used to return argument messages by most commands.
  */
 char *tclXWrongArgs = "wrong # args: ";
-Tcl_Obj *tclXWrongArgsObj;
 
 /*-----------------------------------------------------------------------------
  * ReturnOverflow --
@@ -66,7 +65,7 @@ ReturnOverflow (interp)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_StrToLong --
+ * TclX_StrToLong --
  *      Convert an Ascii string to an long number of the specified base.
  *
  * Parameters:
@@ -82,7 +81,7 @@ ReturnOverflow (interp)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_StrToLong (string, base, longPtr)
+TclX_StrToLong (string, base, longPtr)
     CONST char *string;
     int         base;
     long       *longPtr;
@@ -126,7 +125,7 @@ Tcl_StrToLong (string, base, longPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_StrToInt --
+ * TclX_StrToInt --
  *      Convert an Ascii string to an number of the specified base.
  *
  * Parameters:
@@ -142,7 +141,7 @@ Tcl_StrToLong (string, base, longPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_StrToInt (string, base, intPtr)
+TclX_StrToInt (string, base, intPtr)
     CONST char *string;
     int         base;
     int        *intPtr;
@@ -186,7 +185,7 @@ Tcl_StrToInt (string, base, intPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_StrToUnsigned --
+ * TclX_StrToUnsigned --
  *      Convert an Ascii string to an unsigned int of the specified base.
  *
  * Parameters:
@@ -202,7 +201,7 @@ Tcl_StrToInt (string, base, intPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_StrToUnsigned (string, base, unsignedPtr)
+TclX_StrToUnsigned (string, base, unsignedPtr)
     CONST char *string;
     int         base;
     unsigned   *unsignedPtr;
@@ -232,7 +231,7 @@ Tcl_StrToUnsigned (string, base, unsignedPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_StrToDouble --
+ * TclX_StrToDouble --
  *   Convert a string to a double percision floating point number.
  *
  * Parameters:
@@ -243,7 +242,7 @@ Tcl_StrToUnsigned (string, base, unsignedPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_StrToDouble (string, doublePtr)
+TclX_StrToDouble (string, doublePtr)
     CONST char *string;
     double     *doublePtr;
 {
@@ -263,7 +262,7 @@ Tcl_StrToDouble (string, doublePtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_StrToOffset --
+ * TclX_StrToOffset --
  *      Convert an Ascii string to an off_t number of the specified base.
  *
  * Parameters:
@@ -279,7 +278,7 @@ Tcl_StrToDouble (string, doublePtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_StrToOffset (string, base, offsetPtr)
+TclX_StrToOffset (string, base, offsetPtr)
     CONST char *string;
     int         base;
     off_t      *offsetPtr;
@@ -323,7 +322,7 @@ Tcl_StrToOffset (string, base, offsetPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_DownShift --
+ * TclX_DownShift --
  *     Utility procedure to down-shift a string.  It is written in such
  *     a way as that the target string maybe the same as the source string.
  *
@@ -340,7 +339,7 @@ Tcl_StrToOffset (string, base, offsetPtr)
  *-----------------------------------------------------------------------------
  */
 char *
-Tcl_DownShift (targetStr, sourceStr)
+TclX_DownShift (targetStr, sourceStr)
     char       *targetStr;
     CONST char *sourceStr;
 {
@@ -359,7 +358,7 @@ Tcl_DownShift (targetStr, sourceStr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_UpShift --
+ * TclX_UpShift --
  *     Utility procedure to up-shift a string.
  *
  * Parameters:
@@ -375,7 +374,7 @@ Tcl_DownShift (targetStr, sourceStr)
  *-----------------------------------------------------------------------------
  */
 char *
-Tcl_UpShift (targetStr, sourceStr)
+TclX_UpShift (targetStr, sourceStr)
     char       *targetStr;
     CONST char *sourceStr;
 {
@@ -394,7 +393,7 @@ Tcl_UpShift (targetStr, sourceStr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_GetLong --
+ * TclX_GetLong --
  *
  *      Given a string, produce the corresponding long value.
  *
@@ -409,7 +408,7 @@ Tcl_UpShift (targetStr, sourceStr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_GetLong(interp, string, longPtr)
+TclX_GetLong(interp, string, longPtr)
     Tcl_Interp *interp;
     CONST char *string;
     long       *longPtr;
@@ -442,7 +441,7 @@ Tcl_GetLong(interp, string, longPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_GetUnsigned --
+ * TclX_GetUnsigned --
  *
  *      Given a string, produce the corresponding unsigned integer value.
  *
@@ -457,7 +456,7 @@ Tcl_GetLong(interp, string, longPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_GetUnsigned(interp, string, unsignedPtr)
+TclX_GetUnsigned(interp, string, unsignedPtr)
     Tcl_Interp *interp;
     CONST char *string;
     unsigned   *unsignedPtr;
@@ -502,7 +501,7 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_GetOffset --
+ * TclX_GetOffset --
  *
  *      Given a string, produce the corresponding off_t value.
  *
@@ -517,7 +516,7 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_GetOffset(interp, string, offsetPtr)
+TclX_GetOffset(interp, string, offsetPtr)
     Tcl_Interp *interp;
     CONST char *string;
     off_t      *offsetPtr;
@@ -567,18 +566,19 @@ Tcl_GetOffset(interp, string, offsetPtr)
  *   o exprResultPtr (O) - The result of the expression is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.
+ * FIX: Arguments should not be a `long', as the max length of a string is int.
  *-----------------------------------------------------------------------------
  */
 int
 TclX_RelativeExpr (interp, exprPtr, stringLen, exprResultPtr)
     Tcl_Interp  *interp;
     Tcl_Obj     *exprPtr;
-    long         stringLen;
-    long        *exprResultPtr;
+    int          stringLen;
+    int         *exprResultPtr;
 {
-    
     char *exprStr, *buf;
     int exprLen, exprStrLen, result;
+    long longResult;
     char staticBuf [32];
 
     if (exprPtr->typePtr == Tcl_GetObjType ("int")) {
@@ -591,13 +591,14 @@ TclX_RelativeExpr (interp, exprPtr, stringLen, exprResultPtr)
 
     if (!(STRNEQU (exprStr, "end", 3) ||
           STRNEQU (exprStr, "len", 3))) {
-        if (Tcl_ExprLong (interp, exprStr, exprResultPtr) != TCL_OK) {
-            TclSetObjResultFromStrResult (interp);
+        if (Tcl_ExprLong (interp, exprStr, &longResult) != TCL_OK) {
             return TCL_ERROR;
         }
+        *exprResultPtr = longResult;
+        return TCL_OK;
     }
 
-    sprintf (staticBuf, "%ld",
+    sprintf (staticBuf, "%d",
              stringLen - ((exprStr [0] == 'e') ? 1 : 0));
     exprLen = strlen (staticBuf) + exprStrLen - 2;
 
@@ -608,10 +609,12 @@ TclX_RelativeExpr (interp, exprPtr, stringLen, exprResultPtr)
     }
     strcat (buf, exprStr + 3);
 
-    result = Tcl_ExprLong (interp, buf, exprResultPtr);
+    result = Tcl_ExprLong (interp, buf, &longResult);
 
     if (buf != staticBuf)
         ckfree (buf);
+    if (result == TCL_OK)
+        *exprResultPtr = longResult;
     return result;
 }
 
@@ -683,7 +686,6 @@ TclX_GetOpenChannelObj (interp, handleObj, direction)
     handle = Tcl_GetStringFromObj (handleObj, NULL);
     chan = Tcl_GetChannel (interp, handle, &mode);
     if (chan == (Tcl_Channel) NULL) {
-	TclSetObjResultFromStrResult (interp);  /* FIX: remove */
         return NULL;
     }
     if ((direction & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
@@ -779,7 +781,7 @@ TclX_Eval (interp, options, string)
     char        *string;
 {
     Interp      *iPtr = (Interp *) interp;
-    CallFrame   *savedVarFramePtr;
+    CallFrame   *savedVarFramePtr = NULL;
     int          result;
 
     if (options & TCLX_EVAL_GLOBAL) {
@@ -947,9 +949,9 @@ TclX_GetChannelOption (channel, option)
     Tcl_Channel channel;
     int         option;
 {
-    char *strOption;
-    Tcl_DString strValue;
-    int value;
+    char          *strOption;
+    Tcl_DString    strValue;
+    int            value = 0;
 
     Tcl_DStringInit (&strValue);
 
@@ -1176,14 +1178,19 @@ TclX_WrongArgs (interp, commandNameObj, string)
     Tcl_Obj     *commandNameObj;
     char        *string;
 {
+    char    *commandName;
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
+    int      commandLength;
 
-    Tcl_StringObjAppendObj (resultPtr, tclXWrongArgsObj);
-    Tcl_StringObjAppendObj (resultPtr, commandNameObj);
+    commandName = Tcl_GetStringFromObj (commandNameObj, &commandLength);
+
+    Tcl_AppendStringsToObj (resultPtr,
+			    tclXWrongArgs,
+			    commandName,
+			    (char *)NULL);
 
     if (*string != '\0') {
-        Tcl_StringObjAppend (resultPtr, " ", 1);
-        Tcl_StringObjAppend (resultPtr, string, -1);
+	Tcl_AppendStringsToObj (resultPtr, " ", string, (char *)NULL);
     }
     return TCL_ERROR;
 }
@@ -1217,7 +1224,7 @@ TclX_StringAppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
         if (string == NULL) {
             break;
         }
-        Tcl_StringObjAppend (resultPtr, string, -1);
+        Tcl_AppendToObj (resultPtr, string, -1);
     }
     va_end(argList);
 }

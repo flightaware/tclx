@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 8.0.4.1 1997/04/14 02:01:46 markd Exp $
+ * $Id: tclXhandles.c,v 8.1 1997/04/17 04:58:41 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -100,9 +100,15 @@ AllocEntry _ANSI_ARGS_((tblHeader_pt  tblHdrPtr,
                         int          *entryIdxPtr));
 
 static int
+HandleDecodeObj _ANSI_ARGS_((Tcl_Interp   *interp,
+                             tblHeader_pt  tblHdrPtr,
+                             CONST char   *handle));
+
+static int
 HandleDecode _ANSI_ARGS_((Tcl_Interp   *interp,
                           tblHeader_pt  tblHdrPtr,
                           CONST char   *handle));
+
 
 /*=============================================================================
  * LinkInNewEntries --
@@ -205,6 +211,9 @@ AllocEntry (tblHdrPtr, entryIdxPtr)
  * HandleDecode --
  *   Decode handle into an entry number.
  *
+ *   Same as HandleDecode except it uses the object-based result
+ *   mechanism if an error occurs.
+ *
  * Parameters:
  *   o interp (I) - A error message may be returned in result.
  *   o tblHdrPtr (I) - A pointer to the table header.
@@ -224,18 +233,57 @@ HandleDecode (interp, tblHdrPtr, handle)
 
     if ((strncmp (tblHdrPtr->handleBase, (char *) handle, 
              tblHdrPtr->baseLength) != 0) ||
-             !Tcl_StrToUnsigned (&handle [tblHdrPtr->baseLength], 10, 
+             !TclX_StrToUnsigned (&handle [tblHdrPtr->baseLength], 10, 
                                  &entryIdx)) {
         Tcl_AppendResult (interp, "invalid ", tblHdrPtr->handleBase,
-                          " handle \"", handle, "\"", (char *) NULL);
+			  " handle \"", handle, "\"", (char *) NULL);
         return -1;
     }
     return entryIdx;
-
 }
 
 /*=============================================================================
- * Tcl_HandleTblInit --
+ * HandleDecodeObj --
+ *   Decode handle into an entry number.
+ *
+ *   Same as HandleDecode except it uses the object-based result
+ *   mechanism if an error occurs.
+ *
+ * Parameters:
+ *   o interp (I) - A error message may be returned in result.
+ *   o tblHdrPtr (I) - A pointer to the table header.
+ *   o handle (I) - Handle to decode.
+ * Returns:
+ *   The entry index decoded from the handle, or a negative number if an error
+ *   occured.
+ *-----------------------------------------------------------------------------
+ */
+static int
+HandleDecodeObj (interp, tblHdrPtr, handle)
+    Tcl_Interp   *interp;
+    tblHeader_pt  tblHdrPtr;
+    CONST char   *handle;
+{
+    unsigned entryIdx;
+
+    if ((strncmp (tblHdrPtr->handleBase, (char *) handle, 
+             tblHdrPtr->baseLength) != 0) ||
+             !TclX_StrToUnsigned (&handle [tblHdrPtr->baseLength], 10, 
+                                 &entryIdx)) {
+        TclX_StringAppendObjResult (interp, 
+				    "invalid ",
+				    tblHdrPtr->handleBase,
+                                    " handle \"",
+				    handle, 
+				    "\"", 
+				    (char *) NULL);
+        return -1;
+    }
+    return entryIdx;
+}
+
+/*=============================================================================
+ * TclX_HandleTblInit --
  *   Create and initialize a Tcl dynamic handle table.  The use count on the
  *   table is set to one.
  * Parameters:
@@ -248,7 +296,7 @@ HandleDecode (interp, tblHdrPtr, handle)
  *-----------------------------------------------------------------------------
  */
 void_pt
-Tcl_HandleTblInit (handleBase, entrySize, initEntries)
+TclX_HandleTblInit (handleBase, entrySize, initEntries)
     CONST char *handleBase;
     int         entrySize;
     int         initEntries;
@@ -295,7 +343,7 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
 }
 
 /*=============================================================================
- * Tcl_HandleTblUseCount --
+ * TclX_HandleTblUseCount --
  *   Alter the handle table use count by the specified amount, which can be
  *   positive or negative.  Amount may be zero to retrieve the use count.
  * Parameters:
@@ -306,7 +354,7 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_HandleTblUseCount (headerPtr, amount)
+TclX_HandleTblUseCount (headerPtr, amount)
     void_pt  headerPtr;
     int      amount;
 {
@@ -317,7 +365,7 @@ Tcl_HandleTblUseCount (headerPtr, amount)
 }
 
 /*=============================================================================
- * Tcl_HandleTblRelease --
+ * TclX_HandleTblRelease --
  *   Decrement the use count on a Tcl dynamic handle table.  If the count
  * goes to zero or negative, then release the table.
  *
@@ -326,7 +374,7 @@ Tcl_HandleTblUseCount (headerPtr, amount)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_HandleTblRelease (headerPtr)
+TclX_HandleTblRelease (headerPtr)
     void_pt headerPtr;
 {
     tblHeader_pt  tblHdrPtr = (tblHeader_pt) headerPtr;
@@ -339,7 +387,7 @@ Tcl_HandleTblRelease (headerPtr)
 }
 
 /*=============================================================================
- * Tcl_HandleAlloc --
+ * TclX_HandleAlloc --
  *   Allocate an entry and associate a handle with it.
  *
  * Parameters:
@@ -351,7 +399,7 @@ Tcl_HandleTblRelease (headerPtr)
  *-----------------------------------------------------------------------------
  */
 void_pt
-Tcl_HandleAlloc (headerPtr, handlePtr)
+TclX_HandleAlloc (headerPtr, handlePtr)
     void_pt   headerPtr;
     char     *handlePtr;
 {
@@ -367,7 +415,7 @@ Tcl_HandleAlloc (headerPtr, handlePtr)
 }
 
 /*=============================================================================
- * Tcl_HandleXlate --
+ * TclX_HandleXlate --
  *   Translate a handle to a entry pointer.
  *
  * Parameters:
@@ -379,7 +427,7 @@ Tcl_HandleAlloc (headerPtr, handlePtr)
  *-----------------------------------------------------------------------------
  */
 void_pt
-Tcl_HandleXlate (interp, headerPtr, handle)
+TclX_HandleXlate (interp, headerPtr, handle)
     Tcl_Interp *interp;
     void_pt     headerPtr;
     CONST char *handle;
@@ -404,7 +452,7 @@ Tcl_HandleXlate (interp, headerPtr, handle)
 }
 
 /*=============================================================================
- * Tcl_HandleXlateObj --
+ * TclX_HandleXlateObj --
  *   Translate an object containing a handle name to a entry pointer.
  *
  * Parameters:
@@ -416,7 +464,7 @@ Tcl_HandleXlate (interp, headerPtr, handle)
  *-----------------------------------------------------------------------------
  */
 void_pt
-Tcl_HandleXlateObj (interp, headerPtr, handleObj)
+TclX_HandleXlateObj (interp, headerPtr, handleObj)
     Tcl_Interp *interp;
     void_pt     headerPtr;
     Tcl_Obj *handleObj;
@@ -428,7 +476,7 @@ Tcl_HandleXlateObj (interp, headerPtr, handleObj)
 
     handle = Tcl_GetStringFromObj (handleObj, NULL);
     
-    if ((entryIdx = HandleDecode (interp, tblHdrPtr, handle)) < 0)
+    if ((entryIdx = HandleDecodeObj (interp, tblHdrPtr, handle)) < 0)
         return NULL;
     entryHdrPtr = TBL_INDEX (tblHdrPtr, entryIdx);
 
@@ -444,7 +492,7 @@ Tcl_HandleXlateObj (interp, headerPtr, handleObj)
 }
 
 /*=============================================================================
- * Tcl_HandleWalk --
+ * TclX_HandleWalk --
  *   Walk through and find every allocated entry in a table.  Entries may
  *   be deallocated during a walk, but should not be allocated.
  *
@@ -458,7 +506,7 @@ Tcl_HandleXlateObj (interp, headerPtr, handleObj)
  *-----------------------------------------------------------------------------
  */
 void_pt
-Tcl_HandleWalk (headerPtr, walkKeyPtr)
+TclX_HandleWalk (headerPtr, walkKeyPtr)
     void_pt   headerPtr;
     int      *walkKeyPtr;
 {
@@ -484,7 +532,7 @@ Tcl_HandleWalk (headerPtr, walkKeyPtr)
 }
 
 /*=============================================================================
- * Tcl_WalkKeyToHandle --
+ * TclX_WalkKeyToHandle --
  *   Convert a walk key, as returned from a call to Tcl_HandleWalk into a
  *   handle.  The Tcl_HandleWalk must have succeeded.
  * Parameters:
@@ -495,7 +543,7 @@ Tcl_HandleWalk (headerPtr, walkKeyPtr)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_WalkKeyToHandle (headerPtr, walkKey, handlePtr)
+TclX_WalkKeyToHandle (headerPtr, walkKey, handlePtr)
     void_pt   headerPtr;
     int       walkKey;
     char     *handlePtr;
@@ -507,7 +555,7 @@ Tcl_WalkKeyToHandle (headerPtr, walkKey, handlePtr)
 }
 
 /*=============================================================================
- * Tcl_HandleFree --
+ * TclX_HandleFree --
  *   Frees a handle table entry.
  *
  * Parameters:
@@ -516,7 +564,7 @@ Tcl_WalkKeyToHandle (headerPtr, walkKey, handlePtr)
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_HandleFree (headerPtr, entryPtr)
+TclX_HandleFree (headerPtr, entryPtr)
     void_pt headerPtr;
     void_pt entryPtr;
 {

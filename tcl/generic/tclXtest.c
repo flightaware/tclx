@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 8.0.4.1 1997/04/14 02:01:57 markd Exp $
+ * $Id: tclXtest.c,v 8.1 1997/04/17 04:58:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,6 +21,12 @@
 
 int
 Tclxtest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
+int
+TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+
+int
+Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * Error handler proc that causes errors to come out in the same format as
@@ -158,9 +164,22 @@ int
 Tclxtest_Init (interp)
     Tcl_Interp *interp;
 {
+    tclDeleteInterpAtEnd= TRUE;
+
     Tcl_CreateCommand (interp, "tclx_test_eval", TclxTestEvalCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
+    /*
+     * Add in standard Tcl tests support.
+     */
+    if (Tcltest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
+            (Tcl_PackageInitProc *) NULL);
+    if (TclObjTest_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
     return Tcl_GlobalEval (interp, errorHandler);
 }
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 8.0.4.1 1997/04/14 02:02:20 markd Exp $
+# $Id: fcntl.test,v 8.1 1997/04/17 04:59:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -179,7 +179,8 @@ if {[cequal $tcl_platform(platform) unix] ||
         set doSocketTests 1
     } msg] {
         puts "*************************************************************"
-        puts "Unable to connect to the \"echo\" server ($msg)."
+        puts "Unable to connect to the \"echo\" server:"
+        puts "$msg."
         puts "Some tests skipped."
         puts "*************************************************************"
     }

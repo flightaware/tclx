@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXcmdloop.c,v 8.3 1997/04/17 04:58:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -84,7 +84,7 @@ static int
 IsSetVarCmd (command)
     char  *command;
 {
-    char *nextPtr;
+    char *nextPtr, *lastChar;
     int wordCnt;
 
     if ((!STRNEQU (command, "set", 3)) || (!ISSPACE (command [3])))
@@ -95,8 +95,9 @@ IsSetVarCmd (command)
      */
     wordCnt = 0;
     nextPtr = command;
+    lastChar = command + strlen (command) - 1;
     while (*nextPtr != '\0') {
-        nextPtr = TclWordEnd (nextPtr, FALSE, NULL);
+        nextPtr = TclWordEnd (nextPtr, lastChar, FALSE, NULL);
         nextPtr++;  /* Character after the word */
         while ((*nextPtr != '\0') && (ISSPACE (*nextPtr)))
             nextPtr++;
@@ -680,7 +681,7 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_CommandloopCmd (clientData, interp, argc, argv)
+TclX_CommandloopCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;

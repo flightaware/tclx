@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.0.4.1 1997/04/14 02:01:54 markd Exp $
+ * $Id: tclXselect.c,v 8.1 1997/04/17 04:58:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -253,7 +253,7 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SelectCmd --
+ * TclX_SelectCmd --
  *  Implements the select TCL command:
  *      select readhandles ?writehandles? ?excepthandles? ?timeout?
  *
@@ -267,7 +267,7 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SelectCmd (clientData, interp, argc, argv)
+TclX_SelectCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
@@ -397,13 +397,13 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
 }
 #else
 /*-----------------------------------------------------------------------------
- * Tcl_SelectCmd --
+ * TclX_SelectCmd --
  *     Dummy select command that returns an error for systems that don't
  *     have select.
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SelectCmd (clientData, interp, argc, argv)
+TclX_SelectCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;

@@ -1,8 +1,9 @@
                         Building TclX on Windows 95/NT
 
-The Win32 port of TclX is a work in progress, is not yet complete
-Several features that should work under windows are not yet ported.
-Many of the tests have not yet been converted to work under windows
+The Win32 port of TclX is a work in progress, and is not yet complete.
+Several features that should work under Windows are not yet ported.
+Many of the tests have not yet been converted to work under Windows,
+either.
 
 Please send mail to the authors of this port to tcl-project@neosoft.com.
 There is also a mailing list, which can be used for the discussion of
@@ -14,12 +15,44 @@ message to majordomo@grizzly.com with the body of the message containing:
 To send mail to the list, user tclx-win@grizzly.com.
 
 To build the release:
-   o You need Visual C++ 4.0 (per standard Tcl instructions).  Contributions
-     of a Borland C++ makefile would be welcome (and a donation of a licensed
-     copy of the current Borland C++ even more welcome).
+
+   o You need Borland C++ 5.01 or above
+
+   o It used to run with Visual C++ 4.0 and probably will again with some
+     tweaking.
      
    o Tcl 8.0 and Tk 8.0 should be in a directory adjacent to the tclX8.0.0
-     directory or the paths in common.vc need to be changed.
+     directory or the paths in common.bc/common.vc need to be changed.
+
+
+BORLAND BUILD
+
+   o Edit tclX8.0.0/win/common.bc to set the macro TOOLS to the path to the
+     install directory for Borland C++.  By default, this is c:\bc5.
+
+   o Edit tclX8.0.0/win/common.bc to set the macro PREFIX to the location
+     you want TclX installed.  This PREFIX's parent directory must exist, all
+     other directories, including PREFIX will be built if they don't exist.
+     The resulting directories that will be used for installation are:
+        $(PREFIX)/bin - Executables and DLLs.
+        $(PREFIX)/lib/tclX8.0.0 - Runtime Tcl code and help files for TclX.
+        $(PREFIX)/lib/tkX8.0.0 - Runtime Tcl code and help files for TkX.
+        $(PREFIX)/include - Include files.
+
+   o To compile, cd to tclX8.0.0/win and enter the command:
+
+        make -f makefile.bc
+
+   o To run the TclX tests:
+
+        make -f makefile.bc test
+
+   o To install:
+
+        make -f makefile.bc install
+   
+
+MICROSOFT VISUAL C++ BUILD
 
    o Edit tclX8.0.0/win/common.vc to set the macro TOOLS32 to the path to the
      install directory for MS Visual C++ 4.o.  By default, this is c:\msdev.
@@ -62,7 +95,7 @@ To build the release:
 
 In this release, the following restrictions apply:
 
-    o Support is only provided for Visual C++ 4.0.
+    o Support is only provided for Borland C++ 5.01 and above.
 
     o The following commands are not supported:
        o fork

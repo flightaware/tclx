@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.0.4.1 1997/04/14 02:01:36 markd Exp $
+ * $Id: tclExtend.h,v 8.1 1997/04/17 04:58:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@
  * that TclX was released against.  Its possible that TclX maybe running with
  * a different version of Tcl or Tk.  The basic versions are used for package
  * provide, the full versions as used for file names and include beta release
- * information and patch information.  The TCLX_DEBUG flag turns on assertsm
+ * information and patch information.  The TCLX_DEBUG flag turns on asserts
  * etc.  Its an internal flag, however its normally true for alpha and beta
  * release and false for final releases, so we put the flag right by the 
  * version numbers in hopes that we will remember to change it.
@@ -42,14 +42,12 @@
 #define TCLX_PATCHLEVEL      0
 
 #define TCLX_VERSION        "8.0.0"
-#define TCLX_FULL_VERSION   "8.0.0a2"
+#define TCLX_FULL_VERSION   "8.0.0b1"
 
 #define TKX_VERSION         "8.0.0"
-#define TKX_FULL_VERSION    "8.0.0a2"
+#define TKX_FULL_VERSION    "8.0.0b1"
 
-#ifndef TCLX_DEBUG
-#   define TCLX_DEBUG          1
-#endif
+#define TCLX_DEBUG
 
 /*
  * Generic void pointer.
@@ -61,6 +59,11 @@ typedef void *void_pt;
  */
 #define TCLX_CMDL_INTERACTIVE  (1<<0)
 #define TCLX_CMDL_EXIT_ON_EOF  (1<<1)
+
+/*
+ * Entire TclX_ErrorExit message must fit in a buffer of this size.
+ */
+#define TCLX_ERR_EXIT_MSG_MAX 1024
 
 /*
  * If this variable is non-zero, the TclX shell will delete the interpreter
@@ -108,8 +111,7 @@ EXTERN int
 Tclxlib_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN void
-TclX_ErrorExit _ANSI_ARGS_((Tcl_Interp  *interp,
-                            int          exitCode));
+TclX_ErrorExit _ANSI_ARGS_(TCL_VARARGS_DEF(Tcl_Interp *, interpArg));
 
 EXTERN void
 TclX_EvalRCFile _ANSI_ARGS_((Tcl_Interp *interp));
@@ -142,41 +144,41 @@ TclX_SplitWinCmdLine _ANSI_ARGS_((int    *argcPtr,
  * Exported utility functions.
  */
 EXTERN char * 
-Tcl_DownShift _ANSI_ARGS_((char       *targetStr,
-                           CONST char *sourceStr));
+TclX_DownShift _ANSI_ARGS_((char       *targetStr,
+                            CONST char *sourceStr));
 
 EXTERN int 
-Tcl_GetLong _ANSI_ARGS_((Tcl_Interp  *interp,
-                         CONST char *string,
-                         long        *longPtr));
+TclX_GetLong _ANSI_ARGS_((Tcl_Interp  *interp,
+                          CONST char *string,
+                          long        *longPtr));
 
 EXTERN int 
-Tcl_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
-                             CONST char *string,
-                             unsigned   *unsignedPtr));
+TclX_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
+                              CONST char *string,
+                              unsigned   *unsignedPtr));
 
 EXTERN int
-Tcl_StrToLong _ANSI_ARGS_((CONST char *string,
-                           int          base,
-                           long        *longPtr));
+TclX_StrToLong _ANSI_ARGS_((CONST char *string,
+                            int          base,
+                            long        *longPtr));
 
 EXTERN int
-Tcl_StrToInt _ANSI_ARGS_((CONST char *string,
-                          int         base,
-                          int        *intPtr));
+TclX_StrToInt _ANSI_ARGS_((CONST char *string,
+                           int         base,
+                           int        *intPtr));
 
 EXTERN int
-Tcl_StrToUnsigned _ANSI_ARGS_((CONST char *string,
-                               int         base,
-                               unsigned   *unsignedPtr));
+TclX_StrToUnsigned _ANSI_ARGS_((CONST char *string,
+                                int         base,
+                                unsigned   *unsignedPtr));
 
 EXTERN int
-Tcl_StrToDouble _ANSI_ARGS_((CONST char  *string,
-                             double      *doublePtr));
+TclX_StrToDouble _ANSI_ARGS_((CONST char  *string,
+                              double      *doublePtr));
 
 EXTERN char * 
-Tcl_UpShift _ANSI_ARGS_((char       *targetStr,
-                         CONST char *sourceStr));
+TclX_UpShift _ANSI_ARGS_((char       *targetStr,
+                          CONST char *sourceStr));
 
 /*
  * Exported keyed list object manipulation functions.
@@ -211,41 +213,41 @@ TclX_KeyedListGetKeys _ANSI_ARGS_((Tcl_Interp *interp,
  * Exported handle table manipulation functions.
  */
 EXTERN void_pt  
-Tcl_HandleAlloc _ANSI_ARGS_((void_pt   headerPtr,
-                             char     *handlePtr));
+TclX_HandleAlloc _ANSI_ARGS_((void_pt   headerPtr,
+                              char     *handlePtr));
 
 EXTERN void 
-Tcl_HandleFree _ANSI_ARGS_((void_pt  headerPtr,
-                            void_pt  entryPtr));
+TclX_HandleFree _ANSI_ARGS_((void_pt  headerPtr,
+                             void_pt  entryPtr));
 
 EXTERN void_pt
-Tcl_HandleTblInit _ANSI_ARGS_((CONST char *handleBase,
-                               int         entrySize,
-                               int         initEntries));
+TclX_HandleTblInit _ANSI_ARGS_((CONST char *handleBase,
+                                int         entrySize,
+                                int         initEntries));
 
 EXTERN void
-Tcl_HandleTblRelease _ANSI_ARGS_((void_pt headerPtr));
+TclX_HandleTblRelease _ANSI_ARGS_((void_pt headerPtr));
 
 EXTERN int
-Tcl_HandleTblUseCount _ANSI_ARGS_((void_pt headerPtr,
-                                   int     amount));
+TclX_HandleTblUseCount _ANSI_ARGS_((void_pt headerPtr,
+                                    int     amount));
 
 EXTERN void_pt
-Tcl_HandleWalk _ANSI_ARGS_((void_pt   headerPtr,
+TclX_HandleWalk _ANSI_ARGS_((void_pt   headerPtr,
                             int      *walkKeyPtr));
 
 EXTERN void
-Tcl_WalkKeyToHandle _ANSI_ARGS_((void_pt   headerPtr,
+TclX_WalkKeyToHandle _ANSI_ARGS_((void_pt   headerPtr,
                                  int       walkKey,
                                  char     *handlePtr));
 
 EXTERN void_pt
-Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
+TclX_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              void_pt      headerPtr,
                              CONST  char *handle));
 
 EXTERN void_pt
-Tcl_HandleXlateObj _ANSI_ARGS_((Tcl_Interp    *interp,
+TclX_HandleXlateObj _ANSI_ARGS_((Tcl_Interp    *interp,
                                 void_pt        headerPtr,
                                 Tcl_Obj       *handleObj));
 /*

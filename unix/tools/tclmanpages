@@ -3,6 +3,7 @@ return {
     {tclsh.1        tcl/intro/tclsh}
     {append.n       tcl/strings/append}
     {array.n        tcl/variables/array}
+    {binary.n       tcl/strings/binary}
     {break.n        tcl/control/break}
     {case.n         tcl/control/case}
     {catch.n        tcl/control/catch}
@@ -16,6 +17,7 @@ return {
     {exec.n         tcl/processes/exec}
     {exit.n         tcl/control/exit}
     {expr.n         tcl/math/expr}
+    {fcopy.n        tcl/files/fcopy}
     {file.n         tcl/files/file}
     {flush.n        tcl/files/flush}
     {for.n          tcl/control/for}
@@ -25,6 +27,7 @@ return {
     {glob.n         tcl/files/glob}
     {global.n       tcl/variables/global}
     {history.n      tcl/status/history}
+    {http.n         tcl/sockets/http}
     {if.n           tcl/control/if}
     {incr.n         tcl/math/incr}
     {info.n         tcl/status/info}
@@ -40,6 +43,7 @@ return {
     {lreplace.n     tcl/lists/lreplace}
     {lsearch.n      tcl/lists/lsearch}
     {lsort.n        tcl/lists/lsort}
+    {namespace.n    tcl/variables/namespace}
     {open.n         tcl/files/open}
     {pid.n          tcl/processes/pid}
     {proc.n         tcl/control/proc}
@@ -50,6 +54,7 @@ return {
     {regsub.n       tcl/strings/regsub}
     {rename.n       tcl/control/rename}
     {return.n       tcl/control/return}
+    {safe.n         tcl/control/safe}
     {scan.n         tcl/strings/scan}
     {seek.n         tcl/files/seek}
     {set.n          tcl/variables/set}
@@ -80,16 +85,6 @@ return {
     {socket.n       tcl/sockets/socket}
     {update.n       tcl/events/update}
     {vwait.n        tcl/events/vwait}
-    {@scope.n       tcl/itcl-namespaces/@scope}
-    {code.n         tcl/itcl-namespaces/code}
-    {delete.n       tcl/itcl-namespaces/delete}
-    {ensemble.n     tcl/itcl-namespaces/ensemble}
-    {import.n       tcl/itcl-namespaces/import}
-    {private.n      tcl/itcl-namespaces/private}
-    {protected.n    tcl/itcl-namespaces/protected}
-    {public.n       tcl/itcl-namespaces/public}
-    {scope.n        tcl/itcl-namespaces/scope}
-    {variable.n     tcl/itcl-namespaces/variable}
 }
 
 

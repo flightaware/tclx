@@ -1,0 +1,79 @@
+
+
+------- generic/tclExecute.c -------
+*** /tmp/da002V2	Wed Dec 31 16:00:00 1969
+--- generic/tclExecute.c	Thu Jun  5 16:12:07 1997
+***************
+*** 145,152 ****
+      pc += instBytes;  continue
+  
+  /*
+!  * Macros used to cache (decache) Tcl evaluation stack information in (from)
+!  * local variables.
+   */
+  
+  #define CACHE_STACK_INFO() \
+--- 145,155 ----
+      pc += instBytes;  continue
+  
+  /*
+!  * Macros used to cache often-referenced Tcl evaluation stack information
+!  * in local variables. Note that a DECACHE_STACK_INFO()-CACHE_STACK_INFO()
+!  * pair must surround any call inside TclExecuteByteCode (and a few other
+!  * procedures that use this scheme) that could result in a recursive call
+!  * to TclExecuteByteCode.
+   */
+  
+  #define CACHE_STACK_INFO() \
+***************
+*** 930,937 ****
+--- 933,942 ----
+  			    char *command =
+  				    (codePtr->source + locPtr->srcOffset);
+  			    int numChars = locPtr->numSrcChars;
++ 			    DECACHE_STACK_INFO();
+  			    CallTraceProcedure(interp, tracePtr, cmdPtr,
+  			            command, numChars, objc, objv);
++ 			    CACHE_STACK_INFO();
+  			}
+  		    }
+  		}
+***************
+*** 3180,3187 ****
+  
+      /*
+       * Get the string rep from the objv argument objects and place their
+!      * pointers in argv. First make sure objv is large enough to hold the
+!      * objc args plus 1 extra for the zero end-of-argv word.
+       * THIS FAILS IF AN OBJECT'S STRING REP CONTAINS NULLS.
+       */
+      
+--- 3185,3192 ----
+  
+      /*
+       * Get the string rep from the objv argument objects and place their
+!      * pointers in argv. First make sure argv is large enough to hold the
+!      * objc args plus 1 extra word for the zero end-of-argv word.
+       * THIS FAILS IF AN OBJECT'S STRING REP CONTAINS NULLS.
+       */
+      
+***************
+*** 3192,3198 ****
+      argv[objc] = 0;
+  
+      /*
+!      * Copy the command's characters into a new string.
+       */
+  
+      p = (char *) ckalloc((unsigned) (numChars + 1));
+--- 3197,3203 ----
+      argv[objc] = 0;
+  
+      /*
+!      * Copy the command characters into a new string.
+       */
+  
+      p = (char *) ckalloc((unsigned) (numChars + 1));
+
+
+

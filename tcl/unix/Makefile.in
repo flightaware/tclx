@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: Makefile.in,v 8.5 1997/04/17 04:59:45 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -105,7 +105,7 @@ TLIB_SRCS = ${RUNTIME_DIR}/arrayprocs.tcl \
 
 HELP_DIR = ${srcbasedir}/tcl/help
 
-TEST_OBJS = tclTest.o tclUnixTest.o tclXtest.o tclXunixTest.o
+TEST_OBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o tclXunixTest.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -561,6 +561,9 @@ tclXunixTest.o: ${TCLX_UNIX_SRC_DIR}/tclXunixTest.c
 tclTest.o: ${TCL_SRC}/generic/tclTest.c
 	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclTest.c
 
+tclTestObj.o: ${TCL_SRC}/generic/tclTestObj.c
+	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclTestObj.c
+
 tclUnixTest.o: ${TCL_SRC}/unix/tclUnixTest.c
 	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/unix/tclUnixTest.c
 
@@ -606,9 +609,13 @@ ucbtests: all
 	@echo "* They do not represent problems with TclX,  but are caused   *"
 	@echo "* by Tcl tests being sensitive to the program running the     *"
 	@echo "* tests.                                                      *"
-	@echo "*     load-7.1                                                *"
-	@echo "*     load-7.3                                                *"
-	@echo "*     load-7.4                                                *"
+	@echo "*     namespace-old-9.8                                       *"
+	@echo "*     namespace-old-9.10                                      *"
+	@echo "*     namespace-old-9.11                                      *"
+	@echo "*     namespace-old-9.19                                      *"
+	@echo "*     safe-6.3                                                *"
+	@echo "*     safe-6.4                                                *"
+	@echo "*     safe-6.5                                                *"
 	@echo "***************************************************************"
 	@echo ""
 	./runtest -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"

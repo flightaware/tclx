@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 8.0.4.1 1997/04/14 02:01:54 markd Exp $
+ * $Id: tclXshell.c,v 8.1 1997/04/17 04:58:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -182,16 +182,15 @@ ParseCmdLine (interp, argc, argv)
                          TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
             goto tclError;
     }
-    if (quick) {
-        if (Tcl_SetVar2 (interp, TCLXENV, "quick", "1",
-                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+
+    if (Tcl_SetVar2 (interp, TCLXENV, "quick", quick ? "1" : "0",
+		      TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
             goto tclError;
-    }
-    if (noDump) {
-        if (Tcl_SetVar2 (interp, TCLXENV, "noDump", "1",
-                         TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+
+    if (Tcl_SetVar2 (interp, TCLXENV, "noDump", noDump ? "1" : "0",
+		     TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
             goto tclError;
-    }
+
     return;
 
   usageError:
@@ -207,7 +206,7 @@ ParseCmdLine (interp, argc, argv)
         Tcl_Exit (1);
     }
   tclError:
-    TclX_ErrorExit (interp, 255);
+    TclX_ErrorExit (interp, 255, NULL);
 }
 
 
@@ -253,8 +252,10 @@ TclX_Main (argc, argv, appInitProc)
      * Initialized all packages and application specific commands.  This
      * includes Extended Tcl initialization.
      */
-    if ((*appInitProc)(interp) != TCL_OK)
-        goto errorExit;
+    if ((*appInitProc)(interp) != TCL_OK) {
+        TclX_ErrorExit (interp, 255,
+                        "\n    while\ninitializing application (Tcl_AppInit?)");
+    }
 
     /*
      * Evaluate either a command or file if it was specified on the command
@@ -265,7 +266,8 @@ TclX_Main (argc, argv, appInitProc)
         if (TclX_Eval (interp, 
                        TCLX_EVAL_GLOBAL | TCLX_EVAL_ERR_HANDLER,
                        evalStr) == TCL_ERROR)
-            goto errorExit;
+	    TclX_ErrorExit (interp, 255,
+                            "\n    while\nevaluating -c supplied command");
         goto evalComplete;
     }
 
@@ -275,7 +277,7 @@ TclX_Main (argc, argv, appInitProc)
                        TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
                        TCLX_EVAL_ERR_HANDLER,
                        evalStr) == TCL_ERROR)
-            goto errorExit;
+	    TclX_ErrorExit (interp, 255, NULL);
         goto evalComplete;
     }
     
@@ -289,7 +291,8 @@ TclX_Main (argc, argv, appInitProc)
     if (TclX_CommandLoop (interp, 
                           isatty (0) ? TCLX_CMDL_INTERACTIVE : 0,
                           NULL, NULL, NULL))
-        goto errorExit;
+        TclX_ErrorExit (interp, 255,
+                        "\n    while\nevaulating interactive commands");
 
   evalComplete:
     /* 
@@ -314,9 +317,6 @@ TclX_Main (argc, argv, appInitProc)
         Tcl_DeleteInterp (interp);
         Tcl_Exit (0);
     }
-
-  errorExit:
-    TclX_ErrorExit (interp, 255);
 }
 
 

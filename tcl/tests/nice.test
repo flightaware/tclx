@@ -94,7 +94,7 @@ if {[id user] != "root"} {
             set stat [list $stat $msg]
         }
         set stat
-    } 0 {1 {}}
+    } 0 1
 
     puts "*************************************************************"
     puts "Notice: You are not running as `root', certain nice tests"

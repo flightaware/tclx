@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.0.4.1 1997/04/14 02:01:55 markd Exp $
+ * $Id: tclXsignal.c,v 8.1 1997/04/17 04:58:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -252,10 +252,10 @@ static int
 SetSignalState _ANSI_ARGS_((int             signalNum,
                             signalProcPtr_t sigFunc));
 static int
-Tcl_SignalCmd _ANSI_ARGS_((ClientData  clientData,
-                           Tcl_Interp *interp,
-                           int         argc,
-                           char      **argv));
+TclX_SignalCmd _ANSI_ARGS_((ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         argc,
+                            char      **argv));
 
 static int
 BlockSignals _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -336,10 +336,10 @@ static void
 SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
                               Tcl_Interp *interp));
 static int
-Tcl_KillCmd _ANSI_ARGS_((ClientData  clientData,
-                         Tcl_Interp *interp,
-                         int         argc,
-                         char      **argv));
+TclX_KillCmd _ANSI_ARGS_((ClientData  clientData,
+                          Tcl_Interp *interp,
+                          int         argc,
+                          char      **argv));
 
 
 /*-----------------------------------------------------------------------------
@@ -548,7 +548,7 @@ SigNameToNum (interp, sigName, sigNumPtr)
     if (strlen (sigName) > SIG_NAME_MAX)
         goto invalidSignal;   /* Name too long */
 
-    Tcl_UpShift (sigNameUp, sigName);
+    TclX_UpShift (sigNameUp, sigName);
 
     if (STRNEQU (sigNameUp, "SIG", 3))
         sigNamePtr = &sigNameUp [3];
@@ -595,7 +595,7 @@ ParseSignalSpec (interp, signalStr, allowZero)
      * SigNameToNum generate the error message if its a number, but not a
      * valid signal.
      */
-    if (Tcl_StrToInt (signalStr, 0, &signalNum)) {
+    if (TclX_StrToInt (signalStr, 0, &signalNum)) {
         if (allowZero && (signalNum == 0))
             return 0;
         if (Tcl_SignalId (signalNum) != unknownSignalIdMsg)
@@ -1037,7 +1037,7 @@ ParseSignalList (interp, signalListStr, signals)
 
     if (Tcl_SplitList (interp, signalListStr, &signalListSize, 
                        &signalListArgv) != TCL_OK)
-        return -1;
+        return TCL_ERROR;
 
     if (signalListSize == 0) {
         Tcl_AppendResult (interp, "signal list may not be empty",
@@ -1063,8 +1063,7 @@ ParseSignalList (interp, signalListStr, signals)
 #endif
             signals [signalNum] = TRUE;
         }
-        ckfree ((char *) signalListArgv);
-        return TCL_OK;
+        goto okExit;
     }
 
     /*
@@ -1078,10 +1077,11 @@ ParseSignalList (interp, signalListStr, signals)
                                      signalListArgv [idx],
                                      FALSE);  /* Zero not valid */
         if (signalNum < 0)
-            return -1;
+            goto errorExit;
         signals [signalNum] = TRUE;
     }
 
+  okExit:
     ckfree ((char *) signalListArgv);
     return TCL_OK;
 
@@ -1222,7 +1222,7 @@ ProcessSignalListEntry (interp, signalEntry)
     char           **sigEntry = NULL, **sigState = NULL;
     int              sigEntrySize, sigStateSize;
     int              signalNum, blocked;
-    signalProcPtr_t  actionFunc;
+    signalProcPtr_t  actionFunc = NULL;
     unsigned char    signals [MAXSIG];
 
     /*
@@ -1399,7 +1399,7 @@ SetSignalStates (interp, signalKeyedList)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SignalCmd --
+ * TclX_SignalCmd --
  *     Implements the TCL signal command:
  *         signal action siglist ?command?
  *
@@ -1411,7 +1411,7 @@ SetSignalStates (interp, signalKeyedList)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_SignalCmd (clientData, interp, argc, argv)
+TclX_SignalCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
@@ -1511,7 +1511,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_KillCmd --
+ * TclX_KillCmd --
  *     Implements the TCL kill command:
  *        kill ?-pgroup? ?signal? idlist
  *
@@ -1520,7 +1520,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_KillCmd (clientData, interp, argc, argv)
+TclX_KillCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int     argc;
@@ -1674,12 +1674,12 @@ TclX_SetAppSignalErrorHandler (errorFunc, clientData)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_InitSignalHandling --
+ * TclX_InitSignalHandling --
  *      Initializes singal handling for a interpreter.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_InitSignalHandling (interp)
+TclX_InitSignalHandling (interp)
     Tcl_Interp *interp;
 {
     int              idx;
@@ -1727,9 +1727,9 @@ Tcl_InitSignalHandling (interp)
 
     Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);
 
-    Tcl_CreateCommand (interp, "signal", Tcl_SignalCmd,
+    Tcl_CreateCommand (interp, "signal", TclX_SignalCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "kill", Tcl_KillCmd,
+    Tcl_CreateCommand (interp, "kill", TclX_KillCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 }
 

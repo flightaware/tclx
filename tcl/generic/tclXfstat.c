@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.0.4.1 1997/04/14 02:01:44 markd Exp $
+ * $Id: tclXfstat.c,v 8.1 1997/04/17 04:58:40 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -116,6 +116,7 @@ ReturnStatList (interp,ttyDev, statBufPtr)
 {
     char statList [200];
 
+    /* FIX: use keyedlist routines. */
     sprintf (statList, 
              "{atime %ld} {ctime %ld} {dev %ld} {gid %ld} {ino %ld} {mode %ld} ",
               (long) statBufPtr->st_atime, (long) statBufPtr->st_ctime,
@@ -292,13 +293,13 @@ ReturnStatItem (interp, channel, ttyDev, statBufPtr, itemName)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_FstatCmd --
- *     Implements the fstat TCL command:
+ * TclX_FstatCmd --
+ *      Implements the fstat TCL command:
  *         fstat fileId ?item?|?stat arrayvar?
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_FstatCmd (clientData, interp, argc, argv)
+TclX_FstatCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;

@@ -1264,3 +1264,14 @@
   o Added Win32 support for ftruncate, close-on-exec and partial support for
     dup-ing and open file.  Supplied by Alan Dewar <alan@calgary.hp.com>.
 -------------------------------------------------------------------------------
+01 May 97:
+  o More than 50% of the commands provided by Extended Tcl have been rewritten
+    to use the new object system.
+-------------------------------------------------------------------------------
+11 May 97:
+  o TclX_ErrorExit now has a description field that says why the exit path
+    was taken, making startup failures easier to debug.
+-------------------------------------------------------------------------------
+ 6 Dec 97:
+  o Fixed frename compat function to overwrite existing files.
+-------------------------------------------------------------------------------

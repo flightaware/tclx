@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.7 1997/04/14 00:34:59 markd Exp $
+dnl $Id: configure.in,v 8.8 1997/04/17 05:00:21 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.7 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.8 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -256,12 +256,38 @@ else
     AC_MSG_RESULT(using C compiler specified in by CC env var: $CC)
 fi
 AC_PROG_CC
-case "$GCC" in
-   YES|yes)
-        SYSCFLAGS="-pipe";;
-   NO|no)
-        SYSCFLAGS="";;
-esac
+
+#------------------------------------------------------------------------------
+# If we're using GCC, see if the compiler understands -pipe.  If so, use it.
+# It makes compiling go faster.
+#------------------------------------------------------------------------------
+
+if test -z "$no_pipe"; then
+if test -n "$GCC"; then
+  AC_MSG_CHECKING([if the compiler understands -pipe])
+  OLDCC="$CC"  
+  CC="$CC -pipe"
+  AC_TRY_COMPILE(,,
+    AC_MSG_RESULT(yes),
+    CC="$OLDCC"
+    AC_MSG_RESULT(no))
+fi  
+fi
+
+#------------------------------------------------------------------------------
+# If we're using GCC, we want to see all the compiler warnings.
+#------------------------------------------------------------------------------
+
+if test -n "$GCC"; then 
+    AC_MSG_CHECKING([if the compiler understands -Wall])
+    OLDCC="$CC"
+    CC="$CC -Wall"
+  AC_TRY_COMPILE(,,
+    AC_MSG_RESULT(yes),
+    CC="$OLDCC"
+    AC_MSG_RESULT(no))
+fi  
+
 AC_SUBST(CC)
 AC_SUBST(SYSCFLAGS)
 AC_PROG_RANLIB

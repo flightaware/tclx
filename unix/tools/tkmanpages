@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkmanpages,v 8.0.4.1 1997/04/14 02:03:23 markd Exp $
+# $Id: tkmanpages,v 8.1 1997/04/17 05:00:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 return {
@@ -24,13 +24,17 @@ return {
     {button.n       tk/widgets/button}
     {canvas.n       tk/widgets/canvas}
     {checkbutton.n  tk/widgets/checkbutton}
+    {chooseColor.n  tk/widgets/tk_chooseColor}
     {clipboard.n    tk/control/clipboard}
     {destroy.n      tk/control/destroy}
     {dialog.n       tk/widgets/tk_dialog}
     {entry.n        tk/widgets/entry}
+    {event.n        tk/control/event}
     {focus.n        tk/control/focus}
     {focusNext.n    tk/control/tk_focusNext}
+    {font.n         tk/control/font}
     {frame.n        tk/widgets/frame}
+    {getOpenFile.n  tk/widgets/tk_getOpenFile}
     {grab.n         tk/control/grab}
     {grid.n         tk/control/grid}
     {image.n        tk/images/image}
@@ -41,6 +45,7 @@ return {
     {menubar.n      tk/widgets/tk_menuBar}
     {menubutton.n   tk/widgets/menubutton}
     {message.n      tk/widgets/message}
+    {messageBox.n   tk/widgets/tk_messageBox}
     {option.n       tk/control/option}
     {optionMenu.n   tk/widgets/tk_optionMenu}
     {options.n      tk/widgets/options}

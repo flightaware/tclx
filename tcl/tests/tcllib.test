@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 8.0.4.1 1997/04/14 02:02:39 markd Exp $
+# $Id: tcllib.test,v 8.1 1997/04/17 04:59:39 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -86,8 +86,8 @@ catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 # in C.
 #
 
-if 0 {
-FIX: Disabled due to hack for tcl_safeInterpInit
+if 1 {
+#FIX: Disabled due to hack for tcl_safeInterpInit
 Test tcllib-1.1 {command parameter checking} {
     auto_load a b c d
 } 1 {wrong # args: auto_load ?command?}

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 8.0.4.1 1997/04/14 02:02:52 markd Exp $
+ * $Id: tclXunixSock.c,v 8.1 1997/04/17 04:59:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -115,7 +115,7 @@ BindFileHandles (interp, options, socketFD)
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_ServerCreateCmd --
+ * TclX_ServerCreateCmd --
  *     Implements the TCL server_create command:
  *
  *        server_create ?options?
@@ -133,7 +133,7 @@ BindFileHandles (interp, options, socketFD)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ServerCreateCmd (clientData, interp, argc, argv)
+TclX_ServerCreateCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
@@ -246,7 +246,7 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ServerAcceptCmd --
+ * TclX_ServerAcceptCmd --
  *     Implements the TCL server_accept command:
  *
  *        server_accept ?options? file
@@ -259,24 +259,26 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
+TclX_ServerAcceptCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;
 {
-    Tcl_Channel channel;
-    Tcl_File acceptFile;
-    unsigned options;
-    int acceptSocketFD, addrLen;
-    int socketFD = -1, nextArg;
-    struct sockaddr_in connectSocket;
+    Tcl_Channel          channel;
+    unsigned             options;
+    int                  acceptSocketFD, addrLen;
+    int                  socketFD = -1;
+    int                  nextArg;
+    struct sockaddr_in   connectSocket;
 
     /*
      * Parse arguments.
      */
+
     nextArg = 1;
     options = SERVER_BUF;
+
     while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
         if (STREQU ("-buf", argv [nextArg])) {
             options &= ~SERVER_NOBUF;
@@ -307,12 +309,18 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
     if (channel == NULL)
         return TCL_ERROR;
 
-    acceptFile = Tcl_GetChannelFile (channel, TCL_READABLE);
-    if (acceptFile == NULL)
-        acceptFile = Tcl_GetChannelFile (channel, TCL_WRITABLE);
-    acceptSocketFD =  (int) Tcl_GetFileInfo (acceptFile, NULL);
+    if (Tcl_GetChannelHandle (channel, 
+			      TCL_READABLE, 
+			      (ClientData *)&acceptSocketFD) 
+	== TCL_ERROR) {
+        if (Tcl_GetChannelHandle (channel, 
+				  TCL_WRITABLE,
+				  (ClientData *)&acceptSocketFD) 
+	    == TCL_ERROR)
+	        return TCL_ERROR;
+    }
     if (acceptSocketFD < 0)
-        return TCL_ERROR;
+	return TCL_ERROR;
 
     addrLen = sizeof (connectSocket);
     socketFD = accept (acceptSocketFD, 
@@ -351,9 +359,9 @@ TclX_ServerInit (interp)
      * functionallity, however they can't be implemented as backwards
      * compatibility procs.
      */
-    Tcl_CreateCommand (interp, "server_accept", Tcl_ServerAcceptCmd,
+    Tcl_CreateCommand (interp, "server_accept", TclX_ServerAcceptCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "server_create", Tcl_ServerCreateCmd,
+    Tcl_CreateCommand (interp, "server_create", TclX_ServerCreateCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 }
 

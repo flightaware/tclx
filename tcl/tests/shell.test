@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: shell.test,v 8.0.4.1 1997/04/14 02:02:35 markd Exp $
+# $Id: shell.test,v 8.1 1997/04/17 04:59:35 markd Exp $
 #------------------------------------------------------------------------------
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
@@ -22,6 +22,12 @@ if [cequal $tcl_platform(platform) windows] {
     return
 }
 
+# FIX: Shouldn't have to do the exit after deleteing the fileevent in child
+# process below.  The mainloop proc should exit but this quite working in
+# 8.0b1.
+echo "****"
+echo "**** Warning: hacked around potential eventloop problem"
+echo "****"
 
 # Test tclx_errorHandler traping of errors.
 
@@ -70,6 +76,7 @@ set prog {
         if [cequal $line "STOP NOW"] {
             puts "I AM STOPPING"
             fileevent stdin readable {}
+            exit ;# FIX: Hack, shouldn't need this.  See comments above
         } else {
             puts "You said: $line"
         }

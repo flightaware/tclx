@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.0.4.1 1997/04/14 02:01:39 markd Exp $
+ * $Id: tclXdebug.c,v 8.1 1997/04/17 04:58:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -80,10 +80,10 @@ CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              char        **argv));
 
 static int
-Tcl_CmdtraceCmd _ANSI_ARGS_((ClientData    clientData,
-                             Tcl_Interp   *interp,
-                             int           argc,
-                             char        **argv));
+TclX_CmdtraceCmd _ANSI_ARGS_((ClientData    clientData,
+                              Tcl_Interp   *interp,
+                              int           argc,
+                              char        **argv));
 
 static void
 DebugCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -207,8 +207,6 @@ TraceCode (infoPtr, level, command, argc, argv)
         Tcl_Write (infoPtr->channel, "  ", 2);
 
     if (infoPtr->noEval) {
-        /* FIX: 8.0a2 bug, command always NULL */
-        command = "*** noeval option broken with 8.0a2 ***";
         cmdLen = printLen = strlen (command);
         if ((!infoPtr->noTruncate) && (printLen > CMD_TRUNCATE_SIZE))
             printLen = CMD_TRUNCATE_SIZE;
@@ -399,7 +397,7 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_CmdtraceCmd (clientData, interp, argc, argv)
+TclX_CmdtraceCmd (clientData, interp, argc, argv)
     ClientData    clientData;
     Tcl_Interp   *interp;
     int           argc;
@@ -576,7 +574,7 @@ TclX_DebugInit (interp)
 
     Tcl_CallWhenDeleted (interp, DebugCleanUp, (ClientData) infoPtr);
 
-    Tcl_CreateCommand (interp, "cmdtrace", Tcl_CmdtraceCmd, 
+    Tcl_CreateCommand (interp, "cmdtrace", TclX_CmdtraceCmd, 
                        (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 }
 

@@ -12,15 +12,9 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: profile.test,v 8.2 1997/04/17 04:59:32 markd Exp $
 #------------------------------------------------------------------------------
 #
-
-# FIX:
-echo ***
-echo *** profile tests disabled due to bugs in Tcl 8.0a1
-echo ***
-return
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
@@ -173,11 +167,8 @@ Test profile-2.2 {profile count tests} {
           {{ProcB2 ProcA2 <global>} 1} \
           {{ProcC2 ProcB2 ProcA2 <global>} 2} \
           {{concat ProcB2 ProcA2 <global>} 1} \
-          {{expr ProcC2 ProcB2 ProcA2 <global>} 2} \
-          {{incr ProcA2 <global>} 1} \
           {{list ProcB2 ProcA2 <global>} 2} \
-          {{profile <global>} 1} \
-          {{set ProcA2 <global>} 2}]
+          {{profile <global>} 1}]
 
 Test profile-2.3 {profile count tests} {
    profile -eval on
@@ -199,11 +190,9 @@ Test profile-2.4 {profile count tests} {
           {{ProcB2 ProcA2 <global>} 1} \
           {{ProcC2 ProcB2 ProcA2 <global>} 2} \
           {{concat ProcB2 ProcA2 <global>} 1} \
-          {{expr ProcC2 ProcB2 ProcA2 <global>} 2} \
-          {{incr ProcA2 <global>} 1} \
           {{list ProcB2 ProcA2 <global>} 2} \
-          {{profile <global>} 1} \
-          {{set ProcA2 <global>} 2}]
+          {{profile <global>} 1}]
+
 
 #
 # Test of uplevel.
@@ -238,11 +227,7 @@ Test profile-3.2 {profile count tests} {
           {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{concat ProcD3 ProcB3 ProcA3 <global>} 1} \
           {{concat ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{incr ProcD3 ProcB3 ProcA3 <global>} 1} \
-          {{incr ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{profile <global>} 1} \
-          {{set ProcD3 ProcB3 ProcA3 <global>} 1} \
-          {{set ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{uplevel ProcC3 ProcB3 ProcA3 <global>} 1}]
 
 Test profile-3.3 {profile count tests} {
@@ -269,11 +254,7 @@ Test profile-3.4 {profile count tests} {
           {{ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{concat ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{concat ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{incr ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{incr ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{profile <global>} 1} \
-          {{set ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{set ProcD3 uplevel ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{uplevel ProcC3 ProcB3 ProcA3 <global>} 1}]
 
 #
@@ -305,11 +286,10 @@ Test profile-4.2 {profile count tests} {
 } 0 [list {<global> 1} \
           {{ProcA4 <global>} 1} \
           {{ProcB4 ProcA4 <global>} 1} \
-          {{ProcC4 catch ProcB4 ProcA4 <global>} 1} \
-          {{ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4 ProcB4 ProcA4 <global>} 1} \
+          {{ProcD4 ProcC4 ProcB4 ProcA4 <global>} 1} \
           {{ProcE4 ProcB4 ProcA4 <global>} 1} \
-          {{catch ProcB4 ProcA4 <global>} 1} \
-          {{error ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{error ProcD4 ProcC4 ProcB4 ProcA4 <global>} 1} \
           {{profile <global>} 1}]
 
 Test profile-4.3 {profile count tests} {
@@ -332,11 +312,10 @@ Test profile-4.4 {profile count tests} {
 } 0 [list {<global> 1} \
           {{ProcA4 <global>} 1} \
           {{ProcB4 ProcA4 <global>} 1} \
-          {{ProcC4 catch ProcB4 ProcA4 <global>} 1} \
-          {{ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4 ProcB4 ProcA4 <global>} 1} \
+          {{ProcD4 ProcC4 ProcB4 ProcA4 <global>} 1} \
           {{ProcE4 ProcB4 ProcA4 <global>} 1} \
-          {{catch ProcB4 ProcA4 <global>} 1} \
-          {{error ProcD4 ProcC4 catch ProcB4 ProcA4 <global>} 1} \
+          {{error ProcD4 ProcC4 ProcB4 ProcA4 <global>} 1} \
           {{profile <global>} 1}]
 
 #
@@ -485,22 +464,11 @@ Test profile-6.2 {profile count tests} {
    SumCntData profData
 } 0 [list {<global> 1} \
           {{ProcA6 <global>} 1} \
-          {{ProcB6 if ProcA6 <global>} 1} \
-          {{ProcC6 if ProcA6 <global>} 1} \
-          {{for ProcB6 if ProcA6 <global>} 1} \
-          {{for ProcC6 if ProcA6 <global>} 1} \
-          {{if ProcA6 <global>} 1} \
-          {{incr for ProcB6 if ProcA6 <global>} 1998} \
-          {{incr for ProcC6 if ProcA6 <global>} 3998} \
+          {{ProcB6 ProcA6 <global>} 1} \
+          {{ProcC6 ProcA6 <global>} 1} \
           {{profile <global>} 1} \
-          {{return ProcB6 if ProcA6 <global>} 1} \
-          {{return ProcC6 if ProcA6 <global>} 1} \
-          {{set ProcB6 if ProcA6 <global>} 1} \
-          {{set ProcC6 if ProcA6 <global>} 1} \
-          {{set for ProcB6 if ProcA6 <global>} 1} \
-          {{set for ProcC6 if ProcA6 <global>} 1} \
-          {{set if ProcA6 <global>} 2} \
-          {{string if ProcA6 <global>} 1}]
+          {{return ProcB6 ProcA6 <global>} 1} \
+          {{return ProcC6 ProcA6 <global>} 1}]
 
 Test profile-6.3 {profile count tests} {
    profile -eval on
@@ -519,22 +487,11 @@ Test profile-6.4 {profile count tests} {
    SumCntData profData
 } 0 [list {<global> 1} \
           {{ProcA6 <global>} 1} \
-          {{ProcB6 if ProcA6 <global>} 1} \
-          {{ProcC6 if ProcA6 <global>} 1} \
-          {{for ProcB6 if ProcA6 <global>} 1} \
-          {{for ProcC6 if ProcA6 <global>} 1} \
-          {{if ProcA6 <global>} 1} \
-          {{incr for ProcB6 if ProcA6 <global>} 1998} \
-          {{incr for ProcC6 if ProcA6 <global>} 3998} \
+          {{ProcB6 ProcA6 <global>} 1} \
+          {{ProcC6 ProcA6 <global>} 1} \
           {{profile <global>} 1} \
-          {{return ProcB6 if ProcA6 <global>} 1} \
-          {{return ProcC6 if ProcA6 <global>} 1} \
-          {{set ProcB6 if ProcA6 <global>} 1} \
-          {{set ProcC6 if ProcA6 <global>} 1} \
-          {{set for ProcB6 if ProcA6 <global>} 1} \
-          {{set for ProcC6 if ProcA6 <global>} 1} \
-          {{set if ProcA6 <global>} 2} \
-          {{string if ProcA6 <global>} 1}]
+          {{return ProcB6 ProcA6 <global>} 1} \
+          {{return ProcC6 ProcA6 <global>} 1}]
 
 #
 # Function to build a list from the profile output data with each entry

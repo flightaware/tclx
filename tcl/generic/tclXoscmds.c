@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 8.0.4.1 1997/04/14 02:01:51 markd Exp $
+ * $Id: tclXoscmds.c,v 8.1 1997/04/17 04:58:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,7 +21,7 @@
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_AlarmObjCmd --
+ * TclX_AlarmObjCmd --
  *     Implements the TCL Alarm command:
  *         alarm seconds
  *
@@ -31,11 +31,11 @@
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_AlarmObjCmd (clientData, interp, objc, objv)
+TclX_AlarmObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     double seconds;
 
@@ -53,7 +53,7 @@ Tcl_AlarmObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_LinkObjCmd --
+ * TclX_LinkObjCmd --
  *     Implements the TCL link command:
  *         link ?-sym? srcpath destpath
  *
@@ -62,11 +62,11 @@ Tcl_AlarmObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_LinkObjCmd (clientData, interp, objc, objv)
+TclX_LinkObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     char *srcPath, *destPath;
     Tcl_DString  srcPathBuf, destPathBuf;
@@ -123,7 +123,7 @@ Tcl_LinkObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_NiceObjCmd --
+ * TclX_NiceObjCmd --
  *     Implements the TCL nice command:
  *         nice ?priorityincr?
  *
@@ -133,16 +133,15 @@ Tcl_LinkObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_NiceObjCmd (clientData, interp, objc, objv)
+TclX_NiceObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
-    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
-    int priorityIncr, priority;
-    long longPriorityIncr;
-    char *argv0String;
+    Tcl_Obj    *resultPtr = Tcl_GetObjResult (interp);
+    int         priorityIncr, priority;
+    char       *argv0String;
 
     if (objc > 2)
 	return TclX_WrongArgs (interp, objv [0], "?priorityincr?");
@@ -162,10 +161,8 @@ Tcl_NiceObjCmd (clientData, interp, objc, objv)
     /*
      * Increment the priority.
      */
-    if (Tcl_GetIntFromObj (interp, objv [1], &longPriorityIncr) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, objv [1], &priorityIncr) != TCL_OK)
         return TCL_ERROR;
-
-    priorityIncr = (int)longPriorityIncr;
 
     if (TclXOSincrpriority (interp, priorityIncr, &priority,
                             argv0String) != TCL_OK)
@@ -176,7 +173,7 @@ Tcl_NiceObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SleepObjCmd --
+ * TclX_SleepObjCmd --
  *     Implements the TCL sleep command:
  *         sleep seconds
  *
@@ -186,13 +183,13 @@ Tcl_NiceObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SleepObjCmd (clientData, interp, objc, objv)
+TclX_SleepObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
-    long time;
+    int time;
 
     if (objc != 2)
 	return TclX_WrongArgs (interp, objv [0], "seconds");
@@ -200,12 +197,12 @@ Tcl_SleepObjCmd (clientData, interp, objc, objv)
     if (Tcl_GetIntFromObj (interp, objv [1], &time) != TCL_OK)
         return TCL_ERROR;
 
-    TclXOSsleep ((int) time);
+    TclXOSsleep (time);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SyncObjCmd --
+ * TclX_SyncObjCmd --
  *     Implements the TCL sync command:
  *         sync
  *
@@ -215,11 +212,11 @@ Tcl_SleepObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SyncObjCmd (clientData, interp, objc, objv)
+TclX_SyncObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     Tcl_Channel  channel;
     char        *fileHandle;
@@ -246,7 +243,7 @@ Tcl_SyncObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_SystemObjCmd --
+ * TclX_SystemObjCmd --
  *     Implements the TCL system command:
  *     system command
  *
@@ -256,11 +253,11 @@ Tcl_SyncObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_SystemObjCmd (clientData, interp, objc, objv)
+TclX_SystemObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     char *systemString;
     int exitCode;
@@ -277,7 +274,7 @@ Tcl_SystemObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_UmaskObjCmd --
+ * TclX_UmaskObjCmd --
  *     Implements the TCL umask command:
  *     umask ?octalmask?
  *
@@ -287,11 +284,11 @@ Tcl_SystemObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_UmaskObjCmd (clientData, interp, objc, objv)
+TclX_UmaskObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     int    mask;
     char  *umaskString;
@@ -310,7 +307,7 @@ Tcl_UmaskObjCmd (clientData, interp, objc, objv)
 	Tcl_SetStringObj (Tcl_GetObjResult (interp), numBuf, -1);
     } else {
 	umaskString = Tcl_GetStringFromObj (objv [1], NULL);
-        if (!Tcl_StrToInt (umaskString, 8, &mask)) {
+        if (!TclX_StrToInt (umaskString, 8, &mask)) {
             TclX_StringAppendObjResult (interp, 
                                         "Expected octal number got: ",
                                         Tcl_GetStringFromObj (objv [1],

@@ -12,12 +12,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXfilecmds.c,v 8.4 1997/04/17 04:58:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
  *-----------------------------------------------------------------------------
- * Note: List parsing code stolen from Tcl distribution file tclUtil.c,
+ * Note: The list parsing code is from Tcl distribution file tclUtil.c,
  * procedure TclFindElement.
  *-----------------------------------------------------------------------------
  * Copyright (c) 1987-1994 The Regents of the University of California.
@@ -86,11 +86,11 @@ ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_PipeObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   **objv;
+TclX_PipeObjCmd (clientData, interp, objc, objv)
+     ClientData  clientData;
+     Tcl_Interp *interp;
+     int         objc;
+     Tcl_Obj    *CONST objv[];
 {
     Tcl_Channel  channels [2];
     char        *channelNames [2];
@@ -107,18 +107,19 @@ Tcl_PipeObjCmd (clientData, interp, objc, objv)
     
     if (objc == 1) {
         TclX_StringAppendObjResult (interp,
-                                    channelNames [0], " ",
+                                    channelNames [0], 
+				    " ",
                                     channelNames [1],
                                     (char *) NULL);
     } else {
         if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
                             Tcl_NewStringObj (channelNames [0], -1),
-                            TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL)
+                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
         if (Tcl_ObjSetVar2 (interp, objv [2], (Tcl_Obj *) NULL,
                             Tcl_NewStringObj (channelNames [1], -1),
-                            TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL)
+                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
     }
 
@@ -195,11 +196,11 @@ CopyOpenFile (interp, maxBytes, inChan, outChan)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_CopyfileObjCmd (clientData, interp, objc, objv)
+TclX_CopyfileObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj     *CONST objv[];
 {
 #define TCLX_COPY_ALL        0
 #define TCLX_COPY_BYTES      1
@@ -207,7 +208,8 @@ Tcl_CopyfileObjCmd (clientData, interp, objc, objv)
 
     Tcl_Channel    inChan, outChan;
     long           totalBytesToRead, totalBytesRead;
-    int            objIdx, copyMode, translate, saveErrno;
+    int            objIdx, copyMode, translate;
+    int            saveErrno = 0;
     Tcl_DString    inChanTrans, outChanTrans;
     Tcl_DString    inChanEOF, outChanEOF;
     char          *switchString;
@@ -231,8 +233,8 @@ Tcl_CopyfileObjCmd (clientData, interp, objc, objv)
                                         (char *) NULL);
                 return TCL_ERROR;
             }
-	    if (Tcl_GetIntFromObj (interp, objv [objIdx], &totalBytesToRead)
-		!= TCL_OK) 
+	    if (Tcl_GetLongFromObj (interp, objv [objIdx],
+                                   &totalBytesToRead) != TCL_OK) 
 		    return TCL_ERROR;
         } else if (STREQU (switchString, "-maxbytes")) {
             copyMode = TCLX_COPY_MAX_BYTES;
@@ -243,7 +245,7 @@ Tcl_CopyfileObjCmd (clientData, interp, objc, objv)
                                   (char *) NULL);
                 return TCL_ERROR;
             }
-	    if (Tcl_GetIntFromObj (interp, objv [objIdx], &totalBytesToRead)
+	    if (Tcl_GetLongFromObj (interp, objv [objIdx], &totalBytesToRead)
 		!= TCL_OK)
                 return TCL_ERROR;
         } else if (STREQU (switchString, "-translate")) {
@@ -576,7 +578,7 @@ GetsListElement (interp, channel, bufferPtr, idxPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_LgetsCmd --
+ * Tcl_LgetsObjCmd --
  *
  * Implements the `lgets' Tcl command:
  *    lgets fileId ?varName?
@@ -589,25 +591,29 @@ GetsListElement (interp, channel, bufferPtr, idxPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_LgetsCmd (notUsed, interp, argc, argv)
+TclX_LgetsObjCmd (notUsed, interp, objc, objv)
     ClientData   notUsed;
     Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
+    int          objc;
+    Tcl_Obj    *CONST objv[];
 {
-    Tcl_Channel channel;
+    Tcl_Channel channel = NULL;
     Tcl_DString buffer;
-    int mode;
-    int stat, bufIdx = 0;
+    int mode = 0;
+    int stat, bufIdx = 0, resultLen;
+    Tcl_Obj *dataObj, *savedResultObj;
+    char *savedErrorCode;
+
+    /* FIX: make binary safe, if possible */
 
     Tcl_DStringInit (&buffer);
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " fileId ?varName?", (char *) NULL);
+    if ((objc < 2) || (objc > 3)) {
+        TclX_WrongArgs (interp, objv [0], "fileId ?varName?");
         goto errorExit;
     }
-    channel = TclX_GetOpenChannel (interp, argv [1], TCL_READABLE);
+
+    channel = TclX_GetOpenChannelObj (interp, objv [1], TCL_READABLE);
     if (channel == NULL)
         goto errorExit;
 
@@ -651,39 +657,66 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
                                    TCLX_MODE_NONBLOCKING) == TCL_ERROR)
             goto errorExit;
     }
-    if (argc == 2) {
-        Tcl_DStringResult (interp, &buffer);
+    
+    dataObj = Tcl_NewStringObj (Tcl_DStringValue (&buffer),
+                                Tcl_DStringLength (&buffer));
+    if (objc == 2) {
+        Tcl_SetObjResult (interp, dataObj);
     } else {
-        if (Tcl_SetVar (interp, argv[2], buffer.string,
-                        TCL_LEAVE_ERR_MSG) == NULL)
+        if (Tcl_ObjSetVar2 (interp, objv[2], NULL, dataObj,
+                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (dataObj);
             goto errorExit;
+        }
 
         if (Tcl_Eof (channel) || Tcl_InputBlocked (channel)) {
-            interp->result = "-1";
+            resultLen = -1;
         } else {
-            sprintf (interp->result, "%d", buffer.length);
+            resultLen = Tcl_DStringLength (&buffer);
         }
+        Tcl_SetIntObj (Tcl_GetObjResult (interp), resultLen);
     }
     Tcl_DStringFree (&buffer);
     return TCL_OK;
 
   readError:
-    Tcl_AppendResult (interp, "error reading list from file: ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_StringAppendObjResult (interp, "error reading list from file: ",
+                                Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
+    /*
+     * Save error message and code.
+     */
+    savedResultObj = Tcl_GetObjResult (interp);
+    Tcl_IncrRefCount (savedResultObj);
+    savedErrorCode = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
+    if (savedErrorCode != NULL) {
+        savedErrorCode = ckstrdup (savedErrorCode);
+    }
+    
     /* 
      * If a variable is supplied, return whatever data we have.
      */
-    if (argc > 2) {
-        Tcl_SetVar (interp, argv[2], buffer.string, TCL_LEAVE_ERR_MSG);
+    if (objc > 2) {
+        dataObj = Tcl_NewStringObj (Tcl_DStringValue (&buffer),
+                                    Tcl_DStringLength (&buffer));
+        Tcl_DStringFree (&buffer);
+        if (Tcl_ObjSetVar2 (interp, objv[2], NULL, dataObj,
+                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (dataObj);
+        }
     }
-    Tcl_DStringFree (&buffer);
     if (mode == TCLX_MODE_NONBLOCKING) {
-        if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
-                                   TCLX_MODE_NONBLOCKING) == TCL_ERROR)
-            return TCL_ERROR;
+        TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                               TCLX_MODE_NONBLOCKING);
     }
+    if (savedErrorCode != NULL) {
+        Tcl_SetVar (interp, "errorCode", savedErrorCode, TCL_GLOBAL_ONLY);
+        ckfree (savedErrorCode);
+    }
+    Tcl_SetObjResult (interp, savedResultObj);
+    Tcl_DecrRefCount (savedResultObj);
+
     return TCL_ERROR;
 }
 
@@ -715,7 +748,6 @@ TruncateByPath (interp, filePath, newSize)
     filePath = Tcl_TranslateFileName (interp, filePath, &pathBuf);
     if (filePath == NULL) {
         Tcl_DStringFree (&pathBuf);
-	TclSetObjResultFromStrResult (interp);  /* FIX: remove */
         return TCL_ERROR;
     }
     if (truncate (filePath, newSize) != 0) {
@@ -746,11 +778,11 @@ TruncateByPath (interp, filePath, newSize)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_FtruncateObjCmd (clientData, interp, objc, objv)
+TclX_FtruncateObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj     *CONST objv[];
 {
     int           objIdx, fileIds;
     off_t         newSize;
@@ -777,9 +809,7 @@ Tcl_FtruncateObjCmd (clientData, interp, objc, objv)
     if (objIdx != objc - 2)
         return TclX_WrongArgs (interp, objv [0], "[-fileid] file newsize");
 
-    if (Tcl_GetIntFromObj (interp,
-                           objv [objIdx + 1],
-                           &convSize) != TCL_OK)
+    if (Tcl_GetLongFromObj (interp, objv [objIdx + 1], &convSize) != TCL_OK)
         return TCL_ERROR;
 
     newSize = convSize;
@@ -824,7 +854,6 @@ ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
 
     fileNameObj = Tcl_NewStringObj (fileName, -1);
     result = Tcl_ListObjAppendElement (interp, fileListObj, fileNameObj);
-    Tcl_DecrRefCount (fileNameObj);
     return result;
 }
 
@@ -838,11 +867,11 @@ ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ReaddirObjCmd (clientData, interp, objc, objv)
+TclX_ReaddirObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj    *CONST objv[];
 {
     Tcl_DString  pathBuf;
     char        *dirPath;
@@ -875,7 +904,6 @@ Tcl_ReaddirObjCmd (clientData, interp, objc, objv)
 
     dirPath = Tcl_TranslateFileName (interp, dirPath, &pathBuf);
     if (dirPath == NULL) {
-	TclSetObjResultFromStrResult (interp);  /* FIX: remove */
         goto errorExit;
     }
 
@@ -889,7 +917,6 @@ Tcl_ReaddirObjCmd (clientData, interp, objc, objv)
 
     Tcl_DStringFree (&pathBuf);
     Tcl_SetObjResult (interp, fileListObj);
-    Tcl_DecrRefCount (fileListObj);
     return TCL_OK;
 
   errorExit:

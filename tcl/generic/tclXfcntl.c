@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 8.0.4.1 1997/04/14 02:01:42 markd Exp $
+ * $Id: tclXfcntl.c,v 8.1 1997/04/17 04:58:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,10 +76,10 @@ GetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
                           int          attrib));
 
 static int
-SetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
-                          Tcl_Channel  channel,
-                          int          attrib,
-                          char        *valueStr));
+SetFcntlAttrObj _ANSI_ARGS_((Tcl_Interp  *interp,
+                             Tcl_Channel  channel,
+                             int          attrib,
+                             Tcl_Obj     *valueObj));
 
 /*-----------------------------------------------------------------------------
  * XlateFcntlAttr --
@@ -106,14 +106,16 @@ XlateFcntlAttr (interp, attrName, modify)
     if (strlen (attrName) >= MAX_ATTR_NAME_LEN)
         goto invalidAttrName;
     
-    Tcl_UpShift (attrNameUp, attrName);
+    TclX_UpShift (attrNameUp, attrName);
     
     for (idx = 0; attrNames [idx].name != NULL; idx++) {
         if (STREQU (attrNameUp, attrNames [idx].name)) {
             if (modify && !attrNames [idx].modifiable) {
-                Tcl_AppendResult (interp, "Attribute \"", attrName,
-                                  "\" may not be altered after open",
-                                  (char *) NULL);
+                TclX_StringAppendObjResult (interp, 
+					    "Attribute \"", 
+					    attrName,
+                                            "\" may not be altered after open",
+                                            (char *) NULL);
                 return ATTR_ERROR;
             }
             return attrNames [idx].id;
@@ -124,12 +126,22 @@ XlateFcntlAttr (interp, attrName, modify)
      * Invalid attribute.
      */
   invalidAttrName:
-    Tcl_AppendResult (interp, "unknown attribute name \"", attrName,
-                      "\", expected one of ", (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"unknown attribute name \"",
+				attrName,
+                                "\", expected one of ", 
+				(char *) NULL);
+
     for (idx = 0; attrNames [idx + 1].name != NULL; idx++) {
-        Tcl_AppendResult (interp, attrNames [idx].name, ", ", (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    attrNames [idx].name,
+				    ", ",
+				    (char *) NULL);
     }
-    Tcl_AppendResult (interp, "or ", attrNames [idx].name, (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"or ", 
+				attrNames [idx].name,
+				(char *) NULL);
     return ATTR_ERROR;
 }
 
@@ -199,33 +211,33 @@ GetFcntlAttr (interp, channel, mode, attrib)
         panic ("bug in fcntl get attrib");
     }
 
-    Tcl_SetResult (interp, (value ? "1" : "0"), TCL_STATIC);
+    Tcl_SetIntObj (Tcl_GetObjResult (interp), value != 0);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * SetFcntlAttr --
+ * SetFcntlAttrObj --
  *    Set the the attributes on a channel.
  *
  * Parameters:
  *   o interp - Tcl interpreter, value is returned in the result
  *   o channel - The channel to check.
  *   o attrib - Atrribute to set.
- *   o valueStr - String value (all are boolean now).
+ *   o valueStr - Object value (all are boolean now).
  * Result:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-SetFcntlAttr (interp, channel, attrib, valueStr)
+SetFcntlAttrObj (interp, channel, attrib, valueObj)
     Tcl_Interp  *interp;
     Tcl_Channel  channel;
     int          attrib;
-    char        *valueStr;
+    Tcl_Obj     *valueObj;
 {
     int value;
 
-    if (Tcl_GetBoolean (interp, valueStr, &value) != TCL_OK)
+    if (Tcl_GetBooleanFromObj (interp, valueObj, &value) != TCL_OK)
         return TCL_ERROR;
 
     switch (attrib) {
@@ -258,40 +270,45 @@ SetFcntlAttr (interp, channel, attrib, valueStr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_FcntlCmd --
+ * TclX_FcntlObjCmd --
  *     Implements the fcntl TCL command:
  *         fcntl handle attribute ?value?
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_FcntlCmd (clientData, interp, argc, argv)
+TclX_FcntlObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
-    Tcl_Channel channel;
-    int mode, attrib;
+    Tcl_Channel  channel;
+    int          mode;
+    int          attrib;
+    char        *channelString;
+    char        *fcntlAttributes;
 
-    if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " handle attribute ?value?", (char *) NULL);
-        return TCL_ERROR;
+    if ((objc < 3) || (objc > 4))
+	return TclX_WrongArgs (interp, objv [0],
+                               "handle attribute ?value?");
+
+    channelString = Tcl_GetStringFromObj (objv[1], NULL);
+
+    channel = Tcl_GetChannel (interp, channelString, &mode);
+    if (channel == NULL) {
+	return TCL_ERROR;
     }
 
-    channel = Tcl_GetChannel (interp, argv [1], &mode);
-    if (channel == NULL)
-	return TCL_ERROR;
-
-    attrib = XlateFcntlAttr (interp, argv [2], (argc == 4));
+    fcntlAttributes = Tcl_GetStringFromObj (objv[2], NULL);
+    attrib = XlateFcntlAttr (interp, fcntlAttributes, (objc == 4));
     if (attrib == ATTR_ERROR)
         return TCL_ERROR;
 
-    if (argc == 3) {    
+    if (objc == 3) {    
         if (GetFcntlAttr (interp, channel, mode, attrib) != TCL_OK)
             return TCL_ERROR;
     } else {
-        if (SetFcntlAttr (interp, channel, attrib, argv [3]) != TCL_OK)
+        if (SetFcntlAttrObj (interp, channel, attrib, objv[3]) != TCL_OK)
             return TCL_ERROR;
     }
     return TCL_OK;

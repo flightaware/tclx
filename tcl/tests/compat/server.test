@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 8.0.4.1 1997/04/14 02:02:46 markd Exp $
+# $Id: server.test,v 8.1 1997/04/17 04:59:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -237,7 +237,8 @@ if [catch {
     close [server_connect [id host] echo]
 } msg] {
     puts "*************************************************************"
-    puts "Unable to connect to the \"echo\" server ($msg)."
+    puts "Unable to connect to the \"echo\" server:"
+    puts "$msg."
     puts "Some tests skipped."
     puts "*************************************************************"
 } else {

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 8.0.4.1 1997/04/14 02:01:50 markd Exp $
+ * $Id: tclXmsgcat.c,v 8.1 1997/04/17 04:58:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -30,31 +30,31 @@ typedef int nl_catd;
 #endif /* NO_CATGETS */
 
 static int
-ParseFailOption _ANSI_ARGS_((Tcl_Interp *interp,
-                             CONST char *optionStr,
-                             int        *failPtr));
+ParseFailOptionObj _ANSI_ARGS_((Tcl_Interp *interp,
+                                Tcl_Obj    *optionObj,
+                                int        *failPtr));
 
 static int
-CatOpFailed _ANSI_ARGS_((Tcl_Interp *interp,
-                         CONST char *errorMsg));
+CatOpFailedObj _ANSI_ARGS_((Tcl_Interp *interp,
+                            CONST char *errorMsg));
 
 static int
-Tcl_CatopenCmd _ANSI_ARGS_((ClientData  clientData,
-                            Tcl_Interp *interp,
-                            int         argc,
-                            char      **argv));
+TclX_CatopenObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   *CONST objv[]));
 
 static int
-Tcl_CatgetsCmd _ANSI_ARGS_((ClientData  clientData,
-                            Tcl_Interp *interp,
-                            int         argc,
-                            char      **argv));
+TclX_CatgetsObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   *CONST objv[]));
 
 static int
-Tcl_CatcloseCmd _ANSI_ARGS_((ClientData  clientData,
-                             Tcl_Interp *interp,
-                             int         argc,
-                             char      **argv));
+TclX_CatcloseObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   *CONST objv[]));
 
 static void
 MsgCatCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -115,32 +115,36 @@ catclose (catd)
 #endif /* NO_CATGETS */
 
 /*-----------------------------------------------------------------------------
- * ParseFailOption --
+ * ParseFailOptionObj --
  *
  *   Parse the -fail/-nofail option, if specified.
  *-----------------------------------------------------------------------------
  */
 static int
-ParseFailOption (interp, optionStr, failPtr)
+ParseFailOptionObj (interp, optionObj, failPtr)
     Tcl_Interp *interp;
-    CONST char *optionStr;
+    Tcl_Obj    *optionObj;
     int        *failPtr;
 {
-    if (STREQU ("-fail", ((char *) optionStr)))
+    char *optionStr;
+
+    optionStr = Tcl_GetStringFromObj (optionObj, NULL);
+    if (STREQU ("-fail", optionStr))
         *failPtr = TRUE;
-    else if (STREQU ("-nofail", ((char *) optionStr)))
+    else if (STREQU ("-nofail", optionStr))
         *failPtr = FALSE;
     else {
-        Tcl_AppendResult (interp, "Expected option of `-fail' or ",
-                          "`-nofail', got: `", optionStr, "'",
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "Expected option of `-fail' or ",
+                                    "`-nofail', got: `", optionStr, "'",
+                                    (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * CatOpFailed --
+ * CatOpFailedObj --
  *
  *    Handles failures of catopen and catclose.  If message catalogs are
  * available, if returns the supplied message.  If message are not
@@ -150,16 +154,18 @@ ParseFailOption (interp, optionStr, failPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-CatOpFailed (interp, errorMsg)
+CatOpFailedObj (interp, errorMsg)
     Tcl_Interp *interp;
     CONST char *errorMsg;
 {
 #ifndef NO_CATGETS
-    Tcl_AppendResult (interp, errorMsg, (char *) NULL);
+    TclX_StringAppendObjResult (interp, errorMsg, (char *) NULL);
 
 #else
-    Tcl_AppendResult (interp, "the message catalog facility is not available,",
-                      " default string is always returned", (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"the message catalog facility is not",
+				" available, default string is always",
+				" returned", (char *) NULL);
 
 #endif /* NO_CATGETS */
 
@@ -167,127 +173,157 @@ CatOpFailed (interp, errorMsg)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CatopenCmd --
+ * TclX_CatopenObjCmd --
  *
- *    Implements the TCL echo command:
+ *    Implements the TCLX catopen command:
  *        catopen ?-fail|-nofail? catname
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_CatopenCmd (clientData, interp, argc, argv)
+TclX_CatopenObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   *CONST objv[];
 {
     int      fail;
     nl_catd  catDesc;
     nl_catd *catDescPtr;
+    char    handleName[16];
+    char    *catFileName;
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " ?-fail|-nofail? catname",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-    if (argc == 3) {
-        if (ParseFailOption (interp, argv [1], &fail) != TCL_OK)
+    if ((objc < 2) || (objc > 3))
+        return TclX_WrongArgs (interp, objv [0], "?-fail|-nofail? catname");
+
+    if (objc == 3) {
+        if (ParseFailOptionObj (interp, objv [1], &fail) == TCL_ERROR)
             return TCL_ERROR;
     } else
         fail = FALSE;
 
-    catDesc = catopen (argv [argc - 1], 0);
+    catFileName = Tcl_GetStringFromObj (objv [objc - 1], NULL);
+    catDesc = catopen (catFileName, 0);
     if ((catDesc == (nl_catd) -1) && fail)
-        return CatOpFailed (interp, "open of message catalog failed");
+        return CatOpFailedObj (interp, "open of message catalog failed");
 
-    catDescPtr = (nl_catd *) Tcl_HandleAlloc (msgCatTblPtr, interp->result);
+    catDescPtr = (nl_catd *) TclX_HandleAlloc (msgCatTblPtr, handleName);
     *catDescPtr = catDesc;
 
+    Tcl_SetObjResult (interp, Tcl_NewStringObj (handleName, -1));
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CatgetsCmd --
+ * TclX_CatgetsObjCmd --
  *
- *    Implements the TCL echo command:
+ *    Implements the TCLX catgets command:
  *        catgets catHandle setnum msgnum defaultstr
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_CatgetsCmd (clientData, interp, argc, argv)
+TclX_CatgetsObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   *CONST objv[];
 {
     nl_catd   *catDescPtr;
-    int        msgSetNum, msgNum;
+    int       msgSetNum, msgNum;
     char      *localMsg;
+    char      *defaultStr;
+    int        stringLength;
 
-    if (argc != 5) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " catHandle setnum msgnum ",
-                          "defaultstr", (char *) NULL);
-        return TCL_ERROR;
-    }
-    catDescPtr = (nl_catd *) Tcl_HandleXlate (interp, msgCatTblPtr, argv [1]);
+    if (objc != 5)
+	return TclX_WrongArgs (interp, 
+			       objv [0],
+                               "catHandle setnum msgnum defaultstr");
+
+    catDescPtr = (nl_catd *) TclX_HandleXlateObj (interp, 
+						 msgCatTblPtr,
+						 objv [1]);
     if (catDescPtr == NULL)
         return TCL_ERROR;
-    if (Tcl_GetInt (interp, argv [2], &msgSetNum) != TCL_OK)
-        return TCL_ERROR;
-    if (Tcl_GetInt (interp, argv [3], &msgNum) != TCL_OK)
+
+    if (Tcl_GetIntFromObj (interp, objv [2], &msgSetNum) == TCL_ERROR)
         return TCL_ERROR;
 
-    localMsg = catgets (*catDescPtr, msgSetNum, msgNum, argv [4]);
+    if (Tcl_GetIntFromObj (interp, objv [3], &msgNum) == TCL_ERROR)
+        return TCL_ERROR;
 
-    Tcl_SetResult (interp, localMsg, TCL_VOLATILE);
+    /* if the integer value of the handle is -1, the catopen actually
+     * failed (softly, i.e. the caller did not specify "-fail")
+     * so we detect that and merely return the default string */
+
+    if (*catDescPtr == (nl_catd)-1) {
+        Tcl_SetObjResult (interp, objv [4]);
+	Tcl_IncrRefCount (objv [4]);
+	return TCL_OK;
+    }
+
+    defaultStr = Tcl_GetStringFromObj (objv [4], &stringLength);
+    localMsg = catgets (*catDescPtr, (int)msgSetNum, (int)msgNum, defaultStr);
+
+    Tcl_SetObjResult (interp, Tcl_NewStringObj (localMsg, stringLength));
     return TCL_OK;
-}
+}
+
 
 /*-----------------------------------------------------------------------------
- * Tcl_CatcloseCmd --
+ * TclX_CatcloseObjCmd --
  *
- *    Implements the TCL echo command:
+ *    Implements the TCLX catclose command:
  *        catclose ?-fail|-nofail? catHandle
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_CatcloseCmd (clientData, interp, argc, argv)
+TclX_CatcloseObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   *CONST objv[];
 {
-    int      fail;
-    nl_catd *catDescPtr;
+    int          fail;
+    nl_catd     *catDescPtr;
+    int          result = 0;
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                          " ?-fail|-nofail? catHandle",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-    if (argc == 3) {
-        if (ParseFailOption (interp, argv [1], &fail) != TCL_OK)
+    if ((objc < 2) || (objc > 3))
+	return TclX_WrongArgs (interp, objv [0],
+			       "?-fail|-nofail? catHandle");
+
+    if (objc == 3) {
+        if (ParseFailOptionObj (interp, objv [1], &fail) != TCL_OK)
             return TCL_ERROR;
     } else
         fail = FALSE;
 
-    catDescPtr = (nl_catd *) Tcl_HandleXlate (interp, msgCatTblPtr,
-                                              argv [argc - 1]);
+    catDescPtr = (nl_catd *) TclX_HandleXlateObj (interp, msgCatTblPtr,
+                                              objv [objc - 1]);
     if (catDescPtr == NULL)
         return TCL_ERROR;
 
+    /* If the integer returned by catopen is -1, signifying that the
+     * open failed but "-fail" was not specified to actually force
+     * the failure, we don't close the catalog, but we do delete
+     * the handle. */
+
+    if (*catDescPtr == (nl_catd)-1) {
+	result = -1;
+    } else {
     /*
      * NetBSD has catclose of return type void, which is non-standard.
      */
 #ifdef BAD_CATCLOSE
-    catclose (*catDescPtr);
+	catclose (*catDescPtr);
 #else
-    if ((catclose (*catDescPtr) < 0) && fail)
-        return CatOpFailed (interp, "close of message catalog failed");
+	result = catclose (*catDescPtr);
 #endif
-    Tcl_HandleFree (msgCatTblPtr, catDescPtr);
+    }
+
+    TclX_HandleFree (msgCatTblPtr, catDescPtr);
+
+    if ((result < 0) && fail)
+	return CatOpFailedObj (interp, "close of message catalog failed");
+
     return TCL_OK;
 }
 
@@ -306,28 +342,29 @@ MsgCatCleanUp (clientData, interp)
     nl_catd *catDescPtr;
     int      walkKey;
     
-    if (Tcl_HandleTblUseCount (msgCatTblPtr, -1) > 0)
+    if (TclX_HandleTblUseCount (msgCatTblPtr, -1) > 0)
         return;
 
     walkKey = -1;
     while (TRUE) {
-        catDescPtr = (nl_catd *) Tcl_HandleWalk (msgCatTblPtr, &walkKey);
+        catDescPtr = (nl_catd *) TclX_HandleWalk (msgCatTblPtr, &walkKey);
         if (catDescPtr == NULL)
             break;
-        catclose (*catDescPtr);
+	if (*catDescPtr != (nl_catd)-1)
+	    catclose (*catDescPtr);
     }
-    Tcl_HandleTblRelease (msgCatTblPtr);
+    TclX_HandleTblRelease (msgCatTblPtr);
     msgCatTblPtr = NULL;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_InitMsgCat --
+ * TclX_InitMsgCat --
  *
  *   Initialize the Tcl XPG/3 message catalog support faility.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_InitMsgCat (interp)
+TclX_InitMsgCat (interp)
     Tcl_Interp *interp;
 {
     /*
@@ -335,9 +372,9 @@ Tcl_InitMsgCat (interp)
      * count reflects the number of interpreters.
      */
     if (msgCatTblPtr == NULL) {
-        msgCatTblPtr = Tcl_HandleTblInit ("msgcat", sizeof (nl_catd), 6);
+        msgCatTblPtr = TclX_HandleTblInit ("msgcat", sizeof (nl_catd), 6);
     } else {
-        (void) Tcl_HandleTblUseCount (msgCatTblPtr, 1);
+        (void) TclX_HandleTblUseCount (msgCatTblPtr, 1);
     }
 
     Tcl_CallWhenDeleted (interp, MsgCatCleanUp, (ClientData) NULL);
@@ -346,12 +383,23 @@ Tcl_InitMsgCat (interp)
      * Initialize the commands.
      */
 
-    Tcl_CreateCommand (interp, "catopen", Tcl_CatopenCmd, 
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "catgets", Tcl_CatgetsCmd, 
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "catclose", Tcl_CatcloseCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, 
+			  "catopen",
+			  TclX_CatopenObjCmd, 
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+		          "catgets", 
+			  TclX_CatgetsObjCmd, 
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp, 
+			  "catclose",
+			  TclX_CatcloseObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 }
 
 

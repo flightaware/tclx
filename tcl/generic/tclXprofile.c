@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXprofile.c,v 8.4 1997/04/17 04:58:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -135,7 +135,7 @@ static int
 ProfObjCommandEval _ANSI_ARGS_((ClientData    clientData,
                                 Tcl_Interp   *interp,
                                 int           objc,
-                                Tcl_Obj     **objv));
+                                Tcl_Obj     *CONST objv[]));
 
 static void
 ProfTraceRoutine _ANSI_ARGS_((ClientData    clientData,
@@ -171,7 +171,7 @@ static int
 TclX_ProfileObjCmd _ANSI_ARGS_((ClientData   clientData,
                                 Tcl_Interp  *interp,
                                 int          objc,
-                                Tcl_Obj    **objv));
+                                Tcl_Obj    *CONST objv[]));
 
 static void
 ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -580,7 +580,7 @@ ProfObjCommandEval (clientData, interp, objc, objv)
     ClientData    clientData;
     Tcl_Interp   *interp;
     int           objc;
-    Tcl_Obj     **objv;
+    Tcl_Obj     *CONST objv[];
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     Command *currentCmdPtr;
@@ -634,7 +634,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
         panic (PROF_PANIC, 56);
     cmdPtr = (Command*)cmd;
 #else
-    hPtr = Tcl_FindHashEntry (&iPtr->commandTable, argv [0]);
+    hPtr = Tcl_FindHashEntry (&iPtr->globalNsPtr->cmdTable, argv [0]);
     cmdPtr = (Command *) Tcl_GetHashValue (hPtr);
 #endif
 
@@ -884,7 +884,7 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int argIdx, strLen;
@@ -905,7 +905,7 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
         } else {
             TclX_StringAppendObjResult (interp,
                                         "expected one of \"-commands\", or ",
-                                        "\"-eval\", got \"", argStr,
+                                        "\"-eval\", got \"", argStr, "\"",
                                         (char *) NULL);
             return TCL_ERROR;
         }
@@ -1033,8 +1033,11 @@ TclX_ProfileInit (interp)
 
     Tcl_CallWhenDeleted (interp, ProfMonCleanUp, (ClientData) infoPtr);
 
-    Tcl_CreateObjCommand (interp, "profile", -1, TclX_ProfileObjCmd,
-                          (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, 
+			  "profile",
+			  TclX_ProfileObjCmd,
+                          (ClientData) infoPtr,
+			  (Tcl_CmdDeleteProc*) NULL);
 }
 
 

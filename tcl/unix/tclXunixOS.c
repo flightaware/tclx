@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.0.4.1 1997/04/14 02:02:51 markd Exp $
+ * $Id: tclXunixOS.c,v 8.1 1997/04/17 04:59:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -74,7 +74,6 @@ TclXNotAvailableError (interp, funcName)
     TclX_StringAppendObjResult (interp, funcName, 
 				" is not available on this system",
                                 (char *) NULL);
-    TclSetObjResultFromStrResult (interp);  /* FIX: remove */
     return TCL_ERROR;
 }
 
@@ -90,7 +89,7 @@ TclXNotAvailableError (interp, funcName)
  * Returns:
  *   The file number or -1 if a file number is not associated with this access
  * direction.  Normally the resulting file number is just passed to a system
- * call rather and let the system calls generate thoe error.
+ * call and let the system calls generate an error when -1 is returned.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -98,18 +97,17 @@ ChannelToFnum (channel, direction)
     Tcl_Channel channel;
     int         direction;
 {
-    Tcl_File file;
+    ClientData handle;
 
     if (direction == 0) {
-        file = Tcl_GetChannelFile (channel, TCL_READABLE);
-        if (file == NULL)
-            file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+        if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_ERROR)
+            Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle);
     } else {
-        file = Tcl_GetChannelFile (channel, direction);
-        if (file == NULL)
+        if (Tcl_GetChannelHandle (channel, direction, &handle) == TCL_ERROR) {
             return -1;
+	}
     }
-    return (int) Tcl_GetFileInfo (file, NULL);
+    return (int) handle;
 }
 
 /*-----------------------------------------------------------------------------
@@ -235,17 +233,17 @@ TclXOSpipe (interp, channels)
     int fileNums [2];
 
     if (pipe (fileNums) < 0) {
-        TclX_StringAppendObjResult (interp, "pipe creation failed: ",
-                                    Tcl_PosixError (interp), (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "pipe creation failed: ",
+                                    Tcl_PosixError (interp),
+				    (char *) NULL);
         return TCL_ERROR;
     }
     channels [0] = Tcl_MakeFileChannel ((ClientData) fileNums [0],
-                                        (ClientData) -1,
                                         TCL_READABLE);
     Tcl_RegisterChannel (interp, channels [0]);
 
-    channels [1] = Tcl_MakeFileChannel ((ClientData) -1,
-                                        (ClientData) fileNums [1],
+    channels [1] = Tcl_MakeFileChannel ((ClientData) fileNums [1],
                                         TCL_WRITABLE);
     Tcl_RegisterChannel (interp, channels [1]);
 
@@ -1147,8 +1145,8 @@ ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
     uid_t       *ownerId;
     gid_t       *groupId;
 {
-    struct passwd *passwdPtr;
-    struct group *groupPtr;
+    struct passwd *passwdPtr = NULL;
+    struct group *groupPtr = NULL;
     int tmpId;
 
     if (options & TCLX_CHOWN) {
@@ -1156,7 +1154,7 @@ ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
         if (passwdPtr != NULL) {
             *ownerId = passwdPtr->pw_uid;
         } else {
-            if (!Tcl_StrToInt (ownerStr, 10, &tmpId))
+            if (!TclX_StrToInt (ownerStr, 10, &tmpId))
                 goto unknownUser;
             /*
              * Check for overflow.
@@ -1180,7 +1178,7 @@ ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
             if (groupPtr != NULL) {
                 *groupId = groupPtr->gr_gid;
             } else {
-                if (!Tcl_StrToInt (groupStr, 10, &tmpId))
+                if (!TclX_StrToInt (groupStr, 10, &tmpId))
                     goto unknownGroup;
                 /*
                  * Check for overflow.
@@ -1349,7 +1347,6 @@ TclXOSFChangeOwnGrpObj (interp, options, ownerStr, groupStr, channelIdsObj,
     for (idx = 0; idx < channelCount; idx++) {
         channel = TclX_GetOpenChannelObj (interp, channelIdsListObj [idx], 0);
         if (channel == NULL) {
-	    TclSetObjResultFromStrResult (interp);
             return TCL_ERROR;
 	}
         fnum = ChannelToFnum (channel, 0);
@@ -1478,18 +1475,18 @@ TclXOSGetSelectFnum (interp, channel, readFnumPtr, writeFnumPtr)
     int        *readFnumPtr;
     int        *writeFnumPtr;
 {
-    Tcl_File file;
+    ClientData handle;
 
-    file = Tcl_GetChannelFile (channel, TCL_READABLE);
-    if (file != NULL)
-        *readFnumPtr = (int) Tcl_GetFileInfo (file, NULL);
-    else
+    if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_OK) {
+        *readFnumPtr = (int) handle;
+    } else {
         *readFnumPtr = -1;
-    file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
-    if (file != NULL)
-        *writeFnumPtr = (int) Tcl_GetFileInfo (file, NULL);
-    else
+    }
+    if (Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle) == TCL_OK) {
+        *writeFnumPtr = (int) handle;
+    } else {
         *writeFnumPtr = -1;
+    }
     return TCL_OK;
 }
 
@@ -1717,7 +1714,10 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
     Tcl_Channel channel;
     int        *valuePtr;
 {
-    int readFnum, writeFnum, readMode, writeMode;
+    int     readFnum;
+    int     writeFnum;
+    int     readMode = 0;
+    int     writeMode = 0;
 
     readFnum = ChannelToFnum (channel, TCL_READABLE);
     writeFnum = ChannelToFnum (channel, TCL_WRITABLE);

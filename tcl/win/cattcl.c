@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: cattcl.c,v 8.0.4.1 1997/04/14 02:02:54 markd Exp $
+ * $Id: cattcl.c,v 8.1 1997/04/17 04:59:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,11 +33,11 @@
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SplitWinCmdLine (argcPtr, argvPtr)
+TclX_SplitWinCmdLine (argcPtr, argvPtr, args)
     int    *argcPtr;
     char ***argvPtr;
+    char   *args;
 {
-    char *args = GetCommandLine();
     char **argvlist, *p;
     int size, i;
 

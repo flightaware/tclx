@@ -1,0 +1,103 @@
+From: Brian Lewis <Brian.Lewis@Eng.Sun.COM>
+
+markd@Grizzly.COM said:
+> The following code behaves differently in 7.6 and 8.0b1.  It appears 
+> that break is not setting the result as it use to. 
+
+Hi Mark,
+
+Another great test case... This was indeed a bug that resulted from the
+8.0b1 interpreter result changes. The following patch should fix it.
+Thanks for the report!
+
+  Brian
+
+--------------------------------------------------------------
+
+------- generic/tclExecute.c -------
+*** /tmp/da006lP	Wed Dec 31 16:00:00 1969
+--- generic/tclExecute.c	Mon Jun  9 17:22:16 1997
+***************
+*** 1045,1051 ****
+  		     * catchOffset. If no enclosing range is found, stop
+  		     * execution and return the TCL_BREAK or TCL_CONTINUE.
+  		     */
+- 		    Tcl_ResetResult(interp);
+  		    rangePtr = TclGetExceptionRangeForPc(pc,
+                              /*catchOnly*/ 0, codePtr);
+  		    if (rangePtr == NULL) {
+--- 1045,1050 ----
+***************
+*** 1170,1176 ****
+  				      * continue, error processing. Init.
+  				      * to avoid compiler warning. */
+  
+- 		Tcl_ResetResult(interp);
+  		rangePtr = TclGetExceptionRangeForPc(pc, /*catchOnly*/ 0,
+  			codePtr);
+  		if (rangePtr == NULL) {
+--- 1169,1174 ----
+***************
+*** 2754,2760 ****
+  	     * catchOffset. If no enclosing range is found, stop
+  	     * execution and return TCL_CONTINUE.
+  	     */
+! 	
+  	    rangePtr = TclGetExceptionRangeForPc(pc, /*catchOnly*/ 0,
+  		    codePtr);
+  	    if (rangePtr == NULL) {
+--- 2752,2759 ----
+  	     * catchOffset. If no enclosing range is found, stop
+  	     * execution and return TCL_CONTINUE.
+  	     */
+! 
+! 	    Tcl_ResetResult(interp);
+  	    rangePtr = TclGetExceptionRangeForPc(pc, /*catchOnly*/ 0,
+  		    codePtr);
+  	    if (rangePtr == NULL) {
+
+
+
+------- tclExecute.c -------
+*** /tmp/da006lP	Wed Dec 31 16:00:00 1969
+--- generic/tclExecute.c	Mon Jun  9 17:22:16 1997
+***************
+*** 1045,1051 ****
+  		     * catchOffset. If no enclosing range is found, stop
+  		     * execution and return the TCL_BREAK or TCL_CONTINUE.
+  		     */
+- 		    Tcl_ResetResult(interp);
+  		    rangePtr = TclGetExceptionRangeForPc(pc,
+                              /*catchOnly*/ 0, codePtr);
+  		    if (rangePtr == NULL) {
+--- 1045,1050 ----
+***************
+*** 1170,1176 ****
+  				      * continue, error processing. Init.
+  				      * to avoid compiler warning. */
+  
+- 		Tcl_ResetResult(interp);
+  		rangePtr = TclGetExceptionRangeForPc(pc, /*catchOnly*/ 0,
+  			codePtr);
+  		if (rangePtr == NULL) {
+--- 1169,1174 ----
+***************
+*** 2754,2760 ****
+  	     * catchOffset. If no enclosing range is found, stop
+  	     * execution and return TCL_CONTINUE.
+  	     */
+! 	
+  	    rangePtr = TclGetExceptionRangeForPc(pc, /*catchOnly*/ 0,
+  		    codePtr);
+  	    if (rangePtr == NULL) {
+--- 2752,2759 ----
+  	     * catchOffset. If no enclosing range is found, stop
+  	     * execution and return TCL_CONTINUE.
+  	     */
+! 
+! 	    Tcl_ResetResult(interp);
+  	    rangePtr = TclGetExceptionRangeForPc(pc, /*catchOnly*/ 0,
+  		    codePtr);
+  	    if (rangePtr == NULL) {
+
+

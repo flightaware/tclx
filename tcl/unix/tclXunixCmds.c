@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixCmds.c,v 8.0.4.1 1997/04/14 02:02:49 markd Exp $
+ * $Id: tclXunixCmds.c,v 8.1 1997/04/17 04:59:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,7 +21,7 @@
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_ChrootObjCmd --
+ * TclX_ChrootObjCmd --
  *     Implements the TCL chroot command:
  *         chroot path
  *
@@ -31,11 +31,11 @@
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChrootObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   **objv;
+TclX_ChrootObjCmd (clientData, interp, objc, objv)
+       ClientData  clientData;
+       Tcl_Interp *interp;
+       int         objc;
+       Tcl_Obj   *CONST objv[];
 {
     char   *chrootString;
     int     chrootStrLen;
@@ -56,7 +56,7 @@ Tcl_ChrootObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_TimesObjCmd --
+ * TclX_TimesObjCmd --
  *     Implements the TCL times command:
  *     times
  *
@@ -66,11 +66,11 @@ Tcl_ChrootObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_TimesObjCmd (clientData, interp, objc, objv)
+TclX_TimesObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     struct tms tm;
     char       timesBuf [48];

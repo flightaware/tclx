@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.0.4.1 1997/04/14 02:01:56 markd Exp $
+ * $Id: tclXstring.c,v 8.1 1997/04/17 04:58:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,61 +33,61 @@ static int
 TclX_CindexObjCmd _ANSI_ARGS_((ClientData clientData,
                                Tcl_Interp *interp,
                                int         objc,
-                               Tcl_Obj   **objv));
+                               Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_ClengthObjCmd _ANSI_ARGS_((ClientData clientData,
                                 Tcl_Interp *interp,
                                 int         objc,
-                                Tcl_Obj   **objv));
+                                Tcl_Obj   *CONST objv[]));
 
 static int
 TclX_CconcatObjCmd _ANSI_ARGS_((ClientData clientData,
                                 Tcl_Interp *interp,
                                 int         objc,
-                                Tcl_Obj   **objv));
+                                Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_CrangeObjCmd _ANSI_ARGS_((ClientData clientData,
                                Tcl_Interp *interp,
                                int         objc,
-                               Tcl_Obj   **objv));
+                               Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_CcollateObjCmd _ANSI_ARGS_((ClientData clientData,
                                  Tcl_Interp *interp,
                                  int         objc,
-                                 Tcl_Obj   **objv));
+                                 Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_ReplicateObjCmd _ANSI_ARGS_((ClientData clientData,
                                   Tcl_Interp *interp,
                                   int         objc,
-                                  Tcl_Obj   **objv));
+                                  Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_TranslitObjCmd _ANSI_ARGS_((ClientData clientData,
                                  Tcl_Interp *interp,
                                  int         objc,
-                                 Tcl_Obj   **objv));
+                                 Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_CtypeObjCmd _ANSI_ARGS_((ClientData clientData,
                               Tcl_Interp *interp,
                               int         objc,
-                              Tcl_Obj   **objv));
+                              Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_CtokenObjCmd _ANSI_ARGS_((ClientData clientData,
                                Tcl_Interp *interp,
                                int         objc,
-                               Tcl_Obj   **objv));
+                               Tcl_Obj   *CONST objv[]));
 
 static int 
 TclX_CequalObjCmd _ANSI_ARGS_((ClientData clientData,
                                Tcl_Interp *interp,
                                int         objc,
-                               Tcl_Obj   **objv));
+                               Tcl_Obj   *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -104,10 +104,9 @@ TclX_CindexObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
-    int stringLen;
-    long index;
+    int stringLen, idx;
     char *stringPtr;
 
     if (objc != 3)
@@ -115,14 +114,14 @@ TclX_CindexObjCmd (dummy, interp, objc, objv)
     
     stringPtr = Tcl_GetStringFromObj (objv[1], &stringLen);
 
-    if (TclX_RelativeExpr (interp, objv [2], stringLen, &index) != TCL_OK) {
+    if (TclX_RelativeExpr (interp, objv [2], stringLen, &idx) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if ((index < 0) || (index >= stringLen))
+    if ((idx < 0) || (idx >= stringLen))
         return TCL_OK;
 
-    Tcl_SetStringObj (Tcl_GetObjResult (interp), stringPtr + index, 1);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp), stringPtr + idx, 1);
     return TCL_OK;
 }
 
@@ -141,7 +140,7 @@ TclX_ClengthObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     int length;
 
@@ -158,7 +157,7 @@ TclX_ClengthObjCmd (dummy, interp, objc, objv)
 
 /*-----------------------------------------------------------------------------
  * TclX_CconcatObjCmd --
- *     Implements the cconcat Tcl command:
+ *     Implements the cconcat TclX command:
  *         cconcat ?string? ?string? ?...?
  *
  * Results:
@@ -170,17 +169,20 @@ TclX_CconcatObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
-    int idx;
+    Tcl_Obj    *resultPtr = Tcl_GetObjResult (interp);
+    int         idx;
+    int         stringLength;
+    char       *stringPtr;
 
     /*
      * FIX: It would be faster if we calculated up how much space we needed all
      * at once.  Also we could iterate a pointer into objv until NULL
      */
     for (idx = 1; idx < objc; idx++) {
-        Tcl_StringObjAppendObj (resultPtr, objv [idx]);
+	stringPtr = Tcl_GetStringFromObj (objv [idx], &stringLength);
+	Tcl_AppendToObj (resultPtr, stringPtr, stringLength);
     }
     return TCL_OK;
 }
@@ -202,10 +204,9 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
-    long first, subLen;
-    int fullLen;
+    int first, subLen, fullLen;
     int isRange = (int) clientData;
     char *targetString;
 
@@ -243,8 +244,9 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
     if (first + subLen > fullLen)
         subLen = fullLen - first;
 
-    Tcl_StringObjAppend (Tcl_GetObjResult (interp),
-                         targetString + first, subLen);
+    Tcl_SetObjResult (interp,
+                      Tcl_NewStringObj (targetString + first,
+                                        subLen));
     return TCL_OK;
 }
 
@@ -263,7 +265,7 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     int argIndex, result, local = FALSE;
     char *optionString;
@@ -319,19 +321,23 @@ TclX_ReplicateObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj     *CONST objv[];
 {
-    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
-    long count, repCount;
+    Tcl_Obj     *resultPtr = Tcl_GetObjResult (interp);
+    long         count;
+    long         repCount;
+    char        *stringPtr;
+    int          stringLength;
 
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "string countExpr");
 
-    if (Tcl_GetIntFromObj (interp, objv [2], &repCount) != TCL_OK)
+    if (Tcl_GetLongFromObj (interp, objv [2], &repCount) != TCL_OK)
         return TCL_ERROR;
 
+    stringPtr = Tcl_GetStringFromObj (objv [1], &stringLength);
     for (count = 0; count < repCount; count++) {
-        Tcl_StringObjAppendObj (resultPtr, objv [1]);
+        Tcl_AppendToObj (resultPtr, stringPtr, stringLength);
     }
     return TCL_OK;
 }
@@ -350,7 +356,7 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     Tcl_Obj      *varValueObj;
     Tcl_DString   string;
@@ -366,7 +372,7 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
         return TclX_WrongArgs (interp, objv[0], "strvar separators");
     
     varValueObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
-                                  TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED);
+                                  TCL_LEAVE_ERR_MSG | TCL_PARSE_PART1);
 
     varValue = Tcl_GetStringFromObj (varValueObj, &varValueLen);
 
@@ -374,7 +380,7 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
         return TCL_ERROR;
 
     Tcl_DStringInit (&string);
-    Tcl_DStringAppend (&string, varValue, -1);
+    Tcl_DStringAppend (&string, varValue, varValueLen);
 
     tokenString = Tcl_GetStringFromObj (objv [2], &tokenStrLen);
 
@@ -384,15 +390,14 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     newVarValueObj = Tcl_NewStringObj (startPtr + tokenLen, -1);
 
     if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, newVarValueObj,
-                        TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL) {
+                        TCL_LEAVE_ERR_MSG | TCL_PARSE_PART1) == NULL) {
         Tcl_DStringFree (&string);
         Tcl_DecrRefCount (newVarValueObj);
         return TCL_ERROR;
     }
 
-    Tcl_StringObjAppend (Tcl_GetObjResult (interp), startPtr, tokenLen);
+    Tcl_AppendToObj (Tcl_GetObjResult (interp), startPtr, tokenLen);
     Tcl_DStringFree (&string);
-    Tcl_DecrRefCount (newVarValueObj);
     return TCL_OK;
 }
 
@@ -410,7 +415,7 @@ TclX_CequalObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     char *string1Ptr;
     int string1Len;
@@ -474,7 +479,7 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     unsigned char from [MAX_EXPANSION+1];
     unsigned char to   [MAX_EXPANSION+1];
@@ -558,7 +563,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     int             failIndex = FALSE;
     register char  *class;
@@ -567,7 +572,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     int             classLen;
     int             optStrLen;
 
-    Tcl_Obj        *failVarObj;
+    Tcl_Obj        *failVarObj = NULL;
     Tcl_Obj        *classObj;
     Tcl_Obj        *stringObj;
 
@@ -615,7 +620,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
 
         if (failIndex) 
           goto failInvalid;
-        if (Tcl_GetIntFromObj (interp, stringObj, &number) != TCL_OK)
+        if (Tcl_GetLongFromObj (interp, stringObj, &number) != TCL_OK)
             return TCL_ERROR;
         if ((number < 0) || (number > 255)) {
             TclX_StringAppendObjResult (interp,
@@ -733,7 +738,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
             Tcl_Obj *iObj = Tcl_NewIntObj (index);
 
             if (Tcl_ObjSetVar2 (interp, failVarObj, (Tcl_Obj *) NULL, 
-                    iObj, TCL_LEAVE_ERR_MSG | TCL_PART1_NOT_PARSED) == NULL) {
+                    iObj, TCL_LEAVE_ERR_MSG | TCL_PARSE_PART1) == NULL) {
                 Tcl_DecrRefCount (iObj);
                 return TCL_ERROR;
             }
@@ -764,38 +769,70 @@ void
 TclX_StringInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateObjCommand (interp, "cindex", -1,
-                         TclX_CindexObjCmd, (ClientData) 0, 
-                         (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "clength", -1,
-                          TclX_ClengthObjCmd, (ClientData) 0,
+    Tcl_CreateObjCommand (interp, 
+			  "cindex",
+                          TclX_CindexObjCmd, 
+			  (ClientData) 0, 
+                          (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp, 
+			  "clength",
+                          TclX_ClengthObjCmd, 
+			  (ClientData) 0,
                           (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateObjCommand (interp, "cconcat", -1,
-                          TclX_CconcatObjCmd, (ClientData) 0,
+
+    Tcl_CreateObjCommand (interp, 
+			  "cconcat",
+                          TclX_CconcatObjCmd, 
+			  (ClientData) 0,
                           (Tcl_CmdDeleteProc *)NULL);
-    Tcl_CreateObjCommand (interp, "crange", -1,
-                          TclX_CrangeObjCmd, (ClientData) TRUE, 
+
+    Tcl_CreateObjCommand (interp, 
+			  "crange",
+                          TclX_CrangeObjCmd, 
+			  (ClientData) TRUE, 
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "csubstr", -1,
-                          TclX_CrangeObjCmd, (ClientData) FALSE, 
+
+    Tcl_CreateObjCommand (interp, 
+			  "csubstr",
+                          TclX_CrangeObjCmd,
+			  (ClientData) FALSE, 
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "ccollate", -1,
-                          TclX_CcollateObjCmd, (ClientData) 0,
+
+    Tcl_CreateObjCommand (interp, 
+			  "ccollate",
+                          TclX_CcollateObjCmd,
+			  (ClientData) 0,
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "replicate", -1,
-                          TclX_ReplicateObjCmd, (ClientData) 0, 
+
+    Tcl_CreateObjCommand (interp,
+			  "replicate",
+                          TclX_ReplicateObjCmd, 
+			  (ClientData) 0, 
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "translit", -1,
-                          TclX_TranslitObjCmd, (ClientData) 0, 
+
+    Tcl_CreateObjCommand (interp, 
+			  "translit",
+                          TclX_TranslitObjCmd,
+			  (ClientData) 0, 
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "ctype", -1,
-                          TclX_CtypeObjCmd, (ClientData) 0, 
+
+    Tcl_CreateObjCommand (interp, 
+			  "ctype",
+                          TclX_CtypeObjCmd,
+			  (ClientData) 0, 
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "ctoken", -1,
-                          TclX_CtokenObjCmd, (ClientData) 0, 
+
+    Tcl_CreateObjCommand (interp, 
+			  "ctoken",
+                          TclX_CtokenObjCmd,
+			  (ClientData) 0, 
                           (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand (interp, "cequal", -1,
-                          TclX_CequalObjCmd, (ClientData) 0, 
+
+    Tcl_CreateObjCommand (interp, 
+			  "cequal",
+			  TclX_CequalObjCmd,
+			  (ClientData) 0, 
                           (Tcl_CmdDeleteProc*) NULL);
 
 }

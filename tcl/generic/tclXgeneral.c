@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.0.4.1 1997/04/14 02:01:45 markd Exp $
+ * $Id: tclXgeneral.c,v 8.1 1997/04/17 04:58:40 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -77,7 +77,7 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_EchoObjCmd --
+ * TclX_EchoObjCmd --
  *    Implements the TCL echo command:
  *        echo ?str ...?
  *
@@ -86,11 +86,11 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_EchoObjCmd (dummy, interp, objc, objv)
-    ClientData  dummy;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   **objv;
+TclX_EchoObjCmd (dummy, interp, objc, objv)
+     ClientData  dummy;
+     Tcl_Interp *interp;
+     int         objc;
+     Tcl_Obj    *CONST objv[];
 {
     int   idx;
     Tcl_Channel channel;
@@ -120,17 +120,17 @@ Tcl_EchoObjCmd (dummy, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_InfoxObjCmd --
+ * TclX_InfoxObjCmd --
  *    Implements the TCL infox command:
  *        infox option
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_InfoxObjCmd (clientData, interp, objc, objv)
+TclX_InfoxObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj    *CONST objv[];
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
     char *optionPtr;
@@ -271,7 +271,7 @@ Tcl_InfoxObjCmd (clientData, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_LoopObjCmd --
+ * TclX_LoopObjCmd --
  *     Implements the TCL loop command:
  *         loop var start end ?increment? command
  *
@@ -280,14 +280,14 @@ Tcl_InfoxObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_LoopObjCmd (dummy, interp, objc, objv)
-    ClientData  dummy;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   **objv;
+TclX_LoopObjCmd (dummy, interp, objc, objv)
+     ClientData  dummy;
+     Tcl_Interp *interp;
+     int         objc;
+     Tcl_Obj    *CONST objv[];
 {
     int       result = TCL_OK;
-    long      i, first, limit, incr = 1;
+    int      i, first, limit, incr = 1;
     Tcl_Obj  *command, *iObj;
 
     if ((objc < 5) || (objc > 6))
@@ -296,12 +296,14 @@ Tcl_LoopObjCmd (dummy, interp, objc, objv)
 
     if (Tcl_ExprStringObj (interp, objv [2]) != TCL_OK)
         return TCL_ERROR;
-    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp), &first) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp),
+                           &first) != TCL_OK)
 	return TCL_ERROR;
 
     if (Tcl_ExprStringObj (interp, objv [3]) != TCL_OK)
         return TCL_ERROR;
-    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp), &limit) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp),
+                           &limit) != TCL_OK)
 	return TCL_ERROR;
 
     if (objc == 5) {
@@ -315,16 +317,22 @@ Tcl_LoopObjCmd (dummy, interp, objc, objv)
         command = objv [5];
     }
 
-    iObj = Tcl_NewIntObj (first);
-
     for (i = first;
-             (((i < limit) && (incr >= 0)) || ((i > limit) && (incr < 0)));
-             i += incr) {
-
+         (((i < limit) && (incr >= 0)) || ((i > limit) && (incr < 0)));
+         i += incr) {
+        
+        
+	iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
+                               TCL_PARSE_PART1);
+        if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
+            iObj = Tcl_NewIntObj (first);
+            if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
+                                TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+                Tcl_DecrRefCount (iObj);
+                return TCL_ERROR;
+            }
+        }
         Tcl_SetIntObj (iObj, i);
-	if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *)NULL, iObj,
-			    TCL_LEAVE_ERR_MSG|TCL_PART1_NOT_PARSED) == NULL)
-	    return TCL_ERROR;
 
         result = Tcl_EvalObj (interp, command);
         if (result == TCL_CONTINUE) {
@@ -337,7 +345,8 @@ Tcl_LoopObjCmd (dummy, interp, objc, objv)
                 
                 sprintf (buf, "\n    (\"loop\" body line %d)", 
                          interp->errorLine);
-		Tcl_StringObjAppend (Tcl_GetObjResult (interp), buf, -1);
+		Tcl_AppendStringsToObj (Tcl_GetObjResult (interp), buf, 
+                                        (char *) NULL);
             }
             break;
         }
@@ -346,8 +355,18 @@ Tcl_LoopObjCmd (dummy, interp, objc, objv)
     /*
      * Set variable to its final value.
      */
+    iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
+                           TCL_PARSE_PART1);
+    if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
+        iObj = Tcl_NewIntObj (first);
+        if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
+                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (iObj);
+            return TCL_ERROR;
+        }
+    }
     Tcl_SetIntObj (iObj, i);
-    Tcl_DecrRefCount (iObj);
+
     return result;
 }
 

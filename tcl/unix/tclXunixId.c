@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixId.c,v 8.0.4.1 1997/04/14 02:02:50 markd Exp $
+ * $Id: tclXunixId.c,v 8.1 1997/04/17 04:59:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -55,56 +55,56 @@ GroupnameToGroupidResult _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 IdConvert _ANSI_ARGS_((Tcl_Interp *interp,
-                       int         argc,
-                       char      **argv));
+                       int         objc,
+                       Tcl_Obj   *CONST objv[]));
 
 static int
-IdEffective  _ANSI_ARGS_((Tcl_Interp *interp,
-                          int         argc,
-                          char      **argv));
+IdEffective  _ANSI_ARGS_((Tcl_Interp  *interp,
+                          int          objc,
+                          Tcl_Obj      *CONST objv[]));
 
 static int
-IdProcess  _ANSI_ARGS_((Tcl_Interp *interp,
-                        int         argc,
-                        char      **argv));
+IdProcess  _ANSI_ARGS_((Tcl_Interp    *interp,
+                        int            objc,
+                        Tcl_Obj      *CONST objv[]));
 
 static int
-IdGroupids  _ANSI_ARGS_((Tcl_Interp *interp,
-                         int         argc,
-                         char      **argv,
+IdGroupids  _ANSI_ARGS_((Tcl_Interp    *interp,
+                         int            objc,
+                         Tcl_Obj      *CONST objv[],
                          int         symbolic));
 
 static int
-IdHost _ANSI_ARGS_((Tcl_Interp *interp,
-                    int         argc,
-                    char      **argv));
+IdHost _ANSI_ARGS_((Tcl_Interp    *interp,
+                    int            objc,
+                    Tcl_Obj      *CONST objv[]));
 
 static int
-GetSetWrongArgs _ANSI_ARGS_((Tcl_Interp *interp,
-                             char      **argv));
+GetSetWrongArgs _ANSI_ARGS_((Tcl_Interp    *interp,
+                             Tcl_Obj      *CONST objv[]));
 
 static int
-IdUser _ANSI_ARGS_((Tcl_Interp *interp,
-                    int         argc,
-                    char      **argv));
+IdUser _ANSI_ARGS_((Tcl_Interp    *interp,
+                    int            objc,
+                    Tcl_Obj      *CONST objv[]));
 
 static int
-IdUserId _ANSI_ARGS_((Tcl_Interp *interp,
-                      int         argc,
-                      char      **argv));
+IdUserId _ANSI_ARGS_((Tcl_Interp    *interp,
+                      int            objc,
+                      Tcl_Obj      *CONST objv[]));
 
 static int
-IdGroup _ANSI_ARGS_((Tcl_Interp *interp,
-                     int         argc,
-                     char      **argv));
+IdGroup _ANSI_ARGS_((Tcl_Interp    *interp,
+                     int            objc,
+                     Tcl_Obj      *CONST objv[]));
 
 static int
-IdGroupId _ANSI_ARGS_((Tcl_Interp *interp,
-                       int         argc,
-                       char      **argv));
+IdGroupId _ANSI_ARGS_((Tcl_Interp    *interp,
+                       int            objc,
+                       Tcl_Obj      *CONST objv[]));
 
 /*-----------------------------------------------------------------------------
- * Tcl_IdCmd --
+ * TclX_IdObjCmd --
  *     Implements the TclX id command on Unix.
  *
  *        id user ?name?
@@ -147,13 +147,19 @@ UseridToUsernameResult (interp, userId)
 {
     uid_t          uid = (uid_t) userId;
     struct passwd *pw = getpwuid (userId);
+    Tcl_Obj       *resultObj = Tcl_GetObjResult (interp);
+    char          userIdString[16];
 
     if ((pw == NULL) || ((int) uid != userId)) {
-        sprintf (interp->result, "unknown user id: %d", userId);
+	sprintf (userIdString, "%d", uid);
+	Tcl_AppendStringsToObj (resultObj, 
+	    "unknown user id: ", 
+	    userIdString,
+	    NULL);
         endpwent ();
         return TCL_ERROR;
     }
-    Tcl_SetResult (interp, pw->pw_name, TCL_VOLATILE);
+    Tcl_AppendToObj (resultObj, pw->pw_name, -1);
     endpwent ();
     return TCL_OK;
 }
@@ -164,14 +170,17 @@ UsernameToUseridResult (interp, userName)
     char       *userName;
 {
     struct passwd *pw = getpwnam (userName);
+    Tcl_Obj       *resultObj = Tcl_GetObjResult (interp);
 
     if (pw == NULL) {
-        Tcl_AppendResult (interp, "unknown user id: ", userName, 
-                          (char *) NULL);
+	Tcl_AppendStringsToObj (resultObj,
+				"unknown user id: ", 
+				userName, 
+				 (char *) NULL);
         endpwent ();
         return TCL_ERROR;
     }
-    sprintf (interp->result, "%d", pw->pw_uid);
+    Tcl_SetObjResult (interp, Tcl_NewIntObj (pw->pw_uid));
     endpwent ();
     return TCL_OK;
 }
@@ -181,15 +190,22 @@ GroupidToGroupnameResult (interp, groupId)
     Tcl_Interp *interp;
     int         groupId;
 {
-    gid_t         gid = (gid_t) groupId;
-    struct group *grp = getgrgid (groupId);
+    gid_t          gid = (gid_t) groupId;
+    struct group  *grp = getgrgid (groupId);
+    Tcl_Obj       *resultObj = Tcl_GetObjResult (interp);
+    char          groupIdString[16];
+
+    sprintf (groupIdString, "%d", gid);
 
     if ((grp == NULL) || ((int) gid != groupId)) {
-        sprintf (interp->result, "unknown group id: %d", groupId);
+	Tcl_AppendStringsToObj (resultObj, 
+				"unknown group id: ", 
+				groupIdString,
+				(char *)NULL);
         endgrent ();
         return TCL_ERROR;
     }
-    Tcl_SetResult (interp, grp->gr_name, TCL_VOLATILE);
+    Tcl_AppendToObj (resultObj, grp->gr_name, -1);
     endgrent ();
     return TCL_OK;
 }
@@ -199,13 +215,16 @@ GroupnameToGroupidResult (interp, groupName)
     Tcl_Interp *interp;
     char       *groupName;
 {
-    struct group *grp = getgrnam (groupName);
+    struct group  *grp = getgrnam (groupName);
+    Tcl_Obj       *resultObj = Tcl_GetObjResult (interp);
     if (grp == NULL) {
-        Tcl_AppendResult (interp, "unknown group id: ", groupName,
-                          (char *) NULL);
+        Tcl_AppendStringsToObj (resultObj, 
+				"unknown group id: ",
+				groupName,
+				(char *) NULL);
         return TCL_ERROR;
     }
-    sprintf (interp->result, "%d", grp->gr_gid);
+    Tcl_SetIntObj (resultObj, grp->gr_gid);
     return TCL_OK;
 }
 
@@ -213,40 +232,45 @@ GroupnameToGroupidResult (interp, groupName)
  * id convert type value
  */
 static int
-IdConvert (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+IdConvert (interp, objc, objv)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
-    int uid, gid;
+    long           uid;
+    long           gid;
+    char          *subCommand;
+    char          *valueString;
 
-    if (argc != 4) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " convert type value", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 4)
+        return TclX_WrongArgs (interp, objv [0], "convert type value");
 
-    if (STREQU (argv[2], "user"))
-        return UsernameToUseridResult (interp, argv[3]);
+    subCommand = Tcl_GetStringFromObj (objv[2], NULL);
+    valueString = Tcl_GetStringFromObj (objv[3], NULL);
+
+    if (STREQU (subCommand, "user"))
+        return UsernameToUseridResult (interp, valueString);
     
-    if (STREQU (argv[2], "userid")) {
-        if (Tcl_GetInt (interp, argv[3], &uid) != TCL_OK) 
+    if (STREQU (subCommand, "userid")) {
+        if (Tcl_GetLongFromObj (interp, objv[3], &uid) != TCL_OK) 
             return TCL_ERROR;
         return UseridToUsernameResult (interp, uid);
     }
     
-    if (STREQU (argv[2], "group"))
-        return GroupnameToGroupidResult (interp, argv[3]);
+    if (STREQU (subCommand, "group"))
+        return GroupnameToGroupidResult (interp, valueString);
     
-    if (STREQU (argv[2], "groupid")) {
-        if (Tcl_GetInt (interp, argv[3], &gid) != TCL_OK)
+    if (STREQU (subCommand, "groupid")) {
+        if (Tcl_GetLongFromObj (interp, objv[3], &gid) != TCL_OK)
             return TCL_ERROR;
         return GroupidToGroupnameResult (interp, gid);
         
     }
-    Tcl_AppendResult (interp, "third arg must be \"user\", \"userid\", ",
-                      "\"group\" or \"groupid\", got \"", argv [2], "\"",
-                      (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"third arg must be \"user\", \"userid\", ",
+                                 "\"group\" or \"groupid\", got \"", 
+				 subCommand, "\"",
+                                 (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -254,36 +278,38 @@ IdConvert (interp, argc, argv)
  * id effective type
  */
 static int
-IdEffective (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+IdEffective (interp, objc, objv)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " effective type", (char *) NULL);
-        return TCL_ERROR;
-    }
+    char          *subCommand;
+
+    if (objc != 3)
+        return TclX_WrongArgs (interp, objv [0], "effective type");
     
-    if (STREQU (argv[2], "user"))
+    subCommand = Tcl_GetStringFromObj (objv[2], NULL);
+
+    if (STREQU (subCommand, "user"))
         return UseridToUsernameResult (interp, geteuid ());
     
-    if (STREQU (argv[2], "userid")) {
-        sprintf (interp->result, "%d", geteuid ());
+    if (STREQU (subCommand, "userid")) {
+	Tcl_SetObjResult (interp, Tcl_NewIntObj (geteuid ()));
         return TCL_OK;
     }
     
-    if (STREQU (argv[2], "group"))
+    if (STREQU (subCommand, "group"))
         return GroupidToGroupnameResult (interp, getegid ());
     
-    if (STREQU (argv[2], "groupid")) {
-        sprintf (interp->result, "%d", getegid ());
+    if (STREQU (subCommand, "groupid")) {
+	Tcl_SetObjResult (interp, Tcl_NewIntObj (getegid ()));
         return TCL_OK;
     }
 
-    Tcl_AppendResult (interp, "third arg must be \"user\", \"userid\", ",
-                      "\"group\" or \"groupid\", got \"", argv [2], "\"",
-                      (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"third arg must be \"user\", \"userid\", ",
+                                 "\"group\" or \"groupid\", got \"", 
+				 subCommand, "\"", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -291,46 +317,47 @@ IdEffective (interp, argc, argv)
  * id process ?parent|group? ?set?
  */
 static int
-IdProcess (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+IdProcess (interp, objc, objv)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
-    pid_t  pid;
+    pid_t          pid;
+    char          *subCommand;
+    char          *trailerCommand;
 
-    if (argc > 4) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " process ?parent|group? ?set?",
-                          (char *) NULL);
-        return TCL_OK;
-    }
-    if (argc == 2) {
-        sprintf (interp->result, "%d", getpid ());
+    if (objc > 4)
+        return TclX_WrongArgs (interp, 
+			       objv [0], 
+			       "process ?parent|group? ?set?");
+
+    if (objc == 2) {
+	Tcl_SetObjResult (interp, Tcl_NewIntObj (getpid ()));
         return TCL_OK;
     }
 
-    if (STREQU (argv[2], "parent")) {
-        if (argc != 3) {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                              " process parent", (char *) NULL);
-            return TCL_ERROR;
-        }
-        sprintf (interp->result, "%d", getppid ());
+    subCommand = Tcl_GetStringFromObj (objv[2], NULL);
+
+    if (STREQU (subCommand, "parent")) {
+        if (objc != 3)
+            return TclX_WrongArgs (interp, objv [0], 
+                              " process parent");
+
+	Tcl_SetObjResult (interp, Tcl_NewIntObj (getppid ()));
         return TCL_OK;
     }
-    if (STREQU (argv[2], "group")) {
-        if (argc == 3) {
-            sprintf (interp->result, "%d", getpgrp ());
+    if (STREQU (subCommand, "group")) {
+        if (objc == 3) {
+	    Tcl_SetObjResult (interp, Tcl_NewIntObj (getpgrp ()));
             return TCL_OK;
         }
-        if ((argc != 4) || !STREQU (argv[3], "set")) {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                              " process group ?set?", (char *) NULL);
-            return TCL_ERROR;
-        }
+	trailerCommand = Tcl_GetStringFromObj (objv[3], NULL);
+        if ((objc != 4) || !STREQU (trailerCommand, "set"))
+            return TclX_WrongArgs (interp, objv [0], 
+                              " process group ?set?");
 
         if (Tcl_IsSafe (interp)) {
-            Tcl_AppendResult (interp,
+            TclX_StringAppendObjResult (interp,
                               "can't set process group from a safe interpeter",
                               (char *) NULL);
             return TCL_ERROR;
@@ -345,8 +372,11 @@ IdProcess (interp, argc, argv)
         return TCL_OK;
     }
 
-    Tcl_AppendResult (interp, "expected one of \"parent\" or \"group\" ",
-                      "got \"", argv [2], "\"", (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"expected one of \"parent\" or \"group\" ",
+                                "got \"", 
+				subCommand, "\"", 
+				(char *) NULL);
     return TCL_ERROR;
 }
 
@@ -355,23 +385,21 @@ IdProcess (interp, argc, argv)
  * id groups
  */
 static int
-IdGroupids (interp, argc, argv, symbolic)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-    int         symbolic;
+IdGroupids (interp, objc, objv, symbolic)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
+    int            symbolic;
 {
 #ifndef NO_GETGROUPS
-    gid_t *groups;
-    int nGroups, groupIndex;
-    char numText [12];
-    struct group *grp;
+    gid_t         *groups;
+    int            nGroups, groupIndex;
+    struct group  *grp;
+    Tcl_Obj       *resultObj = Tcl_GetObjResult (interp);
+    Tcl_Obj	  *newObj;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", argv [1],
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (objc != 2)
+        return TclX_WrongArgs (interp, objv [0], "arg");
 
 #ifndef NO_SYSCONF
     if (confNGroups < 0)
@@ -382,24 +410,38 @@ IdGroupids (interp, argc, argv, symbolic)
 
     nGroups = getgroups (confNGroups, groups);
     if (nGroups < 0) {
-        interp->result = Tcl_PosixError (interp);
+        Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
+                                Tcl_PosixError (interp), (char *) NULL);
         ckfree ((char *) groups);
         return TCL_ERROR;
     }
 
     for (groupIndex = 0; groupIndex < nGroups; groupIndex++) {
         if (symbolic) {
-            grp = getgrgid (groups [groupIndex]);
+	    int    groupId = groups [groupIndex];
+            grp = getgrgid (groupId);
             if (grp == NULL) {
-                sprintf (interp->result, "unknown group id: %d", 
-                         groups [groupIndex]);
+		char    groupIdString[16];
+
+		sprintf (groupIdString, "%d", groupId);
+		Tcl_AppendStringsToObj (resultObj,
+		    "unknown group id: ",
+		    groupIdString,
+		    (char *)NULL);
                 endgrent ();
                 return TCL_ERROR;
             }
-            Tcl_AppendElement (interp, grp->gr_name);
+	    newObj = Tcl_NewStringObj (grp->gr_name, -1);
+            Tcl_ListObjAppendElement (interp, 
+				      resultObj,
+				      newObj);
+	    Tcl_DecrRefCount (newObj);
         } else {
-            sprintf (numText, "%d", groups[groupIndex]);
-            Tcl_AppendElement (interp, numText);
+	    newObj = Tcl_NewIntObj(groups[groupIndex]);
+            Tcl_ListObjAppendElement (interp, 
+				      resultObj,
+				      newObj);
+	    Tcl_DecrRefCount (newObj);
         }
     }
     if (symbolic)
@@ -407,8 +449,9 @@ IdGroupids (interp, argc, argv, symbolic)
     ckfree ((char *) groups);
     return TCL_OK;
 #else
-    Tcl_AppendResult (interp, "group id lists unavailable on this system ",
-                      "(no getgroups function)", (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+				"group id lists unavailable on this system ",
+                                "(no getgroups function)", (char *) NULL);
     return TCL_ERROR;
 #endif
 }
@@ -417,25 +460,32 @@ IdGroupids (interp, argc, argv, symbolic)
  * id host
  */
 static int
-IdHost (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+IdHost (interp, objc, objv)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
 #ifndef NO_GETHOSTNAME
-    if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " host", (char *) NULL);
-        return TCL_ERROR;
-    }
-	if (gethostname (interp->result, TCL_RESULT_SIZE) < 0) {
+#ifndef MAXHOSTNAMELEN
+#  define MAXHOSTNAMELEN 256
+#endif
+    char hostNameBuf[MAXHOSTNAMELEN];
+
+    if (objc != 2)
+        return TclX_WrongArgs (interp, objv [0], "host");
+
+	if (gethostname (hostNameBuf, MAXHOSTNAMELEN) < 0) {
 	    interp->result = Tcl_PosixError (interp);
 	    return TCL_ERROR;
 	}
+	hostNameBuf[MAXHOSTNAMELEN-1] = '\0';
+	Tcl_SetObjResult (interp, Tcl_NewStringObj (hostNameBuf, -1));
 	return TCL_OK;
 #else
-        Tcl_AppendResult (interp, "host name unavailable on this system ",
-                          "(no gethostname function)", (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "host name unavailable on this system ",
+                                    "(no gethostname function)",
+				    (char *) NULL);
         return TCL_ERROR;
 #endif
 }
@@ -444,37 +494,41 @@ IdHost (interp, argc, argv)
  * Return error when a get set function has too many args (2 or 3 expected).
  */
 static int
-GetSetWrongArgs (interp, argv)
-    Tcl_Interp *interp;
-    char      **argv;
+GetSetWrongArgs (interp, objv)
+    Tcl_Interp    *interp;
+    Tcl_Obj      *CONST objv[];
 {
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", argv [1],
-                      " ?value?", (char *) NULL);
-    return TCL_ERROR;
+    return TclX_WrongArgs (interp, objv [0], "arg ?value?");
 }
 
 /*
  * id user
  */
 static int
-IdUser (interp, argc, argv)
+IdUser (interp, objc, objv)
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
     struct passwd *pw;
+    char          *user;
 
-    if (argc > 3)
-        return GetSetWrongArgs (interp, argv);
+    if (objc > 3)
+        return GetSetWrongArgs (interp, objv);
 
-    if (argc == 2) {
+    if (objc == 2) {
         return UseridToUsernameResult (interp, getuid ());
     }
 
-    pw = getpwnam (argv[2]);
+    user = Tcl_GetStringFromObj (objv[2], NULL);
+
+    pw = getpwnam (user);
     if (pw == NULL) {
-        Tcl_AppendResult (interp, "user \"", argv[2], "\" does not exist",
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "user \"", 
+				    user, 
+				    "\" does not exist",
+                                    (char *) NULL);
         goto errorExit;
     }
     if (setuid (pw->pw_uid) < 0) {
@@ -493,22 +547,22 @@ IdUser (interp, argc, argv)
  * id userid
  */
 static int
-IdUserId (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+IdUserId (interp, objc, objv)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
-    int  uid;
+    int uid;
 
-    if (argc > 3)
-        return GetSetWrongArgs (interp, argv);
+    if (objc > 3)
+        return GetSetWrongArgs (interp, objv);
 
-    if (argc == 2) {
-        sprintf (interp->result, "%d", getuid ());
+    if (objc == 2) {
+	Tcl_SetObjResult (interp, Tcl_NewIntObj (getuid()));
         return TCL_OK;
     }
 
-    if (Tcl_GetInt (interp, argv[2], &uid) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, objv[2], &uid) != TCL_OK)
         return TCL_ERROR;
 
     if (setuid ((uid_t) uid) < 0) {
@@ -523,24 +577,30 @@ IdUserId (interp, argc, argv)
  * id group
  */
 static int
-IdGroup (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+IdGroup (interp, objc, objv)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
     struct group *grp;
+    char         *groupName;
 
-    if (argc > 3)
-        return GetSetWrongArgs (interp, argv);
+    if (objc > 3)
+        return GetSetWrongArgs (interp, objv);
 
-    if (argc == 2) {
+    if (objc == 2) {
         return GroupidToGroupnameResult (interp, getgid ());
     }
+
+    groupName = Tcl_GetStringFromObj (objv[2], NULL);
      
-    grp = getgrnam (argv[2]);
+    grp = getgrnam (groupName);
     if (grp == NULL) {
-        Tcl_AppendResult (interp, "group \"", argv[2], "\" does not exist",
-                          (char *) NULL);
+        TclX_StringAppendObjResult (interp, 
+				    "group \"", 
+				    groupName,
+				    "\" does not exist",
+                                    (char *) NULL);
         goto errorExit;
     }
     if (setgid (grp->gr_gid) < 0) {
@@ -559,22 +619,22 @@ IdGroup (interp, argc, argv)
  * id groupid
  */
 static int
-IdGroupId (interp, argc, argv)
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+IdGroupId (interp, objc, objv)
+    Tcl_Interp    *interp;
+    int            objc;
+    Tcl_Obj      *CONST objv[];
 {
-    int  gid;
+    int gid;
+    
+    if (objc > 3)
+        return GetSetWrongArgs (interp, objv);
 
-    if (argc > 3)
-        return GetSetWrongArgs (interp, argv);
-
-    if (argc == 2) {
-        sprintf (interp->result, "%d", getgid ());
+    if (objc == 2) {
+	Tcl_SetIntObj (Tcl_GetObjResult (interp), getgid());
         return TCL_OK;
     }
 
-    if (Tcl_GetInt (interp, argv[2], &gid) != TCL_OK)
+    if (Tcl_GetIntFromObj (interp, objv[2], &gid) != TCL_OK)
         return TCL_ERROR;
 
     if (setgid ((gid_t) gid) < 0) {
@@ -586,83 +646,84 @@ IdGroupId (interp, argc, argv)
 }
 
 int
-Tcl_IdCmd (clientData, interp, argc, argv)
+TclX_IdObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj   *CONST objv[];
 {
-    if (argc < 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " arg ?arg...?",
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
+    char       *subCommand;
 
+    if (objc < 2)
+	return TclX_WrongArgs (interp, objv [0], "arg ?arg...?");
+
+    subCommand = Tcl_GetStringFromObj (objv [1], NULL);
     /*
      * If the first argument is "convert", handle the conversion.
      */
-    if (STREQU (argv[1], "convert")) {
-        return IdConvert (interp, argc, argv);
+    if (STREQU (subCommand, "convert")) {
+        return IdConvert (interp, objc, objv);
     }
 
     /*
      * If the first argument is "effective", return the effective user ID,
      * name, group ID or name.
      */
-    if (STREQU (argv[1], "effective")) {
-        return IdEffective (interp, argc, argv);
+    if (STREQU (subCommand, "effective")) {
+        return IdEffective (interp, objc, objv);
     }
 
     /*
      * If the first argument is "process", return the process ID, parent's
      * process ID, process group or set the process group depending on args.
      */
-    if (STREQU (argv[1], "process")) {
-        return IdProcess (interp, argc, argv);
+    if (STREQU (subCommand, "process")) {
+        return IdProcess (interp, objc, objv);
     }
 
     /*
      * Handle getting list of groups the user is a member of.
      */
-    if (STREQU (argv[1], "groups")) {
-        return IdGroupids (interp, argc, argv, TRUE);
+    if (STREQU (subCommand, "groups")) {
+        return IdGroupids (interp, objc, objv, TRUE);
     }
 
-    if (STREQU (argv[1], "groupids")) {
-        return IdGroupids (interp, argc, argv, FALSE);
+    if (STREQU (subCommand, "groupids")) {
+        return IdGroupids (interp, objc, objv, FALSE);
     }
 
     /*
      * Handle returning the host name if its available.
      */
-    if (STREQU (argv[1], "host")) {
-        return IdHost (interp, argc, argv);
+    if (STREQU (subCommand, "host")) {
+        return IdHost (interp, objc, objv);
     }
 
     /*
      * Handle setting or returning the user ID or group ID (by name or number).
      */
-    if (STREQU (argv[1], "user")) {
-        return IdUser (interp, argc, argv);
+    if (STREQU (subCommand, "user")) {
+        return IdUser (interp, objc, objv);
     }
 
-    if (STREQU (argv[1], "userid")) {
-        return IdUserId (interp, argc, argv);
+    if (STREQU (subCommand, "userid")) {
+        return IdUserId (interp, objc, objv);
     }
 
-    if (STREQU (argv[1], "group")) {
-        return IdGroup (interp, argc, argv);
+    if (STREQU (subCommand, "group")) {
+        return IdGroup (interp, objc, objv);
     }
 
-    if (STREQU (argv[1], "groupid")) {
-        return IdGroupId (interp, argc, argv);
+    if (STREQU (subCommand, "groupid")) {
+        return IdGroupId (interp, objc, objv);
     }
 
-    Tcl_AppendResult (interp, "second arg must be one of \"convert\", ",
-                      "\"effective\", \"process\", ",
-                      "\"user\", \"userid\", \"group\", \"groupid\", ",
-                      "\"groups\", \"groupids\", ",
-                      "or \"host\"", (char *) NULL);
+    TclX_StringAppendObjResult (interp, 
+			"second arg must be one of \"convert\", ",
+                        "\"effective\", \"process\", ",
+                        "\"user\", \"userid\", \"group\", \"groupid\", ",
+                        "\"groups\", \"groupids\", ",
+                        "or \"host\"", (char *) NULL);
     return TCL_ERROR;
 }
 

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXwinOS.c,v 8.2 1997/04/17 05:00:00 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -48,6 +48,7 @@ TclXNotAvailableError (Tcl_Interp *interp,
     TclSetObjResultFromStrResult (interp);  /* FIX: remove */
     return TCL_ERROR;
 }
+
 
 /*-----------------------------------------------------------------------------
  * TclX_SplitWinCmdLine --
@@ -120,6 +121,7 @@ TclX_SplitWinCmdLine (int    *argcPtr,
     (*argvPtr) [i] = NULL;
     *argcPtr = i;
 }
+
 
 /*-----------------------------------------------------------------------------
  * ChannelToHandle --

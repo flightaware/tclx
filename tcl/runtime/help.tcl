@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: help.tcl,v 8.2 1997/04/17 04:59:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -140,6 +140,7 @@ proc help:ListSubject {pathName pathList subjectsVar pagesVar} {
     set foundDir 0
     foreach dir $pathList {
         if ![file isdirectory $dir] continue
+        if [cequal [file tail $dir] CVS] continue
         set foundDir 1
         foreach file [glob -nocomplain $dir/*] {
 	    if {[lsearch {.brf .orig .diff .rej} [file extension $file]] \

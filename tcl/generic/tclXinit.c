@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXinit.c,v 8.3 1997/04/17 04:58:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,7 +37,7 @@
  * Globals:
  *   o ${w}x_library - Set to the directory containing the init file.
  */
-static char tclx_fileinit [] =
+static char tclx_findinit [] =
 "proc tclx_findinit {w defaultLib version noInit} {\n\
     upvar #0 env env ${w}x_library libDir tcl_platform tcl_platform\n\
     set dirs {}\n\
@@ -63,7 +63,7 @@ static char tclx_fileinit [] =
     error $msg\n\
 }";
 
-static char tclx_fileinitProc [] = "tclx_findinit";
+static char tclx_findinitProc [] = "tclx_findinit";
 
 /*
  * Prototypes of internal functions.
@@ -82,7 +82,7 @@ InitSetup _ANSI_ARGS_((Tcl_Interp *interp));
  *
  * Find the location of the init file, set the *_library Tcl variable to
  * the directory containing it and evaluate the init file.  This uses the
- * inline proc tclx_fileinit defined above, cause its easier in Tcl.  See
+ * inline proc tclx_findinit defined above, cause its easier in Tcl.  See
  * that proc's documentation for a description of the search algorithm,
  *
  * Parameters:
@@ -106,25 +106,28 @@ TclXRuntimeInit (interp, which, defaultLib, version)
 {
 #define PROC_ARGC 5
     Tcl_CmdInfo cmdInfo;
-    char *procArgv [PROC_ARGC + 1];
+    char *procArgv [PROC_ARGC + 1], *quick;
     
     /*
      * Find the init procedure.  If its not defined, define it now.
      */
-    if (!Tcl_GetCommandInfo (interp, tclx_fileinitProc, &cmdInfo)) {
-        if (Tcl_GlobalEval (interp, tclx_fileinit) != TCL_OK)
+    if (!Tcl_GetCommandInfo (interp, tclx_findinitProc, &cmdInfo)) {
+        if (Tcl_GlobalEval (interp, tclx_findinit) != TCL_OK)
             return TCL_ERROR;
-        if (!Tcl_GetCommandInfo (interp, tclx_fileinitProc, &cmdInfo)) {
-            panic ("can't find %s\n", tclx_fileinitProc);
+        if (!Tcl_GetCommandInfo (interp, tclx_findinitProc, &cmdInfo)) {
+            panic ("can't find %s\n", tclx_findinitProc);
         }
     }
+
+    quick = Tcl_GetVar2 (interp, "TCLXENV", "quick", TCL_GLOBAL_ONLY);
+    if (quick == NULL)
+        quick = "0";
     
-    procArgv [0] = tclx_fileinitProc;
+    procArgv [0] = tclx_findinitProc;
     procArgv [1] = which;
     procArgv [2] = defaultLib;
     procArgv [3] = version;
-    procArgv [4] =(Tcl_GetVar2 (interp, "TCLXENV", "quick",
-                                TCL_GLOBAL_ONLY) != NULL) ? "1" : "0";
+    procArgv [4] = quick;
     procArgv [5] = NULL;
 
     return cmdInfo.proc (cmdInfo.clientData,
@@ -157,15 +160,20 @@ TclX_EvalRCFile (interp)
     Tcl_DStringInit (&buffer);
 
     path = Tcl_TranslateFileName (interp, path, &buffer);
-    if (path == NULL)
-        TclX_ErrorExit (interp, 1);
-        
+    if (path == NULL) {
+        TclX_ErrorExit (interp, 1,
+                        "\n    while\ntranslating RC file name \"%.*s\"",
+                         TCLX_ERR_EXIT_MSG_MAX-64, path);
+    }
+
     if (access (path, R_OK) == 0) {
         if (TclX_Eval (interp,
                        TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
                        TCLX_EVAL_ERR_HANDLER,
                        path) == TCL_ERROR) {
-            TclX_ErrorExit (interp, 1);
+            TclX_ErrorExit (interp, 1,
+                            "\n    while\nevaluating RC file \"%.*s\"",
+                            TCLX_ERR_EXIT_MSG_MAX-64, path);
         }
     }
     Tcl_DStringFree(&buffer);
@@ -182,16 +190,33 @@ TclX_EvalRCFile (interp)
  *   o interp - A pointer to the interpreter, should contain the
  *     error message in `result'.
  *   o exitCode - The code to pass to exit.
+ *   o message - If not NULL, contains a message to add to errorInfo. 
+ *     Arguments will be formatted into the message, but the total maximum
+ *     size is TCLX_ERR_EXIT_MSG_MAX, so use this when formatting arguments
+ *     of unknown length.
+ *   o ... - Arguments to format into message.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_ErrorExit (interp, exitCode)
-    Tcl_Interp  *interp;
-    int          exitCode;
+TclX_ErrorExit TCL_VARARGS_DEF(Tcl_Interp *, interpArg)
 {
-    char *errorStack;
+    va_list argList;
+    Tcl_Interp  *interp;
+    int exitCode;
+    char *message, *errorStack, *noDump;
     Tcl_Channel stdoutChan, stderrChan;
     Tcl_DString savedResult;
+
+    interp = TCL_VARARGS_START (Tcl_Interp *, interpArg, argList);
+    exitCode = va_arg (argList, int);
+    message = va_arg (argList, char *);
+
+    if (message != NULL) {
+        char fmtMessage [TCLX_ERR_EXIT_MSG_MAX];
+        vsprintf (fmtMessage, message, argList);
+        Tcl_AddErrorInfo (interp, fmtMessage);
+    }
+    va_end (argList);
 
     Tcl_DStringInit (&savedResult);
     Tcl_DStringAppend (&savedResult, interp->result, -1);
@@ -206,14 +231,15 @@ TclX_ErrorExit (interp, exitCode)
         /*
          * Get the error stack, if available.
          */
-        if (Tcl_GetVar2 (interp, "TCLXENV", "noDump",
-                         TCL_GLOBAL_ONLY) == NULL) {
+        noDump = Tcl_GetVar2 (interp, "TCLXENV", "noDump", TCL_GLOBAL_ONLY);
+        if ((noDump == NULL) || STREQU (noDump, "0")) {
             errorStack = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
             if ((errorStack != NULL) && (errorStack [0] == '\0'))
                 errorStack = NULL;
         } else {
             errorStack = NULL;
         }
+
         TclX_WriteStr (stderrChan, "Error: ");
         
         /*
@@ -273,8 +299,6 @@ static int
 InitSetup (interp)
     Tcl_Interp *interp;
 {
-    tclXWrongArgsObj = Tcl_NewStringObj (tclXWrongArgs, -1);
-    
     if (Tcl_PkgRequire (interp, "Tcl", TCL_VERSION, 1) == NULL) {
 	return TCL_ERROR;
     }

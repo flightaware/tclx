@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 8.0.4.1 1997/04/14 02:01:37 markd Exp $
+ * $Id: tclXchmod.c,v 8.1 1997/04/17 04:58:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -269,7 +269,6 @@ ChmodFileIdObj (interp, modeInfo, fileIdObj)
     fileId = Tcl_GetStringFromObj (fileIdObj, NULL);
     channel = TclX_GetOpenChannel (interp, fileId, 0);
     if (channel == NULL) {
-	TclSetObjResultFromStrResult (interp);
         return TCL_ERROR;
     }
 
@@ -301,11 +300,11 @@ ChmodFileIdObj (interp, modeInfo, fileIdObj)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChmodObjCmd (clientData, interp, objc, objv)
+TclX_ChmodObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     int           objIdx, idx, fileObjc, fileIds, result;
     modeInfo_t    modeInfo;
@@ -313,7 +312,7 @@ Tcl_ChmodObjCmd (clientData, interp, objc, objv)
     char         *fileIdsString;
     int           fileIdsStrLen;
     char         *modeString;
-    long          modeBits;
+    int          modeBits;
 
     /*
      * Options are not parsable just looking for "-", since modes can
@@ -372,11 +371,11 @@ Tcl_ChmodObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChownObjCmd (clientData, interp, objc, objv)
+TclX_ChownObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj      *CONST *objv;
 {
     int        objIdx, ownerObjc, fileIds;
     Tcl_Obj  **ownerObjv = NULL;
@@ -466,11 +465,11 @@ Tcl_ChownObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChgrpObjCmd (clientData, interp, objc, objv)
+TclX_ChgrpObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj     *CONST objv[];
 {
     int        objIdx, fileIds, fileIdsSwitchLen;
     char      *fileIdsSwitch;

@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXregexp.c,v 8.3 1997/04/17 04:58:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -308,7 +308,7 @@ PreParseRegExp (expression, infoPtr)
     preParseInfo_t *infoPtr;
 {
     register char *scanPtr  = expression;
-    register char *nonMetaStart;
+    register char *nonMetaStart = NULL;
     register int   nonMetaCnt, gotMeta, parenNest;
 
     infoPtr->meta = FALSE;
@@ -452,7 +452,7 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
 
     if (flags & TCLX_REXP_NO_CASE) {
         expBuf = ckalloc (strlen (expression) + 1);
-        Tcl_DownShift (expBuf, expression);
+        TclX_DownShift (expBuf, expression);
     } else {
         expBuf = expression;
     }
@@ -548,7 +548,7 @@ TclX_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
     if (regExpPtr->noCase) {
         if (matchStrLower == NULL) {
             matchStr = ckalloc (strlen (matchStrIn) + 1);
-            Tcl_DownShift (matchStr, matchStrIn);
+            TclX_DownShift (matchStr, matchStrIn);
         } else
             matchStr = matchStrLower;
     } else {

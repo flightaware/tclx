@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.0.4.1 1997/04/14 02:01:49 markd Exp $
+ * $Id: tclXlist.c,v 8.1 1997/04/17 04:58:45 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,43 +22,43 @@ static int
 TclX_LvarcatObjCmd _ANSI_ARGS_((ClientData   clientData,
                                 Tcl_Interp  *interp,
                                 int          objc,
-                                Tcl_Obj    **objv));
+                                Tcl_Obj     *CONST objv[]));
 
 static int
 TclX_LvarpopObjCmd _ANSI_ARGS_((ClientData   clientData,
                                 Tcl_Interp  *interp,
                                 int          objc,
-                                Tcl_Obj    **objv));
+                                Tcl_Obj    *CONST objv[]));
 
 static int
 TclX_LvarpushObjCmd _ANSI_ARGS_((ClientData   clientData,
                                  Tcl_Interp  *interp,
                                  int          objc,
-                                 Tcl_Obj    **objv));
+                                 Tcl_Obj    *CONST objv[]));
 
 static int
 TclX_LemptyObjCmd _ANSI_ARGS_((ClientData   clientData,
                                Tcl_Interp  *interp,
                                int          objc,
-                               Tcl_Obj    **objv));
+                               Tcl_Obj    *CONST objv[]));
 
 static int
 TclX_LassignObjCmd _ANSI_ARGS_((ClientData   clientData,
                                 Tcl_Interp  *interp,
                                 int          objc,
-                                Tcl_Obj    **objv));
+                                Tcl_Obj    *CONST objv[]));
 
 static int
 TclX_LmatchObjCmd _ANSI_ARGS_((ClientData   clientData,
                                Tcl_Interp  *interp,
                                int          objc,
-                               Tcl_Obj    **objv));
+                               Tcl_Obj    *CONST objv[]));
 
 static int
 TclX_LcontainObjCmd _ANSI_ARGS_((ClientData   clientData,
                                  Tcl_Interp  *interp,
                                  int          objc,
-                                 Tcl_Obj    **objv));
+                                 Tcl_Obj    *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -72,9 +72,9 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj *strVarPtr, *strPtr;
+    Tcl_Obj *strVarPtr, *strObjPtr;
     int strArgc, idx, argIdx, strLen;
     char **strArgv, *staticArgv [32], *newStr;
 
@@ -88,20 +88,7 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
      * create it.  If it is shared by more than being a variable, duplicated
      * it.
      */
-    strVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, 0);
-    if (strVarPtr == NULL) {
-        strPtr = Tcl_NewListObj (0, NULL);
-    } else if (strVarPtr->refCount > 1) {
-        strPtr = Tcl_DuplicateObj (strVarPtr);
-    } else {
-        strPtr = strVarPtr;
-        Tcl_IncrRefCount (strPtr);
-    }
-    if (strPtr != strVarPtr) {
-        if (Tcl_ObjSetVar2 (interp, objv [1], NULL, strPtr,
-                            TCL_LEAVE_ERR_MSG) == NULL)
-            goto errorExit;
-    }
+    strVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_PARSE_PART1);
 
     /*
      * FIX: Figure out how to do this without converting to strings, or if
@@ -118,7 +105,7 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
     }
     
     if (strVarPtr != NULL) {
-        strArgv [0] = Tcl_GetStringFromObj (strPtr, &strLen);
+        strArgv [0] = Tcl_GetStringFromObj (strVarPtr, &strLen);
         argIdx = 1;
     } else {
         argIdx = 0;
@@ -128,20 +115,19 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
     }
 
     newStr = Tcl_Concat (strArgc, strArgv);
-    Tcl_SetStringObj (strPtr, newStr, -1);
+    strObjPtr = Tcl_NewStringObj (newStr, -1);
     ckfree (newStr);
 
     if (strArgv != staticArgv)
         ckfree ((char *) strArgv);
-    Tcl_DecrRefCount (strPtr);
-    Tcl_SetObjResult (interp, strPtr);
-    return TCL_OK;
 
-  errorExit:
-    if (strArgv != staticArgv)
-        ckfree ((char *) strArgv);
-    Tcl_DecrRefCount (strPtr);
-    return TCL_ERROR;
+    if (Tcl_ObjSetVar2 (interp, objv [1], NULL, strObjPtr,
+                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+        Tcl_DecrRefCount (strObjPtr);
+        return TCL_ERROR;
+    }
+    Tcl_SetObjResult (interp, strObjPtr);
+    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
@@ -155,29 +141,32 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     Tcl_Obj *listVarPtr, *listPtr, *returnElemPtr = NULL;
-    int listLen;
-    long listIdx;
+    int listIdx, listLen;
 
     if ((objc < 2) || (objc > 4)) {
         return TclX_WrongArgs (interp, objv [0], "var ?indexExpr? ?string?");
     }
 
-    listVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_LEAVE_ERR_MSG);
+    listVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, 
+                                 TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG);
     if (listVarPtr == NULL) {
         return TCL_ERROR;
     }
-    if (listVarPtr->refCount > 1) {
+    if (Tcl_IsShared (listVarPtr)) {
         listPtr = Tcl_DuplicateObj (listVarPtr);
-        if (Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
-                            TCL_LEAVE_ERR_MSG) == NULL)
-            goto errorExit;
-    } else {
-        listPtr = listVarPtr;
-        Tcl_IncrRefCount (listPtr);
+        listVarPtr = Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
+                                     TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG);
+        if (listVarPtr == NULL) {
+            Tcl_DecrRefCount (listPtr);
+            return TCL_ERROR;
+        }
+        if (listVarPtr != listPtr)
+            Tcl_DecrRefCount (listPtr);
     }
+    listPtr = listVarPtr;
 
     /*
      * Get the index of the entry in the list we are doing to replace/delete.
@@ -221,13 +210,11 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
   okExit:
     if (returnElemPtr != NULL)
         Tcl_DecrRefCount (returnElemPtr);
-    Tcl_DecrRefCount (listPtr);
     return TCL_OK;
 
   errorExit:
     if (returnElemPtr != NULL)
         Tcl_DecrRefCount (returnElemPtr);
-    Tcl_DecrRefCount (listPtr);
     return TCL_ERROR;
 }
 
@@ -242,30 +229,32 @@ TclX_LvarpushObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     Tcl_Obj *listVarPtr, *listPtr;
-    int listLen;
-    long listIdx;
+    int listIdx, listLen;
 
     if ((objc < 3) || (objc > 4)) {
         return TclX_WrongArgs (interp, objv [0], "var string ?indexExpr?");
     }
 
-    listVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, 0);
-    if (listVarPtr == NULL) {
-        listPtr = Tcl_NewListObj (0, NULL);
-    } else if (listVarPtr->refCount > 1) {
-        listPtr = Tcl_DuplicateObj (listVarPtr);
-    } else {
-        listPtr = listVarPtr;
-        Tcl_IncrRefCount (listPtr);
+    listVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_PARSE_PART1);
+    if ((listVarPtr == NULL) || (Tcl_IsShared (listVarPtr))) {
+        if (listVarPtr == NULL) {
+            listPtr = Tcl_NewListObj (0, NULL);
+        } else {
+            listPtr = Tcl_DuplicateObj (listVarPtr);
+        }
+        listVarPtr = Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
+                                     TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG);
+        if (listVarPtr == NULL) {
+            Tcl_DecrRefCount (listPtr);
+            return TCL_ERROR;
+        }
+        if (listVarPtr != listPtr)
+            Tcl_DecrRefCount (listPtr);
     }
-    if (listPtr != listVarPtr) {
-        if (Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
-                            TCL_LEAVE_ERR_MSG) == NULL)
-            goto errorExit;
-    }
+    listPtr = listVarPtr;
 
     /*
      * Get the index of the entry in the list we are doing to replace/delete.
@@ -292,11 +281,9 @@ TclX_LvarpushObjCmd (clientData, interp, objc, objv)
                             1, &(objv [2])) != TCL_OK)
         goto errorExit;
 
-    Tcl_DecrRefCount (listPtr);
     return TCL_OK;
 
   errorExit:
-    Tcl_DecrRefCount (listPtr);
     return TCL_ERROR;
 }
 
@@ -311,9 +298,9 @@ TclX_LemptyObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
-    int isEmpty, strLen;
+    int isEmpty, length;
     char *scanPtr;
 
     if (objc != 2) {
@@ -327,10 +314,11 @@ TclX_LemptyObjCmd (clientData, interp, objc, objv)
      * the string for while space.
      */
     if (objv [1]->typePtr == Tcl_GetObjType ("list")) {
-        if (Tcl_ListObjLength (interp, objv [1], &isEmpty) != TCL_OK)
+        if (Tcl_ListObjLength (interp, objv [1], &length) != TCL_OK)
             return TCL_ERROR;
+        isEmpty = (length == 0);
     } else {
-        scanPtr = Tcl_GetStringFromObj (objv [1], &strLen);
+        scanPtr = Tcl_GetStringFromObj (objv [1], &length);
         while ((*scanPtr != '\0') && (ISSPACE (*scanPtr)))
             scanPtr++;
         isEmpty = (*scanPtr == '\0');
@@ -350,7 +338,7 @@ TclX_LassignObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     int listObjc, listIdx, idx, remaining;
     Tcl_Obj **listObjv, *elemPtr, *remainingObjPtr;
@@ -372,12 +360,14 @@ TclX_LassignObjCmd (clientData, interp, objc, objv)
         if (listIdx < listObjc) {
             elemPtr = listObjv [listIdx];
         } else {
-            if (nullObjPtr == NULL)
+            if (nullObjPtr == NULL) {
                 nullObjPtr = Tcl_NewObj ();
+                Tcl_IncrRefCount (nullObjPtr);
+            }
             elemPtr = nullObjPtr;
         }
         if (Tcl_ObjSetVar2 (interp, objv [idx], NULL, elemPtr,
-                            TCL_LEAVE_ERR_MSG) == NULL)
+                            TCL_PARSE_PART1) == NULL)
             goto error_exit;
     }
 
@@ -388,7 +378,6 @@ TclX_LassignObjCmd (clientData, interp, objc, objv)
     if (remaining > 0) {
         remainingObjPtr = Tcl_NewListObj (remaining, &(listObjv [objc - 2]));
         Tcl_SetObjResult (interp, remainingObjPtr);
-        Tcl_DecrRefCount (remainingObjPtr);
     }
 
     if (nullObjPtr != NULL)
@@ -412,7 +401,7 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
 #define EXACT   0
 #define GLOB    1
@@ -441,7 +430,7 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
         return TclX_WrongArgs (interp, objv [0], "?mode? list pattern");
     }
 
-    if (Tcl_ListObjGetElements (interp, objv [1],
+    if (Tcl_ListObjGetElements (interp, objv [objc - 2],
                                 &listObjc, &listObjv) != TCL_OK)
         return TCL_ERROR;
 
@@ -473,7 +462,7 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
         }
     }
     if (matchedListPtr != NULL) {
-        Tcl_DecrRefCount (matchedListPtr);
+        Tcl_SetObjResult (interp, matchedListPtr);
     }
     return TCL_OK;
     
@@ -494,7 +483,7 @@ TclX_LcontainObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj    **objv;
+    Tcl_Obj    *CONST objv[];
 {
     int listObjc, idx, strLen;
     Tcl_Obj **listObjv;
@@ -532,21 +521,47 @@ void
 TclX_ListInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateObjCommand(interp, "lvarcat", -1, TclX_LvarcatObjCmd, 
-                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand(interp, "lvarpop", -1, TclX_LvarpopObjCmd, 
-                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand(interp, "lvarpush", -1, TclX_LvarpushObjCmd, 
-                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand(interp, "lempty", -1, TclX_LemptyObjCmd, 
-                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand(interp, "lassign", -1, TclX_LassignObjCmd, 
-                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand(interp, "lmatch", -1, TclX_LmatchObjCmd, 
-                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateObjCommand(interp, "lcontain", -1, TclX_LcontainObjCmd, 
-                         (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, 
+			 "lvarcat", 
+			 TclX_LvarcatObjCmd, 
+                         (ClientData) NULL, 
+			 (Tcl_CmdDeleteProc*) NULL);
 
+    Tcl_CreateObjCommand(interp, 
+			 "lvarpop", 
+			 TclX_LvarpopObjCmd, 
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp, 
+			 "lvarpush",
+			 TclX_LvarpushObjCmd, 
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp,
+                         "lempty",
+			 TclX_LemptyObjCmd, 
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp, 
+			 "lassign",
+			 TclX_LassignObjCmd, 
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp,
+			 "lmatch",
+			 TclX_LmatchObjCmd, 
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp, 
+			 "lcontain",
+			 TclX_LcontainObjCmd, 
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
 }
 
 

@@ -1,0 +1,44 @@
+
+Michael B. Johnson (wave@pixar.com) wrote:
+: ...I now can't name commands with an inclusive ":"
+
+Michael,
+
+The problem is a bad test in the code that parses names for any 
+namespace qualifiers. You are supposed to be able to use single
+":"s in, e.g., variable and command names. Tcl 8.0b1 does the
+right thing with ":"s inside names, but fails if they are at 
+the very end. I've enclosed a patch below to fix this problem.
+
+By the way, we forgot to include the fact that two or more
+adjacent ":"s are now treated as namespace separators in the list
+of incompatibilities in Tcl 8.0b1. But single ":"s are (with this
+fix) treated as before.
+
+  Brian
+
+----------------------------------------
+
+------- generic/tclNamesp.c -------
+*** /tmp/da002EJ	Wed Dec 31 16:00:00 1969
+--- generic/tclNamesp.c	Thu May 29 11:15:18 1997
+***************
+*** 1470,1476 ****
+              len++;
+  	}
+  
+! 	if ((*end == '\0') && (*(end-1) != ':')) {
+  	    /*
+  	     * qualName ended with a simple name at start. If FIND_ONLY_NS
+  	     * was specified, look this up as a namespace. Otherwise,
+--- 1470,1477 ----
+              len++;
+  	}
+  
+! 	if ((*end == '\0')
+! 	        && !((len >= 2) && (*(end-1) == ':') && (*(end-2) == ':'))) {
+  	    /*
+  	     * qualName ended with a simple name at start. If FIND_ONLY_NS
+  	     * was specified, look this up as a namespace. Otherwise,
+
+

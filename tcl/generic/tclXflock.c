@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 8.0.4.1 1997/04/14 02:01:44 markd Exp $
+ * $Id: tclXflock.c,v 8.1 1997/04/17 04:58:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Need to add an interface to F_GETLK */
@@ -70,14 +70,14 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, lockInfoPtr)
     argIdx++;
 
     if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
-        if (Tcl_GetOffset (interp, argv [argIdx],
+        if (TclX_GetOffset (interp, argv [argIdx],
                            &lockInfoPtr->start) != TCL_OK)
             return TCL_ERROR;
     }
     argIdx++;
 
     if ((argIdx < argc) && (argv [argIdx][0] != '\0')) {
-        if (Tcl_GetOffset (interp, argv [argIdx],
+        if (TclX_GetOffset (interp, argv [argIdx],
                            &lockInfoPtr->len) != TCL_OK)
             return TCL_ERROR;
     }
@@ -104,7 +104,7 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, lockInfoPtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_FlockCmd --
+ * TclX_FlockCmd --
  *
  * Implements the `flock' Tcl command:
  *    flock ?-read|-write? ?-nowait? fileId ?start? ?length? ?origin?
@@ -114,7 +114,7 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, lockInfoPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_FlockCmd (notUsed, interp, argc, argv)
+TclX_FlockCmd (notUsed, interp, argc, argv)
     ClientData   notUsed;
     Tcl_Interp  *interp;
     int          argc;
@@ -196,7 +196,7 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_FunlockCmd --
+ * TclX_FunlockCmd --
  *
  * Implements the `funlock' Tcl command:
  *    funlock fileId ?start? ?length? ?origin?
@@ -207,7 +207,7 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_FunlockCmd (notUsed, interp, argc, argv)
+TclX_FunlockCmd (notUsed, interp, argc, argv)
     ClientData   notUsed;
     Tcl_Interp  *interp;
     int          argc;

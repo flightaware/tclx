@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.0.4.1 1997/04/14 02:03:00 markd Exp $
+ * $Id: tkXshell.c,v 8.1 1997/04/17 05:00:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -162,7 +162,8 @@ TkX_Main(argc, argv, appInitProc)
      */
 
     if ((*appInitProc)(interp) != TCL_OK) {
-        TclX_ErrorExit (interp, 255);
+        TclX_ErrorExit (interp, 255,
+                        "\n    while\ninitializing application (Tcl_AppInit?)");
     }
 
     /*

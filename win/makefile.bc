@@ -1,0 +1,44 @@
+#
+# win/makefile.bc  --
+#
+# Borland C++ 5.x makefile for Extended Tcl/Tk on Windows.
+#------------------------------------------------------------------------------
+# Copyright 1996-1997 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: makefile.bc,v 1.1 1997/05/11 20:33:02 karl Exp $
+#------------------------------------------------------------------------------
+#
+
+all:
+        cd ..\tcl\win
+        make -f makefile.bc all
+        cd ..\..\tk\win
+        make -f makefile.bc all
+
+test:
+        cd ..\tcl\win
+        make -f makefile.bc test
+
+tktest:
+        cd ..\tk\win
+        make -f makefile.bc test
+
+install:
+        cd ..\tcl\win
+        make -f makefile.bc install
+        cd ..\..\tk\win
+        make -f makefile.bc install
+        
+clean:
+        cd ..\tcl\win
+        make -f makefile.bc clean
+        cd ..\..\tk\win
+        make -f makefile.bc clean
+        

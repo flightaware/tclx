@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 8.0.4.1 1997/04/14 02:01:38 markd Exp $
+ * $Id: tclXcmdInit.c,v 8.1 1997/04/17 04:58:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,23 +46,32 @@ Tclxcmd_Init (interp)
     /*
      * from tclXchmod.c
      */
-    Tcl_CreateObjCommand (interp, "chgrp", -1,
-			  Tcl_ChgrpObjCmd, (ClientData) NULL, 
+    Tcl_CreateObjCommand (interp, 
+			  "chgrp",
+			  TclX_ChgrpObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "chmod", -1,
-                          Tcl_ChmodObjCmd, (ClientData) NULL,
+    Tcl_CreateObjCommand (interp,
+			  "chmod",
+			  TclX_ChmodObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "chown", -1,
-			  Tcl_ChownObjCmd, (ClientData) NULL, 
+    Tcl_CreateObjCommand (interp,
+                          "chown",
+			  TclX_ChownObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXcmdloop.c
      */
-    Tcl_CreateCommand (interp, "commandloop", Tcl_CommandloopCmd, 
-                      (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp,
+		       "commandloop",
+		       TclX_CommandloopCmd, 
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXdebug.c
@@ -77,102 +86,144 @@ Tclxcmd_Init (interp)
     /*
      * from tclXfcntl.c
      */
-    Tcl_CreateCommand (interp, "fcntl", Tcl_FcntlCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, 
+			  "fcntl",
+			  TclX_FcntlObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXfilecmds.c
      */
-    Tcl_CreateObjCommand (interp, "pipe", -1,
-		          Tcl_PipeObjCmd, (ClientData) 0,
-		          (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp, "copyfile", -1,
-			  Tcl_CopyfileObjCmd, (ClientData) 0,
+    Tcl_CreateObjCommand (interp,
+			  "pipe",
+			  TclX_PipeObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateCommand (interp, "lgets", Tcl_LgetsCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp, "ftruncate", -1,
-			  Tcl_FtruncateObjCmd, (ClientData) 0,
+    Tcl_CreateObjCommand (interp,
+			  "copyfile",
+			  TclX_CopyfileObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "readdir", -1,
-			  Tcl_ReaddirObjCmd, (ClientData) 0, 
+    Tcl_CreateObjCommand (interp,
+                          "lgets",
+                          TclX_LgetsObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "ftruncate",
+			  TclX_FtruncateObjCmd,
+			  (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "readdir",
+			  TclX_ReaddirObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXmsgcat.c
      */
-    Tcl_InitMsgCat (interp);
+    TclX_InitMsgCat (interp);
 
     /*
      * from tclXprocess.c
      */
-    Tcl_CreateCommand (interp, "execl", Tcl_ExeclCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp,
+		       "execl",
+		       TclX_ExeclCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "fork", -1,
-		          Tcl_ForkObjCmd, (ClientData) 0, 
-		          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+                          "fork",
+			  TclX_ForkObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateCommand (interp, "wait", Tcl_WaitCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp,
+		       "wait",
+		       TclX_WaitCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXsignal.c
      */
-    Tcl_InitSignalHandling (interp);
+    TclX_InitSignalHandling (interp);
 
     /*
      * from tclXoscmds.c
      */
-    Tcl_CreateObjCommand (interp, "alarm", -1,
-		          Tcl_AlarmObjCmd, (ClientData) 0, 
-	                  (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp, "nice", -1,
-		          Tcl_NiceObjCmd, (ClientData) 0,
-	                  (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp, "sleep", -1,
-			  Tcl_SleepObjCmd, (ClientData) 0,
+    Tcl_CreateObjCommand (interp,
+			  "alarm",
+			  TclX_AlarmObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "sync", -1,
-			  Tcl_SyncObjCmd, (ClientData) 0,
+    Tcl_CreateObjCommand (interp,
+			  "nice",
+			  TclX_NiceObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "system", -1,
-			  Tcl_SystemObjCmd, (ClientData) 0, 
+    Tcl_CreateObjCommand (interp,
+			  "sleep",
+			  TclX_SleepObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "umask", -1,
-			 Tcl_UmaskObjCmd, (ClientData) 0, 
-			 (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+                          "sync",
+			  TclX_SyncObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "system",
+			  TclX_SystemObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "umask",
+			  TclX_UmaskObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXunixCmds.c or tclXwinCmds.c
      */
-    Tcl_CreateObjCommand (interp, "chroot", -1,
-		          Tcl_ChrootObjCmd, (ClientData) 0, 
-		          (Tcl_CmdDeleteProc *) NULL);
+    Tcl_CreateObjCommand (interp,
+			  "chroot",
+			  TclX_ChrootObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc *) NULL);
 
-    Tcl_CreateObjCommand (interp, "link", -1,
-		          Tcl_LinkObjCmd, (ClientData) 0, 
-		          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+			  "link",
+			  TclX_LinkObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp, "times", -1,
-			  Tcl_TimesObjCmd, (ClientData) 0,
+    Tcl_CreateObjCommand (interp, 
+			  "times",
+			  TclX_TimesObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
     
     /*
      * from tclXsocket.c
      */
-    Tcl_CreateObjCommand (interp, "host_info", -1,
-		          Tcl_HostInfoObjCmd, (ClientData) 0, 
-		          (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, 
+			  "host_info",
+			  TclX_HostInfoObjCmd,
+                          (ClientData) NULL, 
+			  (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXunixSock.c and stubbed in tclXwinCmds.c.
@@ -203,48 +254,70 @@ Tclxcmd_SafeInit (interp)
     /*
      * from tclXbsearch.c
      */
-    Tcl_CreateCommand (interp, "bsearch", Tcl_BsearchCmd, 
-                      (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp, 
+		       "bsearch",
+		       TclX_BsearchCmd, 
+                      (ClientData) NULL,
+		      (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXfstat.c
      */
-    Tcl_CreateCommand (interp, "fstat", Tcl_FstatCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp,
+		       "fstat",
+		       TclX_FstatCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXflock.c
      */
-    Tcl_CreateCommand (interp, "flock", Tcl_FlockCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "funlock", Tcl_FunlockCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp,
+		       "flock",
+		       TclX_FlockCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateCommand (interp, 
+		       "funlock",
+		       TclX_FunlockCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXfilescan.c
      */
-    Tcl_InitFilescan (interp);
+    TclX_InitFilescan (interp);
 
     /*
      * from tclXgeneral.c
      */
-    Tcl_CreateObjCommand(interp, "echo", -1,
-			 Tcl_EchoObjCmd, (ClientData) 0, 
-		         (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, 
+			  "echo",
+			  TclX_EchoObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand(interp, "infox", -1,
-			 Tcl_InfoxObjCmd, (ClientData) 0, 
+    Tcl_CreateObjCommand(interp, 
+			 "infox",
+			 TclX_InfoxObjCmd,
+                         (ClientData) NULL,
 			 (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand(interp, "loop", -1,
-		         Tcl_LoopObjCmd, (ClientData) 0, 
-		         (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand(interp, 
+			 "loop",
+			 TclX_LoopObjCmd,
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXid.c
      */
-    Tcl_CreateCommand (interp, "id", Tcl_IdCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+			  "id",
+			  TclX_IdObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXkeylist.c
@@ -259,7 +332,7 @@ Tclxcmd_SafeInit (interp)
     /*
      * from tclXmath.c
      */
-    Tcl_InitMath (interp);
+    TclX_InitMath (interp);
 
     /*
      * from tclXprofile.c
@@ -269,8 +342,11 @@ Tclxcmd_SafeInit (interp)
     /*
      * from tclXselect.c
      */
-    Tcl_CreateCommand (interp, "select", Tcl_SelectCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand (interp, 
+		       "select",
+		       TclX_SelectCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXstring.c

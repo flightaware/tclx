@@ -12,11 +12,16 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 8.0.4.1 1997/04/14 02:01:50 markd Exp $
+ * $Id: tclXmath.c,v 8.1 1997/04/17 04:58:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+#ifndef tclx_random
+#  define tclx_srandom srandom
+#  define tclx_random random
+#endif
 
 /*
  * Prototypes of internal functions.
@@ -30,34 +35,34 @@ static long
 ReallyRandom _ANSI_ARGS_((long my_range));
 
 static int
-Tcl_MaxObjCmd _ANSI_ARGS_((ClientData  clientData,
-                           Tcl_Interp *interp,
-                           int         objc,
-                           Tcl_Obj   **objv));
+TclX_MaxObjCmd _ANSI_ARGS_((ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         objc,
+                            Tcl_Obj   *CONST objv[]));
 
 static int
-Tcl_MinObjCmd _ANSI_ARGS_((ClientData  clientData,
-                           Tcl_Interp *interp,
-                           int         objc,
-                           Tcl_Obj   **objv));
+TclX_MinObjCmd _ANSI_ARGS_((ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         objc,
+                            Tcl_Obj   *CONST objv[]));
 
 static int
-Tcl_MaxFunc _ANSI_ARGS_((ClientData  clientData,
-                         Tcl_Interp *interp,
-                         Tcl_Value  *args,
-                         Tcl_Value  *resultPtr));
+TclX_MaxFunc _ANSI_ARGS_((ClientData  clientData,
+                          Tcl_Interp *interp,
+                          Tcl_Value  *args,
+                          Tcl_Value  *resultPtr));
 
 static int
-Tcl_MinFunc _ANSI_ARGS_((ClientData  clientData,
-                         Tcl_Interp *interp,
-                         Tcl_Value  *args,
-                         Tcl_Value  *resultPtr));
+TclX_MinFunc _ANSI_ARGS_((ClientData  clientData,
+                          Tcl_Interp *interp,
+                          Tcl_Value  *args,
+                          Tcl_Value  *resultPtr));
 
 static int
-Tcl_RandomObjCmd _ANSI_ARGS_((ClientData  clientData,
-                              Tcl_Interp *interp,
-                              int         objc,
-                              Tcl_Obj   **objv));
+TclX_RandomObjCmd _ANSI_ARGS_((ClientData  clientData,
+                               Tcl_Interp *interp,
+                               int         objc,
+                               Tcl_Obj   *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -82,7 +87,7 @@ ConvertIntOrDoubleObj (interp, numStrObj, valuePtr)
 {
     long lvalue;
 
-    if (Tcl_GetIntFromObj (interp, numStrObj, &lvalue) == TCL_OK) {
+    if (Tcl_GetLongFromObj (interp, numStrObj, &lvalue) == TCL_OK) {
 	*valuePtr = (double) lvalue;
 	return TCL_OK;
     }
@@ -94,7 +99,7 @@ ConvertIntOrDoubleObj (interp, numStrObj, valuePtr)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_MaxObjCmd --
+ * TclX_MaxObjCmd --
  *      Implements the Tcl max command:
  *        max num1 ?..numN?
  *
@@ -103,15 +108,14 @@ ConvertIntOrDoubleObj (interp, numStrObj, valuePtr)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_MaxObjCmd (clientData, interp, objc, objv)
+TclX_MaxObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
-    Tcl_Obj *returnPtr;
     double value, maxValue = -MAXDOUBLE;
-    int idx, maxIdx   =  1;
+    int idx, maxIdx = 1;
 
     if (objc < 2)
 	return TclX_WrongArgs (interp, objv[0], "num1 ?..numN?");
@@ -124,16 +128,12 @@ Tcl_MaxObjCmd (clientData, interp, objc, objv)
             maxIdx = idx;
         }
     }
-    returnPtr = objv [maxIdx];
-    if (Tcl_IsShared (returnPtr)) {
-	returnPtr = Tcl_DuplicateObj (returnPtr);
-    }
-    Tcl_SetObjResult (interp, returnPtr);
+    Tcl_SetObjResult (interp, objv [maxIdx]);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_MinObjCmd --
+ * TclX_MinObjCmd --
  *     Implements the TCL min command:
  *         min num1 ?..numN?
  *
@@ -142,13 +142,12 @@ Tcl_MaxObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_MinObjCmd (clientData, interp, objc, objv)
+TclX_MinObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
-    Tcl_Obj *returnPtr;
     double value, minValue = MAXDOUBLE;
     int idx, minIdx   = 1;
 
@@ -163,17 +162,13 @@ Tcl_MinObjCmd (clientData, interp, objc, objv)
             minIdx = idx;
 	}
     }
-    returnPtr = objv [minIdx];
-    if (Tcl_IsShared (returnPtr)) {
-	returnPtr = Tcl_DuplicateObj (returnPtr);
-    }
-    Tcl_SetObjResult (interp, returnPtr);
+    Tcl_SetObjResult (interp, objv [minIdx]);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
  *
- * Tcl_MaxFunc --
+ * TclX_MaxFunc --
  *      Implements the Tcl max math function
  *        expr max(num1, num2)
  *
@@ -183,7 +178,7 @@ Tcl_MinObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_MaxFunc (clientData, interp, args, resultPtr)
+TclX_MaxFunc (clientData, interp, args, resultPtr)
     ClientData  clientData;
     Tcl_Interp *interp;
     Tcl_Value  *args;
@@ -218,7 +213,7 @@ Tcl_MaxFunc (clientData, interp, args, resultPtr)
 
 /*-----------------------------------------------------------------------------
  *
- * Tcl_MinFunc --
+ * TclX_MinFunc --
  *      Implements the Tcl min math function
  *        expr min(num1, num2)
  *
@@ -228,7 +223,7 @@ Tcl_MaxFunc (clientData, interp, args, resultPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_MinFunc (clientData, interp, args, resultPtr)
+TclX_MinFunc (clientData, interp, args, resultPtr)
     ClientData  clientData;
     Tcl_Interp *interp;
     Tcl_Value  *args;
@@ -277,13 +272,13 @@ ReallyRandom (myRange)
 
     maxMultiple = RANDOM_RANGE / myRange;
     maxMultiple *= myRange;
-    while ((rnum = random ()) >= maxMultiple)
+    while ((rnum = tclx_random ()) >= maxMultiple)
         continue;
     return (rnum % myRange);
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_RandomObjCmd  --
+ * TclX_RandomObjCmd  --
  *     Implements the TCL random command:
  *     random limit | seed ?seedval?
  *
@@ -292,11 +287,11 @@ ReallyRandom (myRange)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_RandomObjCmd (dummy, interp, objc, objv)
+TclX_RandomObjCmd (dummy, interp, objc, objv)
     ClientData  dummy;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     long range;
     char *seedString;
@@ -305,14 +300,14 @@ Tcl_RandomObjCmd (dummy, interp, objc, objv)
     if ((objc < 2) || (objc > 3))
         goto invalidArgs;
 
-    if (Tcl_GetIntFromObj ((Tcl_Interp *) NULL, objv [1], &range) == TCL_OK) {
+    if (Tcl_GetLongFromObj ((Tcl_Interp *) NULL, objv [1], &range) == TCL_OK) {
         if (objc != 2)
             goto invalidArgs;
 
         if ((range <= 0) || (range > RANDOM_RANGE))
             goto outOfRange;
     } else {
-        long seed;
+        int seed;
 
 	seedString = Tcl_GetStringFromObj (objv [1], &seedStrLen);
 	if (!STREQU (seedString, "seed"))
@@ -324,7 +319,7 @@ Tcl_RandomObjCmd (dummy, interp, objc, objv)
 	} else {
 	    seed = (getpid () + time ((time_t *)NULL));
 	}
-	(void) srandom (seed);
+	(void) tclx_srandom (seed);
 	return TCL_OK;
     }
     Tcl_SetIntObj (Tcl_GetObjResult (interp), ReallyRandom (range));
@@ -346,13 +341,13 @@ Tcl_RandomObjCmd (dummy, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- *  Tcl_InitMath --
+ *  TclX_InitMath --
  *
  *    Initialize the TclX math commands and functions.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_InitMath (interp)
+TclX_InitMath (interp)
     Tcl_Interp *interp;
 {
     Tcl_ValueType minMaxArgTypes [2];
@@ -360,26 +355,36 @@ Tcl_InitMath (interp)
     minMaxArgTypes [0] = TCL_EITHER;
     minMaxArgTypes [1] = TCL_EITHER;
 
-    Tcl_CreateObjCommand (interp, "max", -1,
-			  Tcl_MaxObjCmd, (ClientData) 0,
-                          (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp, "min", -1,
-		          Tcl_MinObjCmd, (ClientData) 0,
-		          (Tcl_CmdDeleteProc*) NULL);
-
-    Tcl_CreateObjCommand (interp, "random", -1,
-			  Tcl_RandomObjCmd, (ClientData) 0,
+    Tcl_CreateObjCommand (interp, 
+			  "max",
+			  TclX_MaxObjCmd,
+                          (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateMathFunc (interp, "max",
-                        2, minMaxArgTypes,
-                        Tcl_MaxFunc,
+    Tcl_CreateObjCommand (interp,
+			  "min",
+			  TclX_MinObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "random",
+			  TclX_RandomObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateMathFunc (interp,
+                        "max",
+                        2, 
+			minMaxArgTypes,
+                        TclX_MaxFunc,
                         (ClientData) NULL);
 
-    Tcl_CreateMathFunc (interp, "min",
-                        2, minMaxArgTypes,
-                        Tcl_MinFunc,
+    Tcl_CreateMathFunc (interp, 
+			"min",
+                        2, 
+			minMaxArgTypes,
+                        TclX_MinFunc,
                         (ClientData) NULL);
 
 }

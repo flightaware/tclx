@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinTest.c,v 8.0.4.1 1997/04/14 02:02:58 markd Exp $
+ * $Id: tclXwinTest.c,v 8.1 1997/04/17 05:00:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -36,7 +36,11 @@ int
 main (int    argc,
       char **argv)
 {
+
+#ifndef BORLAND
     TclX_SplitWinCmdLine (&argc, &argv);
+#endif
+
     TclX_Main (argc, argv, Tcl_AppInit);
     return 0;                   /* Needed only to prevent compiler warning. */
 }

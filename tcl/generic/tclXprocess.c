@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 8.0.4.1 1997/04/14 02:01:52 markd Exp $
+ * $Id: tclXprocess.c,v 8.1 1997/04/17 04:58:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,7 +32,7 @@
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ForkObjCmd --
+ * TclX_ForkObjCmd --
  *     Implements the TCL fork command:
  *     fork
  *
@@ -42,11 +42,11 @@
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ForkObjCmd (clientData, interp, objc, objv)
+TclX_ForkObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     if (objc != 1)
 	return TclX_WrongArgs (interp, objv [0], "");
@@ -57,7 +57,7 @@ Tcl_ForkObjCmd (clientData, interp, objc, objv)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ExeclCmd --
+ * TclX_ExeclCmd --
  *     Implements the TCL execl command:
  *     execl prog ?argList?
  *
@@ -67,7 +67,7 @@ Tcl_ForkObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ExeclCmd (clientData, interp, argc, argv)
+TclX_ExeclCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
@@ -150,7 +150,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_WaitCmd --
+ * TclX_WaitCmd --
  *   Implements the TCL wait command:
  *     wait ?-nohang? ?-untraced? ?-pgroup? ?pid?
  *
@@ -160,16 +160,15 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_WaitCmd (clientData, interp, argc, argv)
+TclX_WaitCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;
 {
-    int    idx, tmpPid, options = 0, pgroup = FALSE;
-    pid_t  pid, returnedPid;
-
-    WAIT_STATUS_TYPE status;    
+    int idx, options = 0, pgroup = FALSE;
+    pid_t returnedPid, tmpPid, pid;
+    int status;    
 
     for (idx = 1; idx < argc; idx++) {
         if (argv [idx][0] != '-')
@@ -201,12 +200,12 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     if (idx < argc - 1)
         goto usage;  
     if (idx < argc) {
-        if (!Tcl_StrToInt (argv [idx], 10, &tmpPid))
+        if (!TclX_StrToInt (argv [idx], 10, (int *)&tmpPid))
             goto invalidPid;
-        if (tmpPid <= 0)
+        if ((int)tmpPid <= 0)
             goto negativePid;
-        pid = (pid_t) tmpPid;
-        if ((int) pid != tmpPid)
+        pid = tmpPid;
+        if (pid != tmpPid)
             goto invalidPid;
     } else {
         pid = -1;  /* pid or pgroup not supplied */
@@ -231,7 +230,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
             pid = 0;
     }
 
-    returnedPid = TCLX_WAITPID (pid, (int *) &status, options);
+    returnedPid = TCLX_WAITPID (pid, (int *) (&status), options);
 
     if (returnedPid < 0) {
         Tcl_AppendResult (interp, "wait for process failed: ",

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXlib.c,v 8.4 1997/04/17 04:58:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -52,6 +52,8 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
 static char loadOusterCmd [] = "source [file join $tclx_library loadouster.tcl]";
 
 
+#define FIX_AUTO_LOAD_HACK 0
+#if  FIX_AUTO_LOAD_HACK
 /*
  * FIX: Ugly hack to work around problems with tcl_safeInitInterp that
  * wants to define auto_load as a proc in slave interps.  Our auto_load is
@@ -61,6 +63,7 @@ static char loadOusterCmd [] = "source [file join $tclx_library loadouster.tcl]"
  */
 static char hackAutoLoadCmd [] = 
   "eval [list proc auto_load cmd [concat {if {[info command tclx_auto_load] != {}} {return [tclx_auto_load $cmd]};} [info body auto_load]]]";
+#endif
 
 /*
  * Indicates the type of library index.
@@ -157,10 +160,10 @@ LoadPackageIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
                                 char        *path));
 
 static int
-Tcl_Auto_load_pkgCmd _ANSI_ARGS_((ClientData   dummy,
-                                  Tcl_Interp  *interp,
-                                  int          argc,
-                                  char       **argv));
+TclX_Auto_load_pkgCmd _ANSI_ARGS_((ClientData   dummy,
+                                   Tcl_Interp  *interp,
+                                   int          argc,
+                                   char       **argv));
 
 static int
 AddInProgress _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -195,16 +198,16 @@ LoadCommand _ANSI_ARGS_((Tcl_Interp  *interp,
                          char        *command));
 
 static int
-Tcl_LoadlibindexCmd _ANSI_ARGS_((ClientData   dummy,
-                                 Tcl_Interp  *interp,
-                                 int          argc,
-                                 char       **argv));
+TclX_LoadlibindexCmd _ANSI_ARGS_((ClientData   dummy,
+                                  Tcl_Interp  *interp,
+                                  int          argc,
+                                  char       **argv));
 
 static int
-Tcl_Auto_loadCmd _ANSI_ARGS_((ClientData   clientData,
-                              Tcl_Interp  *interp,
-                              int          argc,
-                              char       **argv));
+TclX_Auto_loadCmd _ANSI_ARGS_((ClientData   clientData,
+                               Tcl_Interp  *interp,
+                               int          argc,
+                               char       **argv));
 
 static void
 TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -473,9 +476,9 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
     if (pkgDataArgc != 3)
         goto invalidEntry;
 
-    if (!Tcl_StrToOffset (pkgDataArgv [1], 0, offsetPtr))
+    if (!TclX_StrToOffset (pkgDataArgv [1], 0, offsetPtr))
         goto invalidEntry;
-    if (!Tcl_StrToUnsigned (pkgDataArgv [2], 0, lengthPtr))
+    if (!TclX_StrToUnsigned (pkgDataArgv [2], 0, lengthPtr))
         goto invalidEntry;
 
     *fileNamePtr = destPtr = (char *) pkgDataArgv;
@@ -870,7 +873,7 @@ LoadDirIndexCallback (interp, path, fileName, caseSensitive, clientData)
     chkName = fileName;
     if (!caseSensitive) {
         chkName = Tcl_DStringAppend (&chkNameBuf, fileName, -1);
-        Tcl_DownShift (chkName, chkName);
+        TclX_DownShift (chkName, chkName);
     }
 
     /*
@@ -1022,7 +1025,7 @@ LoadPackageIndexes (interp, infoPtr, path)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_Auto_load_pkgCmd --
+ * TclX_Auto_load_pkgCmd --
  *
  *   Implements the command:
  *      auto_load_pkg package
@@ -1031,7 +1034,7 @@ LoadPackageIndexes (interp, infoPtr, path)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_Auto_load_pkgCmd (dummy, interp, argc, argv)
+TclX_Auto_load_pkgCmd (dummy, interp, argc, argv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          argc;
@@ -1276,11 +1279,12 @@ LoadITclImportProc (interp, command)
     Tcl_Interp  *interp;
     char        *command;
 {
-    static char importCmd [] = "import all";
-    Tcl_DString tmpResult, fullName;
-    char **nsSearchPathv = NULL;
-    int nsSearchPathc, idx, nameSpaceLen;
-    char *nameSpace, *nextPtr, *loadCmd;
+    static char    importCmd [] = "import all";
+    Tcl_DString    tmpResult, fullName;
+    char         **nsSearchPathv = NULL;
+    int            nsSearchPathc, idx, nameSpaceLen;
+    char          *nameSpace, *nextPtr; 
+    char          *loadCmd = (char *)NULL;
 
     Tcl_DStringInit (&tmpResult);
     Tcl_DStringInit (&fullName);
@@ -1395,7 +1399,7 @@ LoadCommand (interp, command)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_LoadlibindexCmd --
+ * TclX_LoadlibindexCmd --
  *
  *   This procedure is invoked to process the "Loadlibindex" Tcl command:
  *
@@ -1406,7 +1410,7 @@ LoadCommand (interp, command)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
+TclX_LoadlibindexCmd (dummy, interp, argc, argv)
     ClientData   dummy;
     Tcl_Interp  *interp;
     int          argc;
@@ -1463,7 +1467,7 @@ Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_auto_loadCmd --
+ * TclX_auto_loadCmd --
  *
  *   This procedure is invoked to process the "auto_load" Tcl command:
  *
@@ -1475,7 +1479,7 @@ Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_Auto_loadCmd (clientData, interp, argc, argv)
+TclX_Auto_loadCmd (clientData, interp, argc, argv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          argc;
@@ -1595,15 +1599,22 @@ TclX_LibraryInit (interp)
 
     Tcl_CallWhenDeleted (interp, TclLibCleanUp, (ClientData) infoPtr);
 
-    Tcl_CreateCommand (interp, "auto_load_pkg", Tcl_Auto_load_pkgCmd,
+    Tcl_CreateCommand (interp, "auto_load_pkg", TclX_Auto_load_pkgCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "tclx_auto_load", Tcl_Auto_loadCmd,
+#if  FIX_AUTO_LOAD_HACK
+    Tcl_CreateCommand (interp, "tclx_auto_load", TclX_Auto_loadCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "loadlibindex", Tcl_LoadlibindexCmd,
+#else
+    Tcl_CreateCommand (interp, "auto_load", TclX_Auto_loadCmd,
+                      (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
+#endif
+    Tcl_CreateCommand (interp, "loadlibindex", TclX_LoadlibindexCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 
+#if  FIX_AUTO_LOAD_HACK
     if (Tcl_GlobalEval (interp, hackAutoLoadCmd) == TCL_ERROR)
         return TCL_ERROR;
+#endif
     Tcl_ResetResult (interp);
                                                                   
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixDup.c,v 8.0.4.1 1997/04/14 02:02:49 markd Exp $
+ * $Id: tclXunixDup.c,v 8.1 1997/04/17 04:59:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -52,9 +52,9 @@ ConvertFileHandle (interp, handle)
             fileId = 2;
     } else {
        if (STRNEQU (handle, "file", 4))
-           Tcl_StrToInt (&handle [4], 10, &fileId);
+           TclX_StrToInt (&handle [4], 10, &fileId);
        if (STRNEQU (handle, "sock", 4))
-           Tcl_StrToInt (&handle [4], 10, &fileId);
+           TclX_StrToInt (&handle [4], 10, &fileId);
     }
     if (fileId < 0)
         TclX_StringAppendObjResult (interp, "invalid channel id: ", handle,
@@ -83,26 +83,26 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
     int         mode;
     char       *targetChannelId;
 {
-    Tcl_File channelFile;
+    ClientData handle;
     Tcl_ChannelType *channelType;
     Tcl_Channel newChannel = NULL;
     int srcFileNum, newFileNum = -1;
 
     /*
      * On Unix, the channels we can dup share the same file for the read and
-     * write directions, so use either.
+     * write directions, so use either.  Duping of pipelines can't work.
      */
     if (mode & TCL_READABLE) {
-        channelFile = Tcl_GetChannelFile (srcChannel, TCL_READABLE);
+        Tcl_GetChannelHandle (srcChannel, TCL_READABLE, &handle);
     } else {
-        channelFile = Tcl_GetChannelFile (srcChannel, TCL_WRITABLE);
+        Tcl_GetChannelHandle (srcChannel, TCL_WRITABLE, &handle);
     }
-    srcFileNum = (int) Tcl_GetFileInfo (channelFile, NULL);
+    srcFileNum = (int) handle;
     channelType = Tcl_GetChannelType (srcChannel);
 
     /*
-     * If a target id is specified, close that channel if its open.  Also,
-     * do the actual dup now.
+     * If a target id is specified, close that channel if its open.  Dup
+     * the file.
      */
     if (targetChannelId != NULL) {
         Tcl_Channel oldChannel;
@@ -137,13 +137,12 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
         newChannel = Tcl_MakeTcpClientChannel ((ClientData) newFileNum);
     } else {
         newChannel = Tcl_MakeFileChannel ((ClientData) newFileNum,
-                                          (ClientData) newFileNum,
                                           mode);
     }
     return newChannel;
 
   posixError:
-    Tcl_ResetObjResult (interp);
+    Tcl_ResetResult (interp);
     TclX_StringAppendObjResult (interp, "dup of \"",
                                 Tcl_GetChannelName (srcChannel),
                                 " failed: ",
@@ -167,9 +166,12 @@ TclXOSBindOpenFile (interp, fileNum)
     Tcl_Interp *interp;
     int         fileNum;
 {
-    int fcntlMode, mode, nonBlocking, isSocket;
+    int         fcntlMode;
+    int         mode = 0;
+    int         nonBlocking;
+    int         isSocket;
     struct stat fileStat;
-    char channelName[20];
+    char        channelName[20];
     Tcl_Channel channel = NULL;
 
     /*
@@ -220,7 +222,7 @@ TclXOSBindOpenFile (interp, fileNum)
 
     if (Tcl_GetChannel (interp, channelName, NULL) != NULL) {
         char numBuf [32];
-        Tcl_ResetObjResult (interp);
+        Tcl_ResetResult (interp);
 
         sprintf (numBuf, "%d", fileNum);
         TclX_StringAppendObjResult (interp, "file number \"", numBuf,
@@ -228,13 +230,12 @@ TclXOSBindOpenFile (interp, fileNum)
                                     "channel", (char *) NULL);
         return NULL;
     }
-    Tcl_ResetObjResult (interp);
+    Tcl_ResetResult (interp);
 
     if (isSocket) {
         channel = Tcl_MakeTcpClientChannel ((ClientData) fileNum);
     } else {
         channel = Tcl_MakeFileChannel ((ClientData) fileNum,
-                                       (ClientData) fileNum,
                                        mode);
     }
     Tcl_RegisterChannel (interp, channel);
@@ -263,7 +264,7 @@ TclXOSBindOpenFile (interp, fileNum)
     {
         char numBuf [32];
 
-        Tcl_ResetObjResult (interp);
+        Tcl_ResetResult (interp);
         sprintf (numBuf, "%d", fileNum);
 
         TclX_StringAppendObjResult (interp, "binding open file ", numBuf,

@@ -1,0 +1,72 @@
+
+Lindsay F. Marshall (Lindsay.Marshall@ncl.ac.uk) wrote:
+: I can consistently make 8.0b1 fail and dump core after printing out
+: the error:
+:
+: UpdateStringOfByteCode should never be called
+
+Lindsay,
+
+I was going to suggest that you send me or post a test case for this
+bug when I realized how it could happen. The following patch should
+fix this.
+
+  Brian
+
+---------------------------------------------
+
+
+------- generic/tclCompile.c -------
+*** /tmp/da002JQ	Wed Dec 31 16:00:00 1969
+--- generic/tclCompile.c	Thu May 29 15:00:52 1997
+***************
+*** 1048,1055 ****
+   *	None.
+   *
+   * Side effects:
+!  *	The object's string is set to a valid string that results from
+!  *	the bytecode-to-string conversion.
+   *
+   *----------------------------------------------------------------------
+   */
+--- 1048,1054 ----
+   *	None.
+   *
+   * Side effects:
+!  *	May generate a panic. 
+   *
+   *----------------------------------------------------------------------
+   */
+***************
+*** 1059,1065 ****
+      register Tcl_Obj *objPtr;	/* ByteCode object with string rep that 
+  				 * needs updating. */
+  {
+!     panic("UpdateStringOfByteCode should never be called.");
+  }
+  
+  /*
+--- 1058,1078 ----
+      register Tcl_Obj *objPtr;	/* ByteCode object with string rep that 
+  				 * needs updating. */
+  {
+!     /*
+!      * This procedure is rarely invoked since the internal representation of
+!      * a bytecode object is never modified. We should only be called with a
+!      * duplicate of a bytecode object whose string rep was originally empty
+!      * (i.e., the script was empty). Such duplicate objects have a NULL
+!      * bytes pointer. In this case, create an empty string.
+!      */
+! 
+!     if (objPtr->bytes == NULL) {
+! 	objPtr->bytes = ckalloc(1);
+! 	objPtr->bytes[0] = 0;
+! 	objPtr->length = 0;
+!     } else {
+! 	panic("UpdateStringOfByteCode should never be called.");
+!     }
+  }
+  
+  /*
+
+

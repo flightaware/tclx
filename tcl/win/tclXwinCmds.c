@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 8.0.4.1 1997/04/14 02:02:55 markd Exp $
+ * $Id: tclXwinCmds.c,v 1.4 1997/05/31 03:51:58 karl Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,31 +21,31 @@
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_ChrootCmd --
+ * Tcl_ChrootObjCmd --
  *   Stub to return an error if the chroot command is used on Windows.
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChrootCmd (ClientData  clientData,
-               Tcl_Interp *interp,
-               int         argc,
-               char      **argv)
+Tcl_ChrootObjCmd (ClientData  clientData,
+                  Tcl_Interp *interp,
+                  int         objc,
+                  Tcl_Obj   *CONST objv[])
 {
-    return TclXNotAvailableError (interp, argv [0]);
+    return TclXNotAvailableObjError (interp, objv [0]);
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_TimesCmd --
+ * Tcl_TimesObjCmd --
  *   Stub to return an error if the times command is used on Windows.
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_TimesCmd (ClientData  clientData,
-              Tcl_Interp *interp,
-              int         argc,
-              char      **argv)
+Tcl_TimesObjCmd (ClientData  clientData,
+                 Tcl_Interp *interp,
+                 int         objc,
+                 Tcl_Obj   *CONST objv[])
 {
-    return TclXNotAvailableError (interp, argv [0]);
+    return TclXNotAvailableObjError (interp, objv [0]);
 }
 
 /*-----------------------------------------------------------------------------
@@ -73,5 +73,3 @@ void
 TclX_ServerInit (Tcl_Interp *interp)
 {
 }
-
-

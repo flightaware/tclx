@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 8.0.4.1 1997/04/14 02:01:56 markd Exp $
+ * $Id: tclXsocket.c,v 8.1 1997/04/17 04:58:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,7 +28,7 @@ ReturnGetHostError _ANSI_ARGS_((Tcl_Interp *interp,
 static struct hostent *
 InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
                          int         objc,
-                         Tcl_Obj   **objv));
+                         Tcl_Obj   *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -72,6 +72,9 @@ ReturnGetHostError (interp, host)
         errorMsg = "no data";
         break;
 #endif
+      default:
+	  errorCode = "UNKNOWN_ERROR";
+	  errorMsg = "unknown error";
     }
     Tcl_SetErrorCode (interp, "INET", errorCode, errorMsg, (char *)NULL);
     Tcl_AppendResult (interp, "host lookup failure: ",
@@ -152,7 +155,7 @@ static struct hostent *
 InfoGetHost (interp, objc, objv)
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     struct hostent *hostEntry;
     struct in_addr address;
@@ -182,7 +185,7 @@ InfoGetHost (interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_HostInfoObjCmd --
+ * TclX_HostInfoObjCmd --
  *     Implements the TCL host_info command:
  *
  *      host_info addresses host
@@ -194,11 +197,11 @@ InfoGetHost (interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_HostInfoObjCmd (clientData, interp, objc, objv)
+TclX_HostInfoObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         objc;
-    Tcl_Obj   **objv;
+    Tcl_Obj   *CONST objv[];
 {
     struct hostent *hostEntry;
     struct in_addr  inAddr;

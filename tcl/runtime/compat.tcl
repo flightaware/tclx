@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: compat.tcl,v 8.2 1997/04/17 04:59:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -255,7 +255,7 @@ proc frename {old new} {
         error "rename \"foo\" to \"baz\" failed: directory not empty" {} \
                 POSIX ENOTEMPTY {directory not empty}
     }
-    file rename $old $new
+    file rename -force $old $new
 }
 
 
