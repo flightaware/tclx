@@ -2,7 +2,8 @@
 # Makefile  --
 #
 # Makefile for Extended Tcl C sources.  This will compile all of Extended Tcl
-# and add it to the libtcl.a in the parent directory.
+# and add it to the libtcl.a in the parent directory.  Generates a Tcl shell
+# in the parent directory.
 # 
 #------------------------------------------------------------------------------
 # Copyright 1992 Karl Lehenbauer and Mark Diekhans.
@@ -14,17 +15,20 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: Makefile,v 1.1 1992/09/20 23:24:26 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 include ../Config.mk
 include ../config/$(TCL_CONFIG_FILE)
-
 SHELL=/bin/sh
-LIBTCL=../libtcl.a
+
+#------------------------------------------------------------------------------
+
 CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I../$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) \
         $(SYS_DEP_FLAGS)
+
+#------------------------------------------------------------------------------
 
 OBJS= \
     main.o           tclXbsearch.o    tclXchmod.o      tclXclock.o     \
@@ -36,10 +40,12 @@ OBJS= \
     tclXselect.o     tclXsignal.o     tclXstartup.o    tclXstring.o    \
     tclXunixcmds.o   tclXutil.o       tclXgetdate.o    tclXkeylist.o
  
-all: made.tmp
+#------------------------------------------------------------------------------
+
+all: made.tmp ../tcl
 
 made.tmp: $(OBJS) $(CPLUSOBJS)
-	$(AR) cr $(LIBTCL) $(OBJS) $(CPLUSOBJS)
+	$(AR) cr ../libtcl.a $(OBJS) $(CPLUSOBJS)
 	touch made.tmp
 
 tclXstartup.o: patchlevel.h tclXstartup.c
@@ -52,21 +58,38 @@ tclXgetdate.c: tclXgetdate.y
 	$(YACC) tclXgetdate.y
 	mv y.tab.c tclXgetdate.c
 
-#
+../tcl: ../libtcl.a made.tmp 
+	$(RANLIB_CMD) ../libtcl.a
+	$(CC) $(CFLAGS) main.o ../libtcl.a $(LIBS) $(XLDFLAGS) -o ../tcl
+	if $(DO_STRIPPING) ; then \
+	    strip ../tcl; \
+	    $(MCS_CMD) ../tcl; fi
+
+
+#------------------------------------------------------------------------------
 # This is a painful situation.  The file tcl++.h requires string.h, which is
 # redefined in the UCB Tcl directory.  We force the compiler to search the
 # C++ directories first.
-#
+
 tcl++.o: tcl++.C tcl++.h
 	$(CCPLUS) -c -I $(CCPLUSINCL) $(CFLAGS) $(HISTORY_FLAG) tcl++.C
 
-#
+#------------------------------------------------------------------------------
 # This is just to test if it compiles.
-#
+
+TCL++: ../tcl++
+
+../tcl++: main++.o
+	$(CCPLUS) $(CFLAGS) main++.o ../libtcl.a $(LIBS) $(XLDFLAGS) \
+	-o ../tcl++
+
 main++.o: tcl++.h main++.C
 	$(CCPLUS) -c -I /usr/include/CC $(CFLAGS) $(HISTORY_FLAG) main++.C
 
+
+#------------------------------------------------------------------------------
+
 clean:
 	-rm -f made.tmp tclXgetdate.c
-	-rm -f *.o
+	-rm -f *.o ../tcl ../tcl++
 
