@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.8 1997/07/04 08:41:02 markd Exp $
+ * $Id: tclXprofile.c,v 8.9 1997/07/04 20:23:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -419,11 +419,11 @@ ProfCommandEvalSetup (infoPtr, cmdName, isProcPtr)
     currentCmdPtr = infoPtr->currentCmdPtr;
     if (currentCmdPtr->proc == ProfStrCommandEval)
         currentCmdPtr->proc = infoPtr->savedStrCmdProc;
-    if (currentCmdPtr->clientData == infoPtr)
+    if (currentCmdPtr->clientData == (ClientData) infoPtr)
         currentCmdPtr->clientData = infoPtr->savedStrCmdClientData;
     if (currentCmdPtr->objProc == ProfObjCommandEval)
         currentCmdPtr->objProc = infoPtr->savedObjCmdProc;
-    if (currentCmdPtr->objClientData == infoPtr)
+    if (currentCmdPtr->objClientData == (ClientData) infoPtr)
         currentCmdPtr->objClientData = infoPtr->savedObjCmdClientData;
     infoPtr->currentCmdPtr = NULL;
     infoPtr->savedStrCmdProc = NULL;
@@ -661,9 +661,9 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
      * Force our routines to be called.
      */
     cmdPtr->proc = ProfStrCommandEval;
-    cmdPtr->clientData = infoPtr;
+    cmdPtr->clientData = (ClientData) infoPtr;
     cmdPtr->objProc = ProfObjCommandEval;
-    cmdPtr->objClientData = infoPtr;
+    cmdPtr->objClientData = (ClientData) infoPtr;
 }
 
 /*-----------------------------------------------------------------------------
