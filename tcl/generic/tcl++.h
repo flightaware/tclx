@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.1 1992/12/11 04:51:22 markd Exp markd $
+ * $Id: tcl++.h,v 2.2 1993/02/11 04:40:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -142,10 +142,12 @@ public:
     }
 
     inline int 
-    Eval (const char   *cmd, 
-          char          flags = 0, 
-          char        **termPtr = NULL)
-        { return Tcl_Eval (interp, (char *) cmd, flags, termPtr); }
+    Eval (char   *cmd, 
+          char    flags = 0, 
+          char  **termPtr = NULL)
+    {
+        return Tcl_Eval (interp, cmd, flags, termPtr);
+    }
 
     inline int
     EvalFile (const char *fileName)
