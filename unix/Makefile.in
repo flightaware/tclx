@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.11 1995/04/29 22:53:36 markd Exp markd $
+# $Id: Makefile.in,v 4.12 1995/05/26 05:21:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -69,6 +69,7 @@ TCLX: runtcl
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} all
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd src;       ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} checkup
 
 #------------------------------------------------------------------------------
 # Generate a wish shell {wishx} with Extended Tcl commands.

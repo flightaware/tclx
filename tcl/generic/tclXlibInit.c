@@ -2,7 +2,7 @@
  * tclXlibInit.c
  *
  * Function to add the Extented Tcl library commands into an interpreter. This
- * also sets the Tcl auto_path and and tclx_library variable.
+ * also sets the Tcl auto_path, tcl_library and tclx_library variable.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlibInit.c,v 1.1 1995/01/16 07:36:59 markd Exp markd $
+ * $Id: tclXlibInit.c,v 1.2 1995/01/19 07:37:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -58,6 +58,10 @@ TclXLib_Init (interp)
         else
             libDir = "";
     }
+
+    if (Tcl_SetVar (interp, "tcl_library", libDir,
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        return TCL_ERROR;
 
     if (Tcl_SetVar (interp, "tclx_library", libDir,
                     TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)

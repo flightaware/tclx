@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.15 1995/05/08 02:26:25 markd Exp markd $
+# $Id: Makefile.in,v 4.16 1995/06/07 07:41:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -73,37 +73,23 @@ OBJS= \
     tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
     tclXunixcmds.o   tclXutil.o
 
-UCBOBJS=tclCmdIL.o
-
 #------------------------------------------------------------------------------
 # Compile the TclX library and link the shell.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp made2.tmp tcl TCLXX_${TCLXX}
+all: made.tmp tcl TCLXX_${TCLXX}
 
 tcl: tclXAppInit.o libtclx.a ${LIBTCL} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	      -o tcl || (rm -f tcl; exit 1)
 
-made2.tmp: tcl
-	../runtcl ${srcbasedir}/tools/checkup.tcl
-	touch made2.tmp
-
-made.tmp libtclx.a: ${OBJS} ${UCBOBJS} TCLXX_O_${TCLXX}
-	${AR} cr libtclx.a ${OBJS} ${UCBOBJS}
+made.tmp libtclx.a: ${OBJS} TCLXX_O_${TCLXX}
+	${AR} cr libtclx.a ${OBJS}
 	if [ "${TCLXX}" = "YES" ] ; then \
 	    ${AR} cr libtclx.a tcl++.o ;\
 	else exit 0 ; fi
 	${RANLIB} libtclx.a
 	touch made.tmp
-
-tclCmdIL.o: tclCmdIL.c ${TCL_UCB_SRC}/patchlevel.h
-	${CC} -c ${CC_FLAGS} -DTCL_LIBRARY=\"${INST_MASTER}\" tclCmdIL.c
-
-tclCmdIL.c: ${TCL_UCB_SRC}/tclCmdIL.c
-	rm -f tclCmdIL.c
-	echo '#include "tclXconf.h"'     > tclCmdIL.c
-	cat ${TCL_UCB_SRC}/tclCmdIL.c   >> tclCmdIL.c
 
 tclXlibInit.o: ${srcdir}/tclXlibInit.c
 	${CC} -c ${CC_FLAGS} -DTCLX_LIBRARY=\"${INST_MASTER}\" \
@@ -118,6 +104,15 @@ tclXgetdate.c: ${srcdir}/tclXgetdate.y
 
 tcl++.o: ${srcdir}/tcl++.C ${srcdir}/tcl++.h
 	${CXX} -c ${CXX_FLAGS} ${srcdir}/tcl++.C
+
+#------------------------------------------------------------------------------
+# Do some special checks to make sure TclX is built ok.
+
+checkup: made2.tmp
+
+made2.tmp: tcl
+	../runtcl ${srcbasedir}/tools/checkup.tcl
+	touch made2.tmp
 
 #------------------------------------------------------------------------------
 # Make sure we can link a C++ program (the result is not install).  Target
@@ -171,8 +166,8 @@ install-master-exec:
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made*.tmp tclXgetdate.c tclXAppInit.o tclCmdIL.c
-	-rm -f ${OBJS} ${UCBOBJS} libtclx.a tcl tcl++
+	-rm -f made*.tmp tclXgetdate.c tclXAppInit.o
+	-rm -f ${OBJS} libtclx.a tcl tcl++
 	-rm -f tclXAppInit++.C TCLXX_O_YES TCLXX_O_NO tclXAppInit++.o tcl++.o
 
 #------------------------------------------------------------------------------

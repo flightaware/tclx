@@ -16,17 +16,11 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 4.5 1995/01/01 19:49:36 markd Exp markd $
+ * $Id: tclXregexp.c,v 4.6 1995/03/01 07:23:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * This is declared in tclUtil.c.  Must be set to NULL before compiling
- * a regular expressions.
- */
-extern char *tclRegexpError;
 
 /*
  * Structure used to return pre-parse infomation about a regular expression.
@@ -487,19 +481,18 @@ TclX_RegExpCompile (interp, regExpPtr, expression, flags)
      * errors to generate a useful error message.
      */
     if (preParseInfo.meta) {
-        tclRegexpError = NULL;
         regExpPtr->progPtr = TclRegComp (expBuf);
         
         /*
          * If the preparsing reported an error, but the compile didn't,
          * we have a bug in the pre-parser.
          */
-        if ((!preParseOk) && (tclRegexpError == NULL))
+        if ((!preParseOk) && (regExpPtr->progPtr != NULL))
             panic ("scanmatch preparse bug");
         
-        if (tclRegexpError != NULL) {
+        if (regExpPtr->progPtr == NULL) {
             Tcl_AppendResult (interp, "error in regular expression: ", 
-                              tclRegexpError, (char *) NULL);
+                              TclGetRegError (), (char *) NULL);
             if (flags & TCLX_REXP_NO_CASE)
                 ckfree (expBuf);
             TclX_RegExpClean (regExpPtr);
