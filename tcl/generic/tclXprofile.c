@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 7.7 1996/10/08 07:18:54 markd Exp $
+ * $Id: tclXprofile.c,v 7.8 1996/10/21 03:07:11 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -772,7 +772,7 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
         } else if (STREQU (argv [argIdx], "-eval")) {
             evalMode = TRUE;
         } else {
-            Tcl_AppendResult (interp, "expected one of \"-commands\", or "
+            Tcl_AppendResult (interp, "expected one of \"-commands\", or ",
                               "\"-eval\", got \"", argv [argIdx], "\"",
                               (char *) NULL);
             return TCL_ERROR;
