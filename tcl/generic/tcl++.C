@@ -5,7 +5,7 @@
  * If tcl.h is not already included, it includes it. Tcl.h  has macros that
  * allow it to work with K&R C, ANSI C and C++.
  *---------------------------------------------------------------------------
- * Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -16,7 +16,7 @@
  *---------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.C,v 2.0 1992/10/16 04:51:32 markd Rel markd $
+ * $Id: tcl++.C,v 2.1 1993/01/22 06:51:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

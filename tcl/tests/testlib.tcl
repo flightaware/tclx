@@ -4,7 +4,7 @@
 # Test support routines.  Some of these are based on routines provided with
 # standard Tcl.
 #------------------------------------------------------------------------------
-# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.0 1992/10/16 04:49:22 markd Rel markd $
+# $Id: testlib.tcl,v 2.1 1993/06/21 05:45:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

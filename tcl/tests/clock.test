@@ -3,7 +3,7 @@
 #
 # Tests for the getclock, fmtclock and convertclock commands.
 #---------------------------------------------------------------------------
-# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 2.6 1993/04/16 06:42:34 markd Exp markd $
+# $Id: clock.test,v 2.7 1993/06/21 05:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

@@ -4,7 +4,7 @@
 # Code to build Tcl package library. Defines the proc `buildpackageindex'.
 # 
 #------------------------------------------------------------------------------
-# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 2.3 1993/05/28 08:46:10 markd Exp markd $
+# $Id: buildidx.tcl,v 2.4 1993/05/31 20:33:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

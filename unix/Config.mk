@@ -5,7 +5,7 @@
 # file you have to modify to get Extended Tcl to work.
 # 
 #------------------------------------------------------------------------------
-# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.20 1993/07/18 23:48:04 markd Exp markd $
+# $Id: Config.mk,v 2.21 1993/07/19 15:30:04 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

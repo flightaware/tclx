@@ -3,7 +3,7 @@
 #
 # Tests for tcl.tlib set functions.
 #---------------------------------------------------------------------------
-# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.test,v 2.0 1992/10/16 04:50:14 markd Rel markd $
+# $Id: setfuncs.test,v 2.1 1993/06/21 05:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
