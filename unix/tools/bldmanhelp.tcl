@@ -30,12 +30,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 1.2 1993/08/13 15:01:21 markd Exp markd $
+# $Id: bldmanhelp.tcl,v 1.3 1993/11/04 16:07:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #-----------------------------------------------------------------------------
 # Process the name section.  This is used to generate a @brief: entry.
+# It returns the line that was read.
 
 proc ProcessNameSection {manFH outFH} {
     set line [gets $manFH]
@@ -46,6 +47,7 @@ proc ProcessNameSection {manFH outFH} {
     }
     set brief [string trim [crange $line [string first - $line]+1 end]]
     puts $outFH "'\\\"@brief: $brief"
+    return $line
 }
 
 #-----------------------------------------------------------------------------
@@ -68,10 +70,11 @@ proc CopyManPage {manPage outFH} {
                 CopyManPage [lindex $line 1] $outFH
             }
             {.SH} {
-                if {[lindex $line 1] == "NAME"} {
-                    ProcessNameSection $fh $outFH
-                }
                 puts $outFH $line
+                if {[lindex $line 1] == "NAME"} {
+                    set line [ProcessNameSection $fh $outFH]
+                    puts $outFH $line
+                }
             }
             {.HS .BS .BE .VS .VE} {
             }
