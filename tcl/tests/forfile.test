@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.test,v 6.0 1996/05/10 16:17:33 markd Exp $
+# $Id: forfile.test,v 7.0 1996/06/16 05:32:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] == ""} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
 
 set outfp [open FORFILE.TMP w]

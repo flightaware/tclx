@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 7.4 1996/08/19 07:43:34 markd Exp $
+# $Id: dup.test,v 7.5 1996/09/03 23:39:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 # FIX: Need tests on sockets.
 

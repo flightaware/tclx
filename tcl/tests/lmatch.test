@@ -34,7 +34,7 @@
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 set x {abcd bbcd 123 234 345 445}
 

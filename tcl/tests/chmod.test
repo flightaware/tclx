@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 7.0 1996/06/16 05:31:54 markd Exp $
+# $Id: chmod.test,v 7.1 1996/07/26 05:56:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 if [cequal $tcl_platform(platform) windows] {
     echo "    * The chmod, chown and chgrp commands have not been ported to Win32" 

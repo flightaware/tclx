@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 7.1 1996/07/18 19:36:29 markd Exp $
+# $Id: cmdtrace.test,v 7.2 1996/07/26 05:56:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] == ""} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 #
 # Proc to do something to trace.

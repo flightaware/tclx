@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lassign.test,v 6.0 1996/05/10 16:17:43 markd Exp $
+# $Id: lassign.test,v 7.0 1996/06/16 05:32:27 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] == ""} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 Test lassign-1.1 {lassign command} {
     lassign "a b {c d} e" alpha beta gamma delta epsilon

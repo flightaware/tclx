@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 7.2 1996/09/03 23:39:07 markd Exp $
+# $Id: copyfile.test,v 1.1 1996/09/28 16:25:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 #
 # Compare the contents of two files.  Return 1 if the same, 0 if different.

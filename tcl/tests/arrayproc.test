@@ -12,12 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayproc.test,v 6.0 1996/05/10 16:17:03 markd Exp $
+# $Id: arrayproc.test,v 7.0 1996/06/16 05:31:48 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] == ""} then {source testlib.tcl}
-
+if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
 
 set testArray(foo) bar

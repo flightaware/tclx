@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 7.2 1996/09/03 23:39:07 markd Exp $
+# $Id: ftrunc.test,v 1.1 1996/09/28 16:25:43 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 unlink -nocomplain TRUNCATE.TMP
 

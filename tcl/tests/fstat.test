@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 7.2 1996/08/02 10:59:53 markd Exp $
+# $Id: fstat.test,v 7.3 1996/09/03 23:39:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 unlink -nocomplain gorp.file
 set gorpFH [open gorp.file w]

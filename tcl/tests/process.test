@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 7.0 1996/06/16 05:32:41 markd Exp $
+# $Id: process.test,v 7.1 1996/07/26 05:56:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 if [cequal $tcl_platform(platform) windows] { ;# WIN32???
     echo process win32 work not completed, tests skipped.

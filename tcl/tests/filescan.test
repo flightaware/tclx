@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 7.3 1996/08/03 01:25:24 markd Exp $
+# $Id: filescan.test,v 7.4 1996/08/03 01:50:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 # Increment a name.  This takes a name and "adds one" to it, that is advancing
 # each digit lexically through "0"..."9" -> "A"-"Z" -> "a"..."z".  When one

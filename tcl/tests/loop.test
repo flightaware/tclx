@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loop.test,v 6.0 1996/05/10 16:17:49 markd Exp $
+# $Id: loop.test,v 7.0 1996/06/16 05:32:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 Test loop-1.1 {loop tests} {
     set a {}

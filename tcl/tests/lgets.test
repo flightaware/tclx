@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lgets.test,v 7.1 1996/07/26 05:56:20 markd Exp $
+# $Id: lgets.test,v 7.2 1996/07/28 00:38:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 Test lgets-1.1 {lgets command} {
     lgets

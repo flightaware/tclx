@@ -16,7 +16,7 @@
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 #
 # Fork without exec will not work under Tk, skip this test

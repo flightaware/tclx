@@ -12,11 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdloop.test,v 6.0 1996/05/10 16:17:14 markd Exp $
+# $Id: cmdloop.test,v 7.0 1996/06/16 05:31:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
-if {[info procs test] != "test"} then {source testlib.tcl}
+if [cequal [info procs Test] {}] {source testlib.tcl}
 
 Test cmdloop-1.1 {commandloop tests} {
     commandloop xxx
