@@ -13,13 +13,12 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXstartup.c,v 1.5 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tkXinit.c,v 1.6 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tk.h"
-#include "tkX.h"
 
 
 /*
