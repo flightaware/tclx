@@ -1,5 +1,13 @@
 2004-11-22  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* library/tclx.tcl: Reintroduce the addition of the 'help' command
+	* library/help.tcl: as tclx::help* (they can be namespace imported).
+	* configure:        Adjust the configure to allow --with-help, which
+	* configure.in:     is required to build the TclX help files.  This
+	* Makefile.in:      still needs work on how users would build and
+	install the help depending on whether it was a CVS or general
+	source distribution.
+
 	* library/edprocs.tcl (edprocs): harden tmpfile security access
 
 	* Makefile.in: remove TCL_DEFS dependency
