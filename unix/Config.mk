@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.26 1993/08/13 15:01:21 markd Exp markd $
+# $Id: Config.mk,v 2.27 1993/08/18 06:12:37 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -32,7 +32,7 @@
 # path).
 
 TCL_UCB_LIB=../tcl7.0b2
-TCL_UCB_SRC=$(srcdir)/../tcl7.0b2
+TCL_UCB_SRC=$(srcdir)/$(TCL_UCB_LIB)
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -43,7 +43,7 @@ TCL_UCB_SRC=$(srcdir)/../tcl7.0b2
 
 TK_BUILD=WISHX
 TK_UCB_LIB=../tk3.3b2
-TK_UCB_SRC=$(srcdir)/../tk3.3b2
+TK_UCB_SRC=$(srcdir)/$(TK_UCB_LIB)
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Also a macro that
