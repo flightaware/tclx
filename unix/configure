@@ -1608,7 +1608,8 @@ fi
 
     fi
     if test "$XLIBSW" = nope; then
-	dirs=${XLIBRARY_DIR-"/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"}	for i in $dirs ; do
+	dirs=${XLIBRARY_DIR-"/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"}
+        for i in $dirs ; do
 	    if test -r $i/libX11.a; then
 		XLIBSW="-L$i -lX11"
 	    fi
