@@ -14,56 +14,61 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.tcl,v 8.0.4.1 1997/04/14 02:02:02 markd Exp $
+# $Id: convlib.tcl,v 8.1 1997/04/17 04:59:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-convertlib convert_lib
 
-#------------------------------------------------------------------------------
-# tclx:ParseTclIndex
-# Parse a tclIndex file, returning an array of file names with the list of
-# procedures in each package. This is done by sourcing the file and then
-# going through the local auto_index array that was created. Issues warnings
-# for lines that can't be converted.  tclIndex should be an absolute path
-# name.  Returns 1 if all lines are converted, 0 if some failed.
-#
+namespace eval TclX {
 
-proc tclx:ParseTclIndex {tclIndex fileTblVar ignore} {
-    upvar $fileTblVar fileTbl
-    set allOK 1
+    #--------------------------------------------------------------------------
+    # ParseTclIndex
+    # Parse a tclIndex file, returning an array of file names with the list of
+    # procedures in each package. This is done by sourcing the file and then
+    # going through the local auto_index array that was created. Issues
+    # warnings for lines that can't be converted.  tclIndex should be an
+    # absolute path name.  Returns 1 if all lines are converted, 0 if some
+    # failed.
+    #
 
-    # Open and validate the file.
+    proc ParseTclIndex {tclIndex fileTblVar ignore} {
+        upvar $fileTblVar fileTbl
+        set allOK 1
 
-    set tclIndexFH [open $tclIndex r]
-    set hdr [gets $tclIndexFH]
-    if {!(($hdr == {# Tcl autoload index file, version 2.0}) ||
-          ($hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}))} {
-        error "can only convert version 2.0 Tcl auto-load files"
-    }
-    set dir [file dirname $tclIndex]  ;# Expected by the script.
-    eval [read $tclIndexFH]
-    close $tclIndexFH
+        # Open and validate the file.
 
-    foreach procName [array names auto_index] {
-        if ![string match "source *" $auto_index($procName)] {
-            puts stderr "WARNING: Can't convert load command for \"$procName\": $auto_index($procName)"
-            set allOK 0
-            continue
+        set tclIndexFH [open $tclIndex r]
+        set hdr [gets $tclIndexFH]
+        if {!(($hdr == {# Tcl autoload index file, version 2.0}) ||
+              ($hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}))} {
+            error "can only convert version 2.0 Tcl auto-load files"
         }
-        set filePath [lindex $auto_index($procName) 1]
-        set fileName [file tail $filePath] 
-        if {[lsearch $ignore $fileName] >= 0} continue
+        set dir [file dirname $tclIndex]  ;# Expected by the script.
+        eval [read $tclIndexFH]
+        close $tclIndexFH
 
-        lappend fileTbl($filePath) $procName
-    }
-    if ![info exists fileTbl] {
-        error "no entries could be converted in $tclIndex"
-    }
-    return $allOK
-}
+        foreach procName [array names auto_index] {
+            if ![string match "source *" $auto_index($procName)] {
+                puts stderr "WARNING: Can't convert load command for\
+                        \"$procName\": $auto_index($procName)"
+                set allOK 0
+                continue
+            }
+            set filePath [lindex $auto_index($procName) 1]
+            set fileName [file tail $filePath] 
+            if {[lsearch $ignore $fileName] >= 0} continue
 
-#------------------------------------------------------------------------------
+            lappend fileTbl($filePath) $procName
+        }
+        if ![info exists fileTbl] {
+            error "no entries could be converted in $tclIndex"
+        }
+        return $allOK
+    }
+} ;# namespace TclX
+
+#--------------------------------------------------------------------------
 # convert_lib:
 # Convert a tclIndex library to a .tlib. ignore any files in the ignore
 # list
@@ -87,7 +92,7 @@ proc convert_lib {tclIndex packageLib {ignore {}}} {
 
     # Parse the file.
 
-    set allOK [tclx:ParseTclIndex $tclIndex fileTbl $ignore]
+    set allOK [TclX::ParseTclIndex $tclIndex fileTbl $ignore]
 
     # Generate the .tlib package names with contain the directory and
     # file name, less any extensions.
