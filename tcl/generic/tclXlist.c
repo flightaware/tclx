@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 3.0 1993/11/19 06:58:59 markd Rel markd $
+ * $Id: tclXlist.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -369,11 +369,11 @@ Tcl_LmatchCmd(notUsed, interp, argc, argv)
 
     mode = GLOB;
     if (argc == 4) {
-        if (strcmp(argv[1], "-exact") == 0) {
+        if (STREQU(argv[1], "-exact")) {
             mode = EXACT;
-        } else if (strcmp(argv[1], "-glob") == 0) {
+        } else if (STREQU(argv[1], "-glob")) {
             mode = GLOB;
-        } else if (strcmp(argv[1], "-regexp") == 0) {
+        } else if (STREQU(argv[1], "-regexp")) {
             mode = REGEXP;
         } else {
             Tcl_AppendResult(interp, "bad search mode \"", argv[1],
@@ -395,7 +395,7 @@ Tcl_LmatchCmd(notUsed, interp, argc, argv)
         match = 0;
         switch (mode) {
             case EXACT:
-                match = (strcmp(listArgv[i], argv[argc-1]) == 0);
+                match = (STREQU(listArgv[i], argv[argc-1]));
                 break;
             case GLOB:
                 match = Tcl_StringMatch(listArgv[i], argv[argc-1]);
