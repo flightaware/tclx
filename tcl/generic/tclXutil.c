@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.3 1994/12/29 00:28:22 markd Exp markd $
+ * $Id: tclXutil.c,v 4.4 1995/01/01 19:49:40 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,10 +24,38 @@
 #endif
 
 /*
+ * Prototypes of internal functions.
+ */
+static int
+ReturnOverflow _ANSI_ARGS_((Tcl_Interp *interp));
+
+/*
  * Used to return argument messages by most commands.
  */
 char *tclXWrongArgs = "wrong # args: ";
 
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * ReturnOverflow --
+ *    
+ *   Return an error message about an numeric overflow.
+ *
+ * Parameters:
+ *   o interp (O) - Interpreter to set the error message in.
+ * Returns:
+ *   TCL_ERROR;
+ *-----------------------------------------------------------------------------
+ */
+static int
+ReturnOverflow (interp)
+    Tcl_Interp *interp;
+{
+    interp->result = "integer value too large to represent";
+    Tcl_SetErrorCode(interp, "ARITH", "IOVERFLOW",
+                     interp->result, (char *) NULL);
+    return TCL_ERROR;
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -53,18 +81,42 @@ Tcl_StrToLong (string, base, longPtr)
     int         base;
     long       *longPtr;
 {
-    char *end;
-    long  num;
+    char *end, *p;
+    long  i;
 
-    num = strtol(string, &end, base);
-    while ((*end != '\0') && ISSPACE(*end)) {
+    /*
+     * Note: use strtoul instead of strtol for integer conversions
+     * to allow full-size unsigned numbers, but don't depend on strtoul
+     * to handle sign characters;  it won't in some implementations.
+     */
+
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    if (*p == '-') {
+        p++;
+        i = -strtoul(p, &end, base);
+    } else if (*p == '+') {
+        p++;
+        i = strtoul(p, &end, base);
+    } else {
+        i = strtoul(p, &end, base);
+    }
+    if (end == p) {
+        return FALSE;
+    }
+    if (errno == ERANGE) {
+        return FALSE;
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
     }
-    if ((end == string) || (*end != 0))
+    if (*end != '\0') {
         return FALSE;
-    *longPtr = num;
+    }
+    *longPtr = i;
     return TRUE;
-
 }
 
 /*
@@ -91,18 +143,42 @@ Tcl_StrToInt (string, base, intPtr)
     int         base;
     int        *intPtr;
 {
-    char *end;
-    int   num;
+    char *end, *p;
+    int   i;
 
-    num = strtol(string, &end, base);
-    while ((*end != '\0') && ISSPACE(*end)) {
+    /*
+     * Note: use strtoul instead of strtol for integer conversions
+     * to allow full-size unsigned numbers, but don't depend on strtoul
+     * to handle sign characters;  it won't in some implementations.
+     */
+
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    if (*p == '-') {
+        p++;
+        i = -strtoul(p, &end, base);
+    } else if (*p == '+') {
+        p++;
+        i = strtoul(p, &end, base);
+    } else {
+        i = strtoul(p, &end, base);
+    }
+    if (end == p) {
+        return FALSE;
+    }
+    if (errno == ERANGE) {
+        return FALSE;
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
     }
-    if ((end == string) || (*end != 0))
+    if (*end != '\0') {
         return FALSE;
-    *intPtr = num;
+    }
+    *intPtr = i;
     return TRUE;
-
 }
 
 /*
@@ -129,18 +205,28 @@ Tcl_StrToUnsigned (string, base, unsignedPtr)
     int         base;
     unsigned   *unsignedPtr;
 {
-    char          *end;
-    unsigned long  num;
+    char *end, *p;
+    unsigned i;
 
-    num = strtoul (string, &end, base);
-    while ((*end != '\0') && ISSPACE(*end)) {
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    i = strtoul(p, &end, base);
+    if (end == p) {
+        return FALSE;
+    }
+    if (errno == ERANGE) {
+        return FALSE;
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
     }
-    if ((end == string) || (*end != 0))
+    if (*end != '\0') {
         return FALSE;
-    *unsignedPtr = num;
+    }
+    *unsignedPtr = i;
     return TRUE;
-
 }
 
 /*
@@ -161,19 +247,19 @@ Tcl_StrToDouble (string, doublePtr)
     CONST char *string;
     double     *doublePtr;
 {
-    char   *end;
-    double  num;
+    char   *end, *p;
+    double  i;
 
-    num = strtod (string, &end);
-    while ((*end != '\0') && ISSPACE(*end)) {
-        end++;
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
     }
-    if ((end == string) || (*end != 0))
+    i = strtod (string, &end);
+    if (end == p) {
         return FALSE;
-
-    *doublePtr = num;
+    }
+    *doublePtr = i;
     return TRUE;
-
 }
 
 /*
@@ -200,24 +286,42 @@ Tcl_StrToOffset (string, base, offsetPtr)
     int         base;
     off_t      *offsetPtr;
 {
-    char *end;
-    long  num;
-    off_t offset;
+    char *end, *p;
+    off_t i;
 
-    num = strtol(string, &end, base);
-    while ((*end != '\0') && ISSPACE(*end)) {
+    /*
+     * Note: use strtoul instead of strtol for integer conversions
+     * to allow full-size unsigned numbers, but don't depend on strtoul
+     * to handle sign characters;  it won't in some implementations.
+     */
+
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    if (*p == '-') {
+        p++;
+        i = -strtoul(p, &end, base);
+    } else if (*p == '+') {
+        p++;
+        i = strtoul(p, &end, base);
+    } else {
+        i = strtoul(p, &end, base);
+    }
+    if (end == p) {
+        return FALSE;
+    }
+    if (errno == ERANGE) {
+        return FALSE;
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
     }
-    if ((end == string) || (*end != 0))
+    if (*end != '\0') {
         return FALSE;
-
-    offset = (off_t) num;
-    if (offset != num)
-        return FALSE;
-
-    *offsetPtr = offset;
+    }
+    *offsetPtr = i;
     return TRUE;
-
 }
 
 /*
@@ -377,17 +481,28 @@ Tcl_GetLong(interp, string, longPtr)
     CONST char *string;
     long       *longPtr;
 {
-    char *end;
-    long  i;
+    char *end, *p;
+    long i;
 
-    i = strtol(string, &end, 0);
-    while ((*end != '\0') && ISSPACE(*end)) {
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    i = strtol(p, &end, 0);
+    if (end == p) {
+        badInteger:
+        Tcl_AppendResult(interp, "expected integer but got \"", string,
+                "\"", (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (errno == ERANGE) {
+        return ReturnOverflow (interp);
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
     }
-    if ((end == string) || (*end != 0)) {
-        Tcl_AppendResult (interp, "expected integer but got \"", string,
-                          "\"", (char *) NULL);
-        return TCL_ERROR;
+    if (*end != '\0') {
+        goto badInteger;
     }
     *longPtr = i;
     return TCL_OK;
@@ -417,24 +532,35 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
     CONST char *string;
     unsigned   *unsignedPtr;
 {
-    char          *end;
+    char          *end, *p;
     unsigned long  i;
 
     /*
      * Since some strtoul functions don't detect negative numbers, check
      * in advance.
      */
-    while (ISSPACE(*string))
-        string++;
-    if (string [0] == '-')
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    if (*p == '-')
         goto badUnsigned;
-
-    i = strtoul(string, &end, 0);
-    while ((*end != '\0') && ISSPACE(*end))
+    if (*p == '+') {
+        p++;
+    }
+    i = strtoul(p, &end, 0);
+    if (end == p) {
+        goto badUnsigned;
+    }
+    if (errno == ERANGE) {
+        return ReturnOverflow (interp);
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
-
-    if ((end == string) || (*end != '\0'))
+    }
+    if (*end != '\0') {
         goto badUnsigned;
+    }
 
     *unsignedPtr = i;
     return TCL_OK;
@@ -469,22 +595,39 @@ Tcl_GetTime(interp, string, timePtr)
     CONST char *string;
     time_t     *timePtr;
 {
-    char   *end;
-    long   i;
-    time_t time;
+    char          *end, *p;
+    unsigned long  i;
 
-    i = strtoul(string, &end, 0);
-    while ((*end != '\0') && ISSPACE(*end)) {
+    /*
+     * Since some strtoul functions don't detect negative numbers, check
+     * in advance.
+     */
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    if (*p == '-')
+        goto badTime;
+    if (*p == '+') {
+        p++;
+    }
+    i = strtoul(p, &end, 0);
+    if (end == p) {
+        goto badTime;
+    }
+    if (errno == ERANGE) {
+        return ReturnOverflow (interp);
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
     }
-    if ((end == string) || (*end != 0))
+    if (*end != '\0') {
         goto badTime;
+    }
 
-    time = (time_t) i;
-    if (time != i)
+    *timePtr = (time_t) i;
+    if (*timePtr != i)
         goto badTime;
-
-    *timePtr = time;
     return TCL_OK;
 
   badTime:
@@ -517,22 +660,29 @@ Tcl_GetOffset(interp, string, offsetPtr)
     CONST char *string;
     off_t      *offsetPtr;
 {
-    char   *end;
-    long   i;
-    off_t offset;
+    char *end, *p;
+    long i;
 
-    i = strtol(string, &end, 0);
-    while ((*end != '\0') && ISSPACE(*end)) {
+    errno = 0;
+    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
+        /* Empty loop body. */
+    }
+    i = strtol(p, &end, 0);
+    if (end == p) {
+        goto badOffset;
+    }
+    if (errno == ERANGE) {
+        return ReturnOverflow (interp);
+    }
+    while ((*end != '\0') && isspace(UCHAR(*end))) {
         end++;
     }
-    if ((end == string) || (*end != 0))
+    if (*end != '\0') {
         goto badOffset;
-
-    offset = (off_t) i;
-    if (offset != i)
+    }
+    *offsetPtr = (off_t) i;
+    if (*offsetPtr != i)
         goto badOffset;
-
-    *offsetPtr = offset;
     return TCL_OK;
 
   badOffset:
