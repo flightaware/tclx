@@ -298,7 +298,7 @@
 ./tcl/unix/pkgIndex.proto.in
 ./tcl/unix/tclXAppInit.c
 ./tcl/unix/tclXunixCmds.c
-./tcl/unix/tclXunixDup.c 
+./tcl/unix/tclXunixDup.c
 ./tcl/unix/tclXunixId.c
 ./tcl/unix/tclXunixOS.c
 ./tcl/unix/tclXunixPort.h
