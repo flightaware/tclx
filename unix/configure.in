@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.8 1997/04/17 05:00:21 markd Exp $
+dnl $Id: configure.in,v 8.9 1997/06/12 21:08:53 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.8 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.9 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -185,11 +185,23 @@ eval `${MAKE-make} -f confmakefile`
 rm confmakefile
 
 if test ! -r "$TCL_CONFIG" ; then
-    AC_MSG_ERROR(Config.mk does not set TCL_CONFIG to a valid path to tclConfig.sh)
+    AC_MSG_RESULT(failed)
+    AC_MSG_ERROR(
+    Config.mk does not set TCL_CONFIG to a valid path to
+    tclConfig.sh. TclX expects the Tcl to be built in the directory:
+        $TCL_CONFIG
+    Either build Tcl in this location or edit the value of TCL_CONFIG in
+    unix/Config.mk.)
 fi
 if test "$TKX_BUILD" = "YES"; then
     if test ! -r "$TK_CONFIG" ; then
-        AC_MSG_ERROR(Config.mk does not set TK_CONFIG to a valid path to tkConfig.sh)
+        AC_MSG_RESULT(failed)
+        AC_MSG_ERROR(
+    Config.mk does not set TK_CONFIG to a valid path to
+    tkConfig.sh. TclX expects the Tk to be built in the directory:
+         $TK_CONFIG
+    Either build Tk in this location or edit the value of TK_CONFIG in
+    unix/Config.mk.)
     fi
 fi
 AC_MSG_RESULT(ok)
