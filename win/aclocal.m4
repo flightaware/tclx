@@ -1,4 +1,4 @@
-# Copyright (c) 1999 Scriptics Corporation.
+# Copyright (c) 1999-2000 Ajuba Solutions
 
 #------------------------------------------------------------------------
 # SC_PATH_TCLCONFIG --
