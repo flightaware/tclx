@@ -13,15 +13,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 4.1 1995/01/01 19:49:53 markd Exp markd $
+# $Id: compat.tcl,v 4.2 1995/03/30 05:25:24 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
-#@package: TclX-Compatibility execvp assign_fields server_open
-
-proc execvp {progname args} {
-    error "The execvp command is outdated, use the execl command directly"
-}
+#@package: TclX-Compatibility assign_fields server_open cexpand
 
 proc assign_fields {list args} {
     if [lempty $args] {
@@ -50,3 +46,5 @@ proc server_open args {
 
     uplevel $cmd
 }
+
+proc cexpand str {subst -nocommands -novariables $str}

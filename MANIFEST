@@ -209,7 +209,6 @@
 ./tclhelp/tcl/strings/append
 ./tclhelp/tcl/strings/ccollate
 ./tclhelp/tcl/strings/cequal
-./tclhelp/tcl/strings/cexpand
 ./tclhelp/tcl/strings/cindex
 ./tclhelp/tcl/strings/clength
 ./tclhelp/tcl/strings/crange
