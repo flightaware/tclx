@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.12 1997/08/08 09:58:37 markd Exp $
+ * $Id: tclXstring.c,v 8.13 1997/08/16 16:25:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -564,7 +564,8 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     for (s = (unsigned char *) transString, stringIndex = 0; 
          stringIndex < transStringLen; stringIndex++) {
         if (map [*s] >= 0) {
-            *s++ = map [*s];
+            *s = map [*s];
+            s++;
         }
     }
 
