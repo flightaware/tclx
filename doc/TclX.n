@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.17 1996/04/24 06:37:01 markd Exp $
+.\" $Id: TclX.n,v 5.18 1996/04/25 14:32:30 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -83,7 +83,7 @@ This procedure lists the directories in the directory stack.
 '
 '\"@help: tcl/control/commandloop
 '\"@brief: Create an interactive command loop or event based command reader.
-f.TP
+.TP
 .B commandloop ?\fB-async\fR? ?\fB-interactive \fBon|off|tty\fR? ?\fB-prompt1 \fIcmd\fR? ?\fB-prompt2 \fIcmd\fR? ?\fB-endcommand \fIcmd\fR?
 .br
 Create an interactive command loop reading commands from stdin and writing
