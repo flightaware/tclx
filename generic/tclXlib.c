@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 1.2 2002/04/03 02:50:35 hobbs Exp $
+ * $Id: tclXlib.c,v 1.3 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -58,7 +58,7 @@ static char autoloadCmd [] =
  */
 typedef enum {
     TCLLIB_TNDX,       /* *.tndx                    */
-    TCLLIB_TND,        /* *.tnd (.tndx in 8.3 land) */
+    TCLLIB_TND         /* *.tnd (.tndx in 8.3 land) */
 } indexNameClass_t;
 
 /*
