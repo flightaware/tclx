@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.6 1993/07/18 22:38:14 markd Exp $
+# $Id: Makefile,v 1.1 1993/07/19 06:27:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -26,7 +26,7 @@ CFLAGS=${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR} ${SYS_DEP_FLAGS}
 
 #------------------------------------------------------------------------------
 
-installtools: tclxversion $(TK_BUILD)
+all: tclxversion $(TK_BUILD)
 
 tclxversion: getversion.c
 	$(CC) $(CFLAGS) getversion.c -o tclxversion

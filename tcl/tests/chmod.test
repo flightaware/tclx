@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 2.0 1992/10/16 04:49:26 markd Rel markd $
+# $Id: chmod.test,v 2.1 1993/07/19 06:24:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -30,18 +30,20 @@ proc GetMode {filename} {
 # Certain Unix systems don't handle chmod the same.  This routine test if the
 # system chmod produces the expected results.
 #   o mode - symbolic mode to set the file to.
-#   o expect - expected result from ls.
+#   o args - list of valid expected result from ls.
 #
-proc CheckChmod {mode expect} {
+proc CheckChmod {mode args} {
     global chmodTestsSkipped
-    if [catch {
+
+    set stat 0
+    if {[catch {
         chmod 000 CHECK.TMP
         exec chmod $mode CHECK.TMP
         set sysMode [lindex [exec ls -l CHECK.TMP] 0]
-    }] {
-        set stat 0
-    } else {
-        set stat [expr {"$sysMode" == "$expect"}]
+    }] == 0} {
+        if {[lsearch -exact $args $sysMode] >= 0} {
+            set stat 1
+        }
     }
     if !$stat {
         incr chmodTestsSkipped
@@ -278,28 +280,31 @@ Test chmod-3.13 {chmod symbolic mode tests} {
 
 
 # +t is dificult to test if not root, just make sure it execute and hope
-# for the best.
+# for the best.  Doesn't even work on some systems
 
-Test chmod-3.14 {chmod symbolic mode tests} {
-    chmod 000 CHMOD.TMP
-    chmod u+x CHMOD.TMP
-    chmod u+t CHMOD.TMP
-    set mode [GetMode CHMOD.TMP]
-    expr "($mode == 100) || ($mode == 1100)"
-} 0 {1}
+if [CheckChmod "u+t" "----------" "---------T"] {
 
-Test chmod-3.14 {chmod symbolic mode tests} {
-    chmod 000 CHMOD.TMP
-    chmod u+x CHMOD.TMP
-    chmod u+t CHMOD.TMP
-} 0 {}
+    Test chmod-3.14 {chmod symbolic mode tests} {
+        chmod 000 CHMOD.TMP
+        chmod u+x CHMOD.TMP
+        chmod u+t CHMOD.TMP
+        set mode [GetMode CHMOD.TMP]
+        expr "($mode == 100) || ($mode == 1100)"
+    } 0 {1}
 
-Test chmod-3.15 {chmod symbolic mode tests} {
-    chmod 000   CHMOD.TMP
-    chmod u+x CHMOD.TMP
-    chmod u+t   CHMOD.TMP
-    chmod u-t   CHMOD.TMP
-} 0 {}
+    Test chmod-3.14 {chmod symbolic mode tests} {
+        chmod 000 CHMOD.TMP
+        chmod u+x CHMOD.TMP
+        chmod u+t CHMOD.TMP
+    } 0 {}
+
+    Test chmod-3.15 {chmod symbolic mode tests} {
+        chmod 000   CHMOD.TMP
+        chmod u+x   CHMOD.TMP
+        chmod u+t   CHMOD.TMP
+        chmod u-t   CHMOD.TMP
+    } 0 {}
+}
 
 Test chmod-3.16 {chmod symbolic mode tests} {
     chmod 000         CHMOD.TMP
@@ -328,8 +333,8 @@ SetUpTestFiles
 if {[catch {chown [id userid]  CHMOD.TMP} msg ] ||
     [catch {chgrp [id groupid] CHMOD.TMP} msg ]} {
     puts stderr "*************************************************************"
-    puts stderr "Can't do cchown or chgrp even when current and new group"
-    puts stderr "id are ours.  chown/chgrp tests skipped."
+    puts stderr "Can't do chown or chgrp even when current and new group"
+    puts stderr "id are ours.  chown/chgrp tests skipped on this system."
     puts stderr "    $msg"
     puts stderr "*************************************************************"
     unlink {CHECK.TMP CHMOD.TMP CHMOD2.TMP}

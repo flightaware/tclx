@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.8 1993/07/19 06:25:21 markd Exp markd $
+# $Id: Makefile,v 2.9 1993/07/19 15:30:04 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -45,6 +45,7 @@ all: TCLX runtcl ${TK_BUILD}
 #
 
 TCLX: TCLCOPY runtcl
+	cd tools;     ${MAKE} -${MAKEFLAGS} all
 	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} all
 	cd osSupport; ${MAKE} -${MAKEFLAGS} all
 	cd src;       ${MAKE} -${MAKEFLAGS} all
@@ -185,26 +186,26 @@ install: all TCLXINSTALL ${TK_BUILD}MAYBE
 	@echo "*************************************************************"
 	@echo ""
 
-TCLXINSTALL: INSTALLTOOLS
+TCLXINSTALL:
 	@echo "
 	@echo "   Install TclX master directory"
 	@echo "
 	set -x ;\
 	target=${TCL_MASTERDIR}/`tools/tclxversion` ;\
-	mkdir ${TCL_MASTERDIR} 2>/dev/null ;\
+        (test -d ${TCL_MASTERDIR} || mkdir ${TCL_MASTERDIR}) ;\
 	rm -rf $$target ;\
 	mkdir $$target  ;\
 	(cd tclmaster ; tar -cf - .) | (cd $$target; tar -xf -) ;\
 	rm -f ${TCL_BINDIR}/tcl ;\
 	ln -s $$target/bin/tcl ${TCL_BINDIR}/tcl
 
-TKXINSTALL: INSTALLTOOLS
+TKXINSTALL:
 	@echo "
 	@echo "   Install TkX master directory"
 	@echo "
 	set -x ;\
 	target=${TK_MASTERDIR}/`tools/tkxversion` ;\
-	mkdir ${TK_MASTERDIR} 2>/dev/null ;\
+        (test -d ${TK_MASTERDIR} || mkdir ${TK_MASTERDIR}) ;\
 	rm -rf $$target ;\
 	mkdir $$target  ;\
 	(cd tkmaster ; tar -cf - .) | (cd $$target; tar -xf -) ;\
@@ -212,9 +213,6 @@ TKXINSTALL: INSTALLTOOLS
 	ln -s $$target/bin/wishx ${TCL_BINDIR}/wishx ;\
 	rm -f ${TCL_BINDIR}/tclhelp ;\
 	ln -s $$target/bin/tclhelp ${TCL_BINDIR}/tclhelp
-
-INSTALLTOOLS:
-	cd tools; ${MAKE} -${MAKEFLAGS} installtools
 
 # Fake targets to decide if we install wishx or not.
 
