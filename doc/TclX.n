@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.18 2001/06/30 23:07:34 andreas_kupries Exp $
+.\" $Id: TclX.n,v 8.19 2001/08/02 00:10:24 hobbs Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -42,12 +42,9 @@ source of many of the capabilities of the baseline
 Tcl release, including arrays, files, sockets, file events, and date
 and time handling, among others.
 .PP
-Extended Tcl has three basic functional 
-areas:
-A set of new commands, a Tcl shell (i.e. a Unix shell-style command line
-and interactive environment),  and a user-extensible library of useful
-Tcl procedures, any of which can be automatically loaded on the first
-attempt to execute it.
+Extended Tcl introduces a set of new commands and a user-extensible library
+of useful Tcl procedures, any of which can be automatically loaded on the
+first attempt to execute it.
 .PP
 The command descriptions are separated into several sections:
 .RS 5
@@ -73,8 +70,6 @@ The command descriptions are separated into several sections:
 \(bu String and Character Manipulation Commands
 .TP
 \(bu XPG/3 Message Catalog Commands
-.TP
-\(bu Extended Tcl Shell
 .TP
 \(bu Help Facility
 .TP
@@ -588,7 +583,7 @@ currently defined procedures if none is specified, to the named file.
 '\"@endhelp
 '
 .bp
-.SH "UNIX ACCESS COMMANDS
+.SH "UNIX ACCESS COMMANDS"
 .PP
 These commands provide access to many basic Unix facilities, including process
 handling, date and time processing, signal handling
@@ -2497,183 +2492,6 @@ specified in the call to \fBcatopen\fR.
 '\"@endhelp
 '
 .bp
-.SH "EXTENDED TCL SHELL"
-.sp
-'\"@help: tcl/tclshell/intro
-'\"@brief: Introduction to the tcl shell.
-.B tcl ?\-qn? ?\-f? \fIscript\fB? | ?\-c \fIcommand\fB? ?\fIargs\fR?
-.PP
-The \fBtcl\fR starts the interactive TclX command interpreter.  The TclX shell
-provides an environment for writing, debugging and executing Tcl scripts.  The
-functionality of the TclX shell can be easily obtained by any application
-that includes TclX.
-.PP
-The \fBtcl\fR command, issued without any arguments,
-invokes an interactive Tcl shell, allowing the user to interact
-directly with Tcl, executing any Tcl commands at will and viewing
-their results.
-.PP
-If \fIscript\fR is specified, then the script is executed non-interactively
-with any additional arguments, \fIargs\fR, being supplied in the
-global Tcl
-variable `\fBargv\fR'.  If 
-\fIcommand\fR is supplied, then this command (or semicolon-separated
-series of commands) is executed, with `\fBargv\fR' containing
-any \fIargs\fR.
-.PP
-The TclX shell is intended as an environment for Tcl program development and
-execution.  While it is not a full-featured interactive shell, it provides a
-comfortable environment for the interactive development of Tcl code. 
-.PP
-The following command line flags are recognized by the Tcl shell command
-line parser:
-.TP
-.B \-q
-Quick initialization flag.  The Tcl initiaization file is not evaluated
-and the \fBauto_path\fR variable is not set.  Tcl auto-load libraries will
-not be available.
-.TP
-.B \-n
-No procedure call stack dump.  The procedure call stack will not be displayed
-when an error occurs, only the error message.  Useful in the #! line of
-already debugged scripts.
-.TP
-.B \-f
-Takes the next argument as a script for Tcl to source, rather than entering
-interactive
-mode.  The \fB\-f\fR flag is optional.  Normally the first argument that does
-not start with a `\-' is taken as the script to execute unless the `\-c' option
-is specified.  Any following arguments are passed to the script
-via \fBargv\fR,
-thus any other Tcl shell command-line flags must precede this option.
-.TP
-.B \-c
-Take the next argument as a Tcl command to execute.  It may contain series of 
-commands to execute, separated by `;'.  Any following arguments are passed in
-\fBargv\fR, thus, as with \fB\-f\fR, any other Tcl shell flags must precede
-this option.
-.TP
-.B \-\|\-
-Mark the end of the arguments to the Tcl shell. All arguments following this
-are passed in the Tcl variable \fBargv\fR.  This is useful to pass arguments
-without attempting to execute a Tcl script.
-.PP
-The result string returned by a command executed from the Tcl shell command
-line is
-normally echoed back to the user.  If an error occurs, then the string result
-is displayed, along with the error message.  The error message will be
-preceded by the string ``Error:''.
-.PP
-The \fBset\fR command is a special case.  If the command is called to set
-a variable (i.e. with two arguments), then the result will not be echoed.
-If only one argument, the name of a variable, is supplied to \fBset\fR, then
-the result will be echoed.
-.PP
-If an unknown Tcl command is entered from the command line, then the Unix
-command path, specified in the environment variable \fBPATH\fR,
-will be searched for a command of the same name.
-If the command is found, it will be executed with any arguments remaining
-on the Tcl command line being passed as arguments to the command.
-This feature is provided to enhance the interactive environment for developing
-Tcl scripts.
-.PP
-Automatic execution of programs in this manner is only supported from the
-command line, not in script files
-or in procedures, to reduce confusion and mistakes while programming
-in Tcl.  Scripts should use the Tcl \fBexec\fR or \fBsystem\fR 
-commands to run Unix commands.
-'\"@:
-'\"@:This functionality is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/tclshell/variables
-'\"@brief: Tcl shell variables.
-.PP
-The following variables are set and/or used by the Tcl shell.
-.TP
-.B argv0
-Contains the name of the Tcl program specified on the command line or
-the name that the Tcl shell was invoked under if no program was specified.
-.B argc
-Contains a count of the number of \fIargv\fR arguments (0 if none).
-.B argv
-A list containing the arguments passed in from the command line, excluding
-arguments used by the Tcl shell.  The first element is the first passed
-argument, not the program name.
-.TP
-.B tcl_interactive
-Set to \fB1\fR if Tcl shell is invoked interactively, or \fB0\fR if the
-Tcl shell is directly executing a script.  Normally checked by scripts so
-that they can function as a standalone application if specified on the
-command line, but merely load in and not execute if loaded during an
-interactive invocation of Tcl.
-.TP
-.B auto_path
-Path to search to locate Tcl autoload libraries.  Used by the both the
-Tcl and TclX library autoloading facility.
-.TP
-.B tclx_library
-Path to the TclX runtime library.  If your running the TclX shell or
-an application based on it (like wishx).  The TclX initialization file normally
-adds this to the \fBauto_path\fR.
-.TP
-.B tkx_library
-Path to the TkX runtime library.  This is set only if your application has
-called \fBTkx_Init\fR.  The TkX initialization file normally adds this to the
-auto_path.
-.TP
-.B tcl_prompt1
-Contains code to run to output the prompt used when interactively prompting
-for commands.
-.TP
-.B tcl_prompt2
-Contains code to run to output the prompt used when interactively prompting
-for continuation of an incomplete command.
-.TP
-.B TCLXENV
-Array that contains information used internally by various Tcl procedures that
-are part of the TclX shell.  Don't change this array unless you know what
-your doing.
-'\"@endhelp
-'
-'\"@help: tcl/control/tclx_errorHandler
-'\"@brief: Command to handle Uncaught errors.
-.B tclx_errorHandler \fImessage\fR
-.br
-The \fBtclx_errorHandler\fR command doesn't exist as built-in part of TclX.
-Instead, individual applications or  users  can  define  a
-\fBtclx_errorHandler\fR  command (e.g. as a Tcl procedure) if they wish to
-handle uncaught errors.
-The procedure will be passed a single argument of the
-error \fImessage\fR, with \fBerrorCode\fR and \fBerrorInfo\fR having values
-reflecting the error that occurred.
-.sp
-The \fBtclx_errorHandler\fR command is called when an error that is not
-caught returns to the top level command evaluation in the TclX shell or
-\fBwishx\fR.
-The difference between \fBtclx_errorHandler\fR and \fBbgerror\fR is that
-\fBtclx_errorHandler\fR is called during the synchronous execution of a
-script while \fBbgerror\fR is called as a result of an uncaught error
-in an event handler.  In a non-event oriented Tcl script
-\fBtclx_errorHandler\fR will be called on all errors that are not caught and
-\fBbgerror\fR is not used.
-In a \fBwishx\fR script or event oriented script executed with the TclX
-shell, \fBtclx_errorHandler\fR will be called on uncaught errors during the
-execution of the main script that set up the event oriented program.
-Once the event loop is entered, \fBbgerror\fR will be called on uncaught
-errors.
-.sp
-This procedure is not called in response to commands entered via an interactive
-command loop, only from the evaluation of scripts or Tcl commands passed via
-the command line.
-If the procedure returns normally, the program will just exit without any
-error being issued by the shell.
-Generally the procedure should exit with a non-zero exit code once the error
-has been processed.
-It is not possible to continue executing the code in which the error occurred.
-This is useful for logging \fBerrorInfo\fR or e-mailing it to the maintainer.
-'\"@endhelp
-'
 '\"@help: tcl/events/mainloop
 '\"@brief: Setup a top-level event loop.
 .TP
@@ -2687,9 +2505,6 @@ similar to that used with \fBwish\fR.
 If the global variable \fBtcl_interactive\fR exists and has a true value
 an interactive command handler is started as well.   If the command handler
 is terminated by an EOF, the process will be exited.
-
-This commands is not useful in \fBwishx\fR, as it automatically enters an
-event loop after processing a script.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
