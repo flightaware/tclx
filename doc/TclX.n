@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.1 1994/08/11 03:49:41 markd Exp markd $
+.\" $Id: TclX.n,v 4.2 1994/08/30 05:16:50 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1601,6 +1601,15 @@ Delete the scan context identified by \fIcontexthandle\fR, and free all
 of the
 match statements and compiled regular expressions associated with the
 specified context.
+.TP
+.B scancontext copyfile \fIcontexthandle\fR ?\fIfilehandle\fR?
+.br
+Set or return the file handle that unmatched lines are copied to.
+(See \fBscanfile\fR).  If \fIfilehandle\fR is omitted, the copy file handle
+is returned.  If no copy file is associated with the context, {} is returned.
+If a file handle is specified, it becomes the copy file for
+this context.  If \fIfilehandle\fR is {}, then it removes any copy file
+specification for the context.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1617,7 +1626,9 @@ it, executing the match commands corresponding to patterns matched.
 .sp
 If the optional \fI-copyfile\fR argument is specified, the next argument
 is a file ID to which all lines not matched by any pattern (excluding
-the default pattern) are to be written.
+the default pattern) are to be written.  If the copy file is specified with
+this flag, instead of using the \fBscancontext copyfile\fR command, the 
+file is disassociated from the scan context at the end of the scan.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1663,6 +1674,9 @@ the line that was matched.
 The line number of the line that was matched. This is relative to the first
 line scanned, which is usually, but not necessarily, the first line of the
 file.  The first line is line number one.
+.TP
+.B matchInfo(context)
+The context handle of the context that this scan is associated with.
 .TP
 .B matchInfo(handle)
 The file id (handle) of the file currently being scanned.

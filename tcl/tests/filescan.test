@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 4.1 1994/11/25 20:09:18 markd Exp markd $
+# $Id: filescan.test,v 4.2 1994/11/29 04:35:37 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -229,7 +229,7 @@ scancontext delete $testCH
 
 Test filescan-3.1 {filescan tests} {
     scancontext foomuch
-} 1 {invalid argument, expected one of: create or delete}
+} 1 {invalid argument, expected one of: "create", "delete", or "copyfile"}
 
 Test filescan-3.2 {filescan tests} {
     scanmatch $testCH
@@ -247,6 +247,16 @@ Test filescan-3.5 {filescan tests} {
     set testCH [scancontext create]
     scanfile $testCH $testFH
 } 1 {no patterns in current scan context}
+
+Test filescan-3.6 {filescan tests} {
+    scancontext copyfile
+} 1 {wrong # args: scancontext copyfile contexthandle ?filehandle?}
+
+Test filescan-3.7 {filescan tests} {
+    scancontext copyfile $testCH x y
+} 1 {wrong # args: scancontext copyfile contexthandle ?filehandle?}
+
+
 catch {scancontext delete $testCH}
 
 close $testFH
@@ -364,7 +374,6 @@ Test 6.1 {filescan tests} {
               {3 1 1 123435 {13 18}}]]
 close $testFH
 scancontext delete $testCH
-unlink {TEST.TMP TEST2.TMP TESTCHK.TMP}
 
 set testCH [scancontext create]
 
@@ -376,9 +385,66 @@ Test 7.2 {filescan tests} {
     scanmatch $testCH (x)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.) {}
 } 1 {error in regular expression: too many ()}
 
+#
+# Test the copy file manipulation by sorting a file of numbered lines into two
+# files of odd and even.
+#
+
+set testFH [open test.TMP w]
+loop cnt 0 101 {
+    puts $testFH "Line $cnt"
+    puts $testFH "Match me"
+}
+close $testFH
+set testFH [open test.TMP r]
+
+set testChkFH [open TESTCHK.TMP w]
+set testChk2FH [open TESTCHK2.TMP w]
+
+set testCH [scancontext create]
+scancontext copyfile $testCH $testChkFH
+
+Test 8.1 {filescan tests} {
+    scancontext copyfile $testCH
+} 0 $testChkFH
+
+scanmatch $testCH {^Match me$} {
+    if [cequal [scancontext copyfile $matchInfo(context)] $testChkFH] {
+        scancontext copyfile $matchInfo(context) $testChk2FH
+    } elseif [cequal [scancontext copyfile $matchInfo(context)] $testChk2FH] {
+        scancontext copyfile $matchInfo(context) $testChkFH
+    } else {
+        Test 8.2 {filescan tests} {
+            scancontext copyfile $matchInfo(context)
+        } 0 "should have been $testChkFH or $testChk2FH"
+    }
+}
+
+scanfile $testCH $testFH
+
+close $testFH
+close $testChkFH
+close $testChk2FH
+scancontext delete $testCH
+
+set testChkFH [open TESTCHK.TMP r]
+set testChk2FH [open TESTCHK2.TMP r]
+loop cnt 0 101 2 {
+    Test 8.3 {filescan tests} {
+        gets $testChkFH
+    } 0 "Line $cnt"
+}
+
+loop cnt 1 101 2 {
+    Test 8.4 {filescan tests} {
+        gets $testChk2FH
+    } 0 "Line $cnt"
+}
+
+unlink {TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP}
 rename GenScanRec {}
 rename ValMatch {}
 rename ValScan {}
 rename ChkSubMatch {}
 
-unset matchCnt chkMatchCnt matchInfo testFH test2FH testChkFH
+unset matchCnt chkMatchCnt matchInfo testFH test2FH testChkFH testChk2FH
