@@ -401,7 +401,7 @@ else
 fi
 
 
-# From configure.in Revision: 4.5 dnl
+# From configure.in Revision: 4.6 dnl
 
 
 
@@ -2940,7 +2940,7 @@ fi
 #       These must be after the library checks.
 #------------------------------------------------------------------------------
 
-for ac_func in catgets getcwd select setitimer setvbuf sigaction setpgid
+for ac_func in getcwd select setitimer setvbuf sigaction setpgid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&4
 if eval "test \"`echo '${'ac_cv_func_$ac_func'+set}'`\" = set"; then
@@ -3098,11 +3098,11 @@ int t() {
 EOF
 if eval $ac_compile; then
   rm -rf conftest*
-  echo "$ac_t""`catclose ok'" 1>&4
+  echo "$ac_t"""catclose ok"" 1>&4
 else
   rm -rf conftest*
   
-                echo "$ac_t""`bad catclose return type'" 1>&4
+                echo "$ac_t"""bad catclose return type"" 1>&4
                 cat >> confdefs.h <<\EOF
 #define BAD_CATCLOSE 1
 EOF
