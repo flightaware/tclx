@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 4.5 1995/02/17 04:27:59 markd Exp markd $
+ * $Id: tclXinit.c,v 4.6 1995/04/17 01:24:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,6 +34,11 @@ int *tclxDummyInfoCmdPtr = (int *) Tcl_InfoCmd;
  */
 static int
 ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp));
+
+static int
+InsureVarExists _ANSI_ARGS_((Tcl_Interp *interp,
+                             char       *varName,
+                             char       *defaultValue));
 
 
 /*
@@ -85,6 +90,35 @@ TclX_ErrorExit (interp, exitCode)
      * If that failed, really exit.
      */
     exit (exitCode);
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ * InsureVarExists --
+ *
+ *   Insure that the specified global variable exists.
+ *
+ * Parameters:
+ *   o interp  (I) - A pointer to the interpreter.
+ *   o varName (I) - Name of the variable.
+ *   o defaultValue (I) - Value to set the variable to if it doesn't already
+ *     exist.
+ * Returns:
+ *   TCL_OK if all is ok, TCL_ERROR if an error occured.
+ *-----------------------------------------------------------------------------
+ */
+static int
+InsureVarExists (interp, varName, defaultValue)
+    Tcl_Interp *interp;
+    char       *varName;
+    char       *defaultValue;
+{
+    if (Tcl_GetVar (interp, varName, TCL_GLOBAL_ONLY) == NULL) {
+        if (Tcl_SetVar (interp, varName, defaultValue, 
+                        TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+            return TCL_ERROR;
+    }
+    return TCL_OK;
 }
 
 /*
@@ -187,6 +221,18 @@ int
 TclX_Init (interp)
     Tcl_Interp *interp;
 {
+    /*
+     * Make sure a certain set of variable exists.  If not, default them.
+     * Tcl code often assumes that these exists.
+     */
+    if (InsureVarExists (interp, "errorInfo", "") == TCL_ERROR)
+        return TCL_ERROR;
+    if (InsureVarExists (interp, "errorCode", "") == TCL_ERROR)
+        return TCL_ERROR;
+    if (InsureVarExists (interp, "tcl_interactive", "0") == TCL_ERROR)
+        return TCL_ERROR;
+
+
     if (TclXCmd_Init (interp) == TCL_ERROR)
         goto errorExit;
 
