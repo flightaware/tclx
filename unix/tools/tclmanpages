@@ -1,5 +1,6 @@
 return {
     {Tcl.n          tcl/intro/syntax}
+    {tclsh.1        tcl/intro/tclsh}
     {append.n       tcl/strings/append}
     {array.n        tcl/variables/array}
     {break.n        tcl/control/break}
@@ -79,4 +80,14 @@ return {
     {socket.n       tcl/sockets/socket}
     {update.n       tcl/events/update}
     {vwait.n        tcl/events/vwait}
+    {@scope.n       tcl/itcl-namespaces/@scope}
+    {code.n         tcl/itcl-namespaces/code}
+    {delete.n       tcl/itcl-namespaces/delete}
+    {ensemble.n     tcl/itcl-namespaces/ensemble}
+    {import.n       tcl/itcl-namespaces/import}
+    {private.n      tcl/itcl-namespaces/private}
+    {protected.n    tcl/itcl-namespaces/protected}
+    {public.n       tcl/itcl-namespaces/public}
+    {scope.n        tcl/itcl-namespaces/scope}
+    {variable.n     tcl/itcl-namespaces/variable}
 }
