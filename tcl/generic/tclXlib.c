@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 3.1 1993/12/13 04:36:14 markd Exp markd $
+ * $Id: tclXlib.c,v 3.2 1993/12/16 06:18:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -543,12 +543,12 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
     int          lineArgc, idx, result, status;
     char       **lineArgv = NULL;
 
+    Tcl_DStringInit (&lineBuffer);
+
     indexFilePtr = fopen (tndxFilePath, "r");
     if (indexFilePtr == NULL)
         goto fileError;
     
-    Tcl_DStringInit (&lineBuffer);
-
     while (TRUE) {
         Tcl_DStringFree (&lineBuffer);
         status = Tcl_DStringGets (indexFilePtr, &lineBuffer);
