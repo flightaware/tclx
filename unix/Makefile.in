@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.0 1994/07/16 05:31:16 markd Rel markd $
+# $Id: Makefile.in,v 4.1 1994/09/01 04:40:31 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -185,6 +185,7 @@ ucbtests: all
 	@echo "***     testdcall"
 	@echo "***     testdstring"
 	@echo "***     testlink"
+	@echo "***     testupvar"
 	@echo "***"
 	@echo "*** Expect warnings about not having the following math functions:"
 	@echo "***     T1"

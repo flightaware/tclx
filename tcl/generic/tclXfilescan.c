@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 4.0 1994/07/16 05:26:57 markd Rel markd $
+ * $Id: tclXfilescan.c,v 4.1 1994/11/23 01:58:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,7 +28,7 @@
 #define MATCH_CASE_INSENSITIVE_FLAG 4
 
 typedef struct matchDef_t {
-    Tcl_regexp          regExpInfo;
+    TclX_regexp         regExpInfo;
     char               *command;
     struct matchDef_t  *nextMatchDefPtr;
     short               matchflags;
@@ -95,7 +95,7 @@ CleanUpContext (scanTablePtr, contextPtr)
     matchDef_t  *matchPtr, *oldMatchPtr;
 
     for (matchPtr = contextPtr->matchListHead; matchPtr != NULL;) {
-        Tcl_RegExpClean (&matchPtr->regExpInfo);
+        TclX_RegExpClean (&matchPtr->regExpInfo);
         if (matchPtr->command != NULL)
             ckfree (matchPtr->command);
         oldMatchPtr = matchPtr;
@@ -236,13 +236,13 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     scanContext_t  *contextPtr, **tableEntryPtr;
     char           *result;
     matchDef_t     *newmatch;
-    int             compFlags = REXP_BOTH_ALGORITHMS;
+    int             compFlags = TCLX_REXP_BOTH_ALGORITHMS;
     int             firstArg = 1;
 
     if (argc < 3)
         goto argError;
     if (STREQU (argv[1], "-nocase")) {
-        compFlags |= REXP_NO_CASE;
+        compFlags |= TCLX_REXP_NO_CASE;
         firstArg = 2;
     }
       
@@ -282,12 +282,14 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     newmatch = (matchDef_t *) ckalloc(sizeof (matchDef_t));
     newmatch->matchflags = 0;
 
-    if (compFlags & REXP_NO_CASE) {
+    if (compFlags & TCLX_REXP_NO_CASE) {
         newmatch->matchflags |= MATCH_CASE_INSENSITIVE_FLAG;
         contextPtr->flags |= CONTEXT_A_CASE_INSENSITIVE_FLAG;
     }
 
-    if (Tcl_RegExpCompile (interp, &newmatch->regExpInfo, argv [firstArg + 1], 
+    if (TclX_RegExpCompile (interp,
+                            &newmatch->regExpInfo,
+                            argv [firstArg + 1], 
                            compFlags) != TCL_OK) {
         ckfree ((char *) newmatch);
         return (TCL_ERROR);
@@ -501,11 +503,11 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
         for (matchPtr = contextPtr->matchListHead; matchPtr != NULL; 
                  matchPtr = matchPtr->nextMatchDefPtr) {
 
-            if (!Tcl_RegExpExecute (interp,
-                                    &matchPtr->regExpInfo,
-                                    dynBuf.string,
-                                    lowerDynBuf.string,
-                                    subMatchInfo))
+            if (!TclX_RegExpExecute (interp,
+                                     &matchPtr->regExpInfo,
+                                     dynBuf.string,
+                                     lowerDynBuf.string,
+                                     subMatchInfo))
                 continue;  /* Try next match pattern */
 
             matchedAtLeastOne = TRUE;

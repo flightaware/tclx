@@ -828,3 +828,21 @@
    o Changed configure so it doesn't use -lbsd on AIX.  This library contains
      a broken "pow".
 -------------------------------------------------------------------------------
+10 Aug 94:
+   o Added ccollate command.
+-------------------------------------------------------------------------------
+ 1 Oct 94:
+   o Don't lose errorCode when server_open fails.
+-------------------------------------------------------------------------------
+ 3 Oct 94:
+   o Fixed core dump when an error occurs loading a package from a library.
+-------------------------------------------------------------------------------
+21 Oct 94:
+   o Fixed invalid handling of empty keyed lists that contain white spaces.
+-------------------------------------------------------------------------------
+15 Nov 94:
+   o Changed egrep pattern used to strip comments from tcl.tlib, since the
+     DEC OSF version is broken and mangles the file.
+   o Changed for_file, for_array_keys and for_recursive_glob to handle
+     "return" in command correctly.
+-------------------------------------------------------------------------------

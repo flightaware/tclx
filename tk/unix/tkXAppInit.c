@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 4.0 1994/07/16 05:31:00 markd Rel markd $
+ * $Id: tkXAppInit.c,v 4.1 1994/07/26 05:35:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 4.0 1994/07/16 05:31:00 markd Rel markd $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 4.1 1994/07/26 05:35:44 markd Exp markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"
@@ -47,27 +47,41 @@ static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppIn
 #include <math.h>
 
 /*
- * The following variable is a special hack that allows applications
- * to be linked using the procedure "main" from the Tk library.  The
- * variable generates a reference to "main", which causes main to
- * be brought in from the library (and all of Tk and Tcl with it).
- */
-
-EXTERN int main _ANSI_ARGS_((int     argc,
-                             char  **argv));
-int (*tclXDummyMainPtr)() = (int (*)()) main;
-
-/*
  * The following variable is a special hack that insures the tcl
  * version of matherr() is used when linking against shared libraries
  * Only define if matherr is used on this system.
  */
-
 #if defined(DOMAIN) && defined(SING)
 EXTERN int matherr _ANSI_ARGS_((struct exception *));
 int (*tclDummyMathPtr)() = (int (*)()) matherr;
 #endif
 
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * main --
+ *
+ *	This is the main program for the application.
+ *
+ * Results:
+ *	None: Tk_Main never returns here, so this procedure never
+ *	returns either.
+ *
+ * Side effects:
+ *	Whatever the application does.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+main(argc, argv)
+    int argc;			/* Number of command-line arguments. */
+    char **argv;		/* Values of command-line arguments. */
+{
+    Tk_Main(argc, argv);
+    return 0;			/* Needed only to prevent compiler warning. */
+}
 
 /*
  *----------------------------------------------------------------------

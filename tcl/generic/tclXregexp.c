@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXregexp.c,v 4.0 1994/07/16 05:27:42 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,8 +31,8 @@ extern char *tclRegexpError;
 /*
  * Meta-characters for regular expression
  */
-#define REXP_META                   "^$.[()|?+*\\"
-#define REXP_META_NO_BRACKET_NO_OR  "^$.()?+*\\"
+#define TCLX_REXP_META                   "^$.[()|?+*\\"
+#define TCLX_REXP_META_NO_BRACKET_NO_OR  "^$.()?+*\\"
 
 #ifndef CHAR_MAX
 #    define CHAR_MAX 255
@@ -257,15 +257,15 @@ BoyerMooreExecute (text, textlen, compPtr, patLenP)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_RegExpClean --
+ * TclX_RegExpClean --
  *     Free all resources associated with a regular expression info 
  *     structure..
  *
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_RegExpClean (regExpPtr)
-    Tcl_regexp *regExpPtr;
+TclX_RegExpClean (regExpPtr)
+    TclX_regexp *regExpPtr;
 {
     if (regExpPtr->progPtr != NULL)
     	ckfree ((char *) regExpPtr->progPtr);
@@ -296,7 +296,7 @@ FindNonRegExpSubStr (expression, subStrPtrPtr)
     register int   len;
 
     while (*scanPtr != '\0') {
-        len = strcspn (scanPtr, REXP_META);
+        len = strcspn (scanPtr, TCLX_REXP_META);
         /*
          * If we are at a meta-character, by-pass till non-meta.  If we hit
          * a `[' then by-pass the entire `[...]' range, but be careful, could
@@ -304,7 +304,7 @@ FindNonRegExpSubStr (expression, subStrPtrPtr)
          * we are through.
          */
         if (len == 0) {
-            scanPtr += strspn (scanPtr, REXP_META_NO_BRACKET_NO_OR);
+            scanPtr += strspn (scanPtr, TCLX_REXP_META_NO_BRACKET_NO_OR);
             if (*scanPtr == '|')
                 return 0;
             if (*scanPtr == '[') {
@@ -327,17 +327,17 @@ FindNonRegExpSubStr (expression, subStrPtrPtr)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_RegExpCompile --
+ * TclX_RegExpCompile --
  *     Compile a regular expression.
  *
  * Parameters:
  *     o regExpPtr - Used to hold info on this regular expression.  If the
- *       structure is being reused, it Tcl_RegExpClean should be called first.
+ *       structure is being reused, it TclX_RegExpClean should be called first.
  *     o expression - Regular expression to compile.
  *     o flags - The following flags are recognized:
- *         o REXP_NO_CASE - Comparison will be regardless of case.
- *         o REXP_BOTH_ALGORITHMS - If specified, a Boyer-Moore expression is 
- *           compiled for the largest substring of the expression that does
+ *         o TCLX_REXP_NO_CASE - Comparison will be regardless of case.
+ *         o TCLX_REXP_BOTH_ALGORITHMS - If specified, a Boyer-Moore expression
+ *           is compiled for the largest substring of the expression that does
  *           not contain any meta-characters.  This is slows compiling, but
  *           speeds up large searches.
  *
@@ -346,9 +346,9 @@ FindNonRegExpSubStr (expression, subStrPtrPtr)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_RegExpCompile (interp, regExpPtr, expression, flags)
+TclX_RegExpCompile (interp, regExpPtr, expression, flags)
     Tcl_Interp  *interp;
-    Tcl_regexp  *regExpPtr;
+    TclX_regexp *regExpPtr;
     char        *expression;
     int          flags;
 {
@@ -362,20 +362,20 @@ Tcl_RegExpCompile (interp, regExpPtr, expression, flags)
 
     regExpPtr->progPtr = NULL;
     regExpPtr->boyerMoorePtr = NULL;
-    regExpPtr->noCase = flags & REXP_NO_CASE;
+    regExpPtr->noCase = flags & TCLX_REXP_NO_CASE;
 
-    if (flags & REXP_NO_CASE) {
+    if (flags & TCLX_REXP_NO_CASE) {
         expBuf = ckalloc (strlen (expression) + 1);
         Tcl_DownShift (expBuf, expression);
     } else
         expBuf = expression;
 
-    anyMeta = strpbrk (expBuf, REXP_META) != NULL;
+    anyMeta = strpbrk (expBuf, TCLX_REXP_META) != NULL;
 
     /*
      * If no meta-characters, use Boyer-Moore string matching only.
      */
-    if ((!anyMeta) && (flags & REXP_BOTH_ALGORITHMS)) {
+    if ((!anyMeta) && (flags & TCLX_REXP_BOTH_ALGORITHMS)) {
         regExpPtr->boyerMoorePtr = BoyerMooreCompile (expBuf, strlen (expBuf));
         goto okExitPoint;
     }
@@ -386,7 +386,7 @@ Tcl_RegExpCompile (interp, regExpPtr, expression, flags)
      * characters in the string, don't use B-M, as it seems not optimal at
      * this point.
      */
-    if (flags & REXP_BOTH_ALGORITHMS) {
+    if (flags & TCLX_REXP_BOTH_ALGORITHMS) {
         char *subStrPtr;
         int   subStrLen;
         
@@ -402,17 +402,17 @@ Tcl_RegExpCompile (interp, regExpPtr, expression, flags)
     tclRegexpError = NULL;
     regExpPtr->progPtr = TclRegComp (expBuf);
     if (tclRegexpError != NULL) {
-        if (flags & REXP_NO_CASE)
+        if (flags & TCLX_REXP_NO_CASE)
             ckfree (expBuf);
         Tcl_AppendResult (interp, "error in regular expression: ", 
                           tclRegexpError, (char *) NULL);
-        if (flags & REXP_NO_CASE)
+        if (flags & TCLX_REXP_NO_CASE)
             ckfree (expBuf);
-        Tcl_RegExpClean (regExpPtr);
+        TclX_RegExpClean (regExpPtr);
     }
   
 okExitPoint: 
-    if (flags & REXP_NO_CASE)
+    if (flags & TCLX_REXP_NO_CASE)
         ckfree (expBuf);
     return TCL_OK;
 
@@ -421,7 +421,7 @@ okExitPoint:
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_RegExpExecute --
+ * TclX_RegExpExecute --
  *     Execute a regular expression compiled with Boyer-Moore and/or 
  *     regexp.
  *
@@ -440,9 +440,9 @@ okExitPoint:
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
+TclX_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
     Tcl_Interp       *interp;
-    Tcl_regexp       *regExpPtr;
+    TclX_regexp      *regExpPtr;
     char             *matchStrIn;
     char             *matchStrLower;
     Tcl_SubMatchInfo  subMatchInfo;

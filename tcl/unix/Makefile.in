@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.10 1994/07/15 04:36:50 markd Exp markd $
+# $Id: Makefile.in,v 4.0 1994/07/16 05:27:54 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -46,8 +46,6 @@ TCLEXTEND_H   = ${bldbasedir}/tclmaster/include/tclExtend.h
 TCLPP_H       = ${bldbasedir}/tclmaster/include/tcl++.h
 APPINIT       = ${bldbasedir}/tclmaster/src/tclXAppInit.c
 SYSLIBS       = ${bldbasedir}/tclmaster/src/SYSLIBS${ARCH}
-TCLXMAINPP_C  = ${bldbasedir}/tclmaster/src/tclXmain++.C
-TCLXMAINPP_O  = ${bldbasedir}/tclmaster/lib${ARCH}/tclXmain++.o
 
 LDLIBS = ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
 
@@ -65,7 +63,7 @@ OBJS= \
     tclXfcntl.o      tclXfilecmds.o   tclXfilescan.o   tclXflock.o   \
     tclXfstat.o      tclXgeneral.o    tclXgetdate.o    tclXhandles.o \
     tclXid.o         tclXinit.o       tclXkeylist.o    tclXlib.o     \
-    tclXlist.o       tclXmain.o       tclXmath.o       tclXmsgcat.o  \
+    tclXlist.o       tclXmath.o       tclXmsgcat.o  \
     tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
     tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
     tclXunixcmds.o   tclXutil.o       tclXdata.o
@@ -77,7 +75,7 @@ UCBOBJS=tclCmdIL.o
 # the executable, as some systems leave invalid executables around.
 
 all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${APPINIT} ${SYSLIBS} \
-     ${TCLXMAINPP_C} ${TCL_PLUS_BUILD}
+     ${TCL_PLUS_BUILD}
 
 ${TCL}: tclXAppInit.o ${LIBTCLX_A} ${LIBTCL_A} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
@@ -134,35 +132,27 @@ ${SYSLIBS}: SYSLIBS
 	rm -f ${SYSLIBS}
 	cp SYSLIBS ${SYSLIBS}
 
-${TCLXMAINPP_C}: tclXmain++.C
-	rm -f ${TCLXMAINPP_C}
-	cp tclXmain++.C ${TCLXMAINPP_C}
-
 #------------------------------------------------------------------------------
 # Make sure tcl++.h compiles, plus force tcl++.o into the library.
 
-TCL_PLUS: tcl++ tcl++.o ${TCLXMAINPP_O}
+TCL_PLUS: tcl++ tcl++.o
 
-tcl++: tclXmain++.o tcl++.o made.tmp
-	${CCPLUS} ${CC_FLAGS} ${XLDFLAGS} tclXmain++.o tclXAppInit.o \
+tcl++: tclXAppInit++.o tcl++.o made.tmp
+	${CCPLUS} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit++.o \
            ${LDLIBS} ${XLDLIBS} -o tcl++
 
-tclXmain++.o: tcl++.h tclXmain++.C
-	${CCPLUS} -c ${CC_FLAGS} tclXmain++.C
+tclXAppInit++.o: tcl++.h tclXAppInit++.C
+	${CCPLUS} -c ${CC_FLAGS} tclX++.C
 
-tclXmain++.C: tclXmain.c
-	rm -f tclXmain++.C
-	cp ${srcdir}/tclXmain.c tclXmain++.C
-
-${TCLXMAINPP_O}: tclXmain++.o
-	rm -f ${TCLXMAINPP_O}
-	cp tclXmain++.o ${TCLXMAINPP_O}
+tclXAppInit++.C: tclXAppInit.c
+	rm -f tclXAppInit++.C
+	cp ${srcdir}/tclXAppInit.c tclXAppInit++.C
 
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp tclXgetdate.c tclXmain++.C tclXAppInit.o tclCmdIL.c
-	-rm -f ${OBJS} ${UCBOBJS} tclXmain++.o tcl++.o ${TCL} tcl++
+	-rm -f made.tmp tclXgetdate.c tclXAppInit++.C tclXAppInit.o tclCmdIL.c
+	-rm -f ${OBJS} ${UCBOBJS} tclXAppInit++.o tcl++.o ${TCL} tcl++
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 3.6 1994/07/15 04:40:31 markd Exp markd $
+ * $Id: tclExtend.h,v 4.0 1994/07/16 05:27:57 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -98,18 +98,7 @@ TclX_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
                               char       *checkCmd));
 
 EXTERN void
-TclX_Shell _ANSI_ARGS_((int    argc,
-                        char **argv));
-
-EXTERN void
 Tcl_SetupSigInt _ANSI_ARGS_((void));
-
-/*
- * Run a TclX wish.
- */
-EXTERN void
-TkX_Wish _ANSI_ARGS_((int    argc,
-                      char **argv));
 
 /*
  * Exported utility functions.

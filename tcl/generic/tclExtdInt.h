@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.0 1994/07/16 05:27:30 markd Rel markd $
+ * $Id: tclExtdInt.h,v 4.1 1994/08/11 03:49:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -72,7 +72,7 @@
  * Included the tcl file tclUnix.h after other system files, as it checks
  * if certain things are defined.
  */
-#include "tclUnix.h"
+#include "tclPort.h"
 
 /*
  * These should be take from an include file, but it got to be such a mess
@@ -152,7 +152,7 @@ typedef struct {
     regexp *progPtr;
     char   *boyerMoorePtr;
     int     noCase;
-} Tcl_regexp;
+} TclX_regexp;
 
 typedef struct {
     int start;
@@ -160,10 +160,10 @@ typedef struct {
 } Tcl_SubMatchInfo [NSUBEXP];
 
 /*
- * Flags used by Tcl_RegExpCompile:
+ * Flags used by TclX_RegExpCompile:
  */
-#define REXP_NO_CASE         1   /* Do matching regardless of case    */
-#define REXP_BOTH_ALGORITHMS 2   /* Use boyer-moore along with regexp */
+#define TCLX_REXP_NO_CASE         1   /* Do matching regardless of case    */
+#define TCLX_REXP_BOTH_ALGORITHMS 2   /* Use boyer-moore along with regexp */
 
 /*
  * Used to return argument messages by most commands.
@@ -242,20 +242,20 @@ Tcl_ProcessSignal _ANSI_ARGS_((ClientData  clientData,
                                int         cmdResultCode));
 
 extern void
-Tcl_RegExpClean _ANSI_ARGS_((Tcl_regexp *regExpPtr));
+TclX_RegExpClean _ANSI_ARGS_((TclX_regexp *regExpPtr));
 
 extern int
-Tcl_RegExpCompile _ANSI_ARGS_((Tcl_Interp  *interp,
-                               Tcl_regexp  *regExpPtr,
-                               char        *expression,
-                               int          flags));
+TclX_RegExpCompile _ANSI_ARGS_((Tcl_Interp   *interp,
+                                TclX_regexp  *regExpPtr,
+                                char         *expression,
+                                int          flags));
 
 extern int
-Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
-                               Tcl_regexp       *regExpPtr,
-                               char             *matchStrIn,
-                               char             *matchStrLower,
-                               Tcl_SubMatchInfo  subMatchInfo));
+TclX_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
+                                TclX_regexp      *regExpPtr,
+                                char             *matchStrIn,
+                                char             *matchStrLower,
+                                Tcl_SubMatchInfo  subMatchInfo));
 
 
 extern int

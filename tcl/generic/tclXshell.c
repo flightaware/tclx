@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 3.5 1994/06/28 15:44:52 markd Exp markd $
+ * $Id: tclXshell.c,v 4.0 1994/07/16 05:26:40 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -204,7 +204,7 @@ ParseCmdLine (interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
- * TclX_Shell --
+ * Tcl_Main --
  *
  *   This function runs the TclX shell, including parsing the command line and
  * calling the Tcl_AppInit function at the approriate place.  It either enters
@@ -218,7 +218,7 @@ ParseCmdLine (interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_Shell (argc, argv)
+Tcl_Main (argc, argv)
     int    argc;
     char **argv;
 {

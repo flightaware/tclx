@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.11 1994/07/15 04:36:50 markd Exp markd $
+# $Id: Makefile.in,v 4.0 1994/07/16 05:30:54 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -46,8 +46,6 @@ LIBTKX_A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
 WISHX        = ${bldbasedir}/tkmaster/bin${ARCH}/wishx
 APPINIT      = ${bldbasedir}/tkmaster/src/tkXAppInit.c
 SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS${ARCH}
-TKXMAINPP_C  = ${bldbasedir}/tkmaster/src/tkXmain++.C
-TKXMAINPP_O  = ${bldbasedir}/tkmaster/lib${ARCH}/tkXmain++.o
 
 LIBTCL_A  = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
 LIBTCLX_A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
@@ -67,7 +65,7 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS=tkXinit.o   tkXmain.o  tkXshell.o  tkXdata.o
+OBJS=tkXinit.o tkXshell.o  tkXdata.o
 
 UCBOBJS=tkWindow.o
 
@@ -75,7 +73,7 @@ UCBOBJS=tkWindow.o
 # Compile the TkX library and link wishx.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TKXMAINPP_C} ${TCL_PLUS_BUILD}
+all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TCL_PLUS_BUILD}
 
 ${WISHX}: tkXAppInit.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
@@ -104,34 +102,30 @@ ${SYSLIBS}: SYSLIBS
 	rm -f ${SYSLIBS}
 	cp SYSLIBS ${SYSLIBS}
 
-${TKXMAINPP_C}: tkXmain++.C
-	rm -f ${TKXMAINPP_C}
-	cp tkXmain++.C ${TKXMAINPP_C}
-
 #------------------------------------------------------------------------------
 # Make sure tkXmain.c compiles and links with C++.
 
-TCL_PLUS: wishx++ ${TKXMAINPP_O}
+TCL_PLUS: wishx++
 
-wishx++: tkXmain++.o made.tmp
+wishx++: tkXAppInit++.o made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	    -o wishx++ || (rm -f wishx++; exit 1)
 
-tkXmain++.o: tkXmain++.C
-	${CCPLUS} -c ${CC_FLAGS} tkXmain++.C
+tkXAppInit++.o: tkXAppInit++.C
+	${CCPLUS} -c ${CC_FLAGS} tkXAppInit++.C
 
-tkXmain++.C: tkXmain.c
-	rm -f tkXmain++.C
-	cp ${srcdir}/tkXmain.c tkXmain++.C
+tkXAppInit++.C: tkXAppInit.c
+	rm -f tkXAppInit++.C
+	cp ${srcdir}/tkXAppInit.c tkXAppInit++.C
 
-${TKXMAINPP_O}: tkXmain++.o
-	rm -f ${TKXMAINPP_O}
-	cp tkXmain++.o ${TKXMAINPP_O}
+${TKXAPPINITPP_O}: tkXAppInit++.o
+	rm -f ${TKXAPPINITPP_O}
+	cp tkXAppInit++.o ${TKXAPPINITPP_O}
 
 #------------------------------------------------------------------------------
 clean:
-	-rm -f made.tmp tkXmain++.C tkXAppInit.o tkWindow.c
-	-rm -f ${OBJS} ${UCBOBJS} tkXmain++.o ${WISHX} wishx++
+	-rm -f made.tmp tkXAppInit++.C tkXAppInit.o tkWindow.c
+	-rm -f ${OBJS} ${UCBOBJS} tkXAppInit++.o ${WISHX} wishx++
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

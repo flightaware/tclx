@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXAppInit.c,v 4.0 1994/07/16 05:28:45 markd Rel markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -42,17 +42,6 @@
 #include <math.h>
 
 /*
- * The following variable is a special hack that allows applications
- * to be linked using the procedure "main" from the Tcl library.  The
- * variable generates a reference to "main", which causes main to
- * be brought in from the library (and all of Tcl with it).
- */
-
-EXTERN int main _ANSI_ARGS_((int     argc,
-                             char  **argv));
-int (*tclXDummyMainPtr)() = (int (*)()) main;
-
-/*
  * The following variable is a special hack that insures the tcl
  * version of matherr() is used when linking against shared libraries.
  * Only define if matherr is used on this system.
@@ -63,6 +52,32 @@ EXTERN int matherr _ANSI_ARGS_((struct exception *));
 int (*tclDummyMathPtr)() = (int (*)()) matherr;
 #endif
 
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * main --
+ *
+ *	This is the main program for the application.
+ *
+ * Results:
+ *	None: Tcl_Main never returns here, so this procedure never
+ *	returns either.
+ *
+ * Side effects:
+ *	Whatever the application does.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+main(argc, argv)
+    int argc;			/* Number of command-line arguments. */
+    char **argv;		/* Values of command-line arguments. */
+{
+    Tcl_Main(argc, argv);
+    return 0;			/* Needed only to prevent compiler warning. */
+}
 
 /*
  *----------------------------------------------------------------------
