@@ -37,7 +37,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 8.1 1997/04/17 05:00:25 markd Exp $
+# $Id: cpmanpages.tcl,v 8.2 1997/08/23 18:56:32 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -84,15 +84,18 @@ proc CopyManFile {sourceFile targetFH} {
 #------------------------------------------------------------------------------
 
 proc CopyManPage {sourceFile targetFile} {
-
+    global gzip
     if ![file exists [file dirname $targetFile]] {
         mkdir -path [file dirname $targetFile]
     }
-    catch {file delete $targetFile}
+    catch {file delete $targetFile $targetFile.gz}
 
     set targetFH [open $targetFile w]
     CopyManFile $sourceFile $targetFH
     close $targetFH
+    if $gzip {
+        exec gzip -9f $targetFile
+    }
 }
 
 #------------------------------------------------------------------------------
@@ -182,7 +185,7 @@ proc InstallShortMan {sourceFile targetDir extension} {
 #------------------------------------------------------------------------------
 
 proc InstallLongMan {sourceFile targetDir extension} {
-
+    global gzip
     set manNames [GetManNames $sourceFile]
     if [lempty $manNames] {
         set baseName [file tail [file root $sourceFile]]
@@ -202,11 +205,16 @@ proc InstallLongMan {sourceFile targetDir extension} {
 
     foreach manName $manNames {
         set targetFile  $targetDir/$manName.$extension
-        catch {file delete $targetFile}
+        file delete $targetFile $targetFile.gz
+        if $gzip {
+            set cmd "link $firstFilePath.gz $targetFile.gz"
+        } else {
+            set cmd "link $firstFilePath $targetFile"
+        }
         if {[catch {
-                link $firstFilePath $targetFile
+                eval $cmd
             } msg] != 0} {
-            puts stderr "error from: link $firstFilePath $targetFile"
+            puts stderr "error from: $cmd"
             puts stderr "    $msg"
         } else {
             lappend created [file tail $targetFile]
@@ -253,20 +261,27 @@ proc InstallManPage {sourceFile manDir section} {
 #------------------------------------------------------------------------------
 # main prorgam
 
-if {[llength $argv] < 6 || [llength $argv] > 7} {
-    puts stderr "wrong # args: cpmanpages ?flags? separator cmd func unix sourceDir targetDir"
-    exit 1
-}
-
 umask 022
 
 # Parse command line args
 
 set rmcat 0
-if {[lindex $argv 0] == "-rmcat"} {
-    set rmcat 1
-    lvarpop argv
+set gzip 0
+while {[string match -* $argv]} {
+    set opt [lvarpop argv]
+    switch -- $opt {
+        -rmcat {set rmcat 1}
+        -gzip {set gzip 1}
+        default {
+            puts stderr "unknown flag: $opt"
+        }
+    }
 }
+if {[llength $argv] != 6} {
+    puts stderr "wrong # args: cpmanpages ?flags? separator cmd func unix sourceDir targetDir"
+    exit 1
+}
+
 
 set manSeparator    [Unquote [lindex $argv 0]]
 set sectionXRef(.n) [Unquote [lindex $argv 1]]
