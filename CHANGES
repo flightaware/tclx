@@ -573,4 +573,5 @@
 39 Jul 93:
   o Provided the functions Tcl_AddExtendedCmds and Tcl_AddExtendedLibCmds
     that can add the Extended Tcl commands to an existing interpreter.
+  o Don't print shell prompts if not a tty.
 -------------------------------------------------------------------------------
