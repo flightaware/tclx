@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.10 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tclXutil.c,v 2.11 1993/09/21 05:11:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -285,6 +285,8 @@ Tcl_DStringGets (filePtr, dynStrPtr)
 
     bufPtr = buffer;
     bufEnd = buffer + sizeof (buffer) - 1;
+
+    clearerr (filePtr);  /* Clear previous error/EOF */
 
     while (TRUE) {
         readVal = getc (filePtr);
