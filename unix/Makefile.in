@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 1.7 1992/10/05 00:03:46 markd Exp markd $
+# $Id: Makefile,v 1.8 1992/10/05 19:57:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -96,7 +96,12 @@ runtcl:
 	@echo '# script for testing Tcl before installation'  >>runtcl
 	@echo "TCLDEFAULT=`pwd`/TCLDEFAULT"                   >>runtcl
 	@echo "export TCLDEFAULT"                             >>runtcl
-	@echo "exec `pwd`/tcl \"\$$*\""                       >>runtcl
+	@echo "if [ \$$# = 0 ]"                               >>runtcl
+	@echo "then"                                          >>runtcl
+	@echo "    exec `pwd`/tcl"                            >>runtcl
+	@echo "else"                                          >>runtcl
+	@echo "    exec `pwd`/tcl \"\$$*\""                   >>runtcl
+	@echo "fi"                                            >>runtcl
 	chmod a+rx runtcl
 
 runwish:
@@ -104,7 +109,12 @@ runwish:
 	@echo '# script for testing wish before installation' >>runwish
 	@echo "TCLDEFAULT=`pwd`/TCLDEFAULT"                   >>runwish
 	@echo "export TCLDEFAULT"                             >>runwish
-	@echo "exec `pwd`/wish \"\$$*\""                      >>runwish
+	@echo "if [ \$$# = 0 ]"                               >>runwish
+	@echo "then"                                          >>runwish
+	@echo "    exec `pwd`/wish"                           >>runwish
+	@echo "else"                                          >>runwish
+	@echo "    exec `pwd`/wish \"\$$*\""                  >>runwish
+	@echo "fi"                                            >>runwish
 	chmod a+rx runwish
 
 #------------------------------------------------------------------------------
