@@ -150,8 +150,7 @@ example:
 
 Each of those directories has a file SYSLIBS that contains the
 system libraries that the TclX configure script thinks you should
-use for linking programs.  These are in a form that can be included
-from a make file.  These file are in a format that can be included
+use for linking programs. These file are in a format that can be included
 from a make file.
 
 IMPORTANT NOTE:  libtclx.a must be specified on the link command line
