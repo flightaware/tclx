@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.6 1992/10/06 03:43:12 markd Exp markd $
+# $Id: Config.mk,v 1.7 1992/10/06 16:46:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -118,18 +118,20 @@ MEM_DEBUG_FLAGS=
 
 #==============================================================================
 # Install options sections.  This sections describes the installation options.
-# Some of the actual values are set under each system definition in the
-# system dependent section.  Your might want to change some of these values
-# before installing.
+# Your might want to change some of these values before installing.
 #..............................................................................
 #
 # o TCL_OWNER - The user that will own all Tcl files after installation.
-#   (system dependent)
 # o TCL_GROUP - The group that all Tcl files will belong to after installation.
-#   (system dependent)
-# o TCL_DEFAULT - Base name of Tcl default file.  This name will have a
-#   version number appended.  (system dependent)
 #
+TCL_OWNER=bin
+TCL_OWNER=bin
+
+# o TCL_DEFAULT - Base name of Tcl default file.  This name will have a
+#   version number appended.
+#
+#TCL_DEFAULT=/etc/default/tcl
+TCL_DEFAULT=/usr/local/lib/tcldefault
 
 #
 # The directory to install Tcl binary into.
@@ -168,8 +170,12 @@ TCL_TCLDIR=/usr/local/tcl
 
 TCL_MAN_INSTALL=1
 
+#
 # o TCL_MAN_BASEDIR - Base manual directory where all of the man.* and cat.*
 #   directories live.
+#
+TCL_MAN_BASEDIR=/usr/local/man
+
 #
 # o TCL_MAN_CMD_SECTION - Section for Tcl command  manual pages. Normal `1' or
 #   `C'.  You might perfer TCL since there are some many.
@@ -178,6 +184,12 @@ TCL_MAN_INSTALL=1
 #   In some cases it might be desirable install all manual pages in one
 #   section, in this case, the value should be the same as TCL_MAN_CMD_SECTION.
 #
+#TCL_MAN_CMD_SECTION=TCL
+#TCL_MAN_FUNC_SECTION=TCL
+TCL_MAN_CMD_SECTION=1
+TCL_MAN_FUNC_SECTION=3
+
+#
 # o TK_MAN_CMD_SECTION - Section for Tk command  manual pages. Normal `1' or
 #   `C'.  You might perfer TK since there are some many.
 #
@@ -185,6 +197,17 @@ TCL_MAN_INSTALL=1
 #   In some cases it might be desirable install all manual pages in one
 #   section, in this case, the value should be the same as TK_MAN_CMD_SECTION.
 #
+#TK_MAN_CMD_SECTION=TK
+#TK_MAN_FUNC_SECTION=TK
+TK_MAN_CMD_SECTION=1
+TK_MAN_FUNC_SECTION=3
+
+
+#..............................................................................
+# The rest of the manual page install options are set in the system dependent
+# configuration file (config/*)
+#
+
 # o TCL_MAN_SEPARATOR - The separator character used in the directory name
 #   of the cat* and man* manual directories.  This is usually empty or 
 #   a period.
