@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXselect.c,v 2.3 1993/04/06 05:58:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -293,7 +293,7 @@ Tcl_SelectCmd (clientData, interp, argc, argv)
 
     if (argc < 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " readhandles ?writehandles? ?excepthandles?",
+                          " readFileIds ?writeFileIds? ?exceptFileIds?",
                           " ?timeout?", (char *) NULL);
         return TCL_ERROR;
     }

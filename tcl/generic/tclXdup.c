@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 2.1 1993/03/06 21:42:30 markd Exp markd $
+ * $Id: tclXdup.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -51,26 +51,25 @@ DoNormalDup (interp, oldFilePtr)
     Tcl_Interp *interp;
     OpenFile   *oldFilePtr;
 {
-    Interp   *iPtr = (Interp *) interp;
     int       newFileId;
-    FILE     *newFileCbPtr;
-    char     *mode;
+    OpenFile *filePtr;
 
     newFileId = dup (fileno (oldFilePtr->f));
     if (newFileId < 0)
         goto unixError;
 
-    if (Tcl_SetupFileEntry (interp, newFileId,
-                            oldFilePtr->readable,
-                            oldFilePtr->writable) != TCL_OK)
+    filePtr = Tcl_SetupFileEntry (interp, newFileId,
+                                  oldFilePtr->readable,
+                                  oldFilePtr->writable);
+    if (filePtr == NULL)
         return NULL;
 
     sprintf (interp->result, "file%d", newFileId);
-    return iPtr->filePtrArray [newFileId];
+    return filePtr;
 
 unixError:
     interp->result = Tcl_UnixError (interp);
-    return NULL;;
+    return NULL;
 }
 
 /*
