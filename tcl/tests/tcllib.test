@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 2.3 1993/06/21 05:43:53 markd Exp markd $
+# $Id: tcllib.test,v 2.4 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -131,7 +131,8 @@ proc BuildTestLib {name {pbase TclLibAA}} {
         "#@package: $name-package ${pbase}B ${pbase}C ${pbase}D" \
         "proc ${pbase}B {} {return \"***${pbase}B***\"}" \
         "proc ${pbase}C {} {return \"***${pbase}C***\"}" \
-        "proc ${pbase}D {} {return \"***${pbase}D***\"}"
+        "proc ${pbase}D {} {return \"***${pbase}D***\"}" \
+        "#@packend"
 }
 
 mkdir tcllib1.dir
@@ -196,8 +197,13 @@ PutFile tcllib1.dir/tclIndex "#" "badline" "nukearray nukearray.tmp" \
     "baz baz.tmp"
 
 Test tcllib-5.1 {bogus Ousterhout library index} {
-    nukearray
-} 1 {recursive load of indexes (probable invalid command while loading index)}
+    set stat [catch nukearray msg]
+    if [string match "*/tclIndex isn't a proper Tcl index file" $msg] {
+        list $stat {IS OK}
+    } else {
+        list $stat $msg
+    }
+} 0 {1 {IS OK}}
 
 PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
         {set auto_index(parray)   " source $dir/parray.tcl"} \

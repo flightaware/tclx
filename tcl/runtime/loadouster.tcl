@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loadouster.tcl,v 1.1 1993/06/21 05:58:43 markd Exp markd $
+# $Id: loadouster.tcl,v 1.2 1993/09/28 06:43:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -46,6 +46,7 @@ proc auto_load_ouster_index fn {
         close $f
     }
     if $error {
+        global errorInfo errorCode
         error $msg $errorInfo $errorCode
     }
 }

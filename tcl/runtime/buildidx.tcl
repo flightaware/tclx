@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 2.4 1993/05/31 20:33:09 markd Exp markd $
+# $Id: buildidx.tcl,v 2.5 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -68,6 +68,7 @@ proc TCLSH:CreateLibIndex {libName} {
     unlink -nocomplain $idxName
     set libFH [open $libName r]
     set idxFH [open $idxName w]
+    set packageCnt 0
 
     set contectHdl [scancontext create]
 
@@ -79,21 +80,21 @@ proc TCLSH:CreateLibIndex {libName} {
             TCLSH:PutIdxEntry $idxFH $pkgInfo $matchInfo(offset)
         }
         set pkgInfo [TCLSH:ParsePkgHeader matchInfo]
+        incr packageCnt
     }
 
     scanmatch $contectHdl "^#@packend" {
         if [lempty $pkgInfo] {
             error "#@packend without #@package in $libName"
         }
-        TCLSH:PutIdxEntry $idxFH $pkgDefName $pkgDefWhere $matchInfo(offset) \
-                          $pkgDefProcs
+        TCLSH:PutIdxEntry $idxFH $pkgInfo $matchInfo(offset)
         set pkgInfo {}
     }
 
     set pkgInfo {}
     if {[catch {
         scanfile $contectHdl $libFH
-        if [lempty $pkgInfo] {
+        if {$packageCnt == 0} {
             error "No #@package definitions found in $libName"
         }   
     } msg] != 0} {
