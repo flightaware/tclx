@@ -925,7 +925,7 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 	    fi
 
 	    # Check to enable 64-bit flags for compiler/linker on AIX 4+
-	    if test "$do64bit" = "yes" -o "`uname -v`" -gt "3" ; then
+	    if test "$do64bit" = "yes" -a "`uname -v`" -gt "3" ; then
 		if test "$GCC" = "yes" ; then
 		    AC_MSG_WARN("64bit mode not supported with GCC on $system")
 		else 
