@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.11 1997/07/04 22:43:04 markd Exp $
+ * $Id: tclXlib.c,v 8.12 1997/07/05 09:36:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -60,11 +60,14 @@ typedef enum {
     TCLLIB_OUSTER      /* tclIndex                 */
 } indexNameClass_t;
 
+#if 0
+FIX: update for new Itcl
 /*
  * Indicates if we have ITcl namespaces and the command to check for.
  */
 static int haveNameSpaces = FALSE;
 static char nameSpaceCheckCommand [] = "@scope";
+#endif
 
 /*
  * Per-interpreter structure used for managing the library.
@@ -175,9 +178,12 @@ static int
 LoadStdProc _ANSI_ARGS_((Tcl_Interp  *interp,
                          char        *command));
 
+#if 0
+FIX: update for new Itcl
 static int
 LoadITclImportProc _ANSI_ARGS_((Tcl_Interp  *interp,
                                 char        *command));
+#endif
 
 static int
 LoadCommand _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -807,7 +813,7 @@ LoadOusterIndex (interp, indexFilePath)
      * the file that defines it.
      */
     if (!Tcl_GetCommandInfo (interp,
-                             "auto_load_ouster_index",
+                             "::auto_load_ouster_index",
                              &loadCmdInfo)) {
         if (Tcl_GlobalEval (interp, loadOusterCmd) == TCL_ERROR)
             goto errorExit;
@@ -1266,6 +1272,8 @@ LoadStdProc (interp, command)
     Tcl_DecrRefCount (loadCmd);
     return TCL_OK;
 }
+#if 0
+FIX: update for new Itcl
 
 /*
  *-----------------------------------------------------------------------------
@@ -1297,6 +1305,7 @@ LoadITclImportProc (interp, command)
     char          *searchPathStr, *nameSpace, *nextPtr; 
     Tcl_Obj       *loadCmd = NULL;
 
+/*FIX: This is broken, lets wait for the new ITcl */
     /*
      * Get the namespace search path.
      */
@@ -1370,6 +1379,7 @@ LoadITclImportProc (interp, command)
     Tcl_DStringFree (&fullName);
     return TCL_ERROR;
 }
+#endif
 
 /*
  *-----------------------------------------------------------------------------
@@ -1396,8 +1406,11 @@ LoadCommand (interp, command)
     Tcl_CmdInfo cmdInfo;
 
     result = LoadStdProc (interp, command);
+#if 0
+FIX: update for new Itcl
     if (haveNameSpaces && (result == TCL_CONTINUE))
         result = LoadITclImportProc (interp, command);
+#endif
     if (result == TCL_CONTINUE)
         return TCL_CONTINUE;
     if (result == TCL_ERROR)
@@ -1607,7 +1620,6 @@ TclX_LibraryInit (interp)
     Tcl_Interp *interp;
 {
     libInfo_t *infoPtr;
-    Tcl_CmdInfo cmdInfo;
 
     infoPtr = (libInfo_t *) ckalloc (sizeof (libInfo_t));
 
@@ -1632,10 +1644,13 @@ TclX_LibraryInit (interp)
     Tcl_ResetResult (interp);
                                                                   
 
+#if 0
+FIX: update for new Itcl
     /*
      * Check for ITcl namespaces.
      */
     haveNameSpaces = Tcl_GetCommandInfo (interp, 
                                          nameSpaceCheckCommand,
                                          &cmdInfo);
+#endif
 }

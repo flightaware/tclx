@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 8.1 1997/04/17 04:59:39 markd Exp $
+# $Id: tcllib.test,v 8.2 1997/06/12 21:08:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -86,12 +86,9 @@ catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 # in C.
 #
 
-if 1 {
-#FIX: Disabled due to hack for tcl_safeInterpInit
 Test tcllib-1.1 {command parameter checking} {
     auto_load a b c d
 } 1 {wrong # args: auto_load ?command?}
-}
 
 Test tcllib-1.2 {command parameter checking} {
     loadlibindex
@@ -336,6 +333,38 @@ Test tcllib-8.3 {backslash parsing in package headers} {
 } 0 {CCC}
 
 TclLibCleanUp
+
+#
+# Test with namespaces.
+#
+proc BuildNSTestLib {name ns {pbase TclLibAA}} {
+   PutFile $name \
+        "#@package: $name-package ${ns}::${pbase}B ${ns}::${pbase}C \
+            ${ns}::${pbase}D" \
+        "namespace eval $ns {"\
+        "    proc ${pbase}B {} {return \"***${ns}::${pbase}B***\"}" \
+        "    proc ${pbase}C {} {return \"***${ns}::${pbase}C***\"}" \
+        "    proc ${pbase}D {} {return \"\[${pbase}C\] ***${ns}::${pbase}D***\"}" \
+        "}" \
+        "#@packend"
+}
+
+BuildNSTestLib tcllib1.dir/test1.tlib TclXLibTest  TclLibNS
+TclLibReset
+set auto_path [list [pwd]/tcllib1.dir $tclx_library]
+
+Test tcllib-8.1 {successful library access} {
+    TclXLibTest::TclLibNSB
+} 0 {***TclXLibTest::TclLibNSB***}
+
+Test tcllib-8.2 {successful library access} {
+    TclXLibTest::TclLibNSB
+} 0 {***TclXLibTest::TclLibNSB***}
+
+Test tcllib-8.3 {successful library access} {
+    TclXLibTest::TclLibNSD
+} 0 {***TclXLibTest::TclLibNSC*** ***TclXLibTest::TclLibNSD***}
+
 catch {file delete -force tcllib1.dir}
 catch {file delete -force tcllib2.dir}
 

@@ -1303,3 +1303,7 @@
 09 Jul 97:
   o Added try_eval command.
 -------------------------------------------------------------------------------
+10 Jul 97:
+  o Modified the profile command to correctly support namespaces.
+  o Modified TclX auto load libraries to work with namespaces.
+-------------------------------------------------------------------------------
