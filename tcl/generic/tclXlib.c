@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.15 1997/08/17 04:08:21 markd Exp $
+ * $Id: tclXlib.c,v 8.16 1997/08/17 05:31:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Really should use original auto_load instead load_ouster_index,
@@ -63,15 +63,6 @@ typedef enum {
     TCLLIB_TND,        /* *.tnd (.tndx in 8.3 land */
     TCLLIB_OUSTER      /* tclIndex                 */
 } indexNameClass_t;
-
-#if 0
-FIX: update for new Itcl
-/*
- * Indicates if we have ITcl namespaces and the command to check for.
- */
-static int haveNameSpaces = FALSE;
-static char nameSpaceCheckCommand [] = "@scope";
-#endif
 
 /*
  * Per-interpreter structure used for managing the library.
@@ -181,13 +172,6 @@ LoadAutoPath _ANSI_ARGS_((Tcl_Interp  *interp,
 static int
 LoadStdProc _ANSI_ARGS_((Tcl_Interp  *interp,
                          char        *command));
-
-#if 0
-FIX: update for new Itcl
-static int
-LoadITclImportProc _ANSI_ARGS_((Tcl_Interp  *interp,
-                                char        *command));
-#endif
 
 static int
 LoadCommand _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -1281,121 +1265,12 @@ LoadStdProc (interp, command)
     Tcl_DecrRefCount (loadCmd);
     return TCL_OK;
 }
-#if 0
-FIX: update for new Itcl
-
-/*
- *-----------------------------------------------------------------------------
- * LoadITclImportProc --
- *
- *   Check if the specified command is an auto load ITcl imported proc.  If so,
- * evaluated the load command it.  Don't call if namespaces are not available.
- *
- * Parameters
- *   o interp - A pointer to the interpreter, error returned in result.
- *   o command - The command to load.
- * Returns:
- *   TCL_OK if the command was loaded.
- *   TCL_CONTINUE if the command was not found.
- *   TCL_ERROR if an error occured.
- * FIX: Port to 8.0 namespaces/Itcl
- *-----------------------------------------------------------------------------
- */
-static int
-LoadITclImportProc (interp, command)
-    Tcl_Interp  *interp;
-    char        *command;
-{
-    static char    importCmd [] = "import all";
-    Tcl_Obj       *cmdResult = NULL;
-    Tcl_DString    fullName;
-    Tcl_Obj      **nsSearchPathv;
-    int            nsSearchPathc, idx, nameSpaceLen, searchPathLen;
-    char          *searchPathStr, *nameSpace, *nextPtr; 
-    Tcl_Obj       *loadCmd = NULL;
-
-/*FIX: This is broken, lets wait for the new ITcl */
-    /*
-     * Get the namespace search path.
-     */
-    if (Tcl_Eval (interp, importCmd) == TCL_ERROR)
-        return TCL_ERROR;
-
-    /*
-     * Take over result object from interp.  
-     */
-    cmdResult = Tcl_GetObjResult (interp);
-    Tcl_IncrRefCount (cmdResult);
-    Tcl_ResetResult (interp);
-    
-    if (Tcl_ListObjGetElements (interp, cmdResult,
-                                &nsSearchPathc,
-                                &nsSearchPathv) == TCL_ERROR)
-        goto errorExit;
-
-    /*
-     * Search the path for the name.
-     */
-    Tcl_DStringInit (&fullName);
-    for (idx = 0; idx < nsSearchPathc; idx++) {
-        Tcl_DStringSetLength (&fullName, 0);
-        searchPathStr = Tcl_GetStringFromObj (nsSearchPathv [idx], 
-                                              &searchPathLen);
-        /*FIX: Use list object  */
-        if (TclFindElement (interp,
-                            searchPathStr,
-                            searchPathLen,
-                            &nameSpace,
-                            &nextPtr,
-                            &nameSpaceLen,
-                            NULL))
-            goto errorExit;
-
-        nameSpace [nameSpaceLen] = '\0';
-        if (!STREQU (nameSpace, "::")) {
-            Tcl_DStringAppend (&fullName, nameSpace, -1);
-        }
-        Tcl_DStringAppend (&fullName, "::", -1);
-        Tcl_DStringAppend (&fullName, command, -1);
-        loadCmd = TclX_ObjGetVar2S (interp, AUTO_INDEX,
-                                    fullName.string, TCL_GLOBAL_ONLY);
-	if ((loadCmd == NULL) && (fullName.string[0] == ':') &&
-            (fullName.string[1] == ':')) {
-	    loadCmd = TclX_ObjGetVar2S (interp, AUTO_INDEX, fullName.string+2,
-                                        TCL_GLOBAL_ONLY);
-	}
-        if (loadCmd != NULL)
-            break;
-    }
-
-    if (loadCmd == NULL) {
-        Tcl_DecrRefCount (cmdResult);
-        Tcl_DStringFree (&fullName);
-        return TCL_CONTINUE;   /* Not found */
-    }
-
-    if (Tcl_GlobalEvalObj (interp, loadCmd) == TCL_ERROR)
-        goto errorExit;
-
-    Tcl_DecrRefCount (cmdResult);
-    Tcl_DStringFree (&fullName);
-    return TCL_OK;
-
-    
-  errorExit:
-    if (cmdResult != NULL)
-        Tcl_DecrRefCount (cmdResult);
-    Tcl_DStringFree (&fullName);
-    return TCL_ERROR;
-}
-#endif
 
 /*
  *-----------------------------------------------------------------------------
  * LoadCommand --
  *
- *   Check the "auto_index" array for code to load a command and eval it.  Also
- * check ITcl import list.
+ *   Check the "auto_index" array for code to load a command and eval it.
  *
  * Parameters
  *   o interp - A pointer to the interpreter, error returned in result.
@@ -1412,28 +1287,54 @@ LoadCommand (interp, command)
     char        *command;
 {
     int result;
+    Tcl_DString nsCommand;
     Tcl_CmdInfo cmdInfo;
+    
+    /*
+     * If it doesn't already start with a `::', create a command with one.
+     * We then need to try both.
+     */
+    Tcl_DStringInit (&nsCommand);
+    if (!STRNEQU (command, "::", 2)) {
+        Tcl_DStringAppend (&nsCommand, "::", -1);
+        Tcl_DStringAppend (&nsCommand, command, -1);
+    }
 
     result = LoadStdProc (interp, command);
-#if 0
-FIX: update for new Itcl
-    if (haveNameSpaces && (result == TCL_CONTINUE))
-        result = LoadITclImportProc (interp, command);
-#endif
+    if ((result == TCL_CONTINUE) && (nsCommand.length > 0)) {
+        result = LoadStdProc (interp, nsCommand.string);
+    }
+
     if (result == TCL_CONTINUE)
-        return TCL_CONTINUE;
+        goto exitPoint;
     if (result == TCL_ERROR)
-        return TCL_ERROR;
+        goto exitPoint;
 
     Tcl_ResetResult (interp);
 
-    if (Tcl_GetCommandInfo (interp, command, &cmdInfo))
-        return TCL_OK;  /* Found and loaded */
+    result = TCL_OK;  /* Assume the best */
+    if (Tcl_GetCommandInfo (interp, command, &cmdInfo)) {
+        goto exitPoint;  /* Found and loaded */
+    }
+    if (Tcl_GetCommandInfo (interp, nsCommand.string, &cmdInfo)) {
+        goto exitPoint;  /* Found and loaded */
+    }
 
+    /*
+     * It was in the index but not loaded.
+     */
     TclX_AppendObjResult (interp, "command \"", command,
                           "\" was defined in a Tcl library index, ",
                           "but not in a Tcl library", (char *) NULL);
-    return TCL_ERROR;
+    result = TCL_ERROR;
+    goto exitPoint;
+
+    /*
+     * Variable `result' should contain return code.
+     */
+  exitPoint:
+    Tcl_DStringFree (&nsCommand);
+    return result;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1672,15 +1573,4 @@ TclX_LibraryInit (interp)
                           (Tcl_CmdDeleteProc*) NULL);
 
     Tcl_ResetResult (interp);
-                                                                  
-
-#if 0
-FIX: update for new Itcl
-    /*
-     * Check for ITcl namespaces.
-     */
-    haveNameSpaces = Tcl_GetCommandInfo (interp, 
-                                         nameSpaceCheckCommand,
-                                         &cmdInfo);
-#endif
 }
