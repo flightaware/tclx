@@ -1,8 +1,15 @@
                          TclX bug, idea and task list
 *** Serious Bugs ***
+o loop i 0 1 {error arf}
+   Tcl_AppendStringsToObj called with shared object
+
 o objcmd writing man page not installed.
-o common.vc added -DTCLX_LIBRARY to all cc calls.  This breaks tclXlib.c
-   as it has a variable by the same name.
+
+o looks like a bug in signal handling, got:
+       Tcl_AppendToObj called with shared object
+       Abort (core dumped)
+  when did an interactive ^C.
+
 
 *** Minor bugs and enhancements ***
 From: ellson@hotair.hobl.lucent.com
