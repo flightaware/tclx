@@ -129,7 +129,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 3.4 
+# From configure.in Revision: 3.5 
 
 
 
@@ -544,7 +544,7 @@ fi
 echo checking for tm_tzadj in struct tm
 cat > conftest.c <<EOF
 #include "confdefs.h"
-$decl
+#include <time.h>
 int main() { exit(0); }
 int t() { struct tm tm; tm.tm_tzadj; }
 EOF
@@ -570,7 +570,7 @@ rm -f conftest*
 echo checking for tm_gmtoff in struct tm
 cat > conftest.c <<EOF
 #include "confdefs.h"
-$decl
+#include <time.h>
 int main() { exit(0); }
 int t() { struct tm tm; tm.tm_gmtoff; }
 EOF
