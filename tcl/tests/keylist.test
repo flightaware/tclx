@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: keylist.test,v 4.0 1994/07/16 05:25:19 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -328,3 +328,32 @@ Test keylist-4.14 {keyldel tests} {
     set keyedlist
 } 0 {}
 
+# Handling of empty lists.
+
+set keyedlist {}
+
+Test keylist-5.1 {empty keyed list tests} {
+    keylget keyedlist
+} 0 {}
+
+Test keylist-5.2 {empty keyed list tests} {
+    keylkeys keyedlist
+} 0 {}
+
+Test keylist-5.3 {empty keyed list tests} {
+    keylget keyedlist A
+} 1 {key "A" not found in keyed list}
+
+set keyedlist { 	 }
+
+Test keylist-5.4 {empty keyed list tests} {
+    keylget keyedlist
+} 0 {}
+
+Test keylist-5.5 {empty keyed list tests} {
+    keylkeys keyedlist
+} 0 {}
+
+Test keylist-5.6 {empty keyed list tests} {
+    keylget keyedlist A
+} 1 {key "A" not found in keyed list}

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 3.4 1994/07/04 22:15:08 markd Exp markd $
+ * $Id: tclXkeylist.c,v 4.0 1994/07/16 05:27:12 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -242,8 +242,18 @@ Tcl_GetKeyedListKeys (interp, subFieldName, keyedList, keyesArgcPtr,
     char **keyArgv;
 
     /*
+     * Skip leading white spaces in list.  This keeps totally empty lists
+     * with some white-spaces from being confused with empty field entries
+     * later on in the parsing.
+     */
+    for (; *keyedList != '\0'; keyedList++) {
+        if (ISSPACE (*keyedList) == 0)
+            break;
+    }
+
+    /*
      * If the keys of a subfield are requested, the dig out that field's
-     * list and then rummage through in getting the keys.
+     * list and then rummage through it getting the keys.
      */
     subFieldList = NULL;
     if ((subFieldName != NULL) && (subFieldName [0] != '\0')) {
@@ -349,6 +359,16 @@ Tcl_GetKeyedListField (interp, fieldName, keyedList, fieldValuePtr)
     if (fieldName == '\0') {
         interp->result = "null key not allowed";
         return TCL_ERROR;
+    }
+
+    /*
+     * Skip leading white spaces in list.  This keeps totally empty lists
+     * with some white-spaces from being confused with empty field entries
+     * later on in the parsing.
+     */
+    for (; *keyedList != '\0'; keyedList++) {
+        if (ISSPACE (*keyedList) == 0)
+            break;
     }
 
     /*
