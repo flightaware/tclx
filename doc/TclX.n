@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.0 1994/07/16 05:23:52 markd Rel markd $
+.\" $Id: TclX.n,v 4.1 1994/08/11 03:49:41 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -512,9 +512,11 @@ specified, the current date is assumed.  If the string does not contain a
 time zone mnemonic, the local time zone is assumed, unless the \fBGMT\fR 
 argument is specified, in which case the clock value is calculated assuming
 that the specified time is relative to Greenwich Mean Time.
-If \fIbaseClock\fR is specified,
-it is taken as the current clock value.  This is useful for determining the
-time on a specific day.
+.sp
+If \fIbaseClock\fR is specified, it should contain an integer clock value.
+Only the date in this value is used, not the time.
+This is useful for determining the time on a specific day or doing other
+date-relative conversions.
 .sp
 The character string consists of zero or more specifications of the following
 form:
