@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 2.4 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXmsgcat.c,v 2.5 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -188,7 +188,7 @@ Tcl_CatopenCmd (clientData, interp, argc, argv)
     if ((catDesc == (nl_catd) -1) && fail)
         return CatOpFailed (interp, "open of message catalog failed");
 
-    catDescPtr = Tcl_HandleAlloc (msgCatTblPtr, interp->result);
+    catDescPtr = (nl_catd *) Tcl_HandleAlloc (msgCatTblPtr, interp->result);
     *catDescPtr = catDesc;
 
     return TCL_OK;
@@ -219,7 +219,7 @@ Tcl_CatgetsCmd (clientData, interp, argc, argv)
                           "defaultstr", (char *) NULL);
         return TCL_ERROR;
     }
-    catDescPtr = Tcl_HandleXlate (interp, msgCatTblPtr, argv [1]);
+    catDescPtr = (nl_catd *) Tcl_HandleXlate (interp, msgCatTblPtr, argv [1]);
     if (catDescPtr == NULL)
         return TCL_ERROR;
     if (Tcl_GetInt (interp, argv [2], &msgSetNum) != TCL_OK)
@@ -263,7 +263,8 @@ Tcl_CatcloseCmd (clientData, interp, argc, argv)
     } else
         fail = FALSE;
 
-    catDescPtr = Tcl_HandleXlate (interp, msgCatTblPtr, argv [argc - 1]);
+    catDescPtr = (nl_catd *) Tcl_HandleXlate (interp, msgCatTblPtr,
+                                              argv [argc - 1]);
     if (catDescPtr == NULL)
         return TCL_ERROR;
 
@@ -294,9 +295,12 @@ MsgCatCleanUp (clientData, interp)
         return;
 
     walkKey = -1;
-    while ((catDescPtr = Tcl_HandleWalk (msgCatTblPtr, &walkKey)) != NULL)
+    while (TRUE) {
+        catDescPtr = (nl_catd *) Tcl_HandleWalk (msgCatTblPtr, &walkKey);
+        if (catDescPtr != NULL)
+            break;
         catclose (*catDescPtr);
-
+    }
     Tcl_HandleTblRelease (msgCatTblPtr);
     msgCatTblPtr = NULL;
 }

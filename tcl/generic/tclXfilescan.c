@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.11 1993/10/01 03:47:17 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.12 1993/10/07 06:35:45 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -162,8 +162,10 @@ DeleteScanContext (interp, scanGlobPtr, contextHandle)
 {
     scanContext_t *contextPtr;
 
-    if ((contextPtr = Tcl_HandleXlate (interp, scanGlobPtr->tblHdrPtr, 
-                                       contextHandle)) == NULL)
+    contextPtr = (scanContext_t *) Tcl_HandleXlate (interp,
+                                                    scanGlobPtr->tblHdrPtr, 
+                                                    contextHandle);
+    if (contextPtr == NULL)
         return TCL_ERROR;
 
     CleanUpContext (scanGlobPtr, contextPtr);
@@ -262,8 +264,10 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     if (((firstArg == 2) && (argc != 5)) || ((firstArg == 1) && (argc > 4)))
         goto argError;
 
-    if ((contextPtr = Tcl_HandleXlate (interp, scanGlobPtr->tblHdrPtr, 
-                                       argv [firstArg])) == NULL)
+    contextPtr = (scanContext_t *) Tcl_HandleXlate (interp,
+                                                    scanGlobPtr->tblHdrPtr, 
+                                                    argv [firstArg]);
+    if (contextPtr == NULL)
         return TCL_ERROR;
 
     /*
@@ -458,8 +462,10 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
 	}
     }
 
-    if ((contextPtr = Tcl_HandleXlate (interp, scanGlobPtr->tblHdrPtr, 
-                                       argv [contextHandleIndex])) == NULL)
+    contextPtr = (scanContext_t *) Tcl_HandleXlate (interp,
+                                                    scanGlobPtr->tblHdrPtr, 
+                                                    argv [contextHandleIndex]);
+    if (contextPtr == NULL)
         return TCL_ERROR;
 
     if (Tcl_GetOpenFile (interp, argv [fileHandleIndex],
@@ -610,10 +616,13 @@ FileScanCleanUp (clientData, interp)
     int            walkKey;
     
     walkKey = -1;
-    while ((contextPtr = Tcl_HandleWalk (scanGlobPtr->tblHdrPtr, 
-            &walkKey)) != NULL)
+    while (TRUE) {
+        contextPtr = (scanContext_t *) Tcl_HandleWalk (scanGlobPtr->tblHdrPtr, 
+                                                       &walkKey);
+        if (contextPtr == NULL)
+            break;
         CleanUpContext (scanGlobPtr, contextPtr);
-
+    }
     Tcl_HandleTblRelease (scanGlobPtr->tblHdrPtr);
     ckfree ((char *) scanGlobPtr);
 }
