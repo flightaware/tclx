@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.19 1995/07/19 02:22:39 markd Exp markd $
+# $Id: Makefile.in,v 5.0 1995/07/25 06:00:54 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -64,21 +64,21 @@ all: TCLX runtcl COMP_${TK_BUILD}
 #
 
 TCLX: runtcl
-	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd src;       ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} all
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd src;       ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} checkup
+	cd tools;     ${MAKE} ${PASS_FLAGS} all
+	cd osSupport; ${MAKE} ${PASS_FLAGS} all
+	cd src;       ${MAKE} ${PASSXX_FLAGS} all
+	cd tclsrc;    ${MAKE} ${PASS_FLAGS} all
+	cd tests;     ${MAKE} ${PASS_FLAGS} all
+	cd src;       ${MAKE} ${PASSXX_FLAGS} checkup
 
 #------------------------------------------------------------------------------
 # Generate a wish shell {wishx} with Extended Tcl commands.
 #
 
 COMP_WISHX: runwishx
-	cd tksrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd tktclsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd tktests;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd tksrc;    ${MAKE} ${PASS_FLAGS} all
+	cd tktclsrc; ${MAKE} ${PASS_FLAGS} all
+	cd tktests;  ${MAKE} ${PASS_FLAGS} all
 
 COMP_:
 
@@ -120,7 +120,7 @@ runwishx:
 # Test to see if the C++ include file compiles and links.
 
 tcl++:
-	cd src;${MAKE} -${MAKEFLAGS} tcl++
+	cd src;${MAKE} tcl++
 
 #------------------------------------------------------------------------------
 # Relink using shared libraries.  The libraries must be built and installed
@@ -129,10 +129,10 @@ tcl++:
 shlink: TCL_SHLINK SHLINK_${TK_BUILD}
 
 TCL_SHLINK:
-	cd src;  ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} shlink
+	cd src;  ${MAKE} ${PASSXX_FLAGS} shlink
 
 SHLINK_WISHX:
-	cd tksrc;  ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} shlink
+	cd tksrc;  ${MAKE} ${PASSXX_FLAGS} shlink
 
 SHLINK_:
 
@@ -140,16 +140,16 @@ SHLINK_:
 # Run the tests.
 
 test: all
-	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} test
+	cd tests;     ${MAKE} ${PASS_FLAGS} test
 
 ucbtests: all
-	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} ucbtests
+	cd tests;     ${MAKE} ${PASS_FLAGS} ucbtests
 
 extdtests: all
-	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} extdtests
+	cd tests;     ${MAKE} ${PASS_FLAGS} extdtests
 
 tktest: all
-	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} test
+	cd tktests;   ${MAKE} ${PASS_FLAGS} test
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
@@ -158,10 +158,10 @@ tktest: all
 buildhelp: buildtclhelp buildtkhelp
 
 buildtclhelp:
-	cd tclsrc;   ${MAKE} -${MAKEFLAGS} buildtclhelp
+	cd tclsrc;   ${MAKE} buildtclhelp
 
 buildtkhelp:
-	cd tktclsrc; ${MAKE} -${MAKEFLAGS} buildtkhelp
+	cd tktclsrc; ${MAKE} buildtkhelp
 
 #------------------------------------------------------------------------------
 
@@ -173,23 +173,23 @@ TCLXINSTALL:
 	@echo ""
 	@echo "   Install Extended Tcl using standard model"
 	@echo ""
-	cd src;       ${MAKE} -${MAKEFLAGS} install
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} install
-	cd man;       ${MAKE} -${MAKEFLAGS} install
+	cd src;       ${MAKE} install
+	cd tclsrc;    ${MAKE} install
+	cd man;       ${MAKE} install
 
 TCLXINSTALL_EXEC:
 	@echo ""
 	@echo "   Install Extended Tcl executables using standard model"
 	@echo ""
-	cd src;       ${MAKE} -${MAKEFLAGS} install-exec
+	cd src;       ${MAKE} install-exec
 
 TKXINSTALL:
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} install
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install
+	cd tksrc;     ${MAKE} install
+	cd tktclsrc;  ${MAKE} install
 
 TKXINSTALL_EXEC:
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} install-exec
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install-exec
+	cd tksrc;     ${MAKE} install-exec
+	cd tktclsrc;  ${MAKE} install-exec
 
 # Targets to decide if we install wishx or not.
 
@@ -219,24 +219,24 @@ TCLXMINSTALL:
 	@echo ""
 	@echo "   Install TclX using master directory model"
 	@echo ""
-	cd src;       ${MAKE} -${MAKEFLAGS} install-master
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} install-master
-	cd man;       ${MAKE} -${MAKEFLAGS} install-master
+	cd src;       ${MAKE} install-master
+	cd tclsrc;    ${MAKE} install-master
+	cd man;       ${MAKE} install-master
 
 TCLXMINSTALL-EXEC:
 	@echo ""
 	@echo "   Install TclX executables using master directory model"
 	@echo ""
-	cd src;       ${MAKE} -${MAKEFLAGS} install-master-exec
+	cd src;       ${MAKE} install-master-exec
 
 TKXMINSTALL:
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} install-master
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install-master
-	cd man;       ${MAKE} -${MAKEFLAGS} install-tk-master
+	cd tksrc;     ${MAKE} install-master
+	cd tktclsrc;  ${MAKE} install-master
+	cd man;       ${MAKE} install-tk-master
 
 TKXMINSTALL-EXEC:
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} install-master-exec
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install-master-exec
+	cd tksrc;     ${MAKE} install-master-exec
+	cd tktclsrc;  ${MAKE} install-master-exec
 
 # Fake targets to decide if we install wishx or not.
 
@@ -250,15 +250,15 @@ WISHXMMAYBE-EXEC: TKXMINSTALL-EXEC
 # Clean up all files that were built by make.
 
 clean:
-	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd man;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tools;     ${MAKE} ${PASS_FLAGS} clean
+	cd osSupport; ${MAKE} ${PASS_FLAGS} clean
+	cd src;       ${MAKE} ${PASS_FLAGS} clean
+	cd tclsrc;    ${MAKE} ${PASS_FLAGS} clean
+	cd tksrc;     ${MAKE} ${PASS_FLAGS} clean
+	cd tktclsrc;  ${MAKE} ${PASS_FLAGS} clean
+	cd tests;     ${MAKE} ${PASS_FLAGS} clean
+	cd tktests;   ${MAKE} ${PASS_FLAGS} clean
+	cd man;       ${MAKE} ${PASS_FLAGS} clean
 	-rm -f runtcl runwishx
 	-rm -rf tclmaster tkmaster
 
@@ -266,15 +266,15 @@ clean:
 # Restore to the distributed state.
 
 distclean: clean
-	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd man;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tools;     ${MAKE} ${PASS_FLAGS} distclean
+	cd osSupport; ${MAKE} ${PASS_FLAGS} distclean
+	cd src;       ${MAKE} ${PASS_FLAGS} distclean
+	cd tclsrc;    ${MAKE} ${PASS_FLAGS} distclean
+	cd tksrc;     ${MAKE} ${PASS_FLAGS} distclean
+	cd tktclsrc;  ${MAKE} ${PASS_FLAGS} distclean
+	cd tests;     ${MAKE} ${PASS_FLAGS} distclean
+	cd tktests;   ${MAKE} ${PASS_FLAGS} distclean
+	cd man;       ${MAKE} ${PASS_FLAGS} distclean
 	rm -f Makefile config.status config.cache config.log
 
 # Disable Sun's parallel make, it doesn't get the dependencies right.
