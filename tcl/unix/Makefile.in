@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.8 1997/07/01 02:26:19 markd Exp $
+# $Id: Makefile.in,v 8.9 1997/07/23 03:32:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -622,9 +622,6 @@ ucbtests: all
 	@echo "*     namespace-old-9.10                                      *"
 	@echo "*     namespace-old-9.11                                      *"
 	@echo "*     namespace-old-9.19                                      *"
-	@echo "*     safe-6.3                                                *"
-	@echo "*     safe-6.4                                                *"
-	@echo "*     safe-6.5                                                *"
 	@echo "***************************************************************"
 	@echo ""
 	./runtest -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
@@ -660,7 +657,7 @@ install-runtime:
 install-exec:
 	${INSTCOPY} tcl ${INSTALL_ROOT}${TCLX_INST_BIN}
 	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
-	if test ${TCLX_STLIB_BUILD} != "dont_build_this"; then \
+	if test "${TCLX_STLIB_BUILD}" != ""; then \
 	    ${INSTCOPY} ${TCLX_STLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB}; \
 	    ${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_STLIB_NAME}; \
 	fi

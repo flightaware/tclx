@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.11 1997/06/21 16:33:09 markd Exp $
+dnl $Id: configure.in,v 8.12 1997/06/27 09:11:58 karl Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.11 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.12 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -383,8 +383,8 @@ case "$BUILD_SHARED" in
         TKX_LIB_SPEC="$TCLX_INST_LIB/${TKX_STLIB_NAME}"
         TCLX_STLIB_BUILD=$TCLX_STLIB_NAME
         TKX_STLIB_BUILD=$TKX_STLIB_NAME
-        TCLX_SHLIB_BUILD="dont_build_this"
-        TKX_SHLIB_BUILD="dont_build_this"
+        TCLX_SHLIB_BUILD=""
+        TKX_SHLIB_BUILD=""
         ;;
 esac
 
@@ -392,8 +392,8 @@ esac
 # If the names ended up the same, dont build twice.
 #
 if test "x$TCLX_STLIB_BUILD" = "x$TCLX_SHLIB_BUILD"; then
-        TCLX_STLIB_BUILD="dont_build_this"
-        TKX_STLIB_BUILD="dont_build_this"
+        TCLX_STLIB_BUILD=""
+        TKX_STLIB_BUILD=""
 fi
 
 AC_SUBST(SHOBJ_SUFFIX)

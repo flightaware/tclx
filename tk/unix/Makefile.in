@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.9 1997/07/08 16:38:31 markd Exp $
+# $Id: Makefile.in,v 8.10 1997/07/23 03:33:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -243,7 +243,7 @@ install-runtime:
 install-exec:
 	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_BIN}
 	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
-	if test ${TKX_STLIB_BUILD} != "dont_build_this"; then \
+	if test "${TKX_STLIB_BUILD}" != ""; then \
 	    ${INSTCOPY} ${TKX_STLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB}; \
 	    ${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_STLIB_NAME}; \
 	fi
