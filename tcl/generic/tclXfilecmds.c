@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.7 1996/11/19 21:41:05 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.0 1996/11/21 00:24:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -582,14 +582,16 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     int mode;
     int stat, bufIdx = 0;
 
+    Tcl_DStringInit (&buffer);
+
     if ((argc != 2) && (argc != 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " fileId ?varName?", (char *) NULL);
-        return TCL_ERROR;
+        goto erorrExit;
     }
     channel = TclX_GetOpenChannel (interp, argv [1], TCL_READABLE);
     if (channel == NULL)
-        return TCL_ERROR;
+        goto erorrExit;
 
     /*
      * If the channel is non-blocking, temporarily set blocking mode, since
@@ -602,7 +604,7 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     if (mode == TCLX_MODE_NONBLOCKING) {
         if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
                                    TCLX_MODE_BLOCKING) == TCL_ERROR)
-            return TCL_ERROR;
+            goto erorrExit;
     }
 
     /*
@@ -610,8 +612,6 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
      * More lines are read if newlines are encountered in the middle of
      * a list.
      */
-    Tcl_DStringInit (&buffer);
-
     if (Tcl_Gets (channel, &buffer) < 0) {
         if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))
             goto done;
@@ -631,11 +631,9 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
     if (mode == TCLX_MODE_NONBLOCKING) {
         if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
                                    TCLX_MODE_NONBLOCKING) == TCL_ERROR)
-            return TCL_ERROR;
+            goto erorrExit;
     }
-    if (argc == 2) {
-        Tcl_DStringResult (interp, &buffer);
-    } else {
+    if (argc >= 2) {
         if (Tcl_SetVar (interp, argv[2], buffer.string,
                         TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
@@ -645,8 +643,8 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
         } else {
             sprintf (interp->result, "%d", buffer.length);
         }
-        Tcl_DStringFree (&buffer);
     }
+    Tcl_DStringFree (&buffer);
     return TCL_OK;
 
   readError:
