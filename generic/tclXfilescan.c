@@ -13,12 +13,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.22 1999/06/24 01:08:19 redman Exp $
+ * $Id: tclXfilescan.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-#include "tclRegexp.h"
 
 /*
  * A scan context describes a collection of match patterns and commands,
@@ -412,14 +411,14 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
 {
     scanContext_t  *contextPtr, **tableEntryPtr;
     matchDef_t     *newmatch;
-    int             regExpFlags = REG_ADVANCED;
+    int             regExpFlags = TCL_REG_ADVANCED;
     int             firstArg = 1;
 
     if (objc < 3)
         goto argError;
 
     if (STREQU (Tcl_GetStringFromObj (objv[1], NULL), "-nocase")) {
-        regExpFlags |= REG_ICASE;
+        regExpFlags |= TCL_REG_NOCASE;
         firstArg = 2;
     }
       
@@ -515,7 +514,7 @@ SetMatchInfoVar (interp, scanData)
     Tcl_DString valueBuf;
     char key [32];
     Tcl_Obj *valueObjPtr, *indexObjv [2];
-    TclRegexp *regExpPtr;
+    Tcl_RegExpInfo regExpInfo;
 
     Tcl_DStringInit(&valueBuf);
 
@@ -580,11 +579,11 @@ SetMatchInfoVar (interp, scanData)
     if (scanData->matchPtr == NULL) {
         goto exitPoint;
     }
-    regExpPtr = (TclRegexp *) scanData->matchPtr->regExp;
 
-    for (idx = 0; (unsigned int) idx < regExpPtr->re.re_nsub; idx++) {
-	start = regExpPtr->matches[idx+1].rm_so;
-	end = regExpPtr->matches[idx+1].rm_eo;
+    Tcl_RegExpGetInfo(scanData->matchPtr->regExp, &regExpInfo);
+    for (idx = 0; (unsigned int) idx < regExpInfo.nsubs; idx++) {
+	start = regExpInfo.matches[idx+1].start;
+	end = regExpInfo.matches[idx+1].end;
 
         sprintf (key, "subindex%d", idx);
         indexObjv [0] = Tcl_NewIntObj (start);

@@ -1,3 +1,10 @@
+
+2002-11-03  Karl Lehenbauer <karl@procplace.com>
+
+        * generic/tclXfilescan.c:    Applied patch to fileparse to use 
+	  the public Tcl_RegExp interface instead of the private TclRegexp.  
+	  Submitted by Reinhard Max (rmax) [Patch #631096]
+
 2002-10-15  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tclconfig/tcl.m4:
