@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cphelpdir.sh,v 1.2 1993/10/01 03:49:16 markd Exp markd $
+# $Id: cphelpdir.sh,v 1.3 1993/11/04 06:36:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -31,7 +31,9 @@ then
     echo "***"
     echo "*** Tcl help files not found. Run \"make buildhelp\" to generate"
     echo "***"
+    exit 1
 else
     $TOOLS/instcopy $SRC $BUILD
+    exit $?
 fi
 
