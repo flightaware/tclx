@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXunixId.c,v 8.8 1999/03/31 06:37:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -532,7 +532,7 @@ IdUser (interp, objc, objv)
 
   errorExit:
     endpwent ();
-    return TCL_OK;
+    return TCL_ERROR;
 }
 
 /*
@@ -601,7 +601,7 @@ IdGroup (interp, objc, objv)
 
   errorExit:
     endgrent ();
-    return TCL_OK;
+    return TCL_ERROR;
 }
 
 /*
