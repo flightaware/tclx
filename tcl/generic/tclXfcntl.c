@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 2.4 1993/04/06 05:58:20 markd Exp markd $
+ * $Id: tclXfcntl.c,v 2.5 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -216,7 +216,9 @@ GetFcntlAttr (interp, filePtr, attrName)
         interp->result = (filePtr->_flags & _IOLBF) ? "1" : "0";
         return TCL_OK;
     }
-#elif (defined(_IONBF) && !defined(_SNBF))
+#define TCL_STDIOBUF
+#endif
+#if (!defined(TCL_STDIOBUF)) && (defined(_IONBF) && !defined(_SNBF))
     if (otherAttr & ATTR_NOBUF) {
         interp->result = (filePtr->_flag & _IONBF) ? "1" : "0";
         return TCL_OK;
@@ -225,7 +227,9 @@ GetFcntlAttr (interp, filePtr, attrName)
         interp->result = (filePtr->_flag & _IOLBF) ? "1" : "0";
         return TCL_OK;
     }
-#else
+#define TCL_STDIOBUF
+#endif
+#if !defined(TCL_STDIOBUF)
     if (otherAttr & ATTR_NOBUF) {
         interp->result = (filePtr->_flags & _SNBF) ? "1" : "0";
         return TCL_OK;
@@ -234,6 +238,7 @@ GetFcntlAttr (interp, filePtr, attrName)
         interp->result = (filePtr->_flags & _SLBF) ? "1" : "0";
         return TCL_OK;
     }
+#define TCL_STDIOBUF
 #endif
 
 unixError:
