@@ -34,7 +34,6 @@
 ./man/TclX.man
 ./osSupport/Makefile
 ./osSupport/strftime.c
-./osSupport/strtoul.c
 ./src/Makefile
 ./src/main++.C
 ./src/main.c
