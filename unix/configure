@@ -315,7 +315,7 @@ ac_compile='${CC-cc} $CFLAGS $LDFLAGS conftest.${ac_ext} -o conftest $LIBS >/dev
 
 
 #!/bin/sh
-# From configure.in Revision: 3.13 
+# From configure.in Revision: 3.14 
 
 
 
