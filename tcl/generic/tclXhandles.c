@@ -14,18 +14,24 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 3.0 1993/11/19 06:58:45 markd Rel markd $
+ * $Id: tclXhandles.c,v 3.1 1993/12/19 18:31:33 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
+ * Variable set to contain the alignment factor (in bytes) for this machine.
+ * It is set on the first table initialization.
+ */
+static int entryAlignment = 0;
+
+/*
  * Marco to rounded up a size to be a multiple of (void *).  This is required
  * for systems that have alignment restrictions on pointers and data.
  */
 #define ROUND_ENTRY_SIZE(size) \
-    ((((size) + sizeof (void *) - 1) / sizeof (void *)) * sizeof (void *))
+    ((((size) + entryAlignment - 1) / entryAlignment) * entryAlignment)
 
 /*
  * This is the table header.  It is separately allocated from the table body,
@@ -247,6 +253,21 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
     tblHeader_pt tblHdrPtr;
     int          baseLength = strlen ((char *) handleBase);
 
+    /*
+     * It its not been calculated yet, determine the entry alignment required
+     * for this machine.
+     */
+    if (entryAlignment == 0) {
+        entryAlignment = sizeof (void *);
+        if (sizeof (long) > entryAlignment)
+            entryAlignment = sizeof (long);
+        if (sizeof (double) > entryAlignment)
+            entryAlignment = sizeof (double);
+    }
+
+    /*
+     * Set up the table entry.
+     */
     tblHdrPtr = (tblHeader_pt) ckalloc (sizeof (tblHeader_t) + baseLength + 1);
 
     tblHdrPtr->useCount = 1;
