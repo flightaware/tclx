@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.31 1999/12/12 07:47:35 markd Exp $
+# $Id: Makefile.in,v 8.32 2000/02/05 17:23:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -21,6 +21,7 @@
 #
 srcdir = @srcdir@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
+bldbasedir = @bldbasedir@
 
 test_dir = ${srcbasedir}/tcl/tests
 this_dir = ${srcbasedir}/tcl/unix
@@ -279,13 +280,13 @@ test.standalone: ucbtests.standalone testx.standalone
 test.verbose: ucbtests.verbose testx.verbose
 
 ucbtests: all
-	(cd ${TCL_SRC_DIR}/tests && ${this_dir}/runtest ${test_dir}/ucbtests.tcl)
+	(cd ${TCL_SRC_DIR}/tests && ${bldbasedir}/tcl/unix/runtest ${test_dir}/ucbtests.tcl)
 
 ucbtests.static: all
-	(cd ${TCL_SRC_DIR}/tests && ${this_dir}/runtest.static ${test_dir}/ucbtests.tcl)
+	(cd ${TCL_SRC_DIR}/tests && ${bldbasedir}/tcl/unix/runtest.static ${test_dir}/ucbtests.tcl)
 
 ucbtests.standalone: all
-	(cd ${TCL_SRC_DIR}/tests && ${this_dir}/runtest.standalone ${test_dir}/ucbtests.tcl)
+	(cd ${TCL_SRC_DIR}/tests && ${bldbasedir}/tcl/unix/runtest.standalone ${test_dir}/ucbtests.tcl)
 
 testx: all
 	./runtest -c "cd ${srcbasedir}/tcl/tests; source all"
