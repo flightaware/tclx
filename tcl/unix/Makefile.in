@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.3 1994/03/06 03:23:23 markd Exp markd $
+# $Id: Makefile.in,v 3.4 1994/03/09 16:05:31 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -124,9 +124,9 @@ tcl++.o: tcl++.C tcl++.h
 # Copy include files, etc to the master directory.
 #
 
-${TCLEXTEND_H}: TCLEXTEND_H
+${TCLEXTEND_H}: tclExtend.h
 	rm -f ${TCLEXTEND_H}
-	cp ${srcdir}/TCLEXTEND_H ${TCLEXTEND_H}
+	cp ${srcdir}/tclExtend.h ${TCLEXTEND_H}
 
 ${TCLPP_H}: tcl++.h
 	rm -f ${TCLPP_H}

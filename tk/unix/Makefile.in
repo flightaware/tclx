@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.3 1994/02/07 02:47:51 markd Exp markd $
+# $Id: Makefile.in,v 3.4 1994/03/09 16:05:31 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -42,8 +42,8 @@ XLIBSW      = @XLIBSW@
 
 #------------------------------------------------------------------------------
 
-LIBTK.A      = ${bldbasedir}/tkmaster/lib${ARCH}/libtk.a
-LIBTKX.A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
+LIBTK_A      = ${bldbasedir}/tkmaster/lib${ARCH}/libtk.a
+LIBTKX_A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
 WISHX        = ${bldbasedir}/tkmaster/bin${ARCH}/wishx
 APPINIT      = ${bldbasedir}/tkmaster/src/tkXAppInit.c
 SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS${ARCH}
