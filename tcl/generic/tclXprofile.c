@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.0 1996/11/21 00:24:15 markd Exp $
+ * $Id: tclXprofile.c,v 8.1 1996/12/01 07:32:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -444,14 +444,8 @@ ProfCommandEval (clientData, interp, argc, argv)
          */
         Tcl_DStringInit (&commandWithNs);
         commandNamesp = Itcl_GetNamespPath (Itcl_GetActiveNamesp (interp));
-	if (commandNamesp != NULL) {
+	if ((commandNamesp != NULL) && !STREQU (commandNamesp, "::")) {
             Tcl_DStringAppend (&commandWithNs, commandNamesp, -1);
-
-            /*
-             * If the argument does not have a leading ::, then append one.
-             */
-            if (!STRNEQU (argv[0], "::", 2)) 
-                Tcl_DStringAppend (&commandWithNs, "::", -1); 
 	}
 	Tcl_DStringAppend (&commandWithNs, argv[0], -1); 
 
