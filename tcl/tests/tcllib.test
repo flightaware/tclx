@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 4.1 1994/11/22 04:28:39 markd Exp markd $
+# $Id: tcllib.test,v 4.2 1995/01/01 19:49:12 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -40,16 +40,28 @@ if {[id user] == "root"} {
 }
 
 #
+# Test library directories.
+#
+if ![file isdirectory tcllib1.dir] {
+    mkdir tcllib1.dir
+}
+if ![file isdirectory tcllib2.dir] {
+    mkdir tcllib2.dir
+}
+
+#
 # Since we have libraries coming and going in this test, we need to
 # reset the environment.  
 #
 proc TclLibReset {} {
-        auto_reset
+    auto_reset
 }
 
+#
 proc TclLibCleanUp {} {
     catch {chmod u=wrx {tcllib1.dir tcllib2.dir}}
-    exec rm -rf tcllib1.dir tcllib2.dir
+    unlink [glob -nocomplain tcllib1.dir/*]
+    unlink [glob -nocomplain tcllib2.dir/*]
     TclLibReset
 }
 
@@ -118,7 +130,6 @@ proc BuildTestLib {name {pbase TclLibAA}} {
         "#@packend"
 }
 
-mkdir tcllib1.dir
 BuildTestLib tcllib1.dir/test1.tlib
 PutFile tcllib1.dir/test1.tndx {bogus
 data}
@@ -162,7 +173,6 @@ set auto_path [list [pwd]/tcllib2.dir [pwd]/../tclmaster]
 if {[id user] != "root"} {
     Test tcllib-4.1 {bad rebuild package library index} {
         global errorCode errorInfo
-        mkdir tcllib2.dir
         BuildTestLib tcllib2.dir/test1.tlib TclLibAB
         chmod -w tcllib2.dir
         list [catch {TclLibABB} msg] [crange $msg 0 25] \
@@ -173,7 +183,6 @@ if {[id user] != "root"} {
 }
 
 TclLibCleanUp
-mkdir tcllib1.dir
 set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
 
 PutFile tcllib1.dir/tclIndex "#" "badline" "nukearray nukearray.tmp" \
@@ -206,7 +215,6 @@ if {[id user] != "root"} {
 }
 
 TclLibCleanUp
-mkdir tcllib1.dir
 
 BuildTestLib  tcllib1.dir/test2.tlib TclLibAC
 set auto_path [list [pwd]/tcllib1.dir [pwd]/../tclmaster]
@@ -233,7 +241,6 @@ Test tcllib-6.3 {successful library access} {
 # existing package definitions.  Test for both .tlib and tclIndex indexes.
 #
 TclLibCleanUp
-mkdir {tcllib1.dir tcllib2.dir}
 set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
 
 PutFile tcllib1.dir/test1.tlib \
@@ -259,7 +266,6 @@ Test tcllib-7.2 {Duplicate package handling} {
 
 TclLibCleanUp
 
-mkdir {tcllib1.dir tcllib2.dir}
 set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
 
 PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
@@ -293,7 +299,6 @@ Test tcllib-7.4 {Duplicate package handling} {
 # Test backslash parsing in #@package: line.
 #
 TclLibCleanUp
-mkdir {tcllib1.dir tcllib2.dir}
 set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
 
 PutFile tcllib1.dir/test1.tlib \
@@ -322,6 +327,8 @@ Test tcllib-8.3 {backslash parsing in package headers} {
 } 0 {CCC}
 
 TclLibCleanUp
+catch {rmdir tcllib1.dir}
+catch {rmdir tcllib2.dir}
 
 rename TclLibCleanUp {}
 rename PutFile {}
