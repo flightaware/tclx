@@ -1,5 +1,5 @@
-*** win/tclWinSock.c.ORG	Sun Jun 30 05:28:57 1996
---- win/tclWinSock.c	Thu Jul 18 04:03:03 1996
+*** win/tclWinSock.c.ORG	Mon Jul 22 10:15:38 1996
+--- win/tclWinSock.c	Mon Jul 22 10:15:46 1996
 ***************
 *** 702,708 ****
   
@@ -9,7 +9,7 @@
               TCL_ERROR) {
           Tcl_Close((Tcl_Interp *) NULL, chan);
           return (Tcl_Channel) NULL;
---- 702,756 ----
+--- 702,768 ----
   
       chan = Tcl_CreateChannel(&tcpChannelType, channelName, infoPtr->file,
   	    infoPtr->file, (ClientData) infoPtr);
@@ -48,9 +48,21 @@
 !     SocketInfo *infoPtr;
 !     char channelName[20];
 !     Tcl_Channel chan;
+!     int flag = 1;
 ! 
 !     if (TclHasSockets(NULL) != TCL_OK) {
 ! 	return NULL;
+!     }
+! 
+!     /*
+!      * Set kernel space buffering and non-blocking.
+!      */
+! 
+!     TclSockMinimumBuffers((SOCKET) sock, TCP_BUFFER_SIZE);
+! 
+!     if ((*winSock.ioctlsocket)((SOCKET)sock, FIONBIO, &flag) == SOCKET_ERROR) {
+! 	TclWinConvertWSAError ((*winSock.WSAGetLastError)());
+!         return NULL;
 !     }
 ! 
 !     infoPtr = NewSocketInfo (Tcl_GetFile((ClientData) sock,
