@@ -34,7 +34,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tclshell.tcl,v 1.5 1993/09/03 08:29:22 markd Exp markd $
+# $Id: tclshell.tcl,v 1.6 1993/09/13 14:33:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -71,17 +71,17 @@ proc tclx_unknown2 cmd {
 
     if {([info level] == 2) && ([info script] == "")} {
         if {$name == "!!"} {
-            return [uplevel {history redo}]
+            return [uplevel 2 {history redo}]
         }
         if [regexp {^!(.+)$} $name dummy event] {
-            return [uplevel [list history redo $event]]
+            return [uplevel 2 [list history redo $event]]
         }
         if [regexp {^\^([^^]*)\^([^^]*)\^?$} $name dummy old new] {
-            return [uplevel [list history substitute $old $new]]
+            return [uplevel 2 [list history substitute $old $new]]
         }
         set cmds [info commands $name*]
         if {[llength $cmds] == 1} {
-            return [uplevel [lreplace $cmd 0 0 $cmds]]
+            return [uplevel 2 [lreplace $cmd 0 0 $cmds]]
         }
         if {[llength $cmds] != 0} {
             if {$name == ""} {
