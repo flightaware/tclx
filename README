@@ -22,7 +22,7 @@ EXTENDED TCL
     Extended Tcl (TclX), is a set of extensions to Tcl 7.0, the Tool Command
 Language invented by Dr. John Ousterhout of the University of California at
 Berkeley.  Tcl is a powerful, yet simple embeddable programming language.
-Extended Tcl is oriented towards system programming tasks, with many
+Extended Tcl is oriented towards Unix system programming tasks, with many
 additional interfaces to the Unix operating system, It is upwardly compatible
 with Tcl 7.0.  You take the Extended Tcl package, add it to Tcl 7.0, and from
 that you get Extended Tcl.  (Berkeley Tcl is not included in this
