@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.11 1993/08/26 04:55:13 markd Exp markd $
+# $Id: Makefile.in,v 1.12 1993/09/16 05:37:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -30,18 +30,18 @@ MAN_DIR_SEPARATOR=@MAN_DIR_SEPARATOR@
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
-TK.TCL      = ../tkmaster/tk.tcl
-TK.TLIB     = ../tkmaster/tk.tlib
-TK.TNDX     = ../tkmaster/tk.tndx
-PROLOG.PS   = ../tkmaster/prolog.ps
-TCLHELP     = ../tkmaster/bin/tclhelp
-DEMOS       = ../tkmaster/demos
-MAN         = ../tkmaster/man
-HELP        = ../tkmaster/help
+TK.TCL      = ${bldbasedir}/tkmaster/tk.tcl
+TK.TLIB     = ${bldbasedir}/tkmaster/tk.tlib
+TK.TNDX     = ${bldbasedir}/tkmaster/tk.tndx
+PROLOG.PS   = ${bldbasedir}/tkmaster/prolog.ps
+TCLHELP     = ${bldbasedir}/tkmaster/bin/tclhelp
+DEMOS       = ${bldbasedir}/tkmaster/demos
+MAN         = ${bldbasedir}/tkmaster/man
+HELP        = ${bldbasedir}/tkmaster/help
 CPMANPAGES  = ${srcbasedir}/tools/cpmanpages.tcl
 BLDMANHELP  = ${srcbasedir}/tools/bldmanhelp.tcl
 TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
@@ -50,7 +50,8 @@ TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
 # Copy all files.
 #
 
-all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} ${MAN}
+all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} \
+     ${MAN} HELPCP
 
 
 ${TK.TCL}: ${TK_UCB_SRC}/library/tk.tcl
@@ -59,7 +60,7 @@ ${TK.TCL}: ${TK_UCB_SRC}/library/tk.tcl
 
 ${TK.TLIB} ${TK.TNDX}: ${TK_UCB_SRC}/library/tclIndex tkdemo.tcl
 	../runtcl "-c convert_lib ${TK_UCB_SRC}/library/tclIndex ${TK.TLIB}"
-	cat tkdemo.tcl >>${TK.TLIB}
+	cat ${srcdir}/tkdemo.tcl >>${TK.TLIB}
 	../runtcl "-c buildpackageindex ${TK.TLIB}"
 	
 ${PROLOG.PS}: ${TK_UCB_SRC}/library/prolog.ps
@@ -67,7 +68,7 @@ ${PROLOG.PS}: ${TK_UCB_SRC}/library/prolog.ps
 
 ${TCLHELP}: tclhelp.tcl
 	echo "#!${TCL_BINDIR}/wishx -f" >  ${TCLHELP}
-	cat tclhelp.tcl                 >> ${TCLHELP}
+	cat ${srcdir}/tclhelp.tcl       >> ${TCLHELP}
 	chmod +rx ${TCLHELP}
 
 ${DEMOS}:
@@ -75,8 +76,22 @@ ${DEMOS}:
 	(cd ${TK_UCB_SRC}/library/demos;tar -cf - .) | \
 	    (cd ${DEMOS}; tar -xf -)
 
+#------------------------------------------------------------------------------
+# Copy manual pages to master directory.
+
 ${MAN}:
 	../runtcl ${CPMANPAGES} TK ${TK_UCB_SRC}/doc ${MAN_DIR_SEPARATOR}
+
+#------------------------------------------------------------------------------
+# Copy help files if they don't appear to exist and we are in a different
+# directory from the srcdir.
+#
+
+HELPCP: ${HELP}/Tk.brf
+
+${HELP}/Tk.brf:
+	sh ${srcbasedir}/tools/cphelpdir.sh ${srcbasedir}/tkmaster/help \
+           ${bldbasedir}/tkmaster/help
 
 #------------------------------------------------------------------------------
 # Build help for Tk.

@@ -56,18 +56,27 @@ HOW TO BUILD EXTENDED TCL
       shell (wishx), configure and compile Tk 3.3.  You do not need to install
       it.
 
-    o Edit Config.mk following the instructions in the file.  This file
-      is used to specify values that can't be figured out by the configure
-      script.  This includes the location of the Tcl and Tk distributions.
-      It's also used to specify the sections that the Tcl manual pages are
-      to be installed in.
+    o Enter ./configure to run the configure script.  The following options are
+      recognized by the TclX configure script:
+ 
+        o --srcdir=DIR
+          If you are using a make that supports VPATH (e.g. GNU make) you can
+          use this to compile in a separate directory from the source.
+          Note: The source directory must be clean, it can't contain a built
+          copy of TclX.
+
+    o Edit Config.mk in the build directory following the instructions in the
+      file.  If the --srcdir option to configure is used, it is copied from
+      the source directory to the build directory.  This file is used to
+      specify values that can't be figured out by the configure script.  This
+      includes the location of the Tcl and Tk distributions.  It's also used
+      to specify the sections that the Tcl manual pages are to be installed
+      in.
 
     o Note that the site specific installation options should be set in
       Config.mk before compiling.  It is especially important to set the value
       for TCL_MASTERDIR and TK_MASTERDIR in Config.mk before compiling TclX.
       See the section on "Installing Extended Tcl" for more details.
-
-    o Enter ./configure to run the configure script.
 
     o Config.mk can be used to override several values that configure might
       have gotten wrong or that you desire to be change (like gcc vs cc).
@@ -207,13 +216,18 @@ Install the Extended Tcl master directories by typing the command:
 PORTING NOTES
 =============
 
+General:
+   o On some systems, a failed link will leave an executable target in the
+     *master/bin directories.  In certain cases, you might 
+
 DEC Ultrix:
    o Several tests fail when Tcl is run on an NFS mounted file system.
 
 Sun:
-   o Some versions of the Sun C compiler will leave a non-executable binary
-     around if the link fails with unresolved externals.  You will have to
-     removed them by hand.
+   o Many problems have been encountered on some Sun systems with the flock
+     tests.  These are probably due to an incorrectly configured NFS lockd.
+     The tests have been modified to try and report problems rather than
+     hang.
 
 SCO:
    o SCO Unix systems have a "ranlib" command that is used for Xenix cross-

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.5 1993/08/26 04:55:13 markd Exp markd $
+# $Id: Makefile.in,v 1.6 1993/09/16 05:37:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -25,7 +25,7 @@ srcbasedir = @srcbasedir@
 bldbasedir = @bldbasedir@
 VPATH      = @srcdir@
 
-@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
@@ -40,13 +40,13 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
 all: tclxversion $(TK_BUILD)
 
 tclxversion: getversion.c
-	$(CC) $(CC_FLAGS) getversion.c -o tclxversion
+	$(CC) $(CC_FLAGS) ${srcdir}/getversion.c -o tclxversion
 
 WISHX: tkxversion
 
 tkxversion: getversion.c
-	$(CC) $(CC_FLAGS) -I$(TK_UCB_SRC) -DTK_GET_VERSION getversion.c \
-	   -o tkxversion
+	$(CC) $(CC_FLAGS) -I$(TK_UCB_SRC) -DTK_GET_VERSION \
+	   ${srcdir}/getversion.c -o tkxversion
 
 #------------------------------------------------------------------------------
 

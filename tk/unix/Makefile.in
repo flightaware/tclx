@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.20 1993/09/21 03:40:27 markd Exp markd $
+# $Id: Makefile.in,v 2.21 1993/09/21 05:11:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -35,19 +35,19 @@ XLIBSW     = @XLIBSW@
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
-LIBTK.A      = ../tkmaster/lib/libtk.a
-LIBTKX.A     = ../tkmaster/lib/libtkx.a
-WISHX        = ../tkmaster/bin/wishx
-APPINIT      = ../tkmaster/src/tkXAppInit.c
-SYSLIBS      = ../tkmaster/src/SYSLIBS
-TKXMAINPP.O  = ../tkmaster/lib/tkXmain++.o
+LIBTK.A      = ${bldbasedir}/tkmaster/lib/libtk.a
+LIBTKX.A     = ${bldbasedir}/tkmaster/lib/libtkx.a
+WISHX        = ${bldbasedir}/tkmaster/bin/wishx
+APPINIT      = ${bldbasedir}/tkmaster/src/tkXAppInit.c
+SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS
+TKXMAINPP.O  = ${bldbasedir}/tkmaster/lib/tkXmain++.o
 
-LIBTCL.A  = ../tclmaster/lib/libtcl.a
-LIBTCLX.A = ../tclmaster/lib/libtclx.a
+LIBTCL.A  = ${bldbasedir}/tclmaster/lib/libtcl.a
+LIBTCLX.A = ${bldbasedir}/tclmaster/lib/libtclx.a
 
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the Tcl
@@ -88,11 +88,12 @@ made.tmp ${LIBTKX.A}: ${OBJS}
 	touch made.tmp
 
 tkXinit.o: tkXinit.c
-	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXinit.c
+	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" \
+            ${srcdir}/tkXinit.c
 
 ${APPINIT}: tkXAppInit.c
 	rm -f ${APPINIT}
-	cp tkXAppInit.c ${APPINIT}
+	cp ${srcdir}/tkXAppInit.c ${APPINIT}
 
 ${SYSLIBS}: SYSLIBS
 	rm -f ${SYSLIBS}
@@ -112,7 +113,7 @@ tkXmain++.o: tkXmain++.C
 
 tkXmain++.C: tkXmain.c
 	rm -f tkXmain++.C
-	cp tkXmain.c tkXmain++.C
+	cp ${srcdir}/tkXmain.c tkXmain++.C
 
 ${TKXMAINPP.O}: tkXmain++.o
 	rm -f ${TKXMAINPP.O}
@@ -121,7 +122,8 @@ ${TKXMAINPP.O}: tkXmain++.o
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp ${WISHX} ${OBJS} tkXmain.o
+	-rm -f made.tmp tkXmain++.C
+	-rm -f ${OBJS} tkXmain++.o ${WISHX} wish++
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

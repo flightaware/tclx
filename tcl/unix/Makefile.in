@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.23 1993/09/20 02:45:17 markd Exp markd $
+# $Id: Makefile.in,v 2.24 1993/09/21 03:40:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -33,18 +33,18 @@ LIBS       = @LIBS@ -lm
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 
-LIBTCL.A      = ../tclmaster/lib/libtcl.a
-LIBTCLX.A     = ../tclmaster/lib/libtclx.a
-TCL           = ../tclmaster/bin/tcl
-TCLEXTEND.H   = ../tclmaster/include/tclExtend.h
-TCLPP_H       = ../tclmaster/include/tcl++.h
-APPINIT       = ../tclmaster/src/tclXAppInit.c
-SYSLIBS       = ../tclmaster/src/SYSLIBS
-TCLXMAINPP.O  = ../tclmaster/lib/tclXmain++.o
+LIBTCL.A      = ${bldbasedir}/tclmaster/lib/libtcl.a
+LIBTCLX.A     = ${bldbasedir}/tclmaster/lib/libtclx.a
+TCL           = ${bldbasedir}/tclmaster/bin/tcl
+TCLEXTEND.H   = ${bldbasedir}/tclmaster/include/tclExtend.h
+TCLPP_H       = ${bldbasedir}/tclmaster/include/tcl++.h
+APPINIT       = ${bldbasedir}/tclmaster/src/tclXAppInit.c
+SYSLIBS       = ${bldbasedir}/tclmaster/src/SYSLIBS
+TCLXMAINPP.O  = ${bldbasedir}/tclmaster/lib/tclXmain++.o
 
 LDLIBS = ${LIBTCLX.A} ${LIBTCL.A} ${LIBS}
 
@@ -90,7 +90,8 @@ made.tmp ${LIBTCLX.A}: ${OBJS}
 	touch made.tmp
 
 tclXinit.o: tclXinit.c
-	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" tclXinit.c
+	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" \
+	    ${srcdir}/tclXinit.c
 
 tclXcmdInit.o: tclXcmdInit.c patchlevel.h
 
@@ -100,7 +101,7 @@ tclXgetdate.c: tclXgetdate.y
 	rm y.tab.c
 
 tcl++.o: tcl++.C tcl++.h
-	${CCPLUS} -c ${CC_FLAGS} $(srcdir)/tcl++.C
+	${CCPLUS} -c ${CC_FLAGS} ${srcdir}/tcl++.C
 	${AR} cr ${LIBTCLX.A} tcl++.o
 	${RANLIB} ${LIBTCLX.A}
 	touch made.tmp
@@ -111,15 +112,15 @@ tcl++.o: tcl++.C tcl++.h
 
 ${TCLEXTEND.H}: tclExtend.h
 	rm -f ${TCLEXTEND.H}
-	cp tclExtend.h ${TCLEXTEND.H}
+	cp ${srcdir}/tclExtend.h ${TCLEXTEND.H}
 
 ${TCLPP_H}: tcl++.h
 	rm -f ${TCLPP_H}
-	cp tcl++.h ${TCLPP_H}
+	cp ${srcdir}/tcl++.h ${TCLPP_H}
 
 ${APPINIT}: tclXAppInit.c
 	rm -f ${APPINIT}
-	cp tclXAppInit.c ${APPINIT}
+	cp ${srcdir}/tclXAppInit.c ${APPINIT}
 
 ${SYSLIBS}: SYSLIBS
 	rm -f ${SYSLIBS}
@@ -139,7 +140,7 @@ tclXmain++.o: tcl++.h tclXmain++.C
 
 tclXmain++.C: tclXmain.c
 	rm -f tclXmain++.C
-	cp tclXmain.c tclXmain++.C
+	cp ${srcdir}/tclXmain.c tclXmain++.C
 
 ${TCLXMAINPP.O}: tclXmain++.o
 	rm -f ${TCLXMAINPP.O}
@@ -148,8 +149,8 @@ ${TCLXMAINPP.O}: tclXmain++.o
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp tclXgetdate.c
-	-rm -f *.o ${TCL} tcl++
+	-rm -f made.tmp tclXgetdate.c tclXmain++.C
+	-rm -f $(OBJS) tclXmain++.o ${TCL} tcl++
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

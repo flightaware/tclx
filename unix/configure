@@ -125,7 +125,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.8 
+# From configure.in Revision: 1.9 
 
 
 
@@ -371,16 +371,7 @@ fi
 rm -f conftest*
 done
 
-
-#------------------------------------------------------------------------------
-#       Check for bzero.  We don't use bzero directly, but older SCO
-#       systems have a select FD_ZERO macro that calls bzero, which is
-#       only in the X library.  We redefine bzero as a memset call if
-#       there is no bzero.  If its not needed, it doesn't hurt
-#       anything.
-#------------------------------------------------------------------------------
-
-for func in bzero
+for func in bzero bcopy
 do
 trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
 echo checking for ${func}
@@ -1554,6 +1545,32 @@ fi
 #--------------------------------------------------------------------
 
 # In Tcl X section, due to libraries being needed in compile checks.
+
+#------------------------------------------------------------------------------
+#       If Config.mk is not in the build directory, copy it local.
+#------------------------------------------------------------------------------
+
+if test ! -r Config.mk
+then
+    echo "Copying $srcdir/Config.mk to build directory"
+    cp $srcdir/Config.mk  Config.mk || exit 1
+fi
+
+#------------------------------------------------------------------------------
+#       Copy thest tests to the build directory if they are not there.
+#       We could do something fancier, but this is easy for now.
+#------------------------------------------------------------------------------
+
+if test ! -d tests
+then
+    echo "Copying $srcdir/tests contents to build directory"
+    mkdir tests
+    # Prevent line to long on some systems.
+    CURDIR=`pwd`
+    cd $srcdir/tests
+    cp *.test *.tcl all $CURDIR/tests || exit 1
+    cd $CURDIR
+fi
 
 #------------------------------------------------------------------------------
 # Generate the make files.

@@ -13,11 +13,11 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.8 1993/09/16 05:37:54 markd Exp markd $
+dnl $Id: configure.in,v 1.9 1993/09/20 02:39:07 markd Exp markd $
 dnl----------------------------------------------------------------------------
 
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.8 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.9 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -81,16 +81,7 @@ AC_SUBST(MAKEQUOTE)
 #------------------------------------------------------------------------------
 
 AC_HAVE_FUNCS(catgets getcwd select setitimer setlinebuf sigaction setpgid)
-
-#------------------------------------------------------------------------------
-#       Check for bzero.  We don't use bzero directly, but older SCO
-#       systems have a select FD_ZERO macro that calls bzero, which is
-#       only in the X library.  We redefine bzero as a memset call if
-#       there is no bzero.  If its not needed, it doesn't hurt
-#       anything.
-#------------------------------------------------------------------------------
-
-AC_HAVE_FUNCS(bzero)
+AC_HAVE_FUNCS(bzero bcopy)
 
 #------------------------------------------------------------------------------
 #       Check for missing functions that we need.  They will be
@@ -372,6 +363,32 @@ AC_SUBST(XLIBSW)
 #--------------------------------------------------------------------
 
 # In Tcl X section, due to libraries being needed in compile checks.
+
+#------------------------------------------------------------------------------
+#       If Config.mk is not in the build directory, copy it local.
+#------------------------------------------------------------------------------
+
+if test ! -r Config.mk
+then
+    echo "Copying $srcdir/Config.mk to build directory"
+    cp $srcdir/Config.mk  Config.mk || exit 1
+fi
+
+#------------------------------------------------------------------------------
+#       Copy thest tests to the build directory if they are not there.
+#       We could do something fancier, but this is easy for now.
+#------------------------------------------------------------------------------
+
+if test ! -d tests
+then
+    echo "Copying $srcdir/tests contents to build directory"
+    mkdir tests
+    # Prevent line to long on some systems.
+    CURDIR=`pwd`
+    cd $srcdir/tests
+    cp *.test *.tcl all $CURDIR/tests || exit 1
+    cd $CURDIR
+fi
 
 #------------------------------------------------------------------------------
 # Generate the make files.

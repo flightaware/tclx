@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.20 1993/09/20 02:39:07 markd Exp markd $
+# $Id: Makefile.in,v 2.21 1993/09/21 05:11:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -31,7 +31,7 @@ VPATH      = @srcdir@
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
-@MAKEINCLUDE@ @MAKEQUOTE@${srcbasedir}/Config.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
@@ -177,7 +177,7 @@ ucbtests: all
 	./runtcl -c "cd ${TCL_UCB_SRC}/tests;source ${srcbasedir}/tests/all"
 
 extdtests: all
-	./runtcl -c "cd tests;source all"	
+	./runtcl -c "cd tests;source all"
 
 tktest: all
 	@echo "***************************************************************"
@@ -185,7 +185,8 @@ tktest: all
 	@echo "***     testmakexists"
 	@echo "***************************************************************"
 	@echo ""
-	cd tktests ; ../runwishx -f tktests.tcl -n wish ${TK_UCB_SRC}
+	cd ${srcdir}/tktests ;\
+	    ${bldbasedir}/runwishx -f tktests.tcl -n wish ${TK_UCB_SRC}
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or

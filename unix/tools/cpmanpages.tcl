@@ -7,7 +7,11 @@
 #
 # It is run in the following manner:
 #
-#     tcl cpmanpages.tcl TCL|TCLX|TK sourceDir ?man-separator-char?
+#     tcl $path/cpmanpages.tcl TCL|TCLX|TK sourceDir ?man-separator-char?
+#
+#  Note:
+#    $(srcbase) must be the absolute path to the script. This is needed to
+#    find the buildutil.tcl when source and build directories are different.
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -18,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 1.4 1993/07/31 04:43:45 markd Exp markd $
+# $Id: cpmanpages.tcl,v 1.5 1993/08/13 15:01:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -219,7 +223,7 @@ set manType [lindex $argv 0]
 set sourceDir [lindex $argv 1]
 set manSeparator [lindex $argv 2]
 
-source ../tools/buildutil.tcl
+source [file dirname [info script]]/buildutil.tcl
 
 # Parse the configure files and then default missing values.
 
