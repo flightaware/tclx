@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.5 1997/07/03 20:10:05 markd Exp $
+ * $Id: tclXunixOS.c,v 8.6 1997/07/04 20:24:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -99,10 +99,12 @@ ChannelToFnum (channel, direction)
     ClientData handle;
 
     if (direction == 0) {
-        if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_ERROR)
-            Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle);
+        if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) != TCL_OK &&
+            Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle) != TCL_OK) {
+	    return -1;
+	}
     } else {
-        if (Tcl_GetChannelHandle (channel, direction, &handle) == TCL_ERROR) {
+        if (Tcl_GetChannelHandle (channel, direction, &handle) != TCL_OK) {
             return -1;
 	}
     }
@@ -626,8 +628,6 @@ TclXOSkill (interp, pid, signal, funcName)
  * Parameters:
  *   o interp - Errors are returned in result.
  *   o channel - Channel to get the status of.
- *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
- *     return the first of the read and write numbers.
  *   o statBuf - Status information, made to look as much like Unix as
  *     possible.
  *   o ttyDev - If not NULL, a boolean indicating if the device is
@@ -637,14 +637,13 @@ TclXOSkill (interp, pid, signal, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFstat (interp, channel, direction, statBuf, ttyDev)
+TclXOSFstat (interp, channel, statBuf, ttyDev)
     Tcl_Interp  *interp;
     Tcl_Channel  channel;
-    int          direction;
     struct stat *statBuf;
     int         *ttyDev;
 {
-    int fileNum = ChannelToFnum (channel, direction);
+    int fileNum = ChannelToFnum (channel, 0);
 
     if (fstat (fileNum, statBuf) < 0) {
         TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
@@ -778,21 +777,18 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
  * Parameters:
  *   o channel - Channel.
  *   o fileSize - File size is returned here.
- *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
- *     return the first of the read and write numbers.
  * Results:
  *   TCL_OK or TCL_ERROR.  A POSIX error will be set.
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetFileSize (channel, direction, fileSize)
+TclXOSGetFileSize (channel, fileSize)
     Tcl_Channel  channel;
-    int          direction;
     off_t       *fileSize;
 {
     struct stat statBuf;
 
-    if (fstat (ChannelToFnum (channel, direction), &statBuf)) {
+    if (fstat (ChannelToFnum (channel, 0), &statBuf)) {
         return TCL_ERROR;
     }
     *fileSize = statBuf.st_size;

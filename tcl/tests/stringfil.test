@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfil.test,v 8.0.4.1 1997/04/14 02:02:38 markd Exp $
+# $Id: stringfil.test,v 8.1 1997/04/17 04:59:38 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -28,29 +28,29 @@ e
 f
 g}
 
-TestRemove STRINGFIL.TEST
+TestRemove STRINGFIL.DAT
 
 Test stringfile-1.1 {write_file command} {
-    write_file STRINGFIL.TEST $stringfileTestVar
+    write_file STRINGFIL.DAT $stringfileTestVar
 } 0 {}
 
 Test stringfile-2.1 {read_file command} {
-    read_file STRINGFIL.TEST
+    read_file STRINGFIL.DAT
 } 0 "$stringfileTestVar\n"
 
 Test stringfile-2.2 {read_file command} {
-    read_file  -nonewline STRINGFIL.TEST
+    read_file  -nonewline STRINGFIL.DAT
 } 0 $stringfileTestVar
 
 Test stringfile-2.3 {read_file command} {
-    read_file STRINGFIL.TEST 3
+    read_file STRINGFIL.DAT 3
 } 0 [crange $stringfileTestVar 0 2]
 
 Test stringfile-2.4 {read_file command} {
-    read_file STRINGFIL.TEST nonewline
+    read_file STRINGFIL.DAT nonewline
 } 0 $stringfileTestVar
 
-TestRemove STRINGFIL.TEST
+TestRemove STRINGFIL.DAT
 rename unknown {}
 
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinDup.c,v 8.3 1997/06/30 07:58:01 markd Exp $
+ * $Id: tclXwinDup.c,v 8.4 1997/07/04 20:24:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,7 +48,7 @@ ConvertChannelName (Tcl_Interp *interp,
     } else if (STRNEQU (channelName, "file", 4) ||
                STRNEQU (channelName, "sock", 4)) {
         TclX_AppendObjResult (interp, "on MS Windows, only stdin, ",
-                              "stdout, or stderr maybe the dup target",
+                              "stdout or stderr maybe the dup target",
                               (char *) NULL);
         return TCL_ERROR;
     } else {
@@ -80,28 +80,46 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
     int         mode;
     char       *targetChannelId;
 {
-    Tcl_File channelFile;
     Tcl_Channel newChannel = NULL;
-    int type;
-    HANDLE srcFileHand, newFileHand = NULL;
+    int direction;
+    int result;
+    HANDLE srcFileHand, newFileHand = INVALID_HANDLE_VALUE;
+    int sockType;
+    int sockTypeLen = sizeof(sockType);
 
     /*
      * On Windows, the channels we can dup share the same file for the read and
      * write directions, so use either.
      */
     if (mode & TCL_READABLE) {
-        channelFile = Tcl_GetChannelFile (srcChannel, TCL_READABLE);
+	direction = TCL_READABLE;
     } else {
-        channelFile = Tcl_GetChannelFile (srcChannel, TCL_WRITABLE);
+	direction = TCL_WRITABLE;
     }
-    srcFileHand = (HANDLE) Tcl_GetFileInfo (channelFile, &type);
-    
-    if (type == TCL_WIN_SOCKET) {
-        TclXNotAvailableError (interp,
-                               "duping a socket");
-        goto errorExit;
+
+    result = (Tcl_GetChannelHandle (srcChannel, direction,
+				    (ClientData *) &srcFileHand));
+    if (result != TCL_OK) {
+        TclX_AppendObjResult (interp, "channel \"",
+                              Tcl_GetChannelName (srcChannel),
+                              "\" has no device handle", (char *) NULL);
+	return NULL;
     }
-    
+
+    switch (GetFileType (srcFileHand))
+    {
+    case FILE_TYPE_PIPE:
+	if (getsockopt((SOCKET)srcFileHand, SOL_SOCKET, SO_TYPE,
+		       (void *)&sockType, &sockTypeLen) == 0) {
+	    TclXNotAvailableError (interp, "duping a socket");
+	    return NULL;
+	}
+	break;
+
+    default:
+	break;
+    }
+
     /*
      * Duplicate the channel's file.
      */
@@ -136,13 +154,11 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
         SetStdHandle (stdHandleId, newFileHand);
      }
     
-    newChannel = Tcl_MakeFileChannel ((ClientData) newFileHand,
-                                      (ClientData) newFileHand,
-                                      mode);
+    newChannel = Tcl_MakeFileChannel ((ClientData) newFileHand, mode);
     return newChannel;
 
   errorExit:
-    if (newFileHand != NULL)
+    if (newFileHand != INVALID_HANDLE_VALUE)
         CloseHandle (newFileHand);
     return NULL;
 }
@@ -163,20 +179,13 @@ TclXOSBindOpenFile (interp, fileNum)
     Tcl_Interp *interp;
     int         fileNum;
 {
-    unsigned fileNum;
     HANDLE fileHandle;
-    DWORD fileType;
     int mode, isSocket;
     char channelName[20];
+    char fileNumStr[20];
     Tcl_Channel channel = NULL;
-
-    if (!Tcl_StrToUnsigned (fileNumStr, 0, &fileNum)) {
-        TclX_AppendObjResult (interp, "invalid integer file number \"",
-                              fileNumStr,
-                              "\", expected unsigned integer or Tcl file id",
-                              (char *) NULL);
-        return NULL;
-    }
+    int sockType;
+    int sockTypeLen = sizeof(sockType);
 
     /*
      * Make sure file is open and determine the access mode and file type.
@@ -184,27 +193,33 @@ TclXOSBindOpenFile (interp, fileNum)
      * FIX: find an API under Windows that returns the read/write info.
      */
     fileHandle = (HANDLE) fileNum;
-    fileType = GetFileType (fileHandle);
-    if (fileType == FILE_TYPE_UNKNOWN) {
+    switch (GetFileType (fileHandle))
+    {
+    case FILE_TYPE_UNKNOWN:
         TclWinConvertError (GetLastError ());
         goto posixError;
+    case FILE_TYPE_PIPE:
+	isSocket = getsockopt((SOCKET)fileHandle, SOL_SOCKET, SO_TYPE,
+			       (void *)&sockType, &sockTypeLen) == 0;
+   	break;
+    default:
+	isSocket = 0;
+	break;
     }
+
     mode = TCL_READABLE | TCL_WRITABLE;
 
-    /*
-     * FIX: we don't deal with sockets.
-     */
-    isSocket = 0;
+    sprintf (fileNumStr, "%d", fileNum);
 
     if (isSocket)
-        sprintf (channelName, "sock%d", fileNum);
+        sprintf (channelName, "sock%s", fileNumStr);
     else
-        sprintf (channelName, "file%d", fileNum);
+        sprintf (channelName, "file%s", fileNumStr);
 
     if (Tcl_GetChannel (interp, channelName, NULL) != NULL) {
         Tcl_ResetResult (interp);
         TclX_AppendObjResult (interp, "file number \"", fileNumStr,
-                              "\" is already bound to a Tcl file channel",
+                              "\" is already bound to a Tcl channel",
                               (char *) NULL);
         return NULL;
     }
@@ -213,9 +228,7 @@ TclXOSBindOpenFile (interp, fileNum)
     if (isSocket) {
         channel = Tcl_MakeTcpClientChannel ((ClientData) fileNum);
     } else {
-        channel = Tcl_MakeFileChannel ((ClientData) fileNum,
-                                       (ClientData) fileNum,
-                                       mode);
+        channel = Tcl_MakeFileChannel ((ClientData) fileNum, mode);
     }
     Tcl_RegisterChannel (interp, channel);
 

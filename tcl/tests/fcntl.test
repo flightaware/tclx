@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 8.1 1997/04/17 04:59:19 markd Exp $
+# $Id: fcntl.test,v 8.2 1997/06/12 21:08:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -94,16 +94,12 @@ Test fcntl-1.15 {fcntl tests} {
 Test fcntl-2.1 {fcntl tests} {
     fcntl $testRWFH CLOEXEC 1
     fcntl $testRWFH CLOEXEC
-} 0 1 unixOnly
+} 0 1
 
 Test fcntl-2.2 {fcntl tests} {
     fcntl $testRWFH CLOEXEC 0
     fcntl $testRWFH CLOEXEC
-} 0 0 unixOnly
-
-Test fcntl-2.2.1 {fcntl tests} {
-    fcntl $testRWFH CLOEXEC 0
-} 1 {close-on-exec mode is not available on MS Windows} pcOnly
+} 0 0 
 
 Test fcntl-2.3 {fcntl tests} {
     fcntl $testRPH NONBLOCK 1

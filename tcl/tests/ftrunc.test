@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: ftrunc.test,v 8.0.4.1 1997/04/14 02:02:24 markd Exp $
+# $Id: ftrunc.test,v 8.1 1997/04/17 04:59:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -110,7 +110,7 @@ Test filecmds-7.10.1 {ftruncate tests} {
     set result [list [catch {ftruncate -fileid $fh 0} msg] $msg]
     close $fh
     set result
-} 0 {1 {-fileid option is not available on MS Windows}} pcOnly
+} 0 {0 {}} pcOnly
 
 rename CreateTmpFile {}
 TestRemove TRUNCATE.TMP

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinId.c,v 8.3 1997/07/01 02:58:17 markd Exp $
+ * $Id: tclXwinId.c,v 8.4 1997/07/04 20:24:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -23,13 +23,13 @@
  */
 static int
 IdProcess  _ANSI_ARGS_((Tcl_Interp *interp,
-                        int         argc,
-                        char      **argv));
+			int objc,
+			Tcl_Obj *CONST objv[]));
 
 static int
 IdHost _ANSI_ARGS_((Tcl_Interp *interp,
-                    int         argc,
-                    char      **argv));
+		    int objc,
+		    Tcl_Obj *CONST objv[]));
 
 static int 
 TclX_IdObjCmd _ANSI_ARGS_((ClientData clientData,
@@ -54,20 +54,19 @@ TclX_IdObjCmd _ANSI_ARGS_((ClientData clientData,
  * id process
  */
 static int
-IdProcess (interp, argc, argv)
+IdProcess (interp, objc, objv)
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
-    char numBuf [32];
+    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
 
-    if (argc != 2) {
-        TclX_AppendObjResult (interp, tclXWrongArgs, argv [0], 
+    if (objc != 2) {
+        TclX_AppendObjResult (interp, tclXWrongArgs, objv [0], 
                               " process", (char *) NULL);
-        return TCL_OK;
+        return TCL_ERROR;
     }
-    sprintf (numBuf, "%d", getpid ());
-    Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+    Tcl_SetLongObj (resultPtr, getpid());
     return TCL_OK;
 }
 
@@ -75,15 +74,15 @@ IdProcess (interp, argc, argv)
  * id host
  */
 static int
-IdHost (interp, argc, argv)
+IdHost (interp, objc, objv)
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
     char hostName [TCL_RESULT_SIZE];
 
-    if (argc != 2) {
-        TclX_AppendObjResult (interp, tclXWrongArgs, argv [0], 
+    if (objc != 2) {
+        TclX_AppendObjResult (interp, tclXWrongArgs, objv [0], 
                               " host", (char *) NULL);
         return TCL_ERROR;
     }
@@ -97,31 +96,35 @@ IdHost (interp, argc, argv)
 }
 
 static int
-Tcl_IdCmd (clientData, interp, argc, argv)
+TclX_IdObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
-    if (argc < 2) {
-        TclX_AppendObjResult (interp, tclXWrongArgs, argv [0], " arg ?arg...?",
+    char *optionPtr;
+
+    if (objc < 2) {
+        TclX_AppendObjResult (interp, tclXWrongArgs, objv [0], " arg ?arg...?",
                               (char *) NULL);
         return TCL_ERROR;
     }
+
+    optionPtr = Tcl_GetStringFromObj (objv[1], NULL);
 
     /*
      * If the first argument is "process", return the process ID, parent's
      * process ID, process group or set the process group depending on args.
      */
-    if (STREQU (argv[1], "process")) {
-        return IdProcess (interp, argc, argv);
+    if (STREQU (optionPtr, "process")) {
+        return IdProcess (interp, objc, objv);
     }
 
     /*
      * Handle returning the host name if its available.
      */
-    if (STREQU (argv[1], "host")) {
-        return IdHost (interp, argc, argv);
+    if (STREQU (optionPtr, "host")) {
+        return IdHost (interp, objc, objv);
     }
 
     TclX_AppendObjResult (interp, "second arg must be one of \"process\", ",

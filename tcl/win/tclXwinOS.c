@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 8.5 1997/07/04 20:24:36 markd Exp $
+ * $Id: tclXwinOS.c,v 8.6 1997/07/29 03:02:50 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -26,6 +26,13 @@
  */
 
 #include "tclExtdInt.h"
+
+typedef enum {
+    TCLX_WIN_CONSOLE,
+    TCLX_WIN_FILE,
+    TCLX_WIN_PIPE,
+    TCLX_WIN_SOCKET
+} tclXwinFileType;
 
 
 /*-----------------------------------------------------------------------------
@@ -45,7 +52,16 @@ TclXNotAvailableError (Tcl_Interp *interp,
 {
     TclX_AppendObjResult (interp, funcName, " is not available on MS Windows",
                           (char *) NULL);
-    TclSetObjResultFromStrResult (interp);  /* FIX: remove */
+    return TCL_ERROR;
+}
+int
+TclXNotAvailableObjError (Tcl_Interp *interp,
+			  Tcl_Obj *obj)
+{
+    char *funcName = Tcl_GetStringFromObj(obj, NULL);
+
+    TclX_AppendObjResult (interp, funcName, " is not available on MS Windows",
+                          (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -62,64 +78,119 @@ TclXNotAvailableError (Tcl_Interp *interp,
  * Sun Microsystems, Inc.
  *-----------------------------------------------------------------------------
  */
+
+/*
+ *-------------------------------------------------------------------------
+ *
+ * setargv --
+ *
+ *	Parse the Windows command line string into argc/argv.  Done here
+ *	because we don't trust the builtin argument parser in crt0.  
+ *	Windows applications are responsible for breaking their command
+ *	line into arguments.
+ *
+ *	2N backslashes + quote -> N backslashes + begin quoted string
+ *	2N + 1 backslashes + quote -> literal
+ *	N backslashes + non-quote -> literal
+ *	quote + quote in a quoted string -> single quote
+ *	quote + quote not in quoted string -> empty string
+ *	quote -> begin quoted string
+ *
+ * Results:
+ *	Fills argcPtr with the number of arguments and argvPtr with the
+ *	array of arguments.
+ *
+ * Side effects:
+ *	Memory allocated.
+ *
+ *--------------------------------------------------------------------------
+ */
 void
 TclX_SplitWinCmdLine (int    *argcPtr,
                       char ***argvPtr)
 {
-    char *args = GetCommandLine();
-    char **argvlist, *p;
-    int size, i;
+    char *cmdLine, *p, *arg, *argSpace;
+    char **argv;
+    int argc, size, inquote, copy, slashes;
+    
+    cmdLine = GetCommandLine();
 
     /*
      * Precompute an overly pessimistic guess at the number of arguments
      * in the command line by counting non-space spans.
      */
-    for (size = 2, p = args; *p != '\0'; p++) {
-        if (isspace (*p)) {
-            size++;
-            while (isspace (*p)) {
-                p++;
-            }
-            if (*p == '\0') {
-                break;
-            }
-        }
-    }
-    argvlist = (char **) ckalloc ((unsigned) (size * sizeof (char *)));
-    *argvPtr = argvlist;
 
-    /*
-     * Parse the Windows command line string.  If an argument begins with a
-     * double quote, then spaces are considered part of the argument until the
-     * next double quote.  The argument terminates at the second quote.  Note
-     * that this is different from the usual Unix semantics.
-     */
-    for (i = 0, p = args; *p != '\0'; i++) {
-        while (isspace (*p)) {
-            p++;
-        }
-        if (*p == '\0') {
-            break;
-        }
-        if (*p == '"') {
-            p++;
-            (*argvPtr) [i] = p;
-            while ((*p != '\0') && (*p != '"')) {
-                p++;
-            }
-        } else {
-            (*argvPtr) [i] = p;
-            while (*p != '\0' && !isspace(*p)) {
-                p++;
-            }
-        }
-        if (*p != '\0') {
-            *p = '\0';
-            p++;
-        }
+    size = 2;
+    for (p = cmdLine; *p != '\0'; p++) {
+	if (isspace(*p)) {
+	    size++;
+	    while (isspace(*p)) {
+		p++;
+	    }
+	    if (*p == '\0') {
+		break;
+	    }
+	}
     }
-    (*argvPtr) [i] = NULL;
-    *argcPtr = i;
+    argSpace = (char *) ckalloc((unsigned) (size * sizeof(char *) 
+	    + strlen(cmdLine) + 1));
+    argv = (char **) argSpace;
+    argSpace += size * sizeof(char *);
+    size--;
+
+    p = cmdLine;
+    for (argc = 0; argc < size; argc++) {
+	argv[argc] = arg = argSpace;
+	while (isspace(*p)) {
+	    p++;
+	}
+	if (*p == '\0') {
+	    break;
+	}
+
+	inquote = 0;
+	slashes = 0;
+	while (1) {
+	    copy = 1;
+	    while (*p == '\\') {
+		slashes++;
+		p++;
+	    }
+	    if (*p == '"') {
+		if ((slashes & 1) == 0) {
+		    copy = 0;
+		    if ((inquote) && (p[1] == '"')) {
+			p++;
+			copy = 1;
+		    } else {
+			inquote = !inquote;
+		    }
+                }
+                slashes >>= 1;
+            }
+
+            while (slashes) {
+		*arg = '\\';
+		arg++;
+		slashes--;
+	    }
+
+	    if ((*p == '\0') || (!inquote && isspace(*p))) {
+		break;
+	    }
+	    if (copy != 0) {
+		*arg = *p;
+		arg++;
+	    }
+	    p++;
+        }
+	*arg = '\0';
+	argSpace = arg + 1;
+    }
+    argv[argc] = NULL;
+
+    *argcPtr = argc;
+    *argvPtr = argv;
 }
 
 
@@ -132,30 +203,60 @@ TclX_SplitWinCmdLine (int    *argcPtr,
  *   o channel - Channel to get file number for.
  *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
  *     return the first of the read and write numbers.
- *   o type - The type of the file. TCL_WIN_FILE if an error occurs
- *     (so something is in the value).  Maybe NULL.
+ *   o type - The type of the file. not set if an error occurs.
+ *
  * Returns:
- *   The file handle or NULL if a file number is not associated with this
- * access direction.  Just go ahead and pass this to a system call to
- * get a useful error message, they should never happen.  If type is 
- * TCL_WIN_SOCK, the return value is not valid.
+ *   The file handle or INVALID_HANDLE_VALUE if a HANDLE is not associated 
+ * with this access direction, or if the channel does not have a HANDLE
+ * of the Windows variety. We hope that the channel driver does not return
+ * a HANDLE that we cannot use.
  *-----------------------------------------------------------------------------
  */
-HANDLE
-ChannelToHandle (Tcl_Channel channel,
-                 int         direction,
-                 int        *type)
+static HANDLE
+ChannelToHandle (Tcl_Channel		channel,
+                 int         		direction,
+                 tclXwinFileType	*typePtr)
 {
     ClientData handle;
-
+    int	sockType;
+    int	sockTypeLen = sizeof(sockType);
+    
     if (direction == 0) {
-        if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_ERROR)
-            Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle);
+        if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) != TCL_OK &&
+	    Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle) != TCL_OK) {
+	    handle = INVALID_HANDLE_VALUE;
+	}
     } else {
-        if (Tcl_GetChannelHandle (channel, direction, &handle) == TCL_ERROR) {
-            return -1;
+        if (Tcl_GetChannelHandle (channel, direction, &handle) != TCL_OK) {
+	    handle = INVALID_HANDLE_VALUE;
 	}
     }
+
+    /*
+     * Call GetFileType() even on invalid handles to set errno,
+     * also will coerce INVALID_SOCKET to INVALID_HANDLE,  they
+     * may not be the same on some machines.
+     */
+    switch (GetFileType ((HANDLE) handle)) {
+	case FILE_TYPE_DISK:
+	    *typePtr = TCLX_WIN_FILE;
+	    break;
+	case FILE_TYPE_CHAR:
+	    *typePtr = TCLX_WIN_CONSOLE;
+	    break;
+	case FILE_TYPE_PIPE:
+	    if (getsockopt ((SOCKET)handle, SOL_SOCKET, SO_TYPE, 
+			    (void *)&sockType, &sockTypeLen) == 0) {
+		*typePtr = TCLX_WIN_SOCKET;
+	    } else {
+		*typePtr = TCLX_WIN_PIPE;
+	    }
+	    break;
+	case FILE_TYPE_UNKNOWN:
+	    handle = INVALID_HANDLE_VALUE;
+	    break;
+    }
+    
     return (HANDLE) handle;
 }
 
@@ -176,20 +277,17 @@ ChannelToSocket (Tcl_Interp  *interp,
                  Tcl_Channel  channel)
 {
     ClientData handle;
-    SOCKET sock;
+    tclXwinFileType type;
 
-    /*
-     * Channels are bidiretional, so it doesn't matter which one we get.
-     */
-    if (Tcl_GetChannelHandle (channel, TCL_READABLE, &handle) == TCL_ERROR)
-        Tcl_GetChannelHandle (channel, TCL_WRITABLE, &handle);
+    handle = ChannelToHandle(channel, 0, &type);
 
-    if (strcmp (Tcl_GetChannelType (channel)->typeName, "tcp") != 0) {
+    if (handle == INVALID_HANDLE_VALUE || type != TCLX_WIN_SOCKET) {
         TclX_AppendObjResult (interp, "channel \"",
                               Tcl_GetChannelName (channel),
                               "\" is not a socket", (char *) NULL);
         return INVALID_SOCKET;
     }
+
     return (SOCKET) handle;
 }
 
@@ -287,12 +385,10 @@ TclXOSpipe (interp, channels)
     }
 
     channels [0] = Tcl_MakeFileChannel ((ClientData) readHandle,
-                                        (ClientData) -1,
                                         TCL_READABLE);
     Tcl_RegisterChannel (interp, channels [0]);
 
-    channels [1] = Tcl_MakeFileChannel ((ClientData) -1,
-                                        (ClientData) writeHandle,
+    channels [1] = Tcl_MakeFileChannel ((ClientData) writeHandle,
                                         TCL_WRITABLE);
     Tcl_RegisterChannel (interp, channels [1]);
 
@@ -528,8 +624,6 @@ TclXOSkill (Tcl_Interp *interp,
  * Parameters:
  *   o interp - Errors are returned in result.
  *   o channel - Channel to get file number for.
- *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
- *     return the first of the read and write numbers.
  *   o statBuf - Status information, made to look as much like Unix as
  *     possible.
  *   o ttyDev - If not NULL, a boolean indicating if the device is
@@ -541,19 +635,25 @@ TclXOSkill (Tcl_Interp *interp,
 int
 TclXOSFstat (Tcl_Interp  *interp,
              Tcl_Channel  channel,
-             int          direction,
              struct stat *statBuf,
              int         *ttyDev)
 {
     HANDLE handle;
-    int type;
+    tclXwinFileType type;
     FILETIME creation, access, modify;
 
     /* FIX: More of this information is availiable from
      *      GetFileInformationByHandle
      */
 
-    handle = ChannelToHandle (channel, direction, &type);
+    handle = ChannelToHandle (channel, 0, &type);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+        TclX_AppendObjResult (interp, "channel \"",
+                              Tcl_GetChannelName (channel),
+                              "\" has no device handle", (char *) NULL);
+	return TCL_ERROR;
+    }
 
     /*
      * These don't translate to windows.
@@ -564,27 +664,27 @@ TclXOSFstat (Tcl_Interp  *interp,
 
     statBuf->st_mode = 0;
     switch (type) {
-      case TCL_WIN_PIPE:
+      case TCLX_WIN_PIPE:
         statBuf->st_mode |= S_IFIFO;
         break;
-      case TCL_WIN_FILE:
+      case TCLX_WIN_FILE:
         statBuf->st_mode |= S_IFREG;
         break;
-      case TCL_WIN_SOCKET:
+      case TCLX_WIN_SOCKET:
         statBuf->st_mode |= S_IFSOCK;
         break;
-      case TCL_WIN_CONSOLE:
+      case TCLX_WIN_CONSOLE:
         statBuf->st_mode |= S_IFCHR;
         break;
     }        
 
-    statBuf->st_nlink = (type == TCL_WIN_FILE) ? 1 : 0;
+    statBuf->st_nlink = (type == TCLX_WIN_FILE) ? 1 : 0;
     statBuf->st_uid = 0;   /* FIX??? */
     statBuf->st_gid = 0;
 
     switch (type) {
-      case TCL_WIN_FILE:
-      case TCL_WIN_PIPE:
+      case TCLX_WIN_FILE:
+      case TCLX_WIN_PIPE:
         statBuf->st_size = GetFileSize (handle, NULL);
         if (statBuf->st_size < 0)
             goto winError;
@@ -597,8 +697,8 @@ TclXOSFstat (Tcl_Interp  *interp,
         statBuf->st_ctime = ConvertToUnixTime (modify);
         break;
 
-      case TCL_WIN_SOCKET:
-      case TCL_WIN_CONSOLE:
+      case TCLX_WIN_SOCKET:
+      case TCLX_WIN_CONSOLE:
         statBuf->st_size = 0;
         statBuf->st_atime = 0;
         statBuf->st_mtime = 0;
@@ -607,7 +707,7 @@ TclXOSFstat (Tcl_Interp  *interp,
     }        
 
     if (ttyDev != NULL)
-        *ttyDev = (type == TCL_WIN_CONSOLE) ? 1 : 0;
+        *ttyDev = (type == TCLX_WIN_CONSOLE) ? 1 : 0;
     return TCL_OK;
 
   winError:
@@ -615,47 +715,6 @@ TclXOSFstat (Tcl_Interp  *interp,
     TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
 
-}
-
-/*-----------------------------------------------------------------------------
- * TclXOSSeakable --
- *   System dependent interface to determine if a channel is seekable.
- *
- * Parameters:
- *   o interp - Errors are returned in result.
- *   o channel - Channel to get the status of.
- *   o seekable - TRUE is return if seekable, FALSE if not.
- * Results:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXOSSeekable (interp, channel, seekablePtr)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int         *seekablePtr;
-{
-    int type;
-
-    ChannelToHandle (channel, 0, &type);
-
-    switch (type) {
-      case TCL_WIN_PIPE:
-        *seekablePtr = FALSE;
-        break;
-      case TCL_WIN_FILE:
-        *seekablePtr = TRUE;
-        break;
-      case TCL_WIN_SOCKET:
-        *seekablePtr = FALSE;
-        break;
-      case TCL_WIN_CONSOLE:
-        *seekablePtr = FALSE;
-        break;
-      default:
-        panic ("TclXOSSeekable unknown file type %d", type);
-    }
-    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
@@ -837,33 +896,34 @@ TclXOSWalkDir (Tcl_Interp       *interp,
  * Parameters:
  *   o channel - Channel.
  *   o fileSize - File size is returned here.
- *   o direction - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
- *     return the first of the read and write numbers.
  * Results:
  *   TCL_OK or TCL_ERROR.  A POSIX error will be set.
  *-----------------------------------------------------------------------------
  */
 int
 TclXOSGetFileSize (Tcl_Channel  channel,
-                   int          direction,
                    off_t       *fileSize)
 {
     HANDLE handle; 
-    int type;
+    tclXwinFileType type;
 
-    handle = ChannelToHandle (channel, direction, &type);
+    handle = ChannelToHandle (channel, 0, &type);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+	return TCL_ERROR;
+    }
     
     switch (type) {
-      case TCL_WIN_PIPE:
-      case TCL_WIN_FILE:
+      case TCLX_WIN_PIPE:
+      case TCLX_WIN_FILE:
         *fileSize = GetFileSize (handle, NULL);
         if (*fileSize < 0) {
             TclWinConvertError (GetLastError ());
             return TCL_ERROR;
         }
         break;
-      case TCL_WIN_SOCKET:
-      case TCL_WIN_CONSOLE:
+      case TCLX_WIN_SOCKET:
+      case TCLX_WIN_CONSOLE:
         *fileSize = 0;
     }
     return TCL_OK;
@@ -890,15 +950,23 @@ TclXOSftruncate (Tcl_Interp  *interp,
 {
     HANDLE handle;
     int pos;
+    tclXwinFileType type;
 
-    handle = ChannelToHandle (channel, TCL_WRITABLE, NULL);
-    if (handle == NULL) {
-        TclWinConvertError (GetLastError ());
-        TclX_AppendObjResult (interp, "truncation of \"",
+    handle = ChannelToHandle (channel, TCL_WRITABLE, &type);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+        TclX_AppendObjResult (interp, "channel \"",
                               Tcl_GetChannelName (channel),
-                              "\" failed: ", Tcl_PosixError (interp),
+                              "\" was not open for write access",
                               (char *) NULL);
         return TCL_ERROR;
+    }
+    if (type != TCLX_WIN_FILE) {
+        TclX_AppendObjResult (interp, "truncation of \"",
+                              Tcl_GetChannelName (channel),
+                              "\" failed: can only truncate disk files",
+                              (char *) NULL);
+	return TCL_ERROR;
     }
     pos = Tcl_Tell (channel);
     if (SetFilePointer (handle, (LONG)newSize, NULL,
@@ -954,9 +1022,9 @@ TclXOSftruncate (Tcl_Interp  *interp,
  */
 int
 TclXOSfork (Tcl_Interp *interp,
-            char       *funcName)
+            Tcl_Obj    *funcNameObj)
 {
-    return TclXNotAvailableError (interp, funcName);
+    return TclXNotAvailableObjError (interp, funcNameObj);
 }
 
 /*-----------------------------------------------------------------------------
@@ -1245,13 +1313,14 @@ TclXOSfchmod (interp, channel, mode, funcName)
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
+
 int
-TclXOSChangeOwnGrp (interp, options, ownerStr, groupStr, files, funcName)
+TclXOSChangeOwnGrpObj (interp, options, ownerStr, groupStr, files, funcName)
     Tcl_Interp  *interp;
     unsigned     options;
     char        *ownerStr;
     char        *groupStr;
-    char       **files;
+    Tcl_Obj	*files;
     char       *funcName;
 {
     return TclXNotAvailableError (interp, funcName);
@@ -1279,12 +1348,12 @@ TclXOSChangeOwnGrp (interp, options, ownerStr, groupStr, files, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
+TclXOSFChangeOwnGrpObj (interp, options, ownerStr, groupStr, channelIds, funcName)
     Tcl_Interp *interp;
     unsigned    options;
     char       *ownerStr;
     char       *groupStr;
-    char      **channelIds;
+    Tcl_Obj    *channelIds;
     char       *funcName;
 {
     return TclXNotAvailableError (interp, funcName);
@@ -1310,23 +1379,25 @@ TclXOSGetSelectFnum (Tcl_Interp *interp,
                      int         direction,
                      int        *fnumPtr)
 {
-    Tcl_ChannelType *chanType;
+    tclXwinFileType type;
+    HANDLE handle = ChannelToHandle (channel, direction, &type);
+    
+    if (handle == INVALID_HANDLE_VALUE) {
+        TclX_AppendObjResult (interp,  "channel \"",
+                              Tcl_GetChannelName (channel),
+                              "\" was not open for requested access",
+                              (char *) NULL);
+        return TCL_ERROR;
+    }
 
-    chanType = Tcl_GetChannelType (channel);
-    if (!STREQU (chanType->typeName, "tcp")) {
-        TclX_AppendObjResult (interp, Tcl_GetChannelName (channel),
-                              " is not a socket; select only works on ",
+    if (type != TCLX_WIN_SOCKET) {
+        TclX_AppendObjResult (interp, "channel \"",
+			      Tcl_GetChannelName (channel),
+                              "\" is not a socket; select only works on ",
                               "sockets on Windows", (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (Tcl_GetChannelHandle (channel, direction, &handle) != TCL_OK) {
-        TclX_AppendObjResult (interp,  "channel ",
-                              Tcl_GetChannelName (channel),
-                              " was not open for requested access",
-                              (char *) NULL);
-        return TCL_ERROR;
-    }
     *fnumPtr = (int) handle;
     return TCL_OK;
     
@@ -1384,25 +1455,33 @@ LockUnlockSetup (Tcl_Interp     *interp,
                  char           *whichMsg)
 {
     HANDLE handle;
-    int type;
+    tclXwinFileType type;
 
     /*
      * Get the handle and validate that this is something we can lock.
      */
     handle = ChannelToHandle (lockInfoPtr->channel, 0, &type);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+        TclX_AppendObjResult (interp, "channel \"",
+                              Tcl_GetChannelName (lockInfoPtr->channel),
+                              "\" has no device handle", (char *) NULL);
+	return handle;
+    }
+
     switch (type) {
-      case TCL_WIN_PIPE:
+      case TCLX_WIN_PIPE:
         TclX_AppendObjResult (interp,
                               "can't lock a pipe line under MS Windows",
                               (char *) NULL);
-        return NULL;
-      case TCL_WIN_FILE:
+        return INVALID_HANDLE_VALUE;
+      case TCLX_WIN_FILE:
         break;
-      case TCL_WIN_SOCKET:
+      case TCLX_WIN_SOCKET:
         TclX_AppendObjResult (interp, "can't lock a socket under windows",
                               (char *) NULL);
-        return NULL;
-      case TCL_WIN_CONSOLE:
+        return INVALID_HANDLE_VALUE;
+      case TCLX_WIN_CONSOLE:
         break;  /* FIX: Is this legal?? */
       default:
         panic ("unknown win channel type %d\n", type);
@@ -1453,7 +1532,7 @@ LockUnlockSetup (Tcl_Interp     *interp,
                           Tcl_GetChannelName (lockInfoPtr->channel),
                           "\" failed: ", Tcl_PosixError (interp),
                           (char *) NULL);
-    return NULL;
+    return INVALID_HANDLE_VALUE;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1483,7 +1562,8 @@ TclXOSFlock (interp, lockInfoPtr)
                               &lengthLow,
                               &lengthHigh,
                               "lock");
-    if (handle == NULL)
+
+    if (handle == INVALID_HANDLE_VALUE)
         return TCL_ERROR;
 
     flags = 0;
@@ -1544,7 +1624,7 @@ TclXOSFunlock (interp, lockInfoPtr)
                               &lengthLow,
                               &lengthHigh,
                               "unlock");
-    if (handle == NULL)
+    if (handle == INVALID_HANDLE_VALUE)
         return TCL_ERROR;
 
     if (!UnlockFileEx (handle, 0, lengthLow, lengthHigh, &start)) {
@@ -1632,10 +1712,18 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
     int        *valuePtr;
 {
     HANDLE handle;
-    int type;
+    tclXwinFileType type;
     DWORD flags;
 
     handle = ChannelToHandle (channel, 0, &type);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+        TclX_AppendObjResult (interp, "channel \"",
+                              Tcl_GetChannelName (channel),
+                              "\" has no device handle", (char *) NULL);
+	return TCL_ERROR;
+    }
+
     /*
      * The following works on Windows NT, but not on Windows 95.
      */
@@ -1675,9 +1763,17 @@ TclXOSSetCloseOnExec (interp, channel, value)
     int         value;
 {
     HANDLE handle;
-    int type;
+    tclXwinFileType type;
 
     handle = ChannelToHandle (channel, 0, &type);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+        TclX_AppendObjResult (interp, "channel \"",
+                              Tcl_GetChannelName (channel),
+                              "\" has no device handle", (char *) NULL);
+	return TCL_ERROR;
+    }
+
     /*
      * The following works on Windows NT, but not on Windows 95.
      * N.B. The value of the CLOEXEC flag is the inverse of HANDLE_FLAG_INHERIT.

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 8.2 1997/06/12 21:08:48 markd Exp $
+ * $Id: tclXwinCmds.c,v 8.3 1997/06/30 03:56:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -41,7 +41,7 @@ TclX_SelectCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_ChrootObjCmd (ClientData  clientData,
+TclX_ChrootObjCmd (ClientData  clientData,
                   Tcl_Interp *interp,
                   int         objc,
                   Tcl_Obj   *CONST objv[])
@@ -55,7 +55,7 @@ Tcl_ChrootObjCmd (ClientData  clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_TimesObjCmd (ClientData  clientData,
+TclX_TimesObjCmd (ClientData  clientData,
                  Tcl_Interp *interp,
                  int         objc,
                  Tcl_Obj   *CONST objv[])
@@ -93,10 +93,10 @@ TclX_PlatformCmdsInit (interp)
  *-----------------------------------------------------------------------------
  */
 static int
-Tcl_SelectCmd (ClientData  clientData,
-               Tcl_Interp *interp,
-               int         argc,
-               char      **argv)
+TclX_SelectCmd (ClientData  clientData,
+		Tcl_Interp *interp,
+		int         argc,
+		char      **argv)
 {
     return TclXNotAvailableError (interp, argv [0]);
 }

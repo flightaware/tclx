@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 8.0.4.1 1997/04/14 02:02:54 markd Exp $
+# $Id: makefile.vc,v 8.1 1997/04/17 04:59:53 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -30,10 +30,11 @@ TCLOBJS = \
         $(TMP_DIR)\tclXAppInit.obj
 
 TCLXTESTOBJS = \
-        $(TMP_DIR)\tclXTest.obj \
+        $(TMP_DIR)\tclXtest.obj \
         $(TMP_DIR)\tclXwinTest.obj \
         $(TMP_DIR)\tclTest.obj \
-        $(TMP_DIR)\tclWinTest.obj
+        $(TMP_DIR)\tclWinTest.obj \
+	$(TMP_DIR)\tclTestObj.obj
 
 TCLXOBJS = \
         $(TMP_DIR)\tclXbsearch.obj \
@@ -51,6 +52,7 @@ TCLXOBJS = \
         $(TMP_DIR)\tclXhandles.obj \
         $(TMP_DIR)\tclXinit.obj \
         $(TMP_DIR)\tclXkeylist.obj \
+        $(TMP_DIR)\tclXlgets.obj \
         $(TMP_DIR)\tclXlib.obj \
         $(TMP_DIR)\tclXlibInit.obj \
         $(TMP_DIR)\tclXlist.obj \
@@ -238,6 +240,10 @@ $(TMP_DIR)\winDumpExts.obj: $(TCL_WIN_DIR)\winDumpExts.c
                 $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?
 
 $(TMP_DIR)\tclTest.obj: $(TCL_GENERIC_DIR)\tclTest.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
+                $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?
+
+$(TMP_DIR)\tclTestObj.obj: $(TCL_GENERIC_DIR)\tclTestObj.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
                 $(TCLX_DEFINES) -Fo$(TMP_DIR)\ $?
 
