@@ -302,7 +302,7 @@
 ./tcl/tests/sync.test
 ./tcl/tests/tcllib.test
 ./tcl/tests/testlib.tcl
-./tcl/tests/tryeval.tcl
+./tcl/tests/tryeval.test
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
 ./tcl/unix/pkgIndex.tcl.in
