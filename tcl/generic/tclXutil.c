@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.7 1993/07/20 08:20:26 markd Exp markd $
+ * $Id: tclXutil.c,v 2.8 1993/08/05 06:41:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -562,11 +562,11 @@ Tcl_CloseForError (interp, fileNum)
     int          saveErrNo = errno;
     char        *saveResult, *errorCode, *saveErrorCode, *argv [2], buf [32];
 
-    saveResult = strdup (interp->result);
+    saveResult = ckstrdup (interp->result);
 
     errorCode = Tcl_GetVar (interp, ERROR_CODE, TCL_GLOBAL_ONLY);
     if (errorCode != NULL)
-        saveErrorCode = strdup (errorCode);
+        saveErrorCode = ckstrdup (errorCode);
     else
         saveErrorCode = NULL;
 
