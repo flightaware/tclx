@@ -1,1 +1,1 @@
-SYSLIBS= @XLIBSW@ @LIBS@ -lm
+SYSLIBS= @LIBS@ -lm
