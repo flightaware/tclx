@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.9 1996/08/20 03:50:01 markd Exp $
+ * $Id: tclXwinOS.c,v 7.10 1996/09/03 23:39:11 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -26,21 +26,6 @@
  */
 
 #include "tclExtdInt.h"
-
-/*
- * Prototypes of internal functions.
- */
-static HANDLE
-ChannelToHandle(Tcl_Channel channel,
-                int         direction,
-                int        *type);
-
-static SOCKET
-ChannelToSocket (Tcl_Interp  *interp,
-                 Tcl_Channel  channel);
-
-static time_t
-ConvertToUnixTime (FILETIME fileTime);
 
 
 /*-----------------------------------------------------------------------------
@@ -147,7 +132,7 @@ TclX_SplitWinCmdLine (int    *argcPtr,
  *   o type - The type of the file. TCL_WIN_FILE if an error occurs
  *     (so something is in the value).  Maybe NULL.
  * Returns:
- *   The file number or NULL if a file number is not associated with this
+ *   The file handle or NULL if a file number is not associated with this
  * access direction.  Just go ahead and pass this to a system call to
  * get a useful error message, they should never happen.  If type is 
  * TCL_WIN_SOCK, the return value is not valid.
@@ -586,7 +571,10 @@ TclXOSFstat (Tcl_Interp  *interp,
     HANDLE handle;
     int type;
     FILETIME creation, access, modify;
-    
+
+    /*FIX: More of this information is availiable from
+     * GetFileInformationByHandle */
+
     handle = ChannelToHandle (channel, direction, &type);
 
     /*
@@ -1325,6 +1313,135 @@ TclXOSGetSelectFnum (Tcl_Interp *interp,
 }
 
 /*-----------------------------------------------------------------------------
+ * TclXOSHaveFlock --
+ *   System dependent interface to determine if file locking is available.
+ * Returns:
+ *   TRUE if file locking is available, FALSE if it is not.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSHaveFlock ()
+{
+    OVERLAPPED start;
+
+    start.Internal = 0;
+    start.InternalHigh = 0;
+    start.Offset = 0;
+    start.OffsetHigh = 0;
+    start.hEvent = 0;
+
+    if (!LockFileEx (NULL, 0, 0, 0, 0, &start)) {
+        if (GetLastError () == ERROR_CALL_NOT_IMPLEMENTED)
+            return FALSE;
+    }
+    return TRUE;
+}
+
+/*-----------------------------------------------------------------------------
+ * LockUnlockSetup --
+ *
+ *    Do common setup work for locking or unlocking a file.
+ *
+ * Parameters:
+ *   o interp - Errors are return in the result.
+ *   o lockInfoPtr - Lock specification.
+ *   o startPtr - Start of area to lock is returned in struct.
+ *   o lengthLowPtr - Low-order 32 bits of length of the file to lock.
+ *   o lengthHighPtr - High-order 32 bits of length of the file to lock.  Files
+ *     of length greater than 32 bits are not support.  This is only to allow
+ *     for locking the entier range of the file
+ *   o whichMsg - Either "lock" or "unlock", for error messages.
+ * Returns:
+ *   The file handle or NULL if an error occurs.
+ *-----------------------------------------------------------------------------
+ */
+static HANDLE
+LockUnlockSetup (Tcl_Interp     *interp,
+                 TclX_FlockInfo *lockInfoPtr,
+                 LPOVERLAPPED    startPtr,
+                 LPDWORD         lengthLowPtr,
+                 LPDWORD         lengthHighPtr,
+                 char           *whichMsg)
+{
+    HANDLE handle;
+    int type;
+
+    /*
+     * Get the handle and validate that this is something we can lock.
+     */
+    handle = ChannelToHandle (lockInfoPtr->channel, 0, &type);
+    switch (type) {
+      case TCL_WIN_PIPE:
+        Tcl_AppendResult (interp, "can't lock a pipe line under MS Windows",
+                          (char *) NULL);
+        return NULL;
+      case TCL_WIN_FILE:
+        break;
+      case TCL_WIN_SOCKET:
+        Tcl_AppendResult (interp, "can't lock a socket under windows",
+                          (char *) NULL);
+        return NULL;
+      case TCL_WIN_CONSOLE:
+        break;  /* FIX: Is this legal?? */
+      default:
+        panic ("unknown win channel type %d\n", type);
+    }
+    
+    /*
+     * Calculate actual offset of the start.
+     */
+    switch (lockInfoPtr->whence) {
+      case 0:  /* start */
+        startPtr->Offset = lockInfoPtr->start;
+        break;
+      case 1:  /* current */
+        startPtr->Offset = SetFilePointer (handle, 0, NULL, FILE_CURRENT);
+        if (startPtr->Offset == 0xFFFFFFFF)
+            goto winError;
+        startPtr->Offset += lockInfoPtr->start;
+        break;
+      case 2:  /* end */
+        startPtr->Offset = GetFileSize (handle, NULL);
+        if (startPtr->Offset < 0)
+            goto winError;
+        startPtr->Offset -= lockInfoPtr->start;
+        break;
+    }
+    startPtr->Internal = 0;
+    startPtr->InternalHigh = 0;
+    startPtr->OffsetHigh = 0;
+    startPtr->hEvent = 0;
+
+    /*
+     * Determine length of lock.  If zero, the remained of the file is locked
+     * out its maximum length.
+     */
+    *lengthHighPtr = 0;
+    if (lockInfoPtr->len == 0) {
+        *lengthLowPtr = GetFileSize (handle, NULL);
+        if (*lengthLowPtr < 0)
+            goto winError;
+        *lengthLowPtr -= startPtr->Offset;
+    } else {
+        *lengthLowPtr = lockInfoPtr->len;
+    }
+    if (*lengthLowPtr == 0) {
+        *lengthHighPtr = 0x7FFFFFFF;
+        *lengthLowPtr = 0xFFFFFFFF;
+    }
+    return handle;
+
+  winError:
+    TclWinConvertError (GetLastError ());
+    lockInfoPtr->gotLock = FALSE;
+    Tcl_AppendResult (interp, whichMsg, " of \"",
+                      Tcl_GetChannelName (lockInfoPtr->channel),
+                      "\" failed: ", Tcl_PosixError (interp),
+                      (char *) NULL);
+    return NULL;
+}
+
+/*-----------------------------------------------------------------------------
  * TclXOSFlock --
  *   System dependent interface to locking a file.
  *
@@ -1341,45 +1458,48 @@ TclXOSFlock (interp, lockInfoPtr)
     Tcl_Interp     *interp;
     TclX_FlockInfo *lockInfoPtr;
 {
-/*FIX: Implement*/
-#ifdef F_SETLKW
-    int fnum, stat;
-    struct flock flockInfo;
-    
-    flockInfo.l_start = lockInfoPtr->start;
-    flockInfo.l_len = lockInfoPtr->len;
-    flockInfo.l_type =
-        (lockInfoPtr->access == TCL_WRITABLE) ? F_WRLCK : F_RDLCK;
-    flockInfo.l_whence = lockInfoPtr->whence;
+    HANDLE handle;
+    DWORD flags, lengthHigh, lengthLow;
+    OVERLAPPED start;
 
-    fnum = ChannelToFnum (lockInfoPtr->channel, lockInfoPtr->access);
-
-    stat = fcntl (fnum, lockInfoPtr->block ?  F_SETLKW : F_SETLK, 
-                  &flockInfo);
-
-    /*
-     * Handle status from non-blocking lock.
-     */
-    if ((stat < 0) && (!lockInfoPtr->block) &&
-        ((errno == EACCES) || (errno == EAGAIN))) {
-        lockInfoPtr->gotLock = FALSE;
-        return TCL_OK;
-    }
-    
-    if (stat < 0) {
-        lockInfoPtr->gotLock = FALSE;
-        Tcl_AppendResult (interp, "lock of \"",
-                          Tcl_GetChannelName (lockInfoPtr->channel),
-                          "\" failed: ", Tcl_PosixError (interp));
+    handle = LockUnlockSetup (interp,
+                              lockInfoPtr,
+                              &start,
+                              &lengthLow,
+                              &lengthHigh,
+                              "lock");
+    if (handle == NULL)
         return TCL_ERROR;
-    }
 
+    flags = 0;
+    if (lockInfoPtr->access == TCL_WRITABLE)
+        flags |= LOCKFILE_EXCLUSIVE_LOCK;
+    if (lockInfoPtr->block)
+        flags |= LOCKFILE_FAIL_IMMEDIATELY;
+
+    if (!LockFileEx (handle, flags, 0, lengthLow, lengthHigh, &start)) {
+        if (GetLastError () == ERROR_LOCK_FAILED) {
+            lockInfoPtr->gotLock = FALSE;
+            return TCL_OK;
+        }
+        goto winError;
+    }
     lockInfoPtr->gotLock = TRUE;
     return TCL_OK;
-#else
-    return TclXNotAvailableError (interp,
-                                  "file locking");
-#endif
+
+  winError:
+    if (GetLastError () == ERROR_CALL_NOT_IMPLEMENTED) {
+        Tcl_AppendResult (interp, "file locking is not yet available on ",
+                          "Windows 3.1 and 95", (char *) NULL);
+    } else {
+        TclWinConvertError (GetLastError ());
+        Tcl_AppendResult (interp, "lock of \"",
+                          Tcl_GetChannelName (lockInfoPtr->channel),
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+    }
+    lockInfoPtr->gotLock = FALSE;
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1399,30 +1519,36 @@ TclXOSFunlock (interp, lockInfoPtr)
     Tcl_Interp     *interp;
     TclX_FlockInfo *lockInfoPtr;
 {
-#ifdef F_SETLKW
-    int fnum, stat;
-    struct flock flockInfo;
-    
-    flockInfo.l_start = lockInfoPtr->start;
-    flockInfo.l_len = lockInfoPtr->len;
-    flockInfo.l_type = F_UNLCK;
-    flockInfo.l_whence = lockInfoPtr->whence;
+    HANDLE handle;
+    DWORD lengthHigh, lengthLow;
+    OVERLAPPED start;
 
-    fnum = ChannelToFnum (lockInfoPtr->channel, lockInfoPtr->access);
-
-    stat = fcntl (fnum, F_SETLK, &flockInfo);
-    if (stat < 0) {
-        Tcl_AppendResult (interp, "lock of \"",
-                          Tcl_GetChannelName (lockInfoPtr->channel),
-                          "\" failed: ", Tcl_PosixError (interp));
+    handle = LockUnlockSetup (interp,
+                              lockInfoPtr,
+                              &start,
+                              &lengthLow,
+                              &lengthHigh,
+                              "unlock");
+    if (handle == NULL)
         return TCL_ERROR;
-    }
 
+    if (!UnlockFileEx (handle, 0, lengthLow, lengthHigh, &start)) {
+        goto winError;
+    }
     return TCL_OK;
-#else
-    return TclXNotAvailableError (interp,
-                                  "file locking");
-#endif
+
+  winError:
+    if (GetLastError () == ERROR_CALL_NOT_IMPLEMENTED) {
+        Tcl_AppendResult (interp, "file locking is not yet available on ",
+                          "Windows 3.1 and 95", (char *) NULL);
+    } else {
+        TclWinConvertError (GetLastError ());
+        Tcl_AppendResult (interp, "unlock of \"",
+                          Tcl_GetChannelName (lockInfoPtr->channel),
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+    }
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------

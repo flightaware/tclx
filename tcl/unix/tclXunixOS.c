@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.10 1996/08/19 16:20:20 markd Exp $
+ * $Id: tclXunixOS.c,v 7.11 1996/08/20 03:49:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1415,6 +1415,23 @@ TclXOSGetSelectFnum (interp, channel, readFnumPtr, writeFnumPtr)
     else
         *writeFnumPtr = -1;
     return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSHaveFlock --
+ *   System dependent interface to determine if file locking is available.
+ * Returns:
+ *   TRUE if file locking is available, FALSE if it is not.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSHaveFlock ()
+{
+#ifdef F_SETLKW
+    return TRUE;
+#else
+    return FALSE;
+#endif
 }
 
 /*-----------------------------------------------------------------------------

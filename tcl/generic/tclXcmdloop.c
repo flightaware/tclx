@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 7.1 1996/07/18 19:36:15 markd Exp $
+ * $Id: tclXcmdloop.c,v 7.2 1996/07/24 02:17:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -430,7 +430,7 @@ AsyncCommandHandlerDelete (clientData)
         ckfree (dataPtr->prompt1);
     if (dataPtr->prompt2 != NULL)
         ckfree (dataPtr->prompt2);
-    ckfree (dataPtr);
+    ckfree ((char *) dataPtr);
 }
 
 /*-----------------------------------------------------------------------------

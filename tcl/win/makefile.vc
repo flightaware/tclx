@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.6 1996/08/06 07:15:35 markd Exp $
+# $Id: makefile.vc,v 7.7 1996/09/03 23:39:09 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -33,10 +33,8 @@ ROOT    = ..\..
 TMPDIR  = .
 TOOLS32 = c:\msdev
 TOOLS16 = c:\msdev
-TCLDIR  = ..\..\..\tcl7.5
-TKDIR   = ..\..\..\tk4.1
-
-#TCLX_LIBRARY="C:/markd/tcl/tclX7.5.2/tcl/win"
+TCLDIR  = ..\..\..\tcl7.6b1
+TKDIR   = ..\..\..\tk4.2b1
 
 # Comment the following line to compile with symbols
 #NODEBUG=1
@@ -121,12 +119,12 @@ TCLX16OBJS = $(TMPDIR)\tclWin16.obj
 
 DUMPEXTSOBJS = $(TMPDIR)\winDumpExts.obj
 
-TCLLIB = $(TCLDIR)\win\tcl75.lib
-TCLDLL = $(TCLDIR)\win\tcl75.dll
-TCL16DLL = $(TCLDIR)\win\tcl1675.dll
-TCLXLIB = tclx75.lib
-TCLXDLL = tclx75.dll
-TCLX16DLL = tclx1675.dll
+TCLLIB = $(TCLDIR)\win\tcl76.lib
+TCLDLL = $(TCLDIR)\win\tcl76.dll
+TCL16DLL = $(TCLDIR)\win\tcl1676.dll
+TCLXLIB = tclx76.lib
+TCLXDLL = tclx76.dll
+TCLX16DLL = tclx1676.dll
 TCL = tcl.exe
 TCLXTEST = tclxtest.exe
 DUMPEXTS = dumpexts.exe
@@ -218,6 +216,7 @@ tcl.tlib: $(TLIB_SRCS) cattcl.exe
 
 tcl.tndx: tcl.tlib tclx.tcl buildidx.tcl
         -del tcl.tndx
+        set TCL_LIBRARY=$(TCLDIR)/library
 	.\tcl -q $(ROOT)\unix\tools\genindex.tcl tcl.tlib
 
 tclx.tcl: $(RUNTIME_DIR)\tclx.tcl
@@ -252,11 +251,6 @@ $(TMPDIR)\winDumpExts.obj: $(TCLDIR)\win\winDumpExts.c
 
 $(TMPDIR)\cattcl.obj: $(ROOT)\tcl\win\cattcl.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
-                $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
-
-$(TMPDIR)\tclXlibInit.obj: $(ROOT)\tcl\generic\tclXlibInit.c
-        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
-            -DTCLX_LIBRARY=$(TCLX_LIBRARY) \
                 $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
 
 $(TMPDIR)\tclWin16.obj: $(ROOT)\tcl\win\tclWin16.c

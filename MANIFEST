@@ -298,6 +298,7 @@
 ./tcl/unix/pkgIndex.proto.in
 ./tcl/unix/tclXAppInit.c
 ./tcl/unix/tclXunixCmds.c
+./tcl/unix/tclXunixDup.c 
 ./tcl/unix/tclXunixId.c
 ./tcl/unix/tclXunixOS.c
 ./tcl/unix/tclXunixPort.h
@@ -313,7 +314,6 @@
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h
 ./tcl/win/tclx.rc
-./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
 ./tk/generic/tkXshell.c.diff
@@ -374,6 +374,7 @@
 ./tk/unix/Makefile.in
 ./tk/unix/tkxConfig.sh.in
 ./tk/win/makefile.vc
+./tk/win/tkXAppInit.c
 ./unix/Common.mk.in
 ./unix/Config.mk
 ./unix/INSTALL
@@ -392,5 +393,3 @@
 ./unix/tools/tclmanpages
 ./unix/tools/tkmanpages
 ./win/INSTALL
-./win/tclWinSock.c.diff
-./win/tclWinSock.c.diff

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 7.1 1996/07/18 19:36:19 markd Exp $
+ * $Id: tclXgeneral.c,v 7.2 1996/07/22 17:10:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -131,6 +131,8 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
 {
     char numBuf [32];
 
+    /* FIX: Need a way to get the have_ functionallity from the OS dependent
+       code */
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " option", (char *) NULL);
@@ -164,11 +166,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("have_flock", argv [1])) {
-#       ifdef F_SETLKW
-        interp->result = "1";
-#       else
-        interp->result = "0";
-#       endif        
+        interp->result = TclXOSHaveFlock () ? "1" : "0";
         return TCL_OK;
     }
     if (STREQU ("have_fsync", argv [1])) {

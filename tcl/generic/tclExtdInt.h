@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.11 1996/08/20 03:49:51 markd Exp $
+ * $Id: tclExtdInt.h,v 7.12 1996/08/21 06:54:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -749,6 +749,9 @@ TclXOSGetSelectFnum _ANSI_ARGS_((Tcl_Interp *interp,
                                  Tcl_Channel channel,
                                  int        *readFnumPtr,
                                  int        *writeFnumPtr));
+
+int
+TclXOSHaveFlock _ANSI_ARGS_((void));
 
 int
 TclXOSFlock _ANSI_ARGS_((Tcl_Interp     *interp,
