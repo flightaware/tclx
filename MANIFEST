@@ -8,12 +8,6 @@
 ./acconfig.h
 ./configure
 ./configure.in
-./experimental/README
-./experimental/debugger/README.DEBUG
-./experimental/debugger/ndebug.c
-./experimental/debugger/ndebug.tcl
-./experimental/getkey.c
-./experimental/tcldbm.c
 ./man/CmdWrite.3
 ./man/Handles.3
 ./man/Keylist.3
