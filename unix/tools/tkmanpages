@@ -1,0 +1,55 @@
+#
+# tkmanpages --
+#
+#   Manual info file to be sources by bldmanhelp.tcl that returns a table
+# describing the Tk manual to build the help files from.
+#------------------------------------------------------------------------------
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: bldtkhelp.tcl,v 1.3 1993/06/17 05:25:41 markd Exp markd $
+#------------------------------------------------------------------------------
+#
+return {
+    {after.n        tk/control/after}
+    {bind.n         tk/control/bind}
+    {button.n       tk/widgets/button}
+    {canvas.n       tk/widgets/canvas}
+    {checkbutton.n  tk/widgets/checkbutton}
+    {destroy.n      tk/control/destroy}
+    {entry.n        tk/widgets/entry}
+    {focus.n        tk/control/focus}
+    {frame.n        tk/widgets/frame}
+    {grab.n         tk/control/grab}
+    {label.n        tk/widgets/label}
+    {lbSingSel.n    tk/widgets/tk_listboxSingleSelect}
+    {listbox.n      tk/widgets/listbox}
+    {menu.n         tk/widgets/menu}
+    {menubar.n      tk/widgets/tk_menuBar}
+    {menubutton.n   tk/widgets/menubutton}
+    {message.n      tk/widgets/message}
+    {option.n       tk/control/option}
+    {options.n      tk/widgets/options}
+    {pack.n         tk/control/pack}
+    {place.n        tk/control/place}
+    {radiobutton.n  tk/widgets/radiobutton}
+    {scale.n        tk/widgets/scale}
+    {scrollbar.n    tk/widgets/scrollbar}
+    {selection.n    tk/control/selection}
+    {send.n         tk/control/send}
+    {text.n         tk/widgets/text}
+    {tk.n           tk/control/tk}
+    {tkerror.n      tk/control/tkerror}
+    {tkwait.n       tk/control/tkwait}
+    {toplevel.n     tk/widgets/toplevel}
+    {update.n       tk/control/update}
+    {variables.n    tk/control/variables}
+    {winfo.n        tk/control/winfo}
+    {wm.n           tk/control/wm}
+}
