@@ -5377,18 +5377,18 @@ cat >> $CONFIG_STATUS <<EOF
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
-chmod a+xr,a-w runtcl
-           chmod a+xr,a-w runtcl.static
-           chmod a+xr,a-w runtcl.standalone
-           chmod a+xr,a-w runwishx
-           chmod a+xr,a-w runwishx.static
-           chmod a+xr,a-w runwishx.standalone
-           chmod a+xr,a-w ../tcl/unix/runtest
-           chmod a+xr,a-w ../tcl/unix/runtest.static
-           chmod a+xr,a-w ../tcl/unix/runtest.standalone
-           chmod a+xr,a-w ../tk/unix/runtest
-           chmod a+xr,a-w ../tk/unix/runtest.static
-           chmod a+xr,a-w ../tk/unix/runtest.standalone
+chmod a+xr,go-w runtcl
+           chmod a+xr,go-w runtcl.static
+           chmod a+xr,go-w runtcl.standalone
+           chmod a+xr,go-w runwishx
+           chmod a+xr,go-w runwishx.static
+           chmod a+xr,go-w runwishx.standalone
+           chmod a+xr,go-w ../tcl/unix/runtest
+           chmod a+xr,go-w ../tcl/unix/runtest.static
+           chmod a+xr,go-w ../tcl/unix/runtest.standalone
+           chmod a+xr,go-w ../tk/unix/runtest
+           chmod a+xr,go-w ../tk/unix/runtest.static
+           chmod a+xr,go-w ../tk/unix/runtest.standalone
 exit 0
 EOF
 chmod +x $CONFIG_STATUS
