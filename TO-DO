@@ -2,9 +2,20 @@
 
 *** Porting to 8.1 ***
 o Is Tcl_EvalObjv useful to us?
+
 o Boyer-Moore is not being used.
 
+o option to command loop to quit on an error or something like that
+  (callback?, both?)
+
+o EvalFilePart should do everything Tcl_Eval files does with
+  objects.
+
 *** Serious Bugs ***
+
+o Results of "runtest nonexistant-file" is bogus.  errorInfo is never
+  getting set, as Tcl_EvalFile does not set errorInfo if file can't
+  be opened
 
 o cmdtrace usage message includes garbage after args: .
 

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.11 1997/09/13 17:23:41 markd Exp $
+.\" $Id: TclX.n,v 8.12 1997/11/11 05:33:11 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2136,7 +2136,7 @@ they are equal and \fB1\fR if \fIstring1\fR is greater than \fIstring2\fR.
 If \fB\-local\fR is specified, the strings are compared according to the
 collation environment of the current locale.
 .sp
-This command does not work with binary data.
+This command does not work with binary or UTF data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2151,6 +2151,8 @@ While string concatenation is normally performed by the parser, it is
 occasionally useful to have a command that returns a string.
 The is generally useful when a command to evaluate is required.
 No separators are inserted between the strings.
+.sp
+This command if UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2165,6 +2167,8 @@ It returns \fB1\fR if \fIstring1\fR and \fIstring2\fR are the identical
 and \fB0\fR if they are not.
 This command is a short-cut for \fBstring compare\fR and avoids the
 problems with string expressions being treated unintentionally as numbers.
+.sp
+This command if UTF-aware and will also work on binary data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2181,6 +2185,8 @@ If the expression \fIindexExpr\fR starts with the string \fBend\fR, then
 \fBend\fR is replaced with the index of the last character in the string.  If
 the expression starts with \fBlen\fR, then \fBlen\fR is replaced with the
 length of the string.
+.sp
+This command if UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2197,6 +2203,8 @@ This command is a shortcut for:
     string length string
 .ft R
 .fi
+.sp
+This command if UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2214,6 +2222,8 @@ If the expression \fIfirstExpr\fR or \fBlastExpr\fR starts with the string
 \fBend\fR, then \fBend\fR is replaced with the index of the last character in
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
+.sp
+This command if UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2231,6 +2241,8 @@ If the expression \fIfirstExpr\fR or \fBlengthExpr\fR starts with the string
 \fBend\fR, then \fBend\fR is replaced with the index of the last character in
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
+.sp
+This command if UTF-aware.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2282,7 +2294,8 @@ than 0200).
 .TP
 .B ctype char \fInumber\fR
 Converts the numeric value, \fIstring\fR, to an ASCII character.  Number must
-be in the range 0 through 255.
+be in the range 0 through the maximum UTF-8 values.  If the number is 128, it is
+converted as a UTF-8 encoding value, not a Unicode character value.
 .TP
 .B ctype \fI?\-failindex var? cntrl \fIstring\fR
 Tests that all characters are ``control characters'' as defined by the
@@ -2301,7 +2314,8 @@ set.
 .TP
 .B ctype ord \fIcharacter\fR
 Convert a character into its decimal numeric value.  The first character of
-the string is converted.
+the string is converted.  If the character is a UTF-8 encoding, the numeric
+value of the UTF-8 multi-byte character is returned, not the Unicode character. 
 .TP
 .B ctype \fI?\-failindex var? space \fIstring\fR
 Tests that all characters are either a space, horizontal-tab, carriage
@@ -2339,6 +2353,8 @@ first character that did not match the class is returned in \fIvar\fR.
 .br
 Returns \fIstring\fR, replicated the number of times indicated by the
 expression \fIcountExpr\fR.
+.sp
+This command if UTF-aware and will work with binary data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

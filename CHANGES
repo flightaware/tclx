@@ -1378,3 +1378,6 @@
     interp state on signals. Debugged and submitted by the ever-helpful
     <Viktor-Dukhovni@deshaw.com>.
 -------------------------------------------------------------------------------
+29 Jan 98:
+  o Converted scanfile to use new regular expression facility.
+-------------------------------------------------------------------------------
