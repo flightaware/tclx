@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.14 1997/07/04 09:24:44 markd Exp $
+ * $Id: tclExtdInt.h,v 8.15 1997/07/04 20:23:41 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -221,6 +221,11 @@ extern int
 TclX_StrToOffset _ANSI_ARGS_((CONST char *string,
                               int         base,
                               off_t      *offsetPtr));
+
+int
+TclX_GetUnsignedFromObj _ANSI_ARGS_((Tcl_Interp *interp,
+                                     Tcl_Obj    *objPtr,
+                                     unsigned   *valuePtr));
 
 extern int
 TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,

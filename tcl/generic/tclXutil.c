@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.13 1997/07/04 18:22:32 markd Exp $
+ * $Id: tclXutil.c,v 8.14 1997/07/04 20:24:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -285,7 +285,32 @@ TclX_UpShift (targetStr, sourceStr)
 
 /*-----------------------------------------------------------------------------
  * TclX_GetOffsetFromObj --
- *   Get the value of an integer objects asn an off_t.
+ *   Get the value of an integer objects as an unsigned.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_GetUnsignedFromObj (interp, objPtr, valuePtr)
+    Tcl_Interp *interp;
+    Tcl_Obj    *objPtr;
+    unsigned   *valuePtr;
+{
+    int intValue;
+    
+    if (Tcl_GetIntFromObj (interp, objPtr, &intValue) != TCL_OK)
+        return TCL_ERROR;
+    if (intValue < 0) {
+        TclX_AppendObjResult (interp, "expected unsigned integer, got \"",
+                              Tcl_GetStringFromObj (objPtr, NULL),
+                              "\"", (char *) NULL);
+        return TCL_ERROR;
+    }
+    *valuePtr = intValue;
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_GetOffsetFromObj --
+ *   Get the value of an integer objects as an off_t.
  *-----------------------------------------------------------------------------
  */
 int

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.9 1997/06/30 17:21:40 markd Exp $
+ * $Id: tclXlib.c,v 8.10 1997/07/04 20:23:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -97,7 +97,7 @@ SetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
 
 static int
 GetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                  char       *packageName,
+                                  Tcl_Obj    *packageNamePtr,
                                   char      **fileNamePtr,
                                   off_t      *offsetPtr,
                                   unsigned   *lengthPtr));
@@ -422,7 +422,7 @@ SetPackageIndexEntry (interp, packageName, fileName, offset, length)
  *
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
- *   o packageName (I) - Package name to find.
+ *   o packageNamePtr (I) - Package name to find.
  *   o fileNamePtr (O) - The file name for the library file is returned here.
  *     This should be freed by the caller.
  *   o offsetPtr (O) - Start of the package in the library.
@@ -432,27 +432,32 @@ SetPackageIndexEntry (interp, packageName, fileName, offset, length)
  *-----------------------------------------------------------------------------
  */
 static int
-GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
+GetPackageIndexEntry (interp, packageNamePtr, fileNamePtr, offsetPtr,
+                      lengthPtr)
      Tcl_Interp *interp;
-     char       *packageName;
+     Tcl_Obj    *packageNamePtr;
      char      **fileNamePtr;
      off_t       *offsetPtr;
      unsigned   *lengthPtr;
 {
-    int   pkgDataArgc;
-    char *dataStr, **pkgDataArgv = NULL;
-    char *srcPtr, *destPtr;
-
+    int   pkgDataObjc;
+    Tcl_Obj **pkgDataObjv;
+    Tcl_Obj *varNamePtr, *pkgDataPtr;
+   
+    varNamePtr = Tcl_NewStringObj (AUTO_PKG_INDEX, -1);
+    
     /*
      * Look up the package entry in the array.
      */
-    dataStr = Tcl_GetVar2 (interp, AUTO_PKG_INDEX, packageName,
-                           TCL_GLOBAL_ONLY);
-    if (dataStr == NULL) {
-        TclX_AppendObjResult (interp, "entry not found in \"auto_pkg_index \"",
-                              "for package \"", packageName, "\"",
+    pkgDataPtr = Tcl_ObjGetVar2 (interp, varNamePtr, packageNamePtr,
+                                 TCL_GLOBAL_ONLY);
+    if (pkgDataPtr == NULL) {
+        TclX_AppendObjResult (interp, "entry not found in \"auto_pkg_index\"",
+                              " for package \"", 
+                              Tcl_GetStringFromObj (packageNamePtr, NULL),
+                              "\"",
                               (char *) NULL);
-        return TCL_ERROR;
+        goto errorExit;
     }
 
     /*
@@ -460,35 +465,34 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
      * to the top of the memory area returned by Tcl_SplitList after the
      * other fields have been accessed.  Copied in a way allowing for overlap.
      */
-    if (Tcl_SplitList (interp, dataStr, &pkgDataArgc, &pkgDataArgv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, pkgDataPtr,
+                                &pkgDataObjc, &pkgDataObjv) != TCL_OK)
         goto invalidEntry;
-    if (pkgDataArgc != 3)
-        goto invalidEntry;
-
-    if (!TclX_StrToOffset (pkgDataArgv [1], 0, offsetPtr))
-        goto invalidEntry;
-    if (!TclX_StrToUnsigned (pkgDataArgv [2], 0, lengthPtr))
+    if (pkgDataObjc != 3)
         goto invalidEntry;
 
-    *fileNamePtr = destPtr = (char *) pkgDataArgv;
-    srcPtr = pkgDataArgv [0];
+    if (TclX_GetOffsetFromObj (interp, pkgDataObjv [1], offsetPtr) != TCL_OK)
+        goto invalidEntry;
+    if (TclX_GetUnsignedFromObj (interp, pkgDataObjv [2], lengthPtr) != TCL_OK)
+        goto invalidEntry;
 
-    while (*srcPtr != '\0') {
-        *destPtr++ = *srcPtr++;
-    }
-    *destPtr = '\0';
+    *fileNamePtr = Tcl_GetStringFromObj (pkgDataObjv [0], NULL);
+    *fileNamePtr = ckstrdup (*fileNamePtr);
 
+    Tcl_DecrRefCount (varNamePtr);
     return TCL_OK;
     
     /*
      * Exit point when an invalid entry is found.
      */
   invalidEntry:
-    if (pkgDataArgv != NULL)
-        ckfree ((char *) pkgDataArgv);
     Tcl_ResetResult (interp);
-    TclX_AppendObjResult (interp, "invalid entry in \"auto_pkg_index \"",
-                          "for package \"", packageName, "\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid entry in \"auto_pkg_index\"",
+                          " for package \"",
+                          Tcl_GetStringFromObj (packageNamePtr, NULL), "\"",
+                          (char *) NULL);
+  errorExit:
+    Tcl_DecrRefCount (varNamePtr);
     return TCL_ERROR;
 }
 
@@ -1038,8 +1042,7 @@ TclX_Auto_load_pkgObjCmd (clientData, interp, objc, objv)
         return TclX_WrongArgs (interp, objv [0], "package");
     }
 
-    if (GetPackageIndexEntry (interp,
-                              Tcl_GetStringFromObj (objv [1], NULL),
+    if (GetPackageIndexEntry (interp, objv [1],
                               &fileName, &offset, &length) != TCL_OK)
         return TCL_ERROR;
 
@@ -1182,7 +1185,7 @@ LoadAutoPath (interp, infoPtr)
     Tcl_Interp  *interp;
     libInfo_t   *infoPtr;
 {
-    char   *path, *oldPath;
+    char *path, *oldPath;
 
     path = Tcl_GetVar (interp, AUTO_PATH, TCL_GLOBAL_ONLY);
     if (path == NULL)
