@@ -15,6 +15,7 @@
 ./config/sunos4.1
 ./config/sysv.3.2.0
 ./config/ultrix
+./config/ultrix4.2
 ./config/xenix
 ./experimental/README
 ./experimental/debugger/README.DEBUG
