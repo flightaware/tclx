@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.12 2000/07/05 22:36:49 davidg Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.13 2000/07/11 04:42:10 welch Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -100,22 +100,22 @@ TCL_STUB_LIB_FILE = "$(shell cygpath $(PATHTYPE) '@TCL_BIN_DIR@/@TCL_STUB_LIB_FI
 TCL_DLL_FILE		= @TCL_DLL_FILE@
 TCL_SRC_DIR		= @TCL_SRC_DIR@
 TCL_BIN_DIR		= $(shell cygpath -u '@TCL_BIN_DIR@')
-TCL_GENERIC_DIR		= $(TCL_SRC_DIR)/../generic
-TCL_TEST_DIR		= $(TCL_SRC_DIR)/../tests
-TCL_WIN_DIR		= $(TCL_SRC_DIR)/../win
-TCL_LIBRARY_DIR		= $(TCL_SRC_DIR)/../library
+TCL_GENERIC_DIR		= $(TCL_SRC_DIR)/generic
+TCL_TEST_DIR		= $(TCL_SRC_DIR)/tests
+TCL_WIN_DIR		= $(TCL_SRC_DIR)/win
+TCL_LIBRARY_DIR		= $(TCL_SRC_DIR)/library
 
 TK_LIB_FILE	  = "$(shell cygpath $(PATHTYPE) '@TK_BIN_DIR@/@TK_LIB_FILE@')"
 TK_STUB_LIB_FILE = "$(shell cygpath $(PATHTYPE) '@TK_BIN_DIR@/@TK_STUB_LIB_FILE@')"
 TK_DLL_FILE		= @TK_DLL_FILE@
 TK_SRC_DIR		= @TK_SRC_DIR@
 TK_BIN_DIR		= $(shell cygpath -u '@TK_BIN_DIR@')
-TK_GENERIC_DIR		= $(TK_SRC_DIR)/../generic
-TK_TEST_DIR		= $(TK_SRC_DIR)/../tests
-TK_WIN_DIR		= $(TK_SRC_DIR)/../win
-TK_BITMAP_DIR		= $(TK_SRC_DIR)/../bitmaps
-TK_XLIB_DIR		= $(TK_SRC_DIR)/../xlib
-TK_LIBRARY_DIR		= $(TK_SRC_DIR)/../library
+TK_GENERIC_DIR		= $(TK_SRC_DIR)/generic
+TK_TEST_DIR		= $(TK_SRC_DIR)/tests
+TK_WIN_DIR		= $(TK_SRC_DIR)/win
+TK_BITMAP_DIR		= $(TK_SRC_DIR)/bitmaps
+TK_XLIB_DIR		= $(TK_SRC_DIR)/xlib
+TK_LIBRARY_DIR		= $(TK_SRC_DIR)/library
 
 TCLX_ROOT_DIR_NATIVE   	= $(shell cygpath $(PATHTYPE) '$(TCLX_ROOT_DIR)')
 TCLX_WIN_DIR_NATIVE	= $(shell cygpath $(PATHTYPE) '$(TCLX_WIN_DIR)')
