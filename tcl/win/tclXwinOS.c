@@ -428,7 +428,7 @@ TclXOSsetitimer (Tcl_Interp *interp,
 void
 TclXOSsleep (unsigned seconds)
 {
-    Sleep (seconds*100);
+    Sleep(seconds*1000);
 }
 
 /*-----------------------------------------------------------------------------
