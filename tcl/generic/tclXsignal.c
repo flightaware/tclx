@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.0 1992/10/16 04:51:12 markd Rel markd $
+ * $Id: tclXsignal.c,v 2.1 1992/11/17 06:26:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -91,6 +91,15 @@ static struct {char *name;
 #endif
 
 typedef SIG_PROC_RET_TYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
+
+/*
+ * Include for 386BSD, since they don't have SIG_ERR right now.
+ */
+
+#if defined(BADSIG) && !defined(SIG_ERR)
+#    define SIG_ERR BADSIG
+#endif
+
 
 /*
  * Class of actions that can be set by the signal command.
