@@ -519,7 +519,7 @@ else
 fi
 
 
-# From configure.in Revision: 5.35 dnl
+# From configure.in Revision: 7.1 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -2626,6 +2626,44 @@ rm -f conftest*
 if test "$found_random" = "NO"; then
     cat >> confdefs.h <<\EOF
 #define NO_RANDOM_PROTO 1
+EOF
+
+fi
+
+#------------------------------------------------------------------------------
+# Determine if floor is declared in stdlib.h or math.h.  If it is, we don't
+# want to redeclare it.
+#------------------------------------------------------------------------------
+
+found_floor=NO
+cat > conftest.$ac_ext <<EOF
+#line 2641 "configure"
+#include "confdefs.h"
+#include <stdlib.h>
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep ""floor"" >/dev/null 2>&1; then
+  rm -rf conftest*
+  found_floor=YES
+fi
+rm -f conftest*
+
+cat > conftest.$ac_ext <<EOF
+#line 2653 "configure"
+#include "confdefs.h"
+#include <math.h>
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep ""floor"" >/dev/null 2>&1; then
+  rm -rf conftest*
+  found_floor=YES
+fi
+rm -f conftest*
+
+
+if test "$found_floor" = "NO"; then
+    cat >> confdefs.h <<\EOF
+#define NO_FLOOR_PROTO 1
 EOF
 
 fi
