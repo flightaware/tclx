@@ -1,3 +1,8 @@
+2001-05-24  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* unix/tools/tclmanpages: Added "re_syntax.n" to the list of
+	  processed manpages [#405956].
+
 2001-05-19  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* All of the changes below are there to fix bug [418295].

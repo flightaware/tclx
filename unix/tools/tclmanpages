@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclmanpages,v 8.6 1999/03/31 06:37:59 markd Exp $
+# $Id: tclmanpages,v 8.7 1999/06/24 01:09:07 redman Exp $
 #------------------------------------------------------------------------------
 #
 return {
@@ -81,6 +81,7 @@ return {
     {pwd.n          tcl/status/pwd}
     {read.n         tcl/files/read}
     {regexp.n       tcl/strings/regexp}
+    {re_syntax.n    tcl/strings/re_syntax}
     {registry.n     tcl/files/registry}
     {regsub.n       tcl/strings/regsub}
     {rename.n       tcl/control/rename}
