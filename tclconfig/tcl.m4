@@ -393,13 +393,6 @@ AC_DEFUN(TEA_ENABLE_SHARED, [
 	SHARED_BUILD=0
 	AC_DEFINE(STATIC_BUILD)
     fi
-
-    # These are escaped so that only CFLAGS is picked up at configure time.
-    # The other values will be substituted at make time.
-    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING}"
-    if test "${SHARED_BUILD}" = "1" ; then
-	CFLAGS="${CFLAGS} \${SHLIB_CFLAGS}"
-    fi
     AC_SUBST(SHARED_BUILD)
 ])
 
@@ -997,7 +990,7 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 	    # Check to enable 64-bit flags for compiler/linker
 	    if test "$do64bit" = "yes" ; then
 		if test "$GCC" = "yes" ; then
-		    hpux_arch='`gcc -dumpmachine`'
+		    hpux_arch=`gcc -dumpmachine`
 		    case $hpux_arch in
 			hppa64*)
 			    # 64-bit gcc in use.  Fix flags for GNU ld.
@@ -2539,6 +2532,7 @@ AC_DEFUN(TEA_SETUP_COMPILER, [
 # Results:
 #
 #	Defines the following vars:
+#	CFLAGS -	Done late here to note disturb other AC macros
 #       MAKE_LIB -      Command to execute to build the Tcl library;
 #                       differs depending on whether or not Tcl is being
 #                       compiled as a shared library.
@@ -2598,6 +2592,13 @@ AC_DEFUN(TEA_MAKE_LIB, [
 	fi
 	# Some packages build there own stubs libraries
 	eval eval "${PACKAGE}stub_LIB_FILE=lib${PACKAGE}stub${UNSHARED_LIB_SUFFIX}"
+    fi
+
+    # These are escaped so that only CFLAGS is picked up at configure time.
+    # The other values will be substituted at make time.
+    CFLAGS="${CFLAGS} \${CFLAGS_DEFAULT} \${CFLAGS_WARNING}"
+    if test "${SHARED_BUILD}" = "1" ; then
+	CFLAGS="${CFLAGS} \${SHLIB_CFLAGS}"
     fi
 
     AC_SUBST(MAKE_LIB)
