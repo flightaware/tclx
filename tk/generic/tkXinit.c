@@ -13,12 +13,20 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 4.1 1995/01/01 19:51:00 markd Exp markd $
+ * $Id: tkXinit.c,v 4.2 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tk.h"
+
+/*
+ * Used to override the library and library environment variable used to
+ * find the TkX startup file and runtime library.  The values of these
+ * fields must be changed before TkX_Init is called.
+ */
+char *tkX_library    = TKX_LIBRARY;
+char *tkX_libraryEnv = "TK_LIBRARY";
 
 /*
  * The following is used to force the version of tkWindow.c that was compiled
@@ -56,7 +64,7 @@ TkX_Init (interp)
 	    error $msg\n\
 	}";
 
-    char  *value;
+    char  *interact, *libDir;
 
     /*
      * Make sure main window exists, or Tk_Init will fail in a confusing
@@ -76,9 +84,28 @@ TkX_Init (interp)
     /*
      * If we are going to be interactive, Setup SIGINT handling.
      */
-    value = Tcl_GetVar (interp, "tcl_interactive", TCL_GLOBAL_ONLY);
-    if ((value != NULL) && (value [0] != '0'))
+    interact = Tcl_GetVar (interp, "tcl_interactive", TCL_GLOBAL_ONLY);
+    if ((interact != NULL) && (interact [0] != '0'))
         Tcl_SetupSigInt ();
+
+    /*
+     * Set tk_library to point to the TkX library.  It maybe an empty
+     * string if the path is not defined.
+     */
+    libDir = NULL;
+    if (tkX_libraryEnv != NULL) {
+        libDir = Tcl_GetVar2 (interp, "env", tkX_libraryEnv, TCL_GLOBAL_ONLY);
+    }
+    if (libDir == NULL) {
+        if (tkX_library != NULL)
+            libDir = tkX_library;
+        else
+            libDir = "";
+    }
+    if (Tcl_SetVar (interp, "tk_library", libDir,
+                TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        return TCL_ERROR;
+
 
     /*
      * Find and run the Tk initialization file.

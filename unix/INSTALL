@@ -319,16 +319,15 @@ platforms, please contact us.
 INTEGRATING PATCHES
 ===================
 
-TclX copies and recomplies the following files:
+TclX copies and recomplies the following file:
 
    ${TCL_UCB_SRC}/tcl7.4/tclCmdIL.c to src/tclCmdIL.c
-   ${TK_UCB_SRC/tk4.0/tkWindow.c to tksrc/tkWindow.c
 
-If you patch either of these files, you must compile TclX.  The make rules
+If you patch this file, you must compile TclX.  The make rules
 should take care of recompiling the correct files.  If you patch any of the
 tcl or tk .h files, you should do a make clean and then a make of TclX.
 
-These files are recompiled as they have compiled in paths to the library 
+This file is recompiled as it has compiled in paths to the library 
 directories, which are different under TclX.  We are talking with John
 Ousterhout about a solution.
 
