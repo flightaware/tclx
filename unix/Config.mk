@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.3 1992/10/03 18:02:10 markd Exp markd $
+# $Id: Config.mk,v 1.4 1992/10/04 02:41:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -58,14 +58,15 @@ TK_LIBRARY=/usr/local/lib/tk
 # Compiler debug/optimization/profiling flag to use.  Not that if debugging or
 # profiling is enabled, the DO_STRIPPING option below must be disabled.
 #
-OPTIMIZE_FLAG=-g
+OPTIMIZE_FLAG=-O
 
 #------------------------------------------------------------------------------
 # Stripping of the final tclshell binary.  Specify `true' if the binary is to
 # be stripped (optimized case) or specify `false' if the binary is not to be
 # stripped (debugging case).
 #
-DO_STRIPPING=false
+#DO_STRIPPING=false
+DO_STRIPPING=true
 
 #------------------------------------------------------------------------------
 # Definition of the compiler you want to use, as well as extra flags for the
