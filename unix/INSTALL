@@ -439,11 +439,6 @@ SOLARIS:
      solution.
    o message-cat-1.3 test fails due to broken catopen.  This is should not
      affect actual use of this command.
-   o Using SIGCHLD to detect the termination of processes created by "exec" or
-    "open" has been observed to cause core dumps on Solaris 2.3.  Either use
-     the TclX fork and execl commands to start the process or change
-     Tcl_CreatePipeline in the Tcl file tclUnixUtil.c to use fork instead of
-     vfork.
 
 SCO:
    o SCO Unix systems have a "ranlib" command that is used for Xenix cross-
