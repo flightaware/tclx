@@ -1033,4 +1033,6 @@
   o Added interfaces to TclX_Init and TkX_Init that follow the new calling 
     convention for dynamic loading.
   o Allow min/max commands to take only one argument.
+===============================================================================
+20 Oct 95: Released TclX 7.5a Alpha 2
 -------------------------------------------------------------------------------

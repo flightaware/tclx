@@ -1,11 +1,12 @@
                            Extended Tcl (TclX) 7.5a
                            ========================
 
-TclX 7.5 Alpha 1 Release
+TclX 7.5 Alpha 2 Release
 ========================
 
-This is the first TclX alpha release that is compatible with the Tcl 7.5 /
-Tk 4.1 alpha line.  Its is known to work with the Tcl/Tk alpha 1 releases.
+This is the second TclX alpha release that is compatible with the Tcl 7.5 /
+Tk 4.1 alpha line.  Its is known to work with the Tcl/Tk alpha 2 releases.
+This only consists of a few bug fixes, but they where annoying people.
 
 This release contains mainly changes for compatibility with Tcl 7.5.  Shared
 libraries are not currently built, so its not dynamically loadable out of the

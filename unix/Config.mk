@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.1 1995/08/30 05:07:18 markd Exp $
+# $Id: Config.mk,v 5.3 1995/10/20 05:50:22 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -49,8 +49,8 @@
 # library (libtcl.a),  Note, access is required to tclInt.h which is not
 # installed by Tcl.
 
-TCL_UCB_SRC=${srcbasedir}/../tcl7.5a1
-TCL_UCB_LIB=${bldbasedir}/../tcl7.5a1/unix/libtcl.a
+TCL_UCB_SRC=${srcbasedir}/../tcl7.5a2
+TCL_UCB_LIB=${bldbasedir}/../tcl7.5a2/unix/libtcl.a
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -59,8 +59,8 @@ TCL_UCB_LIB=${bldbasedir}/../tcl7.5a1/unix/libtcl.a
 # UCB Tk library (libtk.a).
 
 TK_BUILD = WISHX
-TK_UCB_SRC=${srcbasedir}/../tk4.1a1
-TK_UCB_LIB=${bldbasedir}/../tk4.1a1/unix/libtk.a
+TK_UCB_SRC=${srcbasedir}/../tk4.1a2
+TK_UCB_LIB=${bldbasedir}/../tk4.1a2/unix/libtk.a
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,

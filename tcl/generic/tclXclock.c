@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 4.3 1995/04/25 03:46:17 markd Exp markd $
+ * $Id: tclXclock.c,v 5.1 1995/10/26 01:02:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -71,7 +71,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     struct tm       *timeDataPtr;
     Tcl_DString      buffer;
     int              bufSize;
-#ifdef TCL_USE_TIMEZONE_VAR
+#ifdef HAVE_TIMEZONE_VAR
     int              savedTimeZone;
     char            *savedTZEnv;
 #endif
@@ -110,7 +110,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
     else
         format = "%a %b %d %X %Z %Y";
 
-#ifdef TCL_USE_TIMEZONE_VAR
+#ifdef HAVE_TIMEZONE_VAR
     /*
      * This is a horrible kludge for systems not having the timezone in
      * struct tm.  No matter what was specified, they use the global time
@@ -148,7 +148,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
         Tcl_DStringSetLength (&buffer, bufSize);
     }
 
-#ifdef TCL_USE_TIMEZONE_VAR
+#ifdef HAVE_TIMEZONE_VAR
     if (useGMT) {
         if (savedTZEnv != NULL) {
             Tcl_SetVar2 (interp, "env", "TZ", savedTZEnv, TCL_GLOBAL_ONLY);
