@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.9 1995/03/23 07:40:06 markd Exp markd $
+# $Id: Makefile.in,v 4.10 1995/04/21 21:07:47 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -124,6 +124,12 @@ tcl++:
 
 test: all
 	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} test
+
+ucbtests: all
+	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} ucbtests
+
+extdtests: all
+	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} extdtests
 
 tktest: all
 	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} test
