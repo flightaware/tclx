@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.10 1997/07/04 18:23:07 markd Exp $
+ * $Id: tclXsignal.c,v 8.11 1997/07/04 20:24:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -855,7 +855,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
         sigInterp = interp;
     }
 
-    errStateObjPtr = TclX_SaveResultErrorInfo (interp);
+    errStateObjPtr = TclX_SaveResultErrorInfo (sigInterp);
 
     /*
      * Process all signals.  Don't process any more if one returns an error.
@@ -877,7 +877,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
      * handling.
      */
     if (result != TCL_ERROR) {
-        TclX_RestoreResultErrorInfo (interp, errStateObjPtr) ;
+        TclX_RestoreResultErrorInfo (sigInterp, errStateObjPtr) ;
     } else {
         Tcl_DecrRefCount (errStateObjPtr);
         cmdResultCode = TCL_ERROR;

@@ -12,9 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 8.0.4.1 1997/04/14 02:03:04 markd Exp $
+# $Id: signal.test,v 8.1 1997/04/17 05:00:07 markd Exp $
 #------------------------------------------------------------------------------
 #
+
+# FIX: need to automate and make part of make tktest.
 
 foreach i [winfo children .] {
     destroy $i
