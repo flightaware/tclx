@@ -12,18 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 5.5 1996/02/24 23:08:55 markd Exp $
+ * $Id: tclXdup.c,v 5.6 1996/03/10 04:42:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * Channel options.
- */
-static char *COPT_BLOCKING    = "-blocking";
-static char *COPT_BUFFERING   = "-buffering";
-static char *COPT_TRANSLATION = "-translation";
 
 /*
  * Prototypes of internal functions.
@@ -31,6 +24,11 @@ static char *COPT_TRANSLATION = "-translation";
 static int
 ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
                                char       *handle));
+
+static int
+DupChannelOptions _ANSI_ARGS_((Tcl_Interp  *interp,
+                               Tcl_Channel  srcChannel,
+                               Tcl_Channel  targetChannel));
 
 static int
 DupFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
@@ -76,6 +74,70 @@ ConvertFileHandle (interp, handle)
 }
 
 /*-----------------------------------------------------------------------------
+ * DupChannelOptions --
+ *
+ *   Set the channel options of one channel to those of another.
+ *
+ * Parameters:
+ *   o interp (I) - Errors returned in result.
+ *   o srcChannel (I) - Channel to get the options.
+ *   o targetChannel (I) - Channel to set the options on.
+ * Result:
+ *   TCL_OK or TCL_ERROR;
+ *-----------------------------------------------------------------------------
+ */
+static int
+DupChannelOptions (interp, srcChannel, targetChannel)
+    Tcl_Interp  *interp;
+    Tcl_Channel  srcChannel;
+    Tcl_Channel  targetChannel;
+{
+    Tcl_DString strValues;
+    char *scanPtr, *option, *value;
+    int size, result;
+
+    Tcl_DStringInit (&strValues);
+
+    if (Tcl_GetChannelOption (srcChannel, NULL, &strValues) != TCL_OK)
+        goto fatalError;
+
+    /*
+     * Walk (rather than split) the list for each name/value pair and set
+     * the new channel.  Only modify blocking if its not the default, as
+     * setting blocking on standard files generates an error on some systems.
+     */
+    scanPtr = strValues.string;
+
+    while (*scanPtr != '\0') {
+        result = TclFindElement (interp, scanPtr, &option, &scanPtr, &size,
+                                 NULL);
+        if ((result != TCL_OK) || (*scanPtr == '\0'))
+            goto fatalError;
+        option [size] = '\0';
+        result = TclFindElement (interp, scanPtr, &value, &scanPtr, &size,
+                                 NULL);
+        if (result != TCL_OK)
+            goto fatalError;
+        value [size] = '\0';
+
+        if (STREQU (option, "-blocking") && (value [0] != '0'))
+            continue;
+
+        if (Tcl_SetChannelOption (interp, targetChannel, option,
+                                  value) != TCL_OK) {
+            Tcl_DStringFree (&strValues);
+            return TCL_ERROR;
+        }
+    }
+
+    Tcl_DStringFree (&strValues);
+    return TCL_OK;
+
+  fatalError:
+    panic ("DupChannelOption bug");
+}
+
+/*-----------------------------------------------------------------------------
  * DupFileHandle --
  *   Duplicate a Tcl file handle.
  *
@@ -99,9 +161,6 @@ DupFileHandle (interp, srcFileId, targetFileId)
     int mode, srcFileNum, isSocket;
     int newFileNum = -1;
     off_t seekOffset = -1;
-    Tcl_DString optValue;
-
-    Tcl_DStringInit (&optValue);
 
     /*
      * Get all the information about the file being duplicated.  On Unix,
@@ -190,56 +249,18 @@ DupFileHandle (interp, srcFileId, targetFileId)
             goto unixError;
     }
     
-    /*
-     * Set channel options.  Only modify the value if its not the default,
-     * as set blocking on standard files generates an error on some systems.
-     */
-    if (Tcl_GetChannelOption (srcChannel, COPT_BLOCKING, &optValue) != TCL_OK)
-        goto channelOptError;
-
-    if (optValue.string [0] == '0') {
-        if (Tcl_SetChannelOption (interp,
-                                  newChannel,
-                                  COPT_BLOCKING,
-                                  optValue.string) == TCL_ERROR)
-            goto errorExit;
-    }
-    Tcl_DStringSetLength (&optValue, 0);
-
-    if (Tcl_GetChannelOption (srcChannel, COPT_BUFFERING, &optValue) != TCL_OK)
-        goto channelOptError;
-
-    if (!STREQU (optValue.string, "full")) {
-        if (Tcl_SetChannelOption (interp,
-                                  newChannel,
-                                  COPT_BUFFERING,
-                                  optValue.string) == TCL_ERROR)
-            goto errorExit;
-    }
-    Tcl_DStringSetLength (&optValue, 0);
-
-    if (Tcl_GetChannelOption (srcChannel, COPT_TRANSLATION,
-                              &optValue) != TCL_OK)
-        goto channelOptError;
-
-    if (!STREQU (optValue.string, "auto")) {
-        if (Tcl_SetChannelOption (interp,
-                                  newChannel,
-                                  COPT_TRANSLATION,
-                                  optValue.string) == TCL_ERROR)
-            goto errorExit;
-    }
-
+    if (DupChannelOptions (interp, srcChannel, newChannel) != TCL_OK)
+        goto errorExit;
 
     Tcl_AppendResult (interp, Tcl_GetChannelName (newChannel),
                       (char *) NULL);
-    Tcl_DStringFree (&optValue);
     return TCL_OK;
 
   unixError:
     Tcl_ResetResult (interp);
     Tcl_AppendResult (interp, "dup of \"", srcFileId, " failed: ",
                       Tcl_PosixError (interp), (char *) NULL);
+
   errorExit:
     if (newChannel != NULL) {
         Tcl_UnregisterChannel (interp, newChannel);
@@ -247,11 +268,7 @@ DupFileHandle (interp, srcFileId, targetFileId)
         if (newFileNum >= 0)
             close (newFileNum);
     }
-    Tcl_DStringFree (&optValue);
     return TCL_ERROR;
-
-  channelOptError:
-    panic ("error getting channel opt");
 }
 
 /*-----------------------------------------------------------------------------
@@ -332,17 +349,17 @@ BindOpenFile (interp, fileNumStr)
      * Set channel options.
      */
     if (fileMode & (O_NONBLOCK | O_NDELAY)) {
-        if (Tcl_SetChannelOption (interp,
-                                  channel,
-                                  COPT_BLOCKING,
-                                  "0") == TCL_ERROR)
+        if (TclX_SetChannelOption (interp,
+                                   channel,
+                                   TCLX_COPT_BLOCKING,
+                                   TCLX_MODE_NONBLOCKING) == TCL_ERROR)
             goto errorExit;
     }
     if (isatty (fileNum)) {
-        if (Tcl_SetChannelOption (interp,
-                                  channel,
-                                  COPT_BUFFERING,
-                                  "line") == TCL_ERROR)
+        if (TclX_SetChannelOption (interp,
+                                   channel,
+                                   TCLX_COPT_BUFFERING,
+                                   TCLX_BUFFERING_LINE) == TCL_ERROR)
             goto errorExit;
     }
 

@@ -444,8 +444,8 @@ BindFileHandles (interp, options, socketFD)
                                    TCL_READABLE | TCL_WRITABLE, TRUE);
 
     if (options & SERVER_NOBUF) {
-        if (Tcl_SetChannelOption (interp, channel, "-buffering",
-                                  "none") == TCL_ERROR)
+        if (TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                                   TCLX_MODE_NONBLOCKING) == TCL_ERROR)
             goto errorExit;
     }
 

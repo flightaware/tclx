@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.10 1996/03/10 22:16:38 markd Exp $
+ * $Id: tclExtdInt.h,v 5.11 1996/03/11 06:15:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,14 +43,6 @@
  * if certain things are defined.
  */
 #include "tclUnixPort.h"
-
-/*
- * Use the real functions, not the Tcl interface that hides signals.
- */
-#undef open
-#undef read
-#undef waitpid
-#undef write
 
 /*
  * Define O_ACCMODE if <fcntl.h> does not define it.
@@ -172,6 +164,29 @@ typedef struct {
 #define TCLX_EVAL_ERR_HANDLER     4  /* Call error handler on error.       */
 
 /*
+ * Defines used by TclX_Get/SetChannelOption.  Defines name TCLX_COPT_ are the
+ * options and the others are the value
+ */
+#define TCLX_COPT_BLOCKING      1
+#define TCLX_MODE_BLOCKING      0
+#define TCLX_MODE_NONBLOCKING   1
+
+#define TCLX_COPT_BUFFERING     2
+#define TCLX_BUFFERING_FULL     0
+#define TCLX_BUFFERING_LINE     1
+#define TCLX_BUFFERING_NONE     2
+
+#define TCLX_COPT_TRANSLATION   3
+#define TCLX_TRANSLATE_AUTO     0
+#define TCLX_TRANSLATE_LF       1
+#define TCLX_TRANSLATE_BINARY   1  /* same as LF */
+#define TCLX_TRANSLATE_CR       2
+#define TCLX_TRANSLATE_CRLF     3
+#define TCLX_TRANSLATE_PLATFORM 4
+
+
+
+/*
  * Used to return argument messages by most commands.
  */
 extern char *tclXWrongArgs;
@@ -226,7 +241,7 @@ TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
 extern int
 TclX_VarEval _ANSI_ARGS_(TCL_VARARGS(Tcl_Interp *, arg1));
 
-int
+extern int
 TclX_WriteStr _ANSI_ARGS_((Tcl_Channel  channel,
                            char        *str));
 
@@ -237,12 +252,16 @@ extern int
 TclX_ChannelFnum _ANSI_ARGS_((Tcl_Channel channel,
                               int         direction));
 
+extern int
+TclX_GetChannelOption _ANSI_ARGS_((Tcl_Channel channel,
+                                   int         option));
+
 extern Tcl_Channel
 TclX_GetOpenChannel _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *handle,
                                  int         accessMode));
 
-int
+extern int
 TclX_GetOpenFnum _ANSI_ARGS_ ((Tcl_Interp *interp,
                                char       *handle,
                                int         accessMode));
@@ -291,6 +310,12 @@ TclX_RuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
                               char       *defaultDir,
                               char       *tclInitVarName,
                               char       *defaultInitFile));
+
+extern int
+TclX_SetChannelOption _ANSI_ARGS_((Tcl_Interp  *interp,
+                                   Tcl_Channel  channel,
+                                   int          option,
+                                   int          value));
 
 extern Tcl_Channel
 TclX_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 5.7 1996/03/10 04:42:32 markd Exp $
+ * $Id: tclXfcntl.c,v 5.8 1996/03/10 22:16:40 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -192,13 +192,9 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
 {
     fcntlAttr_t attrib;
     int aFileNum, current, value;
-    char *option;
-    Tcl_DString optValue;
-
-    Tcl_DStringInit (&optValue);
 
     if (XlateFcntlAttr (interp, attrName, &attrib) != TCL_OK)
-        goto errorExit;
+        return TCL_ERROR;
     
     /*
      * If both file numbers are specified, pick one for the checking.  They
@@ -230,7 +226,7 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
             panic ("fcntl bad attrib");
         }
         interp->result =  value ? "1" : "0";
-        goto okExit;
+        return TCL_OK;
     }
 
     /*
@@ -241,7 +237,7 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
         if (current == -1)
             goto unixError;
         interp->result = (current & attrib.fcntl) ? "1" : "0";
-        goto okExit;
+        return TCL_OK;
     }
 
     if (attrib.other == ATTR_CLOEXEC) {
@@ -249,60 +245,47 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
         if (current == -1)
             goto unixError;
         interp->result = (current & 1) ? "1" : "0";
-        goto okExit;
+        return TCL_OK;
     }
 
     /*
      * Get attributes maintained by the channel.
      */
     if (attrib.other == ATTR_NONBLOCK) {
-        if (Tcl_GetChannelOption (channel, "-blocking",
-                                  &optValue) != TCL_OK)
-            goto channelOptError;
-    
-        interp->result = (optValue.string [0] == '0') ? "1" : "0";
-        goto okExit;
+        if (TclX_GetChannelOption (channel, TCLX_COPT_BLOCKING) ==
+            TCLX_MODE_NONBLOCKING)
+            interp->result = "1";
+        else
+            interp->result = "0";
+        return TCL_OK;
     }
     if (attrib.other == ATTR_NOBUF) {
-        if (Tcl_GetChannelOption (channel, "-buffering",
-                                  &optValue) != TCL_OK)
-            goto channelOptError;
-        if (STREQU (optValue.string, "none"))
+        if (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
+            TCLX_BUFFERING_NONE)
             interp->result = "1";
         else
             interp->result = "0";
-        goto okExit;
+        return TCL_OK;
     }
     if (attrib.other == ATTR_LINEBUF) {
-        if (Tcl_GetChannelOption (channel, "-buffering",
-                                  &optValue) != TCL_OK)
-            goto channelOptError;
-        if (STREQU (optValue.string, "line"))
+        if (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
+            TCLX_BUFFERING_LINE)
             interp->result = "1";
         else
             interp->result = "0";
-        goto okExit;
+        return TCL_OK;
     }
 
     if (attrib.other == ATTR_KEEPALIVE) {
         if (TclXGetKeepAlive (interp, channel, &value) != TCL_OK)
-            goto errorExit;
+            return TCL_ERROR;
         interp->result = value ? "1" : "0";
+        return TCL_OK;
     }
-
-  okExit:
-    Tcl_DStringFree (&optValue);
-    return TCL_OK;
 
   unixError:
     interp->result = Tcl_PosixError (interp);
-
-  errorExit:
-    Tcl_DStringFree (&optValue);
     return TCL_ERROR;
-
-  channelOptError:
-    panic ("error getting channel opt");
 }
 
 /*-----------------------------------------------------------------------------
@@ -351,17 +334,20 @@ SetAttrOnFile (interp, channel, fileNum, attrib, value)
     }
 
     if (attrib.other == ATTR_NONBLOCK) {
-        return Tcl_SetChannelOption (interp, channel, "-blocking",
-                                     value ? "0" : "1");
+        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                                      value ? TCLX_MODE_NONBLOCKING :
+                                              TCLX_MODE_BLOCKING);
     }
     if (attrib.other == ATTR_NOBUF) {
-        return Tcl_SetChannelOption (interp, channel, "-buffering",
-                                     value ? "none" : "full");
+        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
+                                      value ? TCLX_BUFFERING_NONE :
+                                              TCLX_BUFFERING_FULL);
     }
 
     if (attrib.other == ATTR_LINEBUF) {
-        return Tcl_SetChannelOption (interp, channel, "-buffering",
-                                     value ? "line" : "full");
+        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
+                                      value ? TCLX_BUFFERING_LINE :
+                                              TCLX_BUFFERING_FULL);
     }
 
     if (attrib.other == ATTR_KEEPALIVE) {

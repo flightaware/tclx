@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.8 1996/03/10 22:16:47 markd Exp $
+ * $Id: tclXutil.c,v 5.9 1996/03/11 06:16:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -988,4 +988,181 @@ TclX_WriteStr (channel, str)
     char        *str;
 {
     return Tcl_Write (channel, str, strlen (str));
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_GetChannelOption --
+ *
+ *   C-friendly front end to Tcl_GetChannelOption.
+ *
+ * Parameters:
+ *   o channel (I) - Channel to get the option for.
+ *   o optionName (I) - One of the TCLX_COPT_* defines.
+ * Returns:
+ *   The interger option value define.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_GetChannelOption (channel, option)
+    Tcl_Channel channel;
+    int         option;
+{
+    char *strOption;
+    Tcl_DString strValue;
+    int value;
+
+    Tcl_DStringInit (&strValue);
+
+    switch (option) {
+      case TCLX_COPT_BLOCKING:
+        strOption = "-blocking";
+        break;
+
+      case TCLX_COPT_BUFFERING:
+        strOption = "-buffering";
+        break;
+
+      case TCLX_COPT_TRANSLATION:
+        strOption = "-translation";
+        break;
+
+      default:
+        goto fatalError;
+    }
+
+    if (Tcl_GetChannelOption (channel, strOption, &strValue) != TCL_OK)
+        goto fatalError;
+
+    switch (option) {
+      case TCLX_COPT_BLOCKING:
+        if (strValue.string [0] == '0') {
+            value = TCLX_MODE_NONBLOCKING;
+        } else {
+            value = TCLX_MODE_BLOCKING;
+        }
+        break;
+
+      case TCLX_COPT_BUFFERING:
+        if (STREQU (strValue.string, "full")) {
+            value = TCLX_BUFFERING_FULL;
+        } else if (STREQU (strValue.string, "line")) {
+            value = TCLX_BUFFERING_LINE;
+        } else if (STREQU (strValue.string, "none")) {
+            value = TCLX_BUFFERING_NONE;
+        } else {
+            goto fatalError;
+        }
+        break;
+
+      case TCLX_COPT_TRANSLATION:
+        if (STREQU (strValue.string, "auto")) {
+            value = TCLX_TRANSLATE_AUTO;
+        } else if (STREQU (strValue.string, "lf")) {
+            value = TCLX_TRANSLATE_LF;
+        } else if (STREQU (strValue.string, "binary")) {
+            value = TCLX_TRANSLATE_BINARY;
+        } else if (STREQU (strValue.string, "cr")) {
+            value = TCLX_TRANSLATE_CR;
+        } else if (STREQU (strValue.string, "crlf")) {
+            value = TCLX_TRANSLATE_CRLF;
+        } else if (STREQU (strValue.string, "platform")) {
+            value = TCLX_TRANSLATE_PLATFORM;
+        } else {
+            goto fatalError;
+        }
+        break;
+    }
+    Tcl_DStringFree (&strValue);
+    return value;
+
+  fatalError:
+    panic ("TclX_GetChannelOption bug");
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_SetChannelOption --
+ *
+ *   C-friendly front end to Tcl_SetChannelOption.
+ *
+ * Parameters:
+ *   o interp (I) - Errors returned in result.
+ *   o channel (I) - Channel to set the option for.
+ *   o option (I) - One of the TCLX_COPT_* defines.
+ *   o value (I) - Value to set the option too (integer define).
+ * Result:
+ *   TCL_OK or TCL_ERROR;
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_SetChannelOption (interp, channel, option, value)
+    Tcl_Interp  *interp;
+    Tcl_Channel  channel;
+    int          option;
+    int          value;
+{
+    char *strOption, *strValue;
+
+    switch (option) {
+      case TCLX_COPT_BLOCKING:
+        strOption = "-blocking";
+        switch (value) {
+          case TCLX_MODE_BLOCKING:
+            strValue = "1";
+            break;
+          case TCLX_MODE_NONBLOCKING:
+            strValue = "0";
+            break;
+          default:
+            goto fatalError;
+        }
+        break;
+
+      case TCLX_COPT_BUFFERING:
+        strOption = "-buffering";
+        switch (value) {
+          case TCLX_BUFFERING_FULL:
+            strValue = "full";
+            break;
+          case TCLX_BUFFERING_LINE:
+            strValue = "line";
+            break;
+          case TCLX_BUFFERING_NONE:
+            strValue = "none";
+            break;
+          default:
+            goto fatalError;
+        }
+        break;
+
+      case TCLX_COPT_TRANSLATION:
+        strOption = "-translation";
+        switch (value) {
+          case TCLX_TRANSLATE_AUTO:
+            strValue = "auto";
+            break;
+          case TCLX_TRANSLATE_LF:  /* Also binary */
+            strValue = "lf";
+            break;
+          case TCLX_TRANSLATE_CR:
+            strValue = "cr";
+            break;
+          case TCLX_TRANSLATE_CRLF:
+            strValue = "crlf";
+            break;
+          case TCLX_TRANSLATE_PLATFORM:
+            strValue = "platform";
+            break;
+          default:
+            goto fatalError;
+        }
+        break;
+
+      default:
+        goto fatalError;
+    }
+
+    return Tcl_SetChannelOption (interp, channel, strOption, strValue);
+
+  fatalError:
+    panic ("TclX_SetChannelOption bug");
 }
