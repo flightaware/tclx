@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.15 1993/08/26 04:55:13 markd Exp markd $
+# $Id: Makefile.in,v 2.16 1993/08/31 23:03:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -211,9 +211,9 @@ install: all TCLXINSTALL ${TK_BUILD}MAYBE
 	@echo ""
 
 TCLXINSTALL:
-	@echo "
+	@echo ""
 	@echo "   Install TclX master directory"
-	@echo "
+	@echo ""
 	set -x ;\
 	target=${TCL_MASTERDIR}/`tools/tclxversion` ;\
         (test -d ${TCL_MASTERDIR} || mkdir ${TCL_MASTERDIR}) ;\
@@ -224,9 +224,9 @@ TCLXINSTALL:
 	ln -s $$target/bin/tcl ${TCL_BINDIR}/tcl
 
 TKXINSTALL:
-	@echo "
+	@echo ""
 	@echo "   Install TkX master directory"
-	@echo "
+	@echo ""
 	set -x ;\
 	target=${TK_MASTERDIR}/`tools/tkxversion` ;\
         (test -d ${TK_MASTERDIR} || mkdir ${TK_MASTERDIR}) ;\
