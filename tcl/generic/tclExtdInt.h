@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.9 1995/02/25 02:54:53 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.10 1995/03/30 05:26:13 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -167,6 +167,13 @@ typedef struct {
 #define TCLX_REXP_BOTH_ALGORITHMS 2   /* Use boyer-moore along with regexp */
 
 /*
+ * Flags used by TclX_Eval and friends.
+ */
+#define TCLX_EVAL_GLOBAL          1  /* Evaluate in the global environment.*/
+#define TCLX_EVAL_FILE            2  /* Read and evaluate a file.          */
+#define TCLX_EVAL_ERR_HANDLER     4  /* Call error handler on error.       */
+
+/*
  * Used to return argument messages by most commands.
  */
 extern char *tclXWrongArgs;
@@ -219,6 +226,10 @@ extern char *tclXWrongArgs;
 /*
  * Prototypes for utility procedures.
  */
+extern void
+Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
+                               int         fileNum));
+
 extern int
 Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
                              int         interactive));
@@ -233,6 +244,14 @@ Tcl_DStringGets _ANSI_ARGS_((FILE         *filePtr,
                              Tcl_DString  *dynStrPtr));
 
 extern int
+TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
+                       unsigned     options,
+                       char        *cmd));
+
+extern int
+TclX_VarEval ();
+
+extern int
 Tcl_GetDate _ANSI_ARGS_((char   *p,
                          time_t  now,
                          long    zone,
@@ -241,6 +260,16 @@ Tcl_GetDate _ANSI_ARGS_((char   *p,
 extern OpenFile *
 Tcl_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
                                    char       *handle));
+
+extern int
+Tcl_GetTime _ANSI_ARGS_((Tcl_Interp *interp,
+                         CONST char *string,
+                         time_t     *timePtr));
+
+extern int
+Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
+                           CONST char *string,
+                           off_t      *offsetPtr));
 
 extern int
 Tcl_ProcessSignal _ANSI_ARGS_((ClientData  clientData,
@@ -265,16 +294,6 @@ TclX_RegExpExecute _ANSI_ARGS_((Tcl_Interp       *interp,
 
 
 extern int
-Tcl_GetTime _ANSI_ARGS_((Tcl_Interp *interp,
-                         CONST char *string,
-                         time_t     *timePtr));
-
-extern int
-Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
-                           CONST char *string,
-                           off_t      *offsetPtr));
-
-extern int
 Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
                               char        *cstringExpr,
                               long         stringLen,
@@ -287,10 +306,6 @@ extern FILE *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
                                 int         permissions));
-
-extern void
-Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
-                               int         fileNum));
 
 extern clock_t
 Tcl_TicksToMS _ANSI_ARGS_((clock_t numTicks));

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.5 1995/03/28 18:09:47 markd Exp markd $
+ * $Id: tclXutil.c,v 4.6 1995/03/30 05:26:13 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,6 +28,9 @@
  */
 static int
 ReturnOverflow _ANSI_ARGS_((Tcl_Interp *interp));
+
+static int
+CallEvalErrorHandler _ANSI_ARGS_((Tcl_Interp  *interp));
 
 /*
  * Used to return argument messages by most commands.
@@ -922,4 +925,156 @@ Tcl_TicksToMS (numTicks)
          */
         return ((numTicks) * 1000.0 / msPerTick);
     }
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * CallEvalErrorHandler --
+ *
+ *   Call the error handler specified in tclx_errorHandler.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o options (I) - Options controling the evaluation:
+ *     o TCLX_EVAL_GLOBAL - Evaulate in the global context.
+ *     o TCLX_EVAL_ERR_HANDLER - Call the user-specified error callback 
+ *       specified in the global variable tclx_errorHandler if an error
+ *       occurs.
+ *   o cmd (I) - The command to evaluate.
+ * Returns:
+ *   The Tcl result code from the handler.  TCL_ERROR is returned and
+ * result unchanged if not handler is available.
+ *-----------------------------------------------------------------------------
+ */
+static int
+CallEvalErrorHandler (interp)
+    Tcl_Interp  *interp;
+{
+    char         *errorHandler, *msgArg;
+    char         *msgArgv [2];
+    Tcl_DString   command;
+    int           result;
+
+    errorHandler = Tcl_GetVar (interp, "tclx_errorHandler", TCL_GLOBAL_ONLY);
+    if (errorHandler == NULL)
+        return TCL_ERROR;
+    
+    Tcl_DStringInit (&command);
+    Tcl_DStringAppend (&command, errorHandler, -1);
+
+    /*
+     * Use list merge to quote the argument, as it probably contains spaces.
+     */
+    msgArgv [0] = interp->result;
+    msgArgv [1] = NULL;
+    msgArg = Tcl_Merge (1, msgArgv);
+
+    Tcl_DStringAppend (&command, " ", -1);
+    Tcl_DStringAppend (&command, msgArg, -1);
+    ckfree (msgArg);
+
+    result = Tcl_GlobalEval (interp, Tcl_DStringValue (&command));
+    if (result == TCL_ERROR) {
+        Tcl_AddErrorInfo (interp,
+                          "\n    (while processing tclx_errorHandler)");
+    }
+
+    Tcl_DStringFree (&command);
+    return result;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclX_Eval --
+ *
+ *   Evaluate a Tcl command string with various options.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o options (I) - Options controling the evaluation:
+ *     o TCLX_EVAL_GLOBAL - Evaulate in the global context.
+ *     o TCLX_EVAL_FILE - Treat the string as the name of a file to eval.
+ *     o TCLX_EVAL_ERR_HANDLER - Call the user-specified error callback 
+ *       specified in the global variable tclx_errorHandler if an error
+ *       occurs.
+ *   o string (I) - The command or name of file to evaluate.
+ * Returns:
+ *   The Tcl result code.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_Eval (interp, options, string)
+    Tcl_Interp  *interp;
+    unsigned     options;
+    char        *string;
+{
+    Interp      *iPtr = (Interp *) interp;
+    CallFrame   *savedVarFramePtr;
+    int          result;
+
+    if (options & TCLX_EVAL_GLOBAL) {
+        savedVarFramePtr = iPtr->varFramePtr;
+        iPtr->varFramePtr = NULL;
+    }
+
+    if (options & TCLX_EVAL_FILE) {
+        result = Tcl_EvalFile (interp, string);
+    } else {
+        result = Tcl_Eval (interp, string);
+    }
+
+    if ((result == TCL_ERROR) && (options & TCLX_EVAL_ERR_HANDLER)) {
+        result = CallEvalErrorHandler (interp);
+    }
+
+    if (options & TCLX_EVAL_GLOBAL) {
+        iPtr->varFramePtr = savedVarFramePtr;
+    }
+    return result;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclX_VarEval --
+ *
+ *   Evaluate a Tcl command string with various options.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o options (I) - Options controling the evaluation, see TclX_Eval.
+ *   o str, ... (I) - String arguments, terminated by a NULL.  They will
+ *     be concatenated together to form a single string.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_VarEval (va_alist)
+    va_dcl
+{
+    va_list      argList;
+    Tcl_Interp  *interp;
+    unsigned     options;
+    char        *str;
+    Tcl_DString  cmdBuffer;
+    int          result;
+
+    Tcl_DStringInit (&cmdBuffer);
+
+    va_start (argList);
+    interp = va_arg (argList, Tcl_Interp *);
+    options = va_arg (argList, unsigned);
+
+    while (1) {
+        str = va_arg (argList, char *);
+        if (str == NULL)
+            break;
+        Tcl_DStringAppend (&cmdBuffer, str, -1);
+    }
+
+    result = TclX_Eval (interp, options, Tcl_DStringValue (&cmdBuffer));
+    Tcl_DStringFree (&cmdBuffer);
+    
+    return result;
 }

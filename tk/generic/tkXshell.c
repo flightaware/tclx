@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.4 1995/01/16 07:39:53 markd Exp markd $
+ * $Id: tkXshell.c,v 4.5 1995/01/19 06:54:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -254,7 +254,10 @@ TkX_Main (argc, argv)
      */
 
     if (fileName != NULL) {
-	code = Tcl_VarEval(interp, "source ", fileName, (char *) NULL);
+	code = TclX_Eval (interp,
+                          TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
+                          TCLX_EVAL_ERR_HANDLER,
+                          fileName);
 	if (code != TCL_OK) {
 	    goto error;
 	}

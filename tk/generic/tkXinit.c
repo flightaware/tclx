@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 4.2 1995/01/16 07:39:53 markd Exp markd $
+ * $Id: tkXinit.c,v 4.3 1995/01/19 07:37:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -110,5 +110,7 @@ TkX_Init (interp)
     /*
      * Find and run the Tk initialization file.
      */
-    return Tcl_Eval(interp, initCmd);
+    return TclX_Eval(interp,
+                     TCLX_EVAL_GLOBAL | TCLX_EVAL_ERR_HANDLER,
+                     initCmd);
 }

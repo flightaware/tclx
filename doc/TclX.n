@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.13 1995/03/30 19:14:04 markd Exp markd $
+.\" $Id: TclX.n,v 4.14 1995/03/31 06:20:29 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2678,6 +2678,20 @@ for commands.
 .B tcl_prompt2
 Contains code to run to output the prompt used when interactively prompting
 for continuation of an incomplete command.
+.TP
+.B tclx_errorHandler
+If this variable is set to the name of a procedure, that procedure will be
+call if an uncaught error occurs.
+The procedure will be passed a single argument of the error message, however
+to allow future expansion, the procedure should have a final argument of
+\fBargs\fR.
+The procedure is only called in non-interactive shells.
+If the procedure returns normally, the program will just exit without any
+error being issued by the shell.
+Generally the procedure should exit with a non-zero exit code once the error
+has been processed.
+It is not possible to continue executing the code in which the error occurred.
+This is useful for logging \fBerrorInfo\fR or e-mailing it to the maintainer.
 .TP
 .B TCLXENV
 Array that contains information used internally by various Tcl procedures that

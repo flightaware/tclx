@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 4.4 1995/01/16 07:39:53 markd Exp markd $
+ * $Id: tclXinit.c,v 4.5 1995/02/17 04:27:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -157,7 +157,9 @@ ProcessInitFile (interp)
         goto errorExit;
     }
 
-    if (Tcl_EvalFile (interp, initFile.string) != TCL_OK)
+    if (TclX_Eval (interp,
+                   TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE | TCLX_EVAL_ERR_HANDLER,
+                   initFile.string) == TCL_ERROR)
         goto errorExit;
 
   exitPoint:        
@@ -225,7 +227,6 @@ TclX_EvalRCFile (interp)
 {
     Tcl_DString  buffer;
     char        *fullName;
-    int          code;
 
     if (tcl_RcFileName != NULL) {
         fullName = Tcl_TildeSubst (interp, tcl_RcFileName, &buffer);
@@ -233,9 +234,13 @@ TclX_EvalRCFile (interp)
             TclX_ErrorExit (interp, 1);
         
         if (access(fullName, R_OK) == 0) {
-            code = Tcl_EvalFile (interp, fullName);
-            if (code == TCL_ERROR)
+            if (TclX_Eval (interp,
+                           TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
+                           TCLX_EVAL_ERR_HANDLER,
+                           fullName) == TCL_ERROR) {
+                Tcl_DStringFree(&buffer);
                 TclX_ErrorExit (interp, 1);
+            }
         }
 	Tcl_DStringFree(&buffer);
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 4.3 1995/01/01 19:49:23 markd Exp markd $
+ * $Id: tclXshell.c,v 4.4 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -256,14 +256,19 @@ TclX_Main (argc, argv)
      */
     evalStr = Tcl_GetVar2 (interp, TCLXENV, "evalCmd", TCL_GLOBAL_ONLY);
     if (evalStr != NULL) {
-        if (Tcl_Eval (interp, evalStr) == TCL_ERROR)
+        if (TclX_Eval (interp, 
+                       TCLX_EVAL_GLOBAL | TCLX_EVAL_ERR_HANDLER,
+                       evalStr) == TCL_ERROR)
             goto errorExit;
         goto okExit;
     }
 
     evalStr = Tcl_GetVar2 (interp, TCLXENV, "evalFile", TCL_GLOBAL_ONLY);
     if (evalStr != NULL) {
-        if (Tcl_EvalFile (interp, evalStr) == TCL_ERROR)
+        if (TclX_Eval (interp,
+                       TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
+                       TCLX_EVAL_ERR_HANDLER,
+                       evalStr) == TCL_ERROR)
             goto errorExit;
         goto okExit;
     }
