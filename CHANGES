@@ -1244,5 +1244,9 @@
   o Fixed crash with profile when run with ITcl.  Patch supplied by Christopher
     Hylands <cxh@EECS.Berkeley.EDU>.
 -------------------------------------------------------------------------------
+17 Dec 96:
+  o Fixed bug that caused some scanmatch regular expression to fail to match
+    due to problems with the BoyerMoore pre-parse.
+-------------------------------------------------------------------------------
 
  
