@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 4.4 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclXregexp.c,v 4.5 1995/01/01 19:49:36 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,8 +45,8 @@ typedef struct {
 #define TCLX_REXP_META                   "^$.[()|?+*\\"
 #define TCLX_REXP_META_NO_BRACKET_NO_OR  "^$.()?+*\\"
 
-#ifndef CHAR_MAX
-#    define CHAR_MAX 255
+#ifndef UCHAR_MAX
+#    define UCHAR_MAX 255
 #endif
 
 /*
@@ -180,7 +180,7 @@ PreParseRegExp _ANSI_ARGS_((char           *expression,
 
 struct compiled_search_struct {
         unsigned patlen;
-        unsigned deltaspace[CHAR_MAX + 1];
+        unsigned deltaspace[UCHAR_MAX + 1];
 };
 
 
@@ -209,7 +209,7 @@ BoyerMooreCompile (pat, patlen)
         /* set up deltas */
         delta = cp->deltaspace;
 
-        for (i = 0; i <= CHAR_MAX; i++)
+        for (i = 0; i <= UCHAR_MAX; i++)
                 delta[i] = p1;
 
         for (p = (unsigned char *)pat, i = p1; --i > 0;)
