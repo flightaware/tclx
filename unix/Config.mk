@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.18 1993/07/18 15:52:26 markd Exp markd $
+# $Id: Config.mk,v 2.19 1993/07/18 23:27:03 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -253,9 +253,6 @@ TK_MAN_FUNC_SECTION=TK
 #        void.
 #
 #      o TCL_NO_ITIMER - Set if setitimer is not available.
-#
-#      o TCL_NO_FILE_LOCKING - Set if the fcntl system call does not support
-#        file locking.
 #
 #      o TCL_NOVALUES_H - Some systems do not support the <values.h>
 #        include file.  Define this to account for this fact.

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 1.2 1993/05/29 00:27:19 markd Exp markd $
+ * $Id: tclXflock.c,v 1.3 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,7 +29,10 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp    *interp,
                                  OpenFile     **filePtrPtr,
                                  struct flock  *lockInfoPtr));
 
-#ifndef TCL_NO_FILE_LOCKING
+/*
+ * If F_SETLKW is not defined, we assume file locking is not available.
+ */
+#ifdef F_SETLKW
 
 /*
  *-----------------------------------------------------------------------------
