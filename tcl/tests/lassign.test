@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: asgnfield.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -24,7 +24,7 @@ Test assign_fields-1.1 {assign_fields command} {
     return [list $alpha $beta $gamma $delta $epsilon]
 } 2 "a b {c d} e {}"
 
-unset alpha beta gamma delta epsilon
+catch {unset alpha beta gamma delta epsilon}
 rename unknown SAVED_UNKNOWN
 
 
