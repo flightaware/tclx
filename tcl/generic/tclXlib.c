@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 4.4 1995/01/01 19:49:29 markd Exp markd $
+ * $Id: tclXlib.c,v 4.5 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -132,6 +132,12 @@ static void
 RemoveInProgress _ANSI_ARGS_((Tcl_Interp  *interp,
                               libInfo_t   *infoPtr,
                               char        *command));
+
+static int
+LoadChangedPathPackageIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
+                                           libInfo_t   *infoPtr,
+                                           char        *oldPath,
+                                           char        *path));
 
 static int
 LoadAutoPath _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -1003,10 +1009,68 @@ RemoveInProgress (interp, infoPtr, command)
 
 /*
  *-----------------------------------------------------------------------------
+ * LoadChangedPathPackageIndexes --
+ *
+ *   Determine what part of the path has changed and load the package indexes
+ * just for the appended direcories.
+ *
+ * Parameters
+ *   o interp (I) - A pointer to the interpreter, error returned in result.
+ *   o infoPtr (I) - Interpreter specific library info.
+ *   o oldPath (I) - The previous value of auto_path.
+ *   o path (I) - The current value of auto_path.
+ * Returns:
+ *   TCL_OK or TCL_ERROR
+ *-----------------------------------------------------------------------------
+ */
+static int
+LoadChangedPathPackageIndexes (interp, infoPtr, oldPath, path)
+    Tcl_Interp  *interp;
+    libInfo_t   *infoPtr;
+    char        *oldPath;
+    char        *path;
+{
+    char   *changedPath = NULL;
+    int     pathArgc, oldPathArgc, idx;
+    char  **pathArgv = NULL, **oldPathArgv = NULL;
+
+    if (Tcl_SplitList (interp, oldPath, &oldPathArgc, &oldPathArgv) != TCL_OK)
+        goto errorExit;
+    if (Tcl_SplitList (interp, path, &pathArgc, &pathArgv) != TCL_OK)
+        goto errorExit;
+
+    for (idx = 0; (idx < oldPathArgc) && (idx < pathArgc); idx++) {
+        if (!STREQU (oldPathArgv [idx], pathArgv [idx]))
+            break;
+    }
+    changedPath = Tcl_Merge (pathArgc - idx, &pathArgv [idx]);
+
+    if (LoadPackageIndexes (interp, infoPtr, changedPath) != TCL_OK)
+        goto errorExit;
+
+    ckfree (changedPath);
+    ckfree ((char *) pathArgv);
+    ckfree ((char *) oldPathArgv);
+    return TCL_OK;
+
+  errorExit:
+    if (changedPath != NULL)
+        ckfree (changedPath);
+    if (pathArgv != NULL)
+        ckfree ((char *) pathArgv);
+    if (oldPathArgv != NULL)
+        ckfree ((char *) oldPathArgv);
+    return TCL_ERROR;
+
+}
+
+/*
+ *-----------------------------------------------------------------------------
  * LoadAutoPath --
  *
  *   Load all indexs on the auto_path variable.  If auto_path has not changed
- * since the last time libraries were successfully loaded, this is a no-op.
+ * or has just been appended to, since the last time libraries were
+ * successfully loaded, this is a no-op.
  *
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
@@ -1020,7 +1084,7 @@ LoadAutoPath (interp, infoPtr)
     Tcl_Interp  *interp;
     libInfo_t   *infoPtr;
 {
-    char  *path, *oldPath;
+    char   *path, *oldPath;
 
     path = Tcl_GetVar (interp, AUTO_PATH, TCL_GLOBAL_ONLY);
     if (path == NULL)
@@ -1029,14 +1093,23 @@ LoadAutoPath (interp, infoPtr)
     oldPath = Tcl_GetVar (interp, AUTO_OLDPATH, TCL_GLOBAL_ONLY);
 
     /*
-     * Check if the path has changed.  If it has, load indexes, and
-     * save the path if it succeeds.
+     * Check if the path has not changed at all.
      */
     if ((oldPath != NULL) && STREQU (path, oldPath))
         return TCL_OK;
 
-    if (LoadPackageIndexes (interp, infoPtr, path) != TCL_OK)
-        return TCL_ERROR;
+    /*
+     * If the old path exists, then load only the appended directories.
+     * Otherwise, load the entire path.
+     */
+    if (oldPath != NULL) {
+        if (LoadChangedPathPackageIndexes (interp, infoPtr, oldPath,
+                                           path) != TCL_OK)
+            return TCL_ERROR;
+    } else {
+        if (LoadPackageIndexes (interp, infoPtr, path) != TCL_OK)
+            return TCL_ERROR;
+    }
 
     if (Tcl_SetVar (interp, AUTO_OLDPATH, path,
                     TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
