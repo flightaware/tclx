@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 4.11 1995/06/30 22:37:25 markd Exp markd $
+ * $Id: tclExtend.h,v 4.12 1995/07/02 20:32:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,10 +45,9 @@ extern char *tclAppVersion;      /* Version number of the application       */
 extern int   tclAppPatchlevel;   /* Patchlevel of the application           */
 
 /*
- * Used to override the library and library environment variable used to
- * find the TclX startup file and runtime library.  Also the init file name,
- * which is either library relative or absolute.  The values of these
- * fields must be changed before TclX_Init or TclXLib_Init is called.
+ * Used to override the init file name, which is either library relative or
+ * absolute.  The value fields must be changed before TclX_Init or
+ * TclXLib_Init is called.  To change the library location,
  */
 extern char *tclX_library;     /* Library directory to use.        */
 extern char *tclX_libraryEnv;  /* Override environment variable.   */
@@ -222,8 +221,7 @@ Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              CONST  char *handle));
 
 /*
- * Tk with TclX initialization.  These should really be in there own
- * include file.
+ * Tk with TclX initialization.
  *
  * The variables are Used to override the library and library environment
  * variable used to find the TkX startup file and runtime library.  The values
@@ -232,12 +230,12 @@ Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
 extern char *tkX_library;
 extern char *tkX_libraryEnv;
 
+EXTERN int
+TkX_Init _ANSI_ARGS_((Tcl_Interp  *interp));
+
 EXTERN void
 TkX_Main _ANSI_ARGS_((int               argc,
                       char            **argv,
                       Tcl_AppInitProc  *appInitProc));
-
-EXTERN int
-TkX_Init _ANSI_ARGS_((Tcl_Interp  *interp));
 
 #endif

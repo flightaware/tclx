@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 4.4 1995/04/17 01:24:02 markd Exp markd $
+ * $Id: tkXinit.c,v 4.5 1995/06/30 23:27:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,13 +26,12 @@
  * fields must be changed before TkX_Init is called.
  */
 char *tkX_library    = TKX_LIBRARY;
-char *tkX_libraryEnv = "TK_LIBRARY";
+char *tkX_libraryEnv = "TKX_LIBRARY";
 
 /*
- * The following is used to force the version of tkWindow.c that was compiled
- * for TclX to be brought in rather than the standard version.
+ * Procedure that is used to determine if Tk_Init has already been called.
  */
-int *tclxDummyMainWindowPtr = (int *) Tk_MainWindow;
+static char *tkInitProc = "tkScreenChanged";
 
 
 /*
@@ -60,11 +59,12 @@ TkX_Init (interp)
 	} else {\n\
 	    set msg \"can't find $tk_library/tk.tcl; perhaps you \"\n\
 	    append msg \"need to\\ninstall TkX (from TclX) or set your \"\n\
-	    append msg \"TK_LIBRARY environment variable?\"\n\
+	    append msg \"TKX_LIBRARY environment variable?\"\n\
 	    error $msg\n\
 	}";
 
-    char  *interact, *libDir;
+    char        *interact, *libDir;
+    Tcl_CmdInfo  cmdInfo;
 
     /*
      * Make sure main window exists, or Tk_Init will fail in a confusing
@@ -82,12 +82,22 @@ TkX_Init (interp)
     tclAppVersion  = TK_VERSION;
 
     /*
+     * If Tk_Init has been called, don't do anything else.
+     */
+    if (Tcl_GetCommandInfo (interp, tkInitProc, &cmdInfo)) {
+        return TCL_OK;
+    }
+
+    /*
      * Set tk_library to point to the TkX library.  It maybe an empty
      * string if the path is not defined.
      */
     libDir = NULL;
     if (tkX_libraryEnv != NULL) {
         libDir = Tcl_GetVar2 (interp, "env", tkX_libraryEnv, TCL_GLOBAL_ONLY);
+    }
+    if (libDir == NULL) {
+        libDir = Tcl_GetVar (interp, "tk_library", TCL_GLOBAL_ONLY);
     }
     if (libDir == NULL) {
         if (tkX_library != NULL)

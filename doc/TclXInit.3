@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 4.3 1995/01/16 07:39:53 markd Exp markd $
+.\" $Id: TclXInit.3,v 4.4 1995/06/30 22:37:25 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -32,9 +32,6 @@ extern char *tclAppLongname;
 extern char *tclAppVersion;
 extern int   tclAppPatchlevel;
 
-extern char *tclX_library;
-extern char *tclX_libraryEnv;
-
 int
 Tcl_AppInit (Tcl_Interp *interp);
 
@@ -51,15 +48,21 @@ void
 TclX_Main (int               argc,
            char            **argv,
            Tcl_AppInitProc  *appInitProc);
+
+int
+TkX_Init (Tcl_Interp *interp);
+
+void
+TkX_Main (int               argc,
+          char            **argv,
+          Tcl_AppInitProc  *appInitProc);
+
 .ft R
 .fi
 .SH DESCRIPTION
 These functions are used to initialize Extended Tcl and applications based
-on Extended Tcl.
-.P
-IMPORTANT NOTE:  \fBlibtclx.a\fR must be specified on the link command line
-before \fBlibtcl.a\fR.  If the order is reversed, incorrect command line
-parsing code will be used.
+on Extended Tcl.  This manual page also discusses various issues and approaches
+of integrating TclX into other applications.
 '
 .SS tclAppName
 The application name to be returned by the \fBinfox\fR
@@ -138,7 +141,12 @@ or
 .SS TclX_Init
 .PP
 Initializes Extended Tcl, adding the extended command set to the interpreter.
-This is called from \fBTcl_AppInit\fR.
+This is called from \fBTcl_AppInit\fR.  Normally, this function is used in
+an application in place of the \fBTcl_Init\fR function.  If used in this
+way, the UCB Tcl run time environment is not required and startup will be
+faster.  This function may also be called after \fBTcl_Init\fR has been called.
+In this case, the Tcl library mechanism defined in \fBinit.tcl\fR will be
+replaced with the TclX mechanism.
 .PP
 Parameters
 .RS 2
@@ -186,9 +194,76 @@ Returns:
 .SS TclX_Main
 .PP
 This function parses the command line according to the TclX shell
-specification.  It creates an interpreter and calls the specified function
-\fBappInitProc\fR to initialize any application specific commands.
-It then either evaluates the command of script specified on the
-command line or enters an interactive command loop.  This procedure never
-returns, it exits the process when it's done.
-
+specification (Unix shell compatible).
+It creates an interpreter and calls the specified function \fBappInitProc\fR
+to initialize any application specific commands.
+It then either evaluates the command of script specified on the command line
+or enters an interactive command loop.
+This procedure never returns, it exits the process when it's done.  Using
+the TclX shell also gives you SIGINT handling in interactive shells.
+'
+.SS TkX_Init
+.PP
+Initializes Extended Tcl Tk environment.
+This is called from \fBTcl_AppInit\fR.  Normally, this function is used in
+an application in place of the \fBTk_Init\fR function.  If used in this
+way, the UCB Tk run time environment is not required and startup will be
+faster.  This function may also be called after \fBTk_Init\fR has been called.
+In this case, the TclX Tk runtime environment will not be user or required.
+.PP
+Parameters
+.RS 2
+\fBo \fIinterp\fR - A pointer to the interpreter to add the commands to.
+.RE
+.PP
+Returns:
+.RS 2
+\fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
+.RE
+'
+.SS TclX_Main
+.PP
+This function parses the command line according to the wish shell
+specification.
+It creates an interpreter and calls the specified function \fBappInitProc\fR
+to initialize any application specific commands.
+It then either evaluates the command of script specified on the command line
+or enters an interactive command loop.
+This procedure never returns, it exits the process when it's done.  Using
+the TclX wish shell gives you SIGINT handling in interactive shells,
+otherwise it is identical to standard wish.
+'
+.SH "INTEGRATING TCLX WITH OTHER EXTENSIONS AND APPLICATIONS"
+.PP
+There are two aspects to integrating TclX with other applications. Does
+the application use the Tcl/Tk standard runtime or rely only on the 
+TclX runtime and are the Tcl and Tk shells based on the standard Tcl/Tk shells
+or the TclX shells.  The tclAppInit.c is the only file that will normally
+need to be modified.
+.PP
+The normal approach to add TclX to an application is to replace the
+calls to \fBTcl_Init\fR with \fBTclX_Init\fR and  \fBTk_Init\fR with
+\fBTkX_Init\fR.  TclX has a functional superset of the Tcl and Tk
+runtimes.  The TclX, used alone, does not require the standard
+runtime environments to be installed on the system.  It supports faster
+auto loading of the runtime routines and has support for multiple
+version of TclX being installed (use master directory install option
+for most flexability).  However, some people are more comfortable
+adding Tcl in the same way as other extensions.  That is, calling
+\fBTclX_Init\fR after \fBTcl_Init\fR and \fBTkX_Init\fR after \fBTk_Init\fR.
+Currently, calling \fBTkX_Init\fR is uncessary if the \fBTk_Init\fR has
+been called.
+.PP
+If only the TclX command set, but not the procedure library and runtime
+is desired, then \fBTclXCmd_Init\fR is called after \fBTcl_Init\fR.
+.PP
+To get the TclX shell in a Tcl only application, with the \fBtcl\fR command
+functionallity, call \fBTclX_Main\fR from the \fBmain\fR function instead of
+\fBTcl_Main\fR.
+This shell has arguments conforming to other Unix shells and SIGINT signal
+handling when interactive,.
+.PP
+To get the Tclx shell in a Tk application, with the \fBwishx\fR command
+functionallity, call \fBTkX_Main\fR from the \fBmain\fR function instead of
+\fBTk_Main\fR.
+This shell has SIGINT signal handling when interactive,

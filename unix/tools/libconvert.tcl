@@ -14,16 +14,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: libconvert.tcl,v 4.0 1994/07/16 05:29:21 markd Rel markd $
+# $Id: libconvert.tcl,v 4.1 1995/01/01 19:49:49 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
-if ![info exists env(TCL_LIBRARY)] {
+if ![info exists env(TCLX_LIBRARY)] {
     puts stderr "This script is to only be used during the build run by"
     puts stderr "the `runtcl' script."
     exit 1
 }
 
-source $env(TCL_LIBRARY)/tcl.tlib
+source $tclx_library/tcl.tlib
 
 eval convert_lib $argv

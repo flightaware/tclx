@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 4.6 1995/04/17 01:24:02 markd Exp markd $
+ * $Id: tclXinit.c,v 4.7 1995/06/26 23:19:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,12 +22,6 @@
  * The init file name, which is either library relative or absolute.
  */
 char *tclX_initFile = "TclInit.tcl";
-
-/*
- * The following is used to force the version of tclCmdIL.c that was compiled
- * for TclX to be brought in rather than the standard version.
- */
-int *tclxDummyInfoCmdPtr = (int *) Tcl_InfoCmd;
 
 /*
  * Prototypes of internal functions.

@@ -297,56 +297,9 @@ platforms, please contact us.
 
 INTEGRATING WITH OTHER EXTENSIONS AND APPLICATIONS
 ==================================================
-  TclX is normally fairly easy to integrate with other applications and
-extensions.  This section contains notes on the general approach, plus
-notes on extensions that are a little tricky.
 
-To integrate applications following the Tcl_AppInit conventions with TclX,
-including the TclX library handling and shell:
-
-    o Replace the call to "Tcl_Init" with a call to "TclX_Init" in the
-      Tcl_AppInit function.  Call TclX_Main instead of Tcl_Main.
-
-    o In Tk based application, replace the call to "TK_Init" with a call to
-      "TkX_Init" in the Tcl_AppInit function.  Call TclX_Main instead of
-      Tcl_Main.
-
-    o Link with "-ltkx -ltk -ltclx -ltcl" in that order.  If you get strange
-      behavior, such as no shell prompt, check this order.
-
-To add just the TclX commands, but not the TclX library handling or shell
-(including shell signal handling):
-
-    o Add a call to "TclXCmd_Init" after the call to Tcl_Init in the
-      Tcl_AppInit function.
-   
-    o Link with "-ltk -ltcl -ltclx" in that order.
-
-If you need more details on how to initialize TclX, see the TclXInit(3) manual
-page.
-
-TkPixmap:
-    o Build Tk with TkPixmap as directed.  You should have TkPixmap 4.0e or
-      greater.
-
-    o If TclX is already built, do a "rm -rf tkmaster".
-
-    o Change the XLDLIBS line in Config.mk to:
-        XLDLIBS=/full/path/to/libXpm.a
-
-    o Configure and build TclX as directed.
-
-    o If you want to have the pixmap documentation added to the TclX help
-      pages (this is a slow process):
-
-        o Added the line:
-            {pinfo.n        tk/control/pinfo}
-            {uxpm.n         tk/control/uxpm}
-          to the list in tools/tkmanpages.
-
-        o Do a "make buildtkhelp".
-
-        o Do another "make"
+  See the manual page TclXInit.3 for details on how to add TclX to an
+existing application.
 
 PORTING NOTES
 =============

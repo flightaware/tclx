@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.14 1995/07/01 00:12:12 markd Exp markd $
+# $Id: Makefile.in,v 4.15 1995/07/01 16:51:44 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -81,15 +81,15 @@ WISHX: runwishx
 	cd tktests;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
-# Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
-# the local master directories so tcl & wishx can be run before installing.
+# Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
+# at the local master directories so tcl & wishx can be run before installing.
 
 runtcl:
 	@echo ':'                                                   >runtcl
 	@echo '# script for testing Tcl before installation'       >>runtcl
-	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"                >>runtcl
+	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"               >>runtcl
 	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runtcl
-	@echo "export TCL_LIBRARY TCL_PROGRAM"                     >>runtcl
+	@echo "export TCLX_LIBRARY TCL_PROGRAM"                    >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
 	@echo "then"                                               >>runtcl
 	@echo "    exec \$$TCL_PROGRAM"                            >>runtcl
@@ -101,11 +101,11 @@ runtcl:
 runwishx:
 	@echo ':'                                                  >runwishx
 	@echo '# script for testing wishx before installation'    >>runwishx
-	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"               >>runwishx
+	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"              >>runwishx
+	@echo "TKX_LIBRARY=${bldbasedir}/tkmaster"                >>runwishx
 	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                 >>runwishx
-	@echo "TK_LIBRARY=${bldbasedir}/tkmaster"                 >>runwishx
 	@echo "WISHX=${bldbasedir}/tksrc/wishx"                   >>runwishx
-	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"         >>runwishx
+	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"       >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx
 	@echo "    exec \$$WISHX"                                 >>runwishx
