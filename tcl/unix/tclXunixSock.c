@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 5.3 1996/03/19 07:53:01 markd Exp $
+ * $Id: tclXunixSock.c,v 5.13 1996/03/19 08:19:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -182,7 +182,7 @@ TclXGetKeepAlive (interp, channel, valuePtr)
     fileNum = TclX_ChannelFnum (channel, 0);
 
     if (getsockopt (fileNum, SOL_SOCKET, SO_KEEPALIVE,
-                    &value, &valueLen) != 0) {
+                    (void*) &value, &valueLen) != 0) {
         Tcl_AppendResult (interp, "error getting socket KEEPALIVE option: ",
                           Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
@@ -214,7 +214,7 @@ TclXSetKeepAlive (interp, channel, value)
     fileNum = TclX_ChannelFnum (channel, 0);
 
     if (setsockopt (fileNum, SOL_SOCKET, SO_KEEPALIVE,
-                    &value, valueLen) != 0) {
+                    (void*) &value, valueLen) != 0) {
         Tcl_AppendResult (interp, "error setting socket KEEPALIVE option: ",
                           Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
@@ -551,7 +551,7 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
 
     value = 1;
     if (setsockopt (socketFD, SOL_SOCKET, SO_REUSEADDR,
-                    &value, sizeof (value)) < 0) {
+                    (void*) &value, sizeof (value)) < 0) {
         goto unixError;
     }
     if (bind (socketFD, (struct sockaddr *) &local, sizeof (local)) < 0) {
