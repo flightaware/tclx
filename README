@@ -1,10 +1,10 @@
 
                      *** README file for Extended Tcl ***
 
-BETA 3 RELEASE NOTES
+BETA 5 RELEASE NOTES
 ====================
 
-   This is the TclX7.0a Beta-3 release.  This release is tested and compatible
+   This is the TclX7.0a Beta-5 release.  This release is tested and compatible
 with tcl7.0b3 and tk3.3b3.  Please forward questions/bugs/suggestions to
 tcl-project@NeoSoft.com.  This releases is not complete.  The following
 functionality is not complete:
@@ -133,8 +133,7 @@ LINKING TCL APPLICATIONS
    To build a TclX based application containing C code, start with either
 src/main.c (for just Tcl) or tksrc/tkMain.c (for Tk) and add your application
 initialization.  There are comments in the code to guide you.  These need
-to be linked with libtclx.a and libtkx.a.  These libraries are super-sets
-of the standard Tcl libraries and should be used in their place.
+to be linked with libtclx.a and libtkx.a.  These libraries are use
 
 SUPPORT FOR EXTENDED TCL
 ========================

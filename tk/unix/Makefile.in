@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.15 1993/08/26 04:55:13 markd Exp markd $
+# $Id: Makefile.in,v 2.16 1993/08/31 23:03:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -38,16 +38,18 @@ XLIBSW     = @XLIBSW@
 
 #------------------------------------------------------------------------------
 
+LIBTK.A   = ../tkmaster/lib/libtk.a
 LIBTKX.A  = ../tkmaster/lib/libtkx.a
 WISHX     = ../tkmaster/bin/wishx
 
+LIBTCL.A  = ../tclmaster/lib/libtcl.a
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
 
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the Tcl
 # library if it was brought in.
 
-LDLIBS = ${LIBTKX.A} ${XLIBSW} ${LIBTCLX.A} -lm ${LIBS}
+LDLIBS = ${LIBTKX.A} ${LIBTK.A} ${XLIBSW} ${LIBTCLX.A} ${LIBTCL.A} -lm ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src  -I${srcbasedir}/tksrc -I${TK_UCB_SRC} \
@@ -64,7 +66,7 @@ OBJS = tkXstartup.o
 
 all: made.tmp ${WISHX}
 
-${WISHX}: tkXmain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
+${WISHX}: tkXmain.o ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXmain.o ${LDLIBS} ${XLDLIBS} \
 	    -o ${WISHX}
 	if ${DO_STRIPPING} ; then \
@@ -74,7 +76,7 @@ ${WISHX}: tkXmain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
 	    exit 0 ;\
 	fi
 
-made.tmp: ${OBJS}
+made.tmp ${LIBTKX.A}: ${OBJS}
 	${AR} cr ${LIBTKX.A} ${OBJS}
 	${RANLIB} ${LIBTKX.A}
 	touch made.tmp

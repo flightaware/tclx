@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.16 1993/08/31 23:03:20 markd Exp markd $
+# $Id: Makefile.in,v 2.17 1993/09/06 21:44:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -64,10 +64,10 @@ TCLX: TCLCOPY runtcl
 # Copy include and library files from the UCB Tcl distribution to the
 # tclmaster directory.
 #
-LIBTCLX.A = tclmaster/lib/libtclx.a
-TCL.H     = tclmaster/include/tcl.h
+LIBTCL.A = tclmaster/lib/libtcl.a
+TCL.H    = tclmaster/include/tcl.h
 
-TCLCOPY: MKTCLDIRS ${LIBTCLX.A} ${TCL.H}
+TCLCOPY: MKTCLDIRS ${LIBTCL.A} ${TCL.H}
 
 MKTCLDIRS:
 	-mkdir tclmaster         2>/dev/null; exit 0
@@ -75,11 +75,10 @@ MKTCLDIRS:
 	-mkdir tclmaster/include 2>/dev/null; exit 0
 	-mkdir tclmaster/bin     2>/dev/null; exit 0
 
-${LIBTCLX.A}: ${TCL_UCB_LIB}/libtcl.a
-	rm -f ${LIBTCLX.A}
-	cp ${TCL_UCB_LIB}/libtcl.a ${LIBTCLX.A}
-	${RANLIB} ${LIBTCLX.A}
-	rm -f ${TCLMADE.TMP}
+${LIBTCL.A}: ${TCL_UCB_LIB}/libtcl.a
+	rm -f ${LIBTCL.A}
+	cp ${TCL_UCB_LIB}/libtcl.a ${LIBTCL.A}
+	${RANLIB} ${LIBTCL.A}
 
 ${TCL.H}: ${TCL_UCB_LIB}/tcl.h
 	rm -f ${TCL.H}
@@ -97,10 +96,10 @@ WISHX: TKCOPY runwishx
 # Copy include and library files from the UCB Tk distribution to the
 # tkmaster directory.
 #
-LIBTKX.A = tkmaster/lib/libtkx.a
-TK.H     = tkmaster/include/tk.h
+LIBTK.A = tkmaster/lib/libtk.a
+TK.H    = tkmaster/include/tk.h
 
-TKCOPY: MKTKDIRS ${LIBTKX.A} ${TK.H}
+TKCOPY: MKTKDIRS ${LIBTK.A} ${TK.H}
 
 MKTKDIRS:
 	-mkdir tkmaster         2>/dev/null; exit 0
@@ -108,11 +107,10 @@ MKTKDIRS:
 	-mkdir tkmaster/include 2>/dev/null; exit 0
 	-mkdir tkmaster/bin     2>/dev/null; exit 0
 
-${LIBTKX.A}: ${TK_UCB_LIB}/libtk.a
-	rm -f ${LIBTKX.A}
-	cp ${TK_UCB_LIB}/libtk.a ${LIBTKX.A}
-	${RANLIB} ${LIBTKX.A}
-	rm -f ${TKMADE.TMP}
+${LIBTK.A}: ${TK_UCB_LIB}/libtk.a
+	rm -f ${LIBTK.A}
+	cp ${TK_UCB_LIB}/libtk.a ${LIBTK.A}
+	${RANLIB} ${LIBTK.A}
 
 ${TK.H}: ${TK_UCB_LIB}/tk.h
 	rm -f ${TK.H}

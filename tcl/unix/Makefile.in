@@ -1,9 +1,7 @@
 #
 # src/Makefile.in  --
 #
-# Makefile for Extended Tcl C sources.  This will compile all of Extended Tcl
-# and add it to the libtcl.a in the parent directory.  Generates a Tcl shell
-# in the parent directory.
+# Makefile for Extended Tcl C sources. 
 # 
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
@@ -15,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.19 1993/08/26 04:55:13 markd Exp markd $
+# $Id: Makefile.in,v 2.20 1993/08/31 23:03:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -38,12 +36,13 @@ LIBS       = @LIBS@
 
 #------------------------------------------------------------------------------
 
+LIBTCL.A    = ../tclmaster/lib/libtcl.a
 LIBTCLX.A   = ../tclmaster/lib/libtclx.a
 TCL         = ../tclmaster/bin/tcl
 TCLEXTEND_H = ../tclmaster/include/tclExtend.h
 TCLPP_H     = ../tclmaster/include/tcl++.h
 
-LDLIBS = ${LIBTCLX.A} -lm ${LIBS}
+LDLIBS = ${LIBTCLX.A} ${LIBTCL.A} -lm ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${TCL_UCB_SRC}
@@ -67,7 +66,7 @@ OBJS= \
 
 all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${TCL_PLUS_BUILD}
 
-${TCL}: tclXmain.o ${LIBTCLX.A} made.tmp 
+${TCL}: tclXmain.o ${LIBTCLX.A} ${LIBTCL.A} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXmain.o ${LDLIBS} ${XLDLIBS} -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
@@ -76,7 +75,7 @@ ${TCL}: tclXmain.o ${LIBTCLX.A} made.tmp
 	    exit 0 ;\
 	fi
 
-made.tmp: ${OBJS}
+made.tmp ${LIBTCLX.A}: ${OBJS}
 	${AR} cr ${LIBTCLX.A} ${OBJS} ${CPLUSOBJS}
 	${RANLIB} ${LIBTCLX.A}
 	touch made.tmp
