@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 3.7 1994/07/04 22:15:08 markd Exp markd $
+ * $Id: tclXlib.c,v 4.0 1994/07/16 05:27:17 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -250,7 +250,7 @@ EvalFilePart (interp, fileName, offset, length)
      * An error occured in the command, record information telling where it
      * came from.
      */
-    buf = ckalloc (sizeof (fileName) + 64);
+    buf = ckalloc (strlen (fileName) + 64);
     sprintf (buf, "\n    (file \"%s\" line %d)", fileName,
              interp->errorLine);
     Tcl_AddErrorInfo (interp, buf);
