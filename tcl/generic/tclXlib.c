@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 1.2 1992/10/03 18:04:11 markd Exp markd $
+ * $Id: tclXlib.c,v 1.3 1992/10/03 21:35:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -131,7 +131,7 @@ LoadDirIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
                             char        *dirName));
 
 static int
-Loadpackageindexes _ANSI_ARGS_((Tcl_Interp  *interp,
+LoadPackageIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
                                 char        *path));
 
 static int
@@ -266,6 +266,8 @@ MakeAbsFile (interp, fileName, buffer, bufferSize)
 
     if (fileName [0] == '~') {
         fileName = Tcl_TildeSubst (interp, fileName);
+        if (fileName == NULL)
+            return NULL;
         pathLen = strlen (fileName);
         if (pathLen < bufferSize)
             pathName = buffer;
@@ -1202,7 +1204,7 @@ LoadDirIndexes (interp, dirName)
  *-----------------------------------------------------------------------------
  */
 static int
-Loadpackageindexes (interp, path)
+LoadPackageIndexes (interp, path)
     Tcl_Interp  *interp;
     char        *path;
 {
@@ -1460,7 +1462,7 @@ Tcl_Demand_loadCmd (dummy, interp, argc, argv)
      */
     path = Tcl_GetVar (interp, "TCLPATH", TCL_GLOBAL_ONLY);
     if (path != NULL) {
-        if (Loadpackageindexes (interp, path) != TCL_OK)
+        if (LoadPackageIndexes (interp, path) != TCL_OK)
             goto errorExit;
         if (LoadProc (interp, argv [1], &found) != TCL_OK)
             goto errorExit;
@@ -1475,7 +1477,7 @@ Tcl_Demand_loadCmd (dummy, interp, argc, argv)
      */
     path = Tcl_GetVar (interp, "auto_path", TCL_GLOBAL_ONLY);
     if (path != NULL) {
-        if (Loadpackageindexes (interp, path) != TCL_OK)
+        if (LoadPackageIndexes (interp, path) != TCL_OK)
             goto errorExit;
         if (LoadProc (interp, argv [1], &found) != TCL_OK)
             goto errorExit;
