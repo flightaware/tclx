@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.17 1993/09/08 06:32:21 markd Exp markd $
+# $Id: Makefile.in,v 2.18 1993/09/16 05:37:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -42,6 +42,8 @@ XLIBSW     = @XLIBSW@
 LIBTK.A   = ../tkmaster/lib/libtk.a
 LIBTKX.A  = ../tkmaster/lib/libtkx.a
 WISHX     = ../tkmaster/bin/wishx
+APPINIT   = ../tkmaster/src/tkXAppInit.c
+SYSLIBS   = ../tkmaster/src/SYSLIBS
 
 LIBTCL.A  = ../tclmaster/lib/libtcl.a
 LIBTCLX.A = ../tclmaster/lib/libtclx.a
@@ -64,12 +66,14 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 OBJS= tkXAppInit.o   tkXinit.o      tkXmain.o
 
 #------------------------------------------------------------------------------
+# Compile the TkX library and link wishx.  If the link fails, purge
+# the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${WISHX}
+all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS}
 
 ${WISHX}: tkXAppInit.o ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
-	    -o ${WISHX}
+	    -o ${WISHX} || (rm -f ${WISHX}; exit 1)
 	if ${DO_STRIPPING} ; then \
 	    strip ${WISHX}  ;\
 	    ${MCS} ${WISHX} ;\
@@ -84,6 +88,12 @@ made.tmp ${LIBTKX.A}: ${OBJS}
 
 tkXinit.o: tkXinit.c
 	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXinit.c
+
+${APPINIT}: tkXAppInit.c
+	cp tkXAppInit.c ${APPINIT}
+
+${SYSLIBS}: SYSLIBS
+	cp SYSLIBS ${SYSLIBS}
 
 #------------------------------------------------------------------------------
 

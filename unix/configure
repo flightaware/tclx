@@ -125,7 +125,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.7 
+# From configure.in Revision: 1.8 
 
 
 
@@ -1488,8 +1488,28 @@ LIBS="${LIBS_save}"
 if test -n "${have_lib}"; then
    :; XLIBSW="-lX11"
 else
+   :; LIBS_save="${LIBS}"
+LIBS="${LIBS} -lX11"
+have_lib=""
+echo checking for -lX11
+cat > conftest.c <<EOF
+
+int main() { exit(0); }
+int t() { main(); }
+EOF
+if eval $compile; then
+  have_lib="1"
+fi
+rm -f conftest*
+LIBS="${LIBS_save}"
+if test -n "${have_lib}"; then
+   :; XLIBSW="-lX11_s"
+else
    :; XLIBSW=nope
 fi
+
+fi
+
 
 if test "$XLIBSW" = nope; then
     dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"
@@ -1575,7 +1595,7 @@ do
   esac
 done
 
-trap 'rm -fr Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile src/tclXconfig.h conftest*; exit 1' 1 3 15
+trap 'rm -fr Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile src/SYSLIBS tksrc/SYSLIBS src/tclXconfig.h conftest*; exit 1' 1 3 15
 YACC='$YACC'
 RANLIB='$RANLIB'
 CC='$CC'
@@ -1600,7 +1620,7 @@ cat >> config.status <<\EOF
 top_srcdir=$srcdir
 
 # Allow make-time overrides of the generated file list.
-test -n "$gen_files" || gen_files="Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile"
+test -n "$gen_files" || gen_files="Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile src/SYSLIBS tksrc/SYSLIBS"
 
 for file in .. $gen_files; do if [ "x$file" != "x.." ]; then
   srcdir=$top_srcdir

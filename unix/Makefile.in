@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.18 1993/09/08 06:32:21 markd Exp markd $
+# $Id: Makefile.in,v 2.19 1993/09/16 05:37:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -75,6 +75,7 @@ MKTCLDIRS:
 	-mkdir tclmaster/lib     2>/dev/null; exit 0
 	-mkdir tclmaster/include 2>/dev/null; exit 0
 	-mkdir tclmaster/bin     2>/dev/null; exit 0
+	-mkdir tclmaster/src     2>/dev/null; exit 0
 
 ${LIBTCL.A}: ${TCL_UCB_LIB}/libtcl.a
 	rm -f ${LIBTCL.A}
@@ -107,6 +108,7 @@ MKTKDIRS:
 	-mkdir tkmaster/lib     2>/dev/null; exit 0
 	-mkdir tkmaster/include 2>/dev/null; exit 0
 	-mkdir tkmaster/bin     2>/dev/null; exit 0
+	-mkdir tkmaster/src     2>/dev/null; exit 0
 
 ${LIBTK.A}: ${TK_UCB_LIB}/libtk.a
 	rm -f ${LIBTK.A}
@@ -255,8 +257,8 @@ partclean:
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} partclean
 	-rm -f runtcl runwishx
-	-rm -rf tclmaster/bin tclmaster/lib tclmaster/include
-	-rm -rf tkmaster/bin tkmaster/lib tkmaster/include
+	-rm -rf tclmaster/*bin tclmaster/*lib tclmaster/include tclmaster/src
+	-rm -rf tkmaster/*bin tkmaster/*lib tkmaster/include tkmaster/src
 
 #------------------------------------------------------------------------------
 # Clean up all files that were built by make.

@@ -13,11 +13,11 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.7 1993/08/31 23:08:23 markd Exp markd $
+dnl $Id: configure.in,v 1.8 1993/09/16 05:37:54 markd Exp markd $
 dnl----------------------------------------------------------------------------
 
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.7 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.8 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -345,7 +345,9 @@ fi
 AC_SUBST(XINCLUDES)
 
 echo "checking for X11 library archive"
-AC_HAVE_LIBRARY(libX11.a, XLIBSW="-lX11", XLIBSW=nope)
+AC_HAVE_LIBRARY(libX11.a, XLIBSW="-lX11", 
+        AC_HAVE_LIBRARY(libX11.a, XLIBSW="-lX11_s", XLIBSW=nope))
+
 if test "$XLIBSW" = nope; then
     dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"
     for i in $dirs ; do
@@ -375,4 +377,4 @@ AC_SUBST(XLIBSW)
 # Generate the make files.
 #------------------------------------------------------------------------------
 
-AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile)
+AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile src/SYSLIBS tksrc/SYSLIBS)
