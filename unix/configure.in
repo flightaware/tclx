@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.22 1995/04/25 03:04:32 markd Exp markd $
+dnl $Id: configure.in,v 4.23 1995/04/25 03:46:17 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.22 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.23 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -81,7 +81,8 @@ AC_SUBST(HAVE_SYML)
 #------------------------------------------------------------------------------
 
 rm -f runtcl runwishx tests/runtest tktests/runtest 2>/dev/null
-rm -f src/tclCmdIL.o src/tclXinit.o tksrc/tkXinit.o */made*.tmp 2>/dev/null
+rm -f src/tclCmdIL.o src/tclXinit.o src/tclXlibInit.o  2>/dev/null
+rm -f tksrc/tkXinit.o */made*.tmp 2>/dev/null
 
 #------------------------------------------------------------------------------
 #       Some make programs require includes to be 
