@@ -681,3 +681,13 @@
  4 Nov 93:
    o Added "infox apppatchlvel" and tclAppPatchlevel C global.
 -------------------------------------------------------------------------------
+ 7 Nov 93: 
+   o Changed lassign to return a list of unassigned elements.  Thanks to
+     Wolf-D. Ihlenfeldt <wolf@molout.tutkie.tut.ac.jp>.
+   o Modified Extended Tcl to find ~/.tclrc (or other rc file) via the
+     global tcl_RcFileName set in TclX_AppInit.
+   o Changed "infox posix_signals" to "infox have_posix_signals".
+     (*POTENTIAL INCOMPATIBILITY*) 
+   o Added "infox have_sockets" and "infox have_msgcats".
+   o "
+-------------------------------------------------------------------------------
