@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 5.4 1996/03/17 06:52:13 markd Exp $
+# $Id: help.test,v 5.5 1996/04/23 14:46:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,7 +22,7 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 #
 # Only run help test if help has been installed.
 #
-set helpdir ../unix/help
+set helpdir $tclx_library/help
 if [cequal [glob -nocomplain $helpdir/*] ""] {
     echo "****"
     echo "**** No help pages in $helpdir - help test not run"
@@ -182,7 +182,7 @@ Test help-1.4 {help tests} {
 
 Test help-1.5 {help tests} {
     set result [HelpSend "help /tcl/lists/lassign" promptCnt]
-    set fh [open "../unix/help/tcl/lists/lassign"]
+    set fh [open "$tclx_library/help/tcl/lists/lassign"]
     set expect [read $fh]
     close $fh
     set summary {}
@@ -201,7 +201,7 @@ Test help-1.5 {help tests} {
 
 Test help-1.6 {help tests} {
     set result [HelpSend "help /tcl/math/expr" promptCnt]
-    set fh [open "../unix/help/tcl/math/expr"]
+    set fh [open "$tclx_library/help/tcl/math/expr"]
     set expect [read $fh]
     close $fh
     set summary {}
