@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.bc,v 8.8 1999/07/09 22:49:59 hershey Exp $
+# $Id: common.bc,v 8.9 1999/07/22 21:49:59 redman Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -125,8 +125,8 @@ $(TCLX_INCLUDES) -d__WIN32__;$(DEFINES)
 #
 # TclX and TkX versions.
 #
-TCLX_VERSION = 8.2b2
-TKX_VERSION  = 8.2b2
+TCLX_VERSION = 8.2.0
+TKX_VERSION  = 8.2.0
 
 # Comment the following line to compile with symbols
 #NODEBUG=1

@@ -2,11 +2,11 @@
 INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
 ------------------------------------------------------------------------
 
-$Id: INSTALL,v 8.15 1999/07/09 22:49:58 hershey Exp $
+$Id: INSTALL,v 8.16 1999/07/22 21:49:59 redman Exp $
 
 COMPATIBILITY
 =============
-This version is compatible Tcl 8.2b2 and Tk 8.2b2.
+This version is compatible Tcl 8.2.0 and Tk 8.2.0
 
 QUICK START
 ===========
@@ -18,7 +18,7 @@ in the manner that addresses the needs of most users.   If you:
       directories adjacent to the TclX source directory.  i.e.
 
                             mybuilddir/
-                tcl8.2b2/      tk8.2b2/      tclX8.2b2/
+                tcl8.2/      tk8.2/      tclX8.2/
  
     o are installing under /usr/local.
 
@@ -26,7 +26,7 @@ in the manner that addresses the needs of most users.   If you:
 
 ...then the following steps will build, test and install TclX:
 
-    cd tclX8.2b2/unix
+    cd tclX8.2/unix
     configure          # add --enable-shared to build shared libraries
     make
     make test          # Run both standard and extended Tcl tests
@@ -82,7 +82,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       INSTALL.generic, located in the same directory as the file you are
       currently reading.
 
-    o After building and installing Tcl and Tk, cd to tclX8.2b2/unix
+    o After building and installing Tcl and Tk, cd to tclX8.2/unix
 
     o Enter ./configure to run the configure script.  If you are going to
       be compiling with gcc, set the environment variable CC to "gcc".
@@ -110,7 +110,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           use this to compile in a separate directory from the source.  You
           must create a directory called "unix" in your build tree and run
           configure while in the "unix" directory.  The --srcdir argument must
-          specify the "tclX8.2b2/unix" directory, not the top-level TclX 
+          specify the "tclX8.2/unix" directory, not the top-level TclX 
           directory.
           Note: The source directory must be clean, it can't contain a built
           copy of TclX.
@@ -176,7 +176,7 @@ Tk and the tests for Extended Tcl, which test both the new commands added by
 Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
-    o Run TclX tests by typing "make test" in the tclX8.2b2/unix directory.
+    o Run TclX tests by typing "make test" in the tclX8.2/unix directory.
       This runs both the TclX specific tests and an the Tcl tests though
       a interpreter built with TclX.
 
