@@ -13,16 +13,26 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.29 1996/04/24 06:37:21 markd Exp $
+dnl $Id: configure.in,v 5.30 1996/04/25 14:32:48 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.29 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.30 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
 # unset.
 #
 unset MFLAGS MAKEFLAGS 2>/dev/null
+
+#------------------------------------------------------------------------------
+# Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
+# tree.
+#------------------------------------------------------------------------------
+
+srcbasedir=`cd $srcdir/..; pwd`
+AC_SUBST(srcbasedir)
+bldbasedir=`cd ..; pwd`
+AC_SUBST(bldbasedir)
 
 #------------------------------------------------------------------------------
 # System information and date for including in some files.
@@ -101,38 +111,6 @@ AC_ARG_WITH(arch,
 AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
-# Handle the --enable-shared option.
-#------------------------------------------------------------------------------
-
-AC_ARG_ENABLE(shared,
-    [  --enable-shared         build and link with shared libraries],
-    [BUILD_SHARED=$enableval],
-    [BUILD_SHARED=NO])
-case "$BUILD_SHARED" in
-    YES|yes)
-        AC_MSG_RESULT(Will build shared libraries)
-        BUILD_SHARED=YES
-        TCL_USE_LIB=TCL_SHLIB
-        TCL_USE_SHLIB_CFLAGS=TCL_SHLIB_CFLAGS
-        TK_USE_LIB=TK_SHLIB
-        ;;
-    NO|no)
-        AC_MSG_RESULT(Will not build shared libraries)
-        BUILD_SHARED=NO
-        TCL_USE_LIB=TCL_LIB
-        TCL_USE_SHLIB_CFLAGS=TCL_NO_SHLIB_CFLAGS  # Not actually defined
-        TK_USE_LIB=TK_LIB
-        ;;
-     *)
-        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
-        ;;
-esac
-AC_SUBST(BUILD_SHARED)
-AC_SUBST(TCL_USE_LIB)
-AC_SUBST(TCL_USE_SHLIB_CFLAGS)
-AC_SUBST(TK_USE_LIB)
-
-#------------------------------------------------------------------------------
 # Handle the --enable-master option.
 #------------------------------------------------------------------------------
 
@@ -168,14 +146,42 @@ AC_SUBST(TKX_INST_INCL)
 AC_SUBST(TKX_INST_MAN)
 
 #------------------------------------------------------------------------------
-# Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
-# tree.
+# Handle the --enable-shared option.
 #------------------------------------------------------------------------------
 
-srcbasedir=`cd $srcdir/..; pwd`
-AC_SUBST(srcbasedir)
-bldbasedir=`cd ..; pwd`
-AC_SUBST(bldbasedir)
+AC_ARG_ENABLE(shared,
+    [  --enable-shared         build and link with shared libraries],
+    [BUILD_SHARED=$enableval],
+    [BUILD_SHARED=NO])
+case "$BUILD_SHARED" in
+    YES|yes)
+        AC_MSG_RESULT(Will build shared libraries)
+        BUILD_SHARED=YES
+        TCL_USE_SHLIB_CFLAGS=TCL_SHLIB_CFLAGS
+        TCLX_BUILD_LIB_SPEC="-L$bldbasedir/tcl/unix -ltclx"
+        TCLX_LIB_SPEC="-L$TCLX_LIB -ltclx"
+        TKX_BUILD_LIB_SPEC="-L$bldbasedir/tk/unix -ltkx"
+        TKX_LIB_SPEC="-L$TCLX_LIB -ltkx"
+        ;;
+    NO|no)
+        AC_MSG_RESULT(Will not build shared libraries)
+        BUILD_SHARED=NO
+        TCL_USE_SHLIB_CFLAGS=TCL_NO_SHLIB_CFLAGS  # Not actually defined
+        TCLX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/libtclx.a"
+        TCLX_LIB_SPEC="$TCLX_LIB/libtclx.a"
+        TKX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/libtkx.a"
+        TKX_LIB_SPEC="$TCLX_LIB/libtkx.a"
+        ;;
+     *)
+        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
+        ;;
+esac
+AC_SUBST(BUILD_SHARED)
+AC_SUBST(TCL_USE_SHLIB_CFLAGS)
+AC_SUBST(TCLX_BUILD_LIB_SPEC)
+AC_SUBST(TCLX_LIB_SPEC)
+AC_SUBST(TKX_BUILD_LIB_SPEC)
+AC_SUBST(TKX_LIB_SPEC)
 
 #------------------------------------------------------------------------------
 # Extract the version information out of tclExtend.h so it can be assigned
@@ -243,10 +249,10 @@ LIBS=$TCL_LIBS   # Need for tests.
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
 AC_SUBST(TCL_SHLIB_CFLAGS)
+AC_SUBST(TCL_SHLIB_LD)
 AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(TCL_LD_FLAGS)
-AC_SUBST(TCL_SHLIB_LD)
-AC_SUBST(SHLIB_LD)
+AC_SUBST(TCL_LD_SEARCH_FLAGS)
 AC_SUBST(TCL_BUILD_LIB_SPEC)
 AC_SUBST(TCL_LIB_SPEC)
 
@@ -259,6 +265,7 @@ AC_SUBST(TK_DEFS)
 AC_SUBST(TK_LIBS)
 AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TK_XLIBSW)
+AC_SUBST(TK_LD_SEARCH_FLAGS)
 AC_SUBST(TK_BUILD_LIB_SPEC)
 AC_SUBST(TK_LIB_SPEC)
 
@@ -312,6 +319,18 @@ AC_SUBST(TCLX_SHLIB_BASE_NAME)
 AC_SUBST(TCLX_SHLIB_NAME)
 AC_SUBST(TKX_SHLIB_BASE_NAME)
 AC_SUBST(TKX_SHLIB_NAME)
+
+#------------------------------------------------------------------------------
+# Determine the search path argument for the installed TclX libraries.  This
+# is hacked from the variable set in tclConfig.sh.
+#-----------------------------------------------------------------------------
+
+TCLX_LD_SEARCH_FLAGS=`echo $TCL_LD_SEARCH_FLAGS|sed 's%/.*$%%'`
+
+if test "X$TCLX_LD_SEARCH_FLAGS" != "X"; then
+    TCLX_LD_SEARCH_FLAGS=$TCLX_LD_SEARCH_FLAGS$TCLX_INST_LIB
+fi
+AC_SUBST(TCLX_LD_SEARCH_FLAGS)
 
 #------------------------------------------------------------------------------
 # Determine if we have symbolic links on the filesystem we are building

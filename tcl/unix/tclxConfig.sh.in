@@ -9,7 +9,30 @@
 # Date:   @DATE_OUT@
 #
 
+#
+# Version numbers for TclX (see tclExtend.h for details).
+#
 TCLX_FULL_VERSION='@TCLX_FULL_VERSION@'
 TCLX_VERSION='@TCLX_VERSION@'
+
+#
+# Defines for cpp.
+#
 TCLX_DEFS='@DEFS@'
+
+#
+# Additional libraries added by TclX.
+#
 TCLX_LIBS='@TCLX_LIBS@'
+
+#
+# String to pass to linker to pick up the TclX library from its
+# build directory.
+#
+TCLX_BUILD_LIB_SPEC='@TCLX_BUILD_LIB_SPEC@'
+
+#
+# String to pass to linker to pick up the TclX library from its
+# installed directory.
+#
+TCLX_LIB_SPEC='@TCLX_LIB_SPEC@'

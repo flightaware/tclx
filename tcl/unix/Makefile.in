@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.33 1996/04/24 06:37:06 markd Exp $
+# $Id: Makefile.in,v 5.34 1996/04/25 14:32:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -34,12 +34,9 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_USE_SHLIB_CFLAGS} \
 
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
-LDLIBS = libtclx.a ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
-         ${XLDLIBS}
-
-SHLIBLIBS = ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
-
-SHLDLIBS = -L. -ltclx ${SHLIBLIBS}
+LDLIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
+	 ${TCL_DL_LIBS} ${XLDLIBS} @TCL_LD_SEARCH_FLAGS@ \
+	 @TCLX_LD_SEARCH_FLAGS@
 
 
 #------------------------------------------------------------------------------
@@ -92,13 +89,8 @@ all: libtclx.a SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest runtest \
      ${bldbasedir}/tcl/tests
 
 tcl: tclXAppInit.o libtclx.a SHLIB_@BUILD_SHARED@
-	if test "@BUILD_SHARED@" = "YES" ; then \
-	    ${CC} ${LD_SWITCHES} tclXAppInit.o ${SHLDLIBS} -o tcl || \
-	        (rm -f tcl; exit 1) ;\
-	else \
-	    ${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
-	        (rm -f tcl; exit 1) ;\
-	fi
+	${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
+	    (rm -f tcl; exit 1)
 
 libtclx.a: ${OBJS}
 	${AR} cr libtclx.a ${OBJS}
@@ -283,13 +275,8 @@ help:
 # Generate the test program.
 #
 tclXtest: ${TEST_OBJS} libtclx.a
-	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${SHLDLIBS} -o tclXtest || \
-	        (rm -f tclXtest; exit 1) ;\
-	else \
-	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tclXtest || \
-	        (rm -f tclXtest; exit 1) ;\
-	fi
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tclXtest || \
+	    (rm -f tclXtest; exit 1)
 
 tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXtest.c
@@ -318,7 +305,7 @@ runtest: Makefile
 	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tclXtest"          >>runtest
 	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtest
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}:${LD_LIBRARY_PATH}" >>runtest
+	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${LD_LIBRARY_PATH}" >>runtest
 	@echo "export LD_LIBRARY_PATH"                             >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest

@@ -11,6 +11,29 @@
 # Date:   @DATE_OUT@
 #
 
+#
+# Version number for TkX (see tclExtend.h for details).
+#
 TKX_FULL_VERSION='@TKX_FULL_VERSION@'
+
+#
+# Defines for cpp.
+#
 TKX_DEFS='@DEFS@'
+
+#
+# Additional libraries added by TclX.
+#
 TKX_LIBS=''
+
+#
+# String to pass to linker to pick up the TkX library from its
+# build directory.
+#
+TKX_BUILD_LIB_SPEC='@TKX_BUILD_LIB_SPEC@'
+
+#
+# String to pass to linker to pick up the TclX library from its
+# installed directory.
+#
+TKX_LIB_SPEC='@TKX_LIB_SPEC@'

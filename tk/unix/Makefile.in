@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.29 1996/04/24 06:37:11 markd Exp $
+# $Id: Makefile.in,v 5.30 1996/04/25 14:32:38 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,14 +41,11 @@ LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LDLIBS = libtkx.a ${TK_LIB} ${TK_XLIBSW} ${LIBTCLX} ${TCL_LIB} \
-         ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS}
+LDLIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
+	 ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS}\
+	 ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+	 @TCL_LD_SEARCH_FLAGS@ @TK_LD_SEARCH_FLAGS@ @TCLX_LD_SEARCH_FLAGS@
 
-SHLIBLIBS = ${TK_LIB} ${TK_XLIBSW} -L../../tcl/unix -ltclx ${TCL_LIB} \
-	    ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} \
-            ${XLDLIBS}
-
-SHLDLIBS = -L. -ltkx ${SHLIBLIBS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -74,13 +71,8 @@ all: libtkx.a SHLIB_@BUILD_SHARED@ wishx RUNTIME tktest runtest \
      ${bldbasedir}/tk/tests
 
 wishx: tkXAppInit.o libtkx.a ${LIBTK} ${LIBTCLX}
-	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${CC} ${LD_SWITCHES} tkXAppInit.o ${SHLDLIBS} -o wishx || \
-	        (rm -f wishx; exit 1) ;\
-	else \
-	    ${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
-	        (rm -f wishx; exit 1) ;\
-	fi
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
+	    (rm -f wishx; exit 1)
 
 libtkx.a: ${OBJS}
 	${AR} cr libtkx.a ${OBJS}
@@ -145,13 +137,8 @@ help:
 #
 
 tktest: ${TEST_OBJS} libtkx.a ${LIBTCLX}
-	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${SHLDLIBS} -o tktest || \
-	        (rm -f tktest; exit 1) ;\
-	else \
-	    ${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
-	        (rm -f tktest; exit 1) ;\
-	fi
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
+	    (rm -f tktest; exit 1)
 
 tkTest.o: ${TK_SRC}/generic/tkTest.c
 	${CC} -c ${CC_SWITCHES} ${TK_SRC}/generic/tkTest.c
@@ -174,7 +161,7 @@ runtest: Makefile
 	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tktest"                >>runtest
 	@echo "export TCL_LIBRARY TCLX_LIBRARY"                    >>runtest
 	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"          >>runtest
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_SHLIB_DIR}:${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}:${LD_LIBRARY_PATH}" >>runtest
+	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_UNIX_DIR}:${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${LD_LIBRARY_PATH}" >>runtest
 	@echo "export LD_LIBRARY_PATH"                             >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
