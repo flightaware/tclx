@@ -14,9 +14,6 @@
    tzname.  */
 #undef HAVE_TZNAME
 
-/* Define if you have vfork.h.  */
-#undef HAVE_VFORK_H
-
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef mode_t
 
@@ -37,9 +34,6 @@
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
-
-/* Define vfork as fork if vfork does not work.  */
-#undef vfork
 
 /* Define if you don't have sys/socket.h */
 #undef NO_SYS_SOCKET_H
@@ -65,12 +59,6 @@
 /* Define if you don't have tm_zone but do have the external array
    tzname.  */
 #undef HAVE_TZNAME
-
-/* Define if you have vfork.h.  */
-#undef HAVE_VFORK_H
-
-/* Define vfork as fork if vfork does not work.  */
-#undef vfork
 
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
@@ -182,9 +170,6 @@
 /* Define if you have the Xbsd library (-lXbsd).  */
 #undef HAVE_LIBXBSD
 
-/* Define if you have the Xt library (-lXt).  */
-#undef HAVE_LIBXT
-
 /* Define if you have the Xwindow library (-lXwindow).  */
 #undef HAVE_LIBXWINDOW
 
@@ -193,6 +178,9 @@
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
+
+/* Define if you have the dnet_stub library (-ldnet_stub).  */
+#undef HAVE_LIBDNET_STUB
 
 /* Define if you have the ieee library (-lieee).  */
 #undef HAVE_LIBIEEE

@@ -773,9 +773,6 @@
 ===============================================================================
 24 Jan 94: Released TclX7.3a-p2 (patch and full release).
 ===============================================================================
- 1 Mar 94:
-   o Use vfork for fork command if available.
--------------------------------------------------------------------------------
  16 Mar 94:
    o Fixed problem with configure detecting the "timezone" variable on some
      systems,
