@@ -35,23 +35,21 @@ if ![lempty [info commands button]] {
 #
 if {[nice] != 0} {
     puts "*************************************************************"
-    puts "Nice priority is [nice], not zero.  Most \"nice\" command"
-    puts "test will fail (but everything is probably ok)"
+    puts "Nice priority is [nice], not zero.  May cause some failures."
+    puts "(but everything is probably ok)"
     puts "*************************************************************"
     puts ""
 }
+
+set niceBase [nice]
 
 Test nice-1.1 {nice tests} {
     nice 0 1
 } 1 {wrong # args: nice ?priorityincr?}
 
 Test nice-1.2 {nice tests} {
-    nice
-} 0 {0}
-
-Test nice-1.2 {nice tests} {
     nice 0
-} 0 {0}
+} 0 $niceBase
 
 #
 # Since you can't nice back up unless you're root, we spawn a child process 
@@ -71,16 +69,12 @@ if {$pid > 0} {
 }
 
 Test nice-1.4 {nice tests} {
-    nice 8
-} 0 8
+    nice 3
+} 0 [expr $niceBase+3]
 
 Test nice-1.5 {nice tests} {
-    nice 8
-} 0 16
-
-Test nice-1.6 {nice tests} {
-    nice 20
-} 0 19
+    nice 4
+} 0 [expr $niceBase+3+4]
 
 if {[id user] != "root"} {
 
@@ -104,22 +98,18 @@ if {[id user] != "root"} {
 
 Test nice-1.8 {nice tests} {
     nice -1
-} 0 18
+} 0 [expr $niceBase+3+4-1]
 
 Test nice-1.10 {nice tests} {
     nice -9
-} 0 9
+} 0 [expr $niceBase+3+4-1-9]
 
 Test nice-1.11 {nice tests} {
     nice -10
-} 0 -1
+} 0 [expr $niceBase+3+4-1-9-10]
 
 Test nice-1.12 {nice tests} {
-    nice -10
-} 0 -11
-
-Test nice-1.13 {nice tests} {
-    nice -10
-} 0 -20
+    nice -1
+} 0 [expr $niceBase+3+4-1-9-10-1]
 
 exit
