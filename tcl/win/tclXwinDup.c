@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinDup.c,v 8.2 1997/04/17 04:59:59 markd Exp $
+ * $Id: tclXwinDup.c,v 8.3 1997/06/30 07:58:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,13 +47,13 @@ ConvertChannelName (Tcl_Interp *interp,
             *handleIdPtr = STD_ERROR_HANDLE;
     } else if (STRNEQU (channelName, "file", 4) ||
                STRNEQU (channelName, "sock", 4)) {
-        TclX_AppendResult (interp, "on MS Windows, only stdin, ",
-                           "stdout, or stderr maybe the dup target",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "on MS Windows, only stdin, ",
+                              "stdout, or stderr maybe the dup target",
+                              (char *) NULL);
         return TCL_ERROR;
     } else {
-        TclX_AppendResult (interp, "invalid channel id: ",
-                           channelName, (char *) NULL);
+        TclX_AppendObjResult (interp, "invalid channel id: ",
+                              channelName, (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -112,8 +112,8 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
                           0, FALSE,
                           DUPLICATE_SAME_ACCESS)) {
 	TclWinConvertError (GetLastError ());
-        TclX_AppendResult (interp, "dup failed: ",
-                           Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, "dup failed: ",
+                              Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
 
@@ -171,9 +171,10 @@ TclXOSBindOpenFile (interp, fileNum)
     Tcl_Channel channel = NULL;
 
     if (!Tcl_StrToUnsigned (fileNumStr, 0, &fileNum)) {
-        Tcl_AppendResult (interp, "invalid integer file number \"", fileNumStr,
-                          "\", expected unsigned integer or Tcl file id",
-                          (char *) NULL);
+        TclX_AppendObjResult (interp, "invalid integer file number \"",
+                              fileNumStr,
+                              "\", expected unsigned integer or Tcl file id",
+                              (char *) NULL);
         return NULL;
     }
 
@@ -202,9 +203,9 @@ TclXOSBindOpenFile (interp, fileNum)
 
     if (Tcl_GetChannel (interp, channelName, NULL) != NULL) {
         Tcl_ResetResult (interp);
-        Tcl_AppendResult (interp, "file number \"", fileNumStr,
-                          "\" is already bound to a Tcl file channel",
-                          (char *) NULL);
+        TclX_AppendObjResult (interp, "file number \"", fileNumStr,
+                              "\" is already bound to a Tcl file channel",
+                              (char *) NULL);
         return NULL;
     }
     Tcl_ResetResult (interp);
@@ -221,9 +222,9 @@ TclXOSBindOpenFile (interp, fileNum)
     return channel;
 
   posixError:
-    Tcl_AppendResult (interp, "binding open file ", fileNumStr,
-                      " to Tcl channel failed: ", Tcl_PosixError (interp),
-                      (char *) NULL);
+    TclX_AppendObjResult (interp, "binding open file ", fileNumStr,
+                          " to Tcl channel failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
 
     if (channel != NULL) {
         Tcl_UnregisterChannel (interp, channel);

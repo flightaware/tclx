@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinId.c,v 8.2 1997/06/30 03:56:09 markd Exp $
+ * $Id: tclXwinId.c,v 8.3 1997/07/01 02:58:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -62,8 +62,8 @@ IdProcess (interp, argc, argv)
     char numBuf [32];
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " process", (char *) NULL);
+        TclX_AppendObjResult (interp, tclXWrongArgs, argv [0], 
+                              " process", (char *) NULL);
         return TCL_OK;
     }
     sprintf (numBuf, "%d", getpid ());
@@ -83,16 +83,16 @@ IdHost (interp, argc, argv)
     char hostName [TCL_RESULT_SIZE];
 
     if (argc != 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " host", (char *) NULL);
+        TclX_AppendObjResult (interp, tclXWrongArgs, argv [0], 
+                              " host", (char *) NULL);
         return TCL_ERROR;
     }
     if (gethostname (hostName, sizeof (hostName)) < 0) {
-        Tcl_AppendResult (interp, "failed to get host name: ",
-                          Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, "failed to get host name: ",
+                              Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
-    Tcl_AppendResult (interp, hostName, (char *) NULL);
+    TclX_AppendObjResult (interp, hostName, (char *) NULL);
     return TCL_OK;
 }
 
@@ -104,8 +104,8 @@ Tcl_IdCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     if (argc < 2) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " arg ?arg...?",
-                          (char *) NULL);
+        TclX_AppendObjResult (interp, tclXWrongArgs, argv [0], " arg ?arg...?",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -124,8 +124,8 @@ Tcl_IdCmd (clientData, interp, argc, argv)
         return IdHost (interp, argc, argv);
     }
 
-    Tcl_AppendResult (interp, "second arg must be one of \"process\", ",
-                      "or \"host\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "second arg must be one of \"process\", ",
+                          "or \"host\"", (char *) NULL);
     return TCL_ERROR;
 }
 

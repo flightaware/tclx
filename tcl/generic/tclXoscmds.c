@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 8.6 1997/07/04 08:41:02 markd Exp $
+ * $Id: tclXoscmds.c,v 8.7 1997/07/04 15:04:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -126,10 +126,10 @@ TclX_LinkObjCmd (clientData, interp, objc, objv)
         char *argv1String = Tcl_GetStringFromObj (objv [1], NULL);
 
         if (!STREQU (argv1String, "-sym")) {
-            TclX_AppendResult (interp,
-                               "invalid option, expected: \"-sym\", got: ",
-                               Tcl_GetStringFromObj (objv [1], NULL),
-                               (char *) NULL);
+            TclX_AppendObjResult (interp,
+                                  "invalid option, expected: \"-sym\", got: ",
+                                  Tcl_GetStringFromObj (objv [1], NULL),
+                                  (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -348,9 +348,9 @@ TclX_UmaskObjCmd (clientData, interp, objc, objv)
     } else {
 	umaskString = Tcl_GetStringFromObj (objv [1], NULL);
         if (!TclX_StrToInt (umaskString, 8, &mask)) {
-            TclX_AppendResult (interp, "Expected octal number got: ",
-                               Tcl_GetStringFromObj (objv [1], NULL),
-                               (char *) NULL);
+            TclX_AppendObjResult (interp, "Expected octal number got: ",
+                                  Tcl_GetStringFromObj (objv [1], NULL),
+                                  (char *) NULL);
             return TCL_ERROR;
         }
 

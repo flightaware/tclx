@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.6 1997/07/03 21:13:34 markd Exp $
+ * $Id: tclXlist.c,v 8.7 1997/07/04 08:41:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -428,9 +428,9 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
         } else if (STREQU (modeStr, "-regexp")) {
             mode = REGEXP;
         } else {
-            TclX_AppendResult (interp, "bad search mode \"", modeStr,
-                               "\": must be -exact, -glob, or -regexp",
-                               (char *) NULL);
+            TclX_AppendObjResult (interp, "bad search mode \"", modeStr,
+                                  "\": must be -exact, -glob, or -regexp",
+                                  (char *) NULL);
             return TCL_ERROR;
         }
     } else if (objc != 3) {
@@ -491,8 +491,8 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 
   binData:
-    TclX_AppendResult (interp, "The ", mode, " option does not support ",
-                       "binary data", (char *) NULL);
+    TclX_AppendObjResult (interp, "The ", mode, " option does not support ",
+                          "binary data", (char *) NULL);
     return TCL_ERROR;
 }
 

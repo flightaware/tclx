@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 8.4 1997/06/30 07:57:43 markd Exp $
+ * $Id: tclXdup.c,v 8.5 1997/07/03 07:14:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -138,9 +138,9 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
     }
     channelType = Tcl_GetChannelType (srcChannel);
     if (STREQU (channelType->typeName, "pipe")) {
-        TclX_AppendResult (interp, "can not \"dup\" a Tcl command pipeline ",
-                           "created with the \"open\" command",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "can not \"dup\" a Tcl command ",
+                              "pipeline created with the \"open\" command",
+                              (char *) NULL);
         return NULL;
     }
     
@@ -181,8 +181,8 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
 
   posixError:
     Tcl_ResetResult (interp);
-    TclX_AppendResult (interp, "dup of \"", srcChannelId, " failed: ",
-                       Tcl_PosixError (interp), (char *) NULL);
+    TclX_AppendObjResult (interp, "dup of \"", srcChannelId, "\" failed: ",
+                          Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
     if (newChannel != NULL) {
@@ -256,16 +256,16 @@ TclX_DupObjCmd (clientData, interp, objc, objv)
 
   badFnum:
     Tcl_ResetResult (interp);
-    TclX_AppendResult (interp, "invalid integer file number \"",
-                       Tcl_GetStringFromObj (objv [1], NULL),
-                       "\", expected unsigned integer ",
-                       "or Tcl file id", (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid integer file number \"",
+                          Tcl_GetStringFromObj (objv [1], NULL),
+                          "\", expected unsigned integer or Tcl file id",
+                          (char *) NULL);
     return TCL_ERROR;
 
   bind2ndArg:
-    TclX_AppendResult (interp, "the second argument, targetChannelId, ",
-                       "is not allow when binding a file number to ",
-                       "a Tcl channel", (char *) NULL);
+    TclX_AppendObjResult (interp, "the second argument, targetChannelId, ",
+                          "is not allow when binding a file number to ",
+                          "a Tcl channel", (char *) NULL);
     return TCL_ERROR;
 }
 

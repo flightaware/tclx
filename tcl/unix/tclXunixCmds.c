@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixCmds.c,v 8.3 1997/06/30 03:56:06 markd Exp $
+ * $Id: tclXunixCmds.c,v 8.4 1997/06/30 07:57:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -58,9 +58,9 @@ TclX_ChrootObjCmd (clientData, interp, objc, objv)
     chrootString = Tcl_GetStringFromObj (objv [1], &chrootStrLen);
 
     if (chroot (chrootString) < 0) {
-        TclX_AppendResult (interp, "changing root to \"", chrootString,
-                           "\" failed: ", Tcl_PosixError (interp),
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "changing root to \"", chrootString,
+                              "\" failed: ", Tcl_PosixError (interp),
+                              (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;

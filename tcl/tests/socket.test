@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: socket.test,v 8.0.4.1 1997/04/14 02:02:37 markd Exp $
+# $Id: socket.test,v 8.1 1997/04/17 04:59:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -42,7 +42,7 @@ Test socket-1.2 {host_info argument checking} {
 
 Test socket-1.3 {host_info argument checking} {
     host_info bad localhost
-} 1 {invalid option "bad", expected one of "addresses", "official_name" or "aliases"}
+} 1 {invalid option "bad", expected one of "addresses", "official_name", or "aliases"}
 
 #
 # Determine if we are at a development site we know is good.  If we are, we

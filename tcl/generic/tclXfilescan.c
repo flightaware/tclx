@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.5 1997/06/30 17:21:39 markd Exp $
+ * $Id: tclXfilescan.c,v 8.6 1997/07/04 08:41:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -400,9 +400,9 @@ TclX_ScancontextObjCmd (clientData, interp, objc, objv)
                                     (objc == 4) ? objv [3] : NULL);
     }
 
-    TclX_AppendResult (interp, "invalid argument, expected one of: ",
-                       "\"create\", \"delete\", or \"copyfile\"",
-                       (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid argument, expected one of: ",
+                          "\"create\", \"delete\", or \"copyfile\"",
+                          (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -631,8 +631,8 @@ ScanFile (interp, contextPtr, channel)
     scanData_t data;
     
     if (contextPtr->matchListHead == NULL) {
-        TclX_AppendResult (interp, "no patterns in current scan context",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "no patterns in current scan context",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 

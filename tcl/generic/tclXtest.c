@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 8.2 1997/06/12 21:08:33 markd Exp $
+ * $Id: tclXtest.c,v 8.3 1997/07/01 02:58:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -85,8 +85,8 @@ DoTestEval (interp, levelStr, command, resultList)
     code = TclGetFrame (interp, levelStr, &framePtr);
     if (code <= 0) {
         if (code == 0)
-            Tcl_AppendResult (interp, "invalid level \"", levelStr, "\"",
-                              (char *) NULL);
+            TclX_AppendObjResult (interp, "invalid level \"", levelStr, "\"",
+                                  (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -141,8 +141,8 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
     Tcl_Obj *resultList;
 
     if (((argc - 1) % 2) != 0) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0],
-                          " ?level cmd? ?level cmd? ...", (char *) NULL);
+        TclX_AppendObjResult (interp, "wrong # args: ", argv [0],
+                              " ?level cmd? ?level cmd? ...", (char *) NULL);
         return TCL_ERROR;
     }
 

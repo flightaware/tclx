@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlgets.c,v 8.1 1997/07/01 02:26:16 markd Exp $
+ * $Id: tclXlgets.c,v 8.2 1997/07/03 07:14:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -88,13 +88,13 @@ ReadListLine (interp, dataPtr)
              * If not first read, then we have failed in the middle of a list.
              */
             if (dataPtr->lineIdx > 0) {
-                TclX_AppendResult (interp, "EOF in list element",
-                                   (char *) NULL);
+                TclX_AppendObjResult (interp, "EOF in list element",
+                                      (char *) NULL);
                 return TCL_ERROR;
             }
             return TCL_BREAK;  /* EOF with no data */
         }
-        TclX_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
     
@@ -103,9 +103,9 @@ ReadListLine (interp, dataPtr)
      * newline, its an error.
      */
     if (Tcl_Eof (dataPtr->channel)) {
-        TclX_AppendResult (interp,
-                           "EOF encountered before newline while reading ",
-                           "list from channel", (char *) NULL);
+        TclX_AppendObjResult (interp,
+                              "EOF encountered before newline while reading ",
+                              "list from channel", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -268,7 +268,8 @@ ReadListElement (interp, dataPtr, elemObjPtr)
 			sprintf(buf,
 				"list element in braces followed by \"%.*s\" instead of space",
 				(int) (p2-p), p);
-			Tcl_SetResult(interp, buf, TCL_VOLATILE);
+                        Tcl_ResetResult (interp);
+                        TclX_AppendObjResult (interp, buf, (char *) NULL);
 		    }
 		    return TCL_ERROR;
 		}
@@ -335,7 +336,8 @@ ReadListElement (interp, dataPtr, elemObjPtr)
 			sprintf(buf,
 				"list element in quotes followed by \"%.*s\" %s",
 				(int) (p2-p), p, "instead of space");
-			Tcl_SetResult(interp, buf, TCL_VOLATILE);
+                        Tcl_ResetResult (interp);
+                        TclX_AppendObjResult (interp, buf, (char *) NULL);
 		    }
 		    return TCL_ERROR;
 		}
@@ -429,8 +431,9 @@ TclX_LgetsObjCmd (clientData, interp, objc, objv)
                                &optValue) != TCL_OK)
         return TCL_ERROR;
     if (optValue == TCLX_MODE_NONBLOCKING) {
-        TclX_AppendResult (interp, "channel is non-blocking; not currently ",
-                           "supported by the lgets command", (char *) NULL);
+        TclX_AppendObjResult (interp, "channel is non-blocking; not ",
+                              "currently supported by the lgets command",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 

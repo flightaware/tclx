@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 8.2 1997/06/12 21:08:46 markd Exp $
+ * $Id: tclXunixSock.c,v 8.3 1997/07/01 02:58:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -182,17 +182,18 @@ TclX_ServerCreateCmd (clientData, interp, argc, argv)
         } else if (STREQU ("-reuseaddr", argv [nextArg])) {
             /* Ignore for compatibility */
         } else {
-            Tcl_AppendResult (interp, "expected ",
-                              "\"-myip\", \"-myport\", or \"-backlog\", ",
-                              "got \"", argv [nextArg], "\"", (char *) NULL);
+            TclX_AppendObjResult (interp, "expected ",
+                                  "\"-myip\", \"-myport\", or \"-backlog\", ",
+                                  "got \"", argv [nextArg], "\"",
+                                  (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
     }
 
     if (nextArg != argc) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " ?options?", (char *) NULL);
+        TclX_AppendObjResult (interp, tclXWrongArgs, argv[0],
+                              " ?options?", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -228,19 +229,19 @@ TclX_ServerCreateCmd (clientData, interp, argc, argv)
     channel = Tcl_MakeTcpClientChannel ((ClientData) socketFD);
     Tcl_RegisterChannel (interp, channel);
 
-    Tcl_AppendResult (interp, Tcl_GetChannelName (channel), (char *) NULL);
+    TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), (char *) NULL);
     return TCL_OK;
 
     /*
      * Exit points for errors.
      */
   missingArg:
-    Tcl_AppendResult (interp, "missing argument for ", argv [nextArg],
-                      (char *) NULL);
+    TclX_AppendObjResult (interp, "missing argument for ", argv [nextArg],
+                          (char *) NULL);
     return TCL_ERROR;
 
   unixError:
-    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+    TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
     CloseForError (interp, channel, socketFD);
     return TCL_ERROR;
 }
@@ -287,16 +288,17 @@ TclX_ServerAcceptCmd (clientData, interp, argc, argv)
             options &= ~SERVER_BUF;
             options |= SERVER_NOBUF;
         } else {
-            Tcl_AppendResult (interp, "expected \"-buf\" or \"-nobuf\", ",
-                              "got \"", argv [nextArg], "\"", (char *) NULL);
+            TclX_AppendObjResult (interp, "expected \"-buf\" or \"-nobuf\", ",
+                                  "got \"", argv [nextArg], "\"",
+                                  (char *) NULL);
             return TCL_ERROR;
         }
         nextArg++;
     }
 
     if (nextArg != argc - 1) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], " ?options? fileid",
-                          (char *) NULL);
+        TclX_AppendObjResult (interp, tclXWrongArgs, argv[0],
+                              " ?options? fileid", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -338,7 +340,7 @@ TclX_ServerAcceptCmd (clientData, interp, argc, argv)
      * Exit points for errors.
      */
   unixError:
-    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+    TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
     if (socketFD >= 0)
         close (socketFD);
     return TCL_ERROR;

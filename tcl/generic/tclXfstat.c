@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.3 1997/06/30 03:55:58 markd Exp $
+ * $Id: tclXfstat.c,v 8.4 1997/06/30 15:35:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -312,11 +312,13 @@ ReturnStatItem (interp, channel, ttyDev, statBufPtr, itemName)
         if (objPtr == NULL)
             return TCL_ERROR;
     } else {
-        TclX_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
-                           "\"atime\", \"ctime\", \"dev\", \"gid\", \"ino\", ",
-                           "\"mode\", \"mtime\", \"nlink\", \"size\", ",
-                           "\"tty\", \"type\", \"uid\", \"remotehost\", or ",
-                           "\"localhost\"", (char *) NULL);
+        TclX_AppendObjResult (interp, "Got \"", itemName,
+                              "\", expected one of ",
+                              "\"atime\", \"ctime\", \"dev\", \"gid\", ",
+                              "\"ino\", \"mode\", \"mtime\", \"nlink\", ",
+                              "\"size\", \"tty\", \"type\", \"uid\", ",
+                              "\"remotehost\", or \"localhost\"",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -362,9 +364,9 @@ TclX_FstatObjCmd (clientData, interp, objc, objv)
 
         if (objc == 4) {
             if (!STREQU (itemName, "stat")) {
-                TclX_AppendResult (interp,
-                                   "expected item name of \"stat\" when ",
-                                   "using array name", (char *) NULL);
+                TclX_AppendObjResult (interp,
+                                      "expected item name of \"stat\" when ",
+                                      "using array name", (char *) NULL);
                 return TCL_ERROR;
             }
             return ReturnStatArray (interp, ttyDev, &statBuf, objv [3]);

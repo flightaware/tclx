@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.4 1997/06/30 06:07:37 markd Exp $
+ * $Id: tclXselect.c,v 8.5 1997/07/03 20:08:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -329,8 +329,8 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
         if (Tcl_GetDoubleFromObj (interp, objv [4], &timeout) != TCL_OK)
             goto exitPoint;
         if (timeout < 0.0) {
-            Tcl_AppendResult (interp, "timeout must be greater than or equal",
-                              " to zero", (char *) NULL);
+            TclX_AppendObjResult (interp, "timeout must be greater than ",
+                                  "or equal to zero", (char *) NULL);
             goto exitPoint;
         }
         seconds = floor (timeout);
@@ -358,8 +358,8 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
                           &fdSets [0], &fdSets [1], &fdSets [2],
                           timeoutRecPtr);
     if (numSelected < 0) {
-        Tcl_AppendResult (interp, "select error: ", Tcl_PosixError (interp),
-                          (char *) NULL);
+        TclX_AppendObjResult (interp, "select error: ",
+                              Tcl_PosixError (interp), (char *) NULL);
         goto exitPoint;
     }
     
@@ -411,9 +411,9 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj     *CONST objv[];
 {
-    Tcl_AppendResult (interp, 
-                      "select is not available on this version of Unix",
-                      (char *) NULL);
+    TclX_AppendObjResult (interp, 
+                          "select is not available on this version of Unix",
+                          (char *) NULL);
     return TCL_ERROR;
 }
 #endif

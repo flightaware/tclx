@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 8.5 1997/06/30 07:57:42 markd Exp $
+ * $Id: tclXbsearch.c,v 8.6 1997/07/04 08:41:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -132,9 +132,9 @@ TclProcKeyCompare (searchCBPtr)
         oldResult = ckstrdup (oldResult);
 
         Tcl_ResetResult (searchCBPtr->interp);
-        Tcl_AppendResult (searchCBPtr->interp, "invalid integer \"", oldResult,
-                          "\" returned from compare proc \"",
-                          searchCBPtr->tclProc, "\"", (char *) NULL);
+        TclX_AppendObjResult (searchCBPtr->interp, "invalid integer \"",
+                              oldResult, "\" returned from compare proc \"",
+                              searchCBPtr->tclProc, "\"", (char *) NULL);
         ckfree (oldResult);
         return TCL_ERROR;
     }
@@ -180,10 +180,10 @@ ReadAndCompare (fileOffset, searchCBPtr)
         if (Tcl_Gets (searchCBPtr->channel, &searchCBPtr->lineBuf) < 0) {
             if (Tcl_Eof (searchCBPtr->channel) ||
                 Tcl_InputBlocked (searchCBPtr->channel)) {
-                Tcl_AppendResult (searchCBPtr->interp,
-                                  "bsearch got unexpected EOF on \"",
-                                  Tcl_GetChannelName (searchCBPtr->channel),
-                                  "\"", (char *) NULL);
+                TclX_AppendObjResult (searchCBPtr->interp,
+                                    "bsearch got unexpected EOF on \"",
+                                    Tcl_GetChannelName (searchCBPtr->channel),
+                                     "\"", (char *) NULL);
                 return TCL_ERROR;
             }
             goto posixError;
@@ -230,9 +230,9 @@ ReadAndCompare (fileOffset, searchCBPtr)
     return TCL_OK;
 
   posixError:
-   Tcl_AppendResult (searchCBPtr->interp,
-                     Tcl_GetChannelName (searchCBPtr->channel), ": ",
-                     Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
+   TclX_AppendObjResult (searchCBPtr->interp,
+                        Tcl_GetChannelName (searchCBPtr->channel), ": ",
+                        Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 
@@ -291,9 +291,9 @@ BinSearch (searchCBPtr)
     }
 
   posixError:
-   Tcl_AppendResult (searchCBPtr->interp,
-                     Tcl_GetChannelName (searchCBPtr->channel), ": ",
-                     Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
+   TclX_AppendObjResult (searchCBPtr->interp,
+                         Tcl_GetChannelName (searchCBPtr->channel), ": ",
+                         Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 

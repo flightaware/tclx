@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 8.3 1997/06/30 03:56:01 markd Exp $
+ * $Id: tclXmsgcat.c,v 8.4 1997/06/30 07:57:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -134,8 +134,9 @@ ParseFailOptionObj (interp, optionObj, failPtr)
     else if (STREQU ("-nofail", optionStr))
         *failPtr = FALSE;
     else {
-        TclX_AppendResult (interp, "Expected option of `-fail' or ",
-                           "`-nofail', got: `", optionStr, "'", (char *) NULL);
+        TclX_AppendObjResult (interp, "Expected option of `-fail' or ",
+                              "`-nofail', got: `", optionStr, "'",
+                              (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -157,12 +158,12 @@ CatOpFailedObj (interp, errorMsg)
     CONST char *errorMsg;
 {
 #ifndef NO_CATGETS
-    TclX_AppendResult (interp, errorMsg, (char *) NULL);
+    TclX_AppendObjResult (interp, errorMsg, (char *) NULL);
 
 #else
-    TclX_AppendResult (interp, "the message catalog facility is not",
-                       " available, default string is always returned",
-                       (char *) NULL);
+    TclX_AppendObjResult (interp, "the message catalog facility is not",
+                          " available, default string is always returned",
+                          (char *) NULL);
 #endif /* NO_CATGETS */
 
     return TCL_ERROR;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.12 1997/07/04 09:24:48 markd Exp $
+ * $Id: tclXutil.c,v 8.13 1997/07/04 18:22:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -396,13 +396,13 @@ TclX_GetOpenChannel (interp, handle, chanAccess)
         return NULL;
     }
     if ((chanAccess & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
-        Tcl_AppendResult(interp, "channel \"", handle,
-                "\" wasn't opened for reading", (char *) NULL);
+        TclX_AppendObjResult(interp, "channel \"", handle,
+                             "\" wasn't opened for reading", (char *) NULL);
         return NULL;
     }
     if ((chanAccess & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
-        Tcl_AppendResult(interp, "channel \"", handle,
-                "\" wasn't opened for writing", (char *) NULL);
+        TclX_AppendObjResult(interp, "channel \"", handle,
+                             "\" wasn't opened for writing", (char *) NULL);
         return NULL;
     }
 
@@ -439,13 +439,13 @@ TclX_GetOpenChannelObj (interp, handleObj, chanAccess)
         return NULL;
     }
     if ((chanAccess & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
-        TclX_AppendResult (interp, "channel \"", handle,
-                           "\" wasn't opened for reading", (char *) NULL);
+        TclX_AppendObjResult (interp, "channel \"", handle,
+                              "\" wasn't opened for reading", (char *) NULL);
         return NULL;
     }
     if ((chanAccess & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
-        TclX_AppendResult (interp, "channel \"", handle,
-                           "\" wasn't opened for writing", (char *) NULL);
+        TclX_AppendObjResult (interp, "channel \"", handle,
+                              "\" wasn't opened for writing", (char *) NULL);
         return NULL;
     }
 
@@ -957,7 +957,7 @@ TclX_WrongArgs (interp, commandNameObj, string)
 
 
 /*-----------------------------------------------------------------------------
- * TclX_AppendResult --
+ * TclX_AppendObjResult --
  *
  *   Append a variable number of strings onto the object result already
  * present for an interpreter.
@@ -968,7 +968,7 @@ TclX_WrongArgs (interp, commandNameObj, string)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_AppendResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
+TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
 {
     Tcl_Interp *interp;
     Tcl_Obj *resultPtr;
@@ -1054,13 +1054,15 @@ TclX_SaveResultErrorInfo (interp)
     saveObjv [0] = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
     
     nameObjPtr = Tcl_NewStringObj (ERRORINFO, -1);
-    saveObjv [1] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL, TCL_PARSE_PART1);
+    saveObjv [1] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL,
+                                   TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
     if (saveObjv [1] == NULL) {
         saveObjv [1] = Tcl_NewObj ();
     }
 
     nameObjPtr = Tcl_NewStringObj (ERRORCODE, -1);
-    saveObjv [2] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL, TCL_PARSE_PART1);
+    saveObjv [2] = Tcl_ObjGetVar2 (interp, nameObjPtr, NULL,
+                                   TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
     if (saveObjv [2] == NULL) {
         saveObjv [2] = Tcl_NewObj ();
     }
@@ -1097,10 +1099,12 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
     }
 
     nameObjPtr = Tcl_NewStringObj (ERRORINFO, -1);
-    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [1], TCL_PARSE_PART1);
+    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [1],
+                    TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
 
     nameObjPtr = Tcl_NewStringObj (ERRORCODE, -1);
-    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [2], TCL_PARSE_PART1);
+    Tcl_ObjSetVar2 (interp, nameObjPtr, NULL, saveObjv [2], 
+                    TCL_GLOBAL_ONLY | TCL_PARSE_PART1);
 
     Tcl_SetObjResult (interp, saveObjv [0]);
 

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 8.2 1997/06/12 21:08:20 markd Exp $
+ * $Id: tclXhandles.c,v 8.3 1997/06/30 07:57:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -235,8 +235,8 @@ HandleDecode (interp, tblHdrPtr, handle)
              tblHdrPtr->baseLength) != 0) ||
              !TclX_StrToUnsigned (&handle [tblHdrPtr->baseLength], 10, 
                                  &entryIdx)) {
-        Tcl_AppendResult (interp, "invalid ", tblHdrPtr->handleBase,
-			  " handle \"", handle, "\"", (char *) NULL);
+        TclX_AppendObjResult (interp, "invalid ", tblHdrPtr->handleBase,
+                              " handle \"", handle, "\"", (char *) NULL);
         return -1;
     }
     return entryIdx;
@@ -270,8 +270,8 @@ HandleDecodeObj (interp, tblHdrPtr, handle)
                   tblHdrPtr->baseLength) != 0) ||
         !TclX_StrToUnsigned (&handle [tblHdrPtr->baseLength], 10, 
                              &entryIdx)) {
-        TclX_AppendResult (interp, "invalid ", tblHdrPtr->handleBase,
-                           " handle \"", handle, "\"", (char *) NULL);
+        TclX_AppendObjResult (interp, "invalid ", tblHdrPtr->handleBase,
+                              " handle \"", handle, "\"", (char *) NULL);
         return -1;
     }
     return entryIdx;
@@ -437,8 +437,8 @@ TclX_HandleXlate (interp, headerPtr, handle)
 
     if ((entryIdx >= tblHdrPtr->tableSize) ||
             (entryHdrPtr->freeLink != ALLOCATED_IDX)) {
-        Tcl_AppendResult (interp, tblHdrPtr->handleBase, " is not open",
-                          (char *) NULL);
+        TclX_AppendObjResult (interp, tblHdrPtr->handleBase, " is not open",
+                              (char *) NULL);
         return NULL;
     }     
 
@@ -477,8 +477,8 @@ TclX_HandleXlateObj (interp, headerPtr, handleObj)
 
     if ((entryIdx >= tblHdrPtr->tableSize) ||
             (entryHdrPtr->freeLink != ALLOCATED_IDX)) {
-        TclX_AppendResult (interp, tblHdrPtr->handleBase, 
-                           " is not open", (char *) NULL);
+        TclX_AppendObjResult (interp, tblHdrPtr->handleBase, 
+                              " is not open", (char *) NULL);
         return NULL;
     }     
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixId.c,v 8.4 1997/06/30 07:57:58 markd Exp $
+ * $Id: tclXunixId.c,v 8.5 1997/07/01 02:58:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -272,9 +272,9 @@ IdConvert (interp, objc, objv)
         return GroupidToGroupnameResult (interp, gid);
         
     }
-    TclX_AppendResult (interp, "third arg must be \"user\", \"userid\", ",
-                       "\"group\" or \"groupid\", got \"", subCommand, "\"",
-                       (char *) NULL);
+    TclX_AppendObjResult (interp, "third arg must be \"user\", \"userid\", ",
+                          "\"group\" or \"groupid\", got \"", subCommand, "\"",
+                          (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -310,9 +310,9 @@ IdEffective (interp, objc, objv)
         return TCL_OK;
     }
 
-    TclX_AppendResult (interp, "third arg must be \"user\", \"userid\", ",
-                       "\"group\" or \"groupid\", got \"", 
-                       subCommand, "\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "third arg must be \"user\", \"userid\", ",
+                          "\"group\" or \"groupid\", got \"", 
+                          subCommand, "\"", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -360,8 +360,8 @@ IdProcess (interp, objc, objv)
                               " process group ?set?");
 
         if (Tcl_IsSafe (interp)) {
-            TclX_AppendResult (interp,  "can't set process group from a ",
-                               "safe interpeter", (char *) NULL);
+            TclX_AppendObjResult (interp,  "can't set process group from a ",
+                                  "safe interpeter", (char *) NULL);
             return TCL_ERROR;
         }
                         
@@ -374,8 +374,8 @@ IdProcess (interp, objc, objv)
         return TCL_OK;
     }
 
-    TclX_AppendResult (interp, "expected one of \"parent\" or \"group\" got\"",
-                       subCommand, "\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "expected one of \"parent\" or \"group\" ",
+                          "got\"", subCommand, "\"", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -448,8 +448,8 @@ IdGroupids (interp, objc, objv, symbolic)
     ckfree ((char *) groups);
     return TCL_OK;
 #else
-    TclX_AppendResult (interp, "group id lists unavailable on this system ",
-                       "(no getgroups function)", (char *) NULL);
+    TclX_AppendObjResult (interp, "group id lists unavailable on this system ",
+                          "(no getgroups function)", (char *) NULL);
     return TCL_ERROR;
 #endif
 }
@@ -473,15 +473,16 @@ IdHost (interp, objc, objv)
         return TclX_WrongArgs (interp, objv [0], "host");
 
 	if (gethostname (hostNameBuf, MAXHOSTNAMELEN) < 0) {
-            Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+            TclX_AppendObjResult (interp, Tcl_PosixError (interp),
+                                  (char *) NULL);
 	    return TCL_ERROR;
 	}
 	hostNameBuf[MAXHOSTNAMELEN-1] = '\0';
 	Tcl_SetObjResult (interp, Tcl_NewStringObj (hostNameBuf, -1));
 	return TCL_OK;
 #else
-        TclX_AppendResult (interp, "host name unavailable on this system ",
-                           "(no gethostname function)", (char *) NULL);
+        TclX_AppendObjResult (interp, "host name unavailable on this system ",
+                              "(no gethostname function)", (char *) NULL);
         return TCL_ERROR;
 #endif
 }
@@ -520,12 +521,12 @@ IdUser (interp, objc, objv)
 
     pw = getpwnam (user);
     if (pw == NULL) {
-        TclX_AppendResult (interp, "user \"",user, "\" does not exist",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "user \"",user, "\" does not exist",
+                              (char *) NULL);
         goto errorExit;
     }
     if (setuid (pw->pw_uid) < 0) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
     endpwent ();
@@ -559,7 +560,7 @@ IdUserId (interp, objc, objv)
         return TCL_ERROR;
 
     if (setuid ((uid_t) uid) < 0) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -589,12 +590,12 @@ IdGroup (interp, objc, objv)
      
     grp = getgrnam (groupName);
     if (grp == NULL) {
-        TclX_AppendResult (interp, "group \"", groupName, "\" does not exist",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "group \"", groupName,
+                              "\" does not exist", (char *) NULL);
         goto errorExit;
     }
     if (setgid (grp->gr_gid) < 0) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
         goto errorExit;
     }
     endgrent ();
@@ -628,7 +629,7 @@ IdGroupId (interp, objc, objv)
         return TCL_ERROR;
 
     if (setgid ((gid_t) gid) < 0) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -708,11 +709,11 @@ TclX_IdObjCmd (clientData, interp, objc, objv)
         return IdGroupId (interp, objc, objv);
     }
 
-    TclX_AppendResult (interp, "second arg must be one of \"convert\", ",
-                       "\"effective\", \"process\", ",
-                       "\"user\", \"userid\", \"group\", \"groupid\", ",
-                       "\"groups\", \"groupids\", ",
-                       "or \"host\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "second arg must be one of \"convert\", ",
+                          "\"effective\", \"process\", ",
+                          "\"user\", \"userid\", \"group\", \"groupid\", ",
+                          "\"groups\", \"groupids\", ",
+                          "or \"host\"", (char *) NULL);
     return TCL_ERROR;
 }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 8.4 1997/06/30 01:29:04 markd Exp $
+ * $Id: tclXmath.c,v 8.5 1997/06/30 07:57:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -332,8 +332,8 @@ TclX_RandomObjCmd (dummy, interp, objc, objv)
         char buf [18];
 
         sprintf (buf, "%ld", RANDOM_RANGE);
-        TclX_AppendResult (interp, " range must be > 0 and <= ", buf,
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, " range must be > 0 and <= ", buf,
+                              (char *) NULL);
         return TCL_ERROR;
     }
 }

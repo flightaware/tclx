@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.4 1997/06/30 17:21:38 markd Exp $
+ * $Id: tclXdebug.c,v 8.5 1997/07/04 09:24:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -492,25 +492,26 @@ TclX_CmdtraceObjCmd (clientData, interp, objc, objv)
     return TCL_OK;
 
   argumentError:
-    Tcl_AppendResult (interp, tclXWrongArgs, objv [0], 
-                      " level | on ?noeval? ?notruncate? ?procs?",
-                      "?fileid? ?command cmd? | off | depth", (char *) NULL);
+    TclX_AppendObjResult (interp, tclXWrongArgs, objv [0], 
+                          " level | on ?noeval? ?notruncate? ?procs?",
+                          "?fileid? ?command cmd? | off | depth",
+                          (char *) NULL);
     return TCL_ERROR;
 
   missingCommand:
-    Tcl_AppendResult (interp, "command option requires an argument",
-                      (char *) NULL);
+    TclX_AppendObjResult (interp, "command option requires an argument",
+                          (char *) NULL);
     return TCL_ERROR;
 
   mixCommandAndFile:
-    Tcl_AppendResult (interp, "can not specify both the command option and ",
-                      "a file handle", (char *) NULL);
+    TclX_AppendObjResult (interp, "can not specify both the command option ",
+                          "and a file handle", (char *) NULL);
     return TCL_ERROR;
 
   invalidOption:
-    Tcl_AppendResult (interp, "invalid option: expected ",
-                      "one of \"noeval\", \"notruncate\", \"procs\", ",
-                      "\"command\", or a file id", (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid option: expected ",
+                          "one of \"noeval\", \"notruncate\", \"procs\", ",
+                          "\"command\", or a file id", (char *) NULL);
     return TCL_ERROR;
 }
 

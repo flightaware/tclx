@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 8.1 1997/04/17 04:59:44 markd Exp $
+# $Id: server.test,v 8.2 1997/06/12 21:08:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -26,27 +26,6 @@ if [cequal $tcl_platform(platform) windows] {
     echo "    * The server tests have not been ported to Win32" 
     return
 }
-
-#
-# Do all argument and error checking.  We can at least test this, even
-# if we can't run full tests on this particular system.
-#
-
-Test server-4.0 {host_info argument checking} {
-    host_info
-} 1 {wrong # args: host_info option ...}
-
-Test server-4.1 {host_info argument checking} {
-    host_info addresses
-} 1 {wrong # args: host_info addresses host}
-
-Test server-4.2 {host_info argument checking} {
-    host_info addresses xxx yyy
-} 1 {wrong # args: host_info addresses host}
-
-Test server-4.3 {host_info argument checking} {
-    host_info bad localhost
-} 1 {invalid option "bad", expected one of "addresses", "official_name" or "aliases"}
 
 #
 # Determine if we are at a development site we know is good.  If we are, we

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 8.6 1997/06/30 07:57:52 markd Exp $
+ * $Id: tclXprocess.c,v 8.7 1997/06/30 17:21:41 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -223,9 +223,9 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
      */
 #ifdef NO_WAITPID
     if ((options != 0) || pgroup) {
-        TclX_AppendResult (interp, "The \"-nohang\", \"-untraced\" and ",
-                           "\"-pgroup\" options are not available on this ",
-                           "system", (char *) NULL);
+        TclX_AppendObjResult (interp, "The \"-nohang\", \"-untraced\" and ",
+                              "\"-pgroup\" options are not available on this ",
+                              "system", (char *) NULL);
         return TCL_ERROR;
     }
 #endif
@@ -240,8 +240,8 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
     returnedPid = TCLX_WAITPID (pid, (int *) (&status), options);
 
     if (returnedPid < 0) {
-        TclX_AppendResult (interp, "wait for process failed: ",
-                           Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, "wait for process failed: ",
+                              Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -273,14 +273,14 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 
   invalidPid:
-    TclX_AppendResult (interp, "invalid pid or process group id \"",
-                       Tcl_GetStringFromObj (objv [idx], NULL),
-                       "\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid pid or process group id \"",
+                          Tcl_GetStringFromObj (objv [idx], NULL),
+                          "\"", (char *) NULL);
     return TCL_ERROR;
 
   negativePid:
-    TclX_AppendResult (interp, "pid or process group id must be greater ",
-                       "than zero", (char *) NULL);
+    TclX_AppendObjResult (interp, "pid or process group id must be greater ",
+                          "than zero", (char *) NULL);
     return TCL_ERROR;
 }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 8.7 1997/06/30 17:21:37 markd Exp $
+ * $Id: tclXcmdloop.c,v 8.8 1997/07/01 02:58:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -644,8 +644,8 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
                 gotInterrupted = TRUE; 
                 continue;  /* Process signals above */
             }
-            Tcl_AppendResult (interp, "command input error on stdin: ",
-                              Tcl_PosixError (interp), (char *) NULL);
+            TclX_AppendObjResult (interp, "command input error on stdin: ",
+                                  Tcl_PosixError (interp), (char *) NULL);
             return TCL_ERROR;
         }
 
@@ -764,15 +764,15 @@ TclX_CommandloopObjCmd (clientData, interp, objc, objv)
      * option being processed.
      */
   argRequired:
-    Tcl_AppendResult (interp, "argument required for ", argStr,
-                      " option", (char *) NULL);
+    TclX_AppendObjResult (interp, "argument required for ", argStr,
+                          " option", (char *) NULL);
     return TCL_ERROR;
 
   unknownOption:
-    Tcl_AppendResult (interp, "unknown option \"", argStr,
-                      "\", expected one of \"-async\", ",
-                      "\"-interactive\", \"-prompt1\", \"-prompt2\", ",
-                      " or \"-endcommand\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "unknown option \"", argStr,
+                          "\", expected one of \"-async\", ",
+                          "\"-interactive\", \"-prompt1\", \"-prompt2\", ",
+                          " or \"-endcommand\"", (char *) NULL);
     return TCL_ERROR;
     
   wrongArgs:

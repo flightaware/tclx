@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 8.4 1997/06/30 03:55:53 markd Exp $
+ * $Id: tclXchmod.c,v 8.5 1997/06/30 07:57:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -196,8 +196,8 @@ ConvSymMode (interp, symMode, modeVal)
     return modeVal;
 
   invalidMode:
-    TclX_AppendResult (interp, "invalid file mode \"", symMode, "\"",
-                       (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid file mode \"", symMode, "\"",
+                          (char *) NULL);
     return -1;
 }
 
@@ -252,8 +252,8 @@ ChmodFileNameObj (interp, modeInfo, fileNameObj)
     return TCL_OK;
 
   fileError:
-    Tcl_AppendResult (interp, filePath, ": ",
-                      Tcl_PosixError (interp), (char *) NULL);
+    TclX_AppendObjResult (interp, filePath, ": ",
+                          Tcl_PosixError (interp), (char *) NULL);
   errorExit:
     Tcl_DStringFree (&pathBuf);
     return TCL_ERROR;
@@ -409,9 +409,9 @@ TclX_ChownObjCmd (clientData, interp, objc, objv)
         if (STREQU (fileIdsSwitch, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
-            TclX_AppendResult (interp, "Invalid option \"", fileIdsSwitch,
-                               "\", expected \"", FILE_ID_OPT, "\"",
-                               (char *) NULL);
+            TclX_AppendObjResult (interp, "Invalid option \"", fileIdsSwitch,
+                                  "\", expected \"", FILE_ID_OPT, "\"",
+                                  (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -427,8 +427,9 @@ TclX_ChownObjCmd (clientData, interp, objc, objv)
         return TCL_ERROR;
 
     if ((ownerObjc < 1) || (ownerObjc > 2)) {
-        TclX_AppendResult (interp, "owner arg should be: user or {user group}",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp,
+                              "owner arg should be: user or {user group}",
+                              (char *) NULL);
         goto errorExit;
     }
     options = TCLX_CHOWN;
@@ -488,9 +489,9 @@ TclX_ChgrpObjCmd (clientData, interp, objc, objv)
         if (STREQU (fileIdsSwitch, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
-            TclX_AppendResult (interp, "Invalid option \"", fileIdsSwitch,
-                               "\", expected \"", FILE_ID_OPT, "\"",
-                               (char *) NULL);
+            TclX_AppendObjResult (interp, "Invalid option \"", fileIdsSwitch,
+                                  "\", expected \"", FILE_ID_OPT, "\"",
+                                  (char *) NULL);
             return TCL_ERROR;
         }
     }

@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 8.4 1997/06/30 07:57:54 markd Exp $
+ * $Id: tclXsocket.c,v 8.5 1997/06/30 15:35:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -83,7 +83,7 @@ ReturnGetHostError (interp, host)
 	  errorMsg = "unknown error";
     }
     Tcl_SetErrorCode (interp, "INET", errorCode, errorMsg, (char *)NULL);
-    Tcl_AppendResult (interp, "host lookup failure: ",
+    TclX_AppendObjResult (interp, "host lookup failure: ",
                       host, " (", errorMsg, ")",
                       (char *) NULL);
     return TCL_ERROR;
@@ -168,8 +168,8 @@ InfoGetHost (interp, objc, objv)
     char *host       = Tcl_GetStringFromObj (objv [2], NULL);
 
     if (objc != 3) {
-        TclX_AppendResult (interp, tclXWrongArgs, command, " ", 
-                           subCommand, " host", (char *) NULL);
+        TclX_AppendObjResult (interp, tclXWrongArgs, command, " ", 
+                              subCommand, " host", (char *) NULL);
         return NULL;
     }
 
@@ -271,9 +271,9 @@ TclX_HostInfoObjCmd (clientData, interp, objc, objv)
         return TCL_OK;
     }
 
-    TclX_AppendResult (interp, "invalid option \"", subCommand,
-                       "\", expected one of \"addresses\", \"official_name\"",
-                       " or \"aliases\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid option \"", subCommand,
+                          "\", expected one of \"addresses\", ",
+                          "\"official_name\", or \"aliases\"", (char *) NULL);
     return TCL_ERROR;
 }
 

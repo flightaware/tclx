@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 8.4 1997/06/30 07:57:44 markd Exp $
+ * $Id: tclXfcntl.c,v 8.5 1997/07/03 07:14:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -118,9 +118,9 @@ XlateFcntlAttr (interp, attrName, modify)
     for (idx = 0; attrNames [idx].name != NULL; idx++) {
         if (STREQU (attrNameUp, attrNames [idx].name)) {
             if (modify && !attrNames [idx].modifiable) {
-                TclX_AppendResult (interp, "Attribute \"", attrName,
-                                   "\" may not be altered after open",
-                                   (char *) NULL);
+                TclX_AppendObjResult (interp, "Attribute \"", attrName,
+                                      "\" may not be altered after open",
+                                      (char *) NULL);
                 return ATTR_ERROR;
             }
             return attrNames [idx].id;
@@ -131,13 +131,14 @@ XlateFcntlAttr (interp, attrName, modify)
      * Invalid attribute.
      */
   invalidAttrName:
-    TclX_AppendResult (interp, "unknown attribute name \"", attrName,
-                       "\", expected one of ", (char *) NULL);
+    TclX_AppendObjResult (interp, "unknown attribute name \"", attrName,
+                          "\", expected one of ", (char *) NULL);
 
     for (idx = 0; attrNames [idx + 1].name != NULL; idx++) {
-        TclX_AppendResult (interp, attrNames [idx].name, ", ", (char *) NULL);
+        TclX_AppendObjResult (interp, attrNames [idx].name, ", ",
+                              (char *) NULL);
     }
-    TclX_AppendResult (interp, "or ", attrNames [idx].name, (char *) NULL);
+    TclX_AppendObjResult (interp, "or ", attrNames [idx].name, (char *) NULL);
     return ATTR_ERROR;
 }
 

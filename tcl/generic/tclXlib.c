@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.8 1997/06/30 16:47:21 markd Exp $
+ * $Id: tclXlib.c,v 8.9 1997/06/30 17:21:40 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -242,10 +242,10 @@ EvalFilePart (interp, fileName, offset, length)
         goto posixError;
 
     if ((fileSize < offset + length) || (offset < 0)) {
-        TclX_AppendResult (interp,
-                           "range to eval outside of file bounds in \"",
-                           fileName, "\", index file probably corrupt",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp,
+                              "range to eval outside of file bounds in \"",
+                              fileName, "\", index file probably corrupt",
+                              (char *) NULL);
         goto errorExit;
     }
 
@@ -292,12 +292,13 @@ EvalFilePart (interp, fileName, offset, length)
      * Errors accessing the file once its opened are handled here.
      */
   posixError:
-    TclX_AppendResult (interp, "error accessing: ", fileName, ": ",
+    TclX_AppendObjResult (interp, "error accessing: ", fileName, ": ",
                        Tcl_PosixError (interp), (char *) NULL);
     goto errorExit;
 
   prematureEof:
-    TclX_AppendResult (interp, "premature EOF on: ", fileName, (char *) NULL);
+    TclX_AppendObjResult (interp, "premature EOF on: ", fileName,
+                          (char *) NULL);
     goto errorExit;
 
   errorExit:
@@ -448,8 +449,9 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
     dataStr = Tcl_GetVar2 (interp, AUTO_PKG_INDEX, packageName,
                            TCL_GLOBAL_ONLY);
     if (dataStr == NULL) {
-        TclX_AppendResult (interp, "entry not found in \"auto_pkg_index \"",
-                           "for package \"", packageName, "\"", (char *) NULL);
+        TclX_AppendObjResult (interp, "entry not found in \"auto_pkg_index \"",
+                              "for package \"", packageName, "\"",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -485,8 +487,8 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
     if (pkgDataArgv != NULL)
         ckfree ((char *) pkgDataArgv);
     Tcl_ResetResult (interp);
-    TclX_AppendResult (interp, "invalid entry in \"auto_pkg_index \"",
-                       "for package \"", packageName, "\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid entry in \"auto_pkg_index \"",
+                          "for package \"", packageName, "\"", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -635,16 +637,16 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
      */
   formatError:
     Tcl_ResetResult (interp);
-    TclX_AppendResult (interp, "format error in library index \"",
-                       tndxFilePath, "\" (", lineBuffer.string, ")",
-                       (char *) NULL);
+    TclX_AppendObjResult (interp, "format error in library index \"",
+                          tndxFilePath, "\" (", lineBuffer.string, ")",
+                          (char *) NULL);
     goto errorExit;
 
 
   fileError:
-    TclX_AppendResult (interp, "error accessing package index file \"",
-                       tndxFilePath, "\": ", Tcl_PosixError (interp),
-                       (char *) NULL);
+    TclX_AppendObjResult (interp, "error accessing package index file \"",
+                          tndxFilePath, "\": ", Tcl_PosixError (interp),
+                          (char *) NULL);
     goto errorExit;
 
     /*
@@ -975,9 +977,9 @@ LoadPackageIndexes (interp, infoPtr, path)
     Tcl_DStringInit (&dirNameBuf);
 
     if (infoPtr->doingIdxSearch) {
-        TclX_AppendResult (interp, "recursive load of indexes ",
-                           "(probable invalid command while loading index)",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "recursive load of indexes ",
+                              "(probable invalid command while loading index)",
+                              (char *) NULL);
         return TCL_ERROR;
     }
     infoPtr->doingIdxSearch = TRUE;
@@ -1072,8 +1074,8 @@ AddInProgress (interp, infoPtr, command)
     Tcl_CreateHashEntry (&infoPtr->inProgressTbl, command, &newEntry);
 
     if (!newEntry) {
-        TclX_AppendResult (interp, "recursive auto_load of \"",
-                           command, "\"", (char *) NULL);
+        TclX_AppendObjResult (interp, "recursive auto_load of \"",
+                              command, "\"", (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
@@ -1382,9 +1384,9 @@ LoadCommand (interp, command)
     if (Tcl_GetCommandInfo (interp, command, &cmdInfo))
         return TCL_OK;  /* Found and loaded */
 
-    TclX_AppendResult (interp, "command \"", command,
-                       "\" was defined in a Tcl library index, ",
-                       "but not in a Tcl library", (char *) NULL);
+    TclX_AppendObjResult (interp, "command \"", command,
+                          "\" was defined in a Tcl library index, ",
+                          "but not in a Tcl library", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -1441,11 +1443,11 @@ TclX_LoadlibindexObjCmd (clientData, interp, objc, objv)
         if (LoadOusterIndex (interp, pathName) != TCL_OK)
             goto errorExit;
     } else {
-        TclX_AppendResult (interp, "invalid library name, must have an ",
-                           " extension of \".tlib\", \".tli\" or the name ",
-                           "\"tclIndex\", got \"",
-                           Tcl_GetStringFromObj (objv [1], NULL), "\"",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "invalid library name, must have an ",
+                              " extension of \".tlib\", \".tli\" or the name ",
+                              "\"tclIndex\", got \"",
+                              Tcl_GetStringFromObj (objv [1], NULL), "\"",
+                              (char *) NULL);
         goto errorExit;
     }
 

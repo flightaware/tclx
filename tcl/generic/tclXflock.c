@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 8.3 1997/06/30 03:55:57 markd Exp $
+ * $Id: tclXflock.c,v 8.4 1997/06/30 06:53:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Need to add an interface to F_GETLK */
@@ -104,9 +104,9 @@ ParseLockUnlockArgs (interp, objc, objv, argIdx, lockInfoPtr)
         } else if (STREQU (originStr, "end")) {
             lockInfoPtr->whence = 2;
         } else {
-            TclX_AppendResult (interp, "bad origin \"",  originStr,
-                               "\": should be \"start\", \"current\", ",
-                               "or \"end\"",  (char *) NULL);
+            TclX_AppendObjResult (interp, "bad origin \"",  originStr,
+                                  "\": should be \"start\", \"current\", ",
+                                  "or \"end\"",  (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -156,16 +156,16 @@ TclX_FlockObjCmd (clientData, interp, objc, objv)
             lockInfo.block = FALSE;
             continue;
         }
-        TclX_AppendResult (interp, "invalid option \"", optStr,
-                           "\" expected one of \"-read\", \"-write\", or ",
-                           "\"-nowait\"", (char *) NULL);
+        TclX_AppendObjResult (interp, "invalid option \"", optStr,
+                              "\" expected one of \"-read\", \"-write\", or ",
+                              "\"-nowait\"", (char *) NULL);
         return TCL_ERROR;
     }
 
     if (lockInfo.access == (TCL_READABLE | TCL_WRITABLE)) {
-        TclX_AppendResult (interp,
-                           "can not specify both \"-read\" and \"-write\"",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp,
+                              "can not specify both \"-read\" and \"-write\"",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 

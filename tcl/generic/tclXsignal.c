@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.9 1997/07/04 17:23:25 markd Exp $
+ * $Id: tclXsignal.c,v 8.10 1997/07/04 18:23:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -220,6 +220,7 @@ static unsigned signalsReceived [MAXSIG];
  * Table of commands to evaluate when a signal occurs.  If the command is
  * NULL and the signal is received, an error is returned.
  */
+/*FIX: need to allow binary data in commands */
 static char *signalTrapCmds [MAXSIG];
 
 /*
@@ -241,9 +242,8 @@ BlockSignals _ANSI_ARGS_((Tcl_Interp    *interp,
                           int            action,
                           unsigned char  signals [MAXSIG]));
 
-static char *
-SignalBlocked _ANSI_ARGS_((Tcl_Interp  *interp,
-                           int          signalNum));
+static Tcl_Obj *
+SignalBlocked _ANSI_ARGS_((int signalNum));
 
 static int
 SigNameToNum _ANSI_ARGS_((Tcl_Interp *interp,
@@ -288,13 +288,15 @@ SetSignalActions _ANSI_ARGS_((Tcl_Interp      *interp,
                               signalProcPtr_t  actionFunc,
                               char            *command));
 
-static char *
+static int
 FormatSignalListEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                   int         signalNum));
+                                   int         signalNum,
+                                   Tcl_Obj    *sigStatesObjPtr));
 
 static int
 ProcessSignalListEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                    char       *signalEntry));
+                                    char       *signalName,
+                                    Tcl_Obj    *stateObjPtr));
 
 static int
 GetSignalStates _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -302,7 +304,7 @@ GetSignalStates _ANSI_ARGS_((Tcl_Interp    *interp,
 
 static int
 SetSignalStates _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *signalKeyedList));
+                             Tcl_Obj    *sigStatesObjPtr));
 
 static void
 SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -325,7 +327,7 @@ TclX_KillObjCmd _ANSI_ARGS_((ClientData   clientData,
  * GetSignalName --
  *     Get the name for a signal.  This normalized SIGCHLD.
  * Parameters:
- *   o signalNum (I) - Signal number convert.
+ *   o signalNum - Signal number convert.
  * Results
  *   Static signal name.
  *-----------------------------------------------------------------------------
@@ -349,8 +351,8 @@ GetSignalName (signalNum)
  * GetSignalState --
  *     Get the current state of the specified signal.
  * Parameters:
- *   o signalNum (I) - Signal number to query.
- *   o sigProcPtr (O) - The signal function is returned here.
+ *   o signalNum - Signal number to query.
+ *   o sigProcPtr - The signal function is returned here.
  * Results
  *   TCL_OK or TCL_ERROR (check errno).
  *-----------------------------------------------------------------------------
@@ -390,8 +392,8 @@ GetSignalState (signalNum, sigProcPtr)
  * SetSignalState --
  *     Set the state of a signal.
  * Parameters:
- *   o signalNum (I) - Signal number to query.
- *   o sigFunc (O) - The signal function or SIG_DFL or SIG_IGN.
+ *   o signalNum - Signal number to query.
+ *   o sigFunc - The signal function or SIG_DFL or SIG_IGN.
  * Results
  *   TCL_OK or TCL_ERROR (check errno).
  *-----------------------------------------------------------------------------
@@ -427,9 +429,9 @@ SetSignalState (signalNum, sigFunc)
  * system.
  *
  * Parameters::
- *   o interp (O) - Error messages are returned in result.
- *   o action (I) - SIG_BLOCK or SIG_UNBLOCK.
- *   o signals (I) - Boolean array indexed by signal number that indicates
+ *   o interp - Error messages are returned in result.
+ *   o action - SIG_BLOCK or SIG_UNBLOCK.
+ *   o signals - Boolean array indexed by signal number that indicates
  *     the requested signals.
  * Returns:
  *   TCL_OK or TCL_ERROR, with error message in interp.
@@ -453,14 +455,15 @@ BlockSignals (interp, action, signals)
     }
 
     if (sigprocmask (action, &sigBlockSet, NULL)) {
-        TclX_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
     return TCL_OK;
 #else
-    TclX_AppendResult (interp,
-      "Posix signals are not available on this system, can not block signals");
+    TclX_AppendObjResult (interp,
+                          "Posix signals are not available on this system, ",
+                          "can not block signals");
     return TCL_ERROR;
 #endif
 }
@@ -469,31 +472,28 @@ BlockSignals (interp, action, signals)
  * SignalBlocked --
  *     
  *    Determine if a signal is blocked.  On non-Posix systems, always returns
- * "0".
+ * FALSE.
  *
  * Parameters::
- *   o interp (O) - Error messages are returned in result.
- *   o signalNum (I) - The signal to determine the state for.
+ *   o signalNum - The signal to determine the state for.
  * Returns:
- *   NULL if an error occured, or a pointer to a static string of "1" if the
- * signal is block, and a static string of "0" if it is not blocked.
+ *   NULL if an error occured (with error in errno), otherwise a pointer to a
+ * boolean object.
  *-----------------------------------------------------------------------------
  */
-static char *
-SignalBlocked (interp, signalNum)
-    Tcl_Interp  *interp;
-    int          signalNum;
+static Tcl_Obj *
+SignalBlocked (signalNum)
+    int signalNum;
 {
 #ifndef NO_SIGACTION
     sigset_t sigBlockSet;
 
     if (sigprocmask (SIG_BLOCK, NULL, &sigBlockSet)) {
-        TclX_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return NULL;
     }
-    return sigismember (&sigBlockSet, signalNum) ? "1" : "0";
+    return Tcl_NewBooleanObj (sigismember (&sigBlockSet, signalNum));
 #else
-    return "0";
+    return Tcl_NewBooleanObj (FALSE);
 #endif
 }
 
@@ -504,9 +504,9 @@ SignalBlocked (interp, signalNum)
  * "SIG" omitted.
  *
  * Parameters:
- *   o interp (I) - Errors are returned in result.
- *   o sigName (I) - Name of signal to convert.
- *   o sigNumPtr (O) - Signal number is returned here.
+ *   o interp - Errors are returned in result.
+ *   o sigName - Name of signal to convert.
+ *   o sigNumPtr - Signal number is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -542,8 +542,8 @@ SigNameToNum (interp, sigName, sigNumPtr)
     }
 
   invalidSignal:
-    TclX_AppendResult (interp, "invalid signal \"", sigName, "\"",
-                      (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid signal \"", sigName, "\"",
+                          (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -553,9 +553,9 @@ SigNameToNum (interp, sigName, sigNumPtr)
  *   Parse a signal specified as either a name or a number.
  * 
  * Parameters:
- *   o interp (O) - Interpreter for returning errors.
- *   o signalStr (I) - The signal name or number string.
- *   o allowZero (I) - Allow zero as a valid signal number (for kill).
+ *   o interp - Interpreter for returning errors.
+ *   o signalStr - The signal name or number string.
+ *   o allowZero - Allow zero as a valid signal number (for kill).
  * Returns:
  *   The signal number converted, or -1 if an error occures.
  *-----------------------------------------------------------------------------
@@ -633,8 +633,8 @@ SignalTrap (signalNum)
  *
  * Parameters:
  *   o interp (I/O) - The interpreter to return errors in.
- *   o signalNum (I) - The signal number of the signal that occured.
- *   o command (O) - The resulting command adter the formatting.
+ *   o signalNum - The signal number of the signal that occured.
+ *   o command - The resulting command adter the formatting.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -684,10 +684,10 @@ FormatTrapCode (interp, signalNum, command)
         
         badSpec [0] = scanPtr [1];
         badSpec [1] = '\0';
-        TclX_AppendResult (interp, "bad signal trap command formatting ",
-                          "specification \"%", badSpec,
-                          "\", expected one of \"%%\" or \"%S\"",
-                          (char *) NULL);
+        TclX_AppendObjResult (interp, "bad signal trap command formatting ",
+                              "specification \"%", badSpec,
+                              "\", expected one of \"%%\" or \"%S\"",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 }
@@ -698,9 +698,9 @@ FormatTrapCode (interp, signalNum, command)
  * formatted into the command replacing %S with the symbolic signal name.
  *
  * Parameters:
- *   o interp (I) - The interpreter to run the signal in. If an error
+ *   o interp - The interpreter to run the signal in. If an error
  *     occures, then the result will be left in the interp.
- *   o signalNum (I) - The signal number of the signal that occured.
+ *   o signalNum - The signal number of the signal that occured.
  * Return:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -751,11 +751,11 @@ EvalTrapCode (interp, signalNum)
  *   Do processing on the specified signal.
  *
  * Parameters:
- *   o interp (I) - Result will contain the result of the signal handling
+ *   o interp - Result will contain the result of the signal handling
  *     code that was evaled.
- *   o background (I) - Signal handler was called from the event loop with
+ *   o background - Signal handler was called from the event loop with
  *     no current interp.
- *   o signalNum (I) - The signal to process.
+ *   o signalNum - The signal to process.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -777,8 +777,8 @@ ProcessASignal (interp, background, signalNum)
 
         signalsReceived [signalNum] = 0;
         Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);
-        TclX_AppendResult (interp, signalName, " signal received", 
-                           (char *)NULL);
+        TclX_AppendObjResult (interp, signalName, " signal received", 
+                              (char *)NULL);
         Tcl_SetVar (interp, "errorInfo", "", TCL_GLOBAL_ONLY);
         result = TCL_ERROR;
 
@@ -817,14 +817,14 @@ ProcessASignal (interp, background, signalNum)
  * each time the signal was received.
  * 
  * Parameters:
- *   o clientData (I) - Not used.
+ *   o clientData - Not used.
  *   o interp (I/O) - interp result should contain the result for
  *     the command that just executed.  This will either be restored or
  *     replaced with a new result.  If this is NULL, then no interpreter
  *     is directly available (i.e. event loop).  In this case, the first
  *     interpreter in internal interpreter table is used.  If an error results
  *     from signal processing, it is handled via Tcl_BackgroundError.
- *   o cmdResultCode (I) - The integer result returned by the command that
+ *   o cmdResultCode - The integer result returned by the command that
  *     Tcl_Eval just completed.  Should be TCL_OK if not called from
  *     Tcl_Eval.
  * Returns:
@@ -912,9 +912,9 @@ ProcessSignals (clientData, interp, cmdResultCode)
  * of the signal being a single entry of "*".
  * 
  * Parameters:
- *   o interp (O) - Interpreter for returning errors.
- *   o signalListObjPtr (I) - The Tcl list object of signals to convert.
- *   o signals (O) - Boolean array indexed by signal number that indicates
+ *   o interp - Interpreter for returning errors.
+ *   o signalListObjPtr - The Tcl list object of signals to convert.
+ *   o signals - Boolean array indexed by signal number that indicates
  *     which signals are set.
  * Returns:
  *   TCL_OK or TCL_ERROR.
@@ -930,13 +930,13 @@ ParseSignalList (interp, signalListObjPtr, signals)
     char     *signalStr;
     int       signalObjc, signalNum, idx, cnt;
 
-    if (Tcl_ListObjGetElements (interp, signalListObjPtr, &signalObjc, 
-                                &signalObjv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, signalListObjPtr,
+                                &signalObjc, &signalObjv) != TCL_OK)
         return TCL_ERROR;
 
     if (signalObjc == 0) {
-        TclX_AppendResult (interp, "signal list may not be empty",
-                           (char *) NULL);
+        TclX_AppendObjResult (interp, "signal list may not be empty",
+                              (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -982,8 +982,9 @@ ParseSignalList (interp, signalListObjPtr, signals)
     return TCL_OK;
 
   wildMustBeAlone:
-    TclX_AppendResult (interp, "when \"*\" is specified in the signal list, ",
-                       "no other signals may be specified", (char *) NULL);
+    TclX_AppendObjResult (interp, "when \"*\" is specified in the signal ",
+                          "list, no other signals may be specified",
+                          (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -993,11 +994,11 @@ ParseSignalList (interp, signalListObjPtr, signals)
  *    Set the signal state for the specified signals.  
  *
  * Parameters::
- *   o interp (O) - The list is returned in the result.
- *   o signals (I) - Boolean array indexed by signal number that indicates
+ *   o interp - The list is returned in the result.
+ *   o signals - Boolean array indexed by signal number that indicates
  *     the requested signals.
- *   o actionFunc (I) - The function to run when the signal is received.
- *   o command (I) - If the function is the "trap" function, this is the
+ *   o actionFunc - The function to run when the signal is received.
+ *   o command - If the function is the "trap" function, this is the
  *     Tcl command to run when the trap occurs.  Otherwise, NULL.
  * Returns:
  *   TCL_OK or TCL_ERROR, with error message in interp.
@@ -1024,9 +1025,9 @@ SetSignalActions (interp, signals, actionFunc, command)
             signalTrapCmds [signalNum] = ckstrdup (command);
 
         if (SetSignalState (signalNum, actionFunc) == TCL_ERROR) {
-            TclX_AppendResult (interp, Tcl_PosixError (interp),
-                               " while setting ", Tcl_SignalId (signalNum),
-                               (char *) NULL);
+            TclX_AppendObjResult (interp, Tcl_PosixError (interp),
+                                  " while setting ", Tcl_SignalId (signalNum),
+                                  (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -1040,57 +1041,69 @@ SetSignalActions (interp, signals, actionFunc, command)
  * a that state.
  *
  * Parameters::
- *   o interp (O) - Error messages are returned here.
- *   o signalNum (I) - The signal to get the state for.
+ *   o interp - Error messages are returned here.
+ *   o signalNum - The signal to get the state for.
+ *   o sigStatesObjPtr - Keyed list to add entry to.
  * Returns:
- *   A pointer to the dynamically allocate list entry, or NULL if an error
- * occurs.
+ *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-static char *
-FormatSignalListEntry (interp, signalNum)
+static int
+FormatSignalListEntry (interp, signalNum, sigStatesObjPtr)
     Tcl_Interp *interp;
     int         signalNum;
+    Tcl_Obj    *sigStatesObjPtr;
 {
-    char            *sigState [3], *sigEntry [2], *entry;
+    Tcl_Obj *stateObjv [3], *stateObjPtr;
+    int stateObjc;
     signalProcPtr_t  actionFunc;
+    char *actionStr;
 
     if (GetSignalState (signalNum, &actionFunc) == TCL_ERROR)
         goto unixSigError;
-
-    sigState [2] = NULL;
+    
     if (actionFunc == SIG_DFL) {
-        sigState [0]  = SIGACT_DEFAULT;
+        actionStr = SIGACT_DEFAULT;
     } else if (actionFunc == SIG_IGN) {
-        sigState [0] = SIGACT_IGNORE;
+        actionStr = SIGACT_IGNORE;
     } else if (actionFunc == SignalTrap) {
-        if (signalTrapCmds [signalNum] == NULL)
-            sigState [0] = SIGACT_ERROR;
-        else {
-            sigState [0] = SIGACT_TRAP;
-            sigState [2] = signalTrapCmds [signalNum];
+        if (signalTrapCmds [signalNum] == NULL) {
+            actionStr = SIGACT_ERROR;
+        } else {
+            actionStr = SIGACT_TRAP;
         }
     } else {
-        sigState [0] = SIGACT_UNKNOWN;
+        actionStr = SIGACT_UNKNOWN;
     }
-    
-    sigState [1] = SignalBlocked (interp, signalNum);
-    if (sigState [1] == NULL)
-        goto unixSigError;
-    
-    sigEntry [0] = Tcl_SignalId (signalNum);
-    sigEntry [1] = Tcl_Merge ((sigState [2] == NULL) ? 2 : 3,
-                              sigState);
 
-    entry = Tcl_Merge (2, sigEntry);
-    ckfree (sigEntry [1]);
-    return entry;
+    stateObjv [1] = SignalBlocked (signalNum);
+    if (stateObjv [1] == NULL)
+        goto unixSigError;
+    stateObjv [0] = Tcl_NewStringObj (actionStr, -1);
+    if (signalTrapCmds [signalNum] != NULL) {
+        stateObjv [2] = Tcl_NewStringObj (signalTrapCmds [signalNum], -1);
+        stateObjc = 3;
+    } else {
+        stateObjc = 2;
+    }
+    stateObjPtr = Tcl_NewListObj (stateObjc, stateObjv);
+    Tcl_IncrRefCount (stateObjPtr);
+
+    if (TclX_KeyedListSet (interp, sigStatesObjPtr, 
+                           Tcl_SignalId (signalNum),
+                           stateObjPtr) != TCL_OK) {
+        Tcl_DecrRefCount (stateObjPtr);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount (stateObjPtr);
+
+    return TCL_OK;
 
   unixSigError:
-    TclX_AppendResult (interp, Tcl_PosixError (interp),
-                       " while getting ", Tcl_SignalId (signalNum),
-                       (char *) NULL);
-    return NULL;
+    TclX_AppendObjResult (interp, Tcl_PosixError (interp),
+                          " while getting ", Tcl_SignalId (signalNum),
+                          (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1101,67 +1114,68 @@ FormatSignalListEntry (interp, signalNum)
  * it is ignored.
  *
  * Parameters::
- *   o interp (O) - Error messages are returned here.
- *   o signalEntry (I) - Entry from the keyed list.
+ *   o interp - Error messages are returned here.
+ *   o signalName - Signal name.
+ *   o stateObjPtr - Signal state information from keyed list.
  * Returns:
  *   TCL_OK or TCL_ERROR;
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessSignalListEntry (interp, signalEntry)
+ProcessSignalListEntry (interp, signalName, stateObjPtr)
     Tcl_Interp *interp;
-    char       *signalEntry;
+    char       *signalName;
+    Tcl_Obj    *stateObjPtr;
 {
-    char           **sigEntry = NULL, **sigState = NULL;
-    int              sigEntrySize, sigStateSize;
-    int              signalNum, blocked;
+    Tcl_Obj **stateObjv;
+    int stateObjc;
+    char *actionStr, *cmdStr;
+    int signalNum, blocked;
     signalProcPtr_t  actionFunc = NULL;
     unsigned char    signals [MAXSIG];
 
     /*
-     * Split the list.
+     * Get state list.
      */
-    if (Tcl_SplitList (interp, signalEntry,
-                       &sigEntrySize, &sigEntry) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, stateObjPtr,
+                                &stateObjc, &stateObjv) != TCL_OK)
         return TCL_ERROR;
-    if (sigEntrySize != 2)
-        goto invalidEntry;
-    if (Tcl_SplitList (interp, sigEntry [1],
-                       &sigStateSize, &sigState) != TCL_OK)
-        goto errorExit;
-    if (sigStateSize < 2 || sigStateSize > 3)
+    if (stateObjc < 2 || stateObjc > 3)
         goto invalidEntry;
     
     /*
-     * Parse the signal name and state.
+     * Parse the signal name and action.
      */
-    if (SigNameToNum (interp, sigEntry [0], &signalNum) != TCL_OK)
+    if (SigNameToNum (interp, signalName, &signalNum) != TCL_OK)
         return TCL_ERROR;
-
-    if (STREQU (sigState [0], SIGACT_DEFAULT)) {
+    
+    actionStr = Tcl_GetStringFromObj (stateObjv [0], NULL);
+    cmdStr = NULL;
+    if (STREQU (actionStr, SIGACT_DEFAULT)) {
         actionFunc = SIG_DFL;
-        if (sigStateSize != 2)
+        if (stateObjc != 2)
             goto invalidEntry;
-    } else if (STREQU (sigState [0], SIGACT_IGNORE)) {
+    } else if (STREQU (actionStr, SIGACT_IGNORE)) {
         actionFunc = SIG_IGN;
-        if (sigStateSize != 2)
+        if (stateObjc != 2)
             goto invalidEntry;
-    } else if (STREQU (sigState [0], SIGACT_ERROR)) {
+    } else if (STREQU (actionStr, SIGACT_ERROR)) {
         actionFunc = SignalTrap;
-        if (sigStateSize != 2)
+        if (stateObjc != 2)
             goto invalidEntry;
-    } else if (STREQU (sigState [0], SIGACT_TRAP)) {
+    } else if (STREQU (actionStr, SIGACT_TRAP)) {
         actionFunc = SignalTrap;
-        if (sigStateSize != 3)    /* Must have command */
+        if (stateObjc != 3)    /* Must have command */
             goto invalidEntry;
-    } else if (STREQU (sigState [0], SIGACT_UNKNOWN)) {
-        if (sigStateSize != 2)
+        cmdStr = Tcl_GetStringFromObj (stateObjv [2], NULL);
+    } else if (STREQU (actionStr, SIGACT_UNKNOWN)) {
+        if (stateObjc != 2)
             goto invalidEntry;
-        goto exitPoint;  /* Ignore non-Tcl signals */
+        return TCL_OK;  /* Ignore non-Tcl signals */
     }
 
-    if (Tcl_GetBoolean (interp, sigState [1], &blocked) != TCL_OK)
-        goto errorExit;
+    if (Tcl_GetBooleanFromObj (interp, stateObjv [1], &blocked) != TCL_OK)
+        return TCL_ERROR;
     
     memset (signals, FALSE, sizeof (unsigned char) * MAXSIG);
     signals [signalNum] = TRUE;
@@ -1174,35 +1188,24 @@ ProcessSignalListEntry (interp, signalEntry)
 #ifndef NO_SIGACTION
     if (blocked) {
         if (BlockSignals (interp, SIG_BLOCK, signals) != TCL_OK)
-            goto errorExit;
+            return TCL_ERROR;
     }
 #endif
     if (SetSignalActions (interp, signals, actionFunc,
-                        sigState [2]) != TCL_OK)
-        goto errorExit;
+                          cmdStr) != TCL_OK)
+        return TCL_ERROR;
 #ifndef NO_SIGACTION
     if (!blocked) {
         if (BlockSignals (interp, SIG_UNBLOCK, signals) != TCL_OK)
-            goto errorExit;
+            return TCL_ERROR;
     }
 #endif
     
-  exitPoint:
-    if (sigEntry != NULL)
-        ckfree ((char *) sigEntry);
-    if (sigState != NULL)
-        ckfree ((char *) sigState);
     return TCL_OK;
 
   invalidEntry:
-    TclX_AppendResult (interp, "invalid signal keyed list entry \"",
-                       signalEntry, "\"", (char *) NULL);
-
-  errorExit:
-    if (sigEntry != NULL)
-        ckfree ((char *) sigEntry);
-    if (sigState != NULL)
-        ckfree ((char *) sigState);
+    TclX_AppendObjResult (interp, "invalid signal keyed list entry form ",
+                          signalName, (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -1213,8 +1216,8 @@ ProcessSignalListEntry (interp, signalEntry)
  * signals.
  *
  * Parameters::
- *   o interp (O) - The list is returned in the result.
- *   o signals (I) - Boolean array indexed by signal number that indicates
+ *   o interp - The list is returned in the result.
+ *   o signals - Boolean array indexed by signal number that indicates
  *     the requested signals.
  * Returns:
  *   TCL_OK or TCL_ERROR, with error message in interp.
@@ -1225,33 +1228,24 @@ GetSignalStates (interp, signals)
     Tcl_Interp    *interp;
     unsigned char  signals [MAXSIG];
 {
-    int    signalNum, idx, cnt;
-    char  *stateKeyedList [MAXSIG];
+    int signalNum;
+    Tcl_Obj *sigStatesObjPtr;
 
-    cnt = 0;
+    sigStatesObjPtr = TclX_NewKeyedListObj ();
+
     for (signalNum = 0; signalNum < MAXSIG; signalNum++) {
         if (!signals [signalNum])
             continue;
-        stateKeyedList [cnt] =
-            FormatSignalListEntry (interp, 
-                                   signalNum);
-        if (stateKeyedList [cnt] == NULL)
-            goto errorExit;
-        cnt++;
+        if (FormatSignalListEntry (interp, 
+                                   signalNum,
+                                   sigStatesObjPtr) != TCL_OK) {
+            Tcl_DecrRefCount (sigStatesObjPtr);
+            return TCL_ERROR;
+        }
     }
 
-    Tcl_SetResult (interp,
-                   Tcl_Merge (cnt,
-                              stateKeyedList),
-                   TCL_DYNAMIC);
-    for (idx = 0; idx < cnt; idx++)
-        ckfree (stateKeyedList [idx]);
+    Tcl_SetObjResult (interp, sigStatesObjPtr);
     return TCL_OK;
-
-  errorExit:
-    for (idx = 0; idx < cnt; idx++)
-        ckfree (stateKeyedList [idx]);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1261,34 +1255,37 @@ GetSignalStates (interp, signals)
  * GetSignalStates.
  *
  * Parameters::
- *   o interp (O) - Errors are returned in the result.
- *   o signalKeyedList (I) - Keyed list describing signal states.
+ *   o interp - Errors are returned in the result.
+ *   o sigStatesObjPtr - Keyed list to add entry to.
  * Returns:
  *   TCL_OK or TCL_ERROR, with error message in interp.
  *-----------------------------------------------------------------------------
  */
 static int
-SetSignalStates (interp, signalKeyedList)
+SetSignalStates (interp, sigStatesObjPtr)
     Tcl_Interp *interp;
-    char       *signalKeyedList;
+    Tcl_Obj    *sigStatesObjPtr;
 {
-    int     idx, signalListSize;
-    char  **signalList;
+    Tcl_Obj *keysListObj, **keysObjv, *stateObjPtr;
+    int keysObjc, idx;
+    char *signalName;
 
-    if (Tcl_SplitList (interp, signalKeyedList,
-                       &signalListSize, &signalList) != TCL_OK)
+    if (TclX_KeyedListGetKeys (interp, sigStatesObjPtr, NULL,
+                               &keysListObj) != TCL_OK)
         return TCL_ERROR;
-
-    for (idx = 0; idx < signalListSize; idx++) {
-        if (ProcessSignalListEntry (interp, signalList [idx]) != TCL_OK)
-            goto errorExit;
+    if (Tcl_ListObjGetElements (interp, keysListObj,
+                                &keysObjc, &keysObjv) != TCL_OK)
+        return TCL_ERROR;
+                               
+    for (idx = 0; idx < keysObjc; idx++) {
+        signalName = Tcl_GetStringFromObj (keysObjv [idx], NULL);
+        if (TclX_KeyedListGet (interp, sigStatesObjPtr, signalName,
+                               &stateObjPtr) != TCL_OK)
+            return TCL_ERROR;
+        if (ProcessSignalListEntry (interp, signalName, stateObjPtr) != TCL_OK)
+            return TCL_ERROR;
     }
-    ckfree ((char *) signalList);
     return TCL_OK;
-
-  errorExit:
-    ckfree ((char *) signalList);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1321,8 +1318,7 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
     if (STREQU (actionStr, "set")) {
         if (objc != 3)
             goto cmdNotValid;
-        return SetSignalStates (interp,
-                                Tcl_GetStringFromObj (objv [2], NULL));
+        return SetSignalStates (interp, objv [2]);
     }
 
     if (ParseSignalList (interp,
@@ -1332,8 +1328,8 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
 
     if (STREQU (actionStr, SIGACT_TRAP)) {
         if (objc != 4) {
-            TclX_AppendResult (interp, "command required for ",
-                               "trapping signals", (char *) NULL);
+            TclX_AppendObjResult (interp, "command required for ",
+                                  "trapping signals", (char *) NULL);
             return TCL_ERROR;
         }
         return SetSignalActions (interp,
@@ -1386,17 +1382,17 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
     /*
      * Not a valid action.
      */
-    TclX_AppendResult (interp, "invalid signal action specified: ", 
-                       actionStr, ": expected one of \"default\", ",
-                       "\"ignore\", \"error\", \"trap\", \"get\", ",
-                       "\"set\", \"block\", or \"unblock\"", (char *) NULL);
+    TclX_AppendObjResult (interp, "invalid signal action specified: ", 
+                          actionStr, ": expected one of \"default\", ",
+                          "\"ignore\", \"error\", \"trap\", \"get\", ",
+                          "\"set\", \"block\", or \"unblock\"", (char *) NULL);
     return TCL_ERROR;
 
 
   cmdNotValid:
-    TclX_AppendResult (interp, "command may not be ",
-                       "specified for \"", actionStr, "\" action",
-                      (char *) NULL);
+    TclX_AppendObjResult (interp, "command may not be ",
+                          "specified for \"", actionStr, "\" action",
+                          (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -1489,8 +1485,8 @@ TclX_KillObjCmd (clientData, interp, objc, objv)
  * this is the last interpreter, clean up all tables.
  *
  * Parameters:
- *   o clientData (I) - Not used.
- *   o interp (I) - Interp that is being deleted.
+ *   o clientData - Not used.
+ *   o interp - Interp that is being deleted.
  *-----------------------------------------------------------------------------
  */
 static void
@@ -1553,8 +1549,8 @@ TclX_SetupSigInt ()
  * hack.  It just saves the handler and client data in globals.
  *
  * Parameters:
- *   o errorFunc (I) - Error handling function.
- *   o clientData (I) - Client data to pass to function
+ *   o errorFunc - Error handling function.
+ *   o clientData - Client data to pass to function
  *-----------------------------------------------------------------------------
  */
 void
