@@ -21,4 +21,6 @@ o Making packages out of some of the new TclX functionallity, such as
 
 o Remove check for whitespace in keyedlist field names.
 
-o Install instructions.
+o Install instructions for WinDozes.
+
+o Help change to search for file path tail needs documented and tests.

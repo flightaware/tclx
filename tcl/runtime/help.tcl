@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 8.5 1997/07/10 10:50:31 markd Exp $
+# $Id: help.tcl,v 8.6 1997/08/23 18:55:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 # FIX: Convert this to use namespaces.
@@ -108,6 +108,18 @@ namespace eval TclXHelp {
                 return [list $dir/$pathName]
             }
         }
+
+	# Not found, try to find a file matching only the file tail,
+	# for example if --> <helpDir>/tcl/control/if.
+
+	set fileTail [file tail $pathName]
+        foreach dir [RootDirs] {
+	    set fileName [exec find $dir -name $fileTail | head -1]
+	    if {$fileName != {}} {
+                return [list $fileName]
+	    }
+	}
+
         error "\"$pathName\" does not exist" {} \
             [list TCLXHELP NOEXIST $pathName]
     }
