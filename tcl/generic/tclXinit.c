@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.11 1997/09/01 00:58:06 markd Exp $
+ * $Id: tclXinit.c,v 8.12 1997/11/11 05:33:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -40,6 +40,8 @@
  * Globals:
  *   o ${w}x_library - Set to the directory containing the init file.
  */
+/*FIX: Break into 3 parts and don't do source in standalone isn't
+ * available*/
 static char tclx_findinit [] =
 "proc tclx_findinit {w defaultLib version noInit} {\n\
     upvar #0 env env ${w}x_library libDir tcl_platform tcl_platform\n\
@@ -116,6 +118,7 @@ TclXRuntimeInit (interp, which, defaultLib, version)
     char       *version;
     
 {
+    /*FIX: Use objects */
 #define PROC_ARGC 5
     Tcl_CmdInfo cmdInfo;
     char *procArgv [PROC_ARGC + 1], *quick;

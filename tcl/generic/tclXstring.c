@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.15 1997/12/14 21:33:00 markd Exp $
+ * $Id: tclXstring.c,v 8.16 1998/01/28 17:34:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -107,22 +107,24 @@ TclX_CindexObjCmd (dummy, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    int stringLen, idx;
-    char *stringPtr;
+    int strLen, utfLen, idx, numBytes;
+    char *str, buf [TCL_UTF_MAX];
 
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "string indexExpr");
     
-    stringPtr = Tcl_GetStringFromObj (objv[1], &stringLen);
+    str = Tcl_GetStringFromObj (objv[1], &strLen);
+    utfLen = Tcl_NumUtfChars(str, strLen);
 
-    if (TclX_RelativeExpr (interp, objv [2], stringLen, &idx) != TCL_OK) {
+    if (TclX_RelativeExpr (interp, objv [2], utfLen, &idx) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if ((idx < 0) || (idx >= stringLen))
+    if ((idx < 0) || (idx >= utfLen))
         return TCL_OK;
 
-    Tcl_SetStringObj (Tcl_GetObjResult (interp), stringPtr + idx, 1);
+    numBytes = Tcl_UniCharToUtf(Tcl_UniCharAtIndex(str, idx), buf);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp), buf, numBytes);
     return TCL_OK;
 }
 
@@ -143,17 +145,16 @@ TclX_ClengthObjCmd (dummy, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    int length;
+    char *str;
+    int strLen;
 
     if (objc != 2)
         return TclX_WrongArgs (interp, objv[0], "string");
 
-    Tcl_GetStringFromObj (objv[1], &length);
-
-    Tcl_SetIntObj (Tcl_GetObjResult (interp), length);
+    str = Tcl_GetStringFromObj (objv[1], &strLen);
+    Tcl_SetIntObj (Tcl_GetObjResult (interp), Tcl_NumUtfChars(str, strLen));
     return TCL_OK;
 }
-
 
 
 /*-----------------------------------------------------------------------------
@@ -172,18 +173,17 @@ TclX_CconcatObjCmd (dummy, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj    *resultPtr = Tcl_GetObjResult (interp);
-    int         idx;
-    int         stringLength;
-    char       *stringPtr;
+    Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
+    int idx, strLen;
+    char *str;
 
     /*
      * FIX: It would be faster if we calculated up how much space we needed all
      * at once.  Also we could iterate a pointer into objv until NULL
      */
     for (idx = 1; idx < objc; idx++) {
-	stringPtr = Tcl_GetStringFromObj (objv [idx], &stringLength);
-	Tcl_AppendToObj (resultPtr, stringPtr, stringLength);
+	str = Tcl_GetStringFromObj (objv [idx], &strLen);
+	Tcl_AppendToObj (resultPtr, str, strLen);
     }
     return TCL_OK;
 }
@@ -207,9 +207,9 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    int first, subLen, fullLen;
+    int strLen, utfLen, first, subLen;
     int isRange = (int) clientData;
-    char *targetString;
+    char *str, *start, *end;
 
     if (objc != 4) {
         if (isRange)
@@ -220,16 +220,17 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
                                    "string firstExpr lengthExpr");
     }
 
-    targetString = Tcl_GetStringFromObj (objv [1], &fullLen);
+    str = Tcl_GetStringFromObj (objv [1], &strLen);
+    utfLen = Tcl_NumUtfChars(str, strLen);
 
-    if (TclX_RelativeExpr (interp, objv [2], fullLen, &first) != TCL_OK) {
+    if (TclX_RelativeExpr (interp, objv [2], utfLen, &first) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if ((first < 0) || (first >= fullLen))
+    if ((first < 0) || (first >= utfLen))
         return TCL_OK;
 
-    if (TclX_RelativeExpr (interp, objv [3], fullLen, &subLen) != TCL_OK) {
+    if (TclX_RelativeExpr (interp, objv [3], utfLen, &subLen) != TCL_OK) {
         return TCL_ERROR;
     }
         
@@ -239,12 +240,12 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
         subLen = subLen - first +1;
     }
 
-    if (first + subLen > fullLen)
-        subLen = fullLen - first;
+    if (first + subLen > utfLen)
+        subLen = utfLen - first;
 
-    Tcl_SetObjResult (interp,
-                      Tcl_NewStringObj (targetString + first,
-                                        subLen));
+    start = Tcl_UtfAtIndex(str, first);
+    end = Tcl_UtfAtIndex(start, subLen);
+    Tcl_SetStringObj(Tcl_GetObjResult(interp), start, end - start);
     return TCL_OK;
 }
 
@@ -272,6 +273,7 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     char *string2;
     int string2Len;
 
+    /*FIX: Not utf clean */
     if ((objc < 3) || (objc > 4))
         return TclX_WrongArgs (interp, objv[0], "?options? string1 string2");
 
@@ -373,6 +375,7 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     int           tokenStrLen;
     Tcl_Obj      *newVarValueObj;
 
+    /*FIX: Not UTF safe */
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "strvar separators");
     
@@ -411,7 +414,7 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
         return TCL_ERROR;
     }
 
-    Tcl_AppendToObj (Tcl_GetObjResult (interp), startPtr, tokenLen);
+    Tcl_SetStringObj (Tcl_GetObjResult (interp), startPtr, tokenLen);
     Tcl_DStringFree (&string);
     return TCL_OK;
 }
@@ -519,6 +522,8 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     int            idx;
     int            stringIndex;
 
+    /*FIX: Not UTF-safe. */
+
     if (objc != 4)
         return TclX_WrongArgs (interp, objv[0], "from to string");
 
@@ -599,31 +604,32 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    int             failIndex = FALSE;
-    register char  *class;
-    register char  *scanPtr;
-    int             scanStringLen;
-    int             classLen;
-    int             optStrLen;
+    int failIndex = FALSE;
+    char *optStr, *class, *scanPtr;
+    int scanStrLen, cnt, idx, numBytes;
+    char *failVar = NULL;
+    Tcl_Obj *classObj, *stringObj;
+    unsigned long number;
+    char charBuf[TCL_UTF_MAX];
 
-    char           *failVar = NULL;
-    Tcl_Obj        *classObj;
-    Tcl_Obj        *stringObj;
+    if (TCL_UTF_MAX > sizeof(number)) {
+        panic("TclX_CtypeObjCmd: UTF character longer than a long");
+    }
 
-    char           *optionString;
-    int             index;
+    /*FIX:  UTF-safe not finished. */
+    /*FIX: Split into multiple procs; this is looking like one of JO's 
+      functions */
 
     if (objc < 3)
         goto wrongNumArgs;
 
-    optionString = Tcl_GetStringFromObj (objv [1], &optStrLen);
-    if (*optionString == '-') {
-        if (STREQU (optionString, "-failindex")) {
+    optStr = Tcl_GetStringFromObj (objv [1], NULL);
+    if (*optStr == '-') {
+        if (STREQU (optStr, "-failindex")) {
             failIndex = TRUE;
         } else {
-            int len;
             TclX_AppendObjResult (interp, "invalid option \"",
-                                  Tcl_GetStringFromObj (objv [1], &len),
+                                  Tcl_GetStringFromObj (objv [1], NULL),
                                   "\", must be -failindex", (char *) NULL);
             return TCL_ERROR;
         }
@@ -640,42 +646,55 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
         classObj = objv [1];
         stringObj = objv [2];
     }
-    scanPtr = Tcl_GetStringFromObj (stringObj, &scanStringLen);
-    class = Tcl_GetStringFromObj (classObj, &classLen);
+    scanPtr = Tcl_GetStringFromObj (stringObj, &scanStrLen);
+    class = Tcl_GetStringFromObj (classObj, NULL);
 
     /*
-     * Handle conversion requests.
+     * Handle conversion requests.  Works onm UTF-8, not unicode.
      */
     if (STREQU (class, "char")) {
-        long number;
-        char myChar;
+        static int maxCharValue = TCL_UTF_MAX * 255;
 
         if (failIndex) 
           goto failInvalid;
         if (Tcl_GetLongFromObj (interp, stringObj, &number) != TCL_OK)
             return TCL_ERROR;
-        if ((number < 0) || (number > 255)) {
-            TclX_AppendObjResult (interp,
-                                  "number must be in the range 0..255", 
-                                  (char *) NULL);
+        if ((number < 0) || (number > maxCharValue)) {
+            char numBuf[32];
+            sprintf(numBuf, "%d", maxCharValue);
+            TclX_AppendObjResult (interp, "number must be in the range 0..",  
+                                  numBuf, (char *) NULL);
             return TCL_ERROR;
         }
 
-        myChar = (char) number;
-        Tcl_SetStringObj (Tcl_GetObjResult (interp),
-                          &myChar, 1);
+        /*
+         * Shift off bytes into the string until the number is zero.
+         * Allow for a zero.
+         */
+        idx = TCL_UTF_MAX;
+        cnt = 0;
+        do {
+            charBuf[--idx] = number & 0xFF;
+            number = (number >> 8);
+            cnt++;
+        } while ((number != 0) && (idx > 0));
+        if (cnt == 0) {
+            cnt = 1;
+        }
+        Tcl_SetStringObj (Tcl_GetObjResult (interp), &charBuf[idx], cnt);
         return TCL_OK;
     }
 
     if (STREQU (class, "ord")) {
+        Tcl_UniChar uniChar;
         if (failIndex) 
           goto failInvalid;
-
-        /*
-         * Mask to prevent sign extension.
-         */
-        Tcl_SetIntObj (Tcl_GetObjResult (interp), 
-                       0xff & scanPtr [0]);
+        number = 0;
+        numBytes = Tcl_UtfToUniChar(scanPtr, &uniChar);
+        for (cnt = 0; cnt < numBytes; cnt++) {
+            number = (number << 8) | ((unsigned char*) scanPtr)[cnt];
+        }
+        Tcl_SetIntObj (Tcl_GetObjResult (interp), (long) number);
         return TCL_OK;
     }
 
@@ -685,63 +704,63 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
      * or fails and where it fails.
      */
     if (STREQU (class, "alnum")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isalnum (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isalnum (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "alpha")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isalpha (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isalpha (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "ascii")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isascii (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isascii (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "cntrl")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!iscntrl (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!iscntrl (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "digit")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isdigit (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isdigit (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "graph")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isgraph (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isgraph (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "lower")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!islower (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!islower (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "print")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isprint (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isprint (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "punct")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!ispunct (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!ispunct (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "space")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isspace (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isspace (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "upper")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isupper (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isupper (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else if (STREQU (class, "xdigit")) {
-        for (index = 0; index < scanStringLen; index++) {
-            if (!isxdigit (UCHAR (*(scanPtr + index))))
+        for (idx = 0; idx < scanStrLen; idx++) {
+            if (!isxdigit (UCHAR (*(scanPtr + idx))))
                 break;
         }
     } else {
@@ -759,14 +778,14 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
      * false for a null string.  Optionally return the failed index if there
      * is no match.
      */
-    if ((index != 0) && (*(scanPtr + index) == 0))
+    if ((idx != 0) && (idx == scanStrLen)) {
         Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
-    else {
+    } else {
         /*
          * If the fail index was requested, set the variable here.
          */
         if (failIndex) {
-            Tcl_Obj *iObj = Tcl_NewIntObj (index);
+            Tcl_Obj *iObj = Tcl_NewIntObj (idx);
 
             if (Tcl_SetObjVar2 (interp, failVar, NULL, 
                                 iObj, TCL_LEAVE_ERR_MSG | TCL_PARSE_PART1) == NULL) {

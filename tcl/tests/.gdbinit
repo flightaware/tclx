@@ -10,7 +10,7 @@ set env LD_LIBRARY_PATH ../../tcl/unix:../../tk/unix:../../../tcl8.1a/unix:../..
 set env MALLOC_OPTIONS A
 
 handle SIGTERM SIGHUP SIGKILL SIGCHLD pass nostop
-dir ../../tcl/unix ../../tcl/generic ../../tk/unix ../../tk/generic ../../../tcl8.0/generic ../../../tcl8.0/unix ../../../tk8.0/generic ../../../tk8.0/unix
+dir ../../tcl/unix ../../tcl/generic ../../tk/unix ../../tk/generic ../../../tcl8.1a1/generic ../../../tcl8.1a1/unix ../../../tk8.1a1/generic ../../../tk8.1a1/unix
 
 
 

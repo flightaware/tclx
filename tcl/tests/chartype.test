@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chartype.test,v 8.1 1997/04/17 04:59:14 markd Exp $
+# $Id: chartype.test,v 8.2 1997/08/23 18:55:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -198,9 +198,9 @@ Test chartype-1.30 {ctype char tests} {
     ctype char 35
 } 0 {#}
 
-Test chartype-1.31 {ctype char tests} {
-    ctype char 256
-} 1 {number must be in the range 0..255}
+TestReg chartype-1.31 {ctype char tests} {
+    ctype char -30
+} 1 {^number must be in the range 0\.\.*}
 
 Test chartype-1.32 {ctype ord tests} {
     ctype ord A
