@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 8.2 1997/06/25 08:23:49 markd Exp $
+# $Id: string.test,v 8.3 1997/06/25 08:46:56 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -264,6 +264,10 @@ Test string-9.5 {cequal tests} {
 Test string-9.6 {cequal tests} {
     cequal ab\0cd\0ed ab\0cd\0ed
 } 0 1
+
+Test string-9.7 {cequal tests} {
+    cequal file5 file4
+} 0 0
 
 # ccollate command
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.4 1997/04/17 04:58:48 markd Exp $
+ * $Id: tclXprofile.c,v 8.5 1997/06/12 21:08:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -715,7 +715,8 @@ InitializeProcStack (infoPtr, framePtr)
         return;
     InitializeProcStack (infoPtr, framePtr->callerPtr);
     
-        
+       
+/*FIX: Not binary clean */
     PushEntry (infoPtr,
                Tcl_GetStringFromObj (framePtr->objv [0], &nameLen),
                TRUE,
@@ -887,7 +888,7 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
     Tcl_Obj    *CONST objv[];
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
-    int argIdx, strLen;
+    int argIdx;
     int commandMode = FALSE, evalMode = FALSE;
     char *argStr;
         
@@ -895,7 +896,7 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
      * Parse option arguments.
      */
     for (argIdx = 1; argIdx < objc; argIdx++) {
-        argStr = Tcl_GetStringFromObj (objv [argIdx], &strLen);
+        argStr = Tcl_GetStringFromObj (objv [argIdx], NULL);
         if (argStr[0] != '-')
             break;
         if (STREQU (argStr, "-commands")) {
@@ -916,7 +917,7 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
     /*
      * Get argument string for remainder of strings.
      */
-    argStr = Tcl_GetStringFromObj (objv [argIdx], &strLen);
+    argStr = Tcl_GetStringFromObj (objv [argIdx], NULL);
     
     /*
      * Handle the on command.
@@ -961,7 +962,7 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
             
         if (TurnOffProfiling (interp, infoPtr, 
                               Tcl_GetStringFromObj (objv [argIdx + 1],
-                                                    &strLen)) != TCL_OK)
+                                                    NULL)) != TCL_OK)
             return TCL_ERROR;
         return TCL_OK;
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.2 1997/06/12 21:08:32 markd Exp $
+ * $Id: tclXstring.c,v 8.3 1997/06/25 08:46:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -269,7 +269,6 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
 {
     int argIndex, result, local = FALSE;
     char *optionString;
-    int optStrLen;
     char *string1Ptr;
     int string1Len;
     char *string2Ptr;
@@ -280,7 +279,7 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
         return TclX_WrongArgs (interp, objv[0], "?options? string1 string2");
 
     if (objc == 4) {
-        optionString = Tcl_GetStringFromObj (objv [1], &optStrLen);
+        optionString = Tcl_GetStringFromObj (objv [1], NULL);
         if (!STREQU (optionString, "-local")) {
             TclX_StringAppendObjResult (interp, "Invalid option \"",
                                         optionString,
@@ -433,7 +432,7 @@ TclX_CequalObjCmd (dummy, interp, objc, objv)
     Tcl_SetBooleanObj (Tcl_GetObjResult (interp),
                        ((string1Len == string2Len) &&
                         (*string1Ptr == *string2Ptr) &&
-                        (memcpy (string1Ptr, string2Ptr, string1Len))));
+                        (memcmp (string1Ptr, string2Ptr, string1Len) == 0)));
     return TCL_OK;
 }
 

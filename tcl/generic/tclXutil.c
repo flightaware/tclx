@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.2 1997/06/12 21:08:34 markd Exp $
+ * $Id: tclXutil.c,v 8.3 1997/06/25 08:23:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1193,6 +1193,7 @@ TclX_WrongArgs (interp, commandNameObj, string)
     }
     return TCL_ERROR;
 }
+
 
 
 /*-----------------------------------------------------------------------------

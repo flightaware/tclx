@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 8.1 1997/04/17 04:58:33 markd Exp $
+ * $Id: tclXchmod.c,v 8.2 1997/06/12 21:08:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -310,7 +310,6 @@ TclX_ChmodObjCmd (clientData, interp, objc, objv)
     modeInfo_t    modeInfo;
     Tcl_Obj     **fileObjv;
     char         *fileIdsString;
-    int           fileIdsStrLen;
     char         *modeString;
     int          modeBits;
 
@@ -321,7 +320,7 @@ TclX_ChmodObjCmd (clientData, interp, objc, objv)
     fileIds = FALSE;
     objIdx = 1;
     if (objc > 1) {
-	fileIdsString = Tcl_GetStringFromObj (objv [objIdx], &fileIdsStrLen);
+	fileIdsString = Tcl_GetStringFromObj (objv [objIdx], NULL);
         if (STREQU (fileIdsString, FILE_ID_OPT)) {
 	    fileIds = TRUE;
 	    objIdx++;
@@ -355,7 +354,6 @@ TclX_ChmodObjCmd (clientData, interp, objc, objv)
         }
     }
 
-    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return result;
 }
 
@@ -381,20 +379,18 @@ TclX_ChownObjCmd (clientData, interp, objc, objv)
     Tcl_Obj  **ownerObjv = NULL;
     unsigned   options;
     char      *fileIdsSwitch;
-    int        fileIdsSwitchLen;
-    char      *owner;
-    int        ownerStrLen;
-    char      *group;
+    char      *owner, *group;
     int        groupStrLen;
+
 
     /*
      * Parse options.
      */
     fileIds = FALSE;
     for (objIdx = 1; objIdx < objc ; objIdx++) {
-	fileIdsSwitch = Tcl_GetStringFromObj (objv[objIdx],
-					      &fileIdsSwitchLen);
-        if (fileIdsSwitchLen == 0 || fileIdsSwitch[0] != '-') break;
+	fileIdsSwitch = Tcl_GetStringFromObj (objv[objIdx], NULL);
+        if (fileIdsSwitch[0] != '-')
+            break;
         if (STREQU (fileIdsSwitch, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
@@ -422,7 +418,7 @@ TclX_ChownObjCmd (clientData, interp, objc, objv)
         goto errorExit;
     }
     options = TCLX_CHOWN;
-    owner = Tcl_GetStringFromObj (ownerObjv [0], &ownerStrLen);
+    owner = Tcl_GetStringFromObj (ownerObjv [0], NULL);
     group = NULL;
     if (ownerObjc == 2) {
         options |= TCLX_CHGRP;
@@ -444,13 +440,9 @@ TclX_ChownObjCmd (clientData, interp, objc, objv)
             goto errorExit;
     }
 
-    /* Tcl_DecrRefCount ((Tcl_Obj *)ownerObjv); ??? */
-    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_OK;
 
   errorExit:
-    /* Tcl_DecrRefCount ((Tcl_Obj *)ownerObjv); ??? */
-    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_ERROR;
 }
 
@@ -471,15 +463,14 @@ TclX_ChgrpObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj     *CONST objv[];
 {
-    int        objIdx, fileIds, fileIdsSwitchLen;
-    char      *fileIdsSwitch;
-    char      *groupString;
+    int        objIdx, fileIds;
+    char      *fileIdsSwitch, *groupString;
 
     fileIds = FALSE;
     for (objIdx = 1; objIdx < objc; objIdx++) {
-	fileIdsSwitch = Tcl_GetStringFromObj (objv [objIdx],
-					      &fileIdsSwitchLen);
-        if (fileIdsSwitchLen == 0 || fileIdsSwitch[0] != '-') break;
+	fileIdsSwitch = Tcl_GetStringFromObj (objv [objIdx], NULL);
+        if (fileIdsSwitch[0] != '-')
+            break;
         if (STREQU (fileIdsSwitch, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
@@ -506,11 +497,9 @@ TclX_ChgrpObjCmd (clientData, interp, objc, objv)
             goto errorExit;
     }
 
-    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_OK;
 
   errorExit:
-    /* Tcl_DecrRefCount ((Tcl_Obj *)fileObjv); ??? */
     return TCL_ERROR;
 }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.4 1997/04/17 04:58:37 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.5 1997/06/12 21:08:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -223,7 +223,8 @@ TclX_CopyfileObjCmd (clientData, interp, objc, objv)
 
     for (objIdx = 1; objIdx < objc; objIdx++) {
 	switchString = Tcl_GetStringFromObj (objv [objIdx], NULL);
-	if (*switchString != '-') break;
+	if (*switchString != '-')
+            break;
         if (STREQU (switchString, "-bytes")) {
             copyMode = TCLX_COPY_BYTES;
             objIdx++;
@@ -794,7 +795,8 @@ TclX_FtruncateObjCmd (clientData, interp, objc, objv)
     fileIds = FALSE;
     for (objIdx = 1; objIdx < objc ; objIdx++) {
         switchString = Tcl_GetStringFromObj (objv [objIdx], NULL);
-	if (*switchString != '-') break;
+	if (*switchString != '-')
+            break;
         if (STREQU (switchString, FILE_ID_OPT)) {
             fileIds = TRUE;
         } else {
@@ -894,7 +896,7 @@ TclX_ReaddirObjCmd (clientData, interp, objc, objv)
                               switchString, "\"", (char *) NULL);
             return TCL_ERROR;
         }
-        dirPath = Tcl_GetStringFromObj (objv [2], &dirPathLen);
+        dirPath = Tcl_GetStringFromObj (objv [2], NULL);
         hidden = TRUE;
     }
 

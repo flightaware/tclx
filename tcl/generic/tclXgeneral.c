@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.1 1997/04/17 04:58:40 markd Exp $
+ * $Id: tclXgeneral.c,v 8.2 1997/06/12 21:08:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -134,7 +134,6 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
     char *optionPtr;
-    int optionLen;
 
     /*
      * FIX: Need a way to get the have_ functionality from the OS-dependent
@@ -143,7 +142,7 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
     if (objc != 2)
 	return TclX_WrongArgs (interp, objv[0], "option");
 
-    optionPtr = Tcl_GetStringFromObj (objv[1], &optionLen);
+    optionPtr = Tcl_GetStringFromObj (objv[1], NULL);
 
     if (STREQU ("version", optionPtr)) {
         if (tclxVersion != NULL) {

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 8.1 1997/04/17 04:58:46 markd Exp $
+ * $Id: tclXmath.c,v 8.2 1997/06/12 21:08:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -295,7 +295,6 @@ TclX_RandomObjCmd (dummy, interp, objc, objv)
 {
     long range;
     char *seedString;
-    int seedStrLen;
 
     if ((objc < 2) || (objc > 3))
         goto invalidArgs;
@@ -309,7 +308,7 @@ TclX_RandomObjCmd (dummy, interp, objc, objv)
     } else {
         int seed;
 
-	seedString = Tcl_GetStringFromObj (objv [1], &seedStrLen);
+	seedString = Tcl_GetStringFromObj (objv [1], NULL);
 	if (!STREQU (seedString, "seed"))
 	    goto invalidArgs;
 

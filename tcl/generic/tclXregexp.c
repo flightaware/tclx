@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.3 1997/04/17 04:58:49 markd Exp $
+ * $Id: tclXregexp.c,v 8.4 1997/06/12 21:08:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -439,6 +439,7 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
     int             expressionLen;
     preParseInfo_t  preParseInfo;
 
+/*FIX: Not binary clean */
     expression = Tcl_GetStringFromObj (expressionObj, &expressionLen);
     if (expressionLen == 0) {
         TclX_StringAppendObjResult (interp, 
