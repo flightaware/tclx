@@ -12,17 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 8.3 1997/07/04 01:45:44 markd Exp $
+# $Id: cmdtrace.test,v 8.4 1997/07/18 16:38:27 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
-
-set doNoeval 0
-if {$doNoeval} {
-    # FIX
-    echo "**** Some command trace test disabled due to Tcl 8.0b2 bugs"
-}
 
 #
 # Proc to do something to trace.
@@ -89,7 +83,13 @@ Test cmdtrace-1.1 {command trace: evaluated, truncated} {
 cmdtrace off
 }
 
-if {$doNoeval} {
+# FIX: Looks like something is still broken with noeval tracing here
+# Should have a :
+#         set foo \[replicate \"-TheString-\" 10\]
+# instead of duplicated replicate.
+# Same with test 1.4
+
+
 Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
     set cmdtraceFH [open CMDTRACE.OUT w+]
     cmdtrace on $cmdtraceFH noeval
@@ -102,14 +102,13 @@ Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
       DoStuff1
         DoStuff
           replicate \"-TheString-\" 10
-          set foo \[replicate \"-TheString-\" 10\]
+          replicate \"-TheString-\" 10
           set baz \$foo
           set wap 1
-          if {\$wap} {\\n        set wap 0\\n    } else {\\n        set wap 1...}
+          if {\$wap} {\\n        set wap 0\\n    } else \{\\n        set wap 1...
             set wap 0
 cmdtrace off
 "
-}
 
 Test cmdtrace-1.3 {command trace: evaluated, not truncated} {
     set cmdtraceFH [open CMDTRACE.OUT w+]
@@ -131,7 +130,6 @@ Test cmdtrace-1.3 {command trace: evaluated, not truncated} {
 cmdtrace off
 }
 
-if {$doNoeval} {
 Test cmdtrace-1.4 {command trace: not evaluated, not truncated} {
     set cmdtraceFH [open CMDTRACE.OUT w+]
     cmdtrace on $cmdtraceFH notruncate noeval
@@ -143,14 +141,13 @@ Test cmdtrace-1.4 {command trace: not evaluated, not truncated} {
     DoStuff2
       DoStuff1
         DoStuff
-            replicate "-TheString-" 10
-          set foo [replicate "-TheString-" 10]
+          replicate "-TheString-" 10
+          replicate "-TheString-" 10
           set baz $foo
           set wap 1
           if {$wap} {\n        set wap 0\n    } else {\n        set wap 1\n    }
             set wap 0
 cmdtrace off
-}
 }
 
 Test cmdtrace-2.1 {command trace argument error checking} {
@@ -200,8 +197,8 @@ Test cmdtrace-3.1 {command trace argument error checking} {
 {CD DoStuff2 DoStuff2 {}} \
 {CD DoStuff1 DoStuff1 {}} \
 {CD DoStuff DoStuff {}} \
-{CD {{set foo [replicate "-TheString-" 10]}} {{replicate -TheString- 10}} {}} \
-{CD {{set foo [replicate "-TheString-" 10]}} {{set foo -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
+{CD {{replicate "-TheString-" 10}} {{replicate -TheString- 10}} {}} \
+{CD {{replicate "-TheString-" 10}} {{set foo -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
 {CD {{set baz $foo}} {{set baz -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
 {CD {{set wap 1}} {{set wap 1}} {}} \
 {CD {{if {$wap} {

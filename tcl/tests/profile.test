@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 8.3 1997/06/12 21:08:39 markd Exp $
+# $Id: profile.test,v 8.4 1997/07/10 09:49:55 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -468,7 +468,8 @@ Test profile-6.2 {profile count tests} {
           {{::ProcC6 ::ProcA6 <global>} 1} \
           {{::profile <global>} 1} \
           {{::return ::ProcB6 ::ProcA6 <global>} 1} \
-          {{::return ::ProcC6 ::ProcA6 <global>} 1}]
+          {{::return ::ProcC6 ::ProcA6 <global>} 1} \
+          {{::string ::ProcA6 <global>} 1}]
 
 Test profile-6.3 {profile count tests} {
    profile -eval on
@@ -479,6 +480,7 @@ Test profile-6.3 {profile count tests} {
           {{::ProcA6 <global>} 1} \
           {{::ProcB6 ::ProcA6 <global>} 1} \
           {{::ProcC6 ::ProcA6 <global>} 1}]
+
 
 Test profile-6.4 {profile count tests} {
    profile -eval -commands on
@@ -491,7 +493,8 @@ Test profile-6.4 {profile count tests} {
           {{::ProcC6 ::ProcA6 <global>} 1} \
           {{::profile <global>} 1} \
           {{::return ::ProcB6 ::ProcA6 <global>} 1} \
-          {{::return ::ProcC6 ::ProcA6 <global>} 1}]
+          {{::return ::ProcC6 ::ProcA6 <global>} 1} \
+          {{::string ::ProcA6 <global>} 1}]
 
 #
 # Function to build a list from the profile output data with each entry

@@ -13,13 +13,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 8.2 1997/06/12 21:08:41 markd Exp $
+# $Id: tcllib.test,v 8.3 1997/07/10 10:06:42 markd Exp $
 #------------------------------------------------------------------------------
 #
 
+
 if [cequal [info procs Test] {}] {source testlib.tcl}
 eval $SAVED_UNKNOWN
-
 
 global save_auto_path auto_path
 set save_auto_path $auto_path
@@ -374,6 +374,7 @@ rename TclLibReset {}
 
 set auto_path $save_auto_path
 rename unknown {}
+
 
 
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: tryeval.test,v 8.1 1997/07/10 07:21:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -106,7 +106,7 @@ Test try_eval-3.1 {try_eval error result} {
 } 0 {1 {cont: try_eval error 3.1} {cont: errorInfo-error-3.1
     invoked from within
 "try_eval $code $catch $finally"
-    (procedure "test_try_eval" line 1)
+    (procedure "test_try_eval" line 2)
     invoked from within
 "test_try_eval $code $catch $finally"} {cont: errorCode-error-3.1} finally-3.1}
 
@@ -122,7 +122,7 @@ Test try_eval-3.2 {try_eval error result} {
 } 0 {{1 {cont: try_eval error 3.2} {cont: errorInfo-error-3.2
     invoked from within
 "try_eval $code $catch $finally"
-    (procedure "test_try_eval" line 1)
+    (procedure "test_try_eval" line 2)
     invoked from within
 "test_try_eval $code $catch $finally"} {cont: errorCode-error-3.2}}}
 
@@ -142,7 +142,7 @@ Test try_eval-3.3 {try_eval error result} {
 } 0 {1 {try_eval error 3.3} {errorInfo-error-3.3
     invoked from within
 "try_eval $code $catch $finally"
-    (procedure "test_try_eval" line 1)
+    (procedure "test_try_eval" line 2)
     invoked from within
 "test_try_eval $code $catch $finally"} errorCode-error-3.3 finally-3.3}
 
@@ -161,7 +161,7 @@ Test try_eval-3.4 {try_eval error result} {
 } 0 {{1 {try_eval error 3.4} {errorInfo-error-3.4
     invoked from within
 "try_eval $code $catch $finally"
-    (procedure "test_try_eval" line 1)
+    (procedure "test_try_eval" line 2)
     invoked from within
 "test_try_eval $code $catch $finally"} errorCode-error-3.4} finally-3.4}
 
