@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.0 1995/07/25 05:42:46 markd Rel markd $
+ * $Id: tclExtdInt.h,v 5.1 1995/08/04 05:56:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,35 +24,6 @@
 #include "tclInt.h"
 
 #include <sys/param.h>
-
-/*
- * Use the real functions, not the Tcl interface that hides signals.
- */
-#undef open
-#undef read
-#undef waitpid
-#undef write
-
-/*
- * If tclUnix.h has already included time.h, don't include it again, some
- * systems don't #ifdef inside of the file.
- */
-#ifndef NO_SYS_TIME_H
-#    include <time.h>
-#endif
-
-#include <sys/times.h>
-
-/*
- * Make sure CLK_TCK is defined.
- */
-#ifndef CLK_TCK
-#    ifdef HZ
-#        define CLK_TCK HZ
-#    else
-#        define CLK_TCK 60
-#    endif
-#endif
 
 #include <math.h>
 
@@ -75,10 +46,41 @@
 #include "tclPort.h"
 
 /*
+ * Use the real functions, not the Tcl interface that hides signals.
+ */
+#undef open
+#undef read
+#undef waitpid
+#undef write
+
+/*
  * Define O_ACCMODE if <fcntl.h> does not define it.
  */
 #ifndef O_ACCMODE
 #    define O_ACCMODE  (O_RDONLY|O_WRONLY|O_RDWR)
+#endif
+
+/*
+ * If tclPort.h has already included time.h, don't include it again, some
+ * systems don't #ifdef inside of the file.  Also, on some of these systems,
+ * time.h is included by sys/time.h, so don't include it again if that is the
+ * case.
+ */
+#if !defined (NO_SYS_TIME_H) && defined(TIME_WITH_SYS_TIME)
+#    include <time.h>
+#endif
+
+#include <sys/times.h>
+
+/*
+ * Make sure CLK_TCK is defined.
+ */
+#ifndef CLK_TCK
+#    ifdef HZ
+#        define CLK_TCK HZ
+#    else
+#        define CLK_TCK 60
+#    endif
 #endif
 
 /*
