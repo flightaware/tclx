@@ -403,7 +403,7 @@ else
 fi
 
 
-# From configure.in Revision: 4.28 dnl
+# From configure.in Revision: 5.0 dnl
 
 
 
@@ -3712,7 +3712,6 @@ fi
 #       checks.
 #------------------------------------------------------------------------------
 
-# strftime is in -lintl on SCO UNIX.
 echo $ac_n "checking for -lintl""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_lib_intl'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -3720,7 +3719,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lintl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 3724 "configure"
+#line 3723 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -3741,7 +3740,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'intl`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  LIBS="-lintl $LIBS"
+  LIBS="$LIBS -lintl"
 else
   echo "$ac_t""no" 1>&6
 fi
@@ -3751,7 +3750,7 @@ if eval "test \"`echo '$''{'ac_cv_func_strftime'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3755 "configure"
+#line 3754 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char strftime(); below.  */
@@ -3785,20 +3784,24 @@ rm -f conftest*
 fi
 if eval "test \"`echo '$ac_cv_func_'strftime`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  cat >> confdefs.h <<\EOF
-#define HAVE_STRFTIME 1
-EOF
-
+  :
 else
   echo "$ac_t""no" 1>&6
+LIBOBJS="$LIBOBJS strftime.o"
 fi
+
+
+# SGI IRIX 4.0.5 has a broken strftime.
+case `uname -sr 2>/dev/null` in
+  IRIX\ 4.0.1-5*) LIBOBJS="$LIBOBJS strftime.o" ;;
+esac
 
 echo $ac_n "checking for random""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_func_random'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3802 "configure"
+#line 3805 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char random(); below.  */
@@ -3847,7 +3850,7 @@ if eval "test \"`echo '$''{'ac_cv_func_rename'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 3851 "configure"
+#line 3854 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char rename(); below.  */
@@ -3888,11 +3891,6 @@ LIBOBJS="$LIBOBJS rename.o"
 fi
 
 
-# SGI IRIX 4.0.5 has a broken strftime.
-case `uname -sr 2>/dev/null` in
-  IRIX\ 4.0.1-5*) LIBOBJS="$LIBOBJS strftime.o" ;;
-esac
-
 
 
 #------------------------------------------------------------------------------
@@ -3902,7 +3900,7 @@ esac
 #------------------------------------------------------------------------------
 
 cat > conftest.$ac_ext <<EOF
-#line 3906 "configure"
+#line 3904 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF

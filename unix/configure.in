@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.29 1995/07/15 18:54:41 markd Exp markd $
+dnl $Id: configure.in,v 5.0 1995/07/25 06:01:08 markd Rel markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.29 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.0 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -145,7 +145,7 @@ AC_RETSIGTYPE
 #       Find out all about time handling differences.
 #------------------------------------------------------------------------------
 
-AC_TIME_WITH_SYS_TIME
+AC_HEADER_TIME
 AC_STRUCT_TIMEZONE
 
 AC_MSG_CHECKING([tm_tzadj in struct tm])
@@ -657,15 +657,17 @@ AC_CHECK_FUNC(catgets,
 #       checks.
 #------------------------------------------------------------------------------
 
-AC_FUNC_STRFTIME
-AC_CHECK_FUNC(random, ,[LIBOBJS="$LIBOBJS random.o"]
-        AC_DEFINE(NO_RANDOM))
-AC_CHECK_FUNC(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
+AC_CHECK_LIB(intl, strftime, [LIBS="$LIBS -lintl"])
+AC_CHECK_FUNC(strftime, ,[LIBOBJS="$LIBOBJS strftime.o"])
 
 # SGI IRIX 4.0.5 has a broken strftime.
 case `uname -sr 2>/dev/null` in
   IRIX\ 4.0.[1-5]*) LIBOBJS="$LIBOBJS strftime.o" ;;
 esac
+
+AC_CHECK_FUNC(random, ,[LIBOBJS="$LIBOBJS random.o"]
+        AC_DEFINE(NO_RANDOM))
+AC_CHECK_FUNC(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
 
 AC_SUBST(LIBOBJS)
 
