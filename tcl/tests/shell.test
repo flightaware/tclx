@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: shell.test,v 5.4 1996/03/17 08:48:45 markd Exp $
+# $Id: shell.test,v 5.5 1996/03/17 19:43:21 markd Exp $
 #------------------------------------------------------------------------------
 
 if {[info procs test] != "test"} then {source testlib.tcl}
@@ -36,6 +36,7 @@ Test shell-1.0 {TclX shell error handling} {
 # name of the error function.
 Test shell-1.1 {deprected TclX shell error handling} {
     exec $TCL_PROGRAM -c {
+        catch {rename tclx_errorHandler {}}
         proc err msg {
             echo "@@@Error handler got: $msg"
         }

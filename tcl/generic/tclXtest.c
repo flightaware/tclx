@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 5.7 1996/03/14 05:04:05 markd Exp $
+ * $Id: tclXtest.c,v 5.8 1996/03/17 08:48:41 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -25,8 +25,9 @@
  * errors.
  */
 static char errorHandler [] =
-    "proc TclXTestError msg {global errorInfo; puts stderr $errorInfo; exit 1}\n \
-     set tclx_errorHandler TclXTestError";
+    "proc tclx_errorHandler msg {global errorInfo; \
+     if [lempty $errorInfo] {puts $msg} else {puts stderr $errorInfo}; \
+     exit 1}";
 
 /*
  * The following variable is a special hack that insures the tcl

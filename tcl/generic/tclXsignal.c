@@ -1,7 +1,8 @@
 /*
  * tclXsignal.c --
  *
- * Tcl Unix signal support routines and the signal and commands.
+ * Tcl Unix signal support routines and the signal and commands.  The #ifdefs
+ * around several common Unix signals existing are for Windows.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -12,18 +13,24 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 5.3 1996/02/20 09:10:28 markd Exp $
+ * $Id: tclXsignal.c,v 5.4 1996/03/17 06:52:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+/*
+ * If either SIGCLD or SIGCHLD are defined, define them both.  This makes
+ * the interchangeable.  Windows doesn't have this signal.
+ */
 
-#ifndef SIGCLD
-#   define SIGCLD SIGCHLD
-#endif
-#ifndef SIGCHLD
-#   define SIGCHLD SIGCLD
+#if defined(SIGCLD) || defined(SIGCHLD)
+#   ifndef SIGCLD
+#      define SIGCLD SIGCHLD
+#   endif
+#   ifndef SIGCHLD
+#      define SIGCHLD SIGCLD
+#   endif
 #endif
 
 #ifndef MAXSIG
@@ -234,6 +241,9 @@ static char *signalTrapCmds [MAXSIG];
 /*
  * Prototypes of internal functions.
  */
+static char *
+GetSignalName _ANSI_ARGS_((int signalNum));
+
 static int
 GetSignalState _ANSI_ARGS_((int              signalNum,
                             signalProcPtr_t *sigProcPtr));
@@ -262,7 +272,7 @@ ParseSignalSpec _ANSI_ARGS_((Tcl_Interp *interp,
                              int         allowZero));
 
 static RETSIGTYPE
-TclSignalTrap _ANSI_ARGS_((int signalNum));
+SignalTrap _ANSI_ARGS_((int signalNum));
 
 static int
 FormatTrapCode  _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -284,6 +294,11 @@ static int
 ProcessASignal _ANSI_ARGS_((Tcl_Interp *interp,
                             int         background,
                             int         signalNum));
+
+static int
+ProcessSignals _ANSI_ARGS_((ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         cmdResultCode));
 
 static int
 ParseSignalList _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -318,6 +333,30 @@ SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
 
 
 /*-----------------------------------------------------------------------------
+ * GetSignalName --
+ *     Get the name for a signal.  This normalized SIGCHLD.
+ * Parameters:
+ *   o signalNum (I) - Signal number convert.
+ * Results
+ *   Static signal name.
+ *-----------------------------------------------------------------------------
+ */
+static char *
+GetSignalName (signalNum)
+    int signalNum;
+{
+#ifdef SIGCHLD
+    /*
+     * Force name to always be SIGCHLD, even if system defines only SIGCLD.
+     */
+    if (signalNum == SIGCHLD)
+        return "SIGCHLD";
+#endif
+
+    return Tcl_SignalId (signalNum);
+}
+
+/*-----------------------------------------------------------------------------
  * GetSignalState --
  *     Get the current state of the specified signal.
  * Parameters:
@@ -342,10 +381,13 @@ GetSignalState (signalNum, sigProcPtr)
 #else
     signalProcPtr_t  actionFunc;
 
-    if (signalNum == SIGKILL)
-         actionFunc = SIG_DFL;
-    else
-        actionFunc = signal (signalNum, SIG_DFL);
+#ifdef SIGKILL
+    if (signalNum == SIGKILL) {
+        *sigProcPtr = SIG_DFL;
+        return TCL_OK;
+    }
+#endif
+    actionFunc = signal (signalNum, SIG_DFL);
     if (actionFunc == SIG_ERR)
         return TCL_ERROR;
     if (actionFunc != SIG_DFL)
@@ -555,7 +597,7 @@ ParseSignalSpec (interp, signalStr, allowZero)
 }
 
 /*-----------------------------------------------------------------------------
- * TclSignalTrap --
+ * SignalTrap --
  *
  *   Trap handler for UNIX signals.  Sets tells all registered interpreters
  * that a trap has occured and saves the trap info.  The first interpreter to
@@ -563,7 +605,7 @@ ParseSignalSpec (interp, signalStr, allowZero)
  *-----------------------------------------------------------------------------
  */
 static RETSIGTYPE
-TclSignalTrap (signalNum)
+SignalTrap (signalNum)
     int signalNum;
 {
     int idx;
@@ -584,11 +626,16 @@ TclSignalTrap (signalNum)
      * wait is done.  This is fixed by Posix signals and is not necessary under
      * BSD, but it done this way for consistency.
      */
+#ifdef SIGCHLD
     if (signalNum != SIGCHLD) {
-        if (SetSignalState (signalNum, TclSignalTrap) == TCL_ERROR)
-            panic ("TclSignalTrap bug");
+        if (SetSignalState (signalNum, SignalTrap) == TCL_ERROR)
+            panic ("SignalTrap bug");
     }
-#endif
+#else
+    if (SetSignalState (signalNum, SignalTrap) == TCL_ERROR)
+        panic ("SignalTrap bug");
+#endif /* SIGCHLD */
+#endif /* NO_SIGACTION */
 }
 
 /*-----------------------------------------------------------------------------
@@ -694,15 +741,7 @@ FormatTrapCode (interp, signalNum, command)
     int          signalNum;
     Tcl_DString *command;
 {
-    char  *signalName, *copyPtr, *scanPtr;
-
-    /*
-     * Force name to always be SIGCHLD, even if system defines only SIGCLD.
-     */
-    if (signalNum == SIGCHLD)
-        signalName = "SIGCHLD";
-    else
-        signalName = Tcl_SignalId (signalNum);
+    char *copyPtr, *scanPtr;
 
     Tcl_DStringInit (command);
 
@@ -721,7 +760,7 @@ FormatTrapCode (interp, signalNum, command)
 
         switch (scanPtr [1]) {
           case 'S': {
-              Tcl_DStringAppend (command, signalName, -1);
+              Tcl_DStringAppend (command, GetSignalName (signalNum), -1);
               break;
           }
           default:
@@ -823,24 +862,16 @@ ProcessASignal (interp, background, signalNum)
     int         background;
     int         signalNum;
 {
-    char *signalName;
-    int   result = TCL_OK;
+    int result = TCL_OK;
 
     /*
      * Either return an error or evaluate code associated with this signal.
      * If evaluating code, call it for each time the signal occured.
      */
     if (signalTrapCmds [signalNum] == NULL) {
+        char *signalName = GetSignalName (signalNum);
+
         signalsReceived [signalNum] = 0;
-
-        /*
-         * Force name to always be SIGCHLD, even if system defines only SIGCLD.
-         */
-        if (signalNum == SIGCHLD)
-            signalName = "SIGCHLD";
-        else
-            signalName = Tcl_SignalId (signalNum);
-
         Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);
         Tcl_AppendResult (interp, signalName, " signal received", 
                           (char *)NULL);
@@ -867,9 +898,9 @@ ProcessASignal (interp, background, signalNum)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ProcessSignals --
+ * ProcessSignals --
  *  
- *   Called by Tcl_Eval, etc to process pending signals in a safe state
+ *   Called by the async handler to process pending signals in a safe state
  * interpreter state.  This is often called just after a command completes.
  * The results of the command are passed to this procedure and may be altered
  * by it.  If trap code is specified for the signal that was received, then
@@ -898,8 +929,8 @@ ProcessASignal (interp, background, signalNum)
  *   a signal occured.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_ProcessSignals (clientData, interp, cmdResultCode)
+static int
+ProcessSignals (clientData, interp, cmdResultCode)
     ClientData  clientData;
     Tcl_Interp *interp;
     int         cmdResultCode;
@@ -1007,7 +1038,8 @@ ParseSignalList (interp, signalListStr, signals)
     memset (signals, FALSE, sizeof (unsigned char) * MAXSIG);
 
     /*
-     * Handle the wild card signal.
+     * Handle the wild card signal.  Don't return signals that can't be
+     * modified.
      */
     if (STREQU (signalListArgv [0], "*")) {
         if (signalListSize != 1)
@@ -1015,8 +1047,11 @@ ParseSignalList (interp, signalListStr, signals)
         cnt = 0;
         for (idx = 0; sigNameTable [idx].name != NULL; idx++) {
             signalNum = sigNameTable [idx].num;
-            if ((signalNum != SIGKILL) && (signalNum != SIGSTOP))
-                signals [signalNum] = TRUE;
+#ifdef SIGKILL
+            if ((signalNum == SIGKILL) || (signalNum == SIGSTOP))
+                continue;
+#endif
+            signals [signalNum] = TRUE;
         }
         ckfree ((char *) signalListArgv);
         return TCL_OK;
@@ -1125,7 +1160,7 @@ FormatSignalListEntry (interp, signalNum)
         sigState [0]  = SIGACT_DEFAULT;
     } else if (actionFunc == SIG_IGN) {
         sigState [0] = SIGACT_IGNORE;
-    } else if (actionFunc == TclSignalTrap) {
+    } else if (actionFunc == SignalTrap) {
         if (signalTrapCmds [signalNum] == NULL)
             sigState [0] = SIGACT_ERROR;
         else {
@@ -1209,11 +1244,11 @@ ProcessSignalListEntry (interp, signalEntry)
         if (sigStateSize != 2)
             goto invalidEntry;
     } else if (STREQU (sigState [0], SIGACT_ERROR)) {
-        actionFunc = TclSignalTrap;
+        actionFunc = SignalTrap;
         if (sigStateSize != 2)
             goto invalidEntry;
     } else if (STREQU (sigState [0], SIGACT_TRAP)) {
-        actionFunc = TclSignalTrap;
+        actionFunc = SignalTrap;
         if (sigStateSize != 3)    /* Must have command */
             goto invalidEntry;
     } else if (STREQU (sigState [0], SIGACT_UNKNOWN)) {
@@ -1403,7 +1438,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
         }
         return SetSignalActions (interp,
                                  signals,
-                                 TclSignalTrap,
+                                 SignalTrap,
                                  argv [3]);
     }
 
@@ -1427,7 +1462,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
     if (STREQU (argv [1], SIGACT_ERROR)) {
         return SetSignalActions (interp,
                                  signals,
-                                 TclSignalTrap,
+                                 SignalTrap,
                                  NULL);
     }
 
@@ -1484,6 +1519,12 @@ Tcl_KillCmd (clientData, interp, argc, argv)
     int    signalNum, nextArg, idx, procId, procArgc;
     int    pgroup = FALSE;
     char **procArgv;
+    
+#ifdef SIGTERM
+#   define DEFAULT_KILL_SIGNAL SIGTERM
+#else
+#   define DEFAULT_KILL_SIGNAL SIGINT
+#endif
 
     if (argc < 2)
         goto usage;
@@ -1501,7 +1542,7 @@ Tcl_KillCmd (clientData, interp, argc, argv)
      * Get the signal.
      */
     if ((argc - nextArg) == 1) {
-        signalNum = SIGTERM;
+        signalNum = DEFAULT_KILL_SIGNAL;
     } else {
         signalNum = ParseSignalSpec (interp,
                                      argv [nextArg],
@@ -1522,14 +1563,9 @@ Tcl_KillCmd (clientData, interp, argc, argv)
         if (pgroup)
             procId = -procId;
 
-        if (kill ((pid_t) procId, signalNum) < 0) {
-            Tcl_AppendResult (interp, Tcl_PosixError (interp),
-                              " sending ", 
-                              (signalNum == 0) ? 0 : Tcl_SignalId (signalNum),
-                              " to process ", procArgv [idx], (char *) NULL);
+        if (TclX_OSkill (interp, procId, signalNum, argv [0]) != TCL_OK)
             goto errorExit;
-        }
-     }
+    }
 
     ckfree ((char *) procArgv);
     return TCL_OK;
@@ -1603,7 +1639,7 @@ TclX_SetupSigInt ()
 
     if ((GetSignalState (SIGINT, &actionFunc) == TCL_OK) &&
         (actionFunc == SIG_DFL))
-        SetSignalState (SIGINT, TclSignalTrap);
+        SetSignalState (SIGINT, SignalTrap);
 }
 
 /*-----------------------------------------------------------------------------
@@ -1675,7 +1711,7 @@ Tcl_InitSignalHandling (interp)
      */
     interpTable [numInterps].interp = interp;
     interpTable [numInterps].handler =
-        Tcl_AsyncCreate (Tcl_ProcessSignals, (ClientData) NULL);
+        Tcl_AsyncCreate (ProcessSignals, (ClientData) NULL);
     numInterps++;
 
     Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 5.5 1996/02/20 09:10:33 markd Exp $
+ * $Id: tclXunixcmds.c,v 5.6 1996/03/15 07:36:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -159,13 +159,13 @@ Tcl_TimesCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    times(&tm);
+    times (&tm);
 
     sprintf (interp->result, "%ld %ld %ld %ld", 
-             Tcl_TicksToMS (tm.tms_utime),
-             Tcl_TicksToMS (tm.tms_stime),
-             Tcl_TicksToMS (tm.tms_cutime),
-             Tcl_TicksToMS (tm.tms_cstime));
+             TclX_OSTicksToMS (tm.tms_utime),
+             TclX_OSTicksToMS (tm.tms_stime),
+             TclX_OSTicksToMS (tm.tms_cutime),
+             TclX_OSTicksToMS (tm.tms_cstime));
     return TCL_OK;
 }
 

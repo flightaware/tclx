@@ -296,6 +296,7 @@
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
 ./tcl/unix/tclXunixOS.c
+./tcl/unix/tclXunixPort.h
 ./tcl/unix/tclXunixcmds.c
 ./tcl/unix/tclxConfig.sh.in
 ./tk/generic/tkXAppInit.c

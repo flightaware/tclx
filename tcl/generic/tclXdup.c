@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 5.6 1996/03/10 04:42:30 markd Exp $
+ * $Id: tclXdup.c,v 5.7 1996/03/13 08:30:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -226,8 +226,7 @@ DupFileHandle (interp, srcFileId, targetFileId)
             Tcl_UnregisterChannel (interp, newChannel);
         }
 
-        close (newFileNum);
-        chkFileNum = fcntl (srcFileNum, F_DUPFD, newFileNum);
+        chkFileNum = dup2 (srcFileNum, newFileNum);
         if (chkFileNum < 0)
             goto unixError;
         if (chkFileNum != newFileNum) {
@@ -287,8 +286,8 @@ BindOpenFile (interp, fileNumStr)
     Tcl_Interp *interp;
     char       *fileNumStr;
 {
-    unsigned  fileNum;
-    int fileMode, mode, isSocket;
+    unsigned fileNum;
+    int mode, nonBlocking, isSocket;
     struct stat fileStat;
     char channelName[20];
     Tcl_Channel channel = NULL;
@@ -303,21 +302,8 @@ BindOpenFile (interp, fileNumStr)
     /*
      * Make sure file is open and determine the access mode and file type.
      */
-    fileMode = fcntl (fileNum, F_GETFL, 0);
-    if (fileMode == -1)
+    if (TclX_OSGetOpenFileMode (fileNum, &mode, &nonBlocking) != TCL_OK)
         goto unixError;
-
-    switch (fileMode & O_ACCMODE) {
-      case O_RDONLY:
-        mode = TCL_READABLE;
-        break;
-      case O_WRONLY:
-        mode = TCL_WRITABLE;
-        break;
-      case O_RDWR:
-        mode = TCL_READABLE | TCL_WRITABLE;
-        break;
-    }
 
     if (fstat (fileNum, &fileStat) < 0)
         goto unixError;
@@ -348,7 +334,7 @@ BindOpenFile (interp, fileNumStr)
     /*
      * Set channel options.
      */
-    if (fileMode & (O_NONBLOCK | O_NDELAY)) {
+    if (nonBlocking) {
         if (TclX_SetChannelOption (interp,
                                    channel,
                                    TCLX_COPT_BLOCKING,
@@ -368,8 +354,8 @@ BindOpenFile (interp, fileNumStr)
     return TCL_OK;
 
   unixError:
-    Tcl_ResetResult (interp);
-    interp->result = Tcl_PosixError (interp);
+    Tcl_AppendResult (interp, "binding open file to Tcl channel failed: ",
+                      Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
     if (channel != NULL) {

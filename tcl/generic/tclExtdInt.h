@@ -1,7 +1,7 @@
 /*
  * tclExtdInt.h
  *
- * Standard internal include file for Extended Tcl library..
+ * Standard internal include file for Extended Tcl.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.13 1996/03/15 07:35:47 markd Exp $
+ * $Id: tclExtdInt.h,v 5.14 1996/03/17 06:51:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,76 +22,11 @@
 #include "tclExtend.h"
 #include "tclInt.h"
 
-#include <sys/param.h>
-
-#include <math.h>
-
-#ifdef NO_LIMITS_H
-#    include <values.h>
+#if defined(__WIN32__) || defined(_WIN32)
+#   include "tclXwinPort.h"
 #else
-#    include <limits.h>
+#   include "tclXunixPort.h"
 #endif
-
-#ifndef MAXDOUBLE
-#    define MAXDOUBLE HUGE_VAL
-#endif
-
-#include <grp.h>
-
-/*
- * Included the tcl file tclUnixPort.h after other system files, as it checks
- * if certain things are defined.
- */
-#include "tclUnixPort.h"
-
-/*
- * Define O_ACCMODE if <fcntl.h> does not define it.
- */
-#ifndef O_ACCMODE
-#    define O_ACCMODE  (O_RDONLY|O_WRONLY|O_RDWR)
-#endif
-
-/*
- * Make sure we have both O_NONBLOCK and O_NDELAY defined.
- */
-#ifndef O_NONBLOCK
-#   define O_NONBLOCK O_NDELAY
-#endif
-#ifndef O_NDELAY
-#   define O_NDELAY O_NONBLOCK
-#endif
-
-
-/*
- * If tclPort.h has already included time.h, don't include it again, some
- * systems don't #ifdef inside of the file.  Also, on some of these systems,
- * time.h is included by sys/time.h, so don't include it again if that is the
- * case.
- */
-#if !defined (NO_SYS_TIME_H) && defined(TIME_WITH_SYS_TIME)
-#    include <time.h>
-#endif
-
-#include <sys/times.h>
-
-/*
- * Make sure CLK_TCK is defined.
- */
-#ifndef CLK_TCK
-#    ifdef HZ
-#        define CLK_TCK HZ
-#    else
-#        define CLK_TCK 60
-#    endif
-#endif
-
-/*
- * These should be take from an include file, but it got to be such a mess
- * to get the include files right that they are here for good measure.
- */
-struct tm *gmtime ();
-struct tm *localtime ();
-
 
 /*
  * Get ranges of integers and longs.
@@ -263,11 +198,6 @@ Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
                            CONST char *string,
                            off_t      *offsetPtr));
 
-extern int
-Tcl_ProcessSignal _ANSI_ARGS_((ClientData  clientData,
-                               Tcl_Interp *interp,
-                               int         cmdResultCode));
-
 extern void
 TclX_RegExpClean _ANSI_ARGS_((TclX_regexp *regExpPtr));
 
@@ -291,9 +221,6 @@ Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
                               long         stringLen,
                               long        *exprResultPtr));
 
-extern void
-Tcl_ResetSignals _ANSI_ARGS_((void));
-
 extern int
 TclX_RuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
                               char       *tclLibVarName,
@@ -314,9 +241,6 @@ TclX_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                  int         fileNum,
                                  int         mode,
                                  int         isSocket));
-
-extern clock_t
-Tcl_TicksToMS _ANSI_ARGS_((clock_t numTicks));
 
 /*
  * Definitions required to initialize all extended commands.  These are either
@@ -617,6 +541,9 @@ TclXSetKeepAlive _ANSI_ARGS_((Tcl_Interp  *interp,
 /*
  * from tclXxxxOS.c
  */
+extern clock_t
+TclX_OSTicksToMS _ANSI_ARGS_((clock_t numTicks));
+
 extern int
 TclX_OSgetpriority _ANSI_ARGS_((Tcl_Interp *interp,
                                 int        *priority,
@@ -663,4 +590,15 @@ TclX_OSsymlink _ANSI_ARGS_((Tcl_Interp *interp,
 extern void
 TclX_OSElapsedTime _ANSI_ARGS_((clock_t *realTime,
                                 clock_t *cpuTime));
+
+extern int
+TclX_OSkill _ANSI_ARGS_((Tcl_Interp *interp,
+                         pid_t       pid,
+                         int         signal,
+                         char       *funcName));
+
+extern int
+TclX_OSGetOpenFileMode _ANSI_ARGS_((int  fileNum,
+                                    int *mode,
+                                    int *nonBlocking));
 #endif
