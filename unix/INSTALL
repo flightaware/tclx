@@ -2,10 +2,12 @@
 INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
 ------------------------------------------------------------------------
 
-$Id: INSTALL,v 8.5 1997/08/30 22:30:15 markd Exp $
+$Id: INSTALL,v 8.6 1997/09/04 22:39:03 markd Exp $
 
 QUICK START
 ===========
+
+Note: This version is compatibile with Tcl 8.0p1 and Tk 8.0p1.
 
 This section is a quick set of step by step instructions for building TclX
 in the manner that addresses the needs of most users.   If you:
