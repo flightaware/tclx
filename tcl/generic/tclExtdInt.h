@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 1.1 1992/09/20 23:24:26 markd Exp markd $
+ * $Id: tclExtdInt.h,v 1.2 1992/09/21 05:08:03 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,10 +31,15 @@
 
 /*
  * If tclUnix.h has already included time.h, don't include it again, some
- * systems don't #ifdef inside of the file.
+ * systems don't #ifdef inside of the file.  On some systems, undef
+ * CLK_TCK (defined in tclUnix.h) to avoid an annoying warning about
+ * redefinition.
  */
 #ifdef TCL_NEED_TIME_H
 #    if TCL_SYS_TIME_H
+#        ifdef TCL_DUP_CLK_TCK
+#            undef CLK_TCK
+#        endif        
 #        include <time.h>
 #    endif
 #endif

@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: Config.mk,v 1.1 1992/09/20 22:55:24 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -248,6 +248,11 @@ TCL_MAN_INSTALL=1
 #
 #      o TCL_NO_FILE_LOCKING - Set if the fcntl system call does not support
 #        file locking.
+#
+#      o TCL_DUP_CLK_TCK - On some systems that have both time.h and
+#        sys/time.h, tclUnix.h defines CLK_TCK then tclExtdInt.h includes
+#        time.h and you get a redefiniton warning.  Set this flag to prevent
+#        the warning (its not safe to just unset it).
 #
 #    o LIBS - The flags to specify when linking the tclshell.
 #
