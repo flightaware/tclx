@@ -61,6 +61,8 @@ CHANGES IN TCLX 7.5a
     tcl++.h and tcl++.C from a previous release should work.  Contact
     us if this causes you problems.
 
+  o Added support for building shared libraries on systems where shared
+    library support is implemented by Tcl.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================

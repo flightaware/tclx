@@ -1088,3 +1088,9 @@
   o Changed configure to use tclConfig.sh and tkConfig.sh for most
     configuration information.
 -------------------------------------------------------------------------------
+ 2 Mar 96:
+  o Added support for building shared libraries on systems where shared
+    library support is implemented by Tcl.
+===============================================================================
+ 2 Mar 96: Released TclX 7.5a Beta 2
+===============================================================================
