@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.12 1993/04/07 04:50:17 markd Exp markd $
+# $Id: Config.mk,v 2.13 1993/05/04 06:37:29 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -293,6 +293,9 @@ TK_MAN_FUNC_SECTION=TK
 #        from GMT.
 #
 #      o TCL_NO_SOCKETS - Define if sockets are not available.
+#
+#      o TCL_NO_REAL_TIMES - If the times system call does not return the
+#        elasped real time.
 #
 #    o LIBS - The flags to specify when linking the tclshell.
 #
