@@ -1307,3 +1307,7 @@
   o Modified the profile command to correctly support namespaces.
   o Modified TclX auto load libraries to work with namespaces.
 -------------------------------------------------------------------------------
+17 Jul 97:
+  o Modified cmdtrace so that errors in callbacks are saved and returned as
+    command errors rather than printing them to stderr.
+-------------------------------------------------------------------------------

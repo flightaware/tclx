@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.6 1997/07/04 20:23:44 markd Exp $
+ * $Id: tclXdebug.c,v 8.7 1997/07/05 08:00:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -25,15 +25,17 @@
 #define CMD_TRUNCATE_SIZE 60
 
 typedef struct traceInfo_t {
-    Tcl_Interp *interp;
-    Tcl_Trace   traceId;
-    int         inTrace;
-    int         noEval;
-    int         noTruncate;
-    int         procCalls;
-    int         depth;
-    char       *callback;
-    Tcl_Channel channel;
+    Tcl_Interp       *interp;
+    Tcl_Trace         traceId;
+    int               inTrace;
+    int               noEval;
+    int               noTruncate;
+    int               procCalls;
+    int               depth;
+    char             *callback;
+    Tcl_Obj          *errorStatePtr;
+    Tcl_AsyncHandler  errorAsyncHandler;
+    Tcl_Channel       channel;
     } traceInfo_t, *traceInfo_pt;
 
 /*
@@ -61,9 +63,10 @@ TraceCode  _ANSI_ARGS_((traceInfo_pt infoPtr,
                         int          argc,
                         char       **argv));
 
-static void
-TraceCallbackError _ANSI_ARGS_((Tcl_Interp   *interp,
-                                traceInfo_pt infoPtr));
+static int
+TraceCallbackErrorHandler _ANSI_ARGS_((ClientData  clientData,
+                                       Tcl_Interp *interp,
+                                       int         code));
 
 static void
 TraceCallBack _ANSI_ARGS_((Tcl_Interp   *interp,
@@ -113,6 +116,10 @@ TraceDelete (interp, infoPtr)
             ckfree (infoPtr->callback);
             infoPtr->callback = NULL;
         }
+    }
+    if (infoPtr->errorAsyncHandler != NULL) {
+        Tcl_AsyncDelete (infoPtr->errorAsyncHandler);
+        infoPtr->errorAsyncHandler = NULL;
     }
 }
 
@@ -228,39 +235,33 @@ TraceCode (infoPtr, level, command, argc, argv)
 
 
 /*-----------------------------------------------------------------------------
- * TraceCallbackError --
+ * TraceCallbackErrorHandler --
  *
- *   Print out an error message about a trace callback failure if possible and
- * disable tracing.
+ *   Async handler that processes an callback error.  Generates either an
+ * immediate or background error.
  *-----------------------------------------------------------------------------
  */
-static void
-TraceCallbackError (interp, infoPtr)
-    Tcl_Interp   *interp;
-    traceInfo_pt infoPtr;
+static int
+TraceCallbackErrorHandler (clientData, interp, code)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         code;
 {
-    char *value;
-    Tcl_Channel stderrChan;
+    traceInfo_pt infoPtr = (traceInfo_pt) clientData;
 
-    Tcl_AddErrorInfo (interp, "\n    (\"cmdtrace\" callback command)");
+    /*
+     * Put back error message and state.  If not interp passed in, the error
+     * is handled in the background.
+     */
+    TclX_RestoreResultErrorInfo (infoPtr->interp, infoPtr->errorStatePtr);
+    infoPtr->errorStatePtr = NULL;
+    if (interp == NULL) {
+        Tcl_BackgroundError (infoPtr->interp);
+    }    
     
-    stderrChan = Tcl_GetStdChannel (TCL_STDERR);
-    if (stderrChan != NULL) {
-        TclX_WriteStr (stderrChan, 
-                       "cmdtrace callback command error: errorCode = ");
-        value = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
-        if (value == NULL)
-            value = "";
-        TclX_WriteStr (stderrChan, value);
-        TclX_WriteNL (stderrChan);
-        value = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
-        if (value == NULL)
-            value = "";
-        TclX_WriteStr (stderrChan, value);
-        TclX_WriteNL (stderrChan);
-        Tcl_Flush (stderrChan);
-    }
     TraceDelete (interp, infoPtr);
+
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -277,8 +278,9 @@ TraceCallbackError (interp, infoPtr)
  * The code should allow for additional substitution of arguments in future
  * versions (such as a procedure with args as the last argument).  The value
  * of result, errorInfo and errorCode are preserved.  All other state must be
- * preserved by the procedure.  A error will result in information being dumped
- * to stderr and the trace deleted.
+ * preserved by the procedure.  An error will result in an error being flagged
+ * in the control block and async mark being called to handle the error
+ * once the command has completed.
  *-----------------------------------------------------------------------------
  */
 static void
@@ -323,12 +325,14 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
     saveObjPtr = TclX_SaveResultErrorInfo (interp);
 
     /*
-     * Evaluate the command.  If an error occurs, dump something to stderr
-     * and delete the trace.  There is no way to return an error at this
-     * point.
+     * Evaluate the command.  If an error occurs, set up the handler to be
+     * called when its possible.
      */
     if (Tcl_Eval (interp, Tcl_DStringValue (&callback)) == TCL_ERROR) {
-        TraceCallbackError (interp, infoPtr);
+        Tcl_AddObjErrorInfo (interp, "\n    (\"cmdtrace\" callback command)",
+                             -1);
+        infoPtr->errorStatePtr = TclX_SaveResultErrorInfo (interp);
+        Tcl_AsyncMark (infoPtr->errorAsyncHandler);
     }
 
     TclX_RestoreResultErrorInfo (interp, saveObjPtr);
@@ -358,8 +362,12 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;
     int           procLevel;
 
-    if (infoPtr->inTrace)
+    /*
+     * If we are in an error.  
+     */
+    if (infoPtr->inTrace || (infoPtr->errorStatePtr != NULL)) {
         return;
+    }
     infoPtr->inTrace = TRUE;
 
     if (infoPtr->procCalls) {
@@ -489,6 +497,10 @@ TclX_CmdtraceObjCmd (clientData, interp, objc, objv)
 
     if (callback != NULL) {
         infoPtr->callback = ckstrdup (callback);
+        infoPtr->errorAsyncHandler =
+            Tcl_AsyncCreate (TraceCallbackErrorHandler, 
+                             (ClientData) infoPtr);
+
     } else {
         if (channelId == NULL) {
             infoPtr->channel = TclX_GetOpenChannel (interp,
@@ -564,15 +576,17 @@ TclX_DebugInit (interp)
 
     infoPtr = (traceInfo_pt) ckalloc (sizeof (traceInfo_t));
 
-    infoPtr->interp      = interp;
-    infoPtr->traceId     = NULL;
-    infoPtr->inTrace     = FALSE;
-    infoPtr->noEval      = FALSE;
-    infoPtr->noTruncate  = FALSE;
-    infoPtr->procCalls   = FALSE;
-    infoPtr->depth       = 0;
-    infoPtr->callback    = NULL;
-    infoPtr->channel     = NULL;
+    infoPtr->interp = interp;
+    infoPtr->traceId = NULL;
+    infoPtr->inTrace = FALSE;
+    infoPtr->noEval = FALSE;
+    infoPtr->noTruncate = FALSE;
+    infoPtr->procCalls = FALSE;
+    infoPtr->depth = 0;
+    infoPtr->callback = NULL;
+    infoPtr->errorStatePtr = NULL;
+    infoPtr->errorAsyncHandler = NULL;
+    infoPtr->channel = NULL;
 
     Tcl_CallWhenDeleted (interp, DebugCleanUp, (ClientData) infoPtr);
 
