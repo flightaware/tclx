@@ -1,0 +1,115 @@
+#
+# list.test
+#
+# Tests for the lvarpop command.
+#---------------------------------------------------------------------------
+# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id$
+#------------------------------------------------------------------------------
+#
+
+if {[info procs test] != "test"} then {source testlib.tcl}
+
+test list-1.1 {lvarpop tests} {
+    set a {a b c d e f g h i j}
+    list [lvarpop a 0] $a
+} {a {b c d e f g h i j}}
+
+test list-1.2 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a 1] $a
+} {bbbbbb {a c d e f g h i j}}
+
+test list-1.3 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a 4] $a
+} {e {a bbbbbb c d f g h i j}}
+
+test list-1.4 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a 2 frobozz] $a
+} {c {a bbbbbb frobozz d e f g h i j}}
+
+test list-1.5 {lvarpop tests} {
+    set a {a bbbbbb frozbozz d e f g h i j}
+    list [lvarpop a 2 f] $a
+} {frozbozz {a bbbbbb f d e f g h i j}}
+
+test list-1.6 {lvarpop tests} {
+    set a {a bbbbbb c d e f g h i j}
+    list [lvarpop a 20 frobozz] $a
+} {{} {a bbbbbb c d e f g h i j}}
+
+test list-1.7 {lvarpop tests} {
+    set a "a bbbbbb \{a"
+    list [catch {lvarpop a 2 frobozz} msg] $msg
+} {1 {unmatched open brace in list}}
+
+test list-1.8 {lvarpop tests} {
+    set a {}
+    list [lvarpop a] $a
+} {{} {}}
+
+
+test list-2.1 {lvarpush tests} {
+    set a {a b c d e f g h i j}
+    lvarpush a "xxx"
+    set a
+} {xxx a b c d e f g h i j}
+
+test list-2.2 {lvarpush tests} {
+    set a {a c d e f g h i j}
+    lvarpush a b 1
+    set a
+} {a b c d e f g h i j}
+
+test list-2.3 {lvarpush tests} {
+    set a {a bbbbbb c d f g h i j}
+    lvarpush a e 4
+    set a
+} {a bbbbbb c d e f g h i j}
+
+test list-2.4 {lvarpush tests} {
+    set a {a bbbbbb c d e f g h i j}
+    lvarpush a frobozz 2
+    set a
+} {a bbbbbb frobozz c d e f g h i j}
+
+test list-2.5 {lvarpush tests} {
+    set a {a b c d}
+    lvarpush a e 4
+    set a
+} {a b c d e}
+
+test list-2.6 {lvarpush tests} {
+    set a {a b c d}
+    lvarpush a e 4
+    set a
+} {a b c d e}
+
+test list-2.7 {lvarpush tests} {
+    set a {a b c d}
+    lvarpush a e 14
+    set a
+} {a b c d e}
+
+test list-2.8 {lvarpush tests} {
+    set a "a bbbbbb \{a"
+    list [catch {lvarpush a 2 frobozz} msg] $msg
+} {1 {unmatched open brace in list}}
+
+test list-2.9 {lvarpush tests} {
+    set a {}
+    lvarpush a a
+    set a
+} {a}
+
+
