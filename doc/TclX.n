@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.10 1993/04/07 06:47:50 markd Exp markd $
+.\" $Id: TclX.man,v 2.11 1993/05/09 16:18:08 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1928,34 +1928,34 @@ commands to run Unix commands.
 '@help: help
 '@brief: Tcl shell help facility.
 .PP
-The help facility allows one to look up help files which where extracted from
+The help facility allows one to look up help pages which where extracted from
 the standard Tcl manual pages and Tcl scripts during Tcl installation.
 Help files are structured as a
-multilevel directory tree of subjects and help files.  The
+multilevel tree of subjects and help pages.  The
 following commands and options are provided with the help package:
 .TP
 .B help
 .br
-Help, without arguments, lists of all the top-level help subject
-directories and files.
+Help, without arguments, lists of all the help subjects and pages under
+the current help subject.
 .TP
-.B help \fIsubjectdir\fR
-Displays all of help files and lower level subject files (if any exist) under
-the directory \fIsubjectdir\fR.
+.B help \fIsubject\fR
+Displays all of help pages and lower level subjects (if any exist) under
+the subject \fIsubject\fR.
 .TP
-.B help \fIsubjectdir/helpfile\fR
-Display the specified help file.  The help output is passed through a simple
+.B help \fIsubject/helppage\fR
+Display the specified help page.  The help output is passed through a simple
 pager if output exceeds 23 lines, pausing waiting for a return to be entered.
 If any other character is entered, the output is terminated.
 .TP
-.B helpcd ?\fIsubjectdir\fR?
-Change the current subject directory, which is much like the Unix current
+.B helpcd ?\fIsubject\fR?
+Change the current subject, which is much like the Unix current
 directory.  If
-\fIsubjectdir\fR is not specified, return to the top-level of the help tree.
-Help path names may also include ``..'' elements.
+\fIsubject\fR is not specified, return to the top-level of the help tree.
+Help subject path names may also include ``..'' elements.
 .TP
 .B helppwd
-Displays the current help subject directory.
+Displays the current help subject.
 .TP
 .B help help | ?
 Displays help on the help facility at any directory level.
