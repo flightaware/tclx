@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: instcopy.tcl,v 8.4 1999/03/31 06:37:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
@@ -57,7 +57,7 @@ proc DoACopy {file target mode} {
     if {$mode == "FILENAME"} {
         set targetDir [file dirname $target]
         if [file exists $target] {
-            file delete $target
+            file delete -force $target
         }
     } else {
         set targetDir $target

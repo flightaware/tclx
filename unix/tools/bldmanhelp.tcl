@@ -30,7 +30,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: bldmanhelp.tcl,v 8.3 1999/03/31 06:37:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -147,7 +147,7 @@ GenInputFile $docDir $manInfoTbl $tmpFile
 
 buildhelp $helpDir $brief [list $tmpFile]
 
-file delete $tmpFile
+file delete -force $tmpFile
 
 if $gotErrors {
     puts stderr "Errors occured processing manual files"
