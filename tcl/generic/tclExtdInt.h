@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.12 1995/04/30 00:48:00 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.13 1995/05/24 05:27:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -98,12 +98,12 @@ struct tm *localtime ();
 #    define TCL_USE_TM_GMTOFF
 #    define TCL_GOT_TIMEZONE
 #endif
-#if defined(HAVE_TIMEZONE_VAR) && !defined (TCL_GOT_TIMEZONE)
-#    define TCL_USE_TIMEZONE_VAR
-#    define TCL_GOT_TIMEZONE
-#endif
 #if defined(HAVE_GETTIMEOFDAY) && !defined (TCL_GOT_TIMEZONE)
 #    define TCL_USE_GETTIMEOFDAY
+#    define TCL_GOT_TIMEZONE
+#endif
+#if defined(HAVE_TIMEZONE_VAR) && !defined (TCL_GOT_TIMEZONE)
+#    define TCL_USE_TIMEZONE_VAR
 #    define TCL_GOT_TIMEZONE
 #endif
 
