@@ -11,6 +11,7 @@
 ./man/CmdWrite.3
 ./man/Handles.3
 ./man/Keylist.3
+./man/Makefile.in
 ./man/Memory.n
 ./man/TclX.n
 ./man/TclXInit.3
