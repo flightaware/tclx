@@ -1,0 +1,210 @@
+# Copyright (c) 1995-1996 Sun Microsystems, Inc.
+# SCCS: @(#) makefile.vc 1.38 96/03/07 15:25:04
+#
+# Visual C++ 2.x and 4.0 makefile
+#
+
+#
+# Project directories
+#
+# ROOT    = top of source tree
+# TMPDIR  = location where .obj files should be stored during build
+# TOOLS32 = location of VC++ 32-bit development tools, note that the
+#           VC++ 2.0 header files are broken, so you need to use the
+#           ones that come with the developer network CD's, or later
+#           versions of VC++.
+# TOOLS16 = location of VC++ 1.5 16-bit tools, needed to build thunking
+#           library
+#
+
+ROOT    = ..
+TMPDIR  = .
+TOOLS32 = c:\msvc20
+TOOLS16 = c:\msvc
+TCLDIR  = ..\..\..\tcl7.5b3
+TKDIR   = ..\..\..\tk4.1b3
+
+TCLX_LIBRARY = \"\\usr\\lib\\tclX\\7.5\"
+
+# Comment the following line to compile with symbols
+NODEBUG=1
+
+# uncomment the following two lines to compile with TCL_MEM_DEBUG
+#DEBUGDEFINES   =-DTCL_MEM_DEBUG
+
+# Make sure the VC++ tools are at the head of the path
+PATH=$(TOOLS32)\bin;$(PATH)
+
+WINDIR          = $(ROOT)\win
+GENERICDIR      = $(ROOT)\generic
+XLIBDIR         = $(ROOT)\xlib
+
+cc32 = $(TOOLS32)\bin\cl -I$(TOOLS32)\include
+rc32 = $(TOOLS32)\bin\rc
+
+cc16 = $(TOOLS16)\bin\cl -I$(TOOLS16)\include
+link16 = $(TOOLS16)\bin\link
+rc16 = $(TOOLS16)\bin\rc
+
+TCLX_INCLUDES = -I$(TOOLS32)\include -I$(ROOT)\win -I$(ROOT)\generic \
+        -I$(TCLDIR)\generic -I$(TCLDIR)\win
+
+TCLX_DEFINES = \
+    -nologo $(DEBUGDEFINES)
+
+TCLOBJS = \
+        $(TMPDIR)\tclXAppInit.obj
+
+TCLXTESTOBJS = \
+        $(TMPDIR)\tclXTest.obj
+
+TCLXOBJS = \
+        $(TMPDIR)\tclXbsearch.obj \
+        $(TMPDIR)\tclXchmod.obj \
+        $(TMPDIR)\tclXcmdInit.obj \
+        $(TMPDIR)\tclXcmdloop.obj \
+        $(TMPDIR)\tclXdebug.obj \
+        $(TMPDIR)\tclXdup.obj \
+        $(TMPDIR)\tclXfcntl.obj \
+        $(TMPDIR)\tclXfilecmds.obj \
+        $(TMPDIR)\tclXfilescan.obj \
+        $(TMPDIR)\tclXflock.obj \
+        $(TMPDIR)\tclXfstat.obj \
+        $(TMPDIR)\tclXgeneral.obj \
+        $(TMPDIR)\tclXhandles.obj \
+        $(TMPDIR)\tclXid.obj \
+        $(TMPDIR)\tclXinit.obj \
+        $(TMPDIR)\tclXkeylist.obj \
+        $(TMPDIR)\tclXlib.obj \
+        $(TMPDIR)\tclXlibInit.obj \
+        $(TMPDIR)\tclXlist.obj \
+        $(TMPDIR)\tclXmath.obj \
+        $(TMPDIR)\tclXmsgcat.obj \
+        $(TMPDIR)\tclXprocess.obj \
+        $(TMPDIR)\tclXprofile.obj \
+        $(TMPDIR)\tclXregexp.obj \
+        $(TMPDIR)\tclXselect.obj \
+        $(TMPDIR)\tclXserver.obj \
+        $(TMPDIR)\tclXshell.obj \
+        $(TMPDIR)\tclXsignal.obj \
+        $(TMPDIR)\tclXstring.obj \
+        $(TMPDIR)\tclXunixcmds.obj \
+        $(TMPDIR)\tclXutil.obj \
+    $(TMPDIR)\getopt1.obj \
+    $(TMPDIR)\getopt.obj
+
+TCLX16OBJS = $(TMPDIR)\tclWin16.obj
+
+DUMPEXTSOBJS = $(TMPDIR)\winDumpExts.obj
+
+TCLLIB = $(TCLDIR)\win\tcl75.lib
+TCLDLL = $(TCLDIR)\win\tcl75.dll
+TCL16DLL = $(TCLDIR)\win\tcl1675.dll
+TCLXLIB = tclx75.lib
+TCLXDLL = tclx75.dll
+TCLX16DLL = tclx1675.dll
+TCL = tcl75.exe
+TCLXTEST = tclxtest.exe
+DUMPEXTS = dumpexts.exe
+
+CPU=i386
+CP=copy
+
+!include    <ntwin32.mak>
+
+#
+# Targets
+#
+
+all:  $(DUMPEXTS) $(TCLXDLL) $(TCL)
+release: $(DUMPEXTS) $(TCLXDLL) $(TCLX16DLL) $(TCL)
+test:  $(DUMPEXTS) $(TCLXDLL) $(TCLXTEST)
+
+tclXvc.def: dumpexts.exe $(TCLXOBJS)
+        dumpexts.exe -o $@ $(TCLXDLL) @<<
+        $(TCLXOBJS)
+<<
+        echo    tclDeleteInterpAtEnd >> tclXvc.def
+        echo    tclErrorSignalProc >> tclXvc.def
+        echo    tclGotErrorSignal >> tclXvc.def
+        echo    tclSignalBackgroundError >> tclXvc.def
+
+dumpexts.exe: $(DUMPEXTSOBJS)
+        $(link) $(conlflags) -out:dumpexts.exe $(DUMPEXTSOBJS) \
+                $(guilibs) $(libc)
+
+$(TCLXDLL): $(TCLXOBJS) tclXvc.def $(TMPDIR)\tcl.res
+        $(link) $(linkdebug) $(dlllflags) -def:tclXvc.def \
+                $(TMPDIR)\tcl.res $(guilibsdll) -out:$(TCLXDLL) @<<
+                $(TCLXOBJS) $(TCLLIB) Wsock32.lib
+<<
+
+$(TCLX16DLL): $(TCLX16OBJS) tclX16.rc
+        $(link16) @<<,$@,,$(TOOLS16)\lib\ sdllcew oldnames libw toolhelp,<<
+                $(TCLX16OBJS)
+<<
+LIBRARY $(@B);dll
+EXETYPE WINDOWS
+CODE PRELOAD MOVEABLE DISCARDABLE
+DATA PRELOAD MOVEABLE SINGLE
+HEAPSIZE 1024
+<<
+        $(rc16) -i $(ROOT)\generic tclX16.rc $@
+
+
+$(TCL): $(TCLOBJS) $(TCLXLIB) $(TMPDIR)\tcl.res
+        $(link) $(linkdebug) $(conlflags) \
+                $(TCLOBJS) $(TMPDIR)\tcl.res $(TCLXLIB) $(TCLLIB) $(conlibsdll) \
+                -out:$(TCL)
+
+$(TCLXTEST): $(TCLXTESTOBJS) $(TCLXLIB)
+        $(link) $(linkdebug) $(conlflags) \
+                $(TCLXTESTOBJS) $(TCLXLIB) $(conlibsdll) \
+                -out:$(TCLXTEST)
+
+$(ROOT)\generic\patchlvl.h: $(ROOT)\generic\patchlevel.h
+        $(CP) $(ROOT)\generic\patchlevel.h $(ROOT)\generic\patchlvl.h
+
+#
+# Special case object file targets
+#
+
+$(TMPDIR)\testMain.obj: $(ROOT)\win\tclAppInit.c
+        $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCL_INCLUDES) \
+                $(TCLX_DEFINES) -DTCL_TEST -Fo$(TMPDIR)\testMain.obj $?
+
+$(TMPDIR)\winDumpExts.obj: $(ROOT)\win\winDumpExts.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
+                $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
+
+$(TMPDIR)\tclXlibInit.obj: $(ROOT)\generic\tclXlibInit.c
+        $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
+            -DTCLX_LIBRARY=$(TCLX_LIBRARY) \
+                $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
+
+$(TMPDIR)\tclWin16.obj: $(ROOT)\win\tclWin16.c
+        $(cc16) -c -Fo$(TMPDIR)\ $?
+
+#
+# Implicit rules
+#
+
+{$(ROOT)\generic}.c{$(TMPDIR)}.obj:
+    $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
+          $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
+
+{$(ROOT)\win}.c{$(TMPDIR)}.obj:
+    $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
+          $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
+
+{$(ROOT)\win}.rc{$(TMPDIR)}.res:
+        $(rc32) -fo $@ -r -i $(ROOT)\generic -i $(ROOT)\win $<
+
+clean:
+        -del *.exp
+        -del *.lib
+        -del *.dll
+        -del *.exe
+        -del $(TMPDIR)\*.obj
+        -del *.def
+        -del *.res

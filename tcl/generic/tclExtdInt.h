@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.14 1996/03/17 06:51:59 markd Exp $
+ * $Id: tclExtdInt.h,v 5.15 1996/03/18 08:49:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -601,4 +601,18 @@ extern int
 TclX_OSGetOpenFileMode _ANSI_ARGS_((int  fileNum,
                                     int *mode,
                                     int *nonBlocking));
+
+int
+TclX_OSopendir _ANSI_ARGS_((Tcl_Interp     *interp,
+                            char           *path,
+                            TCLX_DIRHANDLE *handlePtr,
+                            int            *caseSensitive));
+int
+TclX_OSreaddir _ANSI_ARGS_((Tcl_Interp     *interp,
+                            TCLX_DIRHANDLE  handle,
+                            char          **fileNamePtr));
+int
+TclX_OSclosedir _ANSI_ARGS_((Tcl_Interp     *interp,
+                             TCLX_DIRHANDLE  handle));
+
 #endif

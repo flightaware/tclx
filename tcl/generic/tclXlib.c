@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 5.4 1996/03/10 04:42:37 markd Exp $
+ * $Id: tclXlib.c,v 5.5 1996/03/15 07:35:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -188,16 +188,14 @@ EvalFilePart (interp, fileName, offset, length)
     int           fileNum, result;
     struct stat   statBuf;
     char         *oldScriptFile, *cmdBuffer, *buf;
-    Tcl_DString   tildeBuf;
+    Tcl_DString   pathBuf;
 
     Tcl_ResetResult (interp);
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
     
-    if (fileName [0] == '~') {
-        if ((fileName = Tcl_TranslateFileName (interp, fileName,
-                                               &tildeBuf)) == NULL)
-            return TCL_ERROR;
-    }
+    fileName = Tcl_TranslateFileName (interp, fileName, &pathBuf);
+    if (fileName == NULL)
+        return TCL_ERROR;
 
     fileNum = open (fileName, O_RDONLY, 0);
     if (fileNum < 0) {
@@ -236,7 +234,7 @@ EvalFilePart (interp, fileName, offset, length)
     ckfree (cmdBuffer);
                          
     if (result != TCL_ERROR) {
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
         return TCL_OK;
     }
 
@@ -261,14 +259,14 @@ EvalFilePart (interp, fileName, offset, length)
   errorExit:
     if (fileNum > 0)
         close (fileNum);
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
  * MakeAbsFile --
  *
- * Convert a file name to an absolute path.  This handles tilde substitution
+ * Convert a file name to an absolute path.  This handles file name translation
  * and preappend the current directory name if the path is relative.
  *
  * Parameters
@@ -300,7 +298,7 @@ MakeAbsFile (interp, fileName, absNamePtr)
 
     /*
      * If it starts with a tilde, the substitution will make it
-     * absolute.
+     * absolute. **WIN-BUG**
      */
     if (fileName [0] == '~') {
         if (Tcl_TranslateFileName (interp, fileName, absNamePtr) == NULL)
@@ -786,14 +784,13 @@ LoadDirIndexes (interp, dirName)
     Tcl_Interp  *interp;
     char        *dirName;
 {
-    DIR           *dirPtr;
-    struct dirent *entryPtr;
-    int            dirNameLen, nameLen;
-    Tcl_DString    filePath;
+    TCLX_DIRHANDLE handle;
+    int caseSensitive, status, tlibStyle, dirNameLen, nameLen;
+    char *fileName;
+    Tcl_DString filePath;
 
-    dirPtr = opendir (dirName);
-    if (dirPtr == NULL)
-        return TCL_OK;   /* Skip directory */
+    if (TclX_OSopendir (NULL, dirName, &handle, &caseSensitive) != TCL_OK)
+        return TCL_OK;   /* Skip directory on error */
 
     Tcl_DStringInit (&filePath);
     Tcl_DStringAppend (&filePath, dirName, -1);
@@ -802,47 +799,59 @@ LoadDirIndexes (interp, dirName)
     dirNameLen = strlen (dirName) + 1;  /* Include `/' */
 
     while (TRUE) {
-        entryPtr = readdir (dirPtr);
-        if (entryPtr == NULL)
+        status = TclX_OSreaddir (interp, handle, &fileName);
+        if (status == TCL_ERROR)
+            goto errorExit;
+        if (status == TCL_BREAK)
             break;
-        nameLen = strlen (entryPtr->d_name);
 
-        if ((nameLen > 5) && 
-            ((STREQU (entryPtr->d_name + nameLen - 5, ".tlib")) ||
-             (STREQU (entryPtr->d_name, "tclIndex")))) {
+        /*
+         * Figure out if its an index file.
+         */
+        nameLen = strlen (fileName);
+        if (nameLen < 5)
+            continue;  /* name too short for any name */
+        if (STREQU (fileName + nameLen - 5, ".tlib")) {
+            tlibStyle = TRUE;
+        } else if ((caseSensitive && STREQU (fileName, "tclIndex")) ||
+                   ((!caseSensitive) && STREQU (fileName, "tclindex"))) {
+            tlibStyle = FALSE;
+        } else {
+            continue;  /* Not an index */
+        }
 
-            /*
-             * Append the file name on to the directory.
-             */
-            Tcl_DStringTrunc (&filePath, dirNameLen);
-            Tcl_DStringAppend (&filePath, entryPtr->d_name, -1);
-
-            /*
-             * Skip index it can't be accessed.
-             */
-            if (access (filePath.string, R_OK) < 0)
-                continue;
-
-            /*
-             * Process the index according to its type.
-             */
-            if (entryPtr->d_name [nameLen - 5] == '.') {
-                if (LoadPackageIndex (interp, filePath.string) != TCL_OK)
-                    goto errorExit;
-            } else {
-                if (LoadOusterIndex (interp, filePath.string) != TCL_OK)
-                    goto errorExit;
-            }
+        /*
+         * Append the file name on to the directory.
+         */
+        Tcl_DStringTrunc (&filePath, dirNameLen);
+        Tcl_DStringAppend (&filePath, fileName, -1);
+        
+        /*
+         * Skip index it can't be accessed.
+         */
+        if (access (filePath.string, R_OK) < 0)
+            continue;
+        
+        /*
+         * Process the index according to its type.
+         */
+        if (tlibStyle) {
+            if (LoadPackageIndex (interp, filePath.string) != TCL_OK)
+                goto errorExit;
+        } else {
+            if (LoadOusterIndex (interp, filePath.string) != TCL_OK)
+                goto errorExit;
         }
     }
 
     Tcl_DStringFree (&filePath);
-    closedir (dirPtr);
+    if (TclX_OSclosedir (interp, handle) != TCL_OK)
+        goto errorExit;
     return TCL_OK;
 
   errorExit:
     Tcl_DStringFree (&filePath);
-    closedir (dirPtr);
+    TclX_OSclosedir (NULL, handle);
     return TCL_ERROR;
 }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 5.5 1996/02/20 09:10:19 markd Exp $
+ * $Id: tclXprocess.c,v 5.6 1996/03/18 08:49:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -56,7 +56,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     char          *argv0       = NULL;
     int            nextArg     = 1;
     int            argInCnt, idx;
-    Tcl_DString    tildeBuf;
+    Tcl_DString    pathBuf;
 
     if (argc < 2)
         goto wrongArgs;
@@ -70,7 +70,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     if ((argc - nextArg) > 2)
         goto wrongArgs;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
 
     /*
      * If arg list is supplied, split it and build up the arguments to pass.
@@ -92,12 +92,9 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
         argList [1] = NULL;
     }
 
-    path = argv [nextArg];
-    if (path [0] == '~') {
-        path = Tcl_TranslateFileName (interp, path, &tildeBuf);
-        if (path == NULL)
-            goto errorExit;
-    }
+    path = Tcl_TranslateFileName (interp, argv [nextArg], &pathBuf);
+    if (path == NULL)
+        goto errorExit;
 
     if (argv0 != NULL) {
         argList [0] = argv0;
@@ -118,7 +115,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
         ckfree ((char *) argList);
 
   errorExit:
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_ERROR;
 
   wrongArgs:

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.14 1996/03/17 06:51:59 markd Exp $
+ * $Id: tclXunixPort.h,v 5.1 1996/03/18 08:49:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -75,4 +75,10 @@
  * it delays signals.
  */
 #define TCLX_WAITPID(pid, status, options) waitpid (pid, status, options)
+
+/*
+ * Handle used to access directories.
+ */
+#define TCLX_DIRHANDLE DIR *
+
 #endif

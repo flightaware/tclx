@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 5.2 1996/02/12 18:15:31 markd Exp $
+ * $Id: tclXchmod.c,v 5.3 1996/02/20 09:10:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -259,14 +259,14 @@ ChmodFileName (interp, modeInfo, fileName)
 {
     char         *filePath;
     struct stat   fileStat;
-    Tcl_DString   tildeBuf;
+    Tcl_DString   pathBuf;
     int           newMode;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
 
-    filePath = Tcl_TranslateFileName (interp, fileName, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, fileName, &pathBuf);
     if (filePath == NULL) {
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
 
@@ -283,14 +283,14 @@ ChmodFileName (interp, modeInfo, fileName)
     if (chmod (filePath, (unsigned short) newMode) < 0)
         goto fileError;
 
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_OK;
 
   fileError:
     Tcl_AppendResult (interp, filePath, ": ",
                       Tcl_PosixError (interp), (char *) NULL);
   errorExit:
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_ERROR;
 }
 
@@ -542,13 +542,13 @@ ChownFileName (interp, ownerInfo, fileName)
 {
     char         *filePath;
     struct stat   fileStat;
-    Tcl_DString   tildeBuf;
+    Tcl_DString   pathBuf;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
 
-    filePath = Tcl_TranslateFileName (interp, fileName, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, fileName, &pathBuf);
     if (filePath == NULL) {
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
 
@@ -562,13 +562,13 @@ ChownFileName (interp, ownerInfo, fileName)
             goto fileError;
     }
 
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_OK;
 
   fileError:
     Tcl_AppendResult (interp, filePath, ": ",
                       Tcl_PosixError (interp), (char *) NULL);
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_ERROR;
 }
 
@@ -710,13 +710,13 @@ ChgrpFileName (interp, groupId, fileName)
 {
     char         *filePath;
     struct stat   fileStat;
-    Tcl_DString   tildeBuf;
+    Tcl_DString   pathBuf;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
 
-    filePath = Tcl_TranslateFileName (interp, fileName, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, fileName, &pathBuf);
     if (filePath == NULL) {
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
 
@@ -724,10 +724,10 @@ ChgrpFileName (interp, groupId, fileName)
         (chown (filePath, fileStat.st_uid, groupId) < 0)) {
         Tcl_AppendResult (interp, filePath, ": ",
                           Tcl_PosixError (interp), (char *) NULL);
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_OK;
 }
 

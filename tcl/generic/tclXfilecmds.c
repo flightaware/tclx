@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.9 1996/03/13 08:29:33 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.10 1996/03/15 07:35:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -667,7 +667,7 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    Tcl_DString tildeBuf1, tildeBuf2;
+    Tcl_DString pathBuf1, pathBuf2;
     char *oldPath, *newPath;
 
     if (argc != 3) {
@@ -676,22 +676,16 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    Tcl_DStringInit (&tildeBuf1);
-    Tcl_DStringInit (&tildeBuf2);
+    Tcl_DStringInit (&pathBuf1);
+    Tcl_DStringInit (&pathBuf2);
     
-    oldPath = argv [1];
-    if (oldPath [0] == '~') {
-        oldPath = Tcl_TranslateFileName (interp, oldPath, &tildeBuf1);
-        if (oldPath == NULL)
-            goto errorExit;
-    }
+    oldPath = Tcl_TranslateFileName (interp, argv [1], &pathBuf1);
+    if (oldPath == NULL)
+        goto errorExit;
 
-    newPath = argv [2];
-    if (newPath [0] == '~') {
-        newPath = Tcl_TranslateFileName (interp, newPath, &tildeBuf2);
-        if (newPath == NULL)
-            goto errorExit;
-    }
+    newPath = Tcl_TranslateFileName (interp, argv [2], &pathBuf2);
+    if (newPath == NULL)
+        goto errorExit;
 
     if (rename (oldPath, newPath) != 0) {
         Tcl_AppendResult (interp, "rename \"", argv [1], "\" to \"", argv [2],
@@ -700,13 +694,13 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
     
-    Tcl_DStringFree (&tildeBuf1);
-    Tcl_DStringFree (&tildeBuf2);
+    Tcl_DStringFree (&pathBuf1);
+    Tcl_DStringFree (&pathBuf2);
     return TCL_OK;
 
   errorExit:
-    Tcl_DStringFree (&tildeBuf1);
-    Tcl_DStringFree (&tildeBuf2);
+    Tcl_DStringFree (&pathBuf1);
+    Tcl_DStringFree (&pathBuf2);
     return TCL_ERROR;
 }
 
@@ -731,22 +725,22 @@ TruncateByPath (interp, filePath, newSize)
     off_t        newSize;
 {
 #ifndef NO_TRUNCATE
-    Tcl_DString  tildeBuf;
+    Tcl_DString  pathBuf;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
 
-    filePath = Tcl_TranslateFileName (interp, filePath, &tildeBuf);
+    filePath = Tcl_TranslateFileName (interp, filePath, &pathBuf);
     if (filePath == NULL) {
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
     if (truncate (filePath, newSize) != 0) {
         Tcl_AppendResult (interp, filePath, ": ", Tcl_PosixError (interp), (char *) NULL);
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
         return TCL_ERROR;
     }
 
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     return TCL_OK;
 #else
     Tcl_AppendResult (interp, "truncating files by path is not available on this system",
@@ -852,7 +846,6 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- *
  * Tcl_ReaddirCmd --
  *     Implements the rename TCL command:
  *         readdir dirPath
@@ -868,10 +861,12 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    Tcl_DString    tildeBuf;
-    char          *dirPath;
-    DIR           *dirPtr;
-    struct dirent *entryPtr;
+    Tcl_DString pathBuf;
+    char *dirPath;
+    TCLX_DIRHANDLE handle;
+    int status, caseSensitive;
+    Tcl_DString fileList;
+    char *fileName;
 
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -879,41 +874,36 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
+    Tcl_DStringInit (&fileList);
 
-    dirPath = argv [1];
-    if (dirPath [0] == '~') {
-        dirPath = Tcl_TranslateFileName (interp, dirPath, &tildeBuf);
-        if (dirPath == NULL)
-            goto errorExit;
-    }
-
-    dirPtr = opendir (dirPath);
-    if (dirPtr == NULL)  {
-        Tcl_AppendResult (interp, dirPath, ": ", Tcl_PosixError (interp),
-                          (char *) NULL);
+    dirPath = Tcl_TranslateFileName (interp, argv [1], &pathBuf);
+    if (dirPath == NULL)
         goto errorExit;
-    }
 
+    if (TclX_OSopendir (interp, dirPath, &handle, &caseSensitive) != TCL_OK)
+        goto errorExit;
+    
     while (TRUE) {
-        entryPtr = readdir (dirPtr);
-        if (entryPtr == NULL)
+        status = TclX_OSreaddir (interp, handle, &fileName);
+        if (status == TCL_ERROR)
+            goto errorExit2;
+        if (status == TCL_BREAK)
             break;
-        if (entryPtr->d_name [0] == '.') {
-            if (entryPtr->d_name [1] == '\0')
-                continue;
-            if ((entryPtr->d_name [1] == '.') &&
-                (entryPtr->d_name [2] == '\0'))
-                continue;
-        }
-        Tcl_AppendElement (interp, entryPtr->d_name);
+        Tcl_DStringAppendElement (&fileList, fileName);
     }
-    closedir (dirPtr);
-    Tcl_DStringFree (&tildeBuf);
+    if (TclX_OSclosedir (interp, handle) != TCL_OK)
+        goto errorExit2;
+    Tcl_DStringFree (&pathBuf);
+    Tcl_DStringResult (interp, &fileList);
     return TCL_OK;
 
+  errorExit2:
+    TclX_OSclosedir (NULL, handle);
+
   errorExit:
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
+    Tcl_DStringFree (&fileList);
     return TCL_ERROR;
 }
 

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 5.1 1996/03/15 07:36:08 markd Exp $
+ * $Id: tclXunixOS.c,v 5.2 1996/03/18 08:49:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -658,5 +658,107 @@ TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
         *nonBlocking = TRUE;
     else
         *nonBlocking = FALSE;
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_OSopendir --
+ *   Portability interface to opendir functionallity.
+ *
+ * Parameters:
+ *   o interp (I) - Errors returned in result.  Maybe NULL if error text is
+ *     not to be returned.
+ *   o path (I) - Path to the directory.
+ *   o handlePtr (O) - The handle to pass in other functions to access this
+ *     directory is returned here.
+ *   o caseSensitive (O) - Are the file names case sensitive?  Always TRUE
+ *     on Unix.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_OSopendir (interp, path, handlePtr, caseSensitive)
+    Tcl_Interp     *interp;
+    char           *path;
+    TCLX_DIRHANDLE *handlePtr;
+    int            *caseSensitive;
+{
+    DIR *handle;
+    
+    handle = opendir (path);
+    if (handle == NULL)  {
+        if (interp != NULL)
+            Tcl_AppendResult (interp, "open of directory \"", path,
+                              "\" failed: ", Tcl_PosixError (interp),
+                              (char *) NULL);
+        return TCL_ERROR;
+    }
+    *handlePtr = handle;
+    *caseSensitive = TRUE;
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_OSreaddir --
+ *   Portability interface to readdir functionallity.  The "." and ".." entries
+ * are not returned.
+ *
+ * Parameters:
+ *   o interp (I) - Errors returned in result.
+ *   o handle (O) - The handle returned by TclX_OSreaddir.
+ *   o fileNamePtr (O) - A pointer to the filename is returned here.
+ * Results:
+ *   TCL_OK or TCL_BREAK if there are no more directory entries.  Some systems
+ * might return TCL_ERROR, but not Unix.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_OSreaddir (interp, handle, fileNamePtr)
+    Tcl_Interp     *interp;
+    TCLX_DIRHANDLE  handle;
+    char          **fileNamePtr;
+{
+    struct dirent *entryPtr;
+   
+    while (TRUE) {
+        entryPtr = readdir (handle);
+        if (entryPtr == NULL)
+            return TCL_BREAK;
+        if (entryPtr->d_name [0] == '.') {
+            if (entryPtr->d_name [1] == '\0')
+                continue;
+            if ((entryPtr->d_name [1] == '.') &&
+                (entryPtr->d_name [2] == '\0'))
+                continue;
+        }
+        *fileNamePtr = entryPtr->d_name;
+        return TCL_OK;
+    }
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_OSclosedir --
+ *   Portability interface to closedir functionallity.
+ *
+ * Parameters:
+ *   o interp (I) - Errors returned in result.  Maybe NULL if error text is
+ *     not to be returned.
+ *   o handle (O) - The handle returned by TclX_OSreaddir.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_OSclosedir (interp, handle)
+    Tcl_Interp     *interp;
+    TCLX_DIRHANDLE  handle;
+{
+    if (closedir (handle) < 0) {
+        if (interp != NULL)
+            Tcl_AppendResult (interp, "close of directory failed: ",
+                              Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
     return TCL_OK;
 }

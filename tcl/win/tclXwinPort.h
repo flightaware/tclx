@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.14 1996/03/17 06:51:59 markd Exp $
+ * $Id: tclXwinPort.h,v 1.1 1996/03/18 08:50:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,6 +21,18 @@
 
 #include "tclWinPort.h"
 
+/*
+ * OS feature definitons.
+ */
+#define NO_CATGETS
+#define NO_FCHMOD
+#define NO_FCHOWN
+#define NO_FSYNC
+#define NO_RANDOM  /* uses compat */
+#define NO_SIGACTION
+#define NO_SYS_SELECT_H
+#define NO_TRUNCATE
+#define RETSIGTYPE void
 
 #include <math.h>
 #include <limits.h>

@@ -187,6 +187,10 @@ all the support they have given us.
 Thanks to Dr. Joseph E. Sacco <jsacco@ssl.com> for his initial work on
 building shared libraries.
 
+Thanks to Michael E Shorter <mike@thx1138.globalware.com> and
+Christopher M Sedore <cmsedore@zombie.maxwell.syr.edu> for their work on
+porting TclX to MS Windows.
+
 NEOSOFT TCL CONSULTING
 ======================
 

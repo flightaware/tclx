@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 5.5 1996/02/20 09:10:33 markd Exp $
+ * $Id: tclXoscmds.c,v 5.1 1996/03/15 07:35:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -178,9 +178,9 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
     int           idx, fileArgc;
     char        **fileArgv, *fileName;
     int           noComplain;
-    Tcl_DString   tildeBuf;
+    Tcl_DString   pathBuf;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
     
     if ((argc < 2) || (argc > 3))
         goto badArgs;
@@ -198,11 +198,11 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        fileName = Tcl_TranslateFileName (interp, fileArgv [idx], &tildeBuf);
+        fileName = Tcl_TranslateFileName (interp, fileArgv [idx], &pathBuf);
         if (fileName == NULL) {
             if (!noComplain)
                 goto errorExit;
-            Tcl_DStringFree (&tildeBuf);
+            Tcl_DStringFree (&pathBuf);
             continue;
         }
         if ((unlink (fileName) != 0) && !noComplain) {
@@ -210,14 +210,14 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
                               Tcl_PosixError (interp), (char *) NULL);
             goto errorExit;
         }
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
     }
 
     ckfree ((char *) fileArgv);
     return TCL_OK;
 
   errorExit:
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     ckfree ((char *) fileArgv);
     return TCL_ERROR;
 
@@ -247,9 +247,9 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
     int           idx, dirArgc, result;
     char        **dirArgv, *dirName, *scanPtr;
     struct stat   statBuf;
-    Tcl_DString   tildeBuf;
+    Tcl_DString   pathBuf;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
 
     if ((argc < 2) || (argc > 3) || 
         ((argc == 3) && !STREQU (argv [1], "-path"))) {
@@ -266,7 +266,7 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
      */
 
     for (idx = 0; idx < dirArgc; idx++) {
-        dirName = Tcl_TranslateFileName (interp, dirArgv [idx], &tildeBuf);
+        dirName = Tcl_TranslateFileName (interp, dirArgv [idx], &pathBuf);
         if (dirName == NULL)
            goto errorExit;
 
@@ -295,14 +295,14 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
         if (TclX_OSmkdir (interp, dirName) != TCL_OK)
            goto errorExit;
 
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
     }
 
     ckfree ((char *) dirArgv);
     return TCL_OK;
 
   errorExit:
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     ckfree ((char *) dirArgv);
     return TCL_ERROR;
 }
@@ -327,9 +327,9 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
     int          idx, dirArgc;
     char       **dirArgv, *dirName;
     int          noComplain;
-    Tcl_DString  tildeBuf;
+    Tcl_DString  pathBuf;
 
-    Tcl_DStringInit (&tildeBuf);
+    Tcl_DStringInit (&pathBuf);
     
     if ((argc < 2) || (argc > 3))
         goto badArgs;
@@ -346,11 +346,11 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 0; idx < dirArgc; idx++) {
-        dirName = Tcl_TranslateFileName (interp, dirArgv [idx], &tildeBuf);
+        dirName = Tcl_TranslateFileName (interp, dirArgv [idx], &pathBuf);
         if (dirName == NULL) {
             if (!noComplain)
                 goto errorExit;
-            Tcl_DStringFree (&tildeBuf);
+            Tcl_DStringFree (&pathBuf);
             continue;
         }
         if ((rmdir (dirName) != 0) && !noComplain) {
@@ -358,14 +358,14 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
                              Tcl_PosixError (interp), (char *) NULL);
            goto errorExit;
         }
-        Tcl_DStringFree (&tildeBuf);
+        Tcl_DStringFree (&pathBuf);
     }
 
     ckfree ((char *) dirArgv);
     return TCL_OK;
 
   errorExit:
-    Tcl_DStringFree (&tildeBuf);
+    Tcl_DStringFree (&pathBuf);
     ckfree ((char *) dirArgv);
     return TCL_ERROR;;
 

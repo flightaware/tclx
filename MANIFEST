@@ -7,6 +7,7 @@
 ./doc/Memory.n
 ./doc/TclX.n
 ./doc/TclXInit.3
+./tcl/compat/getopt.c
 ./tcl/compat/random.c
 ./tcl/compat/rename.c
 ./tcl/generic/tclExtdInt.h
@@ -297,6 +298,7 @@
 ./tcl/unix/Makefile.in
 ./tcl/unix/tclXunixOS.c
 ./tcl/unix/tclXunixPort.h
+./tcl/unix/tclXunixSock.c
 ./tcl/unix/tclXunixcmds.c
 ./tcl/unix/tclxConfig.sh.in
 ./tk/generic/tkXAppInit.c
