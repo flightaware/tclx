@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.5 1994/01/11 06:31:35 markd Exp markd $
+.\" $Id: TclX.n,v 3.6 1994/01/23 17:00:28 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -902,7 +902,8 @@ Specify the action to take when a Unix signal is received by Extended
 Tcl, or a program that embeds it.  \fISiglist\fR is a list
 of either the symbolic or numeric Unix signal (the SIG prefix is optional).
 \fIAction\fR is one of the following actions to be performed on receipt of the
-signal.
+signal.  To specify all modifiable signals, use `*' (this will not include
+SIGKILL and SIGSTOP, as they can not be modified).
 .IP
 \fBdefault\fR - Perform system default action when signal is received
 (see \fBsignal\fR system call documentation).
@@ -933,7 +934,12 @@ values are a list cosisting of the action associated with the signal, a
 \fB0\fR if the signal may be delivered (not block) and a \fB1\fR if it is
 blocked. The actions maybe one of `\fBdefault\fR',`\fBignore\fR',
 `\fBerror\fR' or `\fBtrap\fR.  If the action is trap, the third element is the
-command associated with the action.
+command associated with the action.  The action `\fBunknown\fR' is returned
+if a non-Tcl signal handler has been associated with the signal.
+.IP
+\fBset\fR - Set signals from a keyed list in the format returned by the
+\fBget\fR.  For this action, \fIsiglist\fR is the keyed list of signal
+state.  Signals with an action of `\fBunknown\fR' are not modified.
 .IP
 \fBblock\fR - Block the specified signals from being received. (Posix systems
 only).

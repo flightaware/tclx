@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 3.0 1993/11/19 06:58:03 markd Rel markd $
+# $Id: signal.test,v 3.1 1994/01/23 16:58:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -118,6 +118,26 @@ Test signal-1.8 {signal tests} {
     signal get {SIGHUP SIGINT}
 } 0 {{SIGHUP {error 0}} {SIGINT {error 0}}}
 
+Test signal-1.8.1 {signal tests} {
+    signal error {SIGHUP SIGINT}
+    set sigkl [signal get *]
+    list [keylget sigkl SIGHUP]  [keylget sigkl SIGINT]
+} 0 {{error 0} {error 0}}
+
+Test signal-1.8.2 {signal tests} {
+    set sigkl [signal get *]
+    list [keylget sigkl SIGALRM {}] [keylget sigkl SIGPIPE {}] \
+        [keylget sigkl SIGINT {}]
+} 0 {1 1 1}
+
+Test signal-1.8.3 {signal tests} {
+    signal error {SIGHUP SIGINT}
+    set sigkl [signal get *]
+    signal default {SIGHUP SIGINT}
+    signal set $sigkl
+    signal get {SIGHUP SIGINT}
+} 0 {{SIGHUP {error 0}} {SIGINT {error 0}}}
+
 Test signal-1.9 {signal tests} {
     global errorInfo
     set errorInfo {}
@@ -148,7 +168,7 @@ Test signal-1.10 {signal tests} {
 
 Test signal-1.11 {signal tests} {
     signal ignore foo
-} 1 {invalid signal name: foo}
+} 1 {invalid signal "foo"}
 
 Test signal-1.12 {signal tests} {
     signal ignore sigint "echo foo"
@@ -156,7 +176,7 @@ Test signal-1.12 {signal tests} {
 
 Test signal-1.13 {signal tests} {
     signal baz sigint
-} 1 {invalid signal action specified: baz: expected one of "default", "ignore", "error", "trap", or "get", "block", "unblock"}
+} 1 {invalid signal action specified: baz: expected one of "default", "ignore", "error", "trap", "get", "set", "block", or "unblock"}
 
 #
 # Complex test for the death of a child.
@@ -282,11 +302,11 @@ Test signal-2.4 {kill tests} {
 
 Test signal-2.5 {kill tests} {
     kill 10000 [id process]
-} 1 {invalid signal}
+} 1 {invalid signal "10000"}
 
 Test signal-2.6 {kill tests} {
     kill SIGFOO [id process]
-} 1 {invalid signal}
+} 1 {invalid signal "SIGFOO"}
 
 Test signal-2.7 {kill tests} {
     kill 0 [id process]
