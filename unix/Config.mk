@@ -125,12 +125,12 @@ TK_MASTERDIR=${prefix}/tkX
 #------------------------------------------------------------------------------
 # # The directory to install the tcl, wishx and tclhelp binaries into.
 
-TCL_BINDIR=${execprefix}/bin
+TCL_BINDIR=${exec_prefix}/bin
 
 #------------------------------------------------------------------------------
 # The directory to install the libtcl.a and libtclx.a libraries into.
 
-TCL_LIBDIR=${execprefix}/lib
+TCL_LIBDIR=${exec_prefix}/lib
 
 #------------------------------------------------------------------------------
 # The directory the Tcl .h files go into.
