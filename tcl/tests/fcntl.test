@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 3.0 1993/11/19 06:57:20 markd Rel markd $
+# $Id: fcntl.test,v 3.1 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
