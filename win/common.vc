@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 8.2 1997/08/08 16:51:24 markd Exp $
+# $Id: common.vc,v 8.3 1997/08/30 22:30:23 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -139,11 +139,10 @@ LIB=$(TOOLS32)\LIB;\$(TOOLS32)\MFC\lib
 CPU=i386
 CP=copy
 
+# We are building 95 and NT. We define this to select windows sockets
+# instead of windows sockets 2, which is not available on 95.
+TARGETOS=BOTH
 !include <ntwin32.mak>
-
+ 
 # We need user32 in console mode for handling sockets.
 baselibs=$(baselibs) user32.lib
-
-
-
-

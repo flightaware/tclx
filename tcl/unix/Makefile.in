@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.15 1997/09/01 03:21:25 markd Exp $
+# $Id: Makefile.in,v 8.16 1997/09/06 05:40:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -330,7 +330,7 @@ config:
 
 clean:
 	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} ${TEST_SAOBJS}
-	-rm -f tcl tcl.static tcl.standalone
+	-rm -f tcl tcl.static tcl.standalone tclXAppInitSA.o
 	-rm -f tclXtest tclXtest.static tclXtest.standalone
 	-rm -f ${TCLX_STLIB_NAME} ${TCLX_SHLIB_NAME}
 	-rm -f ${STANDALONE_SRCS} ${STANDALONE_OBJS} tclXAppInitSA.c
