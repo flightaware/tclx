@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.1 1999/06/26 00:18:13 surles Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.2 1999/06/26 02:19:01 redman Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -62,8 +62,8 @@ LIB_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/lib
 TCLX_SCRIPT_INSTALL_DIR = $(INSTALL_ROOT)$(TCLX_LIBRARY)
 TKX_SCRIPT_INSTALL_DIR  = $(INSTALL_ROOT)$(TKX_LIBRARY)
 
-TCLX_SCRIPT_INSTALL_NATIVE= "$(shell cygpath $(PATHTYPE) $(INSTALL_ROOT)$(TCLX_LIBRARY)')"
-TKX_SCRIPT_INSTALL_NATIVE = "$(shell cygpath $(PATHTYPE) $(INSTALL_ROOT)$(TKX_LIBRARY)')"
+TCLX_SCRIPT_INSTALL_NATIVE= $(shell cygpath $(PATHTYPE) '$(INSTALL_ROOT)$(TCLX_LIBRARY)')
+TKX_SCRIPT_INSTALL_NATIVE = $(shell cygpath $(PATHTYPE) '$(INSTALL_ROOT)$(TKX_LIBRARY)')
 
 # Directory in which to install the include file tclx.h:
 INCLUDE_INSTALL_DIR = $(INSTALL_ROOT)$(prefix)/include
@@ -571,10 +571,10 @@ install-libraries:
 	@$(RM) ./tclXTempPkgIndexFile
 
 install-doc:
-	@echo "installing into $(TCLX_SCRIPT_INSTALL_DIR)/help help"
-	@$(INSTCOPY) $(TCLX_ROOT_DIR)/help "$(TCLX_SCRIPT_INSTALL_NATIVE)/help"
-	@echo "installing into $(TKX_SCRIPT_INSTALL_DIR)/help help"
-	@$(INSTCOPY) $(TKX_ROOT_DIR)/help "$(TKX_SCRIPT_INSTALL_NATIVE)/help";\
+#	@echo "installing into $(TCLX_SCRIPT_INSTALL_DIR)/help help"
+#	@$(INSTCOPY) $(TCLX_ROOT_DIR)/help "$(TCLX_SCRIPT_INSTALL_NATIVE)/help"
+#	@echo "installing into $(TKX_SCRIPT_INSTALL_DIR)/help help"
+#	@$(INSTCOPY) $(TKX_ROOT_DIR)/help "$(TKX_SCRIPT_INSTALL_NATIVE)/help";\
 
 test: all $(TCLXTEST) $(TKXTEST) $(CAT32)${EXEEXT}
 	(cd "$(TKX_ROOT_DIR_NATIVE)\tests"; $(RUN_TKXTEST) all \
