@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 8.5 1999/03/31 06:37:54 markd Exp $
+ * $Id: tclXwinCmds.c,v 1.1 2001/10/24 23:31:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -30,9 +30,6 @@ TclX_TimesObjCmd _ANSI_ARGS_((ClientData   clientData,
                              Tcl_Interp  *interp,
 			     int          objc,
 			     Tcl_Obj      *CONST objv[]));
-
-static int 
-TclX_SelectCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 
 /*-----------------------------------------------------------------------------
@@ -84,38 +81,6 @@ TclX_PlatformCmdsInit (interp)
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
     
-}
-
-
-/*-----------------------------------------------------------------------------
- * Tcl_SelectCmd --
- *   Stub to return an error if the select command is used on Windows.
- *-----------------------------------------------------------------------------
- */
-static int
-TclX_SelectCmd (ClientData  clientData,
-		Tcl_Interp *interp,
-		int         argc,
-		char      **argv)
-{
-    return TclXNotAvailableError (interp, argv [0]);
-}
-
-
-/*-----------------------------------------------------------------------------
- * TclX_SelectInit --
- *     Initialize the select command.
- *-----------------------------------------------------------------------------
- */
-void
-TclX_SelectInit (interp)
-    Tcl_Interp *interp;
-{
-    Tcl_CreateCommand (interp, 
-		       "select",
-		       TclX_SelectCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
 }
 
 
