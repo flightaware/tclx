@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: fstat.test,v 1.2 1992/09/21 00:39:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -93,10 +93,17 @@ Test fstat-4.2 {type return} {
     fstat $gorpFH type
 } 0 file
 
+#
+# Check to see that the values that are returned are at least numeric where
+# expected
+#
 Test fstat-4.3 {type return} {
     set dataList {}
     foreach type {dev ino mode nlink uid gid size atime mtime ctime tty
                   type} {
+        if [string match "-*" $type] {
+            set type [csubstr $type 1 end]
+        }
         lappend dataList [ctype digit [fstat $gorpFH $type]]
     }
     set dataList
