@@ -12,36 +12,33 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showprocs.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
+# $Id: showproc.tcl,v 2.2 1993/06/21 05:58:43 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
-#@package: TclX-show_procedures showproc showprocs
+#@package: TclX-showproc showproc
 
-proc showproc {procname} {
-    if [lempty [info procs $procname]] {
-        auto_load $procname
+proc showproc args {
+    if [lempty $args] {
+        set args [info procs]
     }
-    set arglist [info args $procname]
-    set nargs {}
-    while {[llength $arglist] > 0} {
-        set varg [lvarpop arglist 0]
-        if [info default $procname $varg defarg] {
-            lappend nargs [list $varg $defarg]
-        } else {
-            lappend nargs $varg
+    set out {}
+
+    foreach procname $args {
+        if [lempty [info procs $procname]] {
+            auto_load $procname
         }
-    }
-    return "proc $procname \{$nargs\} \{[info body $procname]\}\n"
-}
-
-proc showprocs {args} {
-    if [lempty $args] { set args [info procs] }
-    set out ""
-
-    foreach i $args {
-	foreach j $i { append out [showproc $j] "\n"}
+        set arglist [info args $procname]
+        set nargs {}
+        while {[llength $arglist] > 0} {
+            set varg [lvarpop arglist 0]
+            if [info default $procname $varg defarg] {
+                lappend nargs [list $varg $defarg]
+            } else {
+                lappend nargs $varg
+            }
+        }
+        append out "proc $procname [list $nargs] \{[info body $procname]\}\n"
     }
     return $out
 }
-

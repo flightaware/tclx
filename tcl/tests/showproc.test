@@ -1,5 +1,5 @@
 #
-# showprocs.test
+# showproc.test
 #
 # Tests for tcl.tlib showproc routines.
 #---------------------------------------------------------------------------
@@ -12,32 +12,37 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showprocs.test,v 2.0 1992/10/16 04:50:15 markd Rel markd $
+# $Id: showproc.test,v 2.1 1993/06/21 05:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
-
 if {[info procs test] == ""} then {source testlib.tcl}
 eval $SAVED_UNKNOWN
 
-set testProcVar {proc testproc {testVar} {
+set testProcVar {proc testproc testVar {
     return 1
 }}
 
 eval $testProcVar
 
+set testProcVar2 {proc testproc2 {testVar {baz 10}} {
+    return 60
+}}
+
+eval $testProcVar2
+
 Test showproc-1.1 {showproc command} {
     showproc testproc
 } 0 "$testProcVar\n"
 
-Test showprocs-1.1 {showprocs command} {
-    showprocs testproc
-} 0 "$testProcVar\n\n"
+Test showproc-1.2 {showproc command} {
+    showproc testproc testproc2
+} 0 "$testProcVar\n$testProcVar2\n"
 
 
-Test showprocs-1.2 {showprocs command} {
+Test showproc-1.3 {showproc command} {
     set result ""
 
-    foreach i [split [showprocs] "\n"] {
+    foreach i [split [showproc] "\n"] {
 	if {[lindex $i 0] == "proc"} {
 	    lappend result [lindex $i 1]
 	}
