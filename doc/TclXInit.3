@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Startup.man,v 2.0 1992/10/16 04:49:13 markd Rel markd $
+.\" $Id: Startup.man,v 2.1 1992/11/15 06:59:52 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Tcl_Startup" TCL "" "Tcl"
@@ -55,7 +55,7 @@ Tcl_CommandLoop (Tcl_Interp *interp,
 
 void
 Tcl_ErrorAbort (Tcl_Interp  *interp,
-                int          noDumpStack,
+                int          noStackDump,
                 int          exitCode);
 
 .ft R
