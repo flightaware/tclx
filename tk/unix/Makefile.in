@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.5 1994/03/18 15:42:26 markd Exp markd $
+# $Id: Makefile.in,v 3.6 1994/04/01 02:18:19 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -87,9 +87,9 @@ ${WISHX}: tkXAppInit.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A} made.tmp
 	    exit 0 ;\
 	fi
 
-made.tmp ${LIBTKX.A}: ${OBJS} ${UCBOBJS}
-	${AR} cr ${LIBTKX.A} ${OBJS} ${UCBOBJS}
-	${RANLIB} ${LIBTKX.A}
+made.tmp ${LIBTKX_A}: ${OBJS} ${UCBOBJS}
+	${AR} cr ${LIBTKX_A} ${OBJS} ${UCBOBJS}
+	${RANLIB} ${LIBTKX_A}
 	touch made.tmp
 
 tkWindow.o: tkWindow.c
