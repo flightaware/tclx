@@ -570,3 +570,7 @@
     pending in the stdio buffer.
   o Added TclX autoconf configuration.
 -------------------------------------------------------------------------------
+39 Jul 93:
+  o Provided the functions Tcl_AddExtendedCmds and Tcl_AddExtendedLibCmds
+    that can add the Extended Tcl commands to an existing interpreter.
+-------------------------------------------------------------------------------
