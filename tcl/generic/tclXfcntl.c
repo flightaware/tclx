@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 2.6 1993/07/17 23:29:13 markd Exp markd $
+ * $Id: tclXfcntl.c,v 2.7 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -207,13 +207,16 @@ GetFcntlAttr (interp, filePtr, attrName)
 #    define _SLBF __SLBF
 #endif
 
-#if defined (linux)
+#if defined (__linux__)
+    /*
+     * Linux libc does use _IOLBF
+     */
     if (otherAttr & ATTR_NOBUF) {
         interp->result = (filePtr->_flags & _IONBF) ? "1" : "0";
         return TCL_OK;
     }
     if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->_flags & _IOLBF) ? "1" : "0";
+        interp->result = (filePtr->_flags & 0x200) ? "1" : "0";
         return TCL_OK;
     }
 #define TCL_STDIOBUF
