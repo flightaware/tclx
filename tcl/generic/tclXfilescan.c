@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 3.4 1994/07/04 22:15:08 markd Exp markd $
+ * $Id: tclXfilescan.c,v 4.0 1994/07/16 05:26:57 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -134,7 +134,7 @@ CreateScanContext (interp, scanTablePtr)
                                                         curName);
     *tableEntryPtr = contextPtr;
 
-    Tcl_SetResult (interp, curName, TCL_STATIC);
+    Tcl_SetResult (interp, curName, TCL_VOLATILE);
     return TCL_OK;
 }
 
