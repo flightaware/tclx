@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 2.22 1993/11/17 15:16:25 markd Exp markd $
+ * $Id: tclXshell.c,v 3.0 1993/11/19 06:58:30 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,14 +20,6 @@
 
 extern char *optarg;
 extern int   optind, opterr;
-
-
-/*
- * Name of a user-specific startup script to source if the application is
- * being run interactively (e.g. "~/.tclrc").  Set by Tcl_AppInit.
- *  NULL means don't source anything ever.
- */
-char *tcl_RcFileName = NULL;
 
 static char  exitCmd [] = "exit";
 static char *TCLXENV = "TCLXENV";

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.0 1993/11/19 07:01:28 markd Rel markd $
+# $Id: Makefile.in,v 3.1 1993/11/25 03:21:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -67,7 +67,7 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS=tkXinit.o   tkXmain.o  tkXshell.o
+OBJS=tkXinit.o   tkXmain.o  tkXshell.o  tkXdata.o
 
 UCBOBJS=tkWindow.o
 

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 3.0 1993/11/19 07:01:36 markd Rel markd $
+ * $Id: tkXshell.c,v 3.1 1993/11/19 08:21:29 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -75,11 +75,6 @@ static Tk_Window mainWindow;	/* The main window for the application.  If
 				 * NULL then the application no longer
 				 * exists. */
 static Tcl_Interp *interp;	/* Interpreter for this application. */
-char *tcl_RcFileName = NULL;	/* Name of a user-specific startup script
-				 * to source if the application is being run
-				 * interactively (e.g. "~/.wishrc").  Set
-				 * by Tcl_AppInit.  NULL means don't source
-				 * anything ever. */
 static Tcl_DString command;	/* Used to assemble lines of terminal input
 				 * into Tcl commands. */
 static int gotPartial = 0;      /* Partial command in buffer. */
