@@ -300,7 +300,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
         goto tclArgError;
     }
 
-    bzero (&local, sizeof (local));
+    bzero ((VOID *) &local, sizeof (local));
     nextArg = 1;
     options = SERVER_BUF;
     while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
@@ -346,7 +346,7 @@ Tcl_ServerConnectCmd (clientData, interp, argc, argv)
     /*
      * Convert service number or lookup the service name.
      */
-    bzero (&server, sizeof (server));
+    bzero ((VOID *) &server, sizeof (server));
 
     if (ISDIGIT (service [0])) {
         int  port;
@@ -479,7 +479,7 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
     /*
      * Parse arguments.
      */
-    bzero (&local, sizeof (local));
+    bzero ((VOID *) &local, sizeof (local));
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = INADDR_ANY;
     nextArg = 1;
@@ -618,7 +618,7 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
     /*
      * Accept a socket connection on the socket created by server_create.
      */
-    bzero (&connectSocket, sizeof (connectSocket));
+    bzero ((VOID *) &connectSocket, sizeof (connectSocket));
 
     if (Tcl_GetOpenFile (interp, argv [nextArg], 
                          FALSE, TRUE,  /* Read access */
