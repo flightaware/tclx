@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.16 1993/08/02 05:12:34 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.17 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -233,11 +233,11 @@ Tcl_SetLibraryDirEnvVar (interp, envVar, dir, version1, version2)
 {
     Tcl_DString   masterDir;
 
-    if (Tcl_GetVar (interp, envVar, TCL_GLOBAL_ONLY) != NULL)
+    if (Tcl_GetVar2 (interp, "env", envVar, TCL_GLOBAL_ONLY) != NULL)
         return;
 
     MergeMasterDirPath (dir, version1, version2, &masterDir);
-    Tcl_SetVar (interp, envVar, masterDir.string, TCL_GLOBAL_ONLY);
+    Tcl_SetVar2 (interp, "env", envVar, masterDir.string, TCL_GLOBAL_ONLY);
 
     Tcl_DStringFree (&masterDir);
 
