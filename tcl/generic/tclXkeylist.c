@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.12 1997/11/02 18:13:19 markd Exp $
+ * $Id: tclXkeylist.c,v 8.13 1997/11/12 06:47:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -65,7 +65,7 @@ typedef struct {
  */
 #ifdef TCLX_DEBUG
 #   define KEYL_OBJ_ASSERT(keylAPtr) {\
-        assert (keylAPtr->typePtr == &keyedListType); \
+        TclX_Assert (keylAPtr->typePtr == &keyedListType); \
         ValidateKeyedList (keylAIntPtr); \
     }
 #   define KEYL_REP_ASSERT(keylAIntPtr) \
@@ -178,18 +178,18 @@ ValidateKeyedList (keylIntPtr)
 {
     int idx;
 
-    assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);
-    assert (keylIntPtr->arraySize >= 0);
-    assert (keylIntPtr->numEntries >= 0);
-    assert ((keylIntPtr->arraySize > 0) ?
-            (keylIntPtr->entries != NULL) : TRUE);
-    assert ((keylIntPtr->numEntries > 0) ?
-            (keylIntPtr->entries != NULL) : TRUE);
+    TclX_Assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);
+    TclX_Assert (keylIntPtr->arraySize >= 0);
+    TclX_Assert (keylIntPtr->numEntries >= 0);
+    TclX_Assert ((keylIntPtr->arraySize > 0) ?
+                 (keylIntPtr->entries != NULL) : TRUE);
+    TclX_Assert ((keylIntPtr->numEntries > 0) ?
+                 (keylIntPtr->entries != NULL) : TRUE);
 
     for (idx = 0; idx < keylIntPtr->numEntries; idx++) {
         keylEntry_t *entryPtr = &(keylIntPtr->entries [idx]);
-        assert (entryPtr->key != NULL);
-        assert (entryPtr->valuePtr->refCount >= 1);
+        TclX_Assert (entryPtr->key != NULL);
+        TclX_Assert (entryPtr->valuePtr->refCount >= 1);
         if (entryPtr->valuePtr->typePtr == &keyedListType) {
             ValidateKeyedList (entryPtr->valuePtr->internalRep.otherValuePtr);
         }
@@ -906,10 +906,10 @@ TclX_KeyedListGetKeys (interp, keylPtr, key, listObjPtrPtr)
     if ((key != NULL) && (key [0] != '\0')) {
         findIdx = FindKeyedListEntry (keylIntPtr, key, NULL, &nextSubKey);
         if (findIdx < 0) {
-            assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);  /*FIX:*/
+            TclX_Assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);
             return TCL_BREAK;
         }
-        assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);  /*FIX:*/
+        TclX_Assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);
         return TclX_KeyedListGetKeys (interp, 
                                       keylIntPtr->entries [findIdx].valuePtr,
                                       nextSubKey,
@@ -931,7 +931,7 @@ TclX_KeyedListGetKeys (interp, keylPtr, key, listObjPtrPtr)
         }
     }
     *listObjPtrPtr = listObjPtr;
-    assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);  /*FIX:*/
+    TclX_Assert (keylIntPtr->arraySize >= keylIntPtr->numEntries);
     return TCL_OK;
 }
 

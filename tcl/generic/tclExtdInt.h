@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.19 1997/08/10 22:18:27 markd Exp $
+ * $Id: tclExtdInt.h,v 8.20 1997/11/11 05:33:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,13 +34,15 @@
 #include "tclInt.h"
 
 /*
- * Assert macro for use in TclX.  It is controlled by our own #define, not
- * NDEBUG, but other than that, it is a wrapper around assert.
+ * Assert macro for use in TclX.  Some GCCs libraries are missing a function
+ * used by their macro, so we define out own.
  */
 #ifdef TCLX_DEBUG
-#   define TCLX_ASSERT(expr) (assert (expr))
+#   define TclX_Assert(expr) ((expr) ? (void)0 : \
+                              panic("TclX assertion failure: %s:%d \"%s\"\n",\
+                                    __FILE__, __LINE__, "expr"))
 #else
-#   define TCLX_ASSERT(expr)
+#   define TclX_Assert(expr)
 #endif
 
 /*
