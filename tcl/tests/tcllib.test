@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 3.6 1994/05/29 18:09:04 markd Exp markd $
+# $Id: tcllib.test,v 4.0 1994/07/16 05:25:16 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -44,20 +44,7 @@ if {[id user] == "root"} {
 # reset the environment.  
 #
 proc TclLibReset {} {
-    global auto_execs auto_index auto_pkg_index auto_path
-    catch {unset auto_execs}
-    catch {unset auto_index}
-    catch {unset auto_pkg_index}
-    
-    # This alters the internal knowledge of the last path that was loaded.
-    if [info exists auto_path] {
-        set save_auto_path $auto_path
-    } else {
-        set save_auto_path {}
-    }
-    set auto_path {}
-    auto_load
-    set auto_path $save_auto_path
+        auto_reset
 }
 
 proc TclLibCleanUp {} {
@@ -263,7 +250,6 @@ Test tcllib-7.1 {Duplicate package handling} {
 } 0 {Version-1}
 
 TclLibReset
-rename DupPkgTest {}
 
 Test tcllib-7.2 {Duplicate package handling} {
     lrmdups {a b c}  ;# Force load of indices.
@@ -272,7 +258,7 @@ Test tcllib-7.2 {Duplicate package handling} {
 } 0 {Version-2}
 
 TclLibCleanUp
-rename DupPkgTest {}
+
 mkdir {tcllib1.dir tcllib2.dir}
 set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir [pwd]/../tclmaster]
 
@@ -295,7 +281,6 @@ Test tcllib-7.3 {Duplicate package handling} {
 } 0 {Version-1}
 
 TclLibReset
-rename DupPkgTest {}
 
 Test tcllib-7.4 {Duplicate package handling} {
     lrmdups {a b c}  ;# Force load of indices.
