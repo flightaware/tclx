@@ -33,7 +33,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tcllib.tcl,v 3.0 1993/11/19 07:00:34 markd Rel markd $
+# $Id: tcllib.tcl,v 3.1 1993/12/16 03:56:25 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -138,7 +138,7 @@ proc auto_commands {{option {}}} {
 # *** MODIFIED FOR TclX ***
 
 proc auto_reset {} {
-    global auto_execs auto_index auto_oldpath auto_pkg_index
+    global auto_execs auto_index auto_oldpath
     foreach p [info procs] {
 	if {[info exists auto_index($p)] && ($p != "unknown")
 		&& ![string match auto_* $p]} {
@@ -149,6 +149,7 @@ proc auto_reset {} {
     catch {unset auto_index}
     catch {unset auto_oldpath}
     # *** TclX ***
+    global auto_pkg_index
     catch {unset auto_pkg_index}
     set auto_index(buildpackageindex) {source [info library]/buildidx.tcl}
     return
