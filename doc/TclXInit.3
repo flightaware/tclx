@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 5.7 1996/03/04 23:11:47 markd Exp $
+.\" $Id: TclXInit.3,v 5.8 1996/03/26 03:19:23 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -158,6 +158,31 @@ zero, don't change.
 String pointers are saved without copying, don't release the memory.
 If the arguments are NULL, don't change the values.
 '
+.SH "DYNAMIC LOADING OF TCLX"
+.PP
+TclX can be dynamically loaded on systems that support shared libraries and
+the load command.  This can be done using either the \fBload\fR or
+the \fBpackage require\fR commands.  If \fBpackage require\fR is to be used,
+a \fBpkgIndex,tcl\fR must be constructed.
+The \fBpkg_mkIndex\fR does not generate a pkgIndex.tcl file that works with
+TclX.  Instead a command similar to
+.sp
+.RS 2
+.ft CW
+package ifneeded Tclx 7.5.0 "load $dir/libtclx.so"
+.ft R
+.RE
+.sp
+should be placed in the directory containing the TclX shared library.  A 
+prototype \fBpkgIndex,tcl\fR file is build by TclX and is installed in the
+run time directory under the name  \fBpkgIndex,proto\fR.  This file can't be
+used as-is, but should be renamed and copied or combined with an existing
+\fBpkgIndex,tcl\fR in the directory containing the shared library.
+.PP
+There is no need to dynamically load \fBlibtkx.so\fR, since it only contains
+support for \fBwishx\fR.
+
+
 .SH "INTEGRATING TCLX WITH OTHER EXTENSIONS AND APPLICATIONS"
 .PP
 The main aspects to integrating TclX with into an application is to

@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.26 1996/03/22 04:31:50 markd Exp $
+dnl $Id: configure.in,v 5.27 1996/03/28 07:07:56 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.26 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.27 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -187,9 +187,12 @@ AC_MSG_CHECKING(TclX versions)
 eval `egrep '^#define T.*_VERSION' $srcbasedir/tcl/generic/tclExtend.h | \
       sed -e 's/#define //' -e 's/ *"/="/'`
 AC_MSG_RESULT($TCLX_FULL_VERSION)
+
 AC_SUBST(TCLX_VERSION)
 AC_SUBST(TCLX_FULL_VERSION)
 AC_SUBST(TCLX_SHLIB_VERSION)
+
+AC_SUBST(TKX_VERSION)
 AC_SUBST(TKX_FULL_VERSION)
 AC_SUBST(TKX_SHLIB_VERSION)
 
@@ -531,5 +534,5 @@ AC_SUBST(TCLX_LIBS)
 AC_SUBST(prefix)
 AC_SUBST(execprefix)
 
-AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxConfig.sh ../tk/unix/tkxConfig.sh)
+AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxConfig.sh ../tk/unix/tkxConfig.sh ../tcl/unix/pkgIndex.proto)
 

@@ -156,7 +156,11 @@ with other extensions:
 
    o Build an application based on the TclX shells (tcl or wishx).
 
-See the TclXInit.3 manual page for more details.
+See the TclXInit.3 manual page for more details.  The pkg_mkIndex does not
+generate a pkgIndex.tcl file that works with TclX.  See TclXInit.3 for
+instructions on how to setup a pkgIndex.tcl file for use with the
+package require command.  A prototype pkgIndex.tcl file is installed into the
+TclX run time directory.
 
 SUPPORT FOR EXTENDED TCL
 ========================

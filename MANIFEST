@@ -293,6 +293,7 @@
 ./tcl/tests/testlib.tcl
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
+./tcl/unix/pkgIndex.proto
 ./tcl/unix/tclXchmod.c
 ./tcl/unix/tclXid.c
 ./tcl/unix/tclXunixCmds.c

@@ -1135,3 +1135,8 @@
     named tclx_errorHandler.  This functionality is deprecated and scripts
     should be change to use the new form.
 -------------------------------------------------------------------------------
+ 6 Apr 96:
+  o Added guidelines for creating a pkgIndex.tcl file for use with TclX.  Build
+    a prototype file, pkgIndex.proto, that can be merged with other
+    pkgIndex.tcl files.
+-------------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.30 1996/03/29 22:23:32 markd Exp $
+# $Id: Makefile.in,v 5.31 1996/03/29 22:55:52 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -382,7 +382,7 @@ install: install-runtime install-exec
 	    ${srcbasedir}/man ${INSTALL_ROOT}${TCLX_INST_MAN}
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TCLX_INST_RUNTIME}/help
 
-install-runtime:
+install-runtime: inst_pkgindex_@BUILD_SHARED@
 	${INSTCOPY} tclx.tcl tcl.tlib tcl.tndx \
 	    ${srcdir}/buildidx.tcl ${srcdir}/loadouster.tcl \
 	    ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
@@ -395,10 +395,17 @@ install-exec:
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${INSTCOPY} ${TCLX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
 	    if test "${TCLX_SHLIB_NAME}" != "${TCLX_SHLIB_BASE_NAME}"; then \
-	        ${INSTCOPY} ${TCLX_SHLIB_BASE_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
+		rm -f ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_BASE_NAME};\
+	        ln ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_NAME} \
+		   ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_BASE_NAME} ;\
 	    fi ;\
 	fi
 	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
+
+inst_pkgindex_YES: 
+	${INSTCOPY} pkgIndex.proto ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
+
+inst_pkgindex_NO:
 
 #------------------------------------------------------------------------------
 
