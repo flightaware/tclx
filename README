@@ -1,4 +1,4 @@
-                          Extended Tcl (TclX) 8.3.0
+                          Extended Tcl (TclX) 8.3.5
                           =========================
 
 INTRODUCTION
@@ -22,12 +22,12 @@ with the Extended Tcl command set and signal handling.
 
    While this TclX distribution is tested with Tcl 8.3 and Tk 8.3, it will
 probably work with newer versions of 8.3.*-series Tcl & Tk with little or no 
-changes.  Please check the Extended Tcl homepage at http://www.neosoft.com/tclx
-for the latest release and information.
+changes.  Please check the Extended Tcl homepage at 
+http://tclx.sourceforge.net/ for the latest release and information.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
-(karl@NeoSoft.com) and Mark Diekhans (markd@Kermodei.com), with help
-in the earliest stages from Peter da Silva (peter@NeoSoft.com).
+(karl@procplace.com) and Mark Diekhans (markd@Kermodei.com), with help
+in the earliest stages from Peter da Silva (peter@taronga.com).
 
    As with Tcl, all of Extended Tcl is freely redistributable, including for
 commercial use and resale.
@@ -37,7 +37,7 @@ BUILDING TCLX
 =============
 
    For instructions on how to build TclX on Unix and Unix-like systems,
-see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
+see unix/INSTALL.  For Windows 95/98/NT/XP see win/INSTALL.txt.
 
 CHANGES IN TCLX 8.3
 =====================
@@ -139,14 +139,7 @@ by Tcl if TclX is installed in the same location.
 SUPPORT FOR EXTENDED TCL
 ========================
 
-    We are committed to providing continuing support for Extended Tcl.
-Please send questions, bug reports, and bug fixes to:
-
-         tcl-project@NeoSoft.com
-
-    There is a mailing list for the development of TclX on Windows 95/NT.
-To subscribe, mail majordomo@grizzly.com with the command "subscribe tclx-win"
-in the body of the mail.  Send messages to this list at tclx-win@grizzly.com.
+Please post questions to the comp.lang.tcl newsgroup.
 
 
 WHERE TO GET IT
@@ -154,9 +147,9 @@ WHERE TO GET IT
 
 Extended Tcl can be downloaded by anonymous FTP from:
 
-   ftp://ftp.neosoft.com:/pub/tcl/TclX/tclX*.tar.gz
+   ftp://ftp.procplace.com:/pub/tcl/TclX/tclX*.tar.gz
 
-A contributed sources archive resides on ftp.neosoft.com.
+A contributed sources archive resides on ftp.procplace.com.
 A Frequently Asked Questions (FAQ) document exists in this archive.
 
 Remember to mail Extended Tcl problems and questions to
@@ -178,13 +171,4 @@ to MS Windows.
 
 Thanks to Jan Nijtmans <nijtmans@wxs.nl> of Plus Patch fame for helping
 to get shared library support working for several system.
-
-NEOSOFT PROVIDES TCL SUPPORT, TRAINING, SOFTWARE, AND SERVICES
-==============================================================
-
-  NeoSoft, home of Extended Tcl co-inventor Karl Lehenbauer, provides 
-commercial Tcl releases, support, training and consulting.  NeoSoft 
-can be reached by sending electronic mail to info@NeoSoft.com or by 
-phoning +1 (713) 968-5800.
-
 
