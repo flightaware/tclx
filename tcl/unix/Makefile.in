@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.18 1996/11/18 07:46:08 markd Exp $
+# $Id: Makefile.in,v 7.19 1996/11/20 00:50:39 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -37,11 +37,10 @@ LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 LIBS = @SHARED_LIBS@ ${TCLX_LD_SEARCH_FLAGS}
 
 ALL_LIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
-	       ${TCL_DL_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
+	   ${TCL_DL_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
 
-STATIC_LIBS = ${TCLX_STLIB_NAME} ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} \
-	      ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-	      ${TCLX_CC_SEARCH_FLAGS}
+STATIC_LIBS = ${TCLX_STLIB_NAME} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
+	      ${TCL_DL_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
