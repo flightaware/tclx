@@ -311,7 +311,6 @@
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h
 ./tcl/win/tclx.rc
-./tcl/win/winDumpExts.c
 ./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c

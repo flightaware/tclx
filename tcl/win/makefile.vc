@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.1 1996/07/18 19:36:34 markd Exp $
+# $Id: makefile.vc,v 7.2 1996/07/22 17:10:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -226,7 +226,7 @@ $(TMPDIR)\testMain.obj: $(ROOT)\win\tclAppInit.c
         $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCL_INCLUDES) \
                 $(TCLX_DEFINES) -DTCL_TEST -Fo$(TMPDIR)\testMain.obj $?
 
-$(TMPDIR)\winDumpExts.obj: $(ROOT)\win\winDumpExts.c
+$(TMPDIR)\winDumpExts.obj: $(TCLDIR)\win\winDumpExts.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
                 $(TCLX_DEFINES) -Fo$(TMPDIR)\ $?
 
