@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.24 1997/12/16 17:08:30 markd Exp $
+# $Id: Makefile.in,v 8.24.2.1 1998/12/12 02:53:50 surles Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -263,7 +263,7 @@ distclean: clean
 # Dependencies for generating objects.
 #
 tkXinit.o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
-	${CC} -c ${CC_SWITCHES} -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" \
+	${CC} -c ${CC_SWITCHES} -DTKX_LIBRARY=\"${TKX_LIBRARY_PATH}\" \
 	  ${TKX_GENERIC_DIR}/tkXinit.c
 
 tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
@@ -307,7 +307,7 @@ tkXunixTestSA.c: ${TKX_UNIX_SRC_DIR}/tkXunixTest.c Makefile
 tkXinit..o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
 	@OBJ_SAVE@
 	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
-	    -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" ${TKX_GENERIC_DIR}/tkXinit.c
+	    -DTKX_LIBRARY=\"${TKX_LIBRARY_PATH}\" ${TKX_GENERIC_DIR}/tkXinit.c
 	@OBJ_RESTORE@
 
 tkXinitDSA..o: ${TKX_GENERIC_DIR}/tkXinitDSA.c Makefile
