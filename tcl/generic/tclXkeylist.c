@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXkeylist.c,v 1.1 1992/09/20 23:19:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -175,7 +175,7 @@ SplitAndFindField (interp, fieldName, keyedList, fieldInfoPtr)
                                       &fieldInfoPtr->valuePtr,
                                       &fieldInfoPtr->valueSize);
         if (result != TCL_BREAK)
-            break;  // Found or error, exit before idx is incremented.
+            break;  /* Found or error, exit before idx is incremented. */
     }
     if (result == TCL_ERROR)
         goto errorExit;
