@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXflock.c,v 1.1 1993/04/07 06:02:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -178,7 +178,12 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
     
     stat = fcntl (fileno (filePtr->f), noWaitLock ? F_SETLK : F_SETLKW, 
                   &lockInfo);
-    if ((stat < 0) && (errno != EACCES)) {
+
+    /*
+     * Check to see if the lock failed due to it being locked or
+     * an error.
+     */
+    if ((stat < 0) && !((errno == EACCES) || (errno == EAGAIN))) {
         interp->result = Tcl_UnixError (interp);
         return TCL_ERROR;
     }
