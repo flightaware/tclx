@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: fcntl.test,v 2.0 1992/10/16 04:49:41 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -75,7 +75,7 @@ test fcntl-1.11 {fcntl tests} {
 } {1 {Attribute "NOBUF" may not be cleared once set}}
 
 close $testFH
-set testFH [open FCNTL.TMP r+]  ;# Reopen, can not have both nobuf and linebuf
+set testFH [open FCNTL.TMP w]  ;# Reopen, can not have both nobuf and linebuf
 
 test fcntl-1.12 {fcntl tests} {
     fcntl $testFH LINEBUF 1
