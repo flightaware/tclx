@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXsignal.c,v 3.3 1994/07/02 03:58:16 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -1063,7 +1063,7 @@ ParseSignalList (interp, signalListStr, signals)
     return TCL_OK;
 
   wildMustBeAlone:
-    Tcl_AppendResult (interp, "when \"*\" is specified in the signal list, "
+    Tcl_AppendResult (interp, "when \"*\" is specified in the signal list, ",
                       "no other signals may be specified", (char *) NULL);
 
   errorExit:
