@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 4.0 1994/07/16 05:30:47 markd Rel markd $
+# $Id: tclhelp.tcl,v 4.1 1995/01/01 19:50:08 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -114,7 +114,9 @@ proc DisplayPage {page} {
 
     set w ".tkhelp-[translit "." "_" $page]"
 
-    catch {destroy $w}
+    if [winfo exists $w] {
+        destroy $w
+    }
     toplevel $w
 
     wm title $w "Help on '$page'"
@@ -149,7 +151,10 @@ proc AproposPanel {} {
     global aproposEntryNumber aproposReferenceFrame referenceFrameItem
 
     set aproposEntryNumber 0
-    catch {destory .apropos}
+
+    if [winfo exists .apropos] {
+        destroy .apropos
+    }
     toplevel .apropos
     wm minsize .apropos 1 1
     frame .apropos.entryFrame
@@ -186,6 +191,10 @@ proc AproposPanel {} {
     pack $w -side top -fill x
     button $w.dismiss -text Dismiss -command "destroy .apropos"
     pack $w.dismiss -side bottom -fill x
+
+    # Allow input without Button1 press.
+    focus .apropos.entryFrame.entry
+    update idletasks
 }
 
 #---------------------------------------------------------------------------
@@ -214,21 +223,24 @@ proc DisplayAproposReference {path description} {
 proc PerformAproposSearch {} {
     global TCLXENV referenceFrameItem aproposEntryNumber aproposReferenceFrame
 
+    # Get expression, ignore if empty
+    set regexp [.apropos.entryFrame.entry get]
+    if ![clength $regexp] {
+        return
+    }
+
     #  start variables and clean up any residue from previous searches
     set w .apropos.canvasFrame
     set aproposEntryNumber 0
     .apropos.canvasFrame.canvas delete all
     set aproposReferenceFrame $w.canvas.frame
-    catch "destroy $aproposReferenceFrame"
-    catch "destroy .apropos.canvasFrame.failed"
+    catch {destroy $aproposReferenceFrame}
+    catch {destroy .apropos.canvasFrame.failed}
 
     # create the frame we'll pack matches into and put it into the canvas
     frame $aproposReferenceFrame
     set referenceFrameItem \
         [$w.canvas create window 2 2 -window $aproposReferenceFrame -anchor nw]
-
-    set regexp [.apropos.entryFrame.entry get]
-    focus none
 
     set TCLXENV(help:lineCnt) 0
 
@@ -297,7 +309,6 @@ proc tkhelp addPaths {
     CreateCommandButtons .command
     pack .command -side top -fill x
 
-    catch {destroy .tkhelp}
     frame .tkhelp
     pack .tkhelp -side top -fill both
 
@@ -305,10 +316,9 @@ proc tkhelp addPaths {
 
 }
 
-if !$tcl_interactive {
-    if [catch {
-        tkhelp $argv
-    } msg] {
-        tkerror $msg
-    }
+if [catch {
+    tkhelp $argv
+} msg] {
+    tkerror $msg
 }
+
