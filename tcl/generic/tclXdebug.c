@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXdebug.c,v 2.0 1992/10/16 04:50:34 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -30,7 +30,6 @@ typedef struct traceInfo_t {
     int         noEval;
     int         noTruncate;
     int         procCalls;
-    int         flush;
     int         depth;
     FILE       *filePtr;          /* File to output trace to. */
     } traceInfo_t, *traceInfo_pt;
@@ -178,8 +177,7 @@ TraceCode (traceInfoPtr, level, command, argc, argv)
     }
 
     putc ('\n', traceInfoPtr->filePtr);
-    if (traceInfoPtr->flush)
-        fflush (traceInfoPtr->filePtr);
+    fflush (traceInfoPtr->filePtr);
   
 }
 
@@ -223,7 +221,7 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
  *
  * Tcl_CmdtraceCmd --
  *     Implements the TCL trace command:
- *     cmdtrace level|on [noeval] [notruncate] [flush] [procs] [filehdl]
+ *     cmdtrace level|on [noeval] [notruncate] [procs] [filehdl]
  *     cmdtrace off
  *     cmdtrace depth
  *
@@ -278,7 +276,6 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
     infoPtr->noEval     = FALSE;
     infoPtr->noTruncate = FALSE;
     infoPtr->procCalls  = FALSE;
-    infoPtr->flush      = FALSE;
     infoPtr->filePtr    = stdout;
     fileHandle          = NULL;
 
@@ -293,12 +290,6 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
             if (infoPtr->noEval)
                 goto argumentError;
             infoPtr->noEval = TRUE;
-            continue;
-        }
-        if (STREQU (argv[idx], "flush")) {
-            if (infoPtr->flush)
-                goto argumentError;
-            infoPtr->flush = TRUE;
             continue;
         }
         if (STREQU (argv[idx], "procs")) {
@@ -343,14 +334,14 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
 
 argumentError:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " level | on [noeval] [notruncate] [flush] [procs]",
+                      " level | on [noeval] [notruncate] [procs]",
                       "[handle] | off | depth", (char *) NULL);
     return TCL_ERROR;
 
 invalidOption:
     Tcl_AppendResult (interp, "invalid option: expected ",
                       "one of \"noeval\", \"notruncate\", \"procs\", ",
-                      "\"flush\" or a file handle", (char *) NULL);
+                      "or a file handle", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -396,7 +387,6 @@ Tcl_InitDebug (interp)
     infoPtr->noEval      = FALSE;
     infoPtr->noTruncate  = FALSE;
     infoPtr->procCalls   = FALSE;
-    infoPtr->flush       = FALSE;
     infoPtr->depth       = 0;
 
     Tcl_CreateCommand (interp, "cmdtrace", Tcl_CmdtraceCmd, 

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.3 1992/11/17 06:26:44 markd Exp markd $
+.\" $Id: TclX.man,v 2.4 1993/02/07 22:04:46 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -108,7 +108,7 @@ may be a \fBreturn\fR) will be used as the prompt.
 '@help: debug/cmdtrace
 '@brief: Trace Tcl execution.
 .TP
-.B cmdtrace \fIlevel\fR|\fBon\fR [\fBnoeval\fR] [\fBnotruncate\fR] [\fBflush\fR] [\fIprocs\fR] [\fIfilehandle\fR]
+.B cmdtrace \fIlevel\fR|\fBon\fR [\fBnoeval\fR] [\fBnotruncate\fR] [\fIprocs\fR] [\fIfilehandle\fR]
 .br
 Print a trace statement for all commands executed at depth of \fIlevel\fR or
 below (1 is the top level).  If \fBon\fR is specified, all commands at any
@@ -131,11 +131,6 @@ each other.
 .B notruncate
 Disables the truncation of commands and evaluated arguments.
 .TP
-.B flush
-Causes the output buffer to be flushed after each line is printed.  This is
-useful when tracing C code that cause an application to abort, making it easy
-to narrow the problem down to the command that caused the abort.
-.TP
 .B procs
 Enables the tracing of procedure calls only.  Commands that aren't
 procedure calls (i.e. calls to commands that are written in C, C++
@@ -144,8 +139,11 @@ option is specified.  This option is particularly useful for greatly
 reducing the output of \fBcmdtrace\fR while debugging.
 .TP
 .B filehandle
-If specified, then the trace output will be written to the file rather than
-stdout.
+This is a file id as returned by the \fBopen\fR command.  If specified, then
+the trace output will be written to the file rather than stdout.  A stdio
+buffer flush is done after every line is written so that the trace may be
+monitored externally or provide useful information for debugging problems that
+cause core dumps.
 .RE
 .TP
 .B cmdtrace off
