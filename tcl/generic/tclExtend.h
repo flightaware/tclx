@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.4 1995/11/10 06:50:44 markd Exp $
+ * $Id: tclExtend.h,v 5.5 1995/12/28 23:37:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@
  * version to form the actual extended Tcl version.
  */
 
-#define TCL_EXTD_VERSION_SUFFIX "a-a2"   /* 7.5a-a2 */
+#define TCL_EXTD_VERSION_SUFFIX "a-a3"   /* 7.5a-a3 */
 
 typedef void *void_pt;
 
