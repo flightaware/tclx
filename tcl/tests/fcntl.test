@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 2.3 1993/06/21 05:43:53 markd Exp markd $
+# $Id: fcntl.test,v 2.4 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,47 +23,49 @@ close $testFH
 
 set testFH [open FCNTL.TMP r+]
 
+pipe testRPH testWPH
+
 Test fcntl-1.1 {fcntl tests} {
     fcntl $testFH RDWR
-} 0 {1}
+} 0 1
 
 Test fcntl-1.2 {fcntl tests} {
     fcntl $testFH READ
-} 0 {1}
+} 0 1
 
 Test fcntl-1.3 {fcntl tests} {
     fcntl $testFH WRITE
-} 0 {1}
+} 0 1
 
 Test fcntl-1.4 {fcntl tests} {
     fcntl $testFH CLOEXEC 1
     fcntl $testFH CLOEXEC
-} 0 {1}
+} 0 1
 
 Test fcntl-1.5 {fcntl tests} {
     fcntl $testFH CLOEXEC 0
     fcntl $testFH CLOEXEC
-} 0 {0}
+} 0 0
 
 Test fcntl-1.6 {fcntl tests} {
-    fcntl $testFH NONBLOCK 1
-    fcntl $testFH NONBLOCK
-} 0 {1}
+    fcntl $testRPH NONBLOCK 1
+    fcntl $testRPH NONBLOCK
+} 0 1
 
 Test fcntl-1.7 {fcntl tests} {
     fcntl $testFH append 1
-    list [fcntl $testFH append] [fcntl $testFH nonblock]
-} 0 {1 1}
+    fcntl $testFH append
+} 0 1
 
 Test fcntl-1.8 {fcntl tests} {
     fcntl $testFH APPEND 0
-    list [fcntl $testFH append] [fcntl $testFH nonblock]
-} 0 {0 1}
+    fcntl $testFH append
+} 0 0
 
 Test fcntl-1.9 {fcntl tests} {
-    fcntl $testFH NONBLOCK 0
-    fcntl $testFH nonBlock
-} 0 {0}
+    fcntl $testRPH NONBLOCK 0
+    fcntl $testRPH nonBlock
+} 0 0
 
 Test fcntl-1.10 {fcntl tests} {
     fcntl $testFH NOBUF 1
@@ -80,7 +82,7 @@ set testFH [open FCNTL.TMP w]  ;# Reopen, can not have both nobuf and linebuf
 Test fcntl-1.12 {fcntl tests} {
     fcntl $testFH LINEBUF 1
     fcntl $testFH LINEBUF
-} 0 {1}
+} 0 1
 
 Test fcntl-1.13 {fcntl tests} {
     fcntl $testFH LINEBUF 0
@@ -104,4 +106,6 @@ Test fcntl-1.15 {fcntl tests} {
     fcntl $testFH RDONLY
 } 1 "file \"$testFH\" isn't open"
 
+close $testRPH
+close $testWPH
 unlink FCNTL.TMP
