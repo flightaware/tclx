@@ -12,11 +12,15 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.9 1993/11/09 15:57:52 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.10 1993/11/10 06:47:40 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+#ifdef HAVE_GETPRIORITY
+#include <sys/resource.h>
+#endif
 
 /*
  * A million microsecondss per seconds.
@@ -166,7 +170,7 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
      */
     if (argc == 1) {
 #ifdef HAVE_GETPRIORITY
-        priority = getpriority ();
+        priority = getpriority (PRIO_PROCESS, 0);
 #else
         priority = nice (0);
 #endif
@@ -175,22 +179,28 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
     }
 
     /*
-     * Increment the priority.  On BSD nice does not return the new priority.
-     * so getpriority must be used.
+     * Increment the priority.  On BSD nice does not return the new priority,
+     * plus nice doesn't return an error for negative priorities for non-super
+     * users (but it still doesn't work), so setpriority and getpriority must 
+     * be used.
      */
     if (Tcl_GetInt (interp, argv[1], &priorityIncr) != TCL_OK)
         return TCL_ERROR;
 
     errno = 0;  /* In case old priority is -1 */
 
+#ifdef HAVE_GETPRIORITY
+    priority = setpriority (PRIO_PROCESS, 0, priorityIncr);
+#else
     priority = nice (priorityIncr);
+#endif
     if ((priority  == -1) && (errno != 0)) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
 
 #ifdef HAVE_GETPRIORITY
-    priority = getpriority ();
+    priority = getpriority (PRIO_PROCESS, 0);
 #endif
 
     sprintf (interp->result, "%d", priority);
