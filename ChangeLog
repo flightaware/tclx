@@ -1,3 +1,9 @@
+2001-05-15  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* tcl/generic/tclXlist.c (TclX_LassignObjCmd): Added
+	  TCL_LEAVE_ERR_MSG to call of 'Tcl_SetVar2Ex'. This
+	  fixes the bug [227478].
+
 2001-05-07  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* tcl/generic/tclXgeneral.c (TclX_LoopObjCmd): Changed

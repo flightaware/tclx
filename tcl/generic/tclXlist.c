@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXlist.c,v 8.16 1999/04/23 07:56:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -390,7 +390,7 @@ TclX_LassignObjCmd (clientData, interp, objc, objv)
             elemPtr = nullObjPtr;
         }
         if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv [idx], NULL), NULL,
-                          elemPtr, TCL_PARSE_PART1) == NULL)
+                          elemPtr, TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL)
             goto error_exit;
     }
 
