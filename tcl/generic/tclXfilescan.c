@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.20 1999/04/09 00:21:39 markd Exp $
+ * $Id: tclXfilescan.c,v 8.21 1999/06/23 00:24:57 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -689,8 +689,10 @@ ScanFile (interp, contextPtr, channel)
              data.matchPtr != NULL; 
              data.matchPtr = data.matchPtr->nextMatchDefPtr) {
 
-            matchStat = TclRegExpExecUniChar(interp, data.matchPtr->regExp,
-                                             data.uniLine, data.uniLineLen, -1, 0);
+            matchStat = Tcl_RegExpExec(interp,
+		    data.matchPtr->regExp,
+		    Tcl_DStringValue(&lineBuf),
+		    Tcl_DStringValue(&lineBuf));
             if (matchStat < 0) {
                 result = TCL_ERROR;
                 goto scanExit;
