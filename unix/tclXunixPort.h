@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 8.1 2001/10/24 23:31:50 hobbs Exp $
+ * $Id: tclXunixPort.h,v 8.2 2005/03/24 05:11:16 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,6 +35,9 @@
 
 extern int h_errno;
 
+#ifdef __APPLE__
+# undef panic
+#endif
 
 /*
  * Included the tcl file tclUnixPort.h after other system files, as it checks
