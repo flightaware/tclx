@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 4.2 1995/01/01 19:49:22 markd Exp $
+ * $Id: tclXlibInit.c,v 1.1 1995/01/16 07:36:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,7 +24,7 @@
  * find the TclX startup file and runtime library.  The values of these
  * fields must be changed before TclX_Init is called.
  */
-char *tclX_library    = TCL_MASTERDIR;
+char *tclX_library    = TCLX_LIBRARY;
 char *tclX_libraryEnv = "TCL_LIBRARY";
 
 
@@ -40,46 +40,39 @@ int
 TclXLib_Init (interp)
     Tcl_Interp *interp;
 {
-    char        *value;
-    Tcl_DString  libDir;
-
-    Tcl_DStringInit (&libDir);
+    char  *libDir;
 
     TclX_LibraryInit (interp);
 
     /*
-     * Determine the path to the master (library) directory.
+     * Determine the path to the master (library) directory.  Store it in a
+     * Tcl variable. This may set it to the empty string.
      */
-    value = NULL;
+    libDir = NULL;
     if (tclX_libraryEnv != NULL) {
-        value = Tcl_GetVar2 (interp, "env", tclX_libraryEnv, TCL_GLOBAL_ONLY);
-        if (value != NULL)
-            Tcl_DStringAppend (&libDir, value, -1);
+        libDir = Tcl_GetVar2 (interp, "env", tclX_libraryEnv, TCL_GLOBAL_ONLY);
     }
-    if ((value == NULL) && (tclX_library != NULL))
-        Tcl_DStringAppend (&libDir, tclX_library, -1);
+    if (libDir == NULL) {
+        if (tclX_library != NULL)
+            libDir  = tclX_library;
+        else
+            libDir = "";
+    }
 
-    /*
-     * Store the path in a Tcl variable. This may set it to the empty string.
-     */
-    if (Tcl_SetVar (interp, "tclx_library", libDir.string,
+    if (Tcl_SetVar (interp, "tclx_library", libDir,
                     TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
-        goto errorExit;
+        return TCL_ERROR;
 
     /*
      * Append to auto_path if set actually have a directory.
      */
-    if (Tcl_DStringLength (&libDir) > 0) {
-        if (Tcl_SetVar (interp, "auto_path", libDir.string,
+    if (libDir [0] != '\0') {
+        if (Tcl_SetVar (interp, "auto_path", libDir,
                         TCL_GLOBAL_ONLY  | TCL_APPEND_VALUE |
                         TCL_LIST_ELEMENT | TCL_LEAVE_ERR_MSG) == NULL)
-            goto errorExit;
+        return TCL_ERROR;
     }
 
-    Tcl_DStringFree (&libDir);
     return TCL_OK;
-  errorExit:
-    Tcl_DStringFree (&libDir);
-    return TCL_ERROR;
 }
 

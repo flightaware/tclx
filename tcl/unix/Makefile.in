@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.5 1995/01/16 07:39:53 markd Exp markd $
+# $Id: Makefile.in,v 4.6 1995/01/19 06:55:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -96,7 +96,7 @@ tclCmdIL.c: ${TCL_UCB_SRC}/tclCmdIL.c
 
 tclXlibInit.o: tclXlibInit.c
 	MASTER=${TCL_MASTERDIR}/`../tools/tclxversion` ;\
-	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"$$MASTER\" \
+	${CC} -c ${CC_FLAGS} -DTCLX_LIBRARY=\"$$MASTER\" \
 	    ${srcdir}/tclXlibInit.c
 
 tclXcmdInit.o: tclXcmdInit.c tclXpatchl.h
