@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.30 1999/07/10 00:56:26 redman Exp $
+# $Id: Makefile.in,v 8.31 1999/12/12 07:47:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -21,6 +21,9 @@
 #
 srcdir = @srcdir@
 @MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
+
+test_dir = ${srcbasedir}/tcl/tests
+this_dir = ${srcbasedir}/tcl/unix
 
 #------------------------------------------------------------------------------
 # Local macros.
@@ -116,10 +119,10 @@ STANDALONE_OBJS = \
 HELP_DIR = ${srcbasedir}/tcl/help
 
 TEST_OBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o \
-	@TCL_THREAD_TEST@ tclXunixTest.o
+	tclThreadTest.o tclXunixTest.o
 
 TEST_SAOBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o \
-	@TCL_THREAD_TEST@ tclXunixTestSA.o
+	tclThreadTest.o tclXunixTestSA.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -276,13 +279,13 @@ test.standalone: ucbtests.standalone testx.standalone
 test.verbose: ucbtests.verbose testx.verbose
 
 ucbtests: all
-	./runtest ${srcbasedir}/tcl/tests/ucbtests.tcl ${TCL_SRC_DIR}
+	(cd ${TCL_SRC_DIR}/tests && ${this_dir}/runtest ${test_dir}/ucbtests.tcl)
 
 ucbtests.static: all
-	./runtest.static ${srcbasedir}/tcl/tests/ucbtests.tcl ${TCL_SRC_DIR}
+	(cd ${TCL_SRC_DIR}/tests && ${this_dir}/runtest.static ${test_dir}/ucbtests.tcl)
 
 ucbtests.standalone: all
-	./runtest.standalone ${srcbasedir}/tcl/tests/ucbtests.tcl ${TCL_SRC_DIR}
+	(cd ${TCL_SRC_DIR}/tests && ${this_dir}/runtest.standalone ${test_dir}/ucbtests.tcl)
 
 testx: all
 	./runtest -c "cd ${srcbasedir}/tcl/tests; source all"
