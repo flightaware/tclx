@@ -12,16 +12,19 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 3.1 1994/01/23 16:58:20 markd Exp markd $
+# $Id: flock.test,v 3.2 1994/04/12 02:02:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
+if ![infox have_flock] {
+    puts "File locking is not available on this system, tests skipped"
+    return
+}
+
 unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
 
-catch {flock} msg
-if {$msg == "File locking is not available on this system"} return
 
 #
 # Fork without exec will not work under Tk, skip this test

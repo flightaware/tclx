@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.6 1994/01/23 17:00:28 markd Exp markd $
+.\" $Id: TclX.n,v 3.7 1994/05/16 00:43:11 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -136,6 +136,10 @@ the documentation for version \fB7.0a\fR.
 .TP
 .B patchlevel
 Return the patchlevel for Extended Tcl.
+.TP
+.B have_flock
+Return \fB1\fR if the \fBflock\fR command defined,  \fB0\fR if it is not
+available.
 .TP
 .B have_fsync
 Return \fB1\fR if the \fBfsync\fR system call is available and the \fBsync\fR
