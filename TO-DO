@@ -17,6 +17,7 @@ o looks like a bug in signal handling, got:
        Abort (core dumped)
   when did an interactive ^C.
 
+o TclX creates a global variable `e'
 
 *** Minor bugs and enhancements ***
 From: ellson@hotair.hobl.lucent.com
@@ -25,6 +26,8 @@ From: ellson@hotair.hobl.lucent.com
     This is causing me some problems when building tclX on my laptop with 
     limited disk space.  You should be able to use the installed versions
     of the libraries so that the tcl and tk build areas can be kept clean.
+
+o Umask command should return old umask if it sets its.
 
 o add man compress install
 o Need to either document how namspaces are used in #@package or normalize
@@ -66,4 +69,6 @@ o Making packages out of some of the new TclX functionallity, such as
 o Install instructions for WinDozes.
 
 o Help change to search for file path tail needs documented and tests.
+
+o lvarset listvar idx value 
 
