@@ -1,18 +1,22 @@
                            Extended Tcl (TclX) 8.0.0
                            =========================
 
-BETA 1 Release (second try)
-===========================
-This release is compatible with the Tcl/Tk 8.0b1 releases.  A Win32 release
+BETA 2 Release
+==============
+This release is compatible with the Tcl/Tk 8.0b2 releases.  A Win32 release
 is not yet available.
 
-Due to a mangling of TCL-REQUIRED_PATCHES/result.patch, this is a re-release
-of TclX 8.0.0 beta 1.
+REQUIRED PATCHES
+================
 
-                              **** WARNING *****
-You must install the patches to Tcl 8.0b1 that are in TCL-REQUIRED_PATCHES.
-You may have some of these as most where posted to comp.lang.tcl by the
-SunScript team.
+In some releases of Extended Tcl, particularly beta releases, it is sometimes
+necessary for us to ship patches to the Tcl core to fix or work around a
+problem, etc.  These patches usually come from postings to the
+comp.lang.tcl newsgroup made by the Sunscript team.
+
+If any patches are included in this package's TCL-REQUIRED_PATCHES directory,
+they must be installed into the corresponding version of Tcl you're
+building with.
 
 You may either install the patches by hand, or, go ahead and cd to "unix" and
 configure TclX.  This will put a rule in your tclX8.0b1/unix/Makefile
