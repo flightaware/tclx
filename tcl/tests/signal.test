@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: signal.test,v 1.2 1992/10/04 20:18:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -158,6 +158,12 @@ proc ForkChild {exitCode} {
     return $childPid
 }
 
+if $posix {
+    set expect {123 {{SIGCHLD {trap 0 {global G_gotChild;set G_gotChild 1;sleep 1}}}}}
+} else {
+    set expect {123 {{SIGCHLD {default 0}}}}
+}
+set expect 
 Test signal-1.15 {signal tests} {
     global G_gotChild
     set G_gotChild 0
@@ -166,7 +172,7 @@ Test signal-1.15 {signal tests} {
     PollSigChld
     set status1 [wait $pid1]
     list [lindex $status1 2] [signal get SIGCHLD]
-} 0 {123 {{SIGCHLD {trap 0 {global G_gotChild;set G_gotChild 1;sleep 1}}}}}
+} 0 $expect
 
 signal default SIGCHLD
 
