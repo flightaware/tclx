@@ -1201,4 +1201,7 @@
     Tcl variables.  This removes some of the flexability, but makes it
     consistent with Tcl/Tk and simplifies Win32 port.
    (* potential incompatibility *)
--------------------------------------------------------------------------------
+===============================================================================
+17 Sep 96: Released TclX 7.6.0 Beta 1
+===============================================================================
+
