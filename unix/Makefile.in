@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.22 1993/09/23 05:40:51 markd Exp markd $
+# $Id: Makefile.in,v 2.23 1993/10/01 03:47:17 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -309,7 +309,7 @@ clean: partclean
 # Restore to the distributed state.
 
 distclean: clean
-	cd toolsg;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
