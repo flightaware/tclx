@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.0 1996/11/21 00:24:11 markd Exp $
+ * $Id: tclXlib.c,v 8.1 1996/12/14 14:56:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1306,6 +1306,11 @@ LoadITclImportProc (interp, command)
         Tcl_DStringAppend (&fullName, command, -1);
         loadCmd = Tcl_GetVar2 (interp, AUTO_INDEX,
                                fullName.string, TCL_GLOBAL_ONLY);
+	if ((loadCmd == NULL) && (fullName.string[0] == ':') &&
+		(fullName.string[1] == ':')) {
+	    loadCmd = Tcl_GetVar2 (interp, AUTO_INDEX,
+		    fullName.string+2, TCL_GLOBAL_ONLY);
+	}
         if (loadCmd != NULL)
             break;
     }
