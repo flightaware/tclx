@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 4.3 1995/01/19 07:37:12 markd Exp markd $
+ * $Id: tkXinit.c,v 4.4 1995/04/17 01:24:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -80,13 +80,6 @@ TkX_Init (interp)
     tclAppName     = "Wishx";
     tclAppLongname = "Extended Tk Shell - Wishx";
     tclAppVersion  = TK_VERSION;
-
-    /*
-     * If we are going to be interactive, Setup SIGINT handling.
-     */
-    interact = Tcl_GetVar (interp, "tcl_interactive", TCL_GLOBAL_ONLY);
-    if ((interact != NULL) && (interact [0] != '0'))
-        Tcl_SetupSigInt ();
 
     /*
      * Set tk_library to point to the TkX library.  It maybe an empty

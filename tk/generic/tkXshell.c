@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.6 1995/04/17 01:24:02 markd Exp markd $
+ * $Id: tkXshell.c,v 4.7 1995/06/30 22:37:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -239,12 +239,15 @@ TkX_Main (argc, argv, appInitProc)
     }
 
     /*
-     * Set the "tcl_interactive" variable.
+     * Set the "tcl_interactive" variable.  If we are going to be interactive,
+     * set up SIGINT handling.
      */
     tty = isatty(0);
     Tcl_SetVar(interp, "tcl_interactive",
  	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
- 
+    if ((fileName == NULL) && tty)
+        Tcl_SetupSigInt ();
+
     /*
      * Invoke application-specific initialization.
      */
