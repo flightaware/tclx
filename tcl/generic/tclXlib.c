@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXlib.c,v 8.26 2001/09/11 21:27:20 andreas_kupries Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -298,7 +298,7 @@ MakeAbsFile (interp, fileName, absNamePtr)
      * Otherwise its relative to the current directory, get the directory
      * and join into a path.
      */
-    curDir = TclpGetCwd (interp, &cwdBuffer);
+    curDir = Tcl_GetCwd (interp, &cwdBuffer);
     if (curDir == NULL)
         goto errorExit;
 
