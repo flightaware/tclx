@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # tclx.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: tclx.tcl,v 1.2 2002/04/02 02:59:53 hobbs Exp $
+# $Id: tclx.tcl,v 1.3 2002/04/04 06:15:07 hobbs Exp $
 #-----------------------------------------------------------------------------
 
 namespace eval ::tclx {
@@ -27,7 +27,7 @@ namespace eval ::tclx {
 	fmath.tcl	1
 	forfile.tcl	1
 	globrecur.tcl	1
-	help.tcl	0
+	help.tcl	1
 	profrep.tcl	1
 	pushd.tcl	1
 	setfuncs.tcl	1

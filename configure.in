@@ -3,7 +3,7 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.6 2002/11/12 21:35:30 karll Exp $
+# RCS: @(#) $Id: configure.in,v 1.7 2004/11/23 00:13:39 hobbs Exp $
 
 AC_PREREQ(2.13)
 
@@ -267,13 +267,22 @@ else
 fi
 AC_SUBST(BUILDHELP)
 
-AC_ARG_WITH(help, [  --with-help              directory containing generated help files], with_help=${withval})
-if test x"${with_help}" != x ; then
+# Allow for --without-help to disable building of help
+AC_MSG_CHECKING([where to place TclX help files])
+AC_ARG_WITH(help, [  --with-help              directory containing generated help files], with_help=${withval}, with_help=no)
+HELP_DIR=`pwd`/help
+if test x"${with_help}" = x"no" -o x"${BUILDHELP}" = x ; then
+    BUILDHELP=
+elif test x"${with_help}" != x -a x"${with_help}" != x"yes" ; then
+    # Ensure that we don't catch --with-help by itself
     HELP_DIR=${with_help}
-else
-    HELP_DIR=${srcdir}/help
 fi
 AC_SUBST(HELP_DIR)
+if test x"${BUILDHELP}" != x ; then
+    AC_MSG_RESULT([${HELP_DIR}])
+else
+    AC_MSG_RESULT([do not build help files])
+fi
 
 #--------------------------------------------------------------------
 # END Special case checks

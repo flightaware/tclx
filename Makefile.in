@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.6 2002/12/17 21:52:23 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.7 2004/11/23 00:13:38 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -94,7 +94,7 @@ HELP_DIR	= @HELP_DIR@/tcl
 # library that we are building.
 #========================================================================
 
-lib_BINARIES	= $($(PACKAGE)_LIB_FILE)
+lib_BINARIES	= $(tclx_LIB_FILE)
 BINARIES	= $(lib_BINARIES)
 
 SHELL		= @SHELL@
@@ -181,8 +181,7 @@ INCLUDES	= $(TCLX_INCLUDES) @TCL_INCLUDES@
 
 EXTRA_CFLAGS	= $(MEM_DEBUG_FLAGS) @EXTRA_CFLAGS@
 
-DEFS		= @DEFS@ $(EXTRA_CFLAGS) \
-		  -DTCLX_LIBRARY=\"$(pkglibdir)\"
+DEFS		= @DEFS@ $(EXTRA_CFLAGS)
 
 CONFIG_CLEAN_FILES = Makefile
 
@@ -204,7 +203,7 @@ COMPILE		= $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(C
 # for the BINARIES that you specified above have already been done.
 #========================================================================
 
-all: binaries libraries doc
+all: binaries libraries
 
 #========================================================================
 # The binaries target builds executable programs, Windows .dll's, unix
@@ -217,7 +216,9 @@ binaries: $(BINARIES)
 
 libraries:
 
-doc:
+# We defer doc building to install-doc because if we do BUILDHELP,
+# it doesn't have dependency checking yet.
+doc: @BUILDHELP@
 	@echo "If you have documentation to create, place the commands to"
 	@echo "build the docs in the 'doc:' target.  For example:"
 	@echo "        xml2nroff sample.xml > sample.n"
@@ -226,7 +227,8 @@ doc:
 install: all install-binaries install-libraries install-doc
 
 install-binaries: binaries install-lib-binaries install-bin-binaries
-	if test "x$(SHARED_BUILD)" = "x1"; then \
+	@if test "x$(SHARED_BUILD)" = "x1"; then \
+	    echo "Installing pkgIndex.tcl in $(DESTDIR)$(pkglibdir)"; \
 	    $(INSTALL_DATA) pkgIndex.tcl $(DESTDIR)$(pkglibdir); \
 	fi
 
@@ -247,7 +249,7 @@ install-libraries: libraries
 # directory.
 #========================================================================
 
-install-doc: doc
+install-doc: doc install-help
 	@mkdir -p $(DESTDIR)$(mandir)/mann
 	@echo "Installing documentation in $(DESTDIR)$(mandir)"
 	@for i in $(srcdir)/doc/*.n; do \
@@ -275,19 +277,19 @@ valgrind: binaries libraries
 depend:
 
 #========================================================================
-# $($(PACKAGE)_LIB_FILE) should be listed as part of the BINARIES variable
+# $(tclx_LIB_FILE) should be listed as part of the BINARIES variable
 # mentioned above.  That will ensure that this target is built when you
 # run "make binaries".
 #
-# The $($(PACKAGE)_OBJECTS) objects are created and linked into the final
+# The $(tclx_OBJECTS) objects are created and linked into the final
 # library.  In most cases these object files will correspond to the
 # source files above.
 #========================================================================
 
-$($(PACKAGE)_LIB_FILE): $($(PACKAGE)_OBJECTS)
-	-rm -f $($(PACKAGE)_LIB_FILE)
+$(tclx_LIB_FILE): $(tclx_OBJECTS)
+	-rm -f $(tclx_LIB_FILE)
 	${MAKE_LIB}
-	$(RANLIB) $($(PACKAGE)_LIB_FILE)
+	$(RANLIB) $(tclx_LIB_FILE)
 
 #========================================================================
 # We need to enumerate the list of .c to .o lines here.
@@ -360,6 +362,7 @@ dist: dist-clean
 clean:  
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
 	-rm -f *.$(OBJEXT) core *.core
+	-rm -rf $(HELP_DIR)
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean: clean
@@ -477,7 +480,7 @@ autoload.tcl: ${RUNTIME_DIR}/autoload.tcl
 	cp ${RUNTIME_DIR}/autoload.tcl autoload.tcl
 
 help.tmp:
-	if [ "@HAVE_SYML@" = "YES" ] ; then \
+	if test x"@HAVE_SYML@" = x"YES" ; then \
 	    rm -rf help ;\
 	    ln -s ${HELP_DIR} help ;\
 	else \
@@ -490,16 +493,19 @@ help.tmp:
 # Build help for Tcl & TclX.  These files are normally part of the
 # distribution and not rebuilt by users.
 #
-BUILDHELP=@BUILDHELP@
 buildhelp:
 	rm -rf ${HELP_DIR} help help.tmp
-	if test ! -d @HELP_DIR@ ; then \
-	    mkdir -p @HELP_DIR@ ; \
+	if test ! -d "${HELP_DIR}" ; then \
+	    mkdir -p "${HELP_DIR}" ; \
 	fi
-	mkdir -p ${HELP_DIR}
-	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/bldmanhelp.tcl ${TCL_SRC_DIR}/doc ${TCLX_TOOLS_SRC_DIR}/tclmanpages \
-	    ${HELP_DIR} Tcl.brf
-	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/runbuildhelp.tcl ${HELP_DIR} TclX.brf ${TCLX_DOC_DIR}/TclX.n
-	mkdir -p $(DESTDIR)$(pkglibdir)/help
-	${TCLX_INSTCOPY} ${HELP_DIR} ${TCLX_HELP_INST_DIR}
+	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/bldmanhelp.tcl ${TCL_SRC_DIR}/doc \
+	    ${TCLX_TOOLS_SRC_DIR}/tclmanpages ${HELP_DIR} Tcl.brf
+	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/runbuildhelp.tcl ${HELP_DIR} \
+	    TclX.brf ${TCLX_DOC_DIR}/TclX.n
 
+install-help:
+	@if test -d "${HELP_DIR}" ; then \
+	     echo "Installing TclX help files in ${TCLX_HELP_INST_DIR}"; \
+	     mkdir -p ${TCLX_HELP_INST_DIR}; \
+	     ${TCLX_INSTCOPY} ${HELP_DIR} ${TCLX_HELP_INST_DIR}; \
+	fi
