@@ -18,7 +18,7 @@
  *     University of North Carolina at Chapel Hill
  *     getdate.y    2.13    9/16/86
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 1.1 1992/09/20 23:27:06 markd Exp markd $
+ * $Id: tclXgetdate.y,v 1.2 1992/10/06 03:48:03 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,13 +28,15 @@
 #include <ctype.h>
 #include <time.h>
 
-#define NULL    0
+#ifndef NULL
+#    define NULL    0
+#endif
 
 #define daysec (24L*60L*60L)
 
         static int timeflag, zoneflag, dateflag, dayflag, relflag;
         static time_t relsec, relmonth;
-        static int hh, mm, ss, merid, daylight;
+        static int hh, mm, ss, merid, dayLight;
         static int dayord, dayreq;
         static int month, day, year;
         static int ourzone;
@@ -74,19 +76,19 @@ tspec:  NUMBER MERIDIAN =
                 {hh = $1; mm = $3; merid = $4;}
         | NUMBER ':' NUMBER NUMBER =
                 {hh = $1; mm = $3; merid = 24;
-                daylight = STANDARD; ourzone = -($4%100 + 60*$4/100);}
+                dayLight = STANDARD; ourzone = -($4%100 + 60*$4/100);}
         | NUMBER ':' NUMBER ':' NUMBER =
                 {hh = $1; mm = $3; ss = $5; merid = 24;}
         | NUMBER ':' NUMBER ':' NUMBER MERIDIAN =
                 {hh = $1; mm = $3; ss = $5; merid = $6;}
         | NUMBER ':' NUMBER ':' NUMBER NUMBER =
                 {hh = $1; mm = $3; ss = $5; merid = 24;
-                daylight = STANDARD; ourzone = -($6%100 + 60*$6/100);};
+                dayLight = STANDARD; ourzone = -($6%100 + 60*$6/100);};
 
 zone:   ZONE =
-                {ourzone = $1; daylight = STANDARD;}
+                {ourzone = $1; dayLight = STANDARD;}
         | DAYZONE =
-                {ourzone = $1; daylight = DAYLIGHT;};
+                {ourzone = $1; dayLight = DAYLIGHT;};
 
 dyspec: DAY =
                 {dayord = 1; dayreq = $1;}
@@ -522,7 +524,7 @@ Tcl_GetDate (p, now, zone)
         day = lt->tm_mday;
         relsec = 0; relmonth = 0;
         timeflag=zoneflag=dateflag=dayflag=relflag=0;
-        daylight = MAYBE;
+        dayLight = MAYBE;
         hh = mm = ss = 0;
         merid = 24;
         ourzone = zone;
@@ -536,7 +538,8 @@ Tcl_GetDate (p, now, zone)
 
         if (err) return (-1);
         if (dateflag || timeflag || dayflag) {
-                sdate = dateconv(month,day,year,hh,mm,ss,merid,ourzone,daylight);
+                sdate = dateconv(month,day,year,hh,mm,ss,merid,ourzone,
+                                 dayLight);
                 if (sdate < 0) return -1;
         }
         else {
