@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.45 1993/11/05 07:08:46 markd Exp markd $
+.\" $Id: TclX.n,v 2.46 1993/11/07 18:39:51 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -302,7 +302,7 @@ Causes arguments to be printed unevaluated.  If \fBnoeval\fR
 is specified, the arguments are printed before
 evaluation.  Otherwise, they are printed afterwards.
 .sp
- If the command line is longer than 60 characters, it is truncated
+If the command line is longer than 60 characters, it is truncated
 to 60 and a "..." is postpended to indicate that there was more output
 than was displayed.
 If an evaluated 
@@ -327,6 +327,13 @@ buffer flush is done after every line is written so that the trace may be
 monitored externally or provide useful information for debugging problems that
 cause core dumps.
 .RE
+The most common use of this command is to enable tracing to a file during the
+development.  If a failure occurs, a trace is then available when needed.
+Command tracing will slow down the execution of code, so it should be
+removed when code is debugged.  The following command will enable tracing
+to a file for the remainder of the program:
+.IP
+  cmdtrace on [open cmd.log w]
 .TP
 .B cmdtrace off
 Turn off all tracing.
