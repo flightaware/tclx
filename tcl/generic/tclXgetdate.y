@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.12 1993/10/07 06:35:45 markd Exp markd $
+ * $Id: tclXgetdate.y,v 2.13 1993/10/08 04:39:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -851,7 +851,7 @@ Tcl_GetDate(p, now, zone, timePtr)
     yyMonth = tm->tm_mon + 1;
     yyDay = tm->tm_mday;
     yyTimezone = zone;
-    if (zone == -5000) {
+    if (zone == -50000) {
         yyDSTmode = DSToff;  /* assume GMT */
         yyTimezone = 0;
     } else {
