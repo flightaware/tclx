@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.17 1999/06/23 00:24:57 surles Exp $
+ * $Id: tclXinit.c,v 8.18 1999/06/26 00:14:12 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,7 +29,7 @@
  *    o [info nameofexectutable]/../../tclX$version/$w/$platform, for
  *      running before installation.  Platform is either "unix" or "win".
  * The source -rsrc commands are used when TclX has standalone support built
- * in.  It can't be ifdefed, as many cpp can't handled an #ifdef in a string.
+ * in.
  *
  * Parameters:
  *   o w - Which are we configuring. Either "tcl" or "tk".
@@ -40,9 +40,7 @@
  * Globals:
  *   o ${w}x_library - Set to the directory containing the init file.
  */
-/*FIX: Break into 3 parts and don't do source if standalone isn't
- * available*/
-static char tclx_findinit [] =
+static char* tclx_findinit[] = {
 "proc tclx_findinit {w defaultLib version noInit} {\n\
     upvar #0 env env ${w}x_library libDir tcl_platform tcl_platform\n\
     set dirs {}\n\
@@ -58,12 +56,14 @@ static char tclx_findinit [] =
 	if {[string length $defaultLib]} {\n\
             lappend dirs $defaultLib\n\
 	}\n\
-        set libDir {}\n\
-        if ![catch {uplevel #0 source -rsrc ${w}x}] {\n\
+        set libDir {}\n",
+#ifdef HAVE_TCL_STANDALONE
+       "if ![catch {uplevel #0 source -rsrc ${w}x}] {\n\
 	    uplevel #0 source -rsrc ${w}x:tclIndex\n\
 	    return\n\
-        }\n\
-        set prefix [file dirname [info nameofexecutable]]\n\
+        }\n",
+#endif    
+       "set prefix [file dirname [info nameofexecutable]]\n\
         set plat [file tail $prefix]\n\
         set prefix [file dirname $prefix]\n\
         lappend dirs [file join $prefix lib ${w}X$version]\n\
@@ -81,8 +81,8 @@ static char tclx_findinit [] =
     set msg \"Can't find ${w}x.tcl in the following directories: \n\"\n\
     foreach d $dirs {append msg \"  $d\n\"}\n\
     append msg \"This probably means that TclX wasn't installed properly.\n\"\n\
-    error $msg\n\
-}";
+    error $msg\n}",
+NULL};
 
 static char tclx_findinitProc [] = "tclx_findinit";
 
@@ -90,12 +90,50 @@ static char tclx_findinitProc [] = "tclx_findinit";
  * Prototypes of internal functions.
  */
 static int
+DefineFindInit _ANSI_ARGS_((Tcl_Interp *interp,
+                            Tcl_CmdInfo *cmdInfo));
+
+static int
 InsureVarExists _ANSI_ARGS_((Tcl_Interp *interp,
                              char       *varName,
                              char       *defaultValue));
 
 static int
 InitSetup _ANSI_ARGS_((Tcl_Interp *interp));
+
+
+/*-----------------------------------------------------------------------------
+ * Define the init proc if it doesn't exist.
+ *-----------------------------------------------------------------------------
+ */
+static int
+DefineFindInit(interp, cmdInfo)
+    Tcl_Interp *interp;
+    Tcl_CmdInfo *cmdInfo;
+{
+    int idx;
+
+    /*
+     * Find the init procedure.  If its not defined, define it now.
+     */
+    if (!Tcl_GetCommandInfo(interp, tclx_findinitProc, cmdInfo)) {
+        Tcl_DString findInitCmd;
+        Tcl_DStringInit(&findInitCmd);
+        for (idx = 0; tclx_findinit[idx] != NULL; idx++) {
+            Tcl_DStringAppend(&findInitCmd, tclx_findinit[idx], -1);
+        }
+
+        if (Tcl_GlobalEval(interp, Tcl_DStringValue(&findInitCmd)) != TCL_OK) {
+            Tcl_DStringFree(&findInitCmd);
+            return TCL_ERROR;
+        }
+        Tcl_DStringFree(&findInitCmd);
+        if (!Tcl_GetCommandInfo(interp, tclx_findinitProc, cmdInfo)) {
+            panic ("can't find %s after defining\n", tclx_findinitProc);
+        }
+    }
+    return TCL_OK;
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -128,34 +166,29 @@ TclXRuntimeInit (interp, which, defaultLib, version)
     /*FIX: Use objects */
 #define PROC_ARGC 5
     Tcl_CmdInfo cmdInfo;
-    char *procArgv [PROC_ARGC + 1], *quick;
+    char *procArgv[PROC_ARGC+1];
+    char *quick;
     
-    /*
-     * Find the init procedure.  If its not defined, define it now.
-     */
-    if (!Tcl_GetCommandInfo (interp, tclx_findinitProc, &cmdInfo)) {
-        if (Tcl_GlobalEval (interp, tclx_findinit) != TCL_OK)
-            return TCL_ERROR;
-        if (!Tcl_GetCommandInfo (interp, tclx_findinitProc, &cmdInfo)) {
-            panic ("can't find %s\n", tclx_findinitProc);
-        }
+    if (DefineFindInit(interp, &cmdInfo) != TCL_OK) {
+        return TCL_ERROR;
     }
 
-    quick = Tcl_GetVar2 (interp, "TCLXENV", "quick", TCL_GLOBAL_ONLY);
-    if (quick == NULL)
+    quick = Tcl_GetVar2(interp, "TCLXENV", "quick", TCL_GLOBAL_ONLY);
+    if (quick == NULL) {
         quick = "0";
+    }
     
-    procArgv [0] = tclx_findinitProc;
-    procArgv [1] = which;
-    procArgv [2] = defaultLib;
-    procArgv [3] = version;
-    procArgv [4] = quick;
-    procArgv [5] = NULL;
+    procArgv[0] = tclx_findinitProc;
+    procArgv[1] = which;
+    procArgv[2] = defaultLib;
+    procArgv[3] = version;
+    procArgv[4] = quick;
+    procArgv[5] = NULL;
 
-    return cmdInfo.proc (cmdInfo.clientData,
-                         interp,
-                         PROC_ARGC,
-                         procArgv);
+    return cmdInfo.proc(cmdInfo.clientData,
+                        interp,
+                        PROC_ARGC,
+                        procArgv);
 }
 
 /*-----------------------------------------------------------------------------
@@ -169,33 +202,40 @@ TclXRuntimeInit (interp, which, defaultLib, version)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_EvalRCFile (interp)
-    Tcl_Interp  *interp;
+TclX_EvalRCFile(interp)
+    Tcl_Interp *interp;
 {
-    Tcl_DString  buffer;
-    char        *path;
+    Tcl_DString buffer;
+    char *path;
+    Tcl_Channel chan;
 
-    path = Tcl_GetVar (interp, "tcl_rcFileName", TCL_GLOBAL_ONLY);
-    if (path == NULL)
+    path = Tcl_GetVar(interp, "tcl_rcFileName", TCL_GLOBAL_ONLY);
+    if (path == NULL) {
         return;
+    }
 
     Tcl_DStringInit (&buffer);
 
-    path = Tcl_TranslateFileName (interp, path, &buffer);
+    path = Tcl_TranslateFileName(interp, path, &buffer);
     if (path == NULL) {
-        TclX_ErrorExit (interp, 1,
-                        "\n    while\ntranslating RC file name \"%.*s\"",
-                         TCLX_ERR_EXIT_MSG_MAX-64, path);
+        TclX_ErrorExit(interp, 1,
+                       "\n    while\ntranslating RC file name \"%.*s\"",
+                       TCLX_ERR_EXIT_MSG_MAX-64, path);
     }
 
-    if (access (path, R_OK) == 0) {
-        if (TclX_Eval (interp,
-                       TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
-                       TCLX_EVAL_ERR_HANDLER,
-                       path) == TCL_ERROR) {
-            TclX_ErrorExit (interp, 1,
-                            "\n    while\nevaluating RC file \"%.*s\"",
-                            TCLX_ERR_EXIT_MSG_MAX-64, path);
+    /*
+     * Test for the existence of the rc file before trying to read it.
+     */
+    chan = Tcl_OpenFileChannel(NULL, path, "r", 0);
+    if (chan != (Tcl_Channel)NULL) {
+        Tcl_Close(NULL, chan);
+        if (TclX_Eval(interp,
+                      TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
+                      TCLX_EVAL_ERR_HANDLER,
+                      path) == TCL_ERROR) {
+            TclX_ErrorExit(interp, 1,
+                           "\n    while\nevaluating RC file \"%.*s\"",
+                           TCLX_ERR_EXIT_MSG_MAX-64, path);
         }
     }
     Tcl_DStringFree(&buffer);
