@@ -912,8 +912,7 @@
 -------------------------------------------------------------------------------
 28 Mar 95:
   o Added the subcommands "groups", "groupids" and "host" to the id command.
-  o Added server_create,  server_accept, server_send and server_receive
-    commands.
+  o Added server_create,  server_accept, and server_send commands.
   o Changed server_info to take IP addresses as well as host names.
   o Added fstat localhost option.  Also return the port number in the
     fstat remote host list.  (*POTENTIAL INCOMPATIBILITY*)
@@ -921,3 +920,5 @@
     can return a single file id for buffered files.  The server_open command
     is now a compatibility proc in tcl.tlib.
 -------------------------------------------------------------------------------
+ 31 Mar 95: Released TclX7.4a-beta3.
+===============================================================================
