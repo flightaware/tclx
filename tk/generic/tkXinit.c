@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 1.6 1993/09/16 05:37:54 markd Exp markd $
+ * $Id: tkXinit.c,v 1.7 1993/09/16 05:42:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,14 +33,12 @@
  * Parameters:
  *   o interp - A pointer to the interpreter.
  * Returns:
- *   TCL_OK.
+ *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 int
-TkX_Init (interp, interactive, errorSignalProc)
+TkX_Init (interp)
     Tcl_Interp          *interp;
-    int                  interactive;
-    TkX_ShellSignalProc *errorSignalProc;
 {
     char        *value;
     Tcl_DString  libDir;
