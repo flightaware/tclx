@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: msgcat.test,v 2.0 1992/10/16 04:50:04 markd Rel markd $
+# $Id: msgcat.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 
 if {[info procs test] != "test"} then {source testlib.tcl}
@@ -76,7 +76,7 @@ test message-cat-2.5 {catclose tests} {
 
 test message-cat-2.6 {catclose tests} {
     list [catch {catclose} msg] $msg
-} {1 {wrong # args: catclose [-fail|-nofail] catHandle}}
+} {1 {wrong # args: catclose ?-fail|-nofail? catHandle}}
 
 
 test message-cat-3.1 {catgets tests} {
