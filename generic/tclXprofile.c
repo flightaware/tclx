@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXprofile.c,v 1.2 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -123,7 +123,7 @@ static int
 ProfStrCommandEval _ANSI_ARGS_((ClientData    clientData,
                                 Tcl_Interp   *interp,
                                 int           argc,
-                                char        **argv));
+                                CONST84 char **argv));
 
 static int
 ProfObjCommandEval _ANSI_ARGS_((ClientData    clientData,
@@ -524,7 +524,7 @@ ProfStrCommandEval (clientData, interp, argc, argv)
     ClientData    clientData;
     Tcl_Interp   *interp;
     int           argc;
-    char        **argv;
+    CONST84 char **argv;
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     Command *currentCmdPtr;
