@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 2.2 1993/07/20 08:35:45 markd Exp markd $
+# $Id: unixcmds.test,v 3.0 1993/11/19 06:58:15 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -142,6 +142,14 @@ Test unixcmds-5.2 {system tests} {
 Test unixcmds-5.3 {system tests} {
     system x y z
 } 1 {wrong # args: system command}
+
+Test unixcmds-5.4 {system tests} {
+    system "exit 3"
+} 0 3
+
+Test unixcmds-5.5 {system tests} {
+    system "exit 101"
+} 0 101
 
 # Test the sleep command, as well as we can.
 
