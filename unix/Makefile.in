@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.8 1999/07/07 02:47:13 wart Exp $
+# $Id: Makefile.in,v 8.9 1999/07/08 23:57:26 redman Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -117,7 +117,7 @@ buildhelp:
 #------------------------------------------------------------------------------
 # Install Extended Tcl.
 #
-install: install-binaries install-libraries install-doc
+install: all install-binaries install-libraries install-doc
 
 install-binaries: TCLX_INSTALL_BIN TKX_INSTALL_BIN_${TKX_BUILD}
 
