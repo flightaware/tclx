@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.40 2000/07/13 01:26:46 welch Exp $
+# $Id: Makefile.in,v 8.41 2000/07/14 18:07:45 welch Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -203,7 +203,7 @@ test.static: all
 BUILDHELP=@BUILDHELP@
 buildhelp:
 	rm -rf ${HELP_DIR} help help.tmp
-	if test ! -f @HELP_DIR@ ; then \
+	if test ! -d @HELP_DIR@ ; then \
 	    mkdir @HELP_DIR@ ;\
 	fi
 	mkdir ${HELP_DIR}
