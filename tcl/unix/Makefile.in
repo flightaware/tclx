@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.7 1997/06/21 16:45:29 markd Exp $
+# $Id: Makefile.in,v 8.8 1997/07/01 02:26:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -112,7 +112,7 @@ TEST_OBJS = tclTest.o tclTestObj.o tclUnixTest.o tclXtest.o tclXunixTest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: ${TCLX_STLIB_NAME} tcl checkup RUNTIME tclXtest \
+all: tcl checkup RUNTIME tclXtest \
      runtest
 
 static:	tcl.static
@@ -660,8 +660,10 @@ install-runtime:
 install-exec:
 	${INSTCOPY} tcl ${INSTALL_ROOT}${TCLX_INST_BIN}
 	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
-	${INSTCOPY} ${TCLX_STLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB}
-	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_STLIB_NAME}
+	if test ${TCLX_STLIB_BUILD} != "dont_build_this"; then \
+	    ${INSTCOPY} ${TCLX_STLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB}; \
+	    ${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_STLIB_NAME}; \
+	fi
 	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${INSTCOPY} ${TCLX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\

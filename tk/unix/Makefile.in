@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.8 1997/07/08 06:36:47 markd Exp $
+# $Id: Makefile.in,v 8.9 1997/07/08 16:38:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -65,6 +65,7 @@ SOBJS = ${GENERIC_SOBJS}
 RUNTIME_DIR = ${srcbasedir}/tk/runtime
 
 LIBTCLX = ../../tcl/unix/${TCLX_STLIB_NAME}
+TCL = ../../tcl/unix/tcl
 
 HELP_DIR = ${srcbasedir}/tk/help
 
@@ -75,12 +76,12 @@ TEST_OBJS = tkTest.o tkSquare.o tkXunixTest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: ${TKX_STLIB_NAME} wishx RUNTIME tktest runtest \
+all: wishx RUNTIME tktest runtest \
      ${bldbasedir}/tk/tests
 
 static: wishx.static
 
-wishx: tkXAppInit.o ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${LIBTCLX}
+wishx: tkXAppInit.o ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -169,7 +170,7 @@ help:
 # Generate the test program.
 #
 
-tktest: ${TEST_OBJS} ${TKX_SHLIB_NAME} ${TKX_STLIB_NAME} ${LIBTCLX}
+tktest: ${TEST_OBJS} ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${TCL}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -242,8 +243,10 @@ install-runtime:
 install-exec:
 	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_BIN}
 	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
-	${INSTCOPY} ${TKX_STLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB}
-	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_STLIB_NAME}
+	if test ${TKX_STLIB_BUILD} != "dont_build_this"; then \
+	    ${INSTCOPY} ${TKX_STLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB}; \
+	    ${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_STLIB_NAME}; \
+	fi
 	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB} ;\
