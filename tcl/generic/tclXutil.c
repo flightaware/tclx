@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.6 1995/03/30 05:26:13 markd Exp markd $
+ * $Id: tclXutil.c,v 4.7 1995/04/17 01:24:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -811,13 +811,18 @@ Tcl_SetupFileEntry (interp, fileNum, permissions)
     /*
      * Set up a stdio FILE control block for the new file.
      */
-    if (permissions & TCL_FILE_WRITABLE) {
-        if (permissions & TCL_FILE_READABLE)
-            mode = "r+";
-        else
-            mode = "w";
-    } else {
+    switch (permissions) {
+      case TCL_FILE_READABLE:
         mode = "r";
+        break;
+      case TCL_FILE_WRITABLE:
+        mode = "w";
+        break;
+      case TCL_FILE_READABLE | TCL_FILE_WRITABLE:
+        mode = "r+";
+        break;
+      default:
+        mode = NULL;  /* Cause a core dump on invalid mode */
     }
 
     filePtr = fdopen (fileNum, mode);
