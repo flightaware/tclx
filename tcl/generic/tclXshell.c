@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 1.1 1992/09/20 23:22:10 markd Exp markd $
+ * $Id: tclXstartup.c,v 1.2 1992/10/05 19:58:58 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -445,17 +445,20 @@ errorExit:
  *     then the standard Tcl default file is used, which is formed from a
  *     location specified at compile time and the Extended Tcl version
  *     number.
+ *   o options (I) - Options that control startup behavior.  None are
+ *     currently defined.
  * Notes:
  *   The variables tclAppName, tclAppLongName, tclAppVersion 
  * must be set before calling thus routine if special values are desired.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_Startup (interp, argc, argv, defaultFile)
+Tcl_Startup (interp, argc, argv, defaultFile, options)
     Tcl_Interp  *interp;
     int          argc;
     CONST char **argv;
     CONST char  *defaultFile;
+    unsigned     options;
 {
     char       *cmdBuf;
     tclParms_t  tclParms;
@@ -467,11 +470,11 @@ Tcl_Startup (interp, argc, argv, defaultFile)
     ParseCmdArgs (argc, (char **) argv, &tclParms);
 
     if (Tcl_ShellEnvInit (interp,
-                         tclParms.options,
-                         tclParms.programName,
-                         tclParms.tclArgc, tclParms.tclArgv,
-                         (tclParms.execStr == NULL),
-                         defaultFile) != TCL_OK)
+                          tclParms.options,
+                          tclParms.programName,
+                          tclParms.tclArgc, tclParms.tclArgv,
+                          (tclParms.execStr == NULL),
+                          defaultFile) != TCL_OK)
         goto errorAbort;
 
     /*
