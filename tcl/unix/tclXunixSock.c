@@ -25,6 +25,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#ifndef INADDR_NONE
+#    define INADDR_NONE  ((long) -1)
+#endif
+
 #ifndef HAVE_BCOPY
 #    define bcopy(from, to, length)    memmove((to), (from), (length))
 #endif
