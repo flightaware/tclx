@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.14 1995/03/31 19:26:40 markd Exp markd $
+dnl $Id: configure.in,v 4.15 1995/03/31 20:05:51 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.14 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.15 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -171,7 +171,8 @@ else
 #------------------------------------------------------------------------------
 
 AC_MSG_CHECKING([struct msghdr for msg_accrights])
-AC_TRY_COMPILE([#include <sys/socket.h>],
+AC_TRY_COMPILE([#include <sys/types.h>
+#include <sys/socket.h>],
         [struct msghdr msgHeader;
          msgHeader.msg_accrights = (void*) 0;
          msgHeader.msg_accrightslen = 0;
