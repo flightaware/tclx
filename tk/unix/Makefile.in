@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.1 1996/08/09 07:06:37 markd Exp $
+# $Id: Makefile.in,v 7.2 1996/08/17 02:10:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -35,7 +35,7 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCLX_USE_SHLIB_CFLAGS} \
 	      -I${TCLX_UNIX_BLD_DIR} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR} ${TK_XINCLUDES}
 
-LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
+LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the TclX
