@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 4.2 1995/01/01 19:49:38 markd Exp markd $
+ * $Id: tclXsignal.c,v 4.3 1995/01/20 03:19:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -1400,7 +1400,7 @@ SetSignalStates (interp, signalKeyedList)
  */
 static int
 Tcl_SignalCmd (clientData, interp, argc, argv)
-    char       *clientData;
+    ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;

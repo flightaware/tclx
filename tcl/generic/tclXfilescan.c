@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 4.9 1995/02/21 06:26:09 markd Exp markd $
+ * $Id: tclXfilescan.c,v 4.10 1995/02/24 01:30:31 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -233,7 +233,7 @@ ScanContextCopyFile (interp, scanTablePtr, contextHandle, fileHandle)
  */
 static int
 Tcl_ScancontextCmd (clientData, interp, argc, argv)
-    char       *clientData;
+    ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;
@@ -305,7 +305,7 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
  */
 static int
 Tcl_ScanmatchCmd (clientData, interp, argc, argv)
-    char       *clientData;
+    ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;
@@ -671,7 +671,7 @@ ScanFile (interp, contextPtr, filePtr)
  */
 static int
 Tcl_ScanfileCmd (clientData, interp, argc, argv)
-    char       *clientData;
+    ClientData  clientData;
     Tcl_Interp *interp;
     int         argc;
     char      **argv;
