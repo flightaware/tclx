@@ -1,10 +1,8 @@
                         Building TclX on Windows 95/NT
 
-Welcome to the beta 2 release of TclX 7.6.0.
-
-  This the Win32 code is a work in progress, is not yet production quality.  A
-lot of work is left to do.  It is being made available for those who
-want to contribute to the porting effort.
+The Win32 port of TclX is a work in progress, is not yet complete
+Several features that should work under windows are not yet ported.
+Many of the tests have not yet been converted to work under windows
 
 Please send mail to the authors of this port to tcl-project@neosoft.com.
 There is also a mailing list, which can be used for the discussion of
@@ -63,9 +61,10 @@ In the beta 1 release, the following restrictions apply:
        o chmod
        o chown
        o chgrp
-       o fcntl
        o link
        o kill
+       o nice
+       o alarm
 
     o The following commands are there, but not tested, since the tests have
       not been ported.
@@ -79,11 +78,12 @@ In the beta 1 release, the following restrictions apply:
 
     o The dup command does not work on sockets.
 
+    o The profile command only reports elasped real time, CPU time is not
+      available.
+
     o There are probably problems with using open sockets and pipes with
       commands that operate on open files.
     
-    o No support for installing TclX or setting the runtime path.  You
-        
     o No 16 bit support.
 
     o Documentation has not been updated to indicate windows differences.

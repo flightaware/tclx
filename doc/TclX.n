@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.8 1996/10/04 15:30:10 markd Exp $
+.\" $Id: TclX.n,v 7.9 1996/10/08 07:18:52 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -493,10 +493,12 @@ the context that the uplevel was called in.
 If the \fB-eval\fR option is specified, the procedure evaluation (call) stack
 is used instead of the procedure scope stack.  Upleveled code is reported in
 the context of the procedure that did the uplevel.
-
 .sp
 A Tcl procedure \fBprofrep\fR is supplied for reducing the data and
 producing a report.
+.sp
+On \fBWindows 95/NT\fR, profile command only reports elasped real time,
+CPU time is not available and is reported as zero.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -559,6 +561,8 @@ If \fIseconds\fR is 0.0, any previous alarm request is canceled.
 Only one alarm at a time may be active; the command returns the number of
 seconds left in the previous alarm.  On systems without the \fBsetitimer\fR
 system call, \fIseconds\fR is rounded up to an integer number of seconds.
+.sp
+The \fBalarm\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -586,8 +590,8 @@ command to abort Tk applications after an \fBexecl\fR failure:
     kill [id process]
 .ft R
 .fi
-.br
-On \fBWindows 95/NT\fR systems, where the \fBfork\fR command is not available,
+.sp
+On \fBWindows 95/NT\fR, where the \fBfork\fR command is not available,
 \fBexecl\fR starts a new process and returns the process id.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -625,8 +629,8 @@ and child processes.
 Note: If you are \fBfork\fRing in a Tk based apllication you must \fBexecl\fR
 before doing any window operations in the child or you will receive a
 \fBBadWindow\fR error from the X server.
-.br
-The \fBfork\fR command is not available on \fBWindows 95/NT\fR systems.
+.sp
+The \fBfork\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -708,7 +712,7 @@ Set the process group ID of the current process to its process ID.
 Returns the standard host name of the machine the process is executing on.
 .RE
 .br
-On \fBWindows 95/NT\fR systems, only the \fBhost\fR and \fBprocess\fR options
+On \fBWindows 95/NT\fR, only the \fBhost\fR and \fBprocess\fR options
 are implemented.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -730,6 +734,8 @@ If \fB-pgroup\fR is specified, the numbers in \fIidlist\fR are take
 as process group ids and the signal is sent to all of the process in that
 process group.  A process group id of \fB0\fR specifies the current process
 group.
+.sp
+The \fBkill\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -743,6 +749,8 @@ Create a directory entry, \fIdestpath\fR, linking it to the existing file,
 \fIsrcpath\fR.  If \fB-sym\fR is specified, a symbolic link, rather than
 a hard link, is created.  (The \fB-sym\fR option is only available
 on systems that support symbolic links.)
+.sp
+The \fBlink\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -763,6 +771,8 @@ increasing priority with negative niceness values will only work for the
 superuser.
 .sp
 The new priority is returned.
+.sp
+The \fBnice\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -774,8 +784,8 @@ The new priority is returned.
 .br
 Returns a list containing the contents of the directory \fIdirPath\fR.  The
 directory entries "." and ".." are not returned.
-.br
-On MS Windows systems, \fB-hidden\fR maybe specified include hidden files
+.sp
+On \fBWindows 95/NT\fR, \fB-hidden\fR maybe specified to include hidden files
 in the result.  This flag is ignored on Unix systems.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -786,6 +796,12 @@ in the result.  This flag is ignored on Unix systems.
 .TP
 .B signal \fIaction\fR \fIsiglist\fR ?\fIcommand\fR?
 .br
+Warning:  The behavior of signals under Unix doesn't make signals a general
+event mechanism.  Interrupted system calls, caused by signals, can cause errors
+in code where they are not expected.  This can cause a program to behave in
+unexpected ways.  In general, the only safe usage for signals is to generate
+errors to terminate a blocked operation.
+.sp
 Specify the action to take when a Unix signal is received by Extended
 Tcl, or a program that embeds it.  \fISiglist\fR is a list
 of either the symbolic or numeric Unix signal (the SIG prefix is optional).
@@ -1058,6 +1074,8 @@ If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchmod\fR command
 to determine if this functionality is available.
+.sp
+The \fBchmod\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1079,6 +1097,8 @@ If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchown\fR command
 to determine if this functionality is available.
+.sp
+The \fBchown\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1097,6 +1117,8 @@ If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchown\fR command
 to determine if this functionality is available.
+.sp
+The \fBchgrp\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1119,6 +1141,10 @@ If \fIfileId\fR is a number rather than a Tcl file id, then the \fBdup\fR
 command will bind that file to a Tcl file id.  This is usedful for accessing
 files that are passed from the parent process.
 The argument ?\fItargetFileId\fR? is not valid with this operation.
+.sp
+On \fBWindows 95/NT\fR, only \fBstdin\fR, \fBstdout\fR, or
+\fBstderr\fR maybe specified for \fItargetFileId\fR.  The \fBdup\fR
+command does not work on sockets on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1173,6 +1199,9 @@ The \fBNONBLOCK\fR, \fBNOBUF\fR and \fBLINEBUF\fR are provided for
 compatibility with older scripts.
 The\fBfconfigure\fR command is preferred method of getting and setting these
 attributes.
+.sp
+The \fBAPPEND\fR and \fBCLOEXEC\fR options are not available on
+\fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1209,6 +1238,10 @@ is obtained and 0 if it is not.
 See your system's \fBfcntl\fR system call documentation for full details of
 the behavior of file locking.  If locking is being done on ranges of a
 file, it is best to use unbuffered file access (see the \fBfcntl\fR command).
+.sp
+The \fBflock\fR command is not available on \fBWindows 95\fR.
+It is available on \fBWindows NT\fR.
+
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1216,7 +1249,7 @@ file, it is best to use unbuffered file access (see the \fBfcntl\fR command).
 '\"@help: tcl/files/for_file
 '\"@brief: Do a foreach-style loop on each line in a file.
 .TP
-.B for_file \fIvar filename { code }\fR
+.B for_file \fIvar filename code\fR
 .br
 This procedure implements a loop over the contents of a file.
 For each line in \fIfilename\fR, it sets
@@ -1243,6 +1276,9 @@ would echo all the lines in the password file.
 Remove a locked from a file that was previously placed with the \fIflock\fR
 command.  The arguments are the same as for the \fIflock\fR command, see
 that command for more details.
+.sp
+The \fBfunlock\fR command is not available on \fBWindows 95\fR.
+It is available on \fBWindows NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1325,6 +1361,8 @@ This command is not available or not fully functional if the underlying
 operating system support is not available.  The command \fBinfox have_truncate\fR
 will indicate if this command may truncate by file path.  The command
 \fBinfox have_ftruncate\fR will indicate if this command may truncate by file id.
+.sp
+The \fB-fileid\fR option is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1457,8 +1495,9 @@ or perhaps
         file3 {} {}
 .fi
 .br
-On \fBWindows 95/NT\fR systems, only sockets can be used with the \fBselect\fR
-command.  Pipes, as returned by the \fBopen\fR command, are not supported.
+On \fBWindows 95/NT\fR, only sockets can be used with the \fBselect\fR
+command.
+Pipes, as returned by the \fBopen\fR command, are not supported.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

@@ -1,10 +1,5 @@
                            Extended Tcl (TclX) 7.6.0
                            =========================
-Beta 2 release:  
-   This is an beta 2 release for TclX 7.6.0.  It corresponds to the Tcl 7.6
-and Tk 4.2 releases.  It also includes partial support for Windows 95/NT
-functionality.  See win/INSTALL for details and restrictions.
-
 INTRODUCTION
 ============
 
@@ -22,7 +17,7 @@ in this distribution, obtain it from ftp.smli.com).
    Support is also included for building a Tk 4.2 wish shell (wishx)
 with the Extended Tcl command set and signal handling.
 
-    Extended Tcl runs on most Unix like systems and Windows 95/NT.
+   Extended Tcl runs on most Unix like systems and Windows 95/NT.
 
    While this TclX distribution is tested with Tcl 7.6 and Tk 4.2, it will
 probably work with new versions of Tcl & Tk with little or no changes.
