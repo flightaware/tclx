@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 4.2 1994/11/25 19:00:41 markd Exp markd $
+ * $Id: tclXfilescan.c,v 4.3 1994/11/25 20:09:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -72,6 +72,7 @@ SetMatchVar _ANSI_ARGS_((Tcl_Interp *interp,
 static int
 SetSubMatchVar _ANSI_ARGS_((Tcl_Interp       *interp,
                             char             *fileLine,
+                            int               numSubExprs,
                             Tcl_SubMatchInfo  subMatchInfo));
 
 static void
@@ -377,17 +378,16 @@ SetMatchVar (interp, fileLine, scanLineNum, filePtr, copyFilePtr)
  *-----------------------------------------------------------------------------
  */
 static int
-SetSubMatchVar (interp, fileLine, subMatchInfo)
+SetSubMatchVar (interp, fileLine, numSubExprs, subMatchInfo)
     Tcl_Interp       *interp;
     char             *fileLine;
+    int               numSubExprs;
     Tcl_SubMatchInfo  subMatchInfo;
 {
     int  idx, start, end;
     char key [32], buf [32], *varPtr, holdChar;
     
-    for (idx = 0; idx < NSUBEXP; idx++) {
-        if (subMatchInfo [idx].start < 0)
-            continue;  /* Skip unmatched subexpressions */
+    for (idx = 0; idx < numSubExprs; idx++) {
         start = subMatchInfo [idx].start;
         end = subMatchInfo [idx].end;
 
@@ -399,12 +399,18 @@ SetSubMatchVar (interp, fileLine, subMatchInfo)
             return TCL_ERROR;
 
         sprintf (key, "submatch%d", idx);
-        holdChar = fileLine [end + 1];
-        fileLine [end + 1] = '\0';
-        varPtr = Tcl_SetVar2 (interp, "matchInfo", key,
-                              fileLine + start,
-                              TCL_LEAVE_ERR_MSG);
-        fileLine [end + 1] = holdChar;
+        if (start < 0) {
+            varPtr = Tcl_SetVar2 (interp, "matchInfo", key,
+                                  "",
+                                  TCL_LEAVE_ERR_MSG);
+        } else {
+            holdChar = fileLine [end + 1];
+            fileLine [end + 1] = '\0';
+            varPtr = Tcl_SetVar2 (interp, "matchInfo", key,
+                                  fileLine + start,
+                                  TCL_LEAVE_ERR_MSG);
+            fileLine [end + 1] = holdChar;
+        }
         if (varPtr == NULL)
             return TCL_ERROR;
     }
@@ -523,7 +529,10 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
                     goto scanExit;
                 storedThisLine = TRUE;
             }
-            result = SetSubMatchVar (interp, dynBuf.string, subMatchInfo);
+            result = SetSubMatchVar (interp,
+                                     dynBuf.string,
+                                     matchPtr->regExpInfo.numSubExprs,
+                                     subMatchInfo);
             if (result != TCL_OK)
                 goto scanExit;
 

@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 4.1 1994/11/25 19:00:41 markd Exp markd $
+ * $Id: tclXregexp.c,v 4.2 1994/11/25 20:09:18 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,6 +27,17 @@
  * a regular expressions.
  */
 extern char *tclRegexpError;
+
+/*
+ * Structure used to return pre-parse infomation about a regular expression.
+ */
+typedef struct {
+    int   meta;
+    int   numSubExprs;
+    char *largestNonMeta;
+    int   largestNonMetaLen;
+} preParseInfo_t;
+
 
 /*
  * Meta-characters for regular expression
@@ -53,8 +64,8 @@ BoyerMooreExecute _ANSI_ARGS_((char     *text,
                                unsigned *patLenP));
 
 static int
-FindNonRegExpSubStr _ANSI_ARGS_((char  *expression,
-                                 char **subStrPtrPtr));
+PreParseRegExp _ANSI_ARGS_((char           *expression,
+                            preParseInfo_t *infoPtr));
 
 
 /*
@@ -276,52 +287,126 @@ TclX_RegExpClean (regExpPtr)
 /*
  *-----------------------------------------------------------------------------
  *
- * FindNonRegExpSubStr
- *     Find the largest substring that does not have any regular 
- *     expression meta-characters and is not located within `[...]'.
- *     If the regexp contains an or (|), zero is returned, as the 
- *     Boyer-Moore optimization does not work, since there are actually
- *     multiple patterns.  The real solution is to build the Boyer-Moore
- *     into the regular expression code.
+ * PreParseRegExp --
+ *
+ *   Do preparsing of the regular expression to allow us to do various
+ * optimizations outside of the regular expression parsing.  This includes
+ * detecting if there are any regular expression meta-characters and what
+ * the largest substring is for boyer-moore matching.
+ *
+ * Parameters:
+ *   o expression (I) - Expression to parse.
+ *   o infoPtr (O) - Information is returned in this structure.  The following
+ *     fields are returned:
+ *     o meta - TRUE if there are any meta characters, FALSE otherwise.
+ *     o numSubExprs - The number of subexpressions in the expression.
+ *     o largestNonMeta - Pointer to the beginning of the largest string
+ *       without any meta characters.
+ *     o largestNonMetaLen - Length of the largest non-meta character string.
+ * Returns:
+ *    TRUE if the parse succeeded, FALSE if there appears to be an error.
+ * Call TclRegComp to get a real error message.
  *-----------------------------------------------------------------------------
  */
 static int
-FindNonRegExpSubStr (expression, subStrPtrPtr)
-    char  *expression;
-    char **subStrPtrPtr;
+PreParseRegExp (expression, infoPtr)
+    char           *expression;
+    preParseInfo_t *infoPtr;
 {
-    register char *subStrPtr = NULL;
-    register char  subStrLen = 0;
-    register char *scanPtr   = expression;
-    register int   len;
+    register char *scanPtr  = expression;
+    register char *nonMetaStart;
+    register int   nonMetaCnt, gotMeta, parenNest;
 
+    infoPtr->meta = FALSE;
+    infoPtr->numSubExprs = 0;
+    infoPtr->largestNonMeta = NULL;
+    infoPtr->largestNonMetaLen = 0;
+
+    nonMetaCnt = 0;
+
+    /*
+     * Scan counting subexpressions and searching for the longest string
+     * containing no meta-characters.  Note that backslashed characters
+     * are considered meta for this purpose as they will not behave as
+     * exprected in the Boyer-Moore matching code.  Strings in subexpressions
+     * are not counted.
+     */
     while (*scanPtr != '\0') {
-        len = strcspn (scanPtr, TCLX_REXP_META);
-        /*
-         * If we are at a meta-character, by-pass till non-meta.  If we hit
-         * a `[' then by-pass the entire `[...]' range, but be careful, could
-         * have omitted `]'.  In a `|' is encountered (except in brackets),'
-         * we are through.
-         */
-        if (len == 0) {
-            scanPtr += strspn (scanPtr, TCLX_REXP_META_NO_BRACKET_NO_OR);
-            if (*scanPtr == '|')
-                return 0;
-            if (*scanPtr == '[') {
-                scanPtr += strcspn (scanPtr, "]");
-                if (*scanPtr == ']')
-                    scanPtr++;
-            }          
-        } else {
-            if (len > subStrLen) {
-                subStrPtr = scanPtr;
-                subStrLen = len;
+        switch (*scanPtr++) {
+          case '^':
+          case '$':
+          case '.':
+          case '?':
+          case '+':
+          case '*':
+            gotMeta = TRUE;
+            break;
+          case '[':
+            gotMeta = TRUE;
+            while (*scanPtr != ']' && *scanPtr != '\0') {
+                scanPtr++;
             }
-            scanPtr += len;
+            if (*scanPtr == '\0')
+                return FALSE;
+            break;
+          case '(':
+            gotMeta = TRUE;
+            infoPtr->numSubExprs++;
+            parenNest = 1;
+            while (parenNest > 0 && *scanPtr != '\0') {
+                switch (*scanPtr++) {
+                  case '\\':
+                    if (scanPtr == '\0')
+                        return FALSE;
+                    scanPtr++;
+                    break;
+                  case '(':
+                    infoPtr->numSubExprs++;
+                    parenNest++;
+                    break;
+                  case ')':
+                    parenNest--;
+                    break;
+                }
+            }
+            if ((*scanPtr == '\0') && (parenNest > 0))
+                return FALSE;
+            break;
+          case '\\':
+            gotMeta = TRUE;
+            if (*scanPtr == '\0')
+                return FALSE;
+            scanPtr++;
+            break;
+          default:
+            gotMeta = FALSE;
+            if (nonMetaCnt == 0)
+                nonMetaStart = scanPtr - 1;
+            nonMetaCnt++;
+        }
+        /*
+         * If we just hit a meta character, save the non-meta substring
+         * if its the longest one we have hit.
+         */
+        if (gotMeta && (nonMetaCnt > infoPtr->largestNonMetaLen)) {
+                infoPtr->largestNonMeta = nonMetaStart;
+                infoPtr->largestNonMetaLen = nonMetaCnt;
+        }
+        if (gotMeta) {
+            infoPtr->meta = TRUE;
+            nonMetaCnt = 0;
         }
     }
-    *subStrPtrPtr = subStrPtr;
-    return subStrLen;
+
+    /*
+     * Handle counting non-meta substring at the end of the string.
+     */
+    if (nonMetaCnt > infoPtr->largestNonMetaLen) {
+        infoPtr->largestNonMeta = nonMetaStart;
+        infoPtr->largestNonMetaLen = nonMetaCnt;
+    }
+
+    return TRUE;
 }
 
 /*
@@ -352,8 +437,9 @@ TclX_RegExpCompile (interp, regExpPtr, expression, flags)
     char        *expression;
     int          flags;
 {
-    char *expBuf;
-    int   anyMeta;
+    char           *expBuf;
+    int             preParseOk;
+    preParseInfo_t  preParseInfo;
 
     if (*expression == '\0') {
         Tcl_AppendResult (interp, "Null regular expression", (char *) NULL);
@@ -367,55 +453,63 @@ TclX_RegExpCompile (interp, regExpPtr, expression, flags)
     if (flags & TCLX_REXP_NO_CASE) {
         expBuf = ckalloc (strlen (expression) + 1);
         Tcl_DownShift (expBuf, expression);
-    } else
+    } else {
         expBuf = expression;
-
-    anyMeta = strpbrk (expBuf, TCLX_REXP_META) != NULL;
+    }
 
     /*
-     * If no meta-characters, use Boyer-Moore string matching only.
+     * Pre-parse the expression to gain information used for Boyer-Moore
+     * optimization and returning subexpression results.  If an error occurs,
+     * force the expression compilation anyway to get a real error message.
      */
-    if ((!anyMeta) && (flags & TCLX_REXP_BOTH_ALGORITHMS)) {
-        regExpPtr->boyerMoorePtr = BoyerMooreCompile (expBuf, strlen (expBuf));
-        goto okExitPoint;
+    preParseOk = PreParseRegExp (expBuf,
+                                 &preParseInfo);
+    if (!preParseOk) {
+        preParseInfo.meta = TRUE;
+        preParseInfo.largestNonMetaLen = -1;
     }
- 
+    regExpPtr->numSubExprs = preParseInfo.numSubExprs;
+
     /*
      * Build a Boyer-Moore on the largest non-meta substring, if requested,
-     * and the reg-exp does not contain a `|' (or).  If less that three
-     * characters in the string, don't use B-M, as it seems not optimal at
-     * this point.
+     * If less than three characters in the string and there are meta 
+     * characters, don't use B-M, as it seems not optimal at this point.
      */
-    if (flags & TCLX_REXP_BOTH_ALGORITHMS) {
-        char *subStrPtr;
-        int   subStrLen;
-        
-        subStrLen = FindNonRegExpSubStr (expBuf, &subStrPtr);
-        if (subStrLen > 2)
+    if ((flags & TCLX_REXP_BOTH_ALGORITHMS) && 
+        (preParseInfo.largestNonMetaLen >= (preParseInfo.meta ? 3 : 0))) {
             regExpPtr->boyerMoorePtr = 
-                BoyerMooreCompile (subStrPtr, subStrLen);
+                BoyerMooreCompile (preParseInfo.largestNonMeta,
+                                   preParseInfo.largestNonMetaLen);
     }
     
     /*
-     * Compile meta-character containing regular expression.
+     * Compile meta-character containing regular expression or ones with
+     * errors to generate a useful error message.
      */
-    tclRegexpError = NULL;
-    regExpPtr->progPtr = TclRegComp (expBuf);
-    if (tclRegexpError != NULL) {
-        if (flags & TCLX_REXP_NO_CASE)
-            ckfree (expBuf);
-        Tcl_AppendResult (interp, "error in regular expression: ", 
-                          tclRegexpError, (char *) NULL);
-        if (flags & TCLX_REXP_NO_CASE)
-            ckfree (expBuf);
-        TclX_RegExpClean (regExpPtr);
+    if (preParseInfo.meta) {
+        tclRegexpError = NULL;
+        regExpPtr->progPtr = TclRegComp (expBuf);
+        
+        /*
+         * If the preparsing reported an error, but the compile didn't,
+         * we have a bug in the pre-parser.
+         */
+        if ((!preParseOk) && (tclRegexpError == NULL))
+            panic ("scanmatch preparse bug");
+        
+        if (tclRegexpError != NULL) {
+            Tcl_AppendResult (interp, "error in regular expression: ", 
+                              tclRegexpError, (char *) NULL);
+            if (flags & TCLX_REXP_NO_CASE)
+                ckfree (expBuf);
+            TclX_RegExpClean (regExpPtr);
+            return TCL_ERROR;
+        }
     }
-  
-okExitPoint: 
+
     if (flags & TCLX_REXP_NO_CASE)
         ckfree (expBuf);
     return TCL_OK;
-
 }
 
 /*
@@ -480,10 +574,6 @@ TclX_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
          * If no regexp, its a match!
          */
         if (regExpPtr->progPtr == NULL) {
-            for (idx = 0; idx < NSUBEXP; idx++) {
-                subMatchInfo [idx].start = -1;
-                subMatchInfo [idx].end = -1;
-            }
             result = TRUE; 
             goto exitPoint;
         }
@@ -499,7 +589,7 @@ TclX_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
      * Return submatches if we found it.
      */
     if (result) {
-        for (idx = 1; idx < NSUBEXP; idx++) {
+        for (idx = 1; idx < regExpPtr->numSubExprs + 1; idx++) {
             if (progPtr->startp [idx] == NULL) {
                 subMatchInfo [idx - 1].start = -1;
                 subMatchInfo [idx - 1].end = -1;
@@ -509,8 +599,6 @@ TclX_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
                 subMatchInfo [idx - 1].end =
                     progPtr->endp [idx] - matchStr - 1;
             }
-            subMatchInfo [NSUBEXP-1].start = -1;
-            subMatchInfo [NSUBEXP-1].end = -1;
         }
     }
 
