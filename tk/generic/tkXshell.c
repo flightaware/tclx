@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.3 1995/01/01 19:50:58 markd Exp markd $
+ * $Id: tkXshell.c,v 4.4 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -119,7 +119,7 @@ static void		SignalProc _ANSI_ARGS_((int signalNum));
  */
 
 void
-Tk_Main (argc, argv)
+TkX_Main (argc, argv)
     int argc;				/* Number of arguments. */
     char **argv;			/* Array of argument strings. */
 {
