@@ -1,4 +1,66 @@
+2002-04-03  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* generic/tclXgeneral.c (TclX_EchoObjCmd): use encoding aware
+	functions in 8.1+. [Bug #514053]
+
+	* generic/tclXselect.c: allow to compile on Windows as well
+	(although select isn't supported).
+
+	* Makefile.in: correct install targets
+	* configure:
+	* configure.in:
+	* tclconfig/tcl.m4: update to latest TEA base files
+
+	* win/tclXwinCmds.c: use the generic select command definition
+	* win/tclXwinOS.c (TclXNotAvailableError): use Tcl_AppendResult
+	* win/tclXwinPort.h: prevent redefinition complaints
+
+	* tests/chmod.test:
+	* tests/chroot.test:
+	* tests/fcntl.test:
+	* tests/fstat.test:
+	* tests/ftrunc.test:
+	* tests/lgets.test:
+	* tests/msgcat.test:
+	* tests/nice.test:
+	* tests/pipe.test:
+	* tests/process.test:
+	* tests/profile.test:
+	* tests/tcllib.test:
+	* tests/testlib.tcl:
+	* tests/tryeval.test:
+	* tests/unixcmds.test: convert to use tcltest test command
+
 2002-04-02  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* doc/TclX.n: updated to note lack of shell stuff in 8.4.
+
+	* configure:
+	* configure.in: added FULL_VERSION info
+
+	* generic/tclExtdInt.h: removed TclX_WriteStr, TclX_Eval and
+	TclX_VarEval as they simply shadowed Tcl commands.  Removed
+	TclX_ShellExit (no longer needed).  Updated files with Tcl equivs.
+	* generic/tclExtend.h:
+	* generic/tclXcmdloop.c:
+	* generic/tclXdebug.c:
+	* generic/tclXgeneral.c:
+	* generic/tclXinit.c:
+	* generic/tclXlib.c:
+	* generic/tclXtest.c:
+	* generic/tclXutil.c:
+
+	* generic/tclXinitDSA.c (removed):
+	* generic/tclXinitSA.c (removed): old Tcl plus patch files
+
+	* tests/cmdtrace.test:
+	* tests/dup.test:
+	* tests/flock.test:
+	* tests/help.test:
+	* tests/process.test:
+	* tests/signal.test:
+	* tests/testlib.tcl: updated tests to use $::tcltest::tcltest
+	instead of relying on TCL_PROGRAM.
 
 	* Makefile.in: remove tclXinitLib.c
 
