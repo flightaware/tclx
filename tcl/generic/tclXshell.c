@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 2.19 1993/09/16 05:37:54 markd Exp markd $
+ * $Id: tclXshell.c,v 2.20 1993/09/25 05:09:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -219,6 +219,8 @@ TclX_RunShell (interp)
      * Otherwise, enter an interactive command loop.  Setup SIGINT handling
      * so user may interrupt with out killing program.
      */
+    TclX_EvalRCFile (interp);
     Tcl_SetupSigInt ();
+
     return Tcl_CommandLoop (interp, isatty (0));
 }

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 1.5 1993/08/31 23:03:20 markd Exp $
+ * $Id: tkXAppInit.c,v 1.1 1993/09/16 05:42:39 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /user6/ouster/wish/RCS/tkAppInit.c,v 1.8 93/08/26 14:38:24 ouster Exp $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.1 1993/09/16 05:42:39 markd Exp markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"
@@ -105,5 +105,13 @@ TclX_AppInit(interp)
      * they weren't already created by the init procedures called above.
      */
 
+    /*
+     * Specify a user-specific startup file to invoke if the application
+     * is run interactively.  Typically the startup file is "~/.apprc"
+     * where "app" is the name of the application.  If this line is deleted
+     * then no user-specific startup file will be run under any conditions.
+     */
+
+    tcl_RcFileName = "~/.tclrc";
     return TCL_OK;
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 1.2 1993/10/11 04:24:49 markd Exp markd $
+ * $Id: tclXinit.c,v 1.3 1993/10/23 23:33:57 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -180,4 +180,38 @@ TclX_Init (interp)
   errorExit:
     Tcl_DStringFree (&libDir);
     return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclX_EvalRCFile --
+ *
+ * Evaluate the file stored in tcl_RcFileName it is readable.  Exit if an
+ * error occurs.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_EvalRCFile (interp)
+    Tcl_Interp  *interp;
+{
+    Tcl_DString  buffer;
+    char        *fullName;
+    int          code;
+
+    if (tcl_RcFileName != NULL) {
+        fullName = Tcl_TildeSubst (interp, tcl_RcFileName, &buffer);
+        if (fullName == NULL)
+            TclX_ErrorExit (interp, 1);
+        
+        if (access(fullName, R_OK) == 0) {
+            code = Tcl_EvalFile (interp, fullName);
+            if (code == TCL_ERROR)
+                TclX_ErrorExit (interp, 1);
+        }
+	Tcl_DStringFree(&buffer);
+    }
 }

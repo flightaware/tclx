@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 2.8 1993/08/31 23:03:20 markd Exp markd $
+# $Id: TclInit.tcl,v 2.9 1993/09/03 08:29:22 markd Exp markd $
 #-----------------------------------------------------------------------------
 
 #
@@ -31,6 +31,3 @@ if ![info exists tcl_prompt1] {
 if ![info exists tcl_prompt2] {
     set tcl_prompt2 {return =>}
 }
-
-if [file readable ~/.tclrc] {source ~/.tclrc}
-

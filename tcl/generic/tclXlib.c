@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.11 1993/10/31 23:55:23 markd Exp markd $
+ * $Id: tclXlib.c,v 2.12 1993/11/01 00:18:42 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -320,7 +320,7 @@ MakeAbsFile (interp, fileName, absNamePtr)
                           curDir, (char *) NULL);
     }
 #endif
-    Tcl_DStringAppend (absNamePtr, curDir, -  1);
+    Tcl_DStringAppend (absNamePtr, curDir,   -1);
     Tcl_DStringAppend (absNamePtr, "/",      -1);
     Tcl_DStringAppend (absNamePtr, fileName, -1);
 

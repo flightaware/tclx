@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.20 1993/11/05 05:33:10 markd Exp markd $
+ * $Id: tclExtend.h,v 2.21 1993/11/05 07:08:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -80,7 +80,10 @@ EXTERN void
 TclX_ErrorExit _ANSI_ARGS_((Tcl_Interp  *interp,
                             int          exitCode));
 
-extern void
+EXTERN void
+TclX_EvalRCFile _ANSI_ARGS_((Tcl_Interp *interp));
+
+EXTERN void
 TclX_OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
                                int         topLevel));
 
@@ -89,7 +92,7 @@ TclX_ParseCmdLine _ANSI_ARGS_((Tcl_Interp   *interp,
                                int           argc,
                                char        **argv));
 
-extern void
+EXTERN void
 TclX_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
                               int         intResult,
                               char       *checkCmd));
