@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 7.0 1996/06/16 05:32:06 markd Exp $
+# $Id: dup.test,v 7.2 1996/07/19 03:53:33 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -94,109 +94,125 @@ close $outFH
 # Test binding of open files to ids.  Solaris opens pipes RDWR (I don't know
 # why), so skip some tests if this is the case.
 
-pipe fromChild toParent
-pipe fromParent toChild
-
-flush stdout
-flush stderr
-
-if {[set childPid [fork]] == 0} {
-    catch {
-        close $fromChild
-        close $toChild
-        set toParent [crange $toParent 4 end]
-        set fromParent [crange $fromParent 4 end]
-        set prog {}
-        append prog "set toParent \[dup $toParent\]" \n
-        append prog "set fromParent \[dup $fromParent\]" \n
-        append prog {if ![fcntl $fromParent RDWR] } "{\n"
-        append prog {    puts $toParent "DOING ACCESS CHECK"} \n
-        append prog {    flush $toParent} \n
-        append prog {    catch {puts $fromParent arf} msg} \n
-        append prog {    puts $toParent "msg1: $msg"} \n
-        append prog {    flush $toParent} \n
-        append prog {    catch {gets $toParent} msg} \n
-        append prog {    puts $toParent "msg2: $msg"} \n
-        append prog {    flush $toParent} \n
-        append prog "} else {\n"
-        append prog {    puts $toParent "SKIPPING ACCESS CHECK"} \n
-        append prog {    flush $toParent} \n
-        append prog "}\n"
-        append prog {while {[gets $fromParent msg] >= 0} {
-            puts $toParent "got: $msg"; flush $toParent}}
-        execl $TCL_PROGRAM [list -qc $prog]
-    } msgDOING
-    puts stderr "child failed: $msg"
-    exit 1
-}
-close $toParent
-close $fromParent
-
-Test dup-2.1 {dup tests} {
-    set line [gets $fromChild]
-    switch $line {
-        {DOING ACCESS CHECK} {
-            set doingAccess 1
-            concat OK
-        }
-        {SKIPPING ACCESS CHECK} {
-            set doingAccess 0
-            concat OK
-        }
-        default {
-            set doingAccess 0
-            list $line
+set doDupIdTests 1
+switch $tcl_platform(platform) {
+    unix {
+        #
+        # FreeBSD 2.2-960612-SNAP implments pipes as sockets, but socket
+        # operations on them fail.  
+        #
+        if [cequal "FreeBSD 2.2-960612-SNAP" \
+                   "$tcl_platform(os) $tcl_platform(osVersion)"] {
+            set doDupIdTests 0
         }
     }
-} 0 OK
-
-
-if ![fcntl $toChild RDWR] {
-    Test dup-2.2 {dup tests} {
-        gets $toChild
-    } 1 "channel \"$toChild\" wasn't opened for reading"
-
-    Test dup-2.3 {dup tests} {
-        puts $fromChild arf
-    } 1 "channel \"$fromChild\" wasn't opened for writing"
 }
 
-if $doingAccess {
-    Test dup-2.4 {dup tests} {
-        gets $fromChild line
-        if [string match {msg1: channel "*" wasn't opened for writing} $line] {
-            list OK
-        } else {
-            list $line
+if $doDupIdTests {
+    pipe fromChild toParent
+    pipe fromParent toChild
+
+    flush stdout
+    flush stderr
+
+    if {[set childPid [fork]] == 0} {
+        catch {
+            close $fromChild
+            close $toChild
+            set toParent [crange $toParent 4 end]
+            set fromParent [crange $fromParent 4 end]
+            set prog {}
+            append prog "set toParent \[dup $toParent\]" \n
+            append prog "set fromParent \[dup $fromParent\]" \n
+            append prog {if ![fcntl $fromParent RDWR] } "{\n"
+            append prog {    puts $toParent "DOING ACCESS CHECK"} \n
+            append prog {    flush $toParent} \n
+            append prog {    catch {puts $fromParent arf} msg} \n
+            append prog {    puts $toParent "msg1: $msg"} \n
+            append prog {    flush $toParent} \n
+            append prog {    catch {gets $toParent} msg} \n
+            append prog {    puts $toParent "msg2: $msg"} \n
+            append prog {    flush $toParent} \n
+            append prog "} else {\n"
+            append prog {    puts $toParent "SKIPPING ACCESS CHECK"} \n
+            append prog {    flush $toParent} \n
+            append prog "}\n"
+            append prog {while {[gets $fromParent msg] >= 0} {
+                puts $toParent "got: $msg"; flush $toParent}}
+            execl $TCL_PROGRAM [list -qc $prog]
+        } msg
+        puts stderr "child failed: $msg"
+        exit 1
+    }
+    close $toParent
+    close $fromParent
+
+    Test dup-2.1 {dup tests} {
+        set line [gets $fromChild]
+        switch $line {
+            {DOING ACCESS CHECK} {
+                set doingAccess 1
+                concat OK
+            }
+            {SKIPPING ACCESS CHECK} {
+                set doingAccess 0
+                concat OK
+            }
+            default {
+                set doingAccess 0
+                list $line
+            }
         }
     } 0 OK
-    Test dup-2.5 {dup tests} {
-        gets $fromChild line
-        if [string match {msg2: channel "*" wasn't opened for reading} $line] {
-            list OK
-        } else {
-            list $line
-        }
-    } 0 OK
+
+
+    if ![fcntl $toChild RDWR] {
+        Test dup-2.2 {dup tests} {
+            gets $toChild
+        } 1 "channel \"$toChild\" wasn't opened for reading"
+
+        Test dup-2.3 {dup tests} {
+            puts $fromChild arf
+        } 1 "channel \"$fromChild\" wasn't opened for writing"
+    }
+
+    if $doingAccess {
+        Test dup-2.4 {dup tests} {
+            gets $fromChild line
+            if [string match {msg1: channel "*" wasn't opened for writing} $line] {
+                list OK
+            } else {
+                list $line
+            }
+        } 0 OK
+        Test dup-2.5 {dup tests} {
+            gets $fromChild line
+            if [string match {msg2: channel "*" wasn't opened for reading} $line] {
+                list OK
+            } else {
+                list $line
+            }
+        } 0 OK
+    }
+
+    Test dup-2.6 {dup tests} {
+        puts $toChild "test 2.2"
+        flush $toChild
+        gets $fromChild
+    } 0 {got: test 2.2}
+
+    Test dup-2.7 {dup tests} {
+        puts $toChild "test 2.3"
+        flush $toChild
+        gets $fromChild
+    } 0 {got: test 2.3}
+
+    Test dup-2.8 {dup tests} {
+        close $toChild
+        close $fromChild
+        wait $childPid
+    } 0 [list $childPid EXIT 0]
 }
-
-Test dup-2.6 {dup tests} {
-    puts $toChild "test 2.2"
-    flush $toChild
-    gets $fromChild
-} 0 {got: test 2.2}
-
-Test dup-2.7 {dup tests} {
-    puts $toChild "test 2.3"
-    flush $toChild
-    gets $fromChild
-} 0 {got: test 2.3}
-
-Test dup-2.8 {dup tests} {
-    close $toChild
-    close $fromChild
-    wait $childPid
-} 0 [list $childPid EXIT 0]
 
 Test dup-2.9 {dup tests} {
    set stat [catch {dup 100}]
