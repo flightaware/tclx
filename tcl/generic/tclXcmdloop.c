@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 3.1 1994/01/11 06:31:35 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -89,6 +89,8 @@ TclX_PrintResult (interp, intResult, checkCmd)
     int         intResult;
     char       *checkCmd;
 {
+    FILE *stdoutPtr;
+
     /*
      * If the command was supplied and it was a successful set of a variable,
      * don't output the result.
@@ -96,20 +98,26 @@ TclX_PrintResult (interp, intResult, checkCmd)
     if ((checkCmd != NULL) && (intResult == TCL_OK) && IsSetVarCmd (checkCmd))
         return;
 
+    stdoutPtr = TCL_STDOUT;
+
     if (intResult == TCL_OK) {
         if (interp->result [0] != '\0') {
-            fputs (interp->result, stdout);
-            fputs ("\n", stdout);
+            fputs (interp->result, stdoutPtr);
+            fputs ("\n", stdoutPtr);
         }
     } else {
-        fflush (stdout);
+        FILE *stderrPtr;
+        
+        stderrPtr = TCL_STDERR;
+
+        fflush (stdoutPtr);
         if (intResult == TCL_ERROR)  
-            fputs ("Error: ", stderr);
+            fputs ("Error: ", stderrPtr);
         else
             fprintf (stderr, "Bad return code (%d): ", intResult);
-        fputs (interp->result, stderr);
-        fputs ("\n", stderr);
-        fflush (stderr);
+        fputs (interp->result, stderrPtr);
+        fputs ("\n", stderrPtr);
+        fflush (stderrPtr);
     }
 }
 
@@ -131,6 +139,7 @@ TclX_OutputPrompt (interp, topLevel)
     char *promptHook;
     int   result;
     int   promptDone = FALSE;
+    FILE *stdoutPtr;
 
     /*
      * If a signal came in, process it.  This prevents signals that are queued
@@ -146,21 +155,28 @@ TclX_OutputPrompt (interp, topLevel)
     if (promptHook != NULL) {
         result = Tcl_Eval (interp, promptHook);
         if (result == TCL_ERROR) {
-            fputs ("Error in prompt hook: ", stderr);
-            fputs (interp->result, stderr);
-            fputs ("\n", stderr);
+            FILE *stderrPtr;
+
+            stderrPtr = TCL_STDERR;
+
+            fputs ("Error in prompt hook: ", stderrPtr);
+            fputs (interp->result, stderrPtr);
+            fputs ("\n", stderrPtr);
             TclX_PrintResult (interp, result, NULL);
         } else {
             promptDone = TRUE;
         }
     } 
+
+    stdoutPtr = TCL_STDOUT;
+
     if (!promptDone) {
         if (topLevel)
-            fputs ("%", stdout);
+            fputs ("%", stdoutPtr);
         else
-            fputs (">", stdout);
+            fputs (">", stdoutPtr);
     }
-    fflush (stdout);
+    fflush (stdoutPtr);
     Tcl_ResetResult (interp);
 }
 
@@ -192,6 +208,7 @@ Tcl_CommandLoop (interp, interactive)
     char        inputBuf [128];
     int         topLevel = TRUE;
     int         result;
+    FILE       *stdinPtr, *stdoutPtr;
 
     Tcl_DStringInit (&cmdBuf);
 
@@ -213,17 +230,20 @@ Tcl_CommandLoop (interp, interactive)
         /*
          * Output a prompt and input a command.
          */
-        clearerr (stdin);
-        clearerr (stdout);
+        stdinPtr = TCL_STDIN;
+        stdoutPtr = TCL_STDOUT;
+
+        clearerr (stdinPtr);
+        clearerr (stdoutPtr);
         if (interactive)
             TclX_OutputPrompt (interp, topLevel);
         errno = 0;
-        if (fgets (inputBuf, sizeof (inputBuf), stdin) == NULL) {
-            if (!feof(stdin) && (errno == EINTR)) {
+        if (fgets (inputBuf, sizeof (inputBuf), stdinPtr) == NULL) {
+            if (!feof(stdinPtr) && (errno == EINTR)) {
                 putchar('\n');
                 continue;  /* Next command */
             }
-            if (ferror (stdin)) {
+            if (ferror (stdinPtr)) {
                 Tcl_AppendResult (interp, "command input error on stdin: ",
                                   Tcl_PosixError (interp), (char *) NULL);
                 return TCL_ERROR;

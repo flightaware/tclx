@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 3.6 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclExtdInt.h,v 3.7 1994/06/28 07:07:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -192,6 +192,27 @@ extern char *tclXWrongArgs;
  */
 #define ckstrdup(sourceStr) \
   (strcpy (ckalloc (strlen (sourceStr) + 1), sourceStr))
+
+
+/*
+ * Macros to get the stdin, stdout and stderr pointers out of the interpreter
+ * when error status is not desired.
+ */
+#define TCL_STDIN \
+    (((tclNumFiles < 1) || (tclOpenFiles [0] == NULL)) ? \
+     stdin : tclOpenFiles [0]->f)
+
+#define TCL_STDOUT \
+    (((tclNumFiles < 2) || (tclOpenFiles [1] == NULL)) ? \
+     stdout : \
+      ((tclOpenFiles [1]->f2 != NULL) ? tclOpenFiles [1]->f2 : \
+       tclOpenFiles [1]->f))
+
+#define TCL_STDERR \
+    (((tclNumFiles < 3) || (tclOpenFiles [2] == NULL)) ? \
+     stderr : \
+      ((tclOpenFiles [2]->f2 != NULL) ? tclOpenFiles [2]->f2 : \
+       tclOpenFiles [2]->f))
 
 
 /*

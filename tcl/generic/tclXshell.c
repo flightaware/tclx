@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 3.3 1994/01/11 04:20:30 markd Exp markd $
+ * $Id: tclXshell.c,v 3.4 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -192,7 +192,7 @@ ParseCmdLine (interp, argc, argv)
     return;
 
   usageError:
-    fprintf (stderr, "usage: %s %s\n", argv [0],
+    fprintf (TCL_STDERR, "usage: %s %s\n", argv [0],
              "?-qun? ?-f? ?script?|?-c command? ?args?");
     exit (1);
 
@@ -279,7 +279,7 @@ TclX_Shell (argc, argv)
 
 #if defined(TCL_MEM_DEBUG)
     Tcl_DeleteInterp (interp);
-    fprintf (stderr, " >>> Dumping active memory list to mem.lst <<<\n");
+    fprintf (TCL_STDERR, " >>> Dumping active memory list to mem.lst <<<\n");
     if (Tcl_DumpActiveMemory ("mem.lst") != TCL_OK)
         panic ("error accessing `mem.lst': %s", strerror (errno));
     exit (0);

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 3.1 1994/05/17 06:00:07 markd Exp markd $
+ * $Id: tclXgeneral.c,v 3.2 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -50,14 +50,21 @@ Tcl_EchoCmd(clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int idx;
+    int   idx;
+    FILE *stdoutPtr;
+
+    if (Tcl_GetOpenFile (interp, "stdout", 
+                         TRUE,   /* Write access */
+                         TRUE,   /* Check access */
+                         &stdoutPtr) != TCL_OK)
+        return TCL_ERROR;
 
     for (idx = 1; idx < argc; idx++) {
-        fputs (argv [idx], stdout);
+        fputs (argv [idx], stdoutPtr);
         if (idx < (argc - 1))
-            printf(" ");
+            fprintf (stdoutPtr, " ");
     }
-    printf("\n");
+    fprintf (stdoutPtr, "\n");
     return TCL_OK;
 }
 

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 3.5 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tkXshell.c,v 3.6 1994/06/11 04:02:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,25 +47,8 @@
  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#ifdef __cplusplus
-#    include "tcl++.h"
-#    include <unistd.h>
-#else
-#    include "tclExtend.h"
-#endif
-
+#include "tclExtdInt.h"
 #include "tk.h"
-
-/*
- * Declarations for various library procedures and variables (don't want
- * to include tkInt.h or tkConfig.h here, because people might copy this
- * file out of the Tk source directory to make their own modified versions).
- */
-
-extern void		exit _ANSI_ARGS_((int status));
-extern int		isatty _ANSI_ARGS_((int fd));
-extern int		read _ANSI_ARGS_((int fd, char *buf, size_t size));
-extern char *		strrchr _ANSI_ARGS_((CONST char *string, int c));
 
 /*
  * Global variables used by the main program:
@@ -144,6 +127,9 @@ TkX_Wish (argc, argv)
     char *args, *p, *msg;
     char buf[20];
     int code;
+    FILE *stderrPtr;
+
+    stderrPtr = TCL_STDERR;
 
     interp = Tcl_CreateInterp();
 #ifdef TCL_MEM_DEBUG
@@ -156,7 +142,7 @@ TkX_Wish (argc, argv)
 
     if (Tk_ParseArgv(interp, (Tk_Window) NULL, &argc, argv, argTable, 0)
 	    != TCL_OK) {
-	fprintf(stderr, "%s\n", interp->result);
+	fprintf(stderrPtr, "%s\n", interp->result);
 	exit(1);
     }
     if (name == NULL) {
@@ -198,7 +184,7 @@ TkX_Wish (argc, argv)
 
     mainWindow = Tk_CreateMainWindow(interp, display, name, "Tk");
     if (mainWindow == NULL) {
-	fprintf(stderr, "%s\n", interp->result);
+	fprintf(stderrPtr, "%s\n", interp->result);
 	exit(1);
     }
     Tk_SetClass(mainWindow, "Tk");
@@ -239,7 +225,7 @@ TkX_Wish (argc, argv)
     if (geometry != NULL) {
 	code = Tcl_VarEval(interp, "wm geometry . ", geometry, (char *) NULL);
 	if (code != TCL_OK) {
-	    fprintf(stderr, "%s\n", interp->result);
+	    fprintf(stderrPtr, "%s\n", interp->result);
 	}
     }
 
@@ -269,7 +255,7 @@ TkX_Wish (argc, argv)
     }
     tclSignalBackgroundError = Tk_BackgroundError;
 
-    fflush(stdout);
+    fflush(TCL_STDOUT);
     Tcl_DStringInit(&command);
 
     /*
@@ -299,7 +285,7 @@ error:
     if (msg == NULL) {
 	msg = interp->result;
     }
-    fprintf(stderr, "%s\n", msg);
+    fprintf(stderrPtr, "%s\n", msg);
 
     if (!tclDeleteInterpAtEnd) {
         Tcl_GlobalEval(interp, errorExitCmd);
@@ -327,7 +313,7 @@ SignalProc (signalNum)
     Tcl_DStringFree (&command);
     gotPartial = 0;
     if (tty) {
-        fputc ('\n', stdout);
+        fputc ('\n', TCL_STDOUT);
         TclX_OutputPrompt (interp, !gotPartial);
     }
 }
@@ -362,7 +348,7 @@ StdinProc(clientData, mask)
     char *cmd;
     int code, count;
 
-    count = read(fileno(stdin), input, BUFFER_SIZE);
+    count = read(0, input, BUFFER_SIZE);
     if (count <= 0) {
 	if (!gotPartial) {
 	    if (tty) {

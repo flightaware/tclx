@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 3.0 1993/11/19 06:58:32 markd Rel markd $
+ * $Id: tclXdebug.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -269,7 +269,7 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
     infoPtr->noEval     = FALSE;
     infoPtr->noTruncate = FALSE;
     infoPtr->procCalls  = FALSE;
-    infoPtr->filePtr    = stdout;
+    infoPtr->filePtr    = NULL;
     fileHandle          = NULL;
 
     for (idx = 2; idx < argc; idx++) {
@@ -307,16 +307,14 @@ Tcl_CmdtraceCmd (clientData, interp, argc, argv)
         if (Tcl_GetInt (interp, argv[1], &(infoPtr->depth)) != TCL_OK)
             return TCL_ERROR;
     }
-    if (fileHandle != NULL) {
-        FILE *filePtr;
 
-        if (Tcl_GetOpenFile (interp, fileHandle, 
-                             TRUE,   /* Write access */
-                             TRUE,   /* Check access */
-                             &filePtr) != TCL_OK)
-	    return TCL_ERROR;
-        infoPtr->filePtr = filePtr;
-    }
+    if (fileHandle == NULL)
+        fileHandle = "stdout";
+    if (Tcl_GetOpenFile (interp, fileHandle, 
+                         TRUE,   /* Write access */
+                         TRUE,   /* Check access */
+                         &infoPtr->filePtr) != TCL_OK)
+        return TCL_ERROR;
     
     infoPtr->traceHolder = Tcl_CreateTrace (interp, infoPtr->depth,
                                             CmdTraceRoutine,
