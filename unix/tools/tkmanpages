@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkmanpages,v 5.2 1996/03/04 16:22:28 markd Exp $
+# $Id: tkmanpages,v 5.3 1996/03/10 23:22:01 markd Exp $
 #------------------------------------------------------------------------------
 #
 return {
@@ -62,7 +62,6 @@ return {
     {tkvars.n       tk/control/tkvars}
     {tkwait.n       tk/control/tkwait}
     {toplevel.n     tk/widgets/toplevel}
-    {update.n       tk/control/update}
     {winfo.n        tk/control/winfo}
     {wm.n           tk/control/wm}
 }
