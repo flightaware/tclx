@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 2.8 1993/08/18 06:12:37 markd Exp markd $
+ * $Id: tclXprocess.c,v 2.9 1993/10/31 16:55:57 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -49,12 +49,14 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     char      **argv;
 {
 #define STATIC_ARG_SIZE   12
-    char  *staticArgv [STATIC_ARG_SIZE];
-    char **argInList = NULL;
-    char **argList   = staticArgv;
-    char  *argv0     = NULL;
-    int    nextArg   = 1;
-    int    argInCnt, idx;
+    char          *staticArgv [STATIC_ARG_SIZE];
+    char         **argInList   = NULL;
+    char         **argList     = staticArgv;
+    char          *path;
+    char          *argv0       = NULL;
+    int            nextArg     = 1;
+    int            argInCnt, idx;
+    Tcl_DString    tildeBuf;
 
     if (argc < 2)
         goto wrongArgs;
@@ -68,6 +70,8 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     if ((argc - nextArg) > 2)
         goto wrongArgs;
 
+    Tcl_DStringInit (&tildeBuf);
+
     /*
      * If arg list is supplied, split it and build up the arguments to pass.
      * otherwise, just supply argv[0].  Must be NULL terminated.
@@ -75,7 +79,7 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     if (argc - 1 > nextArg) {
         if (Tcl_SplitList (interp, argv [nextArg + 1],
                            &argInCnt, &argInList) != TCL_OK)
-            return TCL_ERROR;
+            goto errorExit;
 
         if (argInCnt > STATIC_ARG_SIZE - 2)
             argList = (char **) ckalloc ((argInCnt + 1) * sizeof (char **));
@@ -88,13 +92,20 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
         argList [1] = NULL;
     }
 
+    path = argv [nextArg];
+    if (path [0] == '~') {
+        path = Tcl_TildeSubst (interp, path, &tildeBuf);
+        if (path == NULL)
+            goto errorExit;
+    }
+
     if (argv0 != NULL) {
         argList [0] = argv0;
     } else {
 	argList [0] = argv [nextArg];  /* Program name */
     }
 
-    execvp (argv [nextArg], argList);
+    execvp (path, argList);
 
     /*
      * Can only make it here on an error.
@@ -105,7 +116,9 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
         ckfree (argInList);
     if (argList != staticArgv)
         ckfree (argList);
-    
+
+  errorExit:
+    Tcl_DStringFree (&tildeBuf);
     return TCL_ERROR;
 
   wrongArgs:

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 2.4 1993/07/11 19:25:19 markd Exp markd $
+ * $Id: tclXmath.c,v 2.5 1993/10/07 06:35:45 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,7 +29,7 @@ long random ();
 /*
  * Prototypes of internal functions.
  */
-long 
+static long 
 ReallyRandom _ANSI_ARGS_((long my_range));
 
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.10 1993/10/07 06:35:45 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.11 1993/10/24 18:56:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -560,7 +560,7 @@ errorExit:
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_fenameCmd --
+ * Tcl_FrenameCmd --
  *     Implements the rename TCL command:
  *         frename oldPath newPath
  *
@@ -575,18 +575,47 @@ Tcl_FrenameCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
+    Tcl_DString    tildeBuf1, tildeBuf2;
+    char          *oldPath, *newPath;
+
     if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
-                          " oldPath newPath", (char*) NULL);
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " oldPath newPath", (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (rename (argv [1], argv [2]) != 0) {
+    Tcl_DStringInit (&tildeBuf1);
+    Tcl_DStringInit (&tildeBuf2);
+    
+    oldPath = argv [1];
+    if (oldPath [0] == '~') {
+        oldPath = Tcl_TildeSubst (interp, oldPath, &tildeBuf1);
+        if (oldPath == NULL)
+            goto errorExit;
+    }
+
+    newPath = argv [1];
+    if (newPath [0] == '~') {
+        newPath = Tcl_TildeSubst (interp, newPath, &tildeBuf2);
+        if (newPath == NULL)
+            goto errorExit;
+    }
+
+    if (rename (oldPath, newPath) != 0) {
         Tcl_AppendResult (interp, "rename \"", argv [1], "\" to \"", argv [2],
                           "\" failed: ", Tcl_PosixError (interp),
                           (char *) NULL);
         return TCL_ERROR;
     }
 
+    
+    Tcl_DStringFree (&tildeBuf1);
+    Tcl_DStringFree (&tildeBuf2);
     return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&tildeBuf1);
+    Tcl_DStringFree (&tildeBuf2);
+    return TCL_ERROR;
 }
+

@@ -189,12 +189,6 @@ CAVEATS
 the startup sequence that need to be plugged first and guidelines need to
 be developed.
 
-TCL USENET NEWSGROUP
-====================
-
-    A Usenet newsgroup, comp.lang.tcl, is dedicated to discussing Tcl, Tk and
-the applications that embed it.
-
 WHERE TO GET IT
 ===============
 
@@ -213,7 +207,15 @@ or
    harbor.ecn.purdue.edu:tcl/extensions/tclX7.1a.tar.Z
 
 A contributed sources archive resides on harbor.ecn.purdue.edu and is mirrored
-on ftp.ibp.fr for our friends in Europe.
+on ftp.ibp.fr for our friends in Europe.  An  Frequently Asked Questions (FAQ)
+document exists in this archive.
 
 Remember to mail Extended Tcl problems and questions to tcl-project@NeoSoft.com
 not Dr. John Ousterhout.
+
+NEOSOFT TCL CONSULTING
+======================
+
+  NeoSoft, one of the developers of Extended Tcl, provides commercial Tcl
+support and consulting. NeoSoft can be reached by sending electronic mail to 
+info@NeoSoft.com or by phoning +1 713 684 5969.
