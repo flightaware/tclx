@@ -1,3 +1,9 @@
+
+INSTALLATION INSTRUCTIONS FOR EXTENDED TCL ON UNIX AND UNIX-LIKE SYSTEMS
+------------------------------------------------------------------------
+
+$Id: INSTALL,v 1.4 1997/06/14 12:17:55 karl Exp $
+
 QUICK START
 ===========
 
@@ -16,7 +22,7 @@ in the manner that addresses the needs of most users.   If you:
 
     o don't care about having multiple versions installed.
 
-then the following steps will build, test and installed TclX:
+...then the following steps will build, test and install TclX:
 
     cd tclX8.0.0/unix
     configure          # add --enable-shared to build shared libraries
@@ -34,9 +40,10 @@ If you want to customize your installation, read on.
 EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 =======================================
 
-Building the Extended Tcl requires access to built Tcl and Tk source
-directories.  Their location relative to the tclX8.0.0 directory is
-configured by editing tclX8.0.0/unix/Config.mk.
+To successfully build and install Extended Tcl, you must have already
+built Tcl and Tk, and make their built source trees available to
+Extended Tcl during the build process.  Their location relative to the 
+tclX8.0.0 directory is configured by editing tclX8.0.0/unix/Config.mk.
 
 The following directories are included under the TclX directory:
 
@@ -62,18 +69,28 @@ The following directories are included under the TclX directory:
 HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 ==========================================
 
-    o Configure, compile and install Tcl 7.5 following the instructions that
-      come with Tcl. 
+    o Configure, compile and install Tcl 8.0 following the instructions that
+      come with Tcl.  Tcl 8.0 can be obtained from
+
+	ftp://ftp.smli.com/pub/tcl/
+
+	ftp://mirror.neosoft.com/pub/tcl/mirror/ftp.smli.com/
 
     o If you are going to be using Tk and want to build an Extended Tcl wish
-      shell (wishx), configure, compile and install Tk 4.1.
+      shell (wishx), you will also need to configure, compile and install 
+      Tk 8.0.  Generic instructions on how to build and work worth packages
+      configured by "configure" scripts may be found in the file
+      INSTALL.generic, located in the same directory as the file you are
+      currently reading.
 
-    o cd to tclX8.0.0/unix
+    o after building and installing Tcl and Tk, cd to tclX8.0.0/unix
 
     o Edit Config.mk in the build directory following the instructions in the
-      file.  You normally don't need to do this, only if special configuration
-      options are required.  If the --srcdir option to configure is used, it is
-      copied from the source directory to the build directory.  This file is
+      file.  You normally won't need to change anything, unless you require
+      any special configuration options.  
+
+      If the --srcdir option to configure is used, Config.mk is copied from the 
+      source directory to the build directory.  This file is
       used to specify values that can't be figured out by the configure script.
       This includes the location of the Tcl and Tk distributions.  It's also
       used to specify the sections that the Tcl manual pages are to be
@@ -86,7 +103,9 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 
         o --enable-shared=YES|NO
           If "YES", build and link with shared libraries if "NO", no shared
-          libraries will be compiled.  Default is "NO".
+          libraries will be compiled.  Default is "NO".  If you say
+	  "--enable-shared" with no argument, it enables building shared 
+	  libraries.
 
         o --with-tk=YES|NO
           If "YES", compile Tk specific code and wishx, if "NO", no Tk related
@@ -129,8 +148,8 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       can't be run directly.  To run them before installation, use the
       "runtcl" and "runwishx" scripts generated in the unix directory.
 
-    o Extended Tcl comes with help pages that are built from the Tcl 7.5 and
-      Tk 4.1 manual pages as well as the TclX manual page.  If you are building
+    o Extended Tcl comes with help pages that are built from the Tcl 8.0 and
+      Tk 8.0 manual pages as well as the TclX manual page.  If you are building
       TclX with a later version of Tcl or Tk, you might want to rebuild these
       manual pages.  If new manual pages have been added, you can add them
       by editing the "unix/tools/tclmanpages" and "unix/tools/tkmanpages".
@@ -143,9 +162,17 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
       you need to do a "make clean" and a "make" to rebuild Extended Tcl,
       as these changes are not detected by the TclX make files.
 
-   We have a limited number of systems available to test Extended Tcl on,
-we need your help in supporting TclX on a wide range of platforms.  The nature
-of the functionality TclX supports mean a great deal of system dependent code.
+
+HELP... AND THANKS
+==================
+
+We have access to a few different platforms to test Extended Tcl on, but
+we need your help in supporting TclX on a wide range of systems.  As
+Extended Tcl hooks into many of the trickier nooks and crannies of your
+operating system, there is quite a bit of system-dependent code, and
+it took us much fiddling with the configure script to get it right...
+or mostly right.
+
 Thanks to all of those who have helped debug TclX!
 
 TESTING EXTENDED TCL
@@ -198,7 +225,7 @@ a multi-architecture server that has the rest of TclX already installed):
 SHARED LIBRARIES
 ================
 
-   Shared libraries can be build for all systems that Tcl supports shared
+   Shared libraries can be built for all systems that Tcl supports shared
 libraries on.  The --enable-shared flag to configure generates TclX shared
 libraries.  
 
