@@ -72,3 +72,13 @@ o Help change to search for file path tail needs documented and tests.
 
 o lvarset listvar idx value 
 
+----------------------------------------------------------------------------
+Date: Tue, 6 Jan 1998 13:47:06 -0700
+From: Tom Poindexter <tpoindex@nyx.net>
+
+I've just written a Tcl 8.0 interface for FastCGI.  It's in 100% Tcl, using
+TclX for the case where the FastCGI app is spawned by the web server (Apache).
+The spawned FastCGI process gets a socket as file descriptor 0.  Tcl
+makes fd 0 into a File channel, but 'server_accept' is content just to
+extract the fd from the channel, and perform an accept().
+----------------------------------------------------------------------------
