@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 8.3 1997/08/23 18:56:13 markd Exp $
+# $Id: tclhelp.tcl,v 8.4 1997/10/07 18:56:37 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -228,10 +228,13 @@ proc PerformSearch {w direction {string ""}} {
 	tk_dialog .searcherror "Error in Search" "String \"$string\" not found" error 0 "O.K."
 	return
     }
+    $w configure -state normal
     set index2 [$w index "$index + [string length $string] char"]
     $w tag remove sel 1.0 end
     $w tag add sel $index $index2
     $w see $index
+    $w configure -state disabled
+    focus $w
 }
 
 #------------------------------------------------------------------------------
