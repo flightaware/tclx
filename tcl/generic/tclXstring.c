@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.4 1993/07/18 05:59:41 markd Exp markd $
+ * $Id: tclXstring.c,v 2.5 1993/07/25 00:56:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -421,13 +421,16 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
     }
 
     if (STREQU (class, "ord")) {
-        if (strlen (argv [2]) != 1) {
+        int value;
+
+        if ((argv [2][0] == '\0') || (argv [2][1] != '\0')) {
             Tcl_AppendResult (interp, "string to convert must be only one",
                               " character", (char *) NULL);
             return TCL_ERROR;
         }
-
-        sprintf(interp->result, "%d", (int)(*argv[2]));
+        
+        value = 0xff & argv [2][0];  /* Prevent sign extension */
+        sprintf (interp->result, "%u", value);
         return TCL_OK;
     }
 

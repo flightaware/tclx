@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chartype.test,v 2.1 1993/06/21 05:43:53 markd Exp markd $
+# $Id: chartype.test,v 2.2 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -166,4 +166,18 @@ Test chartype-1.37 {ctype ord tests} {
     ctype ord ""
 } 1 {string to convert must be only one character}
 
+Test chartype-1.38 {ctype ord tests} {
+    ctype ord \377
+} 0 {255}
 
+Test chartype-1.39 {ctype ord tests} {
+    ctype ord \277
+} 0 {191}
+
+Test chartype-1.40 {ctype ord tests} {
+    ctype char 255
+} 0  \377
+
+Test chartype-1.41 {ctype ord tests} {
+    ctype char 191
+} 0  \277
