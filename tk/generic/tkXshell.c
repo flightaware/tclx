@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 3.2 1993/12/02 03:56:12 markd Exp markd $
+ * $Id: tkXshell.c,v 3.3 1993/12/03 10:25:23 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -278,6 +278,8 @@ TkX_Wish (argc, argv)
      */
 
     Tk_MainLoop();
+
+    Tcl_DStringFree(&command);
 
     /*
      * Don't exit directly, but rather invoke the Tcl "exit" command.
