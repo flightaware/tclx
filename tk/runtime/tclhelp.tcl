@@ -1,4 +1,3 @@
-
 # tclhelp.tcl --
 #
 # Tk program to access Extended Tcl & Tk help pages.  Uses internal functions
@@ -14,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 4.4 1995/04/07 14:08:02 markd Exp markd $
+# $Id: tclhelp.tcl,v 5.0 1995/07/25 06:00:36 markd Rel $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -125,6 +124,15 @@ proc DisplayPage {page} {
     wm title $w "Help on '$page'"
     wm iconname $w "Help: $page"
     wm minsize $w 1 1
+
+    frame $w.topframe
+    pack $w.topframe -side top -fill x
+
+    button $w.topframe.quit -text "Dismiss" -command "destroy $w"
+    button $w.topframe.search -text "Search" -command "SearchPanel $w.frame.page"
+    pack $w.topframe.quit -side left
+    pack $w.topframe.search -side left
+
     frame $w.frame -borderwidth 10
 
     scrollbar $w.frame.yscroll -relief sunken \
@@ -142,9 +150,82 @@ proc DisplayPage {page} {
     $w.frame.page insert 0.0 $contents
     $w.frame.page configure -state disabled
 
-    button $w.dismiss -text Dismiss -command "destroy $w"
-    pack $w.dismiss -side bottom -fill x
     pack $w.frame -side top -fill both -expand 1
+}
+
+#------------------------------------------------------------------------------
+# Set up the search panel.
+
+proc SearchPanel {w} {
+
+    if [winfo exists .search] {
+        destroy .search
+    }
+
+    toplevel .search
+    wm minsize .search 1 1
+
+    frame .search.topframe
+    pack .search.topframe -side top -fill x
+
+    button .search.topframe.quit -text "Dismiss" -command "destroy .search"
+    button .search.topframe.back -text "Search <<" \
+	-command "PerformSearch $w 0 \[.search.entry get\]"
+    button .search.topframe.search -text "Search >>" \
+	-command "PerformSearch $w 1 \[.search.entry get\]"
+    pack .search.topframe.quit -side left
+    pack .search.topframe.back -side left
+    pack .search.topframe.search -side left
+
+    frame .search.frame
+    pack .search.frame -side top -fill x
+
+    label .search.label -text "Search for"
+    pack .search.label -side left
+
+    entry .search.entry -relief sunken
+    pack .search.entry -side left -fill x -expand y
+
+    if {![catch {set string [selection get]}]} {
+	.search.entry insert end $string
+    }
+
+    bind .search.entry <Return> "PerformSearch $w 1 \[.search.entry get\]"
+
+    # Allow input without Button1 press.
+    focus .search.entry
+    update idletasks
+}
+
+#------------------------------------------------------------------------------
+# Perform the search.
+
+proc PerformSearch {w direction {string ""}} {
+    set index [lindex [$w tag ranges sel] 0]
+    if {$index==""} {
+	set index insert
+    }
+    if {$string==""} {
+	set string [$w tag ranges sel]
+	if {$string!=""} {
+	    set string [eval $w get $string]
+	} else {
+	    return
+	}
+    }
+    if {$direction} {
+	set index [$w search -forwards -nocase $string "$index + 1 char"]
+    } else {
+	set index [$w search -backwards -nocase $string "$index - 1 char"]
+    }
+    if {$index==""} {
+	tk_dialog .searcherror "Error in Search" "String \"$string\" not found" error 0 "O.K."
+	return
+    }
+    set index2 [$w index "$index + [string length $string] char"]
+    $w tag remove sel 1.0 end
+    $w tag add sel $index $index2
+    $w see $index
 }
 
 #------------------------------------------------------------------------------
@@ -311,6 +392,9 @@ proc tkhelp addPaths {
     foreach dir $addPaths {
         lvarpush auto_path $dir
     }
+
+    eval destroy [winfo children .]
+
     CreateCommandButtons .command
     pack .command -side top -fill x
 

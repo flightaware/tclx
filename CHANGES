@@ -1041,4 +1041,8 @@
     convention for dynamic loading.
   o Source tree restructing to allow for multi-platform development.
 -------------------------------------------------------------------------------
+10 Jan 96:
+  o Added help page searching code provided by Jan Nijtmans
+    <nijtmans@nici.kun.nl>.
+-------------------------------------------------------------------------------
  
