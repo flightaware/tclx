@@ -1209,5 +1209,7 @@
 -------------------------------------------------------------------------------
 17 Sep 96:
   o New profiler alogrithm that correctly handles certain uplevel cases.
+  o Added -eval option to the profile command, allowing capturing eval stacks
+    instead of scope stacks.
 -------------------------------------------------------------------------------
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 7.3 1996/08/17 05:42:03 markd Exp $
+ * $Id: tclXprofile.c,v 7.4 1996/09/28 16:18:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -61,10 +61,12 @@ typedef struct profDataEntry_t {
 typedef struct profInfo_t { 
     Tcl_Interp     *interp;            /* Interpreter this is for.           */
     Tcl_Trace       traceHandle;       /* Handle to current trace.           */
-    int             allCommands;       /* Prof all commands, not just procs  */
+    int             commandMode;       /* Prof all commands, not just procs. */
+    int             evalMode;          /* Use eval stack, not scope stack.   */
     clock_t         lastRealTime;      /* Real and CPU time of last trace    */
     clock_t         lastCpuTime;       /* from profiling routines.           */
-    profEntry_t    *stackPtr;          /* Proc/command nesting stack .       */
+    profEntry_t    *stackPtr;          /* Proc/command nesting stack.        */
+    int             stackSize;         /* Size of the stack.                 */
     profEntry_t    *scopeChainPtr;     /* Variable scope chain.              */
     Tcl_HashTable   profDataTable;     /* Cumulative time table, Keyed by    */
                                        /* call stack list.                   */
@@ -112,7 +114,8 @@ InitializeProcStack _ANSI_ARGS_((profInfo_t *infoPtr,
 
 static void
 TurnOnProfiling _ANSI_ARGS_((profInfo_t *infoPtr,
-                             int         allCommands));
+                             int         commandMode,
+                             int         evalMode));
 
 static void
 DeleteProfTrace _ANSI_ARGS_((profInfo_t *infoPtr));
@@ -169,8 +172,7 @@ PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
      */
     entryPtr->cumRealTime = 0;
     entryPtr->cumCpuTime = 0;
-    entryPtr->isProc = (TclFindProc ((Interp *) infoPtr->interp,
-                                     cmdName) != NULL);
+    entryPtr->isProc = isProc;
     entryPtr->procLevel = procLevel;
     entryPtr->scopeLevel = scopeLevel;
     entryPtr->evalLevel = evalLevel;
@@ -183,6 +185,7 @@ PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
      */
     entryPtr->prevEntryPtr = infoPtr->stackPtr;
     infoPtr->stackPtr = entryPtr;
+    infoPtr->stackSize++;
 
     scanPtr = infoPtr->scopeChainPtr;
     while ((scanPtr != NULL) && (scanPtr->procLevel > 0) &&
@@ -213,28 +216,31 @@ RecordData (infoPtr, entryPtr)
     profInfo_t  *infoPtr;
     profEntry_t *entryPtr;
 {
-    int idx, stackSize, newEntry;
+    int idx, newEntry;
     profEntry_t *scanPtr;
     char **stackArgv, *stackListPtr;
     Tcl_HashEntry *hashEntryPtr;
     profDataEntry_t *dataEntryPtr;
 
     /*
-     * Build up a stack list.  Entry [0] is the top of the stack.
+     * Build up a stack list.  Entry [0] is the top of the stack, either the
+     * scope or eval stack is followed, based on the -eval option.  If both
+     * scope and command mode are enabled, commands other than the top command
+     * are skipped.
      */
-    
-
-    for (stackSize = 0, scanPtr = entryPtr; scanPtr != NULL;
-         scanPtr = scanPtr->prevScopePtr) {
-        stackSize++;
-    }
-
-    stackArgv = (char **) ckalloc (sizeof (char *) * stackSize);
-
-    
-    for (idx= 0, scanPtr = entryPtr; scanPtr != NULL;
-         scanPtr = scanPtr->prevScopePtr) {
-        stackArgv [idx++] = scanPtr->cmdName;
+    stackArgv = (char **) ckalloc (sizeof (char *) * infoPtr->stackSize);
+    if (infoPtr->evalMode) {
+        for (idx= 0, scanPtr = entryPtr; scanPtr != NULL;
+             scanPtr = scanPtr->prevEntryPtr) {
+            stackArgv [idx++] = scanPtr->cmdName;
+        }
+    } else {
+        for (idx= 0, scanPtr = entryPtr; scanPtr != NULL;
+             scanPtr = scanPtr->prevScopePtr) {
+            if ((scanPtr != entryPtr) && !scanPtr->isProc)
+                continue;  /* Skip */
+            stackArgv [idx++] = scanPtr->cmdName;
+        }
     }
     stackListPtr = Tcl_Merge (idx, stackArgv);
     ckfree ((char *) stackArgv);
@@ -291,6 +297,7 @@ PopEntry (infoPtr)
      * Remove from the stack, reset the scope chain and free.
      */
     infoPtr->stackPtr = entryPtr->prevEntryPtr;
+    infoPtr->stackSize--;
     infoPtr->scopeChainPtr = infoPtr->stackPtr;
 
     ckfree ((char *) entryPtr);
@@ -362,7 +369,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
      */
      isProc = (TclFindProc (iPtr, argv [0]) != NULL);
 #ifdef ITCL_NAMESPACES      
-    if (infoPtr->allCommands || isProc) {
+    if (infoPtr->commandMode || isProc) {
         char *commandNamesp;
         Tcl_DString commandWithNs;
 
@@ -391,7 +398,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
 	Tcl_DStringFree (&commandWithNs);
     }
 #else
-    if (infoPtr->allCommands || isProc) {
+    if (infoPtr->commandMode || isProc) {
         if (isProc) {
             PushEntry (infoPtr, argv [0], TRUE,
                        procLevel + 1, scopeLevel + 1, evalLevel);
@@ -437,8 +444,9 @@ CleanDataTable (infoPtr)
 /*-----------------------------------------------------------------------------
  * InitializeProcStack --
  *    Recursive procedure to initialize the procedure call stack so its in the
- * same state as the actual procedure  call stack.  If allCommands are enable,
- * they still are not initialized on the stack.
+ * same state as the actual procedure  call stack.  If commandMode is enable,
+ * command records are still are not initialized on the stack, as we have no
+ * way of knowing what command did a Tcl_Eval.
  *
  * Parameters:
  *   o infoPtr - The global profiling info.
@@ -467,14 +475,17 @@ InitializeProcStack (infoPtr, framePtr)
  *
  * Parameters:
  *   o infoPtr - The global profiling info.
- *   o allCommands - TRUE if all commands are going to be logged, FALSE if just
+ *   o commandMode - TRUE if all commands are going to be logged, FALSE if just
  *     procs.
+ *   o evalMode - TRUE if eval stack is to be used to log entries.  FALSE if
+ *     the scope stack is to be used.
  *-----------------------------------------------------------------------------
  */
 static void
-TurnOnProfiling (infoPtr, allCommands)
+TurnOnProfiling (infoPtr, commandMode, evalMode)
     profInfo_t *infoPtr;
-    int         allCommands;
+    int         commandMode;
+    int         evalMode;
 {
     Interp *iPtr = (Interp *) infoPtr->interp;
     int scopeLevel;
@@ -488,7 +499,8 @@ TurnOnProfiling (infoPtr, allCommands)
                          (ClientData) infoPtr);
     TclXOSElapsedTime (&infoPtr->lastRealTime,
                        &infoPtr->lastCpuTime);
-    infoPtr->allCommands = allCommands;
+    infoPtr->commandMode = commandMode;
+    infoPtr->evalMode = evalMode;
     
     /*
      * Add entry for global context, then add in current procedures.
@@ -598,7 +610,7 @@ TurnOffProfiling (interp, infoPtr, varName)
 /*-----------------------------------------------------------------------------
  * Tcl_ProfileCmd --
  *   Implements the TCL profile command:
- *     profile ?-commands? on
+ *     profile ?-commands? ?-eval? on
  *     profile off arrayvar
  *-----------------------------------------------------------------------------
  */
@@ -609,59 +621,59 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
     int           argc;
     char        **argv;
 {
-    profInfo_t  *infoPtr = (profInfo_t *) clientData;
-    int          idx;
-    int          cmdArgc,   optionsArgc = 0;
-    char       **cmdArgv, **optionsArgv = &(argv [1]);
-
+    profInfo_t *infoPtr = (profInfo_t *) clientData;
+    int argIdx, commandMode = FALSE, evalMode = FALSE;
+        
     /*
-     * Scan for options (currently only one is supported).  Set cmdArgv to
-     * contain the rest of the command following the options.
+     * Parse option arguments.
      */
-    for (idx = 1; (idx < argc) && (argv [idx][0] == '-'); idx++)
-        optionsArgc++;
-    cmdArgc = argc - idx;
-    cmdArgv = &(argv [idx]);
-
-    if (cmdArgc < 1)
+    for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
+        if (STREQU (argv [argIdx], "-commands")) {
+            commandMode = TRUE;
+        } else if (STREQU (argv [argIdx], "-eval")) {
+            evalMode = TRUE;
+        } else {
+            Tcl_AppendResult (interp, "expected one of \"-commands\", or "
+                              "\"-eval\", got \"", argv [argIdx], "\"",
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+    if (argIdx >= argc)
         goto wrongArgs;
-
+    
     /*
      * Handle the on command.
      */
-    if (STREQU (cmdArgv [0], "on")) {
-        int allCommands = FALSE;
-
-        if ((cmdArgc != 1) || (optionsArgc > 1))
+    if (STREQU (argv [argIdx], "on")) {
+        if (argIdx != argc - 1)
             goto wrongArgs;
-
-        if (optionsArgc == 1) {
-            if (!STREQU (optionsArgv [0], "-commands")) {
-                Tcl_AppendResult (interp, "expected option of \"-commands\", ",
-                                  "got \"", optionsArgv [0], "\"",
-                                  (char *) NULL);
-                return TCL_ERROR;
-            }
-            allCommands = TRUE;
-        }
 
         if (infoPtr->traceHandle != NULL) {
             Tcl_AppendResult (interp, "profiling is already enabled",
                               (char *) NULL);
             return TCL_ERROR; 
-       }
+        }
 
-        TurnOnProfiling (infoPtr, allCommands);
+        TurnOnProfiling (infoPtr, commandMode, evalMode);
         return TCL_OK;
     }
 
     /*
      * Handle the off command.  Dump the hash table to a variable.
      */
-    if (STREQU (cmdArgv [0], "off")) {
+    if (STREQU (argv [argIdx], "off")) {
 
-        if ((cmdArgc != 2) || (optionsArgc > 0))
+        if (argIdx != argc - 2)
             goto wrongArgs;
+
+        if (commandMode || evalMode) {
+            Tcl_AppendResult (interp, "option \"",
+                              commandMode ? "-command" : "-eval",
+                              "\" not valid when turning off profiling",
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
 
         if (infoPtr->traceHandle == NULL) {
             Tcl_AppendResult (interp, "profiling is not currently enabled",
@@ -669,7 +681,7 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
             return TCL_ERROR;
         }
             
-        if (TurnOffProfiling (interp, infoPtr, argv [2]) != TCL_OK)
+        if (TurnOffProfiling (interp, infoPtr, argv [argIdx + 1]) != TCL_OK)
             return TCL_ERROR;
         return TCL_OK;
     }
@@ -683,7 +695,7 @@ Tcl_ProfileCmd (clientData, interp, argc, argv)
 
   wrongArgs:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
-                      " ?-commands? on|off arrayVar", (char *) NULL);
+                      " ?-commands? ?-eval? on|off arrayVar", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -721,7 +733,12 @@ Tcl_InitProfile (interp)
 
     infoPtr->interp = interp;
     infoPtr->traceHandle = NULL;
+    infoPtr->commandMode = FALSE;
+    infoPtr->evalMode = FALSE;
+    infoPtr->lastRealTime = 0;
+    infoPtr->lastCpuTime = 0;
     infoPtr->stackPtr = NULL;
+    infoPtr->stackSize = 0;
     infoPtr->scopeChainPtr = NULL;
     Tcl_InitHashTable (&infoPtr->profDataTable, TCL_STRING_KEYS);
 

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.5 1996/08/21 06:54:54 markd Exp $
+.\" $Id: TclX.n,v 7.6 1996/09/28 16:14:55 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -99,8 +99,8 @@ The following options are available:
 \fB-async\fR
 A command handler will be associated with stdin.  When input is available
 on stdin, it will be read and accumulated until a full command is available.
-That command will then be evaluated.  An event loop must be entered to make
-for input to be processed.
+That command will then be evaluated.  An event loop must be entered
+for input to be read and processed.
 '
 .TP
 \fB-interactive on|off|tty\fR
@@ -462,7 +462,7 @@ is specified), then sources the file back in if it was changed.
 '\"@help: tcl/debug/profile
 '\"@brief: Collect Tcl script performance profile data.
 .TP
-.B profile ?-commands? on
+.B profile ?-commands? ?-eval? on
 .TP
 .B profile off \fIarrayVar\fR
 .br
@@ -485,8 +485,16 @@ data is for.  The data in each entry is a list consisting of the procedure
 call count and the real time and CPU time in milliseconds spent in the
 procedure (and all procedures it called). The list is in the form {\fIcount
 real cpu\fR}.
-Upleveled code is reported in the context that it was executed in, not
+.sp
+Normally, the variable scope stack is used in reporting where time is
+spent.
+Thus upleveled code is reported in the context that it was executed in, not
 the context that the uplevel was called in.
+If the \fB-eval\fR option is specified, the procedure evaluation (call) stack
+is used instead of the procedure scope stack.  Upleveled code is reported in
+the context of the procedure that did the uplevel.
+
+.sp
 A Tcl procedure \fBprofrep\fR is supplied for reducing the data and
 producing a report.
 '\"@:
