@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 2.20 1993/09/25 05:09:17 markd Exp markd $
+ * $Id: tclXshell.c,v 2.21 1993/11/09 05:42:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,13 +21,30 @@
 extern char *optarg;
 extern int   optind, opterr;
 
+
+/*
+ * Name of a user-specific startup script to source if the application is
+ * being run interactively (e.g. "~/.tclrc").  Set by Tcl_AppInit.
+ *  NULL means don't source anything ever.
+ */
+char *tcl_RcFileName = NULL;
+
+static char  exitCmd [] = "exit";
 static char *TCLXENV = "TCLXENV";
 
+
+/*
+ * Prototypes of internal functions.
+ */
+static void
+ParseCmdLine _ANSI_ARGS_((Tcl_Interp   *interp,
+                          int           argc,
+                          char        **argv));
 
 /*
  *-----------------------------------------------------------------------------
  *
- * TclX_ParseCmdLine --
+ * ParseCmdLine --
  *
  *   Parse the command line for the TclX shell ("tcl") and similar programs.
  * This sets Tcl variables and returns, no other action is taken at this
@@ -61,8 +78,8 @@ static char *TCLXENV = "TCLXENV";
  * before calling thus routine if special values are desired.
  *-----------------------------------------------------------------------------
  */
-void
-TclX_ParseCmdLine (interp, argc, argv)
+static void
+ParseCmdLine (interp, argc, argv)
     Tcl_Interp   *interp;
     int           argc;
     char        **argv;
@@ -181,25 +198,44 @@ TclX_ParseCmdLine (interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
- * TclX_RunShell --
+ * TclX_Shell --
  *
- *   This function runs the TclX shell once all apllication and package
- * initialization has taken place.  It either enters interactive command mode
- * or evaulates a script or command from the command line.
- * TclX_ParseCmdLine must have been called.
+ *   This function runs the TclX shell, including parsing the command line and
+ * calling the Tcl_AppInit function at the approriate place.  It either enters
+ * interactive command mode or evaulates a script or command from the command
+ * line.
  *
  * Parameters:
- *   o interp  (I) - A pointer to the interpreter.
- * Returns:
- *   The result of the command being evaulated.  Check for TCL_ERROR and call
- * TclX_ErrorExit if an error occured after any cleanup you want to do.
+ *   o argc, argv - Arguments passed to main for the command line.
+ * Notes:
+ *   Does not return.
  *-----------------------------------------------------------------------------
  */
-int
-TclX_RunShell (interp)
-    Tcl_Interp  *interp;
+void
+TclX_Shell (argc, argv)
+    int    argc;
+    char **argv;
 {
-    char  *evalStr;
+    Tcl_Interp *interp;
+    char       *evalStr;
+
+    /* 
+     * Create a basic Tcl interpreter.
+     */
+    interp = Tcl_CreateInterp();
+
+    /*
+     * Do command line parsing.  This does not return on an error.  Information
+     * for command line is saved in Tcl variables.
+     */
+    ParseCmdLine (interp, argc, argv);
+
+    /*
+     * Initialized all packages and application specific commands.  This
+     * includes Extended Tcl initialization.
+     */
+    if (Tcl_AppInit (interp) == TCL_ERROR)
+        goto errorExit;
 
     /*
      * Evaluate either a command or file if it was specified on the command
@@ -207,12 +243,16 @@ TclX_RunShell (interp)
      */
     evalStr = Tcl_GetVar2 (interp, TCLXENV, "evalCmd", TCL_GLOBAL_ONLY);
     if (evalStr != NULL) {
-        return Tcl_Eval (interp, evalStr);
+        if (Tcl_Eval (interp, evalStr) == TCL_ERROR)
+            goto errorExit;
+        goto okExit;
     }
 
     evalStr = Tcl_GetVar2 (interp, TCLXENV, "evalFile", TCL_GLOBAL_ONLY);
     if (evalStr != NULL) {
-        return Tcl_EvalFile (interp, evalStr);
+        if (Tcl_EvalFile (interp, evalStr) == TCL_ERROR)
+            goto errorExit;
+        goto okExit;
     }
     
     /*
@@ -222,5 +262,33 @@ TclX_RunShell (interp)
     TclX_EvalRCFile (interp);
     Tcl_SetupSigInt ();
 
-    return Tcl_CommandLoop (interp, isatty (0));
+    if (Tcl_CommandLoop (interp, isatty (0)) == TCL_ERROR)
+        goto errorExit;
+
+  okExit:
+    /* 
+     * Delete the interpreter if memory debugging or explictly requested.
+     * Useful for finding memory leaks.
+     */
+
+#if defined(TCL_MEM_DEBUG) || defined(TCL_DELETE_INTERP)
+    Tcl_DeleteInterp(interp);
+
+#ifdef TCL_SHELL_MEM_LEAK
+    printf (" >>> Dumping active memory list to mem.lst <<<\n");
+    if (Tcl_DumpActiveMemory ("mem.lst") != TCL_OK)
+        panic ("error accessing `mem.lst': %s", strerror (errno));
+#endif
+    exit(0);
+#endif
+
+    /*
+     * If no memory debugging, exit though the exit command to clean up.
+     */
+    Tcl_GlobalEval (interp, exitCmd);
+
+    exit (0);  /* Just in case */
+
+  errorExit:
+    TclX_ErrorExit (interp, 255);
 }

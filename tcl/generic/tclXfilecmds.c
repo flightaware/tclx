@@ -12,12 +12,13 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.12 1993/11/08 05:06:40 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.13 1993/11/10 06:47:40 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
  *-----------------------------------------------------------------------------
- * Note: List parsing code stolen from Tcl distribution file tclUtil.c.
+ * Note: List parsing code stolen from Tcl distribution file tclUtil.c,
+ * procedure TclFindElement.
  *-----------------------------------------------------------------------------
  * Copyright (c) 1987-1993 The Regents of the University of California.
  * All rights reserved.
@@ -285,6 +286,8 @@ Tcl_CopyfileCmd (clientData, interp, argc, argv)
  *   o TCL_OK if an element was validated but there are more in the buffer.
  *   o TCL_BREAK if the end of the list was reached.
  *   o TCL_ERROR if an error occured.
+ * Notes:
+ *   Code is a modified version of UCB procedure tclUtil.c:TclFindElement
  *-----------------------------------------------------------------------------
  */
 static int

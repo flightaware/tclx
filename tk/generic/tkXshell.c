@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXmain.c 1.11 1993/11/09 05:42:59 markd Exp $
+ * $Id: tkXshell.c,v 1.1 1993/11/11 03:56:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -62,7 +62,6 @@
  * file out of the Tk source directory to make their own modified versions).
  */
 
-extern int		access _ANSI_ARGS_((CONST char *path, int mode));
 extern void		exit _ANSI_ARGS_((int status));
 extern int		isatty _ANSI_ARGS_((int fd));
 extern int		read _ANSI_ARGS_((int fd, char *buf, size_t size));
@@ -87,19 +86,20 @@ static int gotPartial = 0;      /* Partial command in buffer. */
 static int tty;			/* Non-zero means standard input is a
 				 * terminal-like device.  Zero means it's
 				 * a file. */
+static char exitCmd[] = "exit";
 static char errorExitCmd[] = "exit 1";
 
 /*
  * Command-line options:
  */
 
-int synchronize = 0;
-char *fileName = NULL;
-char *name = NULL;
-char *display = NULL;
-char *geometry = NULL;
+static int synchronize = 0;
+static char *fileName = NULL;
+static char *name = NULL;
+static char *display = NULL;
+static char *geometry = NULL;
 
-Tk_ArgvInfo argTable[] = {
+static Tk_ArgvInfo argTable[] = {
     {"-file", TK_ARGV_STRING, (char *) NULL, (char *) &fileName,
 	"File from which to read commands"},
     {"-geometry", TK_ARGV_STRING, (char *) NULL, (char *) &geometry,
@@ -141,7 +141,7 @@ static void		SignalProc _ANSI_ARGS_((int signalNum));
  *----------------------------------------------------------------------
  */
 
-int
+void
 TkX_Wish (argc, argv)
     int argc;				/* Number of arguments. */
     char **argv;			/* Array of argument strings. */
@@ -233,7 +233,7 @@ TkX_Wish (argc, argv)
      * Invoke application-specific initialization.
      */
 
-    if (TclX_AppInit(interp) != TCL_OK) {
+    if (Tcl_AppInit(interp) != TCL_OK) {
 	TclX_ErrorExit (interp, 255);
     }
 
@@ -288,10 +288,9 @@ TkX_Wish (argc, argv)
      * Don't exit directly, but rather invoke the Tcl "exit" command.
      * This gives the application the opportunity to redefine "exit"
      * to do additional cleanup.
-     * (Tcl_VarEval is used to keep GCC happy).
      */
 
-    Tcl_VarEval(interp, "exit", (char *) NULL);
+    Tcl_GlobalEval(interp, exitCmd);
     exit(1);
 
 error:
@@ -300,7 +299,7 @@ error:
 	msg = interp->result;
     }
     fprintf(stderr, "%s\n", msg);
-    Tcl_VarEval(interp, errorExitCmd, (char *) NULL);
+    Tcl_GlobalEval(interp, errorExitCmd);
     exit (1);
     return 1;   /* Needed only to prevent compiler warnings. */
 }

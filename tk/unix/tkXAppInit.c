@@ -1,7 +1,7 @@
 /* 
  * tkXAppInit.c --
  *
- *      Provides a default version of the TclX_AppInit procedure for use with
+ *      Provides a default version of the Tcl_AppInit procedure for use with
  *      applications built with Extended Tcl and Tk.  This is based on the
  *      the UCB Tk file tkAppInit.c
  *
@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 1.1 1993/09/16 05:42:39 markd Exp markd $
+ * $Id: tkXAppInit.c,v 1.2 1993/11/09 05:42:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.1 1993/09/16 05:42:39 markd Exp markd $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.2 1993/11/09 05:42:59 markd Exp markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"
@@ -54,11 +54,20 @@ static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppIn
 
 extern int main();
 int *tclDummyMainPtr = (int *) main;
+
+/*
+ * The following variable is a special hack that insures the tcl
+ * version of matherr() is used when linking against shared libraries
+ */
+
+extern int matherr();
+int *tclDummyMathPtr = (int *) matherr;
+
 
 /*
  *----------------------------------------------------------------------
  *
- * TclX_AppInit --
+ * Tcl_AppInit --
  *
  *	This procedure performs application-specific initialization.
  *	Most applications, especially those that incorporate additional
@@ -75,7 +84,7 @@ int *tclDummyMainPtr = (int *) main;
  */
 
 int
-TclX_AppInit(interp)
+Tcl_AppInit(interp)
     Tcl_Interp *interp;		/* Interpreter for application. */
 {
     Tk_Window main;

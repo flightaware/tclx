@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 2.6 1993/07/17 23:33:39 markd Exp markd $
+ * $Id: tclXselect.c,v 2.7 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -24,8 +24,17 @@
 #   include <sys/select.h>
 #endif
 
+/*
+ * Cheat a little to avoid configure checking for floor being prototyped.
+ * These prototypes will conflict with the __CONSTVALUE return type attributed
+ * used by GNU libc, so if its defined, we assume math.h defined these
+ * functions.
+ */
+
+#ifndef __CONSTVALUE
 extern
 double floor ();
+#endif
 
 /*
  * A couple of systems (Xenix and older SCO unix) have bzero hidden away

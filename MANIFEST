@@ -4,6 +4,7 @@
 ./MANIFEST
 ./Makefile.in
 ./README
+./README.SHLIBS
 ./acconfig.h
 ./configure
 ./configure.in

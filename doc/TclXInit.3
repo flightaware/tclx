@@ -12,13 +12,13 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 2.8 1993/09/20 02:37:42 markd Exp markd $
+.\" $Id: TclXInit.3,v 2.9 1993/11/05 07:08:46 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
 .ad b
 .SH NAME
-TclX_AppInit, TclX_Init, TclXCmd_Init, TclXLib_Init - Extended Tcl initialization.
+tclXAppInit, TclX_Init, TclXCmd_Init, TclXLib_Init - Extended Tcl initialization.
 '
 .SH SYNOPSIS
 .nf
@@ -31,7 +31,7 @@ extern char *tclAppVersion;
 extern int   tclAppPatchlevel;
 
 int
-TclX_AppInit (Tcl_Interp *interp);
+Tcl_AppInit (Tcl_Interp *interp);
 
 int
 TclX_Init (Tcl_Interp *interp);
@@ -68,7 +68,7 @@ The application patchlevel to be returned by the \fBinfox\fR command.
 procedures are called.  This value maybe altered from
 the default by the application.
 '
-.SS TclX_AppInit
+.SS Tcl_AppInit
 .PP
 This function is used to initialize an TclX based application.
 It is intended to
@@ -100,7 +100,7 @@ or
 .SS TclX_Init
 .PP
 Initializes Extended Tcl, adding the extended command set to the interpreter.
-This is called from \fBTclX_AppInit\fR.
+This is called from \fBTcl_AppInit\fR.
 .PP
 Parameters
 .RS 2

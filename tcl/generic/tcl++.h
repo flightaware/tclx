@@ -22,7 +22,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.12 1993/09/21 03:40:27 markd Exp markd $
+ * $Id: tcl++.h,v 2.13 1993/11/11 03:57:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -545,19 +545,6 @@ class TclInterp_cl
     XErrorExit (int  exitCode)
     {
         TclX_ErrorExit (interp, exitCode);
-    }
-
-    inline void 
-    XParseCmdLine (int     argc,
-                   char  **argv)
-    {
-        TclX_ParseCmdLine (interp, argc, argv);
-    }
-
-    inline int
-    XRunShell ()
-    {
-        return TclX_RunShell (interp);
     }
 
     /*

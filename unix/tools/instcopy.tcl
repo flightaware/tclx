@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 1.1 1993/11/02 07:25:05 markd Exp markd $
+# $Id: instcopy.tcl,v 1.2 1993/11/04 16:07:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
@@ -40,7 +40,7 @@ proc Usage {{msg {}}} {
     if {"$msg" != ""} {
         puts stderr "Error: $msg"
     }
-    puts stderr {usage: instcopy ?-dir? file1 file2 ... targetdir}
+    puts stderr {usage: instcopy ?-dirname? file1 file2 ... targetdir}
     exit 1
 }
 

@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.34 1993/10/24 04:23:58 markd Exp markd $
+# $Id: Config.mk,v 2.35 1993/11/07 23:58:23 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -39,17 +39,17 @@
 #
 #   o Absolute paths (starting with /), e.g.  /usr/local/lib/libtcl.a
 #   o Paths relative to the source directory make macro ${srcbasedir}, e.g.
-#     $(srcbasedir)/../tk3.4
+#     $(srcbasedir)/../tk3.5
 #   o Paths relative to the build directory make macro ${bldbasedir}, e.g.
-#     ${bldbasedir}/../tk3.4/libtk.a
+#     ${bldbasedir}/../tk3.5/libtk.a
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # The directory containing the UCB Tcl library (libtcl.a) and the UCB Tcl 
 # source distribution directory.  They default to the same directory.
 
-TCL_UCB_LIB=${bldbasedir}/../tcl7.1
-TCL_UCB_SRC=${srcbasedir}/../tcl7.1
+TCL_UCB_LIB=${bldbasedir}/../tcl7.2
+TCL_UCB_SRC=${srcbasedir}/../tcl7.2
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -58,8 +58,8 @@ TCL_UCB_SRC=${srcbasedir}/../tcl7.1
 # distribution directory.
 
 TK_BUILD=WISHX
-TK_UCB_LIB=${bldbasedir}/../tk3.4
-TK_UCB_SRC=${srcbasedir}/../tk3.4
+TK_UCB_LIB=${bldbasedir}/../tk3.5
+TK_UCB_SRC=${srcbasedir}/../tk3.5
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Also a macro that

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.11 1993/09/21 05:11:18 markd Exp markd $
+ * $Id: tclXutil.c,v 2.12 1993/09/25 05:09:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,10 +27,6 @@
  * Used to return argument messages by most commands.
  */
 char *tclXWrongArgs = "wrong # args: ";
-
-#ifndef pow
-extern double pow ();
-#endif
 
 
 /*

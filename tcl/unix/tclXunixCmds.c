@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.10 1993/11/10 06:47:40 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.11 1993/11/11 07:07:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,11 +27,21 @@
  */
 #define TCL_USECS_PER_SEC (1000L * 1000L)
 
+/*
+ * Cheat a little to avoid configure checking for floor and ceil being
+ * prototyped.  These prototypes will conflict with the __CONSTVALUE return
+ * type attributed used by GNU libc, so if its defined, we assume math.h
+ * defined these functions.
+ */
+
+#ifndef __CONSTVALUE
 extern
 double floor ();
 
 extern
 double ceil ();
+#endif
+
 
 /*
  *-----------------------------------------------------------------------------
@@ -179,21 +189,14 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
     }
 
     /*
-     * Increment the priority.  On BSD nice does not return the new priority,
-     * plus nice doesn't return an error for negative priorities for non-super
-     * users (but it still doesn't work), so setpriority and getpriority must 
-     * be used.
+     * Increment the priority.
      */
     if (Tcl_GetInt (interp, argv[1], &priorityIncr) != TCL_OK)
         return TCL_ERROR;
 
     errno = 0;  /* In case old priority is -1 */
 
-#ifdef HAVE_GETPRIORITY
-    priority = setpriority (PRIO_PROCESS, 0, priorityIncr);
-#else
     priority = nice (priorityIncr);
-#endif
     if ((priority  == -1) && (errno != 0)) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;

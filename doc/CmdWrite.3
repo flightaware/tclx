@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: CmdWrite.3,v 2.4 1993/11/09 06:59:01 markd Exp markd $
+.\" $Id: CmdWrite.3,v 2.5 1993/11/10 06:47:40 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Command Writing" TCL "" "Tcl"
@@ -398,7 +398,7 @@ to be visible as Tcl commands, they must be installed into Tcl with
 \fBTcl_CreateCommand\fR.
 .PP
 Application-specific startup is accomplished by creating or editing the
-\fITclX_AppInit\fR function.  In \fITclX_AppInit\fR you should add a
+\fITcl_AppInit\fR function.  In \fITcl_AppInit\fR you should add a
 call to an application-specific init function which you create.  This
 function should take the address of the interpreter it should install its
 commands into, and it should install those commands with \fBTcl_CreateCommand\fR
@@ -408,7 +408,7 @@ The naming convention for application startup routines is \fBApp_Init\fR,
 where \fIApp\fR is the name of your application.  For example, to add
 an application named \fIcute\fR one would create a \fICute_Init\fR routine
 that expected a \fBTcl_Interp\fR pointer as an argument, and add the following
-code to \fITclX_AppInit\fR:
+code to \fITcl_AppInit\fR:
 .sp
 .nf
 .ft CW
@@ -424,7 +424,7 @@ of useful error message back to TclX, then return \fBTCL_ERROR\fR to
 indicate that an error occurred.  If the routine executed successfully,
 it should return \fBTCL_OK\fR.
 .PP
-When you examine \fITclX_AppInit\fR, note that there is 
+When you examine \fITcl_AppInit\fR, note that there is 
 one call already there to install an application -- the call to
 \fITclX_Init\fR installs Extended Tcl into the Tcl core.
 
@@ -449,7 +449,7 @@ variables in your init route, for example:
 .fi
 .PP
 Note that the default values are set by \fITclX_Init\fR, so if you wish
-to override them, you must call your init routine in \fITclX_AppInit\fR
+to override them, you must call your init routine in \fITcl_AppInit\fR
 after its call to \fITclX_Init\fR.
 .PP
 .SH EXTENDED TCL EXIT
