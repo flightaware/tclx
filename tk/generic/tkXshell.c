@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.11 1999/12/03 03:00:52 markd Exp $
+ * $Id: tkXshell.c,v 8.12 2000/02/05 17:09:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -31,7 +31,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkMain.c,v 1.5 1999/04/28 18:18:06 redman Exp $
+ * RCS: @(#) $Id: tkXshell.c,v 8.12 2000/02/05 17:09:59 markd Exp $
  */
 
 /*
@@ -84,8 +84,6 @@ Tcl_ThreadDataKey dataKey;
 extern int		isatty _ANSI_ARGS_((int fd));
 extern char *		strrchr _ANSI_ARGS_((CONST char *string, int c));
 #endif
-extern void		TkpDisplayWarning _ANSI_ARGS_((char *msg,
-			    char *title));
 
 #ifndef TKX_SHELL
 /*
