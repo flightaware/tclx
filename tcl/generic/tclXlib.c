@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.9 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXlib.c,v 2.10 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -750,6 +750,12 @@ LoadPackageIndex (interp, tlibFilePath, overwrite)
  *   o indexFilePath (I) - Absolute path name to the tclIndex file.
  * Returns:
  *   TCL_OK or TCL_ERROR.
+ * Notes:
+ *   The real work of loading an index is done by a procedure that is defined
+ * in a seperate file.  Its not possible to put this file in the standard
+ * tcl.tlib as a tclIndex might get loaded before the tcl.tndx file is found
+ * on the search path.  The function sets up the auto_index array to load the
+ * procedure if its not already defined. 
  *-----------------------------------------------------------------------------
  */
 static int
