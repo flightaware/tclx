@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 8.4 1997/06/30 07:57:51 markd Exp $
+ * $Id: tclXmsgcat.c,v 8.5 1997/07/04 20:23:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -228,7 +228,6 @@ TclX_CatgetsObjCmd (clientData, interp, objc, objv)
     int       msgSetNum, msgNum;
     char      *localMsg;
     char      *defaultStr;
-    int        stringLength;
 
     if (objc != 5)
 	return TclX_WrongArgs (interp, 
@@ -247,9 +246,11 @@ TclX_CatgetsObjCmd (clientData, interp, objc, objv)
     if (Tcl_GetIntFromObj (interp, objv [3], &msgNum) == TCL_ERROR)
         return TCL_ERROR;
 
-    /* if the integer value of the handle is -1, the catopen actually
+    /*
+     * if the integer value of the handle is -1, the catopen actually
      * failed (softly, i.e. the caller did not specify "-fail")
-     * so we detect that and merely return the default string */
+     * so we detect that and merely return the default string.
+     */
 
     if (*catDescPtr == (nl_catd)-1) {
         Tcl_SetObjResult (interp, objv [4]);
@@ -257,10 +258,10 @@ TclX_CatgetsObjCmd (clientData, interp, objc, objv)
 	return TCL_OK;
     }
 
-    defaultStr = Tcl_GetStringFromObj (objv [4], &stringLength);
+    defaultStr = Tcl_GetStringFromObj (objv [4], NULL);
     localMsg = catgets (*catDescPtr, (int)msgSetNum, (int)msgNum, defaultStr);
 
-    Tcl_SetObjResult (interp, Tcl_NewStringObj (localMsg, stringLength));
+    Tcl_SetObjResult (interp, Tcl_NewStringObj (localMsg, -1));
     return TCL_OK;
 }
 
@@ -294,7 +295,7 @@ TclX_CatcloseObjCmd (clientData, interp, objc, objv)
         fail = FALSE;
 
     catDescPtr = (nl_catd *) TclX_HandleXlateObj (interp, msgCatTblPtr,
-                                              objv [objc - 1]);
+                                                  objv [objc - 1]);
     if (catDescPtr == NULL)
         return TCL_ERROR;
 
