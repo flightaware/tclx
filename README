@@ -14,6 +14,12 @@ You must install the patches to Tcl 8.0b1 that are in TCL-REQUIRED_PATCHES.
 You may have some of these as most where posted to comp.lang.tcl by the
 SunScript team.
 
+You may either install the patches by hand, or, go ahead and cd to "unix" and
+configure TclX.  This will put a rule in your tclX8.0b1/unix/Makefile
+where you can then say "make patch-tcl-core" to make the patches on the
+Tcl core.  If any patch is reversed or has already been applied, it
+is ignored.
+
 
 INTRODUCTION
 ============
