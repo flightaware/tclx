@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 1.6 1992/10/05 01:37:16 markd Exp markd $
+.\" $Id: TclX.man,v 1.7 1992/10/05 02:53:18 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1103,6 +1103,10 @@ These commands make many additional math functions available in Tcl, including
 minimum, maximum, trig functions, exponent, logarithm, square root,
 and more. An integer random number generator is provided as well.
 .PP
+The results of floating point calculations will remain floating point numbers
+(containing a decimal point) and will be accurate to the precision of a
+\fIdouble\fR.
+.PP
 All of these commands (except random), take floating point expressions, thus
 the command can be used without the \fBexpr\fR command.  This greatly eases
 the construction of expressions.  For example:
@@ -1285,7 +1289,7 @@ alternative to comparing a list to an empty string.
 '@help: lists/lvarcat
 '@brief: Concatenate the contents lists or strings into a variable
 .TP
-\fBllvarcat\fI var string [\fR\fIstring...\fR]
+\fBlvarcat\fI var string [\fR\fIstring...\fR]
 .br
 This command treats each \fIstring\fR argument as a list and concatenates them
 to the end of the contents of \fIvar\fR, forming a a single list.  The list is
@@ -1435,6 +1439,7 @@ the Unix \fItr\fR program).
 .br
 Returns the character indexed by the expression \fIindexExpr\fR (zero based)
 from \fIstring\fR. This command is a shortcut for:
+.sp
 .nf
 .ft CW
     \fBstring index\fR \fIstring\fR [\fBexpr\fI indexExpr]\fR
@@ -1448,6 +1453,7 @@ from \fIstring\fR. This command is a shortcut for:
 .br
 Returns the length of \fIstring\fR in characters.  
 This command is a shortcut for:
+.sp
 .nf
 .ft CW
     \fBstring length\fR \fIstring\fR
@@ -1464,6 +1470,7 @@ indexed by the expression \fIfirstExpr\fR (zero-based) until the character
 indexed by the expression \fIlastExpr\fR.  The special keyword \fBend\fR may
 be specified for \fIlast\fR to indicate that the remainder of the string is to
 be extracted.  This command is a shortcut for:
+.sp
 .nf
 .ft CW
     \fBstring range\fR \fIstring\fR [\fBexpr\fI firstExpr\fR] [\fBexpr\fI lastExpr]\fR
@@ -1480,6 +1487,7 @@ indexed by the expression \fIfirstExpr\fR (zero-based) for \fIlengthExpr\fR
 characters.  The special keyword \fBend\fR may be specified for
 \fIlengthExpr\fR to indicate that the remainder of the string is to be
 extracted.  This command is a short cut for:
+.sp
 .nf
 .ft CW
     \fBstring range\fR \fIstring\R [\fBexpr\fI firstExpr\fR] [\fBexpr\fR \fIlength\fB-1\fR]
@@ -1675,7 +1683,7 @@ specified in the call to \fBcatopen\fR.
 '@endhelp
 '
 .SH "TCL SHELL AND DEVELOPMENT ENVIRONMENT"
-.PP
+.sp
 '@help: tclshell/intro
 '@brief: Introduction to the tcl shell.
 .B tcl [-q] [[-f] \fIscript\fB]|[-c \fIcommand\fB] [\fIargs\fR]
