@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.6 1993/04/07 05:55:07 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.7 1993/04/13 01:19:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,7 +26,7 @@
 
 
 #ifdef TCL_NEED_SYS_SELECT_H
-#   include "sys/select.h"
+#   include <sys/select.h>
 #endif
 
 /*
