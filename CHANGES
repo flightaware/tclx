@@ -1378,3 +1378,15 @@
     interp state on signals. Debugged and submitted by the ever-helpful
     <Viktor-Dukhovni@deshaw.com>.
 -------------------------------------------------------------------------------
+2 Feb 98:
+  o Added --with-tcl dir and --with-tk configure options.  Contributed by
+    <Viktor-Dukhovni@deshaw.com>.
+-------------------------------------------------------------------------------
+22 Jan 98: 
+  o Added fixes for handling some corner cases in saving and restoring
+    interp state on signals. Debugged and submitted by the ever-helpful
+    <Viktor-Dukhovni@deshaw.com>.
+-------------------------------------------------------------------------------
+25 Apr 98:
+  o Fixed bug with .tndx libraries and references to commands in namespaces.
+-------------------------------------------------------------------------------

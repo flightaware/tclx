@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.19 1997/11/11 05:33:16 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -37,7 +37,6 @@
  */
 static char *AUTO_INDEX     = "auto_index";
 static char *AUTO_PKG_INDEX = "auto_pkg_index";
-static char *TCLX_LIBRARY   = "tclx_library";
 
 /*
  * Command to pass to Tcl_GlobalEval to load the file autoload.tcl.

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.20 1997/08/16 16:25:58 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -1064,7 +1064,8 @@ TclX_WrongArgs (interp, commandNameObj, string)
  * TclX_AppendObjResult --
  *
  *   Append a variable number of strings onto the object result already
- * present for an interpreter.
+ * present for an interpreter.  If the object is shared, the current contents
+ * are discarded.
  *
  * Parameters:
  *   o interp - Interpreter to set the result in.
@@ -1081,6 +1082,11 @@ TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
 
     interp = TCL_VARARGS_START (Tcl_Interp *, arg1, argList);
     resultPtr = Tcl_GetObjResult (interp);
+
+    if (Tcl_IsShared(resultPtr)) {
+        resultPtr = Tcl_NewStringObj(0, NULL);
+        Tcl_SetObjResult(interp, resultPtr);
+    }
 
     TCL_VARARGS_START(Tcl_Interp *,arg1,argList);
     while (1) {
