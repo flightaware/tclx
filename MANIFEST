@@ -296,6 +296,7 @@
 ./tests/select.test
 ./tests/server.test
 ./tests/setfuncs.test
+./tests/shell.test
 ./tests/showproc.test
 ./tests/signal.test
 ./tests/string.test
