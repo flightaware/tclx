@@ -1114,3 +1114,10 @@
     to the base Tcl version instead of a letter.  This makes it compatible
     with the Tcl package versioning mechanism.
 -------------------------------------------------------------------------------
+13 Mar 96:
+  o The copyfile command now disables newline translation by default, copying
+    data in binary mode.  A new option has been added to allow translation.
+===============================================================================
+13 Mar 96: Released TclX 7.5.0 Beta 3
+===============================================================================
+
