@@ -3,7 +3,7 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.30 2002/03/29 05:07:05 hobbs Exp $
+# RCS: @(#) $Id: configure.in,v 1.1 2002/04/02 03:02:04 hobbs Exp $
 
 #--------------------------------------------------------------------
 # Sample configure.in for Tcl Extensions.  The only places you should
@@ -420,7 +420,10 @@ SC_MAKE_LIB
 # Add platform libs to LIBS or SHLIB_LD_LIBS as necessary.
 #--------------------------------------------------------------------
 
-#LIBS="${LIBS} -lsuperfly"
+if test "${TEA_PLATFORM}" = "unix" ; then
+    SC_TCL_LINK_LIBS
+    LIBS="${LIBS} ${MATH_LIBS}"
+fi
 
 #--------------------------------------------------------------------
 # Find tclsh so that we can run pkg_mkIndex to generate the pkgIndex.tcl

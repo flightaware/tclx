@@ -802,7 +802,7 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 		export LINKBIN="link -link50compat"
 	    fi
 
-	    SHLIB_LD="${LINKBIN} -dll -nologo -warn:2"
+	    SHLIB_LD="${LINKBIN} -dll -nologo"
 	    SHLIB_LD_LIBS='${LIBS}'
 
 	    SHLIB_SUFFIX=".dll"
@@ -810,14 +810,14 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 	    UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.lib'
 
 	    EXTRA_CFLAGS="-YX"
-	    LDFLAGS_DEBUG="-debug:full -debugtype:cv"
+	    LDFLAGS_DEBUG="-debug:full -debugtype:cv -warn:2"
 	    LDFLAGS_OPTIMIZE="-release"
 	    LDFLAGS_CONSOLE="-link -subsystem:console ${lflags}"
 	    LDFLAGS_WINDOW="-link -subsystem:windows ${lflags}"
 	    PATHTYPE=-w
+	    TCL_LIB_VERSIONS_OK=nodots
 	    # Bogus to avoid getting this turned off
 	    DL_OBJS="tclLoadNone.obj"
-	    TCL_LIB_VERSIONS_OK=nodots
     	    ;;
 	AIX-5.*)
 	    if test "${TCL_THREADS}" = "1" -a "$GCC" != "yes" ; then
