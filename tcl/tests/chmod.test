@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 1.2 1992/10/03 18:16:36 markd Exp markd $
+# $Id: chmod.test,v 1.3 1992/10/03 22:28:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -296,6 +296,24 @@ Test chmod-4.2 {chmod error tests} {
 
 # chown and chgrp tests
 
+#
+# Some machines have problems with changing group ids on files (even to your
+# own) if you are not root. If thats the case, bail out here.
+#
+
+SetUpTestFiles
+
+
+if {[catch {chgrp [id groupid] CHMOD.TMP} msg ] != 0} {
+    puts stderr "*************************************************************"
+    puts stderr "Can't do chgrp even when current and new group id are"
+    puts stderr "ours.  Maybe a strange system."
+    puts stderr "    $msg"
+    puts stderr "*************************************************************"
+    unlink {CHECK.TMP CHMOD.TMP CHMOD2.TMP}
+    return
+}
+
 set myUID [id userid]
 set myGID [id groupid]
 
@@ -306,25 +324,21 @@ Test chmod-5.1 {chown tests} {
 } 0 [list $myUID $myUID]
 
 Test chmod-5.2 {chown tests} {
-    SetUpTestFiles
     chown [id userid] {CHMOD.TMP CHMOD2.TMP}
     list [GetUID CHMOD.TMP] [GetUID CHMOD2.TMP]
 } 0 [list $myUID $myUID]
 
 Test chmod-5.3 {chown tests} {
-    SetUpTestFiles
     chown [list [id userid] [id groupid]] {CHMOD.TMP CHMOD2.TMP}
     list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
 } 0 [list [list $myUID $myGID] [list $myUID $myGID]]
 
 Test chmod-5.4 {chown tests} {
-    SetUpTestFiles
     chown [list [id user] [id group]] {CHMOD.TMP CHMOD2.TMP}
     list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
 } 0 [list [list $myUID $myGID] [list $myUID $myGID]]
 
 Test chmod-5.5 {chown tests} {
-    SetUpTestFiles
     chown [list [id user] [id group]] {CHMOD.TMP CHMOD2.TMP}
     list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
 } 0 [list [list $myUID $myGID] [list $myUID $myGID]]
