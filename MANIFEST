@@ -290,6 +290,7 @@
 ./tclsrc/setfuncs.tcl
 ./tclsrc/showprocs.tcl
 ./tclsrc/stringfile.tcl
+./tclsrc/tkdemo.tcl
 ./tests/all
 ./tests/arrayproc.test
 ./tests/asgnfield.test
