@@ -12,11 +12,35 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profrep.tcl,v 6.0 1996/05/10 16:16:41 markd Exp $
+# $Id: profrep.tcl,v 7.0 1996/06/16 05:31:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-profrep profrep
+
+#
+# Convert the profile array from entries that have only the time spent in
+# the proc to the time spend in the proc and all it calls.
+#
+proc profrep:sum {inDataVar outDataVar} {
+    upvar 1 $inDataVar inData $outDataVar outData
+    
+    foreach inStack [array names inData] {
+        for {set idx 0} {![lempty [set part [lrange $inStack $idx end]]]} \
+                {incr idx} {
+            if ![info exists outData($part)] {
+                set outData($part) {0 0 0}
+            }
+            lassign $outData($part) count real cpu
+            if {$idx == 0} {
+                incr count [lindex $inData($inStack) 0]
+            }
+            incr real [lindex $inData($inStack) 1]
+            incr cpu [lindex $inData($inStack) 2]
+            set outData($part) [list $count $real $cpu]
+        }
+    }
+}
 
 #
 # Do sort comparison.  May only be called by profrep:sort, as it address its
@@ -118,7 +142,8 @@ proc profrep:print {profDataVar sortedProcList outFile userTitle} {
 proc profrep {profDataVar sortKey {outFile {}} {userTitle {}}} {
     upvar $profDataVar profData
 
-    set sortedProcList [profrep:sort profData $sortKey]
-    profrep:print profData $sortedProcList $outFile $userTitle
+    profrep:sum profData sumProfData
+    set sortedProcList [profrep:sort sumProfData $sortKey]
+    profrep:print sumProfData $sortedProcList $outFile $userTitle
 
 }

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.7 1996/09/28 21:02:36 markd Exp $
+.\" $Id: TclX.n,v 7.8 1996/10/04 15:30:10 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -483,8 +483,8 @@ array \fIarrayVar\fR.  The array is address by a list containing the procedure
 call stack.  Element zero is the top of the stack, the procedure that the
 data is for.  The data in each entry is a list consisting of the procedure
 call count and the real time and CPU time in milliseconds spent in the
-procedure (and all procedures it called). The list is in the form {\fIcount
-real cpu\fR}.
+procedure (but not any procedures it calls). The list is in the form
+{\fIcount real cpu\fR}.
 .sp
 Normally, the variable scope stack is used in reporting where time is
 spent.
