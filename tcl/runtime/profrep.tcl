@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profrep.tcl,v 2.0 1992/10/16 04:52:05 markd Rel markd $
+# $Id: profrep.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -20,8 +20,8 @@
 
 #
 # Summarize the data from the profile command to the specified significant
-# stack depth.  Returns the maximum number of characters of any significant
-# stack.  (useful in columnizing reports).
+# stack depth.  Returns the maximum number of characters in any of the
+# procedure names.  (useful in columnizing reports).
 #
 proc profrep:summarize {profDataVar stackDepth sumProfDataVar} {
     upvar $profDataVar profData $sumProfDataVar sumProfData
@@ -31,12 +31,14 @@ proc profrep:summarize {profDataVar stackDepth sumProfDataVar} {
     }
     set maxNameLen 0
     foreach procStack [array names profData] {
+        foreach procName $procStack {
+            set maxNameLen [max $maxNameLen [clength $procName]]
+        }
         if {[llength $procStack] < $stackDepth} {
             set sigProcStack $procStack
         } else {
             set sigProcStack [lrange $procStack 0 [expr {$stackDepth - 1}]]
         }
-        set maxNameLen [max $maxNameLen [clength $sigProcStack]]
         if [info exists sumProfData($sigProcStack)] {
             set cur $sumProfData($sigProcStack)
             set add $profData($procStack)
@@ -63,7 +65,7 @@ proc profrep:sort {sumProfDataVar sortKey} {
         {real}  {set keyIndex 1}
         {cpu}   {set keyIndex 2}
         default {
-            error "Expected a sort of: `calls',  `cpu' or ` real'"}
+            error "Expected a sort type of: `calls', `cpu' or ` real'"}
     }
 
     # Build a list to sort cosisting of a fix-length string containing the
@@ -100,7 +102,7 @@ proc profrep:print {sumProfDataVar sortedProcList maxNameLen outFile
     # Output a header.
 
     set stackTitle "Procedure Call Stack"
-    set maxNameLen [max $maxNameLen [clength $stackTitle]]
+    set maxNameLen [max [expr $maxNameLen+6] [expr [clength $stackTitle]+4]]
     set hdr [format "%-${maxNameLen}s %10s %10s %10s" $stackTitle \
                     "Calls" "Real Time" "CPU Time"]
     if {$userTitle != ""} {
@@ -115,8 +117,13 @@ proc profrep:print {sumProfDataVar sortedProcList maxNameLen outFile
 
     foreach procStack $sortedProcList {
         set data $sumProfData($procStack)
-        puts $outFH [format "%-${maxNameLen}s %10d %10d %10d" $procStack \
+        puts $outFH [format "%-${maxNameLen}s %10d %10d %10d" \
+                            [lvarpop procStack] \
                             [lindex $data 0] [lindex $data 1] [lindex $data 2]]
+        foreach procName $procStack {
+            if {$procName == "<global>"} break
+            puts $outFH "    $procName"
+        }
     }
     if {$outFile != ""} {
         close $outFH

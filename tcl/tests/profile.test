@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 2.0 1992/10/16 04:50:07 markd Rel markd $
+# $Id: profile.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -214,82 +214,97 @@ proc GetProfRep {fileName} {
 rename SAVED_UNKNOWN unknown
 
 Test profile-5.1 {profrep tests} {
-    profrep profData "calls" 1 prof.tmp "Profile Test 5.1"
+    profrep profData calls 1 prof.tmp "Profile Test 5.1"
     GetProfRep prof.tmp
-} 0 {-----------------------------------------------------
+} 0 {---------------------------------------------------------
 Profile Test 5.1
------------------------------------------------------
-Procedure Call Stack      Calls  Real Time   CPU Time
------------------------------------------------------
-ProcB4                        7         80         11
-ProcA4                        5       1250       1180
-EatTime                       4        800         10
-ProcC4                        3       1000        100
-ProcD4                        1        100       1070
+---------------------------------------------------------
+Procedure Call Stack          Calls  Real Time   CPU Time
+---------------------------------------------------------
+ProcB4                            7         80         11
+ProcA4                            5       1250       1180
+EatTime                           4        800         10
+ProcC4                            3       1000        100
+ProcD4                            1        100       1070
 }
 
 Test profile-5.2 {profrep tests} {
-    profrep profData "real" 1 prof.tmp "Profile Test 5.2"
+    profrep profData real 1 prof.tmp "Profile Test 5.2"
     GetProfRep prof.tmp
-} 0 {-----------------------------------------------------
+} 0 {---------------------------------------------------------
 Profile Test 5.2
------------------------------------------------------
-Procedure Call Stack      Calls  Real Time   CPU Time
------------------------------------------------------
-ProcA4                        5       1250       1180
-ProcC4                        3       1000        100
-EatTime                       4        800         10
-ProcD4                        1        100       1070
-ProcB4                        7         80         11
+---------------------------------------------------------
+Procedure Call Stack          Calls  Real Time   CPU Time
+---------------------------------------------------------
+ProcA4                            5       1250       1180
+ProcC4                            3       1000        100
+EatTime                           4        800         10
+ProcD4                            1        100       1070
+ProcB4                            7         80         11
 }
 
 Test profile-5.3 {profrep tests} {
-    profrep profData "cpu" 1 prof.tmp "Profile Test 5.3"
+    profrep profData cpu 1 prof.tmp "Profile Test 5.3"
     GetProfRep prof.tmp
-} 0 {-----------------------------------------------------
+} 0 {---------------------------------------------------------
 Profile Test 5.3
------------------------------------------------------
-Procedure Call Stack      Calls  Real Time   CPU Time
------------------------------------------------------
-ProcA4                        5       1250       1180
-ProcD4                        1        100       1070
-ProcC4                        3       1000        100
-ProcB4                        7         80         11
-EatTime                       4        800         10
+---------------------------------------------------------
+Procedure Call Stack          Calls  Real Time   CPU Time
+---------------------------------------------------------
+ProcA4                            5       1250       1180
+ProcD4                            1        100       1070
+ProcC4                            3       1000        100
+ProcB4                            7         80         11
+EatTime                           4        800         10
 }
 
 Test profile-5.4 {profrep tests} {
-    profrep profData "cpu" 2 prof.tmp "Profile Test 5.4"
+    profrep profData cpu 2 prof.tmp "Profile Test 5.4"
     GetProfRep prof.tmp
-} 0 {-----------------------------------------------------
+} 0 {---------------------------------------------------------
 Profile Test 5.4
------------------------------------------------------
-Procedure Call Stack      Calls  Real Time   CPU Time
------------------------------------------------------
-ProcA4                        5       1250       1180
-ProcD4 ProcA4                 1        100       1070
-EatTime ProcD4                6       1070       1070
-ProcC4 ProcA4                 3       1000        100
-EatTime ProcC4                2       1000        100
-ProcB4 ProcA4                 7         80         11
-EatTime ProcB4                4        800         10
+---------------------------------------------------------
+Procedure Call Stack          Calls  Real Time   CPU Time
+---------------------------------------------------------
+ProcA4                            5       1250       1180
+ProcD4                            1        100       1070
+    ProcA4
+EatTime                           6       1070       1070
+    ProcD4
+ProcC4                            3       1000        100
+    ProcA4
+EatTime                           2       1000        100
+    ProcC4
+ProcB4                            7         80         11
+    ProcA4
+EatTime                           4        800         10
+    ProcB4
 }
 
 Test profile-5.5 {profrep tests} {
-    profrep profData "cpu" 10 prof.tmp "Profile Test 5.5"
+    profrep profData cpu 10 prof.tmp "Profile Test 5.5"
     GetProfRep prof.tmp
-} 0 {------------------------------------------------------
+} 0 {---------------------------------------------------------
 Profile Test 5.5
-------------------------------------------------------
-Procedure Call Stack       Calls  Real Time   CPU Time
-------------------------------------------------------
-ProcA4                         5       1250       1180
-ProcD4 ProcA4                  1        100       1070
-EatTime ProcD4 ProcA4          6       1070       1070
-ProcC4 ProcA4                  3       1000        100
-EatTime ProcC4 ProcA4          2       1000        100
-ProcB4 ProcA4                  7         80         11
-EatTime ProcB4 ProcA4          4        800         10
+---------------------------------------------------------
+Procedure Call Stack          Calls  Real Time   CPU Time
+---------------------------------------------------------
+ProcA4                            5       1250       1180
+ProcD4                            1        100       1070
+    ProcA4
+EatTime                           6       1070       1070
+    ProcD4
+    ProcA4
+ProcC4                            3       1000        100
+    ProcA4
+EatTime                           2       1000        100
+    ProcC4
+    ProcA4
+ProcB4                            7         80         11
+    ProcA4
+EatTime                           4        800         10
+    ProcB4
+    ProcA4
 }
 
 unset foo
