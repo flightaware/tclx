@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 2.1 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXid.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,19 +21,19 @@
 /*
  * Prototypes of internal functions.
  */
-int
+static int
 UseridToUsernameResult _ANSI_ARGS_((Tcl_Interp *interp,
                                     int         userId));
 
-int
+static int
 UsernameToUseridResult _ANSI_ARGS_((Tcl_Interp *interp,
                                     char       *userName));
 
-int
+static int
 GroupidToGroupnameResult _ANSI_ARGS_((Tcl_Interp *interp,
                                       int         groupId));
 
-int
+static int
 GroupnameToGroupidResult _ANSI_ARGS_((Tcl_Interp *interp,
                                       char       *groupName));
 

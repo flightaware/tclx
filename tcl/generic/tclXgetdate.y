@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.3 1993/02/07 22:04:46 markd Exp markd $
+ * $Id: tclXgetdate.y,v 2.4 1993/04/16 06:42:34 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <ctype.h>
 #include <time.h>
+#include "tcl.h"
 
 #define yyparse         date_parse
 #define yylex           date_lex
@@ -469,9 +470,55 @@ static TABLE    MilitaryTable[] = {
     { NULL }
 };
 
+/*
+ * Prototypes of internal functions.
+ */
+static
+yyerror _ANSI_ARGS_((char *s));
+
+static time_t
+ToSeconds _ANSI_ARGS_((time_t      Hours,
+                       time_t      Minutes,
+                       time_t      Seconds,
+                       MERIDIAN    Meridian));
+
+static int
+Convert _ANSI_ARGS_((time_t      Month,
+                     time_t      Day,
+                     time_t      Year,
+                     time_t      Hours,
+                     time_t      Minutes,
+                     time_t      Seconds,
+                     MERIDIAN    Meridia,
+                     DSTMODE     DSTmode,
+                     time_t     *TimePtr));
+
+static time_t
+DSTcorrect _ANSI_ARGS_((time_t      Start,
+                        time_t      Future));
+
+static time_t
+RelativeDate _ANSI_ARGS_((time_t      Start,
+                          time_t      DayOrdinal,
+                          time_t      DayNumber));
+
+static int
+RelativeMonth _ANSI_ARGS_((time_t      Start,
+                           time_t      RelMonth,
+                           time_t     *TimePtr));
+static int
+LookupWord _ANSI_ARGS_((char  *buff));
+
+static int
+yylex ();
+
+
+/*
+ * Dump error messages in the bit bucket, not to useful.
+ */
 static
 yyerror(s)
-    char        *s;
+    char  *s;
 {
 }
 
