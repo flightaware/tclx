@@ -12,36 +12,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 2.4 1993/07/27 15:06:08 markd Exp markd $
+# $Id: process.test,v 2.5 1993/08/03 06:50:36 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
-
-# Proc to fork and exec child that loops until it gets a signal.  If pgroup
-# is set, a file is created to indicate its been done.  This lets the 
-# parent sync up with the child.
-
-proc ForkLoopingChild {{setPGroup 0}} {
-    unlink -nocomplain {PGROUP.SET}
-    flush stdout
-    flush stderr
-    set newPid [fork]
-    if {$newPid != 0} {
-        if $setPGroup {
-            while {![file exists PGROUP.SET]} {
-                sleep 1
-            }
-        }
-        return $newPid
-    }
-    if $setPGroup {
-        id process group set
-        close [open PGROUP.SET w]
-    }
-    execl ../tclmaster/bin/tcl {-qc {catch {while {1} {sleep 1}}; exit 10}}
-    error "Should never make it here"
-}
 
 
 # Test fork, execl, and wait commands.
@@ -122,6 +97,3 @@ Test process-2.3 {fork, execl, wait tests} {
     set result2 [wait -pgroup -untraced $testPid]
     list $result1 [lrange $result2 1 end]
 } 0 {{} {SIG SIGTERM}}
-
-
-unlink -nocomplain {PGROUP.SET}

@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.2 1993/07/20 08:35:45 markd Exp markd $
+# $Id: testlib.tcl,v 2.3 1993/08/13 06:32:33 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -105,4 +105,32 @@ proc GenRec {id} {
     return [format "Key:%04d {This is a test of file I/O (%d)} KeyX:%04d %s" \
                     $id $id $id [replicate :@@@@@@@@: $id]]
 }
+
+# Proc to fork and exec child that loops until it gets a signal.
+# Can optionally set its pgroup.
+
+proc ForkLoopingChild {{setPGroup 0}} {
+    unlink -nocomplain {PGROUP.SET}
+    flush stdout
+    flush stderr
+    set newPid [fork]
+    if {$newPid != 0} {
+
+        # Wait till the child has set the pgroup.
+        if $setPGroup {
+            while {![file exists PGROUP.SET]} {
+                sleep 1
+            }
+        unlink PGROUP.SET
+        }
+        return $newPid
+    }
+    if $setPGroup {
+        id process group set
+        close [open PGROUP.SET w]
+    }
+    execl ../tclmaster/bin/tcl {-qc {catch {while {1} {sleep 1}}; exit 10}}
+    error "Should never make it here"
+}
+
 

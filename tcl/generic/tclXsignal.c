@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.12 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.13 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,59 +38,115 @@
  * Signal name table maps name to number.
  */
 
-#define SIG_NAME_MAX 7
+#define SIG_NAME_MAX 9  /* Maximum length of any signal name */
 
 static struct {char *name;
         short num;
        } sigNameTable [] = {
-    "HUP",     SIGHUP,
-    "INT",     SIGINT,
-    "QUIT",    SIGQUIT,
-    "ILL",     SIGILL,
-    "TRAP",    SIGTRAP,
-    "IOT",     SIGIOT,
 #ifdef SIGABRT
     "ABRT",    SIGABRT,
+#endif
+#ifdef SIGALRM
+    "ALRM",    SIGALRM,
+#endif
+#ifdef SIGBUS
+    "BUS",     SIGBUS,
+#endif
+#ifdef SIGCHLD
+    "CHLD",    SIGCHLD,
+#endif
+#ifdef SIGCLD
+    "CLD",     SIGCLD,
+#endif
+#ifdef SIGCONT
+    "CONT",    SIGCONT,
 #endif
 #ifdef SIGEMT
     "EMT",     SIGEMT,
 #endif
+#ifdef SIGFPE
     "FPE",     SIGFPE,
+#endif
+#ifdef SIGHUP
+    "HUP",     SIGHUP,
+#endif
+#ifdef SIGILL
+    "ILL",     SIGILL,
+#endif
+#ifdef SIGINT
+    "INT",     SIGINT,
+#endif
+#ifdef SIGIO
+    "IO",      SIGIO,
+#endif
+#ifdef SIGIOT
+    "IOT",     SIGIOT,
+#endif
+#ifdef SIGKILL
     "KILL",    SIGKILL,
-#ifdef SIGBUS
-    "BUS",     SIGBUS,
 #endif
-    "SEGV",    SIGSEGV,
-#ifdef SIGSYS
-    "SYS",     SIGSYS,
+#ifdef SIGLOST
+    "LOST",    SIGLOST,
 #endif
+#ifdef SIGPIPE
     "PIPE",    SIGPIPE,
-    "ALRM",    SIGALRM,
-    "TERM",    SIGTERM,
-    "USR1",    SIGUSR1,
-    "USR2",    SIGUSR2,
-    "CLD",     SIGCLD,
-    "CHLD",    SIGCHLD,
-#ifdef SIGPWR
-    "PWR",     SIGPWR,
 #endif
 #ifdef SIGPOLL
     "POLL",    SIGPOLL,
 #endif
+#ifdef SIGPROF
+    "PROF",    SIGPROF,
+#endif
+#ifdef SIGPWR
+    "PWR",     SIGPWR,
+#endif
+#ifdef SIGQUIT
+    "QUIT",    SIGQUIT,
+#endif
+#ifdef SIGSEGV
+    "SEGV",    SIGSEGV,
+#endif
 #ifdef SIGSTOP
     "STOP",    SIGSTOP,
 #endif
+#ifdef SIGSYS
+    "SYS",     SIGSYS,
+#endif
+#ifdef SIGTERM
+    "TERM",    SIGTERM,
+#endif
+#ifdef SIGTRAP
+    "TRAP",    SIGTRAP,
+#endif
 #ifdef SIGTSTP
     "TSTP",    SIGTSTP,
-#endif
-#ifdef SIGCONT
-    "CONT",    SIGCONT,
 #endif
 #ifdef SIGTTIN
     "TTIN",    SIGTTIN,
 #endif
 #ifdef SIGTTOU
     "TTOU",    SIGTTOU,
+#endif
+#ifdef SIGURG
+    "URG",     SIGURG,
+#endif
+#ifdef SIGUSR1
+    "USR1",    SIGUSR1,
+#endif
+#ifdef SIGUSR2
+    "USR2",    SIGUSR2,
+#endif
+#ifdef SIGVTALRM
+    "VTALRM",  SIGVTALRM,
+#endif
+#ifdef SIGWINCH
+    "WINCH",   SIGWINCH,
+#endif
+#ifdef SIGXCPU
+    "XCPU",    SIGXCPU,
+#endif
+#ifdef SIGXFSZ
+    "XFSZ",    SIGXFSZ,
 #endif
     NULL,         -1};
 
@@ -275,11 +331,10 @@ SigNameToNum (sigName)
  *
  * Tcl_KillCmd --
  *     Implements the TCL kill command:
- *        kill ?signal? proclist
+ *        kill ?-pgroup? ?signal? idlist
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -289,20 +344,27 @@ Tcl_KillCmd (clientData, interp, argc, argv)
     int     argc;
     char      **argv;
 {
-    int    signalNum, idx, procId, procArgc, result = TCL_ERROR;
+    int    signalNum, nextArg, idx, procId, procArgc;
+    int    pgroup = FALSE;
     char **procArgv;
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " ?signal? processlist", (char *) NULL);
-        return TCL_ERROR;
-    }
+    if (argc < 2)
+        goto usage;
 
-    if (argc == 2)
+    nextArg = 1;
+    if (STREQU (argv [nextArg], "-pgroup")) {
+        pgroup = TRUE;
+        nextArg++;
+    }
+        
+    if (((argc - nextArg) < 1) || ((argc - nextArg) > 2))
+        goto usage;
+
+    if ((argc - nextArg) == 1)
         signalNum = SIGTERM;
     else {
-        if (!Tcl_StrToInt (argv[1], 0, &signalNum)) {
-            signalNum = SigNameToNum (argv[1]);
+        if (!Tcl_StrToInt (argv[nextArg], 0, &signalNum)) {
+            signalNum = SigNameToNum (argv[nextArg]);
         }
         if ((signalNum < 0) || (signalNum > MAXSIG)) {
             Tcl_AppendResult (interp, "invalid signal", (char *) NULL);
@@ -310,26 +372,35 @@ Tcl_KillCmd (clientData, interp, argc, argv)
         }
     }
 
-    if (Tcl_SplitList (interp, argv [argc - 1], &procArgc, 
+    if (Tcl_SplitList (interp, argv [nextArg + 1], &procArgc, 
                        &procArgv) != TCL_OK)
         return TCL_ERROR;
 
     for (idx = 0; idx < procArgc; idx++) {
-
         if (Tcl_GetInt (interp, procArgv [idx], &procId) != TCL_OK)
-            goto exitPoint;
+            goto errorExit;
+        
+        if (pgroup)
+            procId = -procId;
 
         if (kill ((pid_t) procId, signalNum) < 0) {
             Tcl_AppendResult (interp, "pid ", procArgv [idx],
                               ": ", Tcl_PosixError (interp), (char *) NULL);
-            goto exitPoint;
+            goto errorExit;
         }
      }
 
-    result = TCL_OK;
-exitPoint:
     ckfree ((char *) procArgv);
-    return result;
+    return TCL_OK;
+        
+  errorExit:
+    ckfree ((char *) procArgv);
+    return TCL_ERROR;;
+
+  usage:
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                      " ?-pgroup? ?signal? idlist", (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*
@@ -855,7 +926,6 @@ ParseSignalList (interp, signalListStr, signalList)
 {
     char         **signalListArgv;
     int            signalListSize, signalNum, idx;
-    int            result = -1;
     char          *signalName;
 
     if (Tcl_SplitList (interp, signalListStr, &signalListSize, 
@@ -865,13 +935,13 @@ ParseSignalList (interp, signalListStr, signalList)
     if (signalListSize > MAXSIG) {
         Tcl_AppendResult (interp, "too many signals supplied in list",
                           (char *) NULL);
-        goto exitPoint;
+        goto errorExit;
     }
 
     if (signalListSize == 0) {
         Tcl_AppendResult (interp, "signal list may not be empty",
                           (char *) NULL);
-        goto exitPoint;
+        goto errorExit;
     }
 
     for (idx = 0; idx < signalListSize; idx++) {
@@ -888,21 +958,23 @@ ParseSignalList (interp, signalListStr, signalList)
             sprintf (numBuf, "%d", signalNum);
             Tcl_AppendResult (interp, "invalid signal number: ",
                               numBuf, (char *) NULL);
-            goto exitPoint;
+            goto errorExit;
         }
 
         if ((signalNum < 1) || (signalNum > MAXSIG)) {
             Tcl_AppendResult (interp, "invalid signal name: ",
                               signalName, (char *) NULL);
-            goto exitPoint;
+            goto errorExit;
         }
         signalList [idx] = signalNum;
     }
 
-    result = signalListSize;
-exitPoint:
     ckfree ((char *) signalListArgv);
-    return result;
+    return signalListSize;
+
+  errorExit:
+    ckfree ((char *) signalListArgv);
+    return -1;
 
 }
 
@@ -1012,7 +1084,7 @@ GetSignalStates (interp, signalListSize, signalList)
 
     return TCL_OK;
 
-unixSigError:
+  unixSigError:
     for (idx = 0; idx <= actuallyDone; idx++)
         ckfree (stateKeyedList [idx]);
 
@@ -1065,7 +1137,7 @@ SetSignalStates (interp, signalListSize, signalList, actionFunc, command)
 
     return TCL_OK;
 
-unixSigError:
+  unixSigError:
     interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
 }

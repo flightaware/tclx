@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 2.4 1993/07/18 19:08:27 markd Exp markd $
+# $Id: signal.test,v 2.5 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -252,7 +252,7 @@ if $posix {
 
 Test signal-2.1 {kill tests} {
     kill
-} 1 {wrong # args: kill ?signal? processlist}
+} 1 {wrong # args: kill ?-pgroup? ?signal? idlist}
 
 signal error SIGINT
 
@@ -279,3 +279,9 @@ Test signal-2.6 {kill tests} {
 Test signal-2.7 {kill tests} {
     kill 0 [id process]
 } 0 {}
+
+Test signal-2.8 {kill tests} {
+    set pgrp [ForkLoopingChild 1]
+    kill -pgroup SIGKILL $pgrp
+    lrange [wait -pgroup $pgrp] 1 2
+} 0 {SIG SIGKILL}
