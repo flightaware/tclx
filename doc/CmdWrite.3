@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: CmdWrite.3,v 2.2 1993/11/07 18:46:27 markd Exp markd $
+.\" $Id: CmdWrite.3,v 2.1 1993/07/20 08:35:45 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Command Writing" TCL "" "Tcl"
@@ -21,7 +21,6 @@
 TclCommandWriting - Writing C language extensions to Tcl.
 '
 .SH OVERVIEW
-.PP
 This document is intended to help the programmer who wishes to extend
 Tcl with C language routines.  It should also be useful to someone
 wishing to add Tcl to an existing editor, communications program, 
@@ -32,7 +31,6 @@ information can also be found in the \fI*.3\fR manual pages in the
 manpages in the \fIman\fR directory of Extended Tcl.
 '
 .SH WRITING TCL EXTENSIONS IN C
-.PP
 All C-based Tcl commands are called with four arguments: a client data pointer,
 an interpreter pointer, an argument count and a pointer to an array of
 pointers to character strings containing the Tcl arguments to the command.
@@ -139,6 +137,8 @@ sense that no Tcl program should be able to cause Tcl to dump core.  Please
 carry this notion forward with your C extensions by validating arguments 
 as above.
 .PP
+.SH ANOTHER C EXTENSION - THE MAX COMMAND
+
 In the command below, two or more arguments are compared and the one with
 the maximum value is returned, if all goes well.  It is an error if there
 are fewer than three arguments (the pointer to the ``max'' command text itself,
@@ -211,9 +211,72 @@ commands.
 Note the call to \fITcl_SetResult\fR in the above command to set the return
 value to Tcl.  \fBTCL_VOLATILE\fR is used because the memory containing the
 result will be freed upon the function's return.
+
+.SH ANOTHER C EXTENSION - THE LREVERSE COMMAND
+
+In the command below, one list is passed as an argument, and a list
+containing all of the elements of the list in reverse order is
+returned.  It is an error if anything other than two arguments are
+passed (the pointer to the ``lreverse'' command text itself,
+\fIargv[0]\fR, and a pointer to the list to reverse.
+.PP
+Once \fIlreverse\fR has determined that it has received the correct
+number of arguments, \fBTcl_SplitList\fR is called to break the
+list into an \fIargc\fR and \fIargv\fR array of pointers.
+.PP
+\fIlreverse\fR then operates on the array of pointers, swapping them
+from lowest to highest, second-lowest to second-highest, and so forth.
+.PP
+Finally \fBTcl_Merge\fR is calleds to create a single new string containing
+the reversed list and it is set as the result via \fBTcl_SetResult\fR.
+Note that \fBTCL_DYNAMIC\fR is used to tell \fBTcl_SetResult\fR that
+it now owns the string and it is up to Tcl to free the string
+when it is done with it.
+.PP
+Note that it \fIis\fR safe to play around with the \fIargv\fR list like
+this, and that a single call to \fBckfree\fR can be made to free all
+the data returned by \fBTcl_SplitList\fR in this manner.
+.PP
+.sp
+.nf
+.ft CW
+int
+Tcl_LreverseCmd(notUsed, interp, argc, argv)
+    ClientData notUsed;			/* Not used. */
+    Tcl_Interp *interp;			/* Current interpreter. */
+    int argc;				/* Number of arguments. */
+    char **argv;			/* Argument strings. */
+{
+    int listArgc, lowListIndex, hiListIndex;
+    char **listArgv;
+    char *temp, *resultList;
+
+    if (argc != 2) {
+	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+		" list\"", (char *) NULL);
+	return TCL_ERROR;
+    }
+
+    if (Tcl_SplitList(interp, argv[1], &listArgc, &listArgv) != TCL_OK) {
+	return TCL_ERROR;
+    }
+    for (lowListIndex = 0, hiListIndex = listArgc;
+	 --hiListIndex > lowListIndex; lowListIndex++) {
+	temp = listArgv[lowListIndex];
+	listArgv[lowListIndex] = listArgv[hiListIndex];
+	listArgv[hiListIndex] = temp;
+    }
+    resultList = Tcl_Merge (listArgc, listArgv);
+    ckfree (listArgv);
+    Tcl_SetResult (interp, resultList, TCL_DYNAMIC);
+    return TCL_OK;
+}
+.ft R
+.fi
+.PP
 '
 .SH INSTALLING YOUR COMMAND
-.PP
+.P
 To install your command into Tcl you must call 
 \fBTcl_CreateCommand\fR, passing
 it the pointer to the interpreter you want to install the command into,
@@ -285,7 +348,6 @@ Since release 6.2, Extended Tcl has supported
 multiple interpreters within one invocation of Tcl.
 '
 .SH THEORY OF HANDLES
-.PP
 Sometimes you need to have a data element that isn't readily representable
 as a string within Tcl, for example a pointer to a complex C data structure.
 It is not a good idea to try to pass pointers around within
@@ -322,14 +384,12 @@ track down a bug with an implicated handle named something like \fBfile4\fR
 or \fBbitmap6\fR than just \fB6\fR.
 .PP
 .SH TRACKING MEMORY CORRUPTION PROBLEMS
-.PP
 Occasionally you may write code that scribbles past the end of an
 allocated piece of memory.  The memory debugging
 routines included in Tcl can help find these problems.  See
 \fIMemory(TCL)\fR for details.
-'
-.SH INSTALLING YOUR EXTENSIONS INTO EXTENDED TCL
 .PP
+.SH INSTALLING YOUR EXTENSIONS INTO EXTENDED TCL
 To add your extensions to Extended Tcl, you must compile them and cause
 them to be linked with TclX.  For the routines to be linked into the
 \fBtcl\fR and \fBwishx\fR executables, they
@@ -369,7 +429,6 @@ one call already there to install an application -- the call to
 \fITclX_Init\fR installs Extended Tcl into the Tcl core.
 
 .SH MAKING APPLICATION INFORMATION VISIBLE FROM EXTENDED TCL
-.PP
 TclX's \fBinfox\fR command can return several pieces of information
 relevant to Extended Tcl, including the application's name, descriptive
 name, patch level and version.  Your application's startup can set
@@ -383,7 +442,6 @@ variables in your init route, for example:
 .sp
 .nf
 .ft CW
-    tclAppPatchlevel = PATCHLEVEL;
     tclAppName = "cute";
     tclAppLongName = "Call Unix/Tcl Environment";
     tclAppVersion = "2.1";
@@ -393,7 +451,7 @@ variables in your init route, for example:
 Note that the default values are set by \fITclX_Init\fR, so if you wish
 to override them, you must call your init routine in \fITclX_AppInit\fR
 after its call to \fITclX_Init\fR.
-'
+.PP
 .SH EXTENDED TCL EXIT
 .PP
 When Extended Tcl exits,
@@ -414,9 +472,9 @@ called when the interpreter is deleted, call \fBTcl_CallWhenDeleted\fR
 from your application initialization routine.  For details on how to
 use this function, read the \fBCallDel\fR(3) manual page that ships with
 Berkeley Tcl.
-'
-.SH EXECUTING TCL CODE FROM YOUR C EXTENSION
 .PP
+.SH EXECUTING TCL CODE FROM YOUR C EXTENSION
+
 Suppose you are in the middle of coding a C extension and you realize
 that you need some operation performed, one that would be simple from
 Tcl but possibly excruciating to do directly in C.  Tcl provides
@@ -425,9 +483,9 @@ the \fBTcl_Eval\fR, \fBTcl_VarEval\fR, \fBTcl_EvalFile\fR and
 from within a C extension.  The results of the call will be in
 \fBinterp->result\fR.  For more information please consult the
 \fBEval\fR(3) manual page within the Berkely Tcl distribution.
-'
-.SH ACCESSING TCL VARIABLES AND ARRAYS FROM YOUR C EXTENSIONS
 .PP
+.SH ACCESSING TCL VARIABLES AND ARRAYS FROM YOUR C EXTENSIONS
+
 Tcl variables and arrays can be read from a C extension through
 the \fBTcl_GetVar\fR and \fBTcl_GetVar2\fR functions, and
 set from C extensions through the \fBTcl_SetVar\fR and
@@ -436,9 +494,9 @@ the \fBTcl_UnsetVar\fR and \fBTcl_UnsetVar2\fR functions.
 For complete information on these functions,
 please refer to the \fBSetVar\fR(3) manual
 page in the \fIdoc\fR directory of the Berkeley Tcl distribution.
-'
-.SH LINKING TCL VARIABLES TO C VARIABLES
 .PP
+.SH LINKING TCL VARIABLES TO C VARIABLES
+
 \fBTcl_LinkVar\R and \fBTcl_UnlinkVar\fR can be used to automatically
 keep Tcl variables synchronized with corresponding C variables.  Once
 a Tcl variable has been linked to a C variable with \fBTcl_LinkVar\fR,
@@ -457,12 +515,11 @@ variable will be updated to have the same value.
 \fIInt\fR, \fIdouble\fR, \fIboolean\fR and \fIchar *\fR variables
 are supported.  For more information, please examine the \fBLinkVar\fR(3)
 manual page in the Berkeley Tcl distribution.
-'
-.SH ADDING NEW MATH FUNCTIONS
 .PP
+.SH ADDING NEW MATH FUNCTIONS TO TCL
 As of Tcl version 7.0, math functions such as \fIsin\fR, \fIcos\fR, etc,
 are directly supported within Tcl expressions.  These obsolete the
-Extended Tcl commands that provided explitic calls for these functions
+Extended Tcl commands that provided explicit calls for these functions
 for many releases.
 .PP
 New math functions can be added to Tcl, or existing math functions
@@ -470,18 +527,18 @@ can be replaced, by calling \fBTcl_CreateMathFunc\fR.
 .PP
 For more information on adding math functions, please examine the
 \fBCrtMathFnc\fR(3) manual page in the Berkeley Tcl distribution.
-'
-.SH PERFORMING TILDE SUBSTITUTIONS ON FILENAMES
 .PP
+.SH PERFORMING TILDE SUBSTITUTIONS ON FILENAMES
+
 The \fBTcl_TildeSubst\fR function is available to C extension writers
 to perform tilde substitutions on filenames.  If the name starts
 with a ``~'' character, the function returns a new string where
 the name is replaced with the home directory of the given user.
 For more information please consult the \fBTildeSubst\fR(3) manual
 page in the Berkeley Tcl distribution.
-'
-.SH SETTING THE RECURSION LIMIT
 .PP
+.SH SETTING THE RECURSION LIMIT
+
 Tcl has a preset recursion limit that limits the maximum allowable nesting
 depth of calls within an interpreter.  This is useful for detecting
 infinite recursions before other limits such as the process memory limit
@@ -491,9 +548,9 @@ The default limit is just a guess, however, and applications that make
 heavy use of recursion may need to call \fBTcl_SetRecursionLimit\fR
 to raise this limit.  For more information, please consult the
 \fBSetRecLmt\fR(3) manual page in the Berkeley Tcl distribution.
-'
-.SH HANDLING SIGNALS FROM TCL EXTENSIONS
 .PP
+.SH HANDLING SIGNALS FROM TCL EXTENSIONS
+
 If an event such as a signal occurs while a Tcl script is being
 executed, it isn't safe to do much in the signal handling routine --
 the Tcl environment cannot be safely manipulated at this point because
@@ -509,9 +566,9 @@ and \fBTcl_AsyncDelete\fR functions provide a safe mechanism for dealing
 with signals and other asynchronous events.  For more information on how
 to use this capability, please refer to the \fBAsync\fR(3) manual page
 in the Berkeley Tcl distribution.
-'
+
 .SH PARSING BACKSLASH SEQUENCES
-.PP
+
 The \fBTcl_Backslash\fR function is called to parse Tcl backslash sequences.
 These backslash sequences are the usual sort that you see in the C
 programming language, such as \fB\\n\fR for newline, \fB\\r\fR for return, and
@@ -522,9 +579,9 @@ For more info on this call, look at the \fBBackslash\fR(3) manual page
 in the Berkeley Tcl distribution.  For information on the valid backslash
 sequences, consult the summary of Tcl language syntax, \fBTcl\fR(n)
 in the same distribution.
-'
-.SH HASH TABLES
 .PP
+.SH HASH TABLES
+
 \fIHash tables\fR provide Tcl with a high-performance facility for looking up
 and managing key-value pairs located and maintained in memory.  Tcl uses 
 hash tables internally to locate procedure definitions, Tcl variables, 
@@ -540,9 +597,9 @@ per run over the life of the program.
 .PP
 For more information on hash tables, please consult the \fBHash\fR(3) manual
 page in the Berkeley Tcl distribution.
-'
-.SH TRACING VARIABLE ACCESSES
 .PP
+.SH TRACING VARIABLE ACCESSES
+
 The C extension writer can arrange to have a C routine called whenever a
 Tcl variable is read, written, or unset.  Variable traces are the
 mechanism by which Tk toolkit widgets such as radio and checkbuttons,
@@ -558,9 +615,9 @@ request information about traces and to delete them.
 .PP
 For more information on variable traces, consult the \fBTraceVar\fR(3)
 manual page in the Berkeley Tcl distribution.
-'
-.SH TRACING EXECUTION
 .PP
+.SH TRACING EXECUTION
+
 Tcl has the ability to call C routines for every command it executes,
 up to a specified depth of nesting levels.  The command \fBTcl_CreateTrace\fR
 creates an execution trace; \fBTcl_DeleteTrace\fR deletes it.
@@ -571,9 +628,9 @@ Tcl applications.
 .PP
 For complete information on execution tracing, please look at
 the \fBCrtTrace\fR(3) manual pages in the Berkeley Tcl distribution.
-'
-.SH EVALUATING TCL EXPRESSIONS
 .PP
+.SH EVALUATING TCL EXPRESSIONS FROM C
+
 \fBTcl_ExprLong\fR, \fBTcl_ExprDouble\fR, \fBTcl_ExprBool\fR,
 and \fBTcl_ExprString\fR can be called to evaluate Tcl expressions
 from within a C routine.  Depending on the routine called, the
@@ -584,9 +641,9 @@ result is either a C \fIlong\fR, a \fIdouble\fR, a boolean
 For complete information on evaluating Tcl expressions from C, you
 are invited to examine the \fBExprLong\fR(3) manpage in the
 Berkeley Tcl distribution.
-'
-.SH PATTERN MATCHING
 .PP
+.SH PATTERN MATCHING
+
 The \fBTcl_StringMatch\fR function can be called to see
 if a string matches a specified pattern.  \fBTcl_StringMatch\fR
 is called by the Tcl \fIstring match\fR command, so the format for
@@ -595,18 +652,17 @@ used by the C-shell; \fBstring\fR(n) describes this format.
 .PP
 More information about \fBTcl_StringMatch\fR is available in
 the \fBStrMatch\fR(3) manpage in the Berkeley Tcl distribution.
-'
-.SH REGULAR EXPRESSION PATTERN MATCHING
 .PP
+.SH REGULAR EXPRESSION PATTERN MATCHING
 \fBTcl_RegExpMatch\fR can be called to determine whether
 a string matches a regular expression.  \fBTcl_RegExpMatch\fR
 is used internally by the \fIregexp\fR Tcl command.
 .PP
 For more information on this function, please consult
 the \fBRegExp\fR(3) manpage in the Berkeley Tcl distribution.
-'
-.SH MANIPULATING TCL LISTS FROM C EXTENSIONS
 .PP
+.SH MANIPULATING TCL LISTS FROM C EXTENSIONS
+
 The C extension writer often needs to create, manipulate and decompose
 Tcl lists.  \fBTcl_SplitList\fR parses a list into an \fIargv\fR and
 \fIargc\fR like to the way command-line arguments are
@@ -619,9 +675,9 @@ to the C programmer.
 .PP
 For more information on these commands, please consult the
 \fBSplitList\fR(3) manual page in the Berkeley Tcl distribution.
-'
-.SH CONCATENATING STRINGS
 .PP
+.SH CONCATENATING STRINGS
+
 \fBTcl_Concat\fR concatenates zero or more strings into a single
 string.  The strings are space-separated.  \fBTcl_Concat\fR
 works like \fITcl_Merge\fR, except that \fBTcl_Concat\fR does
@@ -629,9 +685,9 @@ not attempt to make the resulting string into a valid Tcl list.
 .PP
 \fBTcl_Concat\fR is documented in the \fBConcat\fR(3) manpage
 in the Berkeley Tcl distribution.
-'
-.SH TELLING IF YOU HAVE A COMPLETE COMMAND
 .PP
+.SH DETECTING WHETHER OR NOT YOU HAVE A COMPLETE COMMAND
+
 C routines that collect data to form a command to be passed to
 \fITcl_Eval\fR often need a way to tell whether they have a complete
 command already or whether they need more data.  (Programs that read
@@ -641,9 +697,9 @@ complete command.
 .PP
 For more information examine \fBCmdCmplt\fR(3) in the
 Berkeley Tcl distribution.
-'
-.SH RECORDING COMMANDS FOR COMMAND HISTORY
 .PP
+.SH RECORDING COMMANDS FOR COMMAND HISTORY
+
 Tcl has a history mechanism that is accessed from Tcl through the
 \fIhistory\fR command.  To propagate commands into the command
 history, your extension should call \fITcl_RecordAndEval\fR.
@@ -657,9 +713,9 @@ commands.
 .PP
 For complete information on this function, please examine the
 \fBRecordEval\fR.3 manual page in the Berkeley Tcl distribution.
-'
-.SH CONVERTING FLOATING POINT VALUES TO STRINGS
 .PP
+.SH CONVERTING FLOATING POINT VALUES TO STRINGS
+
 \fBTcl_PrintDouble\fR converts a C \fIdouble\fR into
 an ASCII string.  It ensures that the string output
 will continue to be interpreted as a floating point
@@ -672,9 +728,9 @@ variable.
 For complete information on \fITcl_PrintDouble\fR,
 examine \fBPrintDbl\fR(3) in the Berkeley
 Tcl distribution.
-'
-.SH CREATING CHILD PROCESSES AND PIPELINES FROM C
 .PP
+.SH CREATING CHILD PROCESSES AND PIPELINES FROM C
+
 \fBTcl_CreatePipeline\fR is a useful procedure for spawning
 child processes.  The child (or pipeline of children)
 can have its standard input, output and error redirected
@@ -683,9 +739,9 @@ of the redirection symbols understood by this function,
 look at the \fBexec\fR(n) Tcl
 command.  For complete information on \fBTcl_CreatePipeline\fR,
 please examine \CrtPipelin\fR(3).
-'
-.SH ACCESSING TCL FILEHANDLES FROM C
 .PP
+.SH ACCESSING TCL FILEHANDLES FROM C
+
 Files opened from your C code can be made visible to Tcl code
 via the \fBTcl_EnterFile\fR function.  Likewise, Tcl filehandles
 passed to your C extension can be translated to a Posix
@@ -693,9 +749,9 @@ passed to your C extension can be translated to a Posix
 .PP
 For complete explanations of these commands, please look at
 \fBEnterFile\fR(3) in the Berkeley Tcl distribution.
-'
+
 .SH MANAGING BACKGROUND PROCESS TERMINATION AND CLEANUP
-.PP
+
 When a Posix system does a \fIfork\fR to create a new process,
 the process ID of the child is returned to the caller.  After
 the child process exits, its process table entry (and some
@@ -715,3 +771,15 @@ permitting the processes to be fully reclaimed by the operating system.
 .PP
 For complete information on these routines, please look at
 \fIDetachPids(3)\fR in the Berkeley Tcl distribution.
+.PP
+.SH FOR MORE INFORMATION
+.PP
+In addition to the documentation referenced above, you can learn a lot
+by studying the source code of the commands added by Tcl, Tk and 
+Extended Tcl.  The \fIcomp.lang.tcl\fR Usenet newsgroup is read by
+tens of thousands of Tcl people, and is a good place to ask questions.
+Finally, if you have interactive Internet access, you can ftp to
+\fIharbor.ecn.purdue.edu\fR, the site for contributed Tcl sources.
+``Harbor'' contains quite a few extensions, applications, and so forth,
+including several object-oriented extension packages.
+
