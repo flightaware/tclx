@@ -1,3 +1,8 @@
+2004-12-01  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* unix/tools/tclmanpages: note resource.n last appears and lset.n
+	first appears in 8.4 docs.
+
 2004-11-23  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclXfilescan.c (TclX_ScanfileObjCmd): watch for scanfile
