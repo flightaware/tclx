@@ -1224,4 +1224,6 @@
     auto_loading will find them.
   o Removed --arch configure option.  With new pkgIndex.tcl changes, its not
     much good unless Tcl and Tk supported it.
--------------------------------------------------------------------------------
+===============================================================================
+20 Oct 96: Released TclX 7.6.0 Beta 2
+===============================================================================
