@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 1.5 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclXlib.c,v 2.0 1992/10/16 04:50:55 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -50,6 +50,10 @@ typedef char fileId_t [64];
 /*
  * Prototypes of internal functions.
  */
+static int
+GlobalEvalFile _ANSI_ARGS_((Tcl_Interp *interp,
+                            char       *file));
+
 static int
 EvalFilePart _ANSI_ARGS_((Tcl_Interp  *interp,
                           char        *fileName,
@@ -143,6 +147,34 @@ LoadProc _ANSI_ARGS_((Tcl_Interp  *interp,
 /*
  *-----------------------------------------------------------------------------
  *
+ * GlobalEvalFile --
+ *
+ *	Evaluate a file  at global level in an interpreter.
+ *
+ * Results:
+ *	A standard Tcl result is returned, and interp->result is
+ *	modified accordingly.
+ *-----------------------------------------------------------------------------
+ */
+static int
+GlobalEvalFile(interp, file)
+    Tcl_Interp *interp;
+    char       *file;
+{
+    register Interp *iPtr = (Interp *) interp;
+    int result;
+    CallFrame *savedVarFramePtr;
+
+    savedVarFramePtr = iPtr->varFramePtr;
+    iPtr->varFramePtr = NULL;
+    result = Tcl_EvalFile (interp, file);
+    iPtr->varFramePtr = savedVarFramePtr;
+    return result;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
  * EvalFilePart --
  *
  *   Read in a byte range of a file and evaulate it.
@@ -204,7 +236,7 @@ EvalFilePart (interp, fileName, offset, length)
     oldScriptFile = iPtr->scriptFile;
     iPtr->scriptFile = fileName;
 
-    result = Tcl_Eval (interp, cmdBuffer, 0, (char *) NULL);
+    result = Tcl_GlobalEval (interp, cmdBuffer);
 
     iPtr->scriptFile = oldScriptFile;
     ckfree (cmdBuffer);
@@ -878,7 +910,7 @@ BuildPackageIndex (interp, tlibFilePath)
 
         cmdPtr = "demand_load buildpackageindex";
 
-        if (Tcl_Eval (interp, cmdPtr, 0, (char *) NULL) != TCL_OK)
+        if (Tcl_GlobalEval (interp, cmdPtr) != TCL_OK)
             return TCL_ERROR;
 
         if (!STREQU (interp->result, "1")) {
@@ -899,7 +931,7 @@ BuildPackageIndex (interp, tlibFilePath)
     strcpy (cmdPtr, initCmd);
     strcat (cmdPtr, tlibFilePath);
 
-    if (Tcl_Eval (interp, cmdPtr, 0, (char *) NULL) != TCL_OK) {
+    if (Tcl_GlobalEval (interp, cmdPtr) != TCL_OK) {
         ckfree (cmdPtr);
         return TCL_ERROR;
     }
@@ -1296,7 +1328,7 @@ LoadProc (interp, procName, foundPtr)
      */
     if (type == 'F') {
         if (location [0] == '/') {
-            result = Tcl_EvalFile (interp, location);
+            result = GlobalEvalFile (interp, location);
         } else {
             cmdLen = strlen (location) + 5;
             if (cmdLen < sizeof (cmdBuf))
@@ -1306,7 +1338,7 @@ LoadProc (interp, procName, foundPtr)
             strcpy (cmdPtr, "load ");
             strcat (cmdPtr, location);
 
-            result = Tcl_Eval (interp, cmdPtr, 0, NULL);
+            result = Tcl_GlobalEval (interp, cmdPtr);
             if (cmdPtr != cmdBuf)
                 ckfree (cmdPtr);
         }
