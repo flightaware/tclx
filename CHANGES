@@ -1166,5 +1166,8 @@
  8 May 96:
   o Even more changes to deal with the runtime library search path correctly
     on Solaris and others.
--------------------------------------------------------------------------------
+  o Fixed problems when Tcl/Tk is built with --srcdir.
+===============================================================================
+10 May 96: Released TclX 7.5.1
+===============================================================================
 
