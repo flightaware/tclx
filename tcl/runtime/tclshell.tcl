@@ -34,7 +34,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: tclshell.tcl,v 1.1 1993/06/21 05:58:43 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -47,10 +47,10 @@
 # and interactive csh style redo.  Returns the result of the executed command.
 #
 
-proc tclx_unknown2 args {
+proc tclx_unknown2 {cmd} {
     global interactiveSession auto_noexec
 
-    set name [lindex $args 0]
+    set name [lindex $cmd 0]
 
     if {!$interactiveSession || ([info level] > 2) || [info script] != ""} {
         error "invalid command name \"$name\""
@@ -58,7 +58,8 @@ proc tclx_unknown2 args {
 
     if ![info exists auto_noexec] {
 	if [auto_execok $name] {
-	    return [uplevel 2 system \{$args\}]
+	    uplevel 2 system [list $cmd]
+            return
 	}
     }
 

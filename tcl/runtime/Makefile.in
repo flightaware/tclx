@@ -1,8 +1,9 @@
 #
 # Makefile --
 #
-# Makefile for Extended Tcl package library.
-# 
+# Makefile for Extended Tcl package library.  Also generates help files
+# for both standard and Extended Tcl.  This assumes that Tcl has compiled
+# successfully, as it is run here.
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -13,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.4 1993/04/07 06:50:20 markd Exp markd $
+# $Id: Makefile,v 2.5 1993/06/21 06:02:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,19 +24,20 @@ SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
 
-TCL.TLIB=      ../tclmaster/tcl.tlib
-TCL.TNDX=      ../tclmaster/tcl.tndx
-TCLINIT.TCL=   ../tclmaster/TclInit.tcl
-BUILDHELP.TCL= ../tclmaster/buildhelp.tcl
-BUILDIDX.TCL=  ../tclmaster/buildidx.tcl
-LOADOUSTER.TCL=../tclmaster/loadouster.tcl
+TCL.TLIB       = ../tclmaster/tcl.tlib
+TCL.TNDX       = ../tclmaster/tcl.tndx
+TCLINIT.TCL    = ../tclmaster/TclInit.tcl
+BUILDHELP.TCL  = ../tclmaster/buildhelp.tcl
+BUILDIDX.TCL   = ../tclmaster/buildidx.tcl
+LOADOUSTER.TCL = ../tclmaster/loadouster.tcl
+HELP           = ../tclmaster/help
 
 #------------------------------------------------------------------------------
 
 TCL_SRCS=arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
          forfile.tcl      forrecur.tcl     globrecur.tcl    help.tcl        \
-         profrep.tcl      pushd.tcl        setfuncs.tcl     showprocs.tcl   \
-         stringfile.tcl   tkdemo.tcl        tcllib.tcl      fmath.tcl       \
+         profrep.tcl      pushd.tcl        setfuncs.tcl     showproc.tcl    \
+         stringfile.tcl   tkdemo.tcl       tcllib.tcl       fmath.tcl       \
          tclshell.tcl \
          parray.tcl       ../$(TCL_UCB_DIR)/library/parray.tcl
 
@@ -44,7 +46,7 @@ TCL_SRCS=arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
 all: made.tmp
 
 made.tmp: $(TCLINIT.TCL) $(BUILDHELP.TCL) $(BUILDIDX.TCL) $(LOADOUSTER.TCL) \
-          $(TCL.TLIB)
+          $(TCL.TLIB) HELPDIR
 	touch made.tmp
 
 $(TCLINIT.TCL): TclInit.tcl
@@ -66,10 +68,19 @@ $(LOADOUSTER.TCL): loadouster.tcl
 $(TCL.TLIB): $(TCL_SRCS) $(BUILDIDX.TCL) $(TCLINIT.TCL)
 	-rm -f $(TCL.TLIB) $(TCL.TNDX)
 	cat $(TCL_SRCS) | egrep -v '^#$$|^#  *|^#-|^#=|^  *#' > $@
-#???	../runtcl -c "buildpackageindex $(TCL.TLIB)"
+	../runtcl -c "buildpackageindex $(TCL.TLIB)"
+
+HELPDIR: $(HELP) $(TCLINIT.TCL) $(TCL.TLIB)
+
+$(HELP):
+	mkdir $(HELP)
+	../runtcl ../tools/bldmanhelp.tcl ../$(TCL_UCB_DIR)/doc \
+                  ../tools/tclmanpages $(HELP) Tcl.brf
+	../runtcl buildhelp.tcl -b TclX.brf $(HELP) ../man/TclX.man
+
 
 #------------------------------------------------------------------------------
 
 clean:
 	-rm -f made.tmp $(TCL.TLIB) $(TCL.TNDX)
-
+	-rm -rf $(HELP)
