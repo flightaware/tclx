@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 7.1 1996/07/18 19:36:26 markd Exp $
+ * $Id: tclXsignal.c,v 7.2 1996/07/22 17:10:11 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1615,6 +1615,7 @@ SignalCmdCleanUp (clientData, interp)
     if (idx == numInterps)
         panic ("signal interp lost");
 
+    Tcl_AsyncDelete(interpTable[idx].handler);
     interpTable [idx] = interpTable [--numInterps];
 
     /*
