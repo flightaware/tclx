@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.1 1996/12/01 07:32:54 markd Exp $
+ * $Id:$
  *-----------------------------------------------------------------------------
  */
 

@@ -12,13 +12,13 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.1 1997/02/04 03:22:45 markd Exp $
+.\" $Id: TclX.n,v 8.0.2.1 1996/12/30 22:16:22 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
 .ad b
 .SH NAME
-TclX - Extended Tcl: Extended command set for Tcl
+TclX \- Extended Tcl: Extended command set for Tcl
 '
 .SH "INTRODUCTION"
 .PP
@@ -49,35 +49,36 @@ attempt to execute it.
 The command descriptions are separated into several sections:
 .RS 5
 .TP
-o General Commands
+\(bu General Commands
 .TP
-o Debugging and Development Commands
+\(bu Debugging and Development Commands
 .TP
-o Unix Access Commands
+\(bu Unix Access Commands
 .TP
-o File Commands
+\(bu File Commands
 .TP
-o Network Programming Support
+\(bu Network Programming Support
 .TP
-o File Scanning Commands
+\(bu File Scanning Commands
 .TP
-o Math Commands
+\(bu Math Commands
 .TP
-o List Manipulation Commands
+\(bu List Manipulation Commands
 .TP
-o Keyed Lists
+\(bu Keyed Lists
 .TP
-o String and Character Manipulation Commands
+\(bu String and Character Manipulation Commands
 .TP
-o XPG/3 Message Catalog Commands
+\(bu XPG/3 Message Catalog Commands
 .TP
-o Extended Tcl Shell
+\(bu Extended Tcl Shell
 .TP
-o Help Facility
+\(bu Help Facility
 .TP
-o Tcl Loadable Libraries and Packages
+\(bu Tcl Loadable Libraries and Packages
 .RE
 '
+.bp
 .SH "GENERAL COMMANDS"
 .PP
 A set of general, useful Tcl commands, includes a command to begin
@@ -96,26 +97,26 @@ This procedure lists the directories in the directory stack.
 '\"@help: tcl/control/commandloop
 '\"@brief: Create an interactive command loop or event based command reader.
 .TP
-.B commandloop ?\fB-async\fR? ?\fB-interactive \fBon|off|tty\fR? ?\fB-prompt1 \fIcmd\fR? ?\fB-prompt2 \fIcmd\fR? ?\fB-endcommand \fIcmd\fR?
-.br
+.B commandloop \fR?\fB\-async\fR? ?\fB\-interactive \fBon | off | tty\fR? ?\fB\-prompt1 \fIcmd\fR? ?\fB\-prompt2 \fIcmd\fR? ?\fB\-endcommand \fIcmd\fR?
+.IP
 Create an interactive command loop reading commands from stdin and writing
 results to stdout.  Command loops are maybe either be blocking or event
 oriented.  This command is useful for Tcl scripts that do not normally
 converse interactively with a user through a Tcl command interpreter, but
 which sometimes want to enter this mode, perhaps for debugging or user
 configuration.  The command loop terminates on EOF.
-.sp
+.IP
 The following options are available:
-.RS 5
+.RS
 .TP
-\fB-async\fR
+\fB\-async\fR
 A command handler will be associated with stdin.  When input is available
 on stdin, it will be read and accumulated until a full command is available.
 That command will then be evaluated.  An event loop must be entered
 for input to be read and processed.
 '
 .TP
-\fB-interactive on|off|tty\fR
+\fB\-interactive on | off | tty\fR
 Enable or disable interactive command mode.  In interactive mode, commands
 are prompted for and the results of comments are printed.  The value maybe
 any boolean value or \fBtty\fR.  If \fBtty\fR is used, interactive mode
@@ -123,7 +124,7 @@ is enabled if stdin is associated with a terminal or terminal emulator.
 The default is \fBtty\fR.
 '
 .TP
-\fB-prompt1 \fIcmd\fR
+\fB\-prompt1 \fIcmd\fR
 If specified, \fIcmd\fR  is used is evaluate and its result used for the
 main command prompt.  If not specified, the command in \fBtcl_prompt1\fR
 is evaluated to output the prompt.  Note the difference in behavior,
@@ -132,22 +133,22 @@ allow for future expansion to command loops that write to other than
 stdout.
 '
 .TP
-\fB-prompt2 \fIcmd\fR
+\fB\-prompt2 \fIcmd\fR
 If specified, \fIcmd\fR is used is evaluate and its result used for the
 secondary (continuation) command prompt.  If not specified, the command in
 \fBtcl_prompt2\fR is evaluated to output the prompt.
 '
 .TP
-\fB-endcommand \fIcmd\fR
+\fB\-endcommand \fIcmd\fR
 If specified, \fIcmd\fR is evaluated when the command loop terminates.
-.RE
-.sp
+.IP
 In interactive mode, the results of set commands with two arguments are
 not printed.
-.sp
+.IP
 If \fBSIGINT\fR is configured to generate a Tcl error, it can be used to
 delete the current command being type without aborting the program in
 progress.
+.RE
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -155,8 +156,7 @@ progress.
 '\"@help: tcl/files/echo
 '\"@brief: Echo one or more strings to stdout, followed by a newline.
 .TP
-.B echo ?\fIstr ...\fR?
-.br
+.B echo \fR?\fIstr ...\fR?
 Writes zero or more strings to standard output, followed by a newline.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -166,10 +166,10 @@ Writes zero or more strings to standard output, followed by a newline.
 '\"@brief: Return information about Extended Tcl, or the current application.
 .TP
 .B infox \fIoption\fR
-.br
+.IP
 Return information about Extended Tcl, or the current application.  
 The following \fBinfox\fR command options are available:
-.RS 5
+.RS
 .TP
 .B version
 Return the version number of Extended Tcl.  The version number for
@@ -182,11 +182,11 @@ Return the patchlevel for Extended Tcl.
 .TP
 .B have_fchown
 Return \fB1\fR if the \fBfchown\fR system call is available.  This supports
-the \fB-fileid\fR option on the \fBchown\fR and \fBchgrp\fR commands.
+the \fB\-fileid\fR option on the \fBchown\fR and \fBchgrp\fR commands.
 .TP
 .B have_fchmod
 Return \fB1\fR if the \fBfchmod\fR system call is available.  This supports
-the \fB-fileid\fR option on the \fBchmod\fR command.
+the \fB\-fileid\fR option on the \fBchmod\fR command.
 .TP
 .B have_flock
 Return \fB1\fR if the \fBflock\fR command defined,  \fB0\fR if it is not
@@ -200,7 +200,7 @@ all file buffers.
 .TP
 .B have_ftruncate
 Return \fB1\fR if the \fBftruncate\fR or \fBchsize\fR system call is available.  If it is,
-the \fBftruncate\fR command \fB-fileid\fR option maybe used.
+the \fBftruncate\fR command \fB\-fileid\fR option maybe used.
 .TP
 .B have_msgcats
 Return \fB1\fR if XPG message catalogs are available, \fB0\fR if they are
@@ -249,7 +249,6 @@ application-specific value for this variable.
 '\"@brief: Do a foreach-style loop on each key in an array.
 .TP
 .B for_array_keys \fIvar array_name code\fR
-.br
 This procedure performs a foreach-style loop for each key in the named
 array.  The \fBbreak\fR and \fBcontinue\fR statements work as with
 \fBforeach\fR.
@@ -261,7 +260,6 @@ array.  The \fBbreak\fR and \fBcontinue\fR statements work as with
 '\"@brief: A foreach-style loop for all matched (globbed) files.
 .TP
 .B for_recursive_glob \fIvar dirlist globlist code\fR
-.br
 This procedure performs a foreach-style loop over recursively matched files.
 All directories in \fIdirlist\fR are recursively searched (breadth-first),
 comparing each file found against the file glob patterns in \fBgloblist\fR.
@@ -276,7 +274,6 @@ Symbolic links are not followed.
 '\"@brief: Higher-performance for-style loop.
 .TP
 .B loop \fIvar first limit ?increment? body\fR
-.br
 \fBLoop\fR is a looping command, similar in behavior to the Tcl \fBfor\fR
 statement, except that the \fBloop\fR statement achieves substantially higher
 performance and is easier to code when the beginning and ending values of a
@@ -315,7 +312,6 @@ return immediately.
 '\"@brief: Pop a directory from a stack of directories and cd to it.
 .TP
 .B popd
-.br
 This procedure pops the top directory entry from the directory stack and
 make it the current directory.
 '\"@:
@@ -326,7 +322,6 @@ make it the current directory.
 '\"@brief: Push a directory to a stack of directories.
 .TP
 .B pushd ?\fIdir\fR?
-.br
 This procedure pushs the current directory onto the directory stack and
 \fBcd\fR to the specified directory.  If the directory is not specified,
 then the current directory is pushed, but remains unchanged.
@@ -338,7 +333,6 @@ then the current directory is pushed, but remains unchanged.
 '\"@brief: Recursive filename matching (globbing).
 .TP
 .B recursive_glob \fIdirlist globlist\fR
-.br
 This procedure returns a list of recursively matches files.
 All directories in \fIdirlist\fR are recursively searched (breadth-first),
 comparing each file found against the file glob patterns in \fBgloblist\fR.
@@ -350,8 +344,7 @@ Symbolic links are not followed.
 '\"@help: tcl/status/showproc
 '\"@brief: List the definition of the named procedure.
 .TP
-.B showproc \fI?procname ...?\fR
-.br
+.B showproc \fR?\fIprocname ...?\fR
 This procedure lists the definition of the named procedures.  Loading
 them if it is not already loaded.  If no procedure names are supplied,
 the definitions of all currently loaded procedures are returned.
@@ -359,7 +352,7 @@ the definitions of all currently loaded procedures are returned.
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
 '
-.TP
+.bp
 .SH "DEBUGGING AND DEVELOPMENT COMMANDS"
 This section contains information on commands and procedures that are
 useful for developing and debugging Tcl scripts.
@@ -367,12 +360,12 @@ useful for developing and debugging Tcl scripts.
 '\"@help: tcl/debug/cmdtrace
 '\"@brief: Trace Tcl execution.
 .TP
-.B cmdtrace \fIlevel\fR|\fBon\fR ?\fBnoeval\fR? ?\fBnotruncate\fR? ?\fIprocs\fR? ?\fIfileid\fR? ?\fBcommand\fI cmd\fR?
-.br
+.B cmdtrace \fIlevel\fR | \fBon\fR ?\fBnoeval\fR? ?\fBnotruncate\fR? ?\fIprocs\fR? ?\fIfileid\fR? ?\fBcommand\fI cmd\fR?
+.IP
 Print a trace statement for all commands executed at depth of \fIlevel\fR or
 below (1 is the top level).  If \fBon\fR is specified, all commands at any
 level are traced.  The following options are available:
-.RS 5
+.RS
 .TP
 .B noeval
 Causes arguments to be printed unevaluated.  If \fBnoeval\fR
@@ -405,44 +398,49 @@ monitored externally or provide useful information for debugging problems that
 cause core dumps.
 .TP
 .B command \fIcmd\fR
+.IP
 Call the specified command \fIcmd\fR on when each command is executed instead 
 of tracing to a file.
 See the description of the functionally below.
 This option may not be specified with a \fBfileid\fR.
-.RE
-.sp
+.IP
 The most common use of this command is to enable tracing to a file during the
 development.  If a failure occurs, a trace is then available when needed.
 Command tracing will slow down the execution of code, so it should be
 removed when code is debugged.  The following command will enable tracing
 to a file for the remainder of the program:
 .IP
-  cmdtrace on [open cmd.log w]
-.P
+.nf
+.ft CW
+	cmdtrace on [open cmd.log w]
+.ft R
+.fi
+.IP
 The \fBcommand\fR option causes a user specified trace command to be called
 for each command executed.
 The command will have the following arguments appended to it before evaluation:
-.sp
-.IP
-1) \fIcommand\fR -A string containing the text of the command, before any
+.RS
+.IP "\fIcommand\fR"
+A string containing the text of the command, before any
 argument substitution.
-.IP
-2) \fIargv\fR - A list of the final argument information that will be passed to
+.IP "\fIargv\fR"
+A list of the final argument information that will be passed to
 the command after command, variable, and backslash substitution.
+.IP "\fIevalLevel\fR"
+The \fBTcl_Eval\fR call level.
+.IP "\fIprocLevel\fR"
+The procedure call level.
+.RE
 .IP
-3) \fIevalLevel\fR - The \fBTcl_Eval\fR call level.
-.IP
-4) \fIprocLevel\fR - The procedure call level.
-.P
 The command should be constructed in such a manner that it will work if
 additional arguments are added in the future.  It is suggested that the command
 be a \fBproc\fR with the final argument being \fBargs\fR.
-.sp
+.IP
 Tracing will be turned off while the command is being executed.  The values
 of the \fBerrorInfo\fR and \fBerrorCode\fR variables will be saved and
 restored on return from the command.  It is the command's responsibility
 to preserve all other state.
-.sp
+.IP
 If an error occurs during the execution of \fBcommand\fR, an error message
 is dumped to \fRstderr\fR and the tracing is disabled.  The underlying
 mechanism that this functionality is built on does not support returning
@@ -452,7 +450,6 @@ an error to the interpreter.
 Turn off all tracing.
 .TP
 .B cmdtrace depth
-.br
 Returns the current maximum trace level, or zero if trace is disabled.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -461,8 +458,7 @@ Returns the current maximum trace level, or zero if trace is disabled.
 '\"@help: tcl/debug/edprocs
 '\"@brief: Edit named procs, or all procs.
 .TP
-.B edprocs ?\fIproc\fR...?
-.br
+.B edprocs \fR?\fIproc\fR...?
 This procedure writes the named procedures, or all currently defined
 procedures, to a temporary file, then calls an editor on it (as
 specified by the \fBEDITOR\fR environment variable, or \fBvi\fR if none
@@ -474,10 +470,9 @@ is specified), then sources the file back in if it was changed.
 '\"@help: tcl/debug/profile
 '\"@brief: Collect Tcl script performance profile data.
 .TP
-.B profile ?-commands? ?-eval? on
+.B profile ?\-commands? ?\-eval? on
 .TP
 .B profile off \fIarrayVar\fR
-.br
 This command is used to collect a performance profile of a Tcl script.  It
 collects data at the Tcl procedure level. The number of calls to a procedure,
 and the amount of real and CPU time is collected. Time is also collected for
@@ -485,7 +480,7 @@ the global context.  The procedure data is collected by bucketing it based on
 the procedure call stack, this allows determination of how much time is spent
 in a particular procedure in each of it's calling contexts.
 .sp
-The \fBon\fR option enables profile data collection. If the \fB-commands\fR
+The \fBon\fR option enables profile data collection. If the \fB\-commands\fR
 option is specified, data on all commands within a procedure is collected
 as well a procedures.  Multiple occurrences of a command within a procedure
 are not distinguished, but this data may still be useful for analysis.
@@ -502,7 +497,7 @@ Normally, the variable scope stack is used in reporting where time is
 spent.
 Thus upleveled code is reported in the context that it was executed in, not
 the context that the uplevel was called in.
-If the \fB-eval\fR option is specified, the procedure evaluation (call) stack
+If the \fB\-eval\fR option is specified, the procedure evaluation (call) stack
 is used instead of the procedure scope stack.  Upleveled code is reported in
 the context of the procedure that did the uplevel.
 .sp
@@ -519,7 +514,6 @@ CPU time is not available and is reported as zero.
 '\"@brief: Generate a report from data collect from the profile command.
 .TP
 .B profrep \fIprofDataVar sortKey\fR ?\fIoutFile\fR? ?\fIuserTitle\fR?
-.br
 This procedure generates a report from data collect from the profile command.
 \fBProfDataVar\fR is the name of the array containing the data returned by the
 \fBprofile\fR command. \fBSortKey\fR indicates which data value to sort by.
@@ -527,7 +521,7 @@ It should be one of "\fBcalls\fR", "\fBcpu\fR" or "\fBreal\fR".
 \fBOutFile\fR is the name of file to write the report to.  If omitted,
 stdout is assumed.  \fBUserTitle\fR is an optional title line to add to
 output.
-.P
+.IP
 Listed with indentation below each procedure or command is the procedure
 call stack.
 The first indented line being the procedure that invoked the reported
@@ -548,13 +542,13 @@ the context that the uplevel was called in.
 '\"@brief: Save named procs to a file, or all procs.
 .TP
 .B saveprocs \fIfileName\fR ?\fIproc\fR...?
-.br
 This procedure saves the definition of the named procedure, or all
 currently defined procedures if none is specified, to the named file.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "UNIX ACCESS COMMANDS
 .PP
 These commands provide access to many basic Unix facilities, including process
@@ -565,7 +559,6 @@ and the executing commands via the shell.
 '\"@brief: Set a process alarm clock.
 .TP
 .B alarm \fIseconds\fR
-.br
 Instructs the system to send a SIGALRM signal in the specified number of
 seconds.  This is a floating point number, so fractions of a section may be
 specified.
@@ -582,13 +575,12 @@ The \fBalarm\fR command is not available on \fBWindows 95/NT\fR.
 '\"@help: tcl/processes/execl
 '\"@brief: Perform a process exec, executing a file.
 .TP
-.B execl \fR?\fB-argv0\fR argv0\fR? \fIprog\fR ?\fIarglist\fR?
-.br
+.B execl \fR?\fB\-argv0\fR argv0\fR? \fIprog\fR ?\fIarglist\fR?
 Do an execl, replacing the current program (either Extended Tcl or an
 application with Extended Tcl embedded into it) with \fIprog\fR and
 passing the arguments in the list \fIarglist\fR.
 .sp
-The \fB-argv0\fR options specifies that \fIargv0\fR is to be passed to the
+The \fB\-argv0\fR options specifies that \fIargv0\fR is to be passed to the
 program as argv [0] rather than \fIprog\fR.
 .sp
 Note: If you are using \fBexecl\fR in a Tk application and it fails,
@@ -613,7 +605,6 @@ On \fBWindows 95/NT\fR, where the \fBfork\fR command is not available,
 '\"@brief: Change root directory.
 .TP
 .B chroot \fIdirname\fR
-.br
 Change root directory to \fIdirname\fR, by invoking the POSIX \fBchroot(2)\fR
 system call.  This command only succeeds if running as root.
 '\"@:
@@ -624,7 +615,6 @@ system call.  This command only succeeds if running as root.
 '\"@brief: Fork the current Tcl process.
 .TP
 .B fork
-.br
 Fork the current Tcl process.  Fork returns zero to the child process and the
 process number of the child to the parent process. 
 If the fork fails, a Tcl error is generated.
@@ -651,11 +641,11 @@ The \fBfork\fR command is not available on \fBWindows 95/NT\fR.
 '\"@brief: Access, set or convert process, user and group information.
 .TP
 .B id options
-.br
+.IP
 This command provides a means of getting, setting and converting user, group
 and process ids.  The \fBid\fR command has the following options:
 '
-.RS 5
+.RS
 .TP
 .B id user \fR?\fIname\fR?
 .TP
@@ -704,28 +694,23 @@ Return all of the groupids the user is a member of.
 Return the hostname of the system the program is running on.
 .TP
 .B id process
-.br
 Return the process ID of the current process.
 .TP
 .B id process parent
-.br
 Return the process ID of the parent of the current process.
 .TP
 .B id process group
-.br
 Return the process group ID of the current process.
 .TP
 .B id process group set
-.br
 Set the process group ID of the current process to its process ID.
 .TP
 .B id host
-.br
 Returns the standard host name of the machine the process is executing on.
-.RE
-.br
+.IP
 On \fBWindows 95/NT\fR, only the \fBhost\fR and \fBprocess\fR options
 are implemented.
+.RE
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -733,20 +718,20 @@ are implemented.
 '\"@help: tcl/processes/kill
 '\"@brief: Send a signal to the specified process.
 .TP
-.B kill ?\fB-pgroup\fR ?\fIsignal\fR? \fIidlist\fR
-.br
+.B kill ?\fB\-pgroup\fR ?\fIsignal\fR? \fIidlist\fR
+.IP
 Send a signal to the each process in the list \fIidlist\fR, if permitted.
 \fISignal\fR, if present, is the signal number or the symbolic name of the
 signal, see the signal system call manual page.  The leading ``SIG''
 is optional
 when the signal is specified by its symbolic name.
 The default for \fIsigno\fR is 15, SIGTERM.
-.sp
-If \fB-pgroup\fR is specified, the numbers in \fIidlist\fR are take
+.IP
+If \fB\-pgroup\fR is specified, the numbers in \fIidlist\fR are take
 as process group ids and the signal is sent to all of the process in that
 process group.  A process group id of \fB0\fR specifies the current process
 group.
-.sp
+.IP
 The \fBkill\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -755,13 +740,13 @@ The \fBkill\fR command is not available on \fBWindows 95/NT\fR.
 '\"@help: tcl/files/link
 '\"@brief: Create a link to a file.
 .TP
-.B link ?\fB-sym\fR? \fIsrcpath destpath\fR
-.br
+.B link ?\fB\-sym\fR? \fIsrcpath destpath\fR
+.IP
 Create a directory entry, \fIdestpath\fR, linking it to the existing file,
-\fIsrcpath\fR.  If \fB-sym\fR is specified, a symbolic link, rather than
-a hard link, is created.  (The \fB-sym\fR option is only available
+\fIsrcpath\fR.  If \fB\-sym\fR is specified, a symbolic link, rather than
+a hard link, is created.  (The \fB\-sym\fR option is only available
 on systems that support symbolic links.)
-.sp
+.IP
 The \fBlink\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -771,19 +756,19 @@ The \fBlink\fR command is not available on \fBWindows 95/NT\fR.
 '\"@brief: Change or return the process priority.
 .TP
 .B nice \fR?\fIpriorityincr\fR?
-.br
+.IP
 Change or return the process priority.
 If \fIpriorityincr\fR is omitted, the current priority is returned.  If
 \fIpriorityincr\fR is positive, it is added to the current \fIpriority\fR
 level, up to a system defined maximum (normally \fB19\fR),
-.sp
+.IP
 Negative \fIpriorityincr\fR values cumulatively increase the program's priority
-down to a system defined minimum (normally \fB-19\fR);
+down to a system defined minimum (normally \fB\-19\fR);
 increasing priority with negative niceness values will only work for the
 superuser.
-.sp
+.IP
 The new priority is returned.
-.sp
+.IP
 The \fBnice\fR command is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -792,12 +777,12 @@ The \fBnice\fR command is not available on \fBWindows 95/NT\fR.
 '\"@help: tcl/files/readdir
 '\"@brief: Read the contents of a directory.
 .TP
-.B readdir ?-hidden? \fIdirPath\fR
-.br
+.B readdir ?\-hidden? \fIdirPath\fR
+.IP
 Returns a list containing the contents of the directory \fIdirPath\fR.  The
 directory entries "." and ".." are not returned.
-.sp
-On \fBWindows 95/NT\fR, \fB-hidden\fR maybe specified to include hidden files
+.IP
+On \fBWindows 95/NT\fR, \fB\-hidden\fR maybe specified to include hidden files
 in the result.  This flag is ignored on Unix systems.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -807,34 +792,37 @@ in the result.  This flag is ignored on Unix systems.
 '\"@brief: Specify action to take when a signal is received.
 .TP
 .B signal \fIaction\fR \fIsiglist\fR ?\fIcommand\fR?
-.br
+.IP
 Warning:  The behavior of signals under Unix doesn't make signals a general
 event mechanism.  Interrupted system calls, caused by signals, can cause errors
 in code where they are not expected.  This can cause a program to behave in
 unexpected ways.  In general, the only safe usage for signals is to generate
 errors to terminate a blocked operation.
-.sp
+.IP
 Specify the action to take when a Unix signal is received by Extended
 Tcl, or a program that embeds it.  \fISiglist\fR is a list
 of either the symbolic or numeric Unix signal (the SIG prefix is optional).
 \fIAction\fR is one of the following actions to be performed on receipt of the
 signal.  To specify all modifiable signals, use `*' (this will not include
 SIGKILL and SIGSTOP, as they can not be modified).
-.IP
-\fBdefault\fR - Perform system default action when signal is received
+.RS
+.IP "\fBdefault\fR" 
+Perform system default action when signal is received
 (see \fBsignal\fR system call documentation).
-.IP
-\fBignore\fR - Ignore the signal.
-.IP
-\fBerror\fR - Generate a catchable Tcl error.  It will be as if the command
+.IP "\fBignore\fR"
+Ignore the signal.
+.IP "\fBerror\fR"
+Generate a catchable Tcl error.  It will be as if the command
 that was running returned an error.  The error code will be in the form:
 .br
-    \fBPOSIX SIG\fR \fIsigname\fR
+.nf
+	\fBPOSIX SIG\fR \fIsigname\fR
+.fi
 .br
 For the death of child signal, \fIsigname\fR will always be SIGCHLD, rather
 than SIGCLD, to allow writing portable code.
-.IP
-\fBtrap\fR - When the signal occurs, execute \fIcommand\fR and continue
+.IP "\fBtrap\fR"
+When the signal occurs, execute \fIcommand\fR and continue
 execution if an error is not returned by \fIcommand\fR.  The command will
 be executed in the global context.  The command will be edited before
 execution, replacing occurrences of "%S" with the signal name.
@@ -843,8 +831,8 @@ the trap command is evaluated.
 If an error is returned,
 then follow the standard Tcl error mechanism.  Often \fIcommand\fR will just
 do an \fBexit\fR.
-.IP
-\fBget\fR - Retrieve the current settings of the specified signals.  A keyed
+.IP "\fBget\fR"
+Retrieve the current settings of the specified signals.  A keyed
 list will be returned were the keys are one of the specified signals and the
 values are a list consisting of the action associated with the signal, a
 \fB0\fR if the signal may be delivered (not block) and a \fB1\fR if it is
@@ -852,17 +840,18 @@ blocked. The actions maybe one of `\fBdefault\fR',`\fBignore\fR',
 `\fBerror\fR' or `\fBtrap\fR.  If the action is trap, the third element is the
 command associated with the action.  The action `\fBunknown\fR' is returned
 if a non-Tcl signal handler has been associated with the signal.
-.IP
-\fBset\fR - Set signals from a keyed list in the format returned by the
+.IP "\fBset\fR"
+Set signals from a keyed list in the format returned by the
 \fBget\fR.  For this action, \fIsiglist\fR is the keyed list of signal
 state.  Signals with an action of `\fBunknown\fR' are not modified.
-.IP
-\fBblock\fR - Block the specified signals from being received. (Posix systems
+.IP "\fBblock\fR"
+Block the specified signals from being received. (Posix systems
 only).
-.IP
-\fBunblock\fR - Allow the specified signal to be received. Pending signals
+.IP "\fBunblock\fR"
+Allow the specified signal to be received. Pending signals
 will not occur. (Posix systems only).
-.sp
+.RE
+.IP
 The signal action will remain enabled after the specified signal has occurred.
 The exception to this is \fBSIGCHLD\fR on systems without Posix signals.
 For these systems, \fBSIGCHLD\fR is not be automatically reenabled.  After a
@@ -870,7 +859,7 @@ For these systems, \fBSIGCHLD\fR is not be automatically reenabled.  After a
 performed to retrieve the exit status of the child process before issuing
 another \fBsignal SIGCHLD \fI...\fR command.  For code that is to be portable
 between both types of systems, use this approach.
-.sp
+.IP
 Signals are not processed until after the completion of the Tcl command that
 is executing when the signal is received.  If an interactive Tcl shell is
 running, then the \fBSIGINT\fR will be set to \fBerror\fR, non-interactive
@@ -911,18 +900,18 @@ the command is returned.
 '\"@help: tcl/files/sync
 '\"@brief: Force a file or all files to be written to disk.
 .TP
-.B sync ?\fIfileId\fR?
-.br
+.B sync \fR?\fIfileId\fR?
+.IP
 If \fIfileId\fR is not specified, or if it is and this system does
 not support the \fIfsync\fR system call, issues a \fIsync\fR system
 call to flush all pending disk output.  If \fIfileId\fR is specified
 and the system does support the \fIfsync\fR system call, issues an
 \fIfsync\fR on the file corresponding to the specified Tcl \fIfileId\fR
 to force all pending output to that file out to the disk.
-.sp
+.IP
 If \fIfileId\fR is specified, the file must be writable.  A \fBflush\fR
 will be issued against the \fIfileId\fR before the sync.
-.sp
+.IP
 The \fIinfox have_fsync\fR command can be used to determine if
 "\fBsync\fR \fIfileId\fR" will do a \fIsync\fR or a \fIfsync\fR.
 '\"@:
@@ -936,7 +925,9 @@ The \fIinfox have_fsync\fR command can be used to determine if
 .br
 Return a list containing the process and child execution times in the form:
 .br
-    \fIutime stime cutime cstime\fR
+.nf
+	\fIutime stime cutime cstime\fR
+.fi
 .br
 Also see the \fItimes\fR(2) system call manual page.
 The values are in milliseconds.
@@ -947,7 +938,7 @@ The values are in milliseconds.
 '\"@help: tcl/status/umask
 '\"@brief: Get or set the file-creation mode mask.
 .TP
-.B umask ?\fIoctalmask\fR?
+.B umask \fR?\fIoctalmask\fR?
 .br
 Sets file-creation mode mask to the octal value of \fIoctalmask\fR.
 If \fIoctalmask\fR is omitted, the current mask is returned.
@@ -958,21 +949,21 @@ If \fIoctalmask\fR is omitted, the current mask is returned.
 '\"@help: tcl/processes/wait
 '\"@brief: Wait for a child process to terminate.
 .TP
-.B wait \fR?\fB-nohang\fR? ?\fB-untraced\fR? ?\fB-pgroup\fR? ?\fIpid\fR?
+.B wait \fR?\fB\-nohang\fR? ?\fB\-untraced\fR? ?\fB\-pgroup\fR? ?\fIpid\fR?
 .br
 Waits for a process created with the \fBexecl\fR command to terminate, either
 due to an untrapped signal or call to \fIexit\fR system call.
 If the process id \fIpid\fR is specified, they wait on that process, otherwise
 wait on any child process to terminate.
 .sp
-If \fB-nohang\fR is specified, then don't block waiting on a process to
+If \fB\-nohang\fR is specified, then don't block waiting on a process to
 terminate.  If no process is immediately available, return an empty list.
-If \fB-untraced\fR is specified then the status of child processes
+If \fB\-untraced\fR is specified then the status of child processes
 that are stopped, and whose status has not yet been reported since they
 stopped, are also returned.
-If \fB-pgroup\fR is specified and \fIpid\fR is not specified, then wait
+If \fB\-pgroup\fR is specified and \fIpid\fR is not specified, then wait
 on any child process whose process groupd ID is they same as the
-calling process. If \fIpid\fR is specified with \fB-pgroup\fR, then
+calling process. If \fIpid\fR is specified with \fB\-pgroup\fR, then
 it is take as a process group ID, waiting on any process in that process group
 to terminate.
 .sp
@@ -991,14 +982,15 @@ in the background with the \fBexec\fR command.  However, if any other
 process status will be reaped by the \fBexec\fR command and will not be
 available to the \fBwait\fR command.  
 .sp
-On systems without the \fBwaitpid\fR system call, the \fB-nohang\fR,
-\fB-untraced\fR and \fB-pgroup\fR options are not available.
+On systems without the \fBwaitpid\fR system call, the \fB\-nohang\fR,
+\fB\-untraced\fR and \fB\-pgroup\fR options are not available.
 The \fBinfox have_waitpid\fR command maybe use to determine if this
 functionality is available.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "FILE COMMANDS"
 .PP
 These commands provide extended file access and manipulation.
@@ -1048,7 +1040,7 @@ results will occur.
 '\"@help: tcl/files/copyfile
 '\"@brief: Copy the remainder of one open file into another.
 .TP
-.B copyfile \fR?\fB-bytes \fInum\fR|\fB-maxbytes \fInum\fR? ?\fI-translate\fR? \fIfromFileId toFileId\fR
+.B copyfile \fR?\fB\-bytes \fInum\fR | \fB\-maxbytes \fInum\fR? ?\fI\-translate\fR? \fIfromFileId toFileId\fR
 .br
 Copies the rest of the file specified by \fIfromFileId\fR, starting
 from its current position,
@@ -1056,17 +1048,17 @@ to the file specified by \fItoFileId\fR, starting from its current
 position.  By default, newline translation is disabled for the duration
 of the copy.
 .sp
-If \fB-bytes\fR is specified, then \fInum\fR bytes are copied.  If less than
-\fInum\fR bytes are available, an error is returned.  If \fB-maxbytes\fR is
+If \fB\-bytes\fR is specified, then \fInum\fR bytes are copied.  If less than
+\fInum\fR bytes are available, an error is returned.  If \fB\-maxbytes\fR is
 specified, then \fInum\fR bytes are copied but no error is returned if less
 are available.
 .sp
-If \fB-translate\fR is specified, then newline translation will not be
+If \fB\-translate\fR is specified, then newline translation will not be
 disabled for the copy.
 .sp
 The command returns the number of bytes that were copied.
 .sp
-The \fB-bytes\fR option is particularly useful for mixing binary data
+The \fB\-bytes\fR option is particularly useful for mixing binary data
 in with ASCII commands or data in a data stream.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -1075,14 +1067,14 @@ in with ASCII commands or data in a data stream.
 '\"@help: tcl/files/chmod
 '\"@brief: Set file permissions.
 .TP
-.B chmod \fR[\fB-fileid\fR] \fImode\fR \fIfilelist\fR
+.B chmod \fR[\fB\-fileid\fR] \fImode\fR \fIfilelist\fR
 .br
 Set permissions of each of the files in the list \fIfilelist\fR to \fImode\fR,
 where \fImode\fR is an absolute numeric mode or symbolic permissions as in the
 UNIX \fBchmod(1)\fR command.  To specify a mode as octal, it should be
 prefixed with a "0" (e.g. 0622).
 .sp
-If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+If the option \fB\-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchmod\fR command
 to determine if this functionality is available.
@@ -1095,7 +1087,7 @@ The \fBchmod\fR command is not available on \fBWindows 95/NT\fR.
 '\"@help: tcl/files/chown
 '\"@brief: Change file owner and/or group.
 .TP
-.B chown \fR[\fB-fileid\fR] \fIowner\fR|{\fIowner group\fR} \fIfilelist\fR
+.B chown \fR[\fB\-fileid\fR] \fIowner\fR | {\fIowner group\fR} \fIfilelist\fR
 .br
 Set owner of each file in the list \fIfilelist\fR to \fIowner\fR, which can
 be a user
@@ -1105,7 +1097,7 @@ second element.  \fIGroup\fR can be a group name or numeric group id.
 If \fIgroup\fR is {}, then the file group will be set to the login
 group of the specified user.
 .sp
-If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+If the option \fB\-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchown\fR command
 to determine if this functionality is available.
@@ -1118,14 +1110,14 @@ The \fBchown\fR command is not available on \fBWindows 95/NT\fR.
 '\"@help: tcl/files/chgrp
 '\"@brief: Change file group.
 .TP
-.B chgrp \fR[\fB-fileid\fR] \fIgroup\fR \fIfilelist\fR
+.B chgrp \fR[\fB\-fileid\fR] \fIgroup\fR \fIfilelist\fR
 .br
 Set the
 group id of each file in the list \fIfilelist\fR to \fIgroup\fR, which can
 be either a
 group name or a numeric group id.
 .sp
-If the option \fB-fileid\fR is specified, \fIfilelist\fR is a list of open
+If the option \fB\-fileid\fR is specified, \fIfilelist\fR is a list of open
 file identifiers rather than a list of file names.  This option is not
 available on all Unix systems.  Use the \fBinfox have_fchown\fR command
 to determine if this functionality is available.
@@ -1165,55 +1157,56 @@ non-socket file handle number maybe specified for \fItargetFileId\fR.  The
 '\"@brief: Get or set file access options for an open file.
 .TP
 .B fcntl \fIfileId\fR \fIattribute ?value\fR? 
-.br
+.RS
 This command either sets or clears a file option or returns its current
 value.  If \fIvalue\fR are not specified, then the current value of
 \fBattribute\fR is returned.  All values are boolean. Some attributes maybe
 only be gotten, not modified.
 The following attributes may be specified:
-.IP
-\fBRDONLY\fR - The file is opened for reading only. (Get only)
-.sp
-\fBWRONLY\fR - The file is opened for writing only.  (Get only)
-.sp
-\fBRDWR\fR - The file is opened for reading and writing.  (Get only)
-.sp
-\fBREAD\fR - If the file is readable. (Get only).
-.sp
-\fBWRITE\fR - If the file is writable. (Get only).
-.sp
-\fBAPPEND\fR - The file is opened for append-only writes.  All writes will
+.IP \fBRDONLY\fR 
+The file is opened for reading only. (Get only)
+.IP \fBWRONLY\fR
+The file is opened for writing only.  (Get only)
+.IP \fBRDWR\fR
+The file is opened for reading and writing.  (Get only)
+.IP "\fBREAD\fR   "
+If the file is readable. (Get only).
+.IP \fBWRITE\fR
+If the file is writable. (Get only).
+.IP \fBAPPEND\fR 
+The file is opened for append-only writes.  All writes will
 be forced to the end of the file. (Get or set).
-.sp
-\fBNONBLOCK\fR - The file is to be accessed with non-blocking I/O.  See the
+.IP \fBNONBLOCK\fR
+The file is to be accessed with non-blocking I/O.  See the
 \fBread\fR system call for a description of how it affects the behavior of
 file reads.
-.sp
-\fBCLOEXEC\fR - Close the file on an process exec.  If the \fBexecl\fR
+.IP \fBCLOEXEC\fR 
+Close the file on an process exec.  If the \fBexecl\fR
 command or some other mechanism causes the process to do an
 exec, the file will be closed if this option is set.
-.sp
-\fBNOBUF\fR - The file is not buffered. If set, then there no buffering
+.IP \fBNOBUF\fR 
+The file is not buffered. If set, then there no buffering
 for the file.
-.sp
-\fBLINEBUF\fR - Output the file will be line buffered. The buffer will
+.IP \fBLINEBUF\fR 
+Output the file will be line buffered. The buffer will
 be flushed when a newline is written, when the buffer is full,
 or when input is requested.
-.sp
-\fBKEEPALIVE\fR - Keep a socket connection alive.
+.IP \fBKEEPALIVE\fR 
+Keep a socket connection alive.
 If SIGPIPE is enabled, then it is sent if connection is broken and data is
 written to the socket.
 If SIGPIPE is ignored, an error is returned on the write.  This attribute is
 valid only on sockets.
 By default, SIGPIPE is ignored in Tcl.
-.sp
+.IP
 The \fBNONBLOCK\fR, \fBNOBUF\fR and \fBLINEBUF\fR are provided for
 compatibility with older scripts.
 The\fBfconfigure\fR command is preferred method of getting and setting these
 attributes.
-.sp
+.IP
 The \fBAPPEND\fR and \fBCLOEXEC\fR options are not available on
 \fBWindows 95/NT\fR.
+.RE
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1222,7 +1215,7 @@ The \fBAPPEND\fR and \fBCLOEXEC\fR options are not available on
 '\"@brief: Lock all or part of a file.
 .TP
 .B flock \fIoptions fileId\fR ?\fIstart\fR? ?\fIlength\fR? ?\fIorigin\fR?
-.br
+.IP
 This command places a lock on all or part of the file specified by
 \fIfileId\fR.  The lock is either advisory or mandatory, depending on the mode
 bits of the file.  The lock is placed beginning at relative byte offset
@@ -1234,26 +1227,27 @@ is "\fBcurrent\fR", it is relative to the current access position in the file.
 If it is "\fBend\fR", then it is relative to the end-of-file (a negative is
 before the EOF, positive is after).  If \fIorigin\fR is omitted, \fBstart\fR
 is assumed.
-.sp
+.IP
 The following \fIoptions\fR are recognized:
-.IP
-\fB-read\fR - Place a read lock on the file.  Multiple processes may be
+.RS
+.IP \fB\-read\fR 
+Place a read lock on the file.  Multiple processes may be
 accessing the file with read-locks.
-.IP
-\fB-write\fR - Place a write lock on the file.  Only one process may be
+.IP \fB\-write\fR 
+Place a write lock on the file.  Only one process may be
 accessing a file if there is a write lock.
-.IP
-\fB-nowait\fR - If specified, then the process will not block if the lock
+.IP \fB\-nowait\fR 
+If specified, then the process will not block if the lock
 can not be obtained.  With this option, the command returns 1 if the lock
 is obtained and 0 if it is not.
-.sp
+.RE
+.IP
 See your system's \fBfcntl\fR system call documentation for full details of
 the behavior of file locking.  If locking is being done on ranges of a
 file, it is best to use unbuffered file access (see the \fBfcntl\fR command).
-.sp
+.IP
 The \fBflock\fR command is not available on \fBWindows 95\fR.
 It is available on \fBWindows NT\fR.
-
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1272,7 +1266,9 @@ The \fBbreak\fR and \fBcontinue\fR commands work as with foreach.
 For example, the command
 .sp
 .nf
-	\fBfor_file line /etc/passwd {echo $line}\fR
+.ft CW
+	for_file line /etc/passwd {echo $line}
+.ft R
 .fi
 .sp
 would echo all the lines in the password file.
@@ -1298,63 +1294,66 @@ It is available on \fBWindows NT\fR.
 '\"@help: tcl/files/fstat
 '\"@brief: Obtain status information about an open file.
 .TP
-.B fstat \fIfileId\fR ?\fIitem\fR?|?\fBstat \fIarrayvar\fR?
-.br
+.B fstat \fIfileId\fR ?\fIitem\fR? | ?\fBstat \fIarrayvar\fR?
+.IP
 Obtain status information about an open file.
-.sp
+.IP
 The following keys are used to identify data items:
-.br
-.IP
-o\ \fBatime\fR - The time of last access.
-.IP
-o\ \fBctime\fR - The time of last file status change
-.IP
-o\ \fBdev\fR - The device containing a directory for the file.  This value
+.RS
+.IP "\fBatime\fR"
+The time of last access.
+.IP "\fBctime\fR"
+The time of last file status change
+.IP "\fBdev\fR"
+The device containing a directory for the file.  This value
 uniquely identifies the file system that contains the file.
-.IP
-o\ \fBgid\fR - The group ID of the file's group.
-.IP
-o\ \fBino\fR - The inode number.  This field uniquely identifies the file in a
+.IP "\fBgid\fR"
+The group ID of the file's group.
+.IP "\fBino\fR"
+The inode number.  This field uniquely identifies the file in a
 given file system.
-.IP
-o\ \fBmode\fR - The mode of the file (see the \fBmknod\fR system call).
-.IP
-o\ \fBmtime\fR - Time when the data in the file was last modified.
-.IP
-o\ \fBnlink\fR - The number of links to the file.
-.IP
-o\ \fBsize\fR - The file size in bytes.
-.IP
-o\ \fBtty\fR - If the file is associated with a terminal, then 1 otherwise 0.
-.IP
-o\ \fBtype\fR - The type of the file in symbolic form, which is one of the
+.IP "\fBmode\fR"
+The mode of the file (see the \fBmknod\fR system call).
+.IP "\fBmtime\fR" 
+Time when the data in the file was last modified.
+.IP "\fBnlink\fR"
+The number of links to the file.
+.IP "\fBsize\fR"
+The file size in bytes.
+.IP "\fBtty\fR"
+If the file is associated with a terminal, then 1 otherwise 0.
+.IP "\fBtype\fR"
+The type of the file in symbolic form, which is one of the
 following values: \fBfile\fR, \fBdirectory\fR, \fBcharacterSpecial\fR,
 \fBblockSpecial\fR, \fBfifo\fR, \fBlink\fR, or \fBsocket\fR.
+.IP "\fBuid\fR"
+The user ID of the file's owner.
+.RE
 .IP
-o\ \fBuid\fR - The user ID of the file's owner.
-.sp
 If one of these keys is specified as \fIitem\fR, then that data item is
 returned.
-.sp
+.IP
 If \fBstat \fIarrayvar\fR is specified, then the information is returned in
 the array \fIarrayvar\fR.  Each of the above keys indexes an element of the
 array containing the data.
-.sp
+.IP
 If only \fIfileId\fR is specified, the command returns the data as a keyed
 list.
-.sp
+.IP
 The following values may be returned only if explicitly asked for, it will not
 be returned with the array or keyed list forms:
-.IP
-o\ \fBremotehost\fR - If \fIfileId\fR is a TCP/IP socket connection, then a
+.RS
+.IP "\fBremotehost\fR"
+If \fIfileId\fR is a TCP/IP socket connection, then a
 list is returned with the first element being the remote host IP address.  If
 the remote host name can be found, it is returned as the second element of
 the list.  The remote host IP port number is the third element.
-.IP
-o\ \fBlocalhost\fR - If \fIfileId\fR is a TCP/IP socket connection, then a
+.IP "\fBlocalhost\fR"
+If \fIfileId\fR is a TCP/IP socket connection, then a
 list is returned with the first element being the local host IP address.  If
 the local host name can be found, it is returned as the second element of
 the list.  The local host IP port number is the third element.
+.RE
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1362,11 +1361,11 @@ the list.  The local host IP port number is the third element.
 '\"@help: tcl/files/ftruncate
 '\"@brief: Truncate a file to a specified size.
 .TP
-.B ftruncate \fR[\fB-fileid\fR] \fIfile newsize\fR
+.B ftruncate \fR[\fB\-fileid\fR] \fIfile newsize\fR
 .br
 Truncate a file to have a length of at most \fInewsize\fR bytes.
 .sp
-If the option \fB-fileid\fR is specified, \fIfile\fR is an open
+If the option \fB\-fileid\fR is specified, \fIfile\fR is an open
 file identifier, otherwise it is a file path.
 .sp
 This command is not available or not fully functional if the underlying
@@ -1374,7 +1373,7 @@ operating system support is not available.  The command \fBinfox have_truncate\f
 will indicate if this command may truncate by file path.  The command
 \fBinfox have_ftruncate\fR will indicate if this command may truncate by file id.
 .sp
-The \fB-fileid\fR option is not available on \fBWindows 95/NT\fR.
+The \fB\-fileid\fR option is not available on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1444,12 +1443,12 @@ result of the command.
 '\"@help: tcl/files/read_file
 '\"@brief: Read in a file to a string.
 .TP
-.B read_file ?\fB-nonewline\fR? \fIfileName\fR
-.br
+.B read_file ?\fB\-nonewline\fR? \fIfileName\fR
+.TP
 .B read_file \fIfileName\fR \fInumBytes\fR
 .br
 This proecure reads the file \fIfileName\fR and returns the contents as
-a string.  If \fB-nonewline\fR is specified, then the last character of
+a string.  If \fB\-nonewline\fR is specified, then the last character of
 the file is discarded if it is a newline.  The second form specifies
 exactly how many bytes will be read and returned, unless there are fewer
 than \fInumBytes\fR bytes left in the file; in this case, all the
@@ -1496,17 +1495,23 @@ that are ready in the read, write and exception classes.  If none are ready in
 a class, then that element will be the null list.  For example:
 .sp
 .nf
+.ft CW
         select {file3 file4 file5} {file6 file7} {} 10.5
+.ft R
 
 could return
 
+.ft CW
         {file3 file4} {file6} {}
+.ft R
 
 or perhaps
 
+.ft CW
         file3 {} {}
+.ft R
 .fi
-.br
+.sp
 On \fBWindows 95/NT\fR, only sockets can be used with the \fBselect\fR
 command.
 Pipes, as returned by the \fBopen\fR command, are not supported.
@@ -1524,6 +1529,7 @@ This procedure writes the specified strings to the named file.
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "NETWORK PROGRAMMING SUPPORT"
 .PP
 TclX provides functionality to complement the Tcl \fBsocket\fR command.
@@ -1537,25 +1543,28 @@ To obtain the host name of the system the local system, use the
 '\"@brief: Obtain information about an internet host.
 .TP
 .B host_info \fBaddresses\fR \fIhost\fR
-.br
+.TP
 .B host_info \fBofficial_name\fR \fIhost\fR
-.br
+.TP
 .B host_info \fBaliases\fR \fIhost\fR
 .br
-Obtain information about a internet host. The argument \fBhost\fR can be either
+Obtain information about a internet host. The argument \fIhost\fR can be either
 a host name or an IP address.
-.sp
+.IP
 The following subcommands are recognized:
-.IP
-o\ \fBaddresses\fR - Return the list of IP addresses for \fIhost\fR.
-.IP
-o\ \fBofficial_name\fR - Return official name for \fIhost\fR.
-.IP
-o\ \fBaliases\fR - Return the list of aliases for \fIhost\fR.
+.RS
+.IP \fBaddresses\fR
+Return the list of IP addresses for \fIhost\fR.
+.IP \fBofficial_name\fR
+Return official name for \fIhost\fR.
+.IP \fBaliases\fR
+Return the list of aliases for \fIhost\fR.
 (Note that these are IP number aliases, not DNS \fICNAME\fR
 aliases. See \fIifconfig(2)\fR.)
+.RE
 '\"@endhelp
 '
+.bp
 .SH "FILE SCANNING COMMANDS"
 .PP
 These commands provide a facility to scan files, matching lines of the file
@@ -1613,14 +1622,14 @@ specification for the context.
 '\"@help: tcl/filescan/scanfile
 '\"@brief: Scan a file, executing match code when their patterns are matched.
 .TP
-.B scanfile ?\fI-copyfile copyFileId\fR? \fIcontexthandle\fR \fIfileId\fR
+.B scanfile ?\fI\-copyfile copyFileId\fR? \fIcontexthandle\fR \fIfileId\fR
 .br
 Scan the file specified by \fIfileId\fR, starting from the
 current file position.  Check all patterns in the scan context specified by
 \fIcontexthandle\fR against
 it, executing the match commands corresponding to patterns matched.
 .sp
-If the optional \fI-copyfile\fR argument is specified, the next argument
+If the optional \fI\-copyfile\fR argument is specified, the next argument
 is a file ID to which all lines not matched by any pattern (excluding
 the default pattern) are to be written.  If the copy file is specified with
 this flag, instead of using the \fBscancontext copyfile\fR command, the 
@@ -1631,25 +1640,25 @@ file is disassociated from the scan context at the end of the scan.
 '\"@help: tcl/filescan/scanmatch
 '\"@brief: Specify tcl code to execute when scanfile pattern is matched.
 .TP
-.B scanmatch ?\fB-nocase\fR? \fIcontexthandle\fR ?\fIregexp\fR? \fIcommands\fR
-.br
+.B scanmatch ?\fB\-nocase\fR? \fIcontexthandle\fR ?\fIregexp\fR? \fIcommands\fR
+.IP
 Specify Tcl \fIcommands\fR, to be evaluated when \fIregexp\fR is matched by a
 \fBscanfile\fR command.  The match is added to the scan context specified by
 \fIcontexthandle\fR.  Any number of match statements may be
 specified for a give context.  \fIRegexp\fR is a regular expression (see the
-\fBregexp\fR command).  If \fB-nocase\fR is specified as the first argument,
+\fBregexp\fR command).  If \fB\-nocase\fR is specified as the first argument,
 the pattern is matched regardless of
 alphabetic case.
-.sp
+.IP
 If \fIregexp\fR is not specified, then a default match is
 specified for the scan context.  The default match will be executed when a
 line of the file does not match any of the regular expressions
 in the current scancontext.
-.sp
+.IP
 The array \fBmatchInfo\fR is available to the Tcl code that is executed
 when an expression matches (or defaults).  It contains information about
 the file being scanned and where within it the expression was matched.
-.sp
+.IP
 \fBmatchInfo\fR is local to the top
 level of the match command unless declared global at that level
 by the Tcl \fBglobal\fR command.  If it is to
@@ -1657,7 +1666,7 @@ be used as a global, it \fImust\fR be declared global before \fBscanfile\fR is
 called (since \fBscanfile\fR sets the \fBmatchInfo\fR before the match code is
 executed, a subsequent \fBglobal\fR will override the local variable).
 The following array entries are available:
-.RS 5
+.RS
 .TP
 .B matchInfo(line)
 Contains the text of the line of the file that was matched.
@@ -1686,8 +1695,8 @@ The context handle of the context that this scan is associated with.
 The file id (handle) of the file currently being scanned.
 .TP
 .B matchInfo(copyHandle)
-The file id (handle) of the file specified by the \fB-copyfile\fR option.
-The element does not exist if \fB-copyfile\fR was not specified.
+The file id (handle) of the file specified by the \fB\-copyfile\fR option.
+The element does not exist if \fB\-copyfile\fR was not specified.
 .TP
 .B matchInfo(submatch0)
 Will contain the characters matching the first parenthesized subexpression.
@@ -1698,14 +1707,14 @@ Will contain the a list of the starting and ending indices of the string
 matching the first parenthesized subexpression.
 The second will be contained in \fBsubindex1\fR, etc.
 .RE
-.PP
+.IP
 All \fBscanmatch\fR patterns that match a line will be processed in the order
 in which their
 specifications were added to the scan context.  The remainder of the
 \fBscanmatch\fR pattern-command pairs may be skipped for a file line if a
 \fBcontinue\fR is executed by the Tcl code of a preceding, matched
 pattern.
-.sp
+.IP
 If a \fBreturn\fR is
 executed in the body of the match command, the \fBscanfile\fR command
 currently in
@@ -1715,6 +1724,7 @@ return value.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "MATH COMMANDS"
 .PP
 Several extended math commands commands make many additional math
@@ -1793,6 +1803,7 @@ ever-changing seed.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "LIST MANIPULATION COMMANDS"
 .PP
 Extended Tcl provides additional list manipulation commands and procedures.
@@ -1837,7 +1848,9 @@ unassigned elements is returned.
 For example,
 .sp
 .nf
-   lassign {dave 100 200 {Dave Foo}} name uid gid longName
+.ft CW
+    lassign {dave 100 200 {Dave Foo}} name uid gid longName
+.ft R
 .fi
 .sp
 Assigns \fIname\fR to ``dave'', \fIuid\fR to ``100'', \fIgid\fR to ``200'',
@@ -1875,25 +1888,24 @@ for a string of all whitespaces, which is an empty list.
 '\"@brief: Return a list of elements from a list that match a pattern
 .TP
 .B lmatch \fR?\fImode\fR? \fIlist pattern\fR
-.br
+.IP
 Search the elements of \fIlist\fR, returning a list of all elements
 matching \fIpattern\fR.  If none match, an empty list is returned.
-.sp
+.IP
 The \fImode\fR argument indicates how the elements of the list are to
 be matched against \fIpattern\fR and it must have one of the following
 values:
-.sp
-\fB\-exact\fR
+.RS
+.IP \fB\-exact\fR
 The list element must contain exactly the same string as \fIpattern\fR.
-.sp
-\fB\-glob\fR
+.IP \fB\-glob\fR
 \fIPattern\fR is a glob-style pattern which is matched against each list
 element using the same rules as the \fBstring match\fR command.
-.sp
-\fB\-regexp\fR
+.IP \fB\-regexp\fR
 \fIPattern\fR is treated as a regular expression and matched against
 each list element using the same rules as the \fBregexp\fR command.
-.sp
+.RE
+.IP
 If \fImode\fR is omitted then it defaults to \fB\-glob\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -1975,6 +1987,7 @@ Any duplicate elements are removed.
 '
 '\"@help: tcl/intro/keyedlists
 '\"@brief: Introduction to keyed lists
+.bp
 .SH "KEYED LISTS"
 .PP
 Extended Tcl defines a special type of list referred to as \fIkeyed lists\fR.
@@ -1994,8 +2007,12 @@ This is an example of a keyed list:
 If the variable \fBperson\fR contained the above list, then
 \fBkeylget person NAME\fR would return \fB{Frank Zappa}\fR.
 Executing the command:
-.IP
-\fBkeylset person ID 106\fR
+.sp
+.nf
+.ft CW
+	keylset person ID 106
+.ft R
+.fi
 .PP
 would make \fBperson\fR contain 
 .IP
@@ -2085,6 +2102,7 @@ be specified, if desired.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "STRING AND CHARACTER MANIPULATION COMMANDS"
 .PP
 The commands provide additional functionality to classify characters, convert
@@ -2096,13 +2114,13 @@ the Unix \fItr\fR program).
 '\"@help: tcl/strings/ccollate
 '\"@brief: String comparison command (include localized collation).
 .TP
-.B ccollate ?-local? \fIstring1 string2\fR
+.B ccollate ?\-local? \fIstring1 string2\fR
 .br
 This command compares two strings.  
-If returns \fB-1\fR if \fIstring1\fR is less than \fIstring2\fR, \fB0\fR if
-they are equal amd \fB1\fR if \fIstring1\fR is greater than \fIstring2\fR.
+If returns \fB\-1\fR if \fIstring1\fR is less than \fIstring2\fR, \fB0\fR if
+they are equal and \fB1\fR if \fIstring1\fR is greater than \fIstring2\fR.
 .sp
-If \fB-local\fR is specified, the strings are compared according to the
+If \fB\-local\fR is specified, the strings are compared according to the
 collation environment of the current locale.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -2158,10 +2176,10 @@ length of the string.
 .br
 Returns the length of \fIstring\fR in characters.  
 This command is a shortcut for:
-.sp
+.br
 .nf
 .ft CW
-    \fBstring length\fR \fIstring\fR
+    string length string
 .ft R
 .fi
 '\"@:
@@ -2221,7 +2239,7 @@ the string following the token.
 '\"@help: tcl/strings/ctype
 '\"@brief: Determine if a string has various characteristics.
 .TP
-.B ctype \fI?-failindex var? class string\fR 
+.B ctype \fI?\-failindex var? class string\fR 
 .br
 \fBctype\fR
 determines whether all characters in \fIstring\fR are of the specified
@@ -2231,17 +2249,17 @@ they are not, or if the string is empty.  This command also provides another
 method (besides \fBformat\fR and \fBscan\fR) of converting between an ASCII
 character and its numeric value.  The following \fBctype\fR commands are
 available:
-.RS 5
+.RS
 .TP
-.B ctype \fI?-failindex var? alnum \fIstring\fR
+.B ctype \fI?\-failindex var? alnum \fIstring\fR
 Tests that all characters are alphabetic or numeric characters as defined by
 the character set.
 .TP
-.B ctype \fI?-failindex var? alpha \fIstring\fR
+.B ctype \fI?\-failindex var? alpha \fIstring\fR
 Tests that all characters are alphabetic characters as defined by the
 character set.
 .TP
-.B ctype \fI?-failindex var? ascii \fIstring\fR
+.B ctype \fI?\-failindex var? ascii \fIstring\fR
 Tests that all characters are an ASCII character (a non-negative number less
 than 0200).
 .TP
@@ -2249,18 +2267,18 @@ than 0200).
 Converts the numeric value, \fIstring\fR, to an ASCII character.  Number must
 be in the range 0 through 255.
 .TP
-.B ctype \fI?-failindex var? cntrl \fIstring\fR
+.B ctype \fI?\-failindex var? cntrl \fIstring\fR
 Tests that all characters are ``control characters'' as defined by the
 character set.
 .TP
-.B ctype \fI?-failindex var? digit \fIstring\fR
+.B ctype \fI?\-failindex var? digit \fIstring\fR
 Tests that all characters are valid decimal digits, i.e. 0 through 9.
 .TP
-.B ctype \fI?-failindex var? graph \fIstring\fR
+.B ctype \fI?\-failindex var? graph \fIstring\fR
 Tests that all characters within are any character for which \fIctype print\fR
 is true, except for space characters.
 .TP
-.B ctype \fI?-failindex var? lower \fIstring\fR
+.B ctype \fI?\-failindex var? lower \fIstring\fR
 Tests that all characters are lowercase letters as defined by the character
 set.
 .TP
@@ -2268,31 +2286,31 @@ set.
 Convert a character into its decimal numeric value.  The first character of
 the string is converted.
 .TP
-.B ctype \fI?-failindex var? space \fIstring\fR
+.B ctype \fI?\-failindex var? space \fIstring\fR
 Tests that all characters are either a space, horizontal-tab, carriage
 return, newline, vertical-tab, or form-feed.
 .TP
-.B ctype \fI?-failindex var? print \fIstring\fR
+.B ctype \fI?\-failindex var? print \fIstring\fR
 Tests that all characters are a space or any character for which \fIctype
 alnum\fR or \fIctype punct\fR is true or other ``printing character'' as
 defined by the character set.
 .TP
-.B ctype \fI?-failindex var? punct \fIstring\fR
+.B ctype \fI?\-failindex var? punct \fIstring\fR
 Tests that all characters are made up of any of the characters
 other than the ones for which
 \fBalnum\fR, \fBcntrl\fR, or \fBspace\fR is true.
 .TP
-.B ctype \fI?-failindex var? upper \fIstring\fR
+.B ctype \fI?\-failindex var? upper \fIstring\fR
 Tests that all characters are uppercase letters as defined by the character
 set.
 .TP
-.B ctype \fI?-failindex var? xdigit \fIstring\fR
+.B ctype \fI?\-failindex var? xdigit \fIstring\fR
 Tests that all characters are valid hexadecimal digits, that is \fI0\fR
 through \fI9\fR, a through \fIf\fR or \fIA\fR through \fIF\fR.
-.PP
-If \fI-failindex\fR is specified, then the index into \fIstring\fR of the
-first character that did not match the class is returned in \fIvar\fR.
 .RE
+.IP
+If \fI\-failindex\fR is specified, then the index into \fIstring\fR of the
+first character that did not match the class is returned in \fIvar\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2317,11 +2335,11 @@ Translate characters in \fIstring\fR, changing characters
 occurring
 in \fIinrange\fR
 to the corresponding character in \fIoutrange\fR. \fIInrange\fR and 
-\fIoutrange\fR may be list of characters or a range in the form `A-M'.
+\fIoutrange\fR may be list of characters or a range in the form `A\-M'.
 For example:
 .nf
 .ft CW
-        translit a-z A-Z foobar
+        translit a\-z A\-Z foobar
 .ft R
 .if
 returns "FOOBAR".
@@ -2329,6 +2347,7 @@ returns "FOOBAR".
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "XPG/3 MESSAGE CATALOG COMMANDS"
 .PP
 These commands provide a Tcl interface to message catalogs that are compliant
@@ -2372,7 +2391,7 @@ handles.
 '\"@help: tcl/internation/catopen
 '\"@brief: Open a message catalog.
 .TP
-.B catopen\fR ?\fB-fail\fR|\fB-nofail\fR? \fIcatname\fR
+.B catopen\fR ?\fB\-fail\fR | \fB\-nofail\fR? \fIcatname\fR
 .br
 Open the message catalog \fIcatname\fR.  This may be a relative path name,
 in which case the \fBNLSPATH\fR environment variable is searched to find an
@@ -2381,9 +2400,9 @@ is returned.  Normally, errors are ignored, and in the case of a failed
 call to \fBcatopen\fR, a handle is returned to an
 unopened message catalog.  (This handle may still be passed to \fBcatgets\fR
 and \fBcatclose\fR, causing \fBcatgets\fR to simply return the default string,
-as described above.  If the \fB-fail\fR 
+as described above.  If the \fB\-fail\fR 
 option is specified, an error is returned
-if the open fails.  The option \fB-nofail\fR specifies the default behavior
+if the open fails.  The option \fB\-nofail\fR specifies the default behavior
 of not returning an error when \fBcatopen\fR fails to open a specified
 message catalog.  If the handle from a failed \fBcatopen\fR is passed to
 \fBcatgets\fR, the default string is returned.
@@ -2409,24 +2428,25 @@ string, \fIdefaultstr\fR, is returned.
 '\"@help: tcl/internation/catclose
 '\"@brief: Close a message catalog.
 .TP
-.B catclose\fR ?\fB-fail\fR|\fB-nofail\fR? \fIcathandle\fR
+.B catclose\fR ?\fB\-fail\fR | \fB\-nofail\fR? \fIcathandle\fR
 .br
 Close the message catalog specified by \fIcathandle\fR.
-Normally, errors are ignored.  If \fB-fail\fR is
+Normally, errors are ignored.  If \fB\-fail\fR is
 specified, any errors closing the message catalog
-file are returned.  The option \fB-nofail\fR
+file are returned.  The option \fB\-nofail\fR
 specifies the default behavior of not returning an error.  The use of
-\fB-fail\fR only makes sense if it was also
+\fB\-fail\fR only makes sense if it was also
 specified in the call to \fBcatopen\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "EXTENDED TCL SHELL"
 .sp
 '\"@help: tcl/tclshell/intro
 '\"@brief: Introduction to the tcl shell.
-.B tcl ?-qn? ?-f? \fIscript\fB?|?-c \fIcommand\fB? ?\fIargs\fR?
+.B tcl ?\-qn? ?\-f? \fIscript\fB? | ?\-c \fIcommand\fB? ?\fIargs\fR?
 .PP
 The \fBtcl\fR starts the interactive TclX command interpreter.  The TclX shell
 provides an environment for writing, debugging and executing Tcl scripts.  The
@@ -2466,8 +2486,8 @@ already debugged scripts.
 .B \-f
 Takes the next argument as a script for Tcl to source, rather than entering
 interactive
-mode.  The \fB-f\fR flag is optional.  Normally the first argument that does
-not start with a `-' is taken as the script to execute unless the `-c' option
+mode.  The \fB\-f\fR flag is optional.  Normally the first argument that does
+not start with a `\-' is taken as the script to execute unless the `\-c' option
 is specified.  Any following arguments are passed to the script
 via \fBargv\fR,
 thus any other Tcl shell command-line flags must precede this option.
@@ -2475,10 +2495,10 @@ thus any other Tcl shell command-line flags must precede this option.
 .B \-c
 Take the next argument as a Tcl command to execute.  It may contain series of 
 commands to execute, separated by `;'.  Any following arguments are passed in
-\fBargv\fR, thus, as with \fB-f\fR, any other Tcl shell flags must precede
+\fBargv\fR, thus, as with \fB\-f\fR, any other Tcl shell flags must precede
 this option.
 .TP
-.B \-\-
+.B \-\|\-
 Mark the end of the arguments to the Tcl shell. All arguments following this
 are passed in the Tcl variable \fBargv\fR.  This is useful to pass arguments
 without attempting to execute a Tcl script.
@@ -2620,6 +2640,7 @@ event loop after processing a script.
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "HELP FACILITY"
 '\"@help: help
 '\"@brief: Tcl help facility.
@@ -2645,6 +2666,7 @@ To run the Tk-based interactive help program:
     tclhelp ?addpaths?
 .ft R
 .fi
+.sp
 Where \fIaddpaths\fR are additional paths to search for help directories.
 By default, only the \fIauto_path\fR used by \fBtclhelp\fR is search.
 This will result in help on Tcl, Extended Tcl and Tk.
@@ -2690,6 +2712,7 @@ the \fBregexp\fR command).
 '
 '\"@help: tcl/libraries/packagelib
 '\"@brief: Tcl loadable libraries and packages.
+.bp
 .SH "TCL LOADABLE LIBRARIES AND PACKAGES"
 .PP
 Extended Tcl supports standard Tcl \fBtclIndex\fR libraries and package
@@ -2750,6 +2773,7 @@ the \fBdirectory_stack\fR portion of the package file to be loaded.
 '\"@:This functionality is provided by Extended Tcl.
 '\"@endhelp
 '
+.bp
 .SH "PACKAGE LIBRARY MANAGEMENT COMMANDS"
 .PP
 Several commands are available for building and managing package
@@ -2760,9 +2784,9 @@ management commands and variables are also supported.
 .TP
 '\"@help: tcl/libraries/auto_commands
 '\"@brief: List names of loadable library commands and procedures.
-.B auto_commands\fR ?\fB-loaders\fR?
+.B auto_commands\fR ?\fB\-loaders\fR?
 Lists the names of all known loadable procedures and commands
-procedures.  If \fB-loaders\fR is specified, the command that will be
+procedures.  If \fB\-loaders\fR is specified, the command that will be
 executed to load the command will also be returned.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
@@ -2816,7 +2840,7 @@ redefined).
 If \fIcommand\fR is not specified, the indexes will be loaded, if they
 have not already been loaded or if the \fBauto_path\fR variable has
 changed, but no command will be loaded.
-.PP
+.sp
 This command overrides the standard Tcl procedure of the same name.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -2848,9 +2872,9 @@ supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 .TP
 '\"@help: tcl/libraries/auto_packages
 '\"@brief: List all packages.
-.B auto_packages ?\fI-location\fR?
+.B auto_packages ?\fI\-location\fR?
 .br
-Returns a list of the names of all defined packages. If \fI-location\fR
+Returns a list of the names of all defined packages. If \fI\-location\fR
 is specified, a list of pairs of package name and the \fB.tlib\fR path
 name, offset and length of the package within the library.
 '\"@:
@@ -2878,4 +2902,3 @@ if the requested file could not be found.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
-

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 7.2 1996/11/07 02:28:38 markd Exp $
+# $Id: buildutil.tcl,v 8.0.2.1 1996/12/21 05:06:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -47,6 +47,9 @@ proc MakeAbs fname {
 proc CopyFile {sourceFile target} {
     global tcl_platform
 
+    if {[lsearch {.orig .diff .rej} [file extension $sourceFile]] >= 0} {
+	return
+    }
     if {[file isdirectory $target]} {
         set targetFile [file join $target [file tail $sourceFile]]
     } else {
