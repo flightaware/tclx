@@ -549,7 +549,7 @@
 20 Jul 93:
   o Fixed bug with lgets not handling backslashes correctly.
 ===============================================================================
-20 Jul 93: Released TclX7.0c Beta 1.
+20 Jul 93: Released TclX7.0a Beta 1.
 ===============================================================================
 22 Jul 93:
   o Changed filescan (Boyer-Moore) code to prevent code generation bug under
@@ -573,7 +573,7 @@
     that can add the Extended Tcl commands to an existing interpreter.
   o Don't print shell prompts if not a tty.
 ===============================================================================
- 2 Aug 93: Released TclX7.0c Beta 2.
+ 2 Aug 93: Released TclX7.0a Beta 2.
 ===============================================================================
  3 Aug 93:
   o Fixed core dump in chmod command.
@@ -584,7 +584,7 @@
     "TclXyy".  This is to allow apllications to include yacc code.
   o Call isascii before isspace to handle non-ASCII character sets.
 ===============================================================================
- 5 Aug 93: Released TclX7.0c Beta 3.
+ 5 Aug 93: Released TclX7.0a Beta 3.
 ===============================================================================
 17 Aug 93:
   o Add -bytes and -maxbytes options to copyfile.
@@ -608,7 +608,7 @@
     changes were done for compatibility with UCB Tcl.
     (*POTENTIAL INCOMPATIBILITY*)
 ===============================================================================
- 1 Sep 93: Released TclX7.0c Beta 4.
+ 1 Sep 93: Released TclX7.0a Beta 4.
 ===============================================================================
  4 Sep 93:
   o Fixed problem with TCL_LIBRARY and TK_LIBRARY being set to the standard
@@ -690,5 +690,13 @@
      (*POTENTIAL INCOMPATIBILITY*) 
    o Added "infox have_sockets" and "infox have_msgcats".
    o chartype ord will not return an error on multi-char strings.
-   o Added chroot, nice and sync commands.
+   o Added "chroot", "nice", and "sync" commands, "infox have_fsync" option.
 -------------------------------------------------------------------------------
+10 Nov 93:
+   o Added epoch keyword in convertclock.  This is to support the postgres
+     database time date format.  Thanks to "Wolf-D. Ihlenfeldt"
+     <wolf@molout.tutkie.tut.ac.jp>
+   o Exported Tcl_GetTimeZone.
+===============================================================================
+10 Nov 93: Released TclX7.1a Beta 5.
+===============================================================================

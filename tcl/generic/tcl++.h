@@ -22,7 +22,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.11 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tcl++.h,v 2.12 1993/09/21 03:40:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -547,21 +547,6 @@ class TclInterp_cl
         TclX_ErrorExit (interp, exitCode);
     }
 
-    inline void
-    XInitLibDirPath (Tcl_DString *libDirPtr,
-                     char        *envVar,
-                     char        *dir,
-                     char        *version1,
-                     char        *version2)
-    {
-        TclX_InitLibDirPath (interp,
-                             libDirPtr,
-                             envVar,
-                             dir,
-                             version1,
-                             version2);
-    }
-
     inline void 
     XParseCmdLine (int     argc,
                    char  **argv)
@@ -590,15 +575,6 @@ class TclInterp_cl
                  unsigned   *unsignedPtr)
     {
          return Tcl_GetUnsigned (interp, string, unsignedPtr);
-    }
-
-    inline int
-    ProcessSignals (ClientData  clientData,
-                    int         cmdResultCode)
-    {
-        return Tcl_ProcessSignals (clientData,
-                                   interp,
-                                   cmdResultCode);
     }
 
     /*

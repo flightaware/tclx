@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.13 1993/10/08 04:39:48 markd Exp markd $
+ * $Id: tclXgetdate.y,v 2.14 1993/11/03 15:22:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 2.13 $
+ * $Revision: 2.14 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -116,7 +116,7 @@ extern struct tm  *localtime();
 }
 
 %token  tAGO tDAY tDAYZONE tID tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
-%token  tSEC_UNIT tSNUMBER tUNUMBER tZONE
+%token  tSEC_UNIT tSNUMBER tUNUMBER tZONE tEPOCH
 
 %type   <Number>        tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
 %type   <Number>        tSEC_UNIT tSNUMBER tUNUMBER tZONE
@@ -227,6 +227,11 @@ date    : tUNUMBER '/' tUNUMBER {
             yyMonth = $2;
             yyDay = $1;
         }
+		  | tEPOCH {
+				yyMonth = 1;
+				yyDay = 1;
+				yyYear = EPOCH;
+		  }
         | tUNUMBER tMONTH tUNUMBER {
             yyMonth = $2;
             yyDay = $1;
@@ -373,6 +378,7 @@ static TABLE    OtherTable[] = {
     { "twelfth",        tUNUMBER,       12 },
 #endif
     { "ago",            tAGO,   1 },
+    { "epoch",          tEPOCH,   0 },
     { NULL }
 };
 

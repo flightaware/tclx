@@ -1,4 +1,3 @@
-cmdtrace on [open cmd.log w]
 #
 # buildhelp.tcl --
 #
@@ -16,7 +15,7 @@ cmdtrace on [open cmd.log w]
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.11 1993/11/04 16:07:50 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.12 1993/11/10 06:47:40 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.27 1993/10/29 14:36:38 markd Exp markd $
+# $Id: Makefile.in,v 2.28 1993/11/05 05:33:10 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -67,7 +67,7 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS=tkXinit.o   tkXmain.o
+OBJS=tkXinit.o   tkXmain.o  tkXshell.o
 
 UCBOBJS=tkWindow.o
 
@@ -94,12 +94,13 @@ made.tmp ${LIBTKX.A}: ${OBJS} ${UCBOBJS}
 
 tkWindow.o: tkWindow.c
 	MASTER=${TK_MASTERDIR}/`../tools/tkxversion` ;\
-	${CC} -c -I${TK_UCB_SRC} ${CC_FLAGS} -DTK_LIBRARY=\"$$MASTER\" \
-	    tkWindow.c
+	${CC} -c -I${TK_UCB_SRC} ${CC_FLAGS} ${DEFS} \
+	    -DTK_LIBRARY=\"$$MASTER\" tkWindow.c
 
 tkWindow.c: ${TK_UCB_SRC}/tkWindow.c
 	rm -f tkWindow.c
-	cp ${TK_UCB_SRC}/tkWindow.c tkWindow.c
+	echo '#include "tclXconfig.h"' >tkWindow.c
+	cat ${TK_UCB_SRC}/tkWindow.c  >>tkWindow.c
 
 tkXinit.o: tkXinit.c
 	MASTER=${TK_MASTERDIR}/`../tools/tkxversion` ;\

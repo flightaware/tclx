@@ -343,6 +343,7 @@
 ./tksrc/tkXAppInit.c
 ./tksrc/tkXinit.c
 ./tksrc/tkXmain.c
+./tksrc/tkXshell.c
 ./tktclsrc/Makefile.in
 ./tktclsrc/tclhelp.tcl
 ./tktclsrc/tkdemo.tcl

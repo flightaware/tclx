@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.32 1993/11/10 06:47:40 markd Exp markd $
+# $Id: Makefile.in,v 2.33 1993/11/10 07:24:31 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -236,8 +236,8 @@ TCLXINSTALL:
 	    ${srcbasedir}/man ${TCL_MAN_BASEDIR}
 
 TCLXINSTALL-EXEC:
-	${INSTCOPY} tclmaster/bin/tcl ${TCL_BINDIR}
-	${INSTCOPY} tclmaster/lib/libtclx.a ${TCL_LIBDIR}
+	${INSTCOPY} tclmaster/bin${ARCH}/tcl ${TCL_BINDIR}
+	${INSTCOPY} tclmaster/lib${ARCH}/libtclx.a ${TCL_LIBDIR}
 	${RANLIB} ${TCL_LIBDIR}/libtclx.a
 
 TKXINSTALL:
@@ -247,9 +247,9 @@ TKXINSTALL:
 	   ${TK_INST_MASTER}
 
 TKXINSTALL-EXEC:
-	${INSTCOPY} tkmaster/bin/wishx ${TCL_BINDIR}
-	${INSTCOPY} tkmaster/bin/tclhelp ${TCL_BINDIR}
-	${INSTCOPY} tkmaster/lib/libtkx.a ${TCL_LIBDIR}
+	${INSTCOPY} tkmaster/bin${ARCH}/wishx ${TCL_BINDIR}
+	${INSTCOPY} tkmaster/bin${ARCH}/tclhelp ${TCL_BINDIR}
+	${INSTCOPY} tkmaster/lib${ARCH}/libtkx.a ${TCL_LIBDIR}
 	${RANLIB} ${TCL_LIBDIR}/libtkx.a
 
 # Fake targets to decide if we install wishx or not.
