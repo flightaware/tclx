@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.11 2005/03/24 05:11:15 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.12 2005/03/25 00:50:09 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -62,7 +62,7 @@ PKG_HEADERS	= @PKG_HEADERS@
 # have been added to the configure script.
 #========================================================================
 
-HELP_DIR	= @HELP_DIR@/tcl
+HELP_DIR	= @HELP_DIR@
 HELP_DIR_NATIVE	= `@CYGPATH@ ${HELP_DIR}`
 
 #========================================================================
@@ -144,6 +144,7 @@ TCL_LIBS	= @TCL_LIBS@
 EXTRA_PATH	= $(top_builddir):$(TCL_BIN_DIR)
 TCLSH_ENV	= TCL_LIBRARY=`@CYGPATH@ $(TCL_SRC_DIR)/library` \
 		  TCLX_LIBRARY=`@CYGPATH@ $(srcdir)/library` \
+		  TCLX_HELP_DIR="$(HELP_DIR_NATIVE)" \
 		  @LD_LIBRARY_PATH_VAR@="$(EXTRA_PATH):$(@LD_LIBRARY_PATH_VAR@)" \
 		  PATH="$(EXTRA_PATH):$(PATH)" \
 		  TCLLIBPATH="$(top_builddir)"
@@ -182,7 +183,7 @@ COMPILE		= $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(C
 # for the BINARIES that you specified above have already been done.
 #========================================================================
 
-all: binaries libraries
+all: binaries libraries doc
 
 #========================================================================
 # The binaries target builds executable programs, Windows .dll's, unix
@@ -195,13 +196,7 @@ binaries: $(BINARIES) pkgIndex.tcl
 
 libraries:
 
-# We defer doc building to install-doc because if we do BUILDHELP,
-# it doesn't have dependency checking yet.
 doc: @BUILDHELP@
-	@echo "If you have documentation to create, place the commands to"
-	@echo "build the docs in the 'doc:' target.  For example:"
-	@echo "        xml2nroff sample.xml > sample.n"
-	@echo "        xml2html sample.xml > sample.html"
 
 install: all install-binaries install-libraries install-doc
 
@@ -340,11 +335,13 @@ dist: dist-clean
 # variable in configure.in
 #========================================================================
 
-clean:  
+clean: helpclean
 	-test -z "$(BINARIES)" || rm -f $(BINARIES)
 	-rm -f *.$(OBJEXT) core *.core
-	-rm -rf $(HELP_DIR)
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+
+helpclean:
+	-rm -rf $(HELP_DIR)
 
 distclean: clean
 	-rm -f *.tab.c
@@ -440,27 +437,20 @@ uninstall-binaries:
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
 
-
-# Should this check to see we aren't removing something important?
-help.tmp:
-	rm -rf help
-	@LN_S@ ${HELP_DIR} help
-	touch help.tmp
-
 #------------------------------------------------------------------------------
 # Build help for Tcl & TclX.  These files are normally part of the
 # distribution and not rebuilt by users.
 #
-buildhelp:
-	rm -rf ${HELP_DIR} help help.tmp
+buildhelp: help
+help: $(BINARIES)
 	if test ! -d "${HELP_DIR}" ; then \
 	    mkdir -p "${HELP_DIR}" ; \
+	    ${TCLSH} ${TCLX_TOOLS_SRC_DIR}/bldmanhelp.tcl \
+		`@CYGPATH@ ${TCL_SRC_DIR}/doc` \
+		${TCLX_TOOLS_SRC_DIR}/tclmanpages ${HELP_DIR_NATIVE} Tcl.brf; \
+	    ${TCLSH} ${TCLX_TOOLS_SRC_DIR}/runbuildhelp.tcl \
+		${HELP_DIR_NATIVE} TclX.brf ${TCLX_DOC_DIR}/TclX.n; \
 	fi
-	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/bldmanhelp.tcl \
-	    `@CYGPATH@ ${TCL_SRC_DIR}/doc` \
-	    ${TCLX_TOOLS_SRC_DIR}/tclmanpages ${HELP_DIR_NATIVE} Tcl.brf
-	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/runbuildhelp.tcl ${HELP_DIR_NATIVE} \
-	    TclX.brf ${TCLX_DOC_DIR}/TclX.n
 
 install-help:
 	@if test -d "${HELP_DIR}" ; then \

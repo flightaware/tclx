@@ -1,3 +1,18 @@
+2005-03-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* configure, configure.in: AC_PROG_LN_S no longer needed
+	* tests/help.test: correct help tests to use correct help dir
+	* Makefile.in: doc target cleanup (das)
+	Add helpclean target and make help not rebuild always.
+	Add TCLX_HELP_DIR to TCLSH_ENV.
+
+	* license.terms (new): minimal license terms file
+
+	* library/buildhelp.tcl (buildhelp): redir 2>/dev/null for exec
+	col check. (das)
+
+	* unix/tclXunixPort.h: undef panic for __APPLE__ (das)
+
 2005-03-24  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* Makefile.in, tclconfig/tcl.m4: Get AIX wide int type right.
