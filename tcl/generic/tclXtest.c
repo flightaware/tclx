@@ -13,11 +13,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 7.1 1996/07/22 17:10:12 markd Exp $
+ * $Id: tclXtest.c,v 7.2 1996/08/06 07:15:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
-#include "tclExtend.h"
+#include "tclExtdInt.h"
 
 extern int
 Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
@@ -44,7 +44,6 @@ int (*tclDummyMathPtr)() = matherr;
 
 /*-----------------------------------------------------------------------------
  * main --
- *
  * This is the main program for the application.
  *-----------------------------------------------------------------------------
  */
@@ -59,8 +58,110 @@ main (argc, argv)
 
 
 /*-----------------------------------------------------------------------------
- * Tcl_AppInit --
+ * DoTestEval --
+ *   Evaluate a level/command pair.
+ * Parameters:
+ *   o interp - Errors are returned in result.
+ *   o levelStr - Level string to parse.
+ *   o command - Command to evaluate.
+ *   o resultList - DString to append the two element eval code and result to.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+DoTestEval (interp, levelStr, command, resultList)
+    Tcl_Interp  *interp;
+    char        *levelStr;
+    char        *command;
+    Tcl_DString *resultList;
+{
+    Interp *iPtr = (Interp *) interp;
+    int result;
+    char numBuf [32];
+    CallFrame *savedVarFramePtr, *framePtr;
+
+    /*
+     * Find the frame to eval in.
+     */
+    result = TclGetFrame (interp, levelStr, &framePtr);
+    if (result <= 0) {
+        if (result == 0)
+            Tcl_AppendResult (interp, "invalid level \"", levelStr, "\"",
+                              (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     * Evaluate in the new environment.
+     */
+    savedVarFramePtr = iPtr->varFramePtr;
+    iPtr->varFramePtr = framePtr;
+
+    result = Tcl_Eval (interp, command);
+
+    iPtr->varFramePtr = savedVarFramePtr;
+
+    /*
+     * Append the two element list.
+     */
+    Tcl_DStringStartSublist (resultList);
+    sprintf (numBuf, "%d", result);
+    Tcl_DStringAppendElement (resultList, numBuf);
+    Tcl_DStringAppendElement (resultList, interp->result);
+    Tcl_DStringEndSublist (resultList);
+
+    Tcl_ResetResult (interp);
+    return TCL_OK;
+}
+
+
+/*-----------------------------------------------------------------------------
+ * TclxTestEvalCmd --
+ *    Command used in profile test.  It purpose is to evaluate a series of
+ * commands at a specified level.  Its like uplevel, but can generate more
+ * complex situations.  Level is specified in the same manner as uplevel,
+ * with 0 being the current level.
+ *     tclx_test_eval ?level cmd? ?level cmd? ...
  *
+ * Results:
+ *   A list contain a list entry for each command evaluated.  Each entry is
+ * the eval code and result string.
+ *-----------------------------------------------------------------------------
+ */
+static int
+TclxTestEvalCmd (clientData, interp, argc, argv)
+    ClientData    clientData;
+    Tcl_Interp   *interp;
+    int           argc;
+    char        **argv;
+{
+    int idx;
+    Tcl_DString resultList;
+
+    if (((argc - 1) % 2) != 0) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                          " ?level cmd? ?level cmd? ...", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    Tcl_DStringInit (&resultList);
+
+    for (idx = 1; idx < argc; idx += 2) {
+        if (DoTestEval (interp, argv [idx], argv [idx + 1],
+                        &resultList) == TCL_ERROR) {
+            Tcl_DStringFree (&resultList);
+            return TCL_ERROR;
+        }
+    }
+        
+    Tcl_DStringResult (interp, &resultList);
+    Tcl_DStringFree (&resultList);
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * Tcl_AppInit --
  *  Initialize TclX test application.
  *
  * Results:
@@ -78,12 +179,15 @@ Tcl_AppInit (interp)
     if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tclx", Tclx_Init, Tclx_SafeInit);
-    if (Tcltest_Init(interp) == TCL_ERROR) {
+    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
+    if (Tcltest_Init (interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
                       (Tcl_PackageInitProc *) NULL);
+
+    Tcl_CreateCommand (interp, "tclx_test_eval", TclxTestEvalCmd,
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
     return Tcl_GlobalEval (interp, errorHandler);
 }

@@ -2,7 +2,7 @@
 # profile.test
 #
 # Tests for the profile command and profrep procedure.
-#---------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 7.0 1996/06/16 05:32:42 markd Exp $
+# $Id: profile.test,v 7.1 1996/07/26 05:56:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -40,15 +40,51 @@ if {[lindex $profData($idx) 1] == 0} {
     puts "*** not return elapsed real time.  The configure script"
     puts "*** did not properly detect this.  Try undefining the flag"
     puts "*** TIMES_RETS_REAL_TIME in src/tclXconf.h and reporting"
-    puts "*** this to the maintainers"
+    puts "*** this to the maintainers\n"
 }
+
+#
+# Test error cases.
+#
+Test profile-1.1 {profile error tests} {
+    profile off
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
+
+Test profile-1.2 {profile error tests} {
+    profile baz
+} 1 {expected one of "on" or "off", got "baz"}
+
+Test profile-1.3 {profile error tests} {
+    profile -comman on
+} 1 {expected option of "-commands", got "-comman"}
+
+Test profile-1.4 {profile error tests} {
+    profile -commands off
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
+
+Test profile-1.5 {profile error tests} {
+    profile -commands
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
+
+Test profile-1.6 {profile error tests} {
+    profile -commands on foo
+} 1 {wrong # args: profile ?-commands? on|off arrayVar}
+
+Test profile-1.7 {profile error tests} {
+    profile off foo
+} 1 {profiling is not currently enabled}
+
+Test profile-1.8 {profile error tests} {
+    profile on
+    profile on
+} 1 {profiling is already enabled}
+profile off foo
 
 #
 # Function to build a list from the profile output data with each entry
 # contain the call stack and call count.  The list is returned sorted by
 # call stack.
 #
-
 proc SumCntData {profDataVar} {
     upvar $profDataVar profData
     set sumData {}
@@ -58,11 +94,14 @@ proc SumCntData {profDataVar} {
     return [lsort $sumData]
 }
 
-proc ProcA1 {} {ProcB1}
-proc ProcB1 {} {ProcC1;ProcC1}
-proc ProcC1 {} {}
+#
+# Test of normal procedure calls.
+#
+proc ProcA1 {} {ProcB1; set j 1; incr j; set k 1}
+proc ProcB1 {} {ProcC1; concat a b; ProcC1; list a b; list c d}
+proc ProcC1 {} {expr 1+1}
 
-Test profile-1.1 {profile count tests} {
+Test profile-2.1 {profile count tests} {
    profile on
    ProcA1
    profile off profData
@@ -70,14 +109,36 @@ Test profile-1.1 {profile count tests} {
 } 0 [list {<global> 1} \
           {{ProcA1 <global>} 1} \
           {{ProcB1 ProcA1 <global>} 1} \
-          {{ProcC1 ProcB1 ProcA1 <global>} 2}]
+          {{ProcC1 ProcB1 ProcA1 <global>} 2} \
+          {{Test <global>} 1}]
 
+Test profile-2.2 {profile count tests} {
+   profile -commands on
+   ProcA1
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA1 <global>} 1} \
+          {{ProcB1 ProcA1 <global>} 1} \
+          {{ProcC1 ProcB1 ProcA1 <global>} 2} \
+          {{Test <global>} 1} \
+          {{concat ProcB1 ProcA1 <global>} 1} \
+          {{expr ProcC1 ProcB1 ProcA1 <global>} 2} \
+          {{incr ProcA1 <global>} 1} \
+          {{list ProcB1 ProcA1 <global>} 2} \
+          {{profile <global>} 1} \
+          {{set ProcA1 <global>} 2}]
+
+
+#
+# Test of uplevel.
+#
 proc ProcA2 {} {ProcB2}
 proc ProcB2 {} {ProcC2}
 proc ProcC2 {} {uplevel ProcD2; ProcD2}
-proc ProcD2 {} {}
+proc ProcD2 {} {set a 1; incr a; concat a b}
 
-Test profile-1.2 {profile count tests} {
+Test profile-3.1 {profile count tests} {
    profile on
    ProcA2
    profile off profData
@@ -87,15 +148,41 @@ Test profile-1.2 {profile count tests} {
           {{ProcB2 ProcA2 <global>} 1} \
           {{ProcC2 ProcB2 ProcA2 <global>} 1} \
           {{ProcD2 ProcB2 ProcA2 <global>} 1} \
-          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1}]
+          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{Test <global>} 1}]
+
+Test profile-3.2 {profile count tests} {
+   profile -commands on
+   ProcA2
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA2 <global>} 1} \
+          {{ProcB2 ProcA2 <global>} 1} \
+          {{ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{ProcD2 ProcB2 ProcA2 <global>} 1} \
+          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{Test <global>} 1} \
+          {{concat ProcD2 ProcB2 ProcA2 <global>} 1} \
+          {{concat ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{incr ProcD2 ProcB2 ProcA2 <global>} 1} \
+          {{incr ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{profile <global>} 1} \
+          {{set ProcD2 ProcB2 ProcA2 <global>} 1} \
+          {{set ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{uplevel ProcC2 ProcB2 ProcA2 <global>} 1}]
+
+#
+# Test of error unwind.
+#
 
 proc ProcA3 {} {ProcB3}
-proc ProcB3 {} {catch {ProcC3};ProcE3}
+proc ProcB3 {} {catch {ProcC3}; ProcE3}
 proc ProcC3 {} {ProcD3}
 proc ProcD3 {} {error baz}
 proc ProcE3 {} {}
 
-Test profile-1.3 {profile count tests} {
+Test profile-4.1 {profile count tests} {
    profile on
    ProcA3
    profile off profData
@@ -105,7 +192,69 @@ Test profile-1.3 {profile count tests} {
           {{ProcB3 ProcA3 <global>} 1} \
           {{ProcC3 ProcB3 ProcA3 <global>} 1} \
           {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-          {{ProcE3 ProcB3 ProcA3 <global>} 1}]
+          {{ProcE3 ProcB3 ProcA3 <global>} 1} \
+          {{Test <global>} 1}]
+
+Test profile-4.2 {profile count tests} {
+   profile -commands on
+   ProcA3
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA3 <global>} 1} \
+          {{ProcB3 ProcA3 <global>} 1} \
+          {{ProcC3 catch ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcC3 catch ProcB3 ProcA3 <global>} 1} \
+          {{ProcE3 ProcB3 ProcA3 <global>} 1} \
+          {{Test <global>} 1} \
+          {{catch ProcB3 ProcA3 <global>} 1} \
+          {{error ProcD3 ProcC3 catch ProcB3 ProcA3 <global>} 1} \
+          {{profile <global>} 1}]
+
+#
+# Test of a command that calls procedures from different levels.
+#
+
+proc ProcA4 {} {ProcB4}
+proc ProcB4 {} {tclx_test_eval 0 ProcC4a #0 ProcC4b 0 ProcC4c 1 ProcC4d }
+proc ProcC4a {} {ProcD4}
+proc ProcC4b {} {ProcD4}
+proc ProcC4c {} {ProcD4}
+proc ProcC4d {} {ProcD4}
+
+if [cequal [info commands tclx_test_eval] {}] {
+    puts "*** Command \"tclx_test_eval\" is not available in the interpreter,"
+    puts "*** some tests skipped\n"
+}
+Test profile-5.1 {profile count tests} {
+   profile on
+   ProcA4
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA4 <global>} 1} \
+          {{ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4a ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4b <global>} 1} \
+          {{ProcC4c ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4d ProcA4 <global>} 1} \
+          {{Test <global>} 1}]
+
+Test profile-5.2 {profile count tests} {
+   profile -commands on
+   ProcA4
+   profile off profData
+   SumCntData profData
+} 0 [list {<global> 1} \
+          {{ProcA4 <global>} 1} \
+          {{ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4a tclx_test_eval ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4b <global>} 1} \
+          {{ProcC4c tclx_test_eval ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4d ProcA4 <global>} 1} \
+          {{Test <global>} 1} \
+          {{profile <global>} 1} \
+          {{tclx_test_eval ProcB4 ProcA4 <global>} 1}]
 
 #
 # Function to build a list from the profile output data with each entry
@@ -135,22 +284,23 @@ proc EatTime {amount} {
     }    
 }
 
-proc ProcA4 {} {ProcB4;ProcC4;ProcD4}
-proc ProcB4 {} {EatTime 1}
-proc ProcC4 {} {EatTime 100}
-proc ProcD4 {} {EatTime 1000}
+proc ProcA10 {} {ProcB10;ProcC10;ProcD10}
+proc ProcB10 {} {EatTime 1}
+proc ProcC10 {} {EatTime 100}
+proc ProcD10 {} {EatTime 1000}
 
 Test profile-2.1 {profile CPU time tests} {
    profile on
-   ProcA4
+   ProcA10
    profile off profData
    SumCpuData profData
 } 0 [list {<global> 1} \
-          {{EatTime ProcB4 ProcA4 <global>} 1} \
-          {{EatTime ProcC4 ProcA4 <global>} 1} \
-          {{EatTime ProcD4 ProcA4 <global>} 1} \
-          {{ProcA4 <global>} 1} {{ProcB4 ProcA4 <global>} 1} \
-          {{ProcC4 ProcA4 <global>} 1} {{ProcD4 ProcA4 <global>} 1}]
+          {{EatTime ProcB10 ProcA10 <global>} 1} \
+          {{EatTime ProcC10 ProcA10 <global>} 1} \
+          {{EatTime ProcD10 ProcA10 <global>} 1} \
+          {{ProcA10 <global>} 1} {{ProcB10 ProcA10 <global>} 1} \
+          {{ProcC10 ProcA10 <global>} 1} {{ProcD10 ProcA10 <global>} 1}\
+          {{Test <global>} 1}]
 
 proc ProcA1 {} {ProcB1;set a 1;incr a}
 proc ProcB1 {} {ProcC1;ProcC1}
@@ -165,44 +315,12 @@ Test profile-3.1 {profile -command tests} {
           {{ProcA1 <global>} 1} \
           {{ProcB1 ProcA1 <global>} 1} \
           {{ProcC1 ProcB1 ProcA1 <global>} 2} \
+          {{Test <global>} 1} \
           {{incr ProcA1 <global>} 1} \
           {{incr ProcC1 ProcB1 ProcA1 <global>} 2} \
           {{profile <global>} 1} {{set ProcA1 <global>} 1} \
           {{set ProcC1 ProcB1 ProcA1 <global>} 2}]
 
-Test profile-4.1 {profile error tests} {
-    profile off
-} 1 {wrong # args: profile ?-commands? on|off arrayVar}
-
-Test profile-4.2 {profile error tests} {
-    profile baz
-} 1 {expected one of "on" or "off", got "baz"}
-
-Test profile-4.3 {profile error tests} {
-    profile -comman on
-} 1 {expected option of "-commands", got "-comman"}
-
-Test profile-4.4 {profile error tests} {
-    profile -commands off
-} 1 {wrong # args: profile ?-commands? on|off arrayVar}
-
-Test profile-4.5 {profile error tests} {
-    profile -commands
-} 1 {wrong # args: profile ?-commands? on|off arrayVar}
-
-Test profile-4.6 {profile error tests} {
-    profile -commands on foo
-} 1 {wrong # args: profile ?-commands? on|off arrayVar}
-
-Test profile-4.7 {profile error tests} {
-    profile off foo
-} 1 {profiling is not currently enabled}
-
-Test profile-4.8 {profile error tests} {
-    profile on
-    profile on
-} 1 {profiling is already enabled}
-profile off foo
 
 #
 # Set up some dummy profile data for the report tests.  The data is not
@@ -210,19 +328,19 @@ profile off foo
 # same.
 #
 catch {unset profData}
-set baz {EatTime ProcB4 ProcA4}
+set baz {EatTime ProcB10 ProcA10}
 set profData($baz) {4 800 10}
-set baz {ProcC4 ProcA4}
+set baz {ProcC10 ProcA10}
 set profData($baz) {3 1000 101}
-set baz {EatTime ProcC4 ProcA4}
+set baz {EatTime ProcC10 ProcA10}
 set profData($baz) {2 1001 100}
-set baz {ProcD4 ProcA4}
+set baz {ProcD10 ProcA10}
 set profData($baz) {1 100 1071}
-set baz ProcA4
+set baz ProcA10
 set profData($baz) {5 1250 1180}
-set baz {EatTime ProcD4 ProcA4}
+set baz {EatTime ProcD10 ProcA10}
 set profData($baz) {6 1070 1070}
-set baz {ProcB4 ProcA4}
+set baz {ProcB10 ProcA10}
 set profData($baz) {7 80 11}
 
 #
@@ -246,22 +364,22 @@ Profile Test 5.1
 ---------------------------------------------------------
 Procedure Call Stack          Calls  Real Time   CPU Time
 ---------------------------------------------------------
-ProcB4                            7         80         11
-    ProcA4
+ProcB10                           7         80         11
+    ProcA10
 EatTime                           6       1070       1070
-    ProcD4
-    ProcA4
-ProcA4                            5       1250       1180
+    ProcD10
+    ProcA10
+ProcA10                           5       1250       1180
 EatTime                           4        800         10
-    ProcB4
-    ProcA4
-ProcC4                            3       1000        101
-    ProcA4
+    ProcB10
+    ProcA10
+ProcC10                           3       1000        101
+    ProcA10
 EatTime                           2       1001        100
-    ProcC4
-    ProcA4
-ProcD4                            1        100       1071
-    ProcA4
+    ProcC10
+    ProcA10
+ProcD10                           1        100       1071
+    ProcA10
 }
 
 Test profile-5.2 {profrep tests} {
@@ -272,22 +390,22 @@ Profile Test 5.2
 ---------------------------------------------------------
 Procedure Call Stack          Calls  Real Time   CPU Time
 ---------------------------------------------------------
-ProcA4                            5       1250       1180
+ProcA10                           5       1250       1180
 EatTime                           6       1070       1070
-    ProcD4
-    ProcA4
+    ProcD10
+    ProcA10
 EatTime                           2       1001        100
-    ProcC4
-    ProcA4
-ProcC4                            3       1000        101
-    ProcA4
+    ProcC10
+    ProcA10
+ProcC10                           3       1000        101
+    ProcA10
 EatTime                           4        800         10
-    ProcB4
-    ProcA4
-ProcD4                            1        100       1071
-    ProcA4
-ProcB4                            7         80         11
-    ProcA4
+    ProcB10
+    ProcA10
+ProcD10                           1        100       1071
+    ProcA10
+ProcB10                           7         80         11
+    ProcA10
 }
 
 Test profile-5.3 {profrep tests} {
@@ -298,22 +416,22 @@ Profile Test 5.3
 ---------------------------------------------------------
 Procedure Call Stack          Calls  Real Time   CPU Time
 ---------------------------------------------------------
-ProcA4                            5       1250       1180
-ProcD4                            1        100       1071
-    ProcA4
+ProcA10                           5       1250       1180
+ProcD10                           1        100       1071
+    ProcA10
 EatTime                           6       1070       1070
-    ProcD4
-    ProcA4
-ProcC4                            3       1000        101
-    ProcA4
+    ProcD10
+    ProcA10
+ProcC10                           3       1000        101
+    ProcA10
 EatTime                           2       1001        100
-    ProcC4
-    ProcA4
-ProcB4                            7         80         11
-    ProcA4
+    ProcC10
+    ProcA10
+ProcB10                           7         80         11
+    ProcA10
 EatTime                           4        800         10
-    ProcB4
-    ProcA4
+    ProcB10
+    ProcA10
 }
 
 unset foo
