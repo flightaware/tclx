@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 2.3 1993/04/20 13:34:56 markd Exp markd $
+ * $Id: tclXid.c,v 2.4 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -146,7 +146,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
 {
     struct passwd *pw;
     struct group *grp;
-    int uid, gid;
+    int uid, gid, pid;
 
     if (argc < 2) 
         goto bad_args;
@@ -239,7 +239,12 @@ Tcl_IdCmd (clientData, interp, argc, argv)
                                   " process group ?set?", (char *) NULL);
                 return TCL_ERROR;
             }
+#ifndef TCL_NO_SETPGID
+            pid = getpid ();
+            setpgid (pid, pid);
+#else
             setpgrp ();
+#endif
             return TCL_OK;
         }
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
