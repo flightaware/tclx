@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.9 1993/08/31 23:03:20 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.10 1993/09/21 03:40:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -207,9 +207,11 @@ TclX_OutputPrompt (interp, topLevel)
  * Parameters:
  *   o interp (I) - A pointer to the interpreter
  *   o interactive (I) - If TRUE print prompts and non-error results.
+ * Returns:
+ *   TCL_OK or TCL_ERROR;
  *-----------------------------------------------------------------------------
  */
-void
+int
 Tcl_CommandLoop (interp, interactive)
     Tcl_Interp *interp;
     int         interactive;
@@ -249,9 +251,11 @@ Tcl_CommandLoop (interp, interactive)
                 putchar('\n');
                 continue;  /* Next command */
             }
-            if (ferror (stdin))
-                panic ("command loop: error on input file: %s\n",
-                       strerror (errno));
+            if (ferror (stdin)) {
+                Tcl_AppendResult (interp, "command input error on stdin: ",
+                                  Tcl_PosixError (interp), (char *) NULL);
+                return TCL_ERROR;
+            }
             goto endOfFile;
         }
         Tcl_DStringAppend (&cmdBuf, inputBuf, -1);
@@ -273,8 +277,9 @@ Tcl_CommandLoop (interp, interactive)
         topLevel = TRUE;
         Tcl_DStringFree (&cmdBuf);
     }
-endOfFile:
+  endOfFile:
     Tcl_DStringFree (&cmdBuf);
+    return TCL_OK;
 }
 
 /*
@@ -369,7 +374,7 @@ Tcl_CommandloopCmd(clientData, interp, argc, argv)
         SetPromptVar (interp, "downLevelPromptHook", oldDownLevelHook, NULL);
         
     result = TCL_OK;
-exitPoint:
+  exitPoint:
     if (oldTopLevelHook != NULL)
         ckfree (oldTopLevelHook);
     if (oldDownLevelHook != NULL)

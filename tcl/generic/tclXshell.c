@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.18 1993/09/05 02:01:59 markd Exp markd $
+ * $Id: tclXshell.c,v 2.19 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -220,7 +220,5 @@ TclX_RunShell (interp)
      * so user may interrupt with out killing program.
      */
     Tcl_SetupSigInt ();
-    Tcl_CommandLoop (interp, isatty (0));
-
-    return TCL_OK;
+    return Tcl_CommandLoop (interp, isatty (0));
 }
