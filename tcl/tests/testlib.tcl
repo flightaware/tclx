@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.3 1993/08/13 06:32:33 markd Exp markd $
+# $Id: testlib.tcl,v 2.4 1993/09/09 06:07:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -107,29 +107,26 @@ proc GenRec {id} {
 }
 
 # Proc to fork and exec child that loops until it gets a signal.
-# Can optionally set its pgroup.
+# Can optionally set its pgroup.  Wait till child has actually execed or
+# kill breaks on some systems (i.e. AIX).
 
 proc ForkLoopingChild {{setPGroup 0}} {
-    unlink -nocomplain {PGROUP.SET}
+    close [open CHILD.RUN w]
     flush stdout
     flush stderr
     set newPid [fork]
     if {$newPid != 0} {
-
-        # Wait till the child has set the pgroup.
-        if $setPGroup {
-            while {![file exists PGROUP.SET]} {
-                sleep 1
-            }
-        unlink PGROUP.SET
+        # Wait till the child is actually running.
+        while {[file exists CHILD.RUN]} {
+            sleep 1
         }
         return $newPid
     }
     if $setPGroup {
         id process group set
-        close [open PGROUP.SET w]
     }
-    execl ../tclmaster/bin/tcl {-qc {catch {while {1} {sleep 1}}; exit 10}}
+    execl ../tclmaster/bin/tcl \
+        {-qc {unlink CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}}
     error "Should never make it here"
 }
 
