@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.10 1995/03/29 08:23:58 markd Exp markd $
+.\" $Id: TclX.n,v 4.11 1995/03/29 17:29:19 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1535,7 +1535,7 @@ servers.  The socket file handles maybe be read or written using either
 the \fBgets\fR, \fBread\fR, and \fBputs\fR commands or the \fBserver_send\fR
 \fBserver_receive\fR commands.
 .TP
-.B server_open ?\fIoption\fR? \fIhost service\fR
+.B server_connect ?\fIoption\fR? \fIhost service\fR
 .br
 Open a TCP/IP connection to a server of \fIhost\fR on the port specified by
 \fIservice\fR.  The server is then accessed using the standard Tcl
@@ -1551,16 +1551,12 @@ use the \fBserver_info\fR command to obtain the list of valid address.
 The options are:
 .br
 .IP
-o\ \fB-buf\fR - Specifies that the file is buffered. In this case, a pair of
-Tcl file ids are returned in a list.  The first id is open for read access,
-the second for write.  When writing to the file,
+o\ \fB-buf\fR - Specifies that the file is buffered.  When writing to the file,
 the \fBflush\fR command must be used to force data in the buffer to
-be sent to the server.  The \fBclose\fR command must be called against both
-file ids when you are done using the socket.  Buffered access will result in 
+be sent to the server.  Buffered access will result in 
 significantly better performance when reading data, and will also improve
 the performance of a series of writes done without intervening reads.
-The \fBfcntl\fR command may be used to make one of these files unbuffered,
-or line buffered.  The buffering is only used when accessing the file via
+The buffering is only used when accessing the file via
 the \fBgets\fR, \fBread\fR, and \fBputs\fR commands. The \fBserver_send\fR
 \fBserver_receive\fR commands do not use the file bufferes.  Mixing these
 two classes of commands on a buffered file may lead to indeterminate
@@ -1568,6 +1564,14 @@ results.
 .IP
 o\ \fB-nobuf\fR - The file is unbuffered. A single file id,
 open for both reading and writing, is returned.
+.IP
+o\ \fB-twoids\fR - Return a pair of file ids in a list.  The first id is
+open for read access, the second for write access.  The \fBclose\fR command
+must be called against both file ids when you are done using the socket and
+they maybe closed independently.  This option is primarily intended to
+implement compatibility procedures for deprecated commands, however it maybe
+useful for code that needs to independently manage the read and write ends 
+of the socket.
 .IP
 o\ \fB-myip\fR \fIipNumber\fR - Define the IP
 number for your side of the connection.  This is useful for multi-homed 
@@ -1633,8 +1637,9 @@ default is 5.
 .br
 Accept a TCP/IP connection to the server socket associated with
 \fIfileid\fR.
-Option can be either \fB-buf\fR or \fB-nobuf\fR.  See the \fBserver_open\fR
-command for a description of these options.
+Options are \fB-buf\fR, \fB-nobuf\fR and \fB-twoids\fR.
+See the \fBserver_connect\fR command for a description of these options.
+A file handle (or a pair of file handles when \fB-twoids\fR) is return.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1677,8 +1682,8 @@ Options are:
 o\ \fB-nonewline\fR - Don't append a newline character to the end of the
 message.  The default is to append a newline character.
 .IP
-o\ \fB-noroute\fR - Requests that routing be bypassed and the direct interface
-used (usually used only by diagnostic or routing programs)
+o\ \fB-dontroute\fR - Requests that routing be bypassed and the direct
+interface used (usually used only by diagnostic or routing programs)
 .IP
 o\ \fB-outofband\fR - Send out-of-band data on the socket.
 '\"@:
