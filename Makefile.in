@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.10 2005/03/19 01:16:05 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.11 2005/03/24 05:11:15 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -268,8 +268,8 @@ $(PKG_LIB_FILE): $(PKG_OBJECTS)
 	$(RANLIB) $(PKG_LIB_FILE)
 
 pkgIndex.tcl:
-	(echo 'package ifneeded $(PACKAGE_NAME) $(PACKAGE_VERSION) \
-	    [list load [file join $$dir $(PKG_LIB_FILE)]]'\
+	(echo 'package ifneeded Tclx $(PACKAGE_VERSION) \
+		[list load [file join $$dir $(PKG_LIB_FILE)] Tclx]'\
 	) > pkgIndex.tcl
 
 #========================================================================
