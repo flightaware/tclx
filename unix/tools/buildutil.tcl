@@ -12,9 +12,28 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 7.0 1996/06/16 05:34:31 markd Exp $
+# $Id: buildutil.tcl,v 7.1 1996/10/04 15:30:34 markd Exp $
 #------------------------------------------------------------------------------
 #
+
+#------------------------------------------------------------------------------
+# MakeAbs -- 
+#   Base a file name absolute.
+#------------------------------------------------------------------------------
+proc MakeAbs fname {
+    switch [file pathtype $fname] {
+        absolute {
+            return $fname
+        }
+        relative {
+            return [file join [pwd] $fname]
+        }
+        volumerelative {
+            return [eval file join [linsert [file split $fname] 1 [pwd]]]
+        }
+    }
+}
+
 
 #------------------------------------------------------------------------------
 # CopyFile -- 
@@ -26,8 +45,10 @@
 #------------------------------------------------------------------------------
 
 proc CopyFile {sourceFile target} {
+    global tcl_platform
+
     if {[file isdirectory $target]} {
-        set targetFile "$target/[file tail $sourceFile]"
+        set targetFile [file join $target [file tail $sourceFile]]
     } else {
         set targetFile $target
     }
@@ -41,11 +62,14 @@ proc CopyFile {sourceFile target} {
 
     # Fixup the mode.
 
-    file stat $sourceFile sourceStat
-    if {$sourceStat(mode) & 0100} {
-        chmod a+rx $targetFile
-    } else {
-        chmod a+r  $targetFile
+    # FIX: chmod not ported to windows yet.
+    if ![cequal $tcl_platform(platform) windows] {
+        file stat $sourceFile sourceStat
+        if {$sourceStat(mode) & 0100} {
+            chmod a+rx $targetFile
+        } else {
+            chmod a+r  $targetFile
+        }
     }
 }
 
@@ -58,16 +82,16 @@ proc CopyFile {sourceFile target} {
 
 proc CopySubDir {sourceDir destDir} {
     foreach sourceFile [readdir $sourceDir] {
-        if [file isdirectory $sourceDir/$sourceFile] {
-          if [cequal [file tail $sourceFile ] "CVS"] {
-                  continue
-          }
-            set destFile $destDir/$sourceFile
-            if {![file exists $destFile]} {
-                mkdir $destFile}
-            CopySubDir $sourceDir/$sourceFile $destFile
+        set sourcePath [file join $sourceDir $sourceFile]
+        if [file isdirectory $sourcePath] {
+            if [cequal [file tail $sourceFile] "CVS"] {
+                continue
+            }
+            set destFile [file join $destDir $sourceFile]
+            file mkdir $destFile
+            CopySubDir $sourcePath $destFile
         } else {
-            CopyFile $sourceDir/$sourceFile $destDir
+            CopyFile $sourcePath $destDir
         }
     }
 }
@@ -92,18 +116,10 @@ proc CopyDir {sourceDir destDir} {
     
     # Dirs must be absolutes paths, as we are going to change directories.
 
-    set sourceDir [glob $sourceDir]
-    if {[cindex $sourceDir 0] != "/"} {
-        set sourceDir "$cwd/$sourceDir"
-    }
-    set destDir [glob $destDir]
-    if {[cindex $destDir 0] != "/"} {
-        set destDir "$cwd/$destDir"
-    }
+    set sourceDir [MakeAbs [glob $sourceDir]]
+    set destDir [MakeAbs [glob $destDir]]
 
-    if {![file exists $destDir]} {
-        mkdir $destDir
-    }
+    file mkdir $destDir
     if ![file isdirectory $destDir] {
         error "\"$destDir\" isn't a directory"
     }

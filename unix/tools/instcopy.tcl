@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 7.0 1996/06/16 05:34:39 markd Exp $
+# $Id: instcopy.tcl,v 7.1 1996/10/04 15:30:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
@@ -61,9 +61,7 @@ proc DoACopy {file target mode} {
     } else {
         set targetDir $target
     }
-    if ![file exists $targetDir] {
-        mkdir -path  $targetDir
-    }
+    file mkdir $targetDir
 
     if [file isdirectory $file] {
         CopyDir $file $target
@@ -95,8 +93,11 @@ switch -exact -- [lindex $argv 0] {
     }
 }
 
-set files [lrange $argv 0 [expr $argc-2]]
-set targetDir [lindex $argv [expr $argc-1]]
+set files {}
+foreach file [lrange $argv 0 [expr $argc-2]] {
+    lappend files [eval file join [file split $file]]
+}
+set targetDir [eval file join [file split [lindex $argv [expr $argc-1]]]]
 
 if {[file exists $targetDir] && ![file isdirectory $targetDir] &&
     ($mode != "FILENAME")} {
