@@ -306,6 +306,10 @@ Test string-7.3 {ctoken tests} {
           "a"     "   test   " \
           "test"  "   " \
           ""      ""]
+Test string-7.2 {ctoken tests} {
+    ctoken "No such variable" " \t"
+} 1 {can't read "No such variable": no such variable}
+
 
 Test string-9.1 {cequal tests} {
     cequal
