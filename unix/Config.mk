@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.10 1995/06/26 06:21:08 markd Exp markd $
+# $Id: Config.mk,v 4.11 1995/06/30 23:53:39 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -75,6 +75,7 @@ TK_UCB_SRC=${srcbasedir}/../tk4.0
 #
 
 #YACC=yacc
+#YACC=bison -b y
 #RANLIB=ranlib
 
 AR=ar
