@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.20 1997/11/11 05:33:13 markd Exp $
+ * $Id: tclExtdInt.h,v 8.21 1997/12/14 18:25:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -90,7 +90,7 @@
  */
 
 typedef struct {
-    regexp *progPtr;
+    Tcl_RegExp *progPtr;
     char   *boyerMoorePtr;
     int     noCase;
     int     numSubExprs;
