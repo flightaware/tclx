@@ -119,7 +119,7 @@
 ./tcllib/help/files/flock
 ./tcllib/help/files/flush
 ./tcllib/help/files/for_file
-./tcllib/help/files/for_recursive_
+./tcllib/help/files/for_recursive_glob
 ./tcllib/help/files/fstat
 ./tcllib/help/files/funlock
 ./tcllib/help/files/gets
@@ -168,7 +168,7 @@
 ./tcllib/help/keyedlists/keylset
 ./tcllib/help/libraries/autoload
 ./tcllib/help/libraries/autoprocs
-./tcllib/help/libraries/buildpackagein
+./tcllib/help/libraries/buildpackageindex
 ./tcllib/help/libraries/convert_lib
 ./tcllib/help/libraries/demand_load
 ./tcllib/help/libraries/load
