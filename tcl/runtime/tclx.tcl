@@ -1,20 +1,20 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 2.7 1993/07/12 05:26:12 markd Exp markd $
+# $Id: TclInit.tcl,v 2.8 1993/08/31 23:03:20 markd Exp markd $
 #-----------------------------------------------------------------------------
 
 #
 # Unknown command trap handler.
 #
-proc unknown {name args} {
-    if [auto_load $name] {
-        return [uplevel 1 $name $args]
+proc unknown args {
+    if [auto_load [lindex $args 0]] {
+        return [uplevel 1 $args]
     }
     if {([info proc tclx_unknown2] == "") && ![auto_load tclx_unknown2]} {
         error "can't find tclx_unknown2 on auto_path"
     }
-    return [tclx_unknown2 [concat $name $args]]
+    return [tclx_unknown2 $args]
 }
 
 set auto_index(buildpackageindex) {source [info library]/buildidx.tcl}
