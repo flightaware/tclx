@@ -5,7 +5,7 @@
  * Tcl command set and libraries.  This makes it easier to use a different
  * main.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 3.3 1993/12/03 10:25:23 markd Exp markd $
+ * $Id: tkXshell.c,v 3.4 1994/04/12 01:50:24 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,7 +26,7 @@
  *	can be used as the basis for main programs for other Tk
  *	applications.
  *
- * Copyright (c) 1990-1993 The Regents of the University of California.
+ * Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  *
  * Permission is hereby granted, without written agreement and without

@@ -3,7 +3,7 @@
 #
 #  Build or process a directory list recursively.
 #------------------------------------------------------------------------------
-# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.tcl,v 2.3 1993/09/25 16:06:44 markd Exp markd $
+# $Id: globrecur.tcl,v 3.0 1993/11/19 07:00:29 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 

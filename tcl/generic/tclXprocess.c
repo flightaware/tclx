@@ -3,7 +3,7 @@
  *
  * Tcl command to create and manage processes.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 3.1 1994/03/02 07:26:19 markd Exp markd $
+ * $Id: tclXprocess.c,v 3.2 1994/03/18 15:42:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

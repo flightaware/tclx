@@ -3,7 +3,7 @@
 #
 # Functions to read and write strings from a file that has not been opened.
 #------------------------------------------------------------------------------
-# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfile.tcl,v 2.2 1993/04/07 02:42:32 markd Exp markd $
+# $Id: stringfile.tcl,v 3.0 1993/11/19 07:00:41 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 

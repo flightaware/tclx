@@ -4,7 +4,7 @@
 # Perform set functions on lists.  Also has a procedure for removing duplicate
 # list entries.
 #------------------------------------------------------------------------------
-# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 3.0 1993/11/19 07:00:26 markd Rel markd $
+# $Id: setfuncs.tcl,v 3.1 1994/05/06 04:53:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

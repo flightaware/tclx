@@ -3,7 +3,7 @@
  *
  * Extended Tcl initialzation and initialization utilitied.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 3.0 1993/11/19 06:59:35 markd Rel markd $
+ * $Id: tclXinit.c,v 3.1 1993/12/03 10:25:23 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

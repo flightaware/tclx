@@ -6,7 +6,7 @@
  *      the UCB Tk file tkAppInit.c
  *
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 3.1 1993/11/21 01:19:20 markd Exp markd $
+ * $Id: tkXAppInit.c,v 3.2 1993/12/15 09:28:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 3.1 1993/11/21 01:19:20 markd Exp markd $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 3.2 1993/12/15 09:28:07 markd Exp markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"

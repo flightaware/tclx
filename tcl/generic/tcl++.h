@@ -11,7 +11,7 @@
  * to the constructor and is referenced by the object, but not owned by it.
  * When the object is deleted, the interpreter will not be deleted.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -22,7 +22,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 3.1 1993/11/25 23:14:07 markd Exp markd $
+ * $Id: tcl++.h,v 3.2 1994/01/23 03:37:29 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

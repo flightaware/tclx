@@ -3,7 +3,7 @@
  *
  * Extended Tcl pipe, copyfile and lgets commands.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 3.0 1993/11/19 06:58:38 markd Rel markd $
+ * $Id: tclXfilecmds.c,v 3.1 1994/01/23 17:00:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -20,7 +20,7 @@
  * Note: List parsing code stolen from Tcl distribution file tclUtil.c,
  * procedure TclFindElement.
  *-----------------------------------------------------------------------------
- * Copyright (c) 1987-1993 The Regents of the University of California.
+ * Copyright (c) 1987-1994 The Regents of the University of California.
  * All rights reserved.
  *
  * Permission is hereby granted, without written agreement and without

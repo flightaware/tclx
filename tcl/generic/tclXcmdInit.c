@@ -5,7 +5,7 @@
  * library commands are not added here, to make it easier to build applications
  * that don't use the extended libraries.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 3.0 1993/11/19 06:59:45 markd Rel markd $
+ * $Id: tclXcmdInit.c,v 3.1 1994/01/23 17:00:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

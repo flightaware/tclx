@@ -6,7 +6,7 @@
 # files.  
 # 
 #------------------------------------------------------------------------------
-# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.14 1993/11/19 06:15:32 markd Exp markd $
+# $Id: buildhelp.tcl,v 3.0 1993/11/19 07:00:46 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:

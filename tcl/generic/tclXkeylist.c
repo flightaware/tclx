@@ -3,7 +3,7 @@
  *
  *  Extended Tcl keyed list commands and interfaces.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 3.1 1994/01/05 06:16:05 markd Exp markd $
+ * $Id: tclXkeylist.c,v 3.2 1994/02/16 06:53:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

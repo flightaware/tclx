@@ -3,7 +3,7 @@
  *
  * Tcl command execution trace command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 2.6 1993/08/05 06:41:55 markd Exp markd $
+ * $Id: tclXdebug.c,v 3.0 1993/11/19 06:58:32 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 

@@ -3,7 +3,7 @@
  *
  * Tcl commands to access unix library calls.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 3.4 1994/02/03 06:06:29 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 3.5 1994/03/18 15:42:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

@@ -3,7 +3,7 @@
  *
  * Contains yacc grammer for parsing date and time strings based on getdate.y.
  *-----------------------------------------------------------------------------
- * Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.15 1993/11/11 03:57:52 markd Exp markd $
+ * $Id: tclXgetdate.y,v 3.0 1993/11/19 06:59:42 markd Rel markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 2.15 $
+ * $Revision: 3.0 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by

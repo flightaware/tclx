@@ -3,7 +3,7 @@
  *
  * Extended Tcl dup command.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 2.8 1993/09/08 14:18:12 markd Exp markd $
+ * $Id: tclXdup.c,v 3.0 1993/11/19 06:58:34 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 

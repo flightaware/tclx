@@ -4,7 +4,7 @@
  * Initialization code for the wishx and other Tk & Extended Tcl based
  * applications.
  *-----------------------------------------------------------------------------
- * Copyright 1991-1993 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1994 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 3.2 1994/04/12 01:50:24 markd Exp markd $
+ * $Id: tkXinit.c,v 3.3 1994/05/17 05:39:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
