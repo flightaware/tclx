@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.18 1997/08/30 22:29:57 markd Exp $
+ * $Id: tclXlib.c,v 8.19 1997/11/11 05:33:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,7 +38,21 @@
 static char *AUTO_INDEX     = "auto_index";
 static char *AUTO_PKG_INDEX = "auto_pkg_index";
 static char *TCLX_LIBRARY   = "tclx_library";
-static char *AUTO_LOAD_FILE = "autoload.tcl";
+
+/*
+ * Command to pass to Tcl_GlobalEval to load the file autoload.tcl.
+ * This is a global rather than a local so it will work with K&R compilers.
+ * Its writable so it works with gcc.
+ */
+#ifdef HAVE_TCL_STANDALONE
+static char autoloadCmd [] =
+"if [catch {source -rsrc autoload}] {\n\
+    source [file join $tclx_library autoload.tcl]\n\
+}";
+#else
+static char autoloadCmd [] =
+    "source [file join $tclx_library autoload.tcl]";
+#endif
 
 /*
  * Indicates the type of library index.
@@ -958,25 +972,9 @@ int
 TclX_LibraryInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_Obj *libDirObj;
-    Tcl_DString autoLoadSrc;
     int result;
 
-    /*
-     * Get path to autoload.tcl file that contains modified version of 
-     * the Tcl autoload proc and eval the file.
-     */
-    libDirObj = TclX_ObjGetVar2S (interp, TCLX_LIBRARY, NULL, 
-                                  TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
-    if (libDirObj == NULL) {
-        return TCL_ERROR;
-    }
-    Tcl_DStringInit (&autoLoadSrc);
-    TclX_JoinPath (Tcl_GetStringFromObj (libDirObj, NULL),
-                   AUTO_LOAD_FILE, &autoLoadSrc);
-    result = TclX_Eval (interp, TCLX_EVAL_GLOBAL|TCLX_EVAL_FILE,
-                        autoLoadSrc.string);
-    Tcl_DStringFree (&autoLoadSrc);
+    result = TclX_Eval (interp, TCLX_EVAL_GLOBAL, autoloadCmd);
     if (result == TCL_ERROR) {
         return TCL_ERROR;
     }
