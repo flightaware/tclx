@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 2.6 1993/07/20 08:35:45 markd Exp markd $
+ * $Id: tclXgetdate.y,v 2.7 1993/08/05 06:41:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -821,7 +821,7 @@ int
 Tcl_GetDate(p, now, zone, timePtr)
     char          *p;
     time_t         now;
-    int            zone;
+    long           zone;
     time_t        *timePtr;
 {
     struct tm           *tm;
