@@ -306,6 +306,7 @@
 ./tests/string.test
 ./tests/stringfil.test
 ./tests/sync.test
+./tests/tclXtest.c
 ./tests/tcllib.test
 ./tests/testlib.tcl
 ./tests/unixcmds.test
@@ -369,6 +370,7 @@
 ./tktclsrc/tkdemo.tcl
 ./tktests/Makefile.in
 ./tktests/signal.test
+./tktests/tkXtest.c
 ./tools/Makefile.in
 ./tools/bldmanhelp.tcl
 ./tools/buildutil.tcl
