@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.9 1998/01/28 17:34:08 markd Exp $
+ * $Id: tclXfilescan.c,v 8.10 1998/01/28 18:41:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -528,6 +528,7 @@ SetMatchInfoVar (interp, scanData)
 {
     static char *MATCHINFO = "matchInfo";
     int idx, start, end;
+    char *startStr, *endStr;
     char key [32];
     Tcl_Obj *valueObjPtr, *indexObjv [2];
 
@@ -593,8 +594,8 @@ SetMatchInfoVar (interp, scanData)
         return TCL_OK;
 
     for (idx = 0; idx < scanData->matchPtr->regExp->re.re_nsub; idx++) {
-        start = scanData->matchPtr->regExp->matches[idx].startp - scanData->line;
-        end = scanData->matchPtr->regExp->matches[idx].endp - scanData->line;
+        start = scanData->matchPtr->regExp->matches[idx].rm_so;
+        end = scanData->matchPtr->regExp->matches[idx].rm_eo;
 
         sprintf (key, "subindex%d", idx);
         indexObjv [0] = Tcl_NewIntObj (start);
@@ -607,8 +608,10 @@ SetMatchInfoVar (interp, scanData)
         }
 
         sprintf (key, "submatch%d", idx);
-        valueObjPtr = Tcl_NewStringObj (scanData->line + start,
-                                        (end - start) + 1);
+        startStr = Tcl_UtfAtIndex(scanData->line, start);
+        endStr = Tcl_UtfAtIndex(scanData->line, end);
+
+        valueObjPtr = Tcl_NewStringObj(startStr, (endStr - startStr) + 1);
         if (Tcl_SetObjVar2 (interp, "matchInfo", key, valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
