@@ -328,18 +328,23 @@ SVR3 systems (14 character file name limit):
      with truncated names by doing a "make buildhelp".
 
 DEC Ultrix:
+
    o Setting O_APPEND via the fcntl FSETFL system call returns an EOPNOTSUPP
      (Operation not supported) error.  This causes failures of fcntl tests
      2.4 and 2.5. This is an Ultrix bug as far as we can tell.
+
    o The fstat system call does does not return updated modification times on
      an open file.  This causes fstat test 3.1 to fail. This is an Ultrix bug.
+
    o Several tests fail when Tcl is run on an NFS mounted file system.
+
    o Problems with flock tests have been reported on some Ultrix systems.  See
      `General Porting Notes' section above.
 
 DEC Alpha:
    o message-cat-1.3 test fails due to broken catopen.  This is should not
      affect actual use of this command.
+
    o On OSF/1 V2.0 Rev 240 it has been noted that strtod segmentation faults
      when the first character of a string has the high order bit set. This
      breaks string expressions and eight bit characters.
@@ -357,6 +362,7 @@ SOLARIS:
      ucbcc, remember to set CC=ucbcc environment variable, make clean, and
      reconfigure before going a "make CC=ucbcc". Using gcc is another
      solution.
+
    o message-cat-1.3 test fails due to broken catopen.  This is should not
      affect actual use of this command.
 
@@ -366,7 +372,6 @@ SCO:
      an error if used on COFF files.  Many developers rename the command
      to "xranlib" if they are not doing cross development.  Later versions
      of the command return a warning if used on COFF binaries.
-
 
 SGI:
    o There appears to be a compiler bug with some SGI compilers.
@@ -384,6 +389,9 @@ SGI:
      attempt to use them.  This will prevent wishx from connecting to the
      display.   Either remove the files from the system or edit tksrc/Makefile
      to remove the use of "-lsocket -lnsl".
+
+   o The fstat system call does does not return updated modification times on
+     an open file.  This causes fstat test 3.1 to fail. This is an IRIX bug.
   
 BSDI:
    o The BSDI 1.0  make is broken.  It does not correctly handle the setting of
@@ -401,12 +409,17 @@ BSDI:
 
 386BSD/NetBSD:
    o Expect round off errors in floating point math tests.
+
    o Expect errors in floating point math error handling tests.
+
    o Expect errors in format command tests.
+
    o The installation of the manual pages fails because make can't handle
      passing a empty string as an argument to a program (it deletes the
      string).  Try GNU make.
+
    o Also seee the 386BSD/BSDI section below.
+
    o NetBSD 1.0 declares catclose as returning void rather than int. This is
      checked for in configure but still causes the message-cat-2.4 test
      to fail.
