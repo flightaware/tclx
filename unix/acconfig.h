@@ -217,3 +217,5 @@
 /* Define if stdio FILE has the _IO_read_ptr/_IO_read_end fields */
 #undef HAVE_STDIO_IO_READ_PTR
 
+/* Define if have th function BSDgettimeofday (SGI) */
+#undef HAVE_BSDGETTIMEOFDAY

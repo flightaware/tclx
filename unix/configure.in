@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.23 1995/04/25 03:46:17 markd Exp markd $
+dnl $Id: configure.in,v 4.24 1995/05/01 05:35:02 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.23 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.24 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -327,11 +327,14 @@ AC_SUBST(bldbasedir)
 #------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------
-#       Supply substitutes for missing POSIX library procedures, or
-#       set flags so Tcl uses alternate procedures.
+#	SGI systems don't use the BSD form of the gettimeofday function,
+#	but they have a BSDgettimeofday function that can be used instead.
+#	Other systems have not gettimeofday at all.  Figure out which
+#	of these cases applies.
 #--------------------------------------------------------------------
 
-AC_FUNC_CHECK(gettimeofday, , AC_DEFINE(NO_GETTOD))
+AC_CHECK_FUNC(BSDgettimeofday, AC_DEFINE(HAVE_BSDGETTIMEOFDAY),
+	AC_CHECK_FUNC(gettimeofday, , AC_DEFINE(NO_GETTOD)))
 
 #--------------------------------------------------------------------
 #	On a few very rare systems, all of the libm.a stuff is
