@@ -15,7 +15,7 @@ message to majordomo@grizzly.com with the body of the message containing:
 
 To send mail to the list, user tclx-win@grizzly.com.
 
-The alpha release is available in:
+The beta release is available in:
         ftp://ftp.neosoft.com/pub/tcl/tclx-distrib/tclX7.6.0b1.tar.gz
 
 To build the release:

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.12 1996/09/09 22:13:44 markd Exp $
+ * $Id: tclXunixOS.c,v 7.13 1996/09/09 22:52:45 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1668,7 +1668,7 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
                           (readMode & 1) ? "on" : "off",
                           " and write file has it ",
                           (writeMode & 1) ? "on" : "off",
-                          "; don't know how to get attribute for a channel "
+                          "; don't know how to get attribute for a channel ",
                           "configure this way", (char *) NULL);
         return TCL_ERROR;
     }

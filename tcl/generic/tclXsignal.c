@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 7.2 1996/07/22 17:10:11 markd Exp $
+ * $Id: tclXsignal.c,v 7.3 1996/07/30 02:29:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1519,7 +1519,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
  *  Standard TCL results, may return the UNIX system error message.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 Tcl_KillCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.9 1996/09/09 22:52:18 markd Exp $
+# $Id: Makefile.in,v 7.10 1996/09/09 23:00:42 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -299,12 +299,9 @@ dltest.tmp: dltest
 	touch dltest.tmp
 
 dltest:
-	if [ "@HAVE_SYML@" = "YES" ]; then \
-            if [ -e ${TCL_BUILD}/unix/dltest ]; then \
-	        ln -sf `cd ${TCL_BUILD}/unix/dltest; pwd` dltest ;\
-	    else \
-	        touch dltest ;\
-	    fi \
+	if [ "@HAVE_SYML@" = "YES" -a -r ${TCL_BUILD}/unix/dltest ]; then \
+	    rm -rf dltest ;\
+	    ln -s `cd ${TCL_BUILD}/unix/dltest; pwd` dltest ;\
 	else \
 	    touch dltest ;\
 	fi

@@ -701,12 +701,12 @@ LIBS=$TCL_LIBS   # Need for tests.
 
 #
 # Make TCL_LD_SEARCH_FLAGS a full value.  It is normally contains a value
-# with the path LIB_INSTALL_DIR.  Expand this to be the value of the 
+# with the path LIB_RUNTIME_DIR.  Expand this to be the value of the 
 # TCL_EXEC_PREFIX.  Also, save the original search flags, we will need them
 # later.
 #
 ORIG_TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
-LIB_INSTALL_DIR=$TCL_EXEC_PREFIX
+LIB_RUNTIME_DIR=$TCL_EXEC_PREFIX
 TCL_LD_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS`
 
 
@@ -861,7 +861,7 @@ esac
 #-----------------------------------------------------------------------------
 
 if test "X$ORIG_TCL_LD_SEARCH_FLAGS" != "X"; then
-    LIB_INSTALL_DIR=$TCLX_INST_LIB
+    LIB_RUNTIME_DIR=$TCLX_INST_LIB
     TCLX_LD_SEARCH_FLAGS=`eval echo $ORIG_TCL_LD_SEARCH_FLAGS` 
 fi
 
