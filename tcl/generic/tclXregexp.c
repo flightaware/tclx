@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 2.3 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXregexp.c,v 2.4 1993/07/18 05:59:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -219,7 +219,8 @@ BoyerMooreExecute (text, textlen, compPtr, patLenP)
         register unsigned char *p, *t;
         struct compiled_search_struct *csp = 
         	(struct compiled_search_struct*) compPtr;
-        register unsigned i, p1, j, *delta = csp->deltaspace;
+        register unsigned i, j, *delta = csp->deltaspace;
+        int p1;
         char *pat;
         unsigned patlen;
 
