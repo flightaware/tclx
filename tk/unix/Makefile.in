@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.38 2000/04/04 00:41:53 wart Exp $
+# $Id: Makefile.in,v 8.39 2000/07/13 00:23:05 welch Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -200,6 +200,7 @@ test.static: all
 # Build help for Tk.  These files are normally part of the distribution and
 # not rebuilt by users.
 #
+BUILDHELP=@BUILDHELP@
 buildhelp:
 	rm -rf ${HELP_DIR} help help.tmp
 	mkdir ${HELP_DIR}
@@ -216,7 +217,7 @@ install-libraries:  install-runtime install-misc
 
 install-doc:
 
-install-misc: buildhelp
+install-misc: ${BUILDHELP}
 	${INSTCOPY} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c \
 	    ${INSTALL_ROOT}${TKX_INST_RUNTIME}
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help

@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.29 2000/02/05 17:24:27 markd Exp $
+dnl $Id: configure.in,v 8.30 2000/04/04 00:41:53 wart Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.29 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.30 $),)dnl
 
 #------------------------------------------------------------------------------
 # Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
@@ -741,6 +741,20 @@ AC_HEADER_EGREP("floor", math.h, [found_floor=YES])
 if test "$found_floor" = "NO"; then
     AC_DEFINE(NO_FLOOR_PROTO)
 fi
+
+#------------------------------------------------------------------------------
+# Determine if we have enough tools to generate the help files.
+#------------------------------------------------------------------------------
+
+AC_PATH_PROGS(NROFF, nroff, :, ${PATH})
+
+if test "x${NROFF}" = "x:" ; then
+    AC_MSG_WARN(No nroff executable found.  Cannot build help files.) ;
+    BUILDHELP=
+else
+    BUILDHELP=buildhelp
+fi
+AC_SUBST(BUILDHELP)
 
 #------------------------------------------------------------------------------
 # Generate the make files.

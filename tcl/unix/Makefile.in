@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.33 2000/06/06 19:12:10 wart Exp $
+# $Id: Makefile.in,v 8.34 2000/07/13 00:23:02 welch Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -308,6 +308,7 @@ testx.verbose: all
 # Build help for Tcl & TclX.  These files are normally part of the
 # distribution and not rebuilt by users.
 #
+BUILDHELP=@BUILDHELP@
 buildhelp: tcl tcl.tndx
 	rm -rf ${HELP_DIR} help help.tmp
 	mkdir ${HELP_DIR}
@@ -325,7 +326,7 @@ install-libraries: install-runtime install-misc
 
 install-doc: 
 
-install-misc: buildhelp
+install-misc: ${BUILDHELP}
 	${INSTCOPY} ${TCLX_GENERIC_DIR}/tclExtend.h \
 	    ${INSTALL_ROOT}${TCLX_INST_INCL}
 	${INSTCOPY} ${TCLX_UNIX_SRC_DIR}/tclXAppInit.c \
