@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
+# $Id: dup.test,v 2.4 1993/09/23 04:53:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -72,7 +72,7 @@ if {[set childPid [fork]] == 0} {
     dup $outFH stdout
     close $outFH
         
-    execl ../tclmaster/bin/tcl [list -qc {commandloop {return ""} {return ""}}]
+    execl $TCL_PROGRAM [list -qc {commandloop {return ""} {return ""}}]
     puts stderr "execl failed"
     exit 1
 }
