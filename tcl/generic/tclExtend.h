@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.6 1997/08/17 04:08:20 markd Exp $
+ * $Id: tclExtend.h,v 8.7 1997/08/30 22:29:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,12 +42,12 @@
 #define TCLX_PATCHLEVEL      0
 
 #define TCLX_VERSION        "8.0.0"
-#define TCLX_FULL_VERSION   "8.0.0b3"
+#define TCLX_FULL_VERSION   "8.0.0"
 
 #define TKX_VERSION         "8.0.0"
-#define TKX_FULL_VERSION    "8.0.0b3"
+#define TKX_FULL_VERSION    "8.0.0"
 
-#define TCLX_DEBUG
+#undef TCLX_DEBUG
 
 /*
  * Generic void pointer.
