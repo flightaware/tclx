@@ -1,5 +1,4 @@
 ./CHANGES
-./INSTALL
 ./MANIFEST
 ./README
 ./doc/CmdWrite.3
@@ -228,7 +227,6 @@
 ./tcl/help/tcl/variables/trace
 ./tcl/help/tcl/variables/unset
 ./tcl/help/tcl/variables/upvar
-./tcl/runtime/tclx.tcl
 ./tcl/runtime/arrayprocs.tcl
 ./tcl/runtime/buildhelp.tcl
 ./tcl/runtime/buildidx.tcl
@@ -246,6 +244,7 @@
 ./tcl/runtime/showproc.tcl
 ./tcl/runtime/stringfile.tcl
 ./tcl/runtime/tcllib.tcl
+./tcl/runtime/tclx.tcl
 ./tcl/tests/all
 ./tcl/tests/arrayproc.test
 ./tcl/tests/bsearch.test
@@ -355,6 +354,7 @@
 ./tk/unix/tkxConfig.sh.in
 ./unix/Common.mk.in
 ./unix/Config.mk
+./unix/INSTALL
 ./unix/Makefile.in
 ./unix/configure
 ./unix/configure.in
