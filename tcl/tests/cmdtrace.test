@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 8.5 1997/08/17 05:31:54 markd Exp $
+# $Id: cmdtrace.test,v 8.6 1997/08/23 18:55:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -83,13 +83,6 @@ Test cmdtrace-1.1 {command trace: evaluated, truncated} {
 cmdtrace off
 }
 
-# FIX: Looks like something is still broken with noeval tracing here
-# Should have a :
-#         set foo \[replicate \"-TheString-\" 10\]
-# instead of duplicated replicate.
-# Same with test 1.4
-
-
 Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
     set cmdtraceFH [open CMDTRACE.OUT w+]
     cmdtrace on $cmdtraceFH noeval
@@ -102,7 +95,7 @@ Test cmdtrace-1.2 {command trace: not evaluated, truncated} {
       DoStuff1
         DoStuff
           replicate \"-TheString-\" 10
-          replicate \"-TheString-\" 10
+          set foo \[replicate \"-TheString-\" 10\]
           set baz \$foo
           set wap 1
           if {\$wap} {\\n        set wap 0\\n    } else \{\\n        set wap 1...
@@ -142,7 +135,7 @@ Test cmdtrace-1.4 {command trace: not evaluated, not truncated} {
       DoStuff1
         DoStuff
           replicate "-TheString-" 10
-          replicate "-TheString-" 10
+          set foo [replicate "-TheString-" 10]
           set baz $foo
           set wap 1
           if {$wap} {\n        set wap 0\n    } else {\n        set wap 1\n    }
@@ -198,7 +191,7 @@ Test cmdtrace-3.1 {command trace argument error checking} {
 {CD DoStuff1 DoStuff1 {}} \
 {CD DoStuff DoStuff {}} \
 {CD {{replicate "-TheString-" 10}} {{replicate -TheString- 10}} {}} \
-{CD {{replicate "-TheString-" 10}} {{set foo -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
+{CD {{set foo [replicate "-TheString-" 10]}} {{set foo -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
 {CD {{set baz $foo}} {{set baz -TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString--TheString-}} {}} \
 {CD {{set wap 1}} {{set wap 1}} {}} \
 {CD {{if {$wap} {
