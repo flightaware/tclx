@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.6 1995/01/23 04:32:49 markd Exp markd $
+# $Id: Config.mk,v 4.7 1995/03/23 07:40:06 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -48,8 +48,8 @@
 # The directory containing the UCB Tcl library (libtcl.a) and the UCB Tcl 
 # source distribution directory.  They default to the same directory.
 
-TCL_UCB_LIB=${bldbasedir}/../tcl7.4b2
-TCL_UCB_SRC=${srcbasedir}/../tcl7.4b2
+TCL_UCB_LIB=${bldbasedir}/../tcl7.4b3
+TCL_UCB_SRC=${srcbasedir}/../tcl7.4b3
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -58,8 +58,8 @@ TCL_UCB_SRC=${srcbasedir}/../tcl7.4b2
 # distribution directory.
 
 TK_BUILD=WISHX
-TK_UCB_LIB=${bldbasedir}/../tk4.0b2
-TK_UCB_SRC=${srcbasedir}/../tk4.0b2
+TK_UCB_LIB=${bldbasedir}/../tk4.0b3
+TK_UCB_SRC=${srcbasedir}/../tk4.0b3
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,
