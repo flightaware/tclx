@@ -1,7 +1,7 @@
 /*
  * tkXshell.c
  *
- * Version of Tk main modified for TclX to support SIGINT and use some of
+ * Version of tkMain.c modified for TclX to support SIGINT and use some of
  * the TclX utility procedures.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1999 Karl Lehenbauer and Mark Diekhans.
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.10 1999/06/26 03:15:18 markd Exp $
+ * $Id: tkXshell.c,v 8.11 1999/12/03 03:00:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -26,16 +26,50 @@
  *	for Tk applications.
  *
  * Copyright (c) 1990-1994 The Regents of the University of California.
- * Copyright (c) 1994-1995 Sun Microsystems, Inc.
+ * Copyright (c) 1994-1997 Sun Microsystems, Inc.
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * SCCS: @(#) tkMain.c 1.145 96/03/08 17:13:44
+ * RCS: @(#) $Id: tkMain.c,v 1.5 1999/04/28 18:18:06 redman Exp $
  */
 
+/*
+ * This define is used to mark the differences in the TclX version of
+ * this program.   Its never intended to be turned off.
+ */
+#define TKX_SHELL
+
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+#ifdef TKX_SHELL
 #include <tclExtdInt.h>
+#endif
+#include <tcl.h>
 #include <tk.h>
+#include "tkInt.h"
+#ifdef NO_STDLIB_H
+#   include "../compat/stdlib.h"
+#else
+#   include <stdlib.h>
+#endif
+#ifdef __WIN32__
+#include "tkWinInt.h"
+#endif
+
+
+typedef struct ThreadSpecificData {
+    Tcl_Interp *interp;         /* Interpreter for this thread. */
+    Tcl_DString command;        /* Used to assemble lines of terminal input
+				 * into Tcl commands. */
+    Tcl_DString line;           /* Used to read the next line from the
+				 * terminal input. */
+    int tty;                    /* Non-zero means standard input is a 
+				 * terminal-like device.  Zero means it's
+				 * a file. */
+} ThreadSpecificData;
+Tcl_ThreadDataKey dataKey;
 
 /*
  * Declarations for various library procedures and variables (don't want
@@ -46,15 +80,27 @@
  * some systems.
  */
 
-#ifndef __WIN32__
-extern char * strrchr _ANSI_ARGS_((CONST char *string, int c));
+#if !defined(__WIN32__) && !defined(_WIN32)
+extern int		isatty _ANSI_ARGS_((int fd));
+extern char *		strrchr _ANSI_ARGS_((CONST char *string, int c));
 #endif
+extern void		TkpDisplayWarning _ANSI_ARGS_((char *msg,
+			    char *title));
 
+#ifndef TKX_SHELL
+/*
+ * Forward declarations for procedures defined later in this file.
+ */
+
+static void		Prompt _ANSI_ARGS_((Tcl_Interp *interp, int partial));
+static void		StdinProc _ANSI_ARGS_((ClientData clientData,
+			    int mask));
+#endif
 
 /*
  *----------------------------------------------------------------------
  *
- * TkX_MainEx --
+ * TkMainEx --
  *
  *	Main program for Wish and most other Tk-based applications.
  *
@@ -69,9 +115,13 @@ extern char * strrchr _ANSI_ARGS_((CONST char *string, int c));
  *
  *----------------------------------------------------------------------
  */
-
+#ifdef TKX_SHELL
 void
 TkX_MainEx(argc, argv, appInitProc, interp)
+#else
+void
+Tk_MainEx(argc, argv, appInitProc, interp)
+#endif
     int argc;				/* Number of arguments. */
     char **argv;			/* Array of argument strings. */
     Tcl_AppInitProc *appInitProc;	/* Application-specific initialization
@@ -80,49 +130,90 @@ TkX_MainEx(argc, argv, appInitProc, interp)
 					 * to execute commands. */
     Tcl_Interp *interp;
 {
-    char *args, *msg, *fileName;
-    char buf[20];
+    char *args, *fileName;
+    char buf[TCL_INTEGER_SPACE];
     int code;
+#ifndef TKX_SHELL
     size_t length;
-    Tcl_Channel inChannel, outChannel, errChannel;
-    int tty;
-#if defined(WIN32) && !defined(BORLAND)
-    char buffer [MAX_PATH];
+#endif
+    Tcl_Channel inChannel, outChannel;
+    Tcl_DString argString;
+    ThreadSpecificData *tsdPtr;
+#ifdef __WIN32__
+    HANDLE handle;
+#endif
+#ifdef TKX_SHELL
+    char *msg;
+    Tcl_Channel errChannel;
+    int argi;
 #endif
 
-    /* 
-     * Initialize the stubs before making any calls to Tcl or Tk APIs.
+    /*
+     * Ensure that we are getting the matching version of Tcl.  This is
+     * really only an issue when Tk is loaded dynamically.
      */
 
-    if (Tcl_InitStubs(interp, "8.0", 0) == NULL) {
+    if (Tcl_InitStubs(interp, TCL_VERSION, 1) == NULL) {
 	abort();
     }
+#ifdef TKX_SHELL
     if (TclX_InitTclStubs(interp, "8.0", 0) == NULL) {
 	abort();
     }
     
-    TclX_SetAppInfo (TRUE,
-                     "wishx",
-                     "Extended Wish",
-                     TKX_FULL_VERSION,
-                     TCLX_PATCHLEVEL);
+    TclX_SetAppInfo(TRUE,
+                    "wishx",
+                    "Extended Wish",
+                    TKX_FULL_VERSION,
+                    TCLX_PATCHLEVEL);
+#endif
 
+    tsdPtr = (ThreadSpecificData *) 
+	Tcl_GetThreadData(&dataKey, sizeof(ThreadSpecificData));
+    
+    Tcl_FindExecutable(argv[0]);
+    tsdPtr->interp = interp;
+
+#if (defined(__WIN32__) || defined(MAC_TCL))
+    Tk_InitConsoleChannels(interp);
+#endif
+    
 #ifdef TCL_MEM_DEBUG
     Tcl_InitMemory(interp);
 #endif
 
-#if defined(WIN32) && !defined(BORLAND)
+#ifdef TKX_SHELL
     /*
-     * Parse the command line. Since Windows programs don't get passed the
-     * command name as the first argument, we need to fetch it explicitly.
+     * TclX command line parsing.  Need to find the file
+     * name. Options to Tk assumed to take one arguments, with
+     * the exception of -sync.
      */
-
-    TclX_SplitWinCmdLine (&argc, &argv);
-    GetModuleFileName (NULL, buffer, sizeof (buffer));
-    argv[0] = buffer;
-#endif
-
-    Tcl_FindExecutable(argv[0]);
+    fileName = NULL;
+    argi = 1;
+    while ((argi < argc) && (argv[argi][0] == '-')) {
+        argi++;
+        if (STREQU(argv[argi], "--")) {
+            break; /* end of options */
+        } else if (!STREQU(argv[argi], "-sync")) {
+            argi++; /* takes an argument */
+        }
+    }
+    /* Parse out file name, if supplied. */
+    if (argi < argc) {
+        int i;
+        fileName = argv[argi];
+        if (STREQU(argv[argi-1], "--")) {
+            i = argi-1;
+        } else {
+            i = argi;
+        }
+        argi++;
+        while (argi < argc) {
+            argv[i++] = argv[argi++];
+        }
+        argc = i+1;
+    }
+#else
     /*
      * Parse command-line arguments.  A leading "-file" argument is
      * ignored (a historical relic from the distant past).  If the
@@ -143,6 +234,7 @@ TkX_MainEx(argc, argv, appInitProc, interp)
 	argc--;
 	argv++;
     }
+#endif
 
     /*
      * Make command-line arguments available in the Tcl variables "argc"
@@ -150,12 +242,19 @@ TkX_MainEx(argc, argv, appInitProc, interp)
      */
 
     args = Tcl_Merge(argc-1, argv+1);
-    Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
+    Tcl_ExternalToUtfDString(NULL, args, -1, &argString);
+    Tcl_SetVar(interp, "argv", Tcl_DStringValue(&argString), TCL_GLOBAL_ONLY);
+    Tcl_DStringFree(&argString);
     ckfree(args);
     sprintf(buf, "%d", argc-1);
+
+    if (fileName == NULL) {
+	Tcl_ExternalToUtfDString(NULL, argv[0], -1, &argString);
+    } else {
+	fileName = Tcl_ExternalToUtfDString(NULL, fileName, -1, &argString);
+    }
     Tcl_SetVar(interp, "argc", buf, TCL_GLOBAL_ONLY);
-    Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv[0],
-	    TCL_GLOBAL_ONLY);
+    Tcl_SetVar(interp, "argv0", Tcl_DStringValue(&argString), TCL_GLOBAL_ONLY);
 
     /*
      * Set the "tcl_interactive" variable.
@@ -169,73 +268,135 @@ TkX_MainEx(argc, argv, appInitProc, interp)
      */
 
 #ifdef __WIN32__
-    tty = 1;
+    handle = GetStdHandle(STD_INPUT_HANDLE);
+
+    if ((handle == INVALID_HANDLE_VALUE) || (handle == 0) 
+	     || (GetFileType(handle) == FILE_TYPE_UNKNOWN)) {
+	/*
+	 * If it's a bad or closed handle, then it's been connected
+	 * to a wish console window.
+	 */
+
+	tsdPtr->tty = 1;
+    } else if (GetFileType(handle) == FILE_TYPE_CHAR) {
+	/*
+	 * A character file handle is a tty by definition.
+	 */
+
+	tsdPtr->tty = 1;
+    } else {
+	tsdPtr->tty = 0;
+    }
+
 #else
-    tty = isatty(0);
+    tsdPtr->tty = isatty(0);
 #endif
     Tcl_SetVar(interp, "tcl_interactive",
-	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
-
-    if ((fileName == NULL) && tty)
-        TclX_SetupSigInt ();
+	    ((fileName == NULL) && tsdPtr->tty) ? "1" : "0", TCL_GLOBAL_ONLY);
 
     /*
      * Invoke application-specific initialization.
      */
 
     if ((*appInitProc)(interp) != TCL_OK) {
-	printf("BAD\n");
-        TclX_ErrorExit (interp, 255,
-                        "\n    while\ninitializing application (Tcl_AppInit?)");
+#ifdef TKX_SHELL
+        TclX_ErrorExit(interp, 255,
+                       "\n    while\ninitializing application (Tcl_AppInit?)");
+#else
+	TkpDisplayWarning(Tcl_GetStringResult(interp),
+		"Application initialization failed");
+#endif
     }
+#ifdef TKX_SHELL
     if (Tk_InitStubs(interp, "8.0", 0) == NULL) {
 	abort();
     }
+#endif
 
     /*
      * Invoke the script specified on the command line, if any.
      */
 
     if (fileName != NULL) {
-	code = TclX_Eval (interp,
-                          TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
-                          TCLX_EVAL_ERR_HANDLER,
-                          fileName);
+	Tcl_ResetResult(interp);
+#ifdef TKX_SHELL
+	code = TclX_Eval(interp,
+                         TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
+                         TCLX_EVAL_ERR_HANDLER,
+                         fileName);
 	if (code != TCL_OK) {
 	    goto error;
 	}
-	tty = 0;
-    } else {
-        char* tcl_interactive = Tcl_GetVar(interp, "tcl_interactive",
-                                           TCL_GLOBAL_ONLY);
-        if ((tcl_interactive != NULL)
-            && (strcmp(tcl_interactive, "0") != 0)) {
-            /*
-             * Commands will come from standard input, so set up an event
-             * handler for standard input.  Evaluate the .rc file, if one
-             * has been specified, set up an event handler for standard
-             * input, and print a prompt if the input device is a terminal.
-             */
-            TclX_EvalRCFile (interp);
+#else
+	code = Tcl_EvalFile(interp, fileName);
+	if (code != TCL_OK) {
+	    /*
+	     * The following statement guarantees that the errorInfo
+	     * variable is set properly.
+	     */
 
-            /*
-             * Establish a channel handler for stdin.
-             */
-            inChannel = Tcl_GetStdChannel(TCL_STDIN);
-            if (inChannel) {
-                if (TclX_AsyncCommandLoop (interp,
-                                           tty ? (TCLX_CMDL_INTERACTIVE |
-                                                  TCLX_CMDL_EXIT_ON_EOF) : 0,
-                                           NULL, NULL, NULL) == TCL_ERROR)
-                    goto error;
-            }
+	    Tcl_AddErrorInfo(interp, "");
+	    TkpDisplayWarning(Tcl_GetVar(interp, "errorInfo",
+		    TCL_GLOBAL_ONLY), "Error in startup script");
+	    Tcl_DeleteInterp(interp);
+	    Tcl_Exit(1);
+	}
+#endif
+	tsdPtr->tty = 0;
+    } else {
+#ifdef TKX_SHELL
+        /*
+         * Commands will come from standard input, so set up an event
+         * handler for standard input.  Evaluate the .rc file, if one
+         * has been specified, set up an event handler for standard
+         * input, and print a prompt if the input device is a terminal.
+         *
+         * NOTE: At one time this was only if tcl_interactive was true.
+         * This was removed due to Tk tests starting a process as a 
+         * child and sending it commands on stdin.
+         */
+        TclX_EvalRCFile(interp);
+
+        /*
+         * Establish a channel handler for stdin.
+         */
+        inChannel = Tcl_GetStdChannel(TCL_STDIN);
+        if (inChannel) {
+            if (TclX_AsyncCommandLoop(interp,
+                                      tsdPtr->tty ? (TCLX_CMDL_INTERACTIVE |
+                                                     TCLX_CMDL_EXIT_ON_EOF) : 0,
+                                      NULL, NULL, NULL) == TCL_ERROR)
+                goto error;
         }
+#else
+	/*
+	 * Evaluate the .rc file, if one has been specified.
+	 */
+
+	Tcl_SourceRCFile(interp);
+
+	/*
+	 * Establish a channel handler for stdin.
+	 */
+
+	inChannel = Tcl_GetStdChannel(TCL_STDIN);
+	if (inChannel) {
+	    Tcl_CreateChannelHandler(inChannel, TCL_READABLE, StdinProc,
+		    (ClientData) inChannel);
+	}
+	if (tsdPtr->tty) {
+	    Prompt(interp, 0);
+	}
+#endif
     }
+    Tcl_DStringFree(&argString);
 
     outChannel = Tcl_GetStdChannel(TCL_STDOUT);
     if (outChannel) {
 	Tcl_Flush(outChannel);
     }
+    Tcl_DStringInit(&tsdPtr->command);
+    Tcl_DStringInit(&tsdPtr->line);
     Tcl_ResetResult(interp);
 
     /*
@@ -244,11 +405,17 @@ TkX_MainEx(argc, argv, appInitProc, interp)
      */
 
     Tk_MainLoop();
-    TclX_ShellExit (interp, 0);
+    Tcl_DeleteInterp(interp);
+#ifdef TKX_SHELL
+    TclX_ShellExit(interp, 0);
+#else
+    Tcl_Exit(0);
+#endif
 
+#ifdef TKX_SHELL
 error:
     msg = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
-    if (msg == NULL) {
+    if ((msg == NULL) || (msg[0] == '\0')) {
 	msg = interp->result;
     }
     errChannel = Tcl_GetStdChannel(TCL_STDERR);
@@ -258,6 +425,10 @@ error:
     }
 
     TclX_ShellExit (interp, 1);
+#endif
 }
-
-
+#ifdef TKX_SHELL
+/*
+ * StdinProc and Prompt functions deleted.
+ */
+#endif
