@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 1.1 1996/10/04 05:03:00 markd Exp $
+# $Id: file.test,v 1.1 1996/10/04 15:30:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -73,12 +73,12 @@ Test file-compat-2.1 {rmdir tests} {
 Test file-compat-2.2 {rmdir tests} {
     catch {rmdir MKDIR1.TMP}
     list [catch {rmdir MKDIR1.TMP} msg] [string tolower $msg]
-} 0 {1 {can't remove "mkdir1.tmp" : no such file or directory}}
+} 0 {1 {can't remove "mkdir1.tmp": no such file or directory}}
 
 Test file-compat-2.3 {rmdir tests} {
     catch {rmdir MKDIR1.TMP}
     list [catch {rmdir MKDIR1.TMP} msg] [string tolower $msg]
-} 0 {1 {can't remove "mkdir1.tmp" : no such file or directory}}
+} 0 {1 {can't remove "mkdir1.tmp": no such file or directory}}
 
 Test file-compat-2.4 {rmdir tests} {
     close [open MKDIR3.TMP w]
@@ -100,7 +100,7 @@ Test file-compat-3.1 {unlink tests} {
 
 Test file-compat-3.2 {unlink tests} {
     list [catch {unlink UNLINK.TMP} msg] [string tolower $msg]
-} 0 {1 {can't remove "unlink.tmp" : no such file or directory}}
+} 0 {1 {can't remove "unlink.tmp": no such file or directory}}
 
 Test file-compat-3.4 {unlink tests} {
     set fh [open UNLINK.TMP w]
@@ -123,7 +123,7 @@ Test file-compat-4.1 {frename tests} {
 Test file-compat-4.4 {frename tests} {
     TestRemove FRENAME3.TMP
     list [catch {frename FRENAME3.TMP FRENAME4.TMP} msg] [string tolower $msg]
-} 0 {1 {error renaming "frename3.tmp" to "frename4.tmp" : no such file or directory}}
+} 0 {1 {error renaming "frename3.tmp": no such file or directory}}
 
 TestRemove MKDIR1.TMP MKDIR2.TMP MKDIR3.TMP FRENAME1.TMP FRENAME2.TMP
 
