@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.6 1997/07/04 20:24:28 markd Exp $
+ * $Id: tclXunixOS.c,v 8.7 1997/08/08 16:51:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -429,7 +429,11 @@ TclXOSsystem (interp, command, exitCode)
     }
     close (errPipes [0]);
 
-    waitpid (pid, (int *) &waitStatus, 0);
+    if (waitpid (pid, (int *) &waitStatus, 0) < 0) {
+        TclX_AppendObjResult (interp, "wait failed: ",
+                              Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
     
     /*
      * Return status based on wait result.
