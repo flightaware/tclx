@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 8.4 1999/03/31 06:37:55 markd Exp $
+ * $Id: tclXwinPort.h,v 1.1 2001/10/24 23:31:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,15 +34,33 @@
 /*
  * OS feature definitons.
  */
-#define NO_CATGETS
-#define NO_FCHMOD
-#define NO_FCHOWN
-#define NO_FSYNC
-#define NO_RANDOM  /* uses compat */
-#define NO_SIGACTION
-#define NO_SYS_SELECT_H
-#define NO_TRUNCATE    /* FIX: Are we sure there is no way to truncate???*/
-#define RETSIGTYPE void
+#ifndef NO_CATGETS
+#   define NO_CATGETS
+#endif
+#ifndef NO_FCHMOD
+#   define NO_FCHMOD
+#endif
+#ifndef NO_FCHOWN
+#   define NO_FCHOWN
+#endif
+#ifndef NO_FSYNC
+#   define NO_FSYNC
+#endif
+#ifndef NO_RANDOM
+#   define NO_RANDOM  /* uses compat */
+#endif
+#ifndef NO_SIGACTION
+#   define NO_SIGACTION
+#endif
+#ifndef NO_SYS_SELECT_H
+#   define NO_SYS_SELECT_H
+#endif
+#ifndef NO_TRUNCATE
+#   define NO_TRUNCATE    /* FIX: Are we sure there is no way to truncate???*/
+#endif
+#ifndef RETSIGTYPE
+#   define RETSIGTYPE void
+#endif
 
 #include <math.h>
 #include <limits.h>
@@ -54,29 +72,27 @@
 /*
  * No restartable signals in WIN32.
  */
-#define NO_SIG_RESTART
+#ifndef NO_SIG_RESTART
+#   define NO_SIG_RESTART
+#endif
 
 /*
  * Define a macro to call wait pid.  We don't use Tcl_WaitPid on Unix because
  * it delays signals.
  */
-#define TCLX_WAITPID(pid, status, options) Tcl_WaitPid ((Tcl_Pid)pid, status, options)
+#define TCLX_WAITPID(pid, status, options) \
+	Tcl_WaitPid((Tcl_Pid)pid, status, options)
 
 #define bcopy(from, to, length)    memmove((to), (from), (length))
 
 /*
  * Compaibility functions.
  */
-extern long
-random (void);
+extern long	random(void);
 
-extern void
-srandom (unsigned int x);
+extern void	srandom(unsigned int x);
 
-extern int
-getopt (int           nargc,
-        char * const *nargv,
-        const char   *ostr);
+extern int	getopt(int nargc, char * const *nargv, const char *ostr);
 
 #endif
 
