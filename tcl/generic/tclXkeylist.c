@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 2.1 1993/03/06 21:43:53 markd Exp markd $
+ * $Id: tclXkeylist.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,7 +38,8 @@ CompareKeyListField _ANSI_ARGS_((Tcl_Interp   *interp,
                                  CONST char   *fieldName,
                                  CONST char   *field,
                                  char        **valuePtr,
-                                 int          *valueSizePtr));
+                                 int          *valueSizePtr,
+                                 int          *bracedPtr));
 
 int
 SplitAndFindField _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -63,6 +64,8 @@ SplitAndFindField _ANSI_ARGS_((Tcl_Interp  *interp,
  *     returned.
  *   o valueSizePtr (O) - If the field names match, the length of the value
  *     part is returned here.
+ *   o bracedPtr (O) - If the field names match, non-zero/zero to inficate
+ *     that the value was/warn't in braces.
  * Returns:
  *    TCL_OK - If the field names match.
  *    TCL_BREAK - If the fields names don't match.
@@ -70,12 +73,14 @@ SplitAndFindField _ANSI_ARGS_((Tcl_Interp  *interp,
  *-----------------------------------------------------------------------------
  */
 static int
-CompareKeyListField (interp, fieldName, field, valuePtr, valueSizePtr)
+CompareKeyListField (interp, fieldName, field, valuePtr, valueSizePtr,
+                     bracedPtr)
     Tcl_Interp   *interp;
     CONST char   *fieldName;
     CONST char   *field;
     char        **valuePtr;
     int          *valueSizePtr; 
+    int          *bracedPtr;
 {
     char *elementPtr, *nextPtr;
     int   fieldNameSize, elementSize;
@@ -109,7 +114,7 @@ CompareKeyListField (interp, fieldName, field, valuePtr, valueSizePtr)
      * Extract the value from the list.
      */
     if (TclFindElement (interp, nextPtr, &elementPtr, &nextPtr, &elementSize, 
-                        NULL) != TCL_OK)
+                        bracedPtr) != TCL_OK)
         return TCL_ERROR;
     if (nextPtr[0] != '\0') {
         Tcl_AppendResult (interp, "invalid keyed list format: ",
@@ -155,7 +160,7 @@ SplitAndFindField (interp, fieldName, keyedList, fieldInfoPtr)
     CONST char  *keyedList;
     fieldInfo_t *fieldInfoPtr;
 {
-    int  idx, result;
+    int  idx, result, braced;
 
     if (fieldName == '\0') {
         interp->result = "null key not allowed";
@@ -173,7 +178,8 @@ SplitAndFindField (interp, fieldName, keyedList, fieldInfoPtr)
         result = CompareKeyListField (interp, fieldName, 
                                       fieldInfoPtr->argv [idx],
                                       &fieldInfoPtr->valuePtr,
-                                      &fieldInfoPtr->valueSize);
+                                      &fieldInfoPtr->valueSize,
+                                      &braced);
         if (result != TCL_BREAK)
             break;  /* Found or error, exit before idx is incremented. */
     }
@@ -338,7 +344,7 @@ Tcl_GetKeyedListField (interp, fieldName, keyedList, fieldValuePtr)
     char       **fieldValuePtr;
 {
     char *nameSeparPtr, *scanPtr, *valuePtr;
-    int   valueSize, result;
+    int   valueSize, result, braced;
 
     if (fieldName == '\0') {
         interp->result = "null key not allowed";
@@ -372,7 +378,7 @@ Tcl_GetKeyedListField (interp, fieldName, keyedList, fieldValuePtr)
         fieldPtr [fieldSize] = '\0';
 
         result = CompareKeyListField (interp, (char *) fieldName, fieldPtr,
-                                      &valuePtr, &valueSize);
+                                      &valuePtr, &valueSize, &braced);
         fieldPtr [fieldSize] = saveChar;
         if (result != TCL_BREAK)
             break;  /* Found or an error */
@@ -398,8 +404,12 @@ Tcl_GetKeyedListField (interp, fieldName, keyedList, fieldValuePtr)
             char *fieldValue;
 
             fieldValue = ckalloc (valueSize + 1);
-            strncpy (fieldValue, valuePtr, valueSize);
-            fieldValue [valueSize] = '\0';
+          if (braced)  {
+              strncpy (fieldValue, valuePtr, valueSize);
+              fieldValue [valueSize] = '\0';
+          } else {
+              TclCopyAndCollapse(valueSize, valuePtr, fieldValue);
+          }
             *fieldValuePtr = fieldValue;
         }
     }
