@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.11 1994/06/29 04:14:57 markd Exp markd $
+.\" $Id: TclX.n,v 3.12 1994/07/13 05:36:14 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -410,15 +410,13 @@ producing a report
 '\"@help: tcl/debug/profrep
 '\"@brief: Generate a report from data collect from the profile command.
 .TP
-.B profrep \fIprofDataVar sortKey stackDepth\fR ?\fIoutFile\fR? ?\fIuserTitle\fR?
+.B profrep \fIprofDataVar sortKey\fR ?\fIoutFile\fR? ?\fIuserTitle\fR?
 .br
 This procedure generates a report from data collect from the profile command.
 \fBProfDataVar\fR is the name of the array containing the data returned by the
 \fBprofile\fR command. \fBSortKey\fR indicates which data value to sort by.
 It should be one of "\fBcalls\fR", "\fBcpu\fR" or "\fBreal\fR".
-\fBStackDepth\fR is the stack depth to consider significant.  A value of 1
-reports by procedure only, a value of 2 reports by procedure and its caller,
-etc. \fBOutFile\fR is the name of file to write the report to.  If omitted,
+\fBOutFile\fR is the name of file to write the report to.  If omitted,
 stdout is assumed.  \fBUserTitle\fR is an optional title line to add to
 output.
 '\"@:

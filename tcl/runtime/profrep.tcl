@@ -12,87 +12,64 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profrep.tcl,v 3.0 1993/11/19 07:00:31 markd Rel markd $
+# $Id: profrep.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-profrep profrep
 
 #
-# Summarize the data from the profile command to the specified significant
-# stack depth.  Returns the maximum number of characters in any of the
-# procedure names.  (useful in columnizing reports).
+# Do sort comparison.  May only be called by profrep:sort, as it address its
+# local variables.
 #
-proc profrep:summarize {profDataVar stackDepth sumProfDataVar} {
-    upvar $profDataVar profData $sumProfDataVar sumProfData
+proc profrep:sortcmp {key1 key2} {
+    upvar profData profData keyIndex keyIndex
+    
+    set val1 [lindex $profData($key1) $keyIndex]
+    set val2 [lindex $profData($key2) $keyIndex]
 
-    if {(![info exists profData]) || ([catch {array size profData}] != 0)} {
-        error "`profDataVar' must be the name of an array returned by the `profile off' command"
+    if {$val1 < $val2} {
+        return -1
     }
-    set maxNameLen 0
-    foreach procStack [array names profData] {
-        foreach procName $procStack {
-            set maxNameLen [max $maxNameLen [clength $procName]]
-        }
-        if {[llength $procStack] < $stackDepth} {
-            set sigProcStack $procStack
-        } else {
-            set sigProcStack [lrange $procStack 0 [expr {$stackDepth - 1}]]
-        }
-        if [info exists sumProfData($sigProcStack)] {
-            set cur $sumProfData($sigProcStack)
-            set add $profData($procStack)
-            set     new [expr [lindex $cur 0]+[lindex $add 0]]
-            lappend new [expr [lindex $cur 1]+[lindex $add 1]]
-            lappend new [expr [lindex $cur 2]+[lindex $add 2]]
-            set sumProfData($sigProcStack) $new
-        } else {
-            set sumProfData($sigProcStack) $profData($procStack)
-        }
+    if {$val1 > $val2} {
+        return 1
     }
-    return $maxNameLen
+    return 0
 }
 
 #
 # Generate a list, sorted in descending order by the specified key, contain
 # the indices into the summarized data.
 #
-proc profrep:sort {sumProfDataVar sortKey} {
-    upvar $sumProfDataVar sumProfData
+proc profrep:sort {profDataVar sortKey} {
+    upvar $profDataVar profData
 
     case $sortKey {
         {calls} {set keyIndex 0}
         {real}  {set keyIndex 1}
         {cpu}   {set keyIndex 2}
         default {
-            error "Expected a sort type of: `calls', `cpu' or ` real'"}
+            error "Expected a sort type of: `calls', `cpu' or ` real'"
+        }
     }
 
-    # Build a list to sort cosisting of a fix-length string containing the
-    # key value and proc stack. Then sort it.
-
-    foreach procStack [array names sumProfData] {
-        set key [format "%016d" [lindex $sumProfData($procStack) $keyIndex]]
-        lappend keyProcList [list $key $procStack]
-    }
-    set keyProcList [lsort $keyProcList]
-
-    # Convert the assending sorted list into a descending list of proc stacks.
-
-    for {set idx [expr [llength $keyProcList]-1]} {$idx >= 0} {incr idx -1} {
-        lappend sortedProcList [lindex [lindex $keyProcList $idx] 1]
-    }
-    return $sortedProcList
+    return [lsort -integer -decreasing -command profrep:sortcmp \
+            [array names profData]]
 }
 
 #
 # Print the sorted report
 #
-
-proc profrep:print {sumProfDataVar sortedProcList maxNameLen outFile
-                    userTitle} {
-    upvar $sumProfDataVar sumProfData
+proc profrep:print {profDataVar sortedProcList outFile userTitle} {
+    upvar $profDataVar profData
     
+    set maxNameLen 0
+    foreach procStack [array names profData] {
+        foreach procName $procStack {
+            set maxNameLen [max $maxNameLen [clength $procName]]
+        }
+    }
+
     if {$outFile == ""} {
         set outFH stdout
     } else {
@@ -116,7 +93,7 @@ proc profrep:print {sumProfDataVar sortedProcList maxNameLen outFile
     # Output the data in sorted order.
 
     foreach procStack $sortedProcList {
-        set data $sumProfData($procStack)
+        set data $profData($procStack)
         puts $outFH [format "%-${maxNameLen}s %10d %10d %10d" \
                             [lvarpop procStack] \
                             [lindex $data 0] [lindex $data 1] [lindex $data 2]]
@@ -134,16 +111,14 @@ proc profrep:print {sumProfDataVar sortedProcList maxNameLen outFile
 # Generate a report from data collect from the profile command.
 #   o profDataVar (I) - The name of the array containing the data from profile.
 #   o sortKey (I) - Value to sort by. One of "calls", "cpu" or "real".
-#   o stackDepth (I) - The stack depth to consider significant.
 #   o outFile (I) - Name of file to write the report to.  If omitted, stdout
 #     is assumed.
 #   o userTitle (I) - Title line to add to output.
 
-proc profrep {profDataVar sortKey stackDepth {outFile {}} {userTitle {}}} {
+proc profrep {profDataVar sortKey {outFile {}} {userTitle {}}} {
     upvar $profDataVar profData
 
-    set maxNameLen [profrep:summarize profData $stackDepth sumProfData]
-    set sortedProcList [profrep:sort sumProfData $sortKey]
-    profrep:print sumProfData $sortedProcList $maxNameLen $outFile $userTitle
+    set sortedProcList [profrep:sort profData $sortKey]
+    profrep:print profData $sortedProcList $outFile $userTitle
 
 }
