@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.2 2002/12/17 21:57:40 hobbs Exp $
+ * $Id: tclXkeylist.c,v 1.3 2005/02/04 01:41:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -417,6 +417,7 @@ FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
 
 #ifndef NO_KEYLIST_HASH_TABLE
     if (keylIntPtr->hashTbl != NULL) {
+	Tcl_HashEntry *entryPtr;
 	char tmp = key[keyLen];
 	if (keySeparPtr != NULL) {
 	    /*
@@ -425,7 +426,6 @@ FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
 	     */
 	    key[keyLen] = '\0';
 	}
-	Tcl_HashEntry *entryPtr;
 	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl, key);
 	if (entryPtr != NULL) {
 	    findIdx = (int) Tcl_GetHashValue(entryPtr);

@@ -1,3 +1,9 @@
+2005-02-07  Andreas Kupries <andreask@activestate.com>
+
+	* generic/tclXkeylist.c (FindKeyedListEntry): Moved a C99 specific
+	  variable declaration to the top of its block, making it C89
+	  compatible.
+
 2005-02-03  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tests/keylist.test, generic/tclXkeylist.c: improve efficiency of
