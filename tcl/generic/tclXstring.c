@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.16 1998/01/28 17:34:17 markd Exp $
+ * $Id: tclXstring.c,v 8.17 1998/02/01 08:52:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -565,7 +565,11 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     for (; idx < fromLen; idx++)
         map [from [idx]] = -1;
 
-    transStringObj = Tcl_DuplicateObj (objv [3]);
+    /*
+     * Get a string object to transform.
+     */
+    transString = Tcl_GetStringFromObj (objv[3], &transStringLen);
+    transStringObj = Tcl_NewStringObj (transString, transStringLen);
     transString = Tcl_GetStringFromObj (transStringObj, &transStringLen);
 
     for (s = (unsigned char *) transString, stringIndex = 0; 
