@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.10 1997/08/08 09:59:00 markd Exp $
+# $Id: Makefile.in,v 8.11 1997/08/17 04:08:32 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -635,37 +635,10 @@ test.static:	ucbtests.static testx.static
 test.verbose:	ucbtests.verbose testx.verbose
 
 ucbtests: all
-	@echo ""
-	@echo "***************************************************************"
-	@echo "* Note: Expect failures from the following standard Tcl tests.*"
-	@echo "* They do not represent problems with TclX,  but are caused   *"
-	@echo "* by Tcl tests being sensitive to the program running the     *"
-	@echo "* tests.                                                      *"
-	@echo "*     namespace-old-9.8                                       *"
-	@echo "*     namespace-old-9.10                                      *"
-	@echo "*     namespace-old-9.11                                      *"
-	@echo "*     namespace-old-9.19                                      *"
-	@echo "***************************************************************"
-	@echo ""
-	./runtest -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
+	./runtest ${srcbasedir}/tcl/tests/ucbtests.tcl ${TCL_SRC}
 
 ucbtests.static: all
-	@echo ""
-	@echo "***************************************************************"
-	@echo "* Note: Expect failures from the following standard Tcl tests.*"
-	@echo "* They do not represent problems with TclX,  but are caused   *"
-	@echo "* by Tcl tests being sensitive to the program running the     *"
-	@echo "* tests.                                                      *"
-	@echo "*     namespace-old-9.8                                       *"
-	@echo "*     namespace-old-9.10                                      *"
-	@echo "*     namespace-old-9.11                                      *"
-	@echo "*     namespace-old-9.19                                      *"
-	@echo "*     safe-6.3                                                *"
-	@echo "*     safe-6.4                                                *"
-	@echo "*     safe-6.5                                                *"
-	@echo "***************************************************************"
-	@echo ""
-	./runtest.static -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
+	./runtest.static ${srcbasedir}/tcl/tests/ucbtests.tcl ${TCL_SRC}
 
 testx: all
 	./runtest -c "cd ${srcbasedir}/tcl/tests; source all"
