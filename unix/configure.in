@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.1 1997/01/11 04:46:21 markd Exp $
+dnl $Id: configure.in,v 8.2 1997/02/04 03:09:50 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.1 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.2 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -315,6 +315,10 @@ case "$BUILD_SHARED" in
         TCLX_LIB_SPEC="-L$TCLX_INST_LIB ${TCLX_LIB_FLAG}"
         TKX_BUILD_LIB_SPEC="-L$bldbasedir/tk/unix ${TKX_LIB_FLAG}"
         TKX_LIB_SPEC="-L$TCLX_INST_LIB ${TKX_LIB_FLAG}"
+        TCLX_STLIB_BUILD=$TCLX_STLIB_NAME
+        TKX_STLIB_BUILD=$TKX_STLIB_NAME
+        TCLX_SHLIB_BUILD=$TCLX_SHLIB_NAME
+        TKX_SHLIB_BUILD=$TKX_SHLIB_NAME
         ;;
     NO|no)
         AC_MSG_RESULT(Will not build shared libraries)
@@ -323,16 +327,32 @@ case "$BUILD_SHARED" in
         TCLX_LIB_SPEC="$TCLX_INST_LIB/${TCLX_STLIB_NAME}"
         TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/${TKX_STLIB_NAME}"
         TKX_LIB_SPEC="$TCLX_INST_LIB/${TKX_STLIB_NAME}"
+        TCLX_STLIB_BUILD=$TCLX_STLIB_NAME
+        TKX_STLIB_BUILD=$TKX_STLIB_NAME
+        TCLX_SHLIB_BUILD="dont_build_this"
+        TKX_SHLIB_BUILD="dont_build_this"
         ;;
 esac
+
+#
+# If the names ended up the same, dont build twice.
+#
+if test "x$TCLX_STLIB_BUILD" = "x$TCLX_SHLIB_BUILD"; then
+        TCLX_STLIB_BUILD="dont_build_this"
+        TKX_STLIB_BUILD="dont_build_this"
+fi
 
 AC_SUBST(SHOBJ_SUFFIX)
 AC_SUBST(TCL_STLIB_NAME)
 AC_SUBST(TK_STLIB_NAME)
 AC_SUBST(TCLX_STLIB_NAME)
 AC_SUBST(TCLX_SHLIB_NAME)
+AC_SUBST(TCLX_STLIB_BUILD)
+AC_SUBST(TCLX_SHLIB_BUILD)
 AC_SUBST(TKX_STLIB_NAME)
 AC_SUBST(TKX_SHLIB_NAME)
+AC_SUBST(TKX_STLIB_BUILD)
+AC_SUBST(TKX_SHLIB_BUILD)
 AC_SUBST(TCLX_BUILD_LIB_SPEC)
 AC_SUBST(TCLX_LIB_SPEC)
 AC_SUBST(TKX_BUILD_LIB_SPEC)
