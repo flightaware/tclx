@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 3.1 1994/05/28 03:38:22 markd Exp $
+# $Id: genindex.tcl,v 1.1 1994/07/09 03:09:58 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cphelpdir.sh,v 3.1 1994/05/28 03:38:22 markd Exp $
+# $Id: symlinkext.sh,v 1.1 1994/07/15 04:41:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

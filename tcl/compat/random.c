@@ -4,7 +4,7 @@
  * BSD random function to support the TclX random command on SysV based
  * systems.
  *-----------------------------------------------------------------------------
- * $Id: random.c,v 1.1 1993/07/11 19:28:29 markd Exp markd $
+ * $Id: random.c,v 3.0 1993/11/19 07:00:55 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
