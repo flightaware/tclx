@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.13 1993/05/04 06:37:29 markd Exp markd $
+# $Id: Config.mk,v 2.14 1993/05/16 15:37:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -214,7 +214,7 @@ TK_MAN_FUNC_SECTION=TK
 
 # o TCL_MAN_SEPARATOR - The separator character used in the directory name
 #   of the cat* and man* manual directories.  This is usually empty or 
-#   a period.
+#   a period. i.e "/usr/man/man1" or "/usr/man/man.1".
 #
 # o TCL_MAN_STYLE - The style of manual management the system has.It is
 #   a string with one of the following values:
