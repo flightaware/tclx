@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 5.2 1996/01/27 16:10:15 markd Exp $
+# $Id: tclhelp.tcl,v 5.3 1996/02/12 18:17:23 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -414,6 +414,6 @@ proc tkhelp addPaths {
 if [catch {
     tkhelp $argv
 } msg] {
-    tkerror $msg
+    bgerror $msg
 }
 
