@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.4 1994/12/31 23:28:51 markd Exp markd $
+# $Id: Makefile.in,v 4.5 1995/01/01 19:51:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -109,6 +109,7 @@ ${TCL_H}: ${TCL_UCB_SRC}/tcl.h
 WISHX: TKCOPY runwishx
 	cd tksrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tktclsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+	cd tktests;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
 # Copy include and library files from the UCB Tk distribution to the
@@ -338,6 +339,8 @@ clean:
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	-rm -f runtcl runwishx
 	-rm -rf tclmaster tkmaster
 
@@ -351,5 +354,7 @@ distclean: clean
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd tktests;   ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	rm -f Makefile config.status config.cache
 
