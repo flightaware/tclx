@@ -185,15 +185,15 @@ ${bldbasedir}/tk/tests:
 # Run the UCB tests with wishx.
 
 test: all
-	echo "cd ${TK_SRC}/tests; source all; exit" | \
+	echo "cd ${TK_SRC}/tests; source all.tcl; exit" | \
 	    ./runtest -geometry +0+0
 
 test.static: all
-	echo "cd ${TK_SRC}/tests; source all; exit" | \
+	echo "cd ${TK_SRC}/tests; source all.tcl; exit" | \
 	    ./runtest.static -geometry +0+0
 
 test.verbose: all
-	echo "cd ${TK_SRC}/tests; set VERBOSE 1; source all; exit" | \
+	echo "cd ${TK_SRC}/tests; set VERBOSE 1; source all.tcl; exit" | \
 	    ./runtest -geometry +0+0
 
 #------------------------------------------------------------------------------
