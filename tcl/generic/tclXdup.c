@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 8.3 1997/06/25 16:58:51 markd Exp $
+ * $Id: tclXdup.c,v 8.4 1997/06/30 07:57:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -62,8 +62,8 @@ DupChannelOptions (interp, srcChannel, targetChannel)
 
     Tcl_DStringInit (&strValues);
 
-    if (Tcl_GetChannelOption (srcChannel, NULL, &strValues) != TCL_OK)
-        goto fatalError;
+    if (Tcl_GetChannelOption (interp, srcChannel, NULL, &strValues) != TCL_OK)
+        goto errorExit;
 
     /*
      * Walk (rather than split) the list for each name/value pair and set
@@ -93,13 +93,16 @@ DupChannelOptions (interp, srcChannel, targetChannel)
 
         if (Tcl_SetChannelOption (interp, targetChannel, option,
                                   value) != TCL_OK) {
-            Tcl_DStringFree (&strValues);
-            return TCL_ERROR;
+            goto errorExit;
         }
     }
 
     Tcl_DStringFree (&strValues);
     return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&strValues);
+    return TCL_ERROR;
 
   fatalError:
     panic ("DupChannelOption bug");

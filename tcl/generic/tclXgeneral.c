@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.4 1997/06/30 03:55:59 markd Exp $
+ * $Id: tclXgeneral.c,v 8.5 1997/06/30 07:57:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -296,32 +296,23 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
      Tcl_Obj    *CONST objv[];
 {
     int       result = TCL_OK;
-    int      i, first, limit, incr = 1;
+    long      i, first, limit, incr = 1;
     Tcl_Obj  *command, *iObj;
 
     if ((objc < 5) || (objc > 6))
 	return TclX_WrongArgs (interp, objv [0], 
                                "var first limit ?incr? command");
 
-    if (Tcl_ExprStringObj (interp, objv [2]) != TCL_OK)
+    if (Tcl_ExprLongObj (interp, objv [2], &first) != TCL_OK)
         return TCL_ERROR;
-    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp),
-                           &first) != TCL_OK)
-	return TCL_ERROR;
 
-    if (Tcl_ExprStringObj (interp, objv [3]) != TCL_OK)
+    if (Tcl_ExprLongObj (interp, objv [3], &limit) != TCL_OK)
         return TCL_ERROR;
-    if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp),
-                           &limit) != TCL_OK)
-	return TCL_ERROR;
 
     if (objc == 5) {
         command = objv [4];
     } else {
-	if (Tcl_ExprStringObj (interp, objv [4]) != TCL_OK)
-	    return TCL_ERROR;
-	if (Tcl_GetIntFromObj (interp, Tcl_GetObjResult (interp), 
-			       &incr) != TCL_OK)
+	if (Tcl_ExprLongObj (interp, objv [4], &incr) != TCL_OK)
 	    return TCL_ERROR;
         command = objv [5];
     }
@@ -334,14 +325,14 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
 	iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
                                TCL_PARSE_PART1);
         if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
-            iObj = Tcl_NewIntObj (first);
+            iObj = Tcl_NewLongObj (first);
             if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
                                 TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
                 Tcl_DecrRefCount (iObj);
                 return TCL_ERROR;
             }
         }
-        Tcl_SetIntObj (iObj, i);
+        Tcl_SetLongObj (iObj, i);
 
         result = Tcl_EvalObj (interp, command);
         if (result == TCL_CONTINUE) {
@@ -367,14 +358,14 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
     iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
                            TCL_PARSE_PART1);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
-        iObj = Tcl_NewIntObj (first);
+        iObj = Tcl_NewLongObj (first);
         if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
                             TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (iObj);
             return TCL_ERROR;
         }
     }
-    Tcl_SetIntObj (iObj, i);
+    Tcl_SetLongObj (iObj, i);
 
     return result;
 }

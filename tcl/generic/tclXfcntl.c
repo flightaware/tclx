@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 8.3 1997/06/30 03:55:56 markd Exp $
+ * $Id: tclXfcntl.c,v 8.4 1997/06/30 07:57:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -161,7 +161,7 @@ GetFcntlAttr (interp, channel, mode, attrib)
     int          mode;
     int          attrib;
 {
-    int value;
+    int value, optValue;
 
     switch (attrib) {
       case ATTR_RDONLY:
@@ -188,16 +188,22 @@ GetFcntlAttr (interp, channel, mode, attrib)
             return TCL_ERROR;
         break;
       case ATTR_NONBLOCK:
-        value  = (TclX_GetChannelOption (channel, TCLX_COPT_BLOCKING) ==
-                  TCLX_MODE_NONBLOCKING);
+        if (TclX_GetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                                   &optValue) != TCL_OK)
+            return TCL_ERROR;
+        value = (optValue == TCLX_MODE_NONBLOCKING);
         break;
       case ATTR_NOBUF:
-        value = (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
-                 TCLX_BUFFERING_NONE);
+        if (TclX_GetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
+                                   &optValue) != TCL_OK)
+            return TCL_ERROR;
+        value = (optValue == TCLX_BUFFERING_NONE);
         break;
       case ATTR_LINEBUF:
-        value = (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
-                 TCLX_BUFFERING_LINE);
+        if (TclX_GetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
+                                   &optValue) != TCL_OK)
+            return TCL_ERROR;
+        value = (optValue == TCLX_BUFFERING_LINE);
         break;
       case ATTR_KEEPALIVE:
         if (TclXOSgetsockopt (interp, channel, SO_KEEPALIVE, &value) != TCL_OK)

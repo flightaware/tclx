@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.8 1997/06/30 07:57:55 markd Exp $
+ * $Id: tclXutil.c,v 8.9 1997/07/01 02:58:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,11 +46,11 @@ char *tclXWrongArgs = "wrong # args: ";
  *      Convert an Ascii string to an number of the specified base.
  *
  * Parameters:
- *   o string (I) - String containing a number.
- *   o base (I) - The base to use for the number 8, 10 or 16 or zero to decide
+ *   o string - String containing a number.
+ *   o base - The base to use for the number 8, 10 or 16 or zero to decide
  *     based on the leading characters of the number.  Zero to let the number
  *     determine the base.
- *   o intPtr (O) - Place to return the converted number.  Will be 
+ *   o intPtr - Place to return the converted number.  Will be 
  *     unchanged if there is an error.
  *
  * Returns:
@@ -107,11 +107,11 @@ TclX_StrToInt (string, base, intPtr)
  *      Convert an Ascii string to an unsigned int of the specified base.
  *
  * Parameters:
- *   o string (I) - String containing a number.
- *   o base (I) - The base to use for the number 8, 10 or 16 or zero to decide
+ *   o string - String containing a number.
+ *   o base - The base to use for the number 8, 10 or 16 or zero to decide
  *     based on the leading characters of the number.  Zero to let the number
  *     determine the base.
- *   o unsignedPtr (O) - Place to return the converted number.  Will be 
+ *   o unsignedPtr - Place to return the converted number.  Will be 
  *     unchanged if there is an error.
  *
  * Returns:
@@ -153,11 +153,11 @@ TclX_StrToUnsigned (string, base, unsignedPtr)
  *      Convert an Ascii string to an off_t number of the specified base.
  *
  * Parameters:
- *   o string (I) - String containing a number.
- *   o base (I) - The base to use for the number 8, 10 or 16 or zero to decide
+ *   o string - String containing a number.
+ *   o base - The base to use for the number 8, 10 or 16 or zero to decide
  *     based on the leading characters of the number.  Zero to let the number
  *     determine the base.
- *   o offsetPtr (O) - Place to return the converted number.  Will be 
+ *   o offsetPtr - Place to return the converted number.  Will be 
  *     unchanged if there is an error.
  *
  * Returns:
@@ -214,12 +214,12 @@ TclX_StrToOffset (string, base, offsetPtr)
  *     a way as that the target string maybe the same as the source string.
  *
  * Parameters:
- *   o targetStr (I) - String to store the down-shifted string in.  Must
+ *   o targetStr - String to store the down-shifted string in.  Must
  *     have enough space allocated to store the string.  If NULL is specified,
  *     then the string will be dynamicly allocated and returned as the
  *     result of the function. May also be the same as the source string to
  *     shift in place.
- *   o sourceStr (I) - The string to down-shift.
+ *   o sourceStr - The string to down-shift.
  *
  * Returns:
  *   A pointer to the down-shifted string
@@ -249,12 +249,12 @@ TclX_DownShift (targetStr, sourceStr)
  *     Utility procedure to up-shift a string.
  *
  * Parameters:
- *   o targetStr (I) - String to store the up-shifted string in.  Must
+ *   o targetStr - String to store the up-shifted string in.  Must
  *     have enough space allocated to store the string.  If NULL is specified,
  *     then the string will be dynamicly allocated and returned as the
  *     result of the function. May also be the same as the source string to
  *     shift in place.
- *   o sourceStr (I) - The string to up-shift.
+ *   o sourceStr - The string to up-shift.
  *
  * Returns:
  *   A pointer to the up-shifted string.
@@ -307,10 +307,10 @@ TclX_GetOffsetFromObj (interp, objPtr, offsetPtr)
  * length that is passed in.
  *
  * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- *   o exprPtr (I) - Object with expression to evaluate.
- *   o stringLen (I) - The length of the string.
- *   o exprResultPtr (O) - The result of the expression is returned here.
+ *   o interp - A pointer to the interpreter.
+ *   o exprPtr - Object with expression to evaluate.
+ *   o stringLen - The length of the string.
+ *   o exprResultPtr - The result of the expression is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -370,9 +370,9 @@ TclX_RelativeExpr (interp, exprPtr, stringLen, exprResultPtr)
  *    Convert a file handle to a channel with error checking.
  *
  * Parameters:
- *   o interp (I) - Current interpreter.
- *   o handle (I) - The file handle to convert.
- *   o chanAccess (I) - TCL_READABLE and/or TCL_WRITABLE, both or zero for no
+ *   o interp - Current interpreter.
+ *   o handle - The file handle to convert.
+ *   o chanAccess - TCL_READABLE and/or TCL_WRITABLE, both or zero for no
  *     checking.
  * Returns:
  *   A the channel or NULL if an error occured.
@@ -412,9 +412,9 @@ TclX_GetOpenChannel (interp, handle, chanAccess)
  *    Convert a file handle to a channel with error checking.
  *
  * Parameters:
- *   o interp    (I) - Current interpreter.
- *   o handleObj (I) - The file handle object to convert.
- *   o chanAccess (I) - TCL_READABLE and/or TCL_WRITABLE, both or zero for no
+ *   o interp    - Current interpreter.
+ *   o handleObj - The file handle object to convert.
+ *   o chanAccess - TCL_READABLE and/or TCL_WRITABLE, both or zero for no
  *     checking.
  * Returns:
  *   A the channel or NULL if an error occured.
@@ -456,7 +456,7 @@ TclX_GetOpenChannelObj (interp, handleObj, chanAccess)
  * it the result of the failed command.
  *
  * Parameters:
- *   o interp (I) - A pointer to the interpreter.
+ *   o interp - A pointer to the interpreter.
  * Returns:
  *   The Tcl result code from the handler.  TCL_ERROR is returned and
  * result unchanged if not handler is available.
@@ -510,14 +510,14 @@ CallEvalErrorHandler (interp)
  *   Evaluate a Tcl command string with various options.
  *
  * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- *   o options (I) - Options controling the evaluation:
+ *   o interp - A pointer to the interpreter.
+ *   o options - Options controling the evaluation:
  *     o TCLX_EVAL_GLOBAL - Evaulate in the global context.
  *     o TCLX_EVAL_FILE - Treat the string as the name of a file to eval.
  *     o TCLX_EVAL_ERR_HANDLER - Call the user-specified error callback 
  *       specified in the global variable tclx_errorHandler if an error
  *       occurs.
- *   o string (I) - The command or name of file to evaluate.
+ *   o string - The command or name of file to evaluate.
  * Returns:
  *   The Tcl result code.
  *-----------------------------------------------------------------------------
@@ -559,9 +559,9 @@ TclX_Eval (interp, options, string)
  *   Evaluate a Tcl command string with various options.
  *
  * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- *   o options (I) - Options controling the evaluation, see TclX_Eval.
- *   o str, ... (I) - String arguments, terminated by a NULL.  They will
+ *   o interp - A pointer to the interpreter.
+ *   o options - Options controling the evaluation, see TclX_Eval.
+ *   o str, ... - String arguments, terminated by a NULL.  They will
  *     be concatenated together to form a single string.
  *-----------------------------------------------------------------------------
  */
@@ -600,8 +600,8 @@ TclX_VarEval TCL_VARARGS_DEF(Tcl_Interp *, arg1)
  *   Write a string to a channel.
  *
  * Parameters:
- *   o channel (I) - Channel to write to.
- *   o str (I) - The string to write.
+ *   o channel - Channel to write to.
+ *   o str - The string to write.
  * Returns:
  *   Same as for Tcl_Write, -1 is an error.
  *-----------------------------------------------------------------------------
@@ -621,7 +621,7 @@ TclX_WriteStr (channel, str)
  * direction.
  *
  * Parameters:
- *   o strValue (I) - Channel translation value.
+ *   o strValue - Channel translation value.
  * Returns:
  *   The integer option value.
  *----------------------------------------------------------------------------- */
@@ -653,7 +653,7 @@ ParseTranslationOption (strValue)
  * direction.
  *
  * Parameters:
- *   o value (I) - Integer channel translation value.
+ *   o value - Integer channel translation value.
  * Returns:
  *   The string option value.
  *----------------------------------------------------------------------------
@@ -686,16 +686,21 @@ FormatTranslationOption (value)
  *   C-friendly front end to Tcl_GetChannelOption.
  *
  * Parameters:
- *   o channel (I) - Channel to get the option for.
- *   o optionName (I) - One of the TCLX_COPT_* defines.
+ *   o interp - Error message are returned in result
+ *   o channel - Channel to get the option for.
+ *   o optionName - One of the TCLX_COPT_* defines.
+ *   o valuePtr - Value is returned here.
  * Returns:
- *   The integer option value define by TclX.
+ *   TCL_OK or TCL_ERROR.
+ * FIX: Maybe drop these.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_GetChannelOption (channel, option)
+TclX_GetChannelOption (interp, channel, option, valuePtr)
+    Tcl_Interp *interp;
     Tcl_Channel channel;
     int         option;
+    int        *valuePtr;
 {
     char          *strOption;
     Tcl_DString    strValue;
@@ -720,8 +725,11 @@ TclX_GetChannelOption (channel, option)
         goto fatalError;
     }
 
-    if (Tcl_GetChannelOption (channel, strOption, &strValue) != TCL_OK)
-        goto fatalError;
+    if (Tcl_GetChannelOption (interp, channel, strOption,
+                              &strValue) != TCL_OK) {
+        Tcl_DStringFree (&strValue);
+        return TCL_ERROR;
+    }
 
     switch (option) {
       case TCLX_COPT_BLOCKING:
@@ -776,10 +784,11 @@ TclX_GetChannelOption (channel, option)
       }
     }
     Tcl_DStringFree (&strValue);
-    return value;
+    *valuePtr = value;
+    return TCL_OK;
 
   fatalError:
-    panic ("TclX_GetChannelOption bug");
+    panic ("TclX_GetChannelOption bug");  /* FIX: return error. */
     return 0;  /* Not reached */
 }
 
@@ -789,10 +798,10 @@ TclX_GetChannelOption (channel, option)
  *   C-friendly front end to Tcl_SetChannelOption.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o channel (I) - Channel to set the option for.
- *   o option (I) - One of the TCLX_COPT_* defines.
- *   o value (I) - Value to set the option to (integer define).  Note, if
+ *   o interp - Errors returned in result.
+ *   o channel - Channel to set the option for.
+ *   o option - One of the TCLX_COPT_* defines.
+ *   o value - Value to set the option to (integer define).  Note, if
  *     this is translation, it can either be the read and write directions
  *     masked together or a single value.
  * Result:
@@ -885,8 +894,8 @@ TclX_SetChannelOption (interp, channel, option, value)
  *   Interface to Tcl_Join path to join only two files.
  *
  * Parameters:
- *   o path1, path2 (I) - File paths to join.
- *   o joinedPath (O) - DString buffere that joined path is returned in.
+ *   o path1, path2 - File paths to join.
+ *   o joinedPath - DString buffere that joined path is returned in.
  *     must be initialized.
  * Returns:
  *   A pointer to joinedPath->string.
@@ -914,8 +923,8 @@ TclX_JoinPath (path1, path2, joinedPath)
  *   Easily create "wrong # args" error messages.
  *
  * Parameters:
- *   o commandNameObj (I) - Object containing name of command (objv[0])
- *   o string (I) - Text message to append.
+ *   o commandNameObj - Object containing name of command (objv[0])
+ *   o string - Text message to append.
  * Returns:
  *   TCL_ERROR
  *-----------------------------------------------------------------------------
@@ -951,8 +960,8 @@ TclX_WrongArgs (interp, commandNameObj, string)
  * present for an interpreter.
  *
  * Parameters:
- *   o interp (I) - Interpreter to set the result in.
- *   o args (I) - Strings to append, terminated by a NULL.
+ *   o interp - Interpreter to set the result in.
+ *   o args - Strings to append, terminated by a NULL.
  *-----------------------------------------------------------------------------
  */
 void
@@ -985,7 +994,7 @@ TclX_AppendResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
  * out forcing a conversion.
  *
  * Parameters:
- *   o objPtr (I) - Object to check.
+ *   o objPtr - Object to check.
  * Returns:
  *   True if NULL, FALSE if not.
  *-----------------------------------------------------------------------------

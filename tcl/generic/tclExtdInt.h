@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.11 1997/06/30 15:35:57 markd Exp $
+ * $Id: tclExtdInt.h,v 8.12 1997/07/01 02:26:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -238,8 +238,10 @@ TclX_WriteStr _ANSI_ARGS_((Tcl_Channel  channel,
 
 
 extern int
-TclX_GetChannelOption _ANSI_ARGS_((Tcl_Channel channel,
-                                   int         option));
+TclX_GetChannelOption _ANSI_ARGS_((Tcl_Interp  *interp,
+                                   Tcl_Channel  channel,
+                                   int          option,
+                                   int         *valuePtr));
 
 extern Tcl_Obj *
 TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,

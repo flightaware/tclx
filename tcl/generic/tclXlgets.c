@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.8 1997/06/30 07:57:45 markd Exp $
+ * $Id: tclXlgets.c,v 8.1 1997/07/01 02:26:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -409,7 +409,7 @@ TclX_LgetsObjCmd (clientData, interp, objc, objv)
 {
     Tcl_Channel channel;
     ReadData readData;
-    int rstat;
+    int rstat, optValue;
     Tcl_Obj *elemObj, *dataObj;
 
     if ((objc < 2) || (objc > 3)) {
@@ -425,8 +425,10 @@ TclX_LgetsObjCmd (clientData, interp, objc, objv)
      * yet.
      * FIX: Make callback driven for non-blocking.
      */
-    if (TclX_GetChannelOption (channel, TCLX_COPT_BLOCKING) ==
-            TCLX_MODE_NONBLOCKING) {
+    if (TclX_GetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                               &optValue) != TCL_OK)
+        return TCL_ERROR;
+    if (optValue == TCLX_MODE_NONBLOCKING) {
         TclX_AppendResult (interp, "channel is non-blocking; not currently ",
                            "supported by the lgets command", (char *) NULL);
         return TCL_ERROR;

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.8 1997/06/30 07:57:45 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.9 1997/07/01 02:26:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -293,11 +293,19 @@ TclX_CopyfileObjCmd (clientData, interp, objc, objv)
         goto errorExit;
 
     if (!translate) {
-        Tcl_GetChannelOption (inChan, TCL_TRANSLATION_OPT, &inChanTrans);
-        Tcl_GetChannelOption (outChan, TCL_TRANSLATION_OPT, &outChanTrans);
-        Tcl_GetChannelOption (inChan, TCL_EOFCHAR_OPT, &inChanEOF);
-        Tcl_GetChannelOption (outChan, TCL_EOFCHAR_OPT, &outChanEOF);
-        
+        if (Tcl_GetChannelOption (interp, inChan, TCL_TRANSLATION_OPT,
+                                  &inChanTrans) != TCL_OK)
+            goto errorExit;
+        if (Tcl_GetChannelOption (interp, outChan, TCL_TRANSLATION_OPT,
+                                  &outChanTrans) != TCL_OK)
+            goto errorExit;
+        if (Tcl_GetChannelOption (interp, inChan, TCL_EOFCHAR_OPT,
+                                  &inChanEOF) != TCL_OK)
+            goto errorExit;
+        if (Tcl_GetChannelOption (interp, outChan, TCL_EOFCHAR_OPT,
+                                  &outChanEOF) != TCL_OK)
+            goto errorExit;
+
         if (Tcl_SetChannelOption (interp, inChan, TCL_TRANSLATION_OPT,
                                   "binary") != TCL_OK)
             goto errorExit;
