@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.13 1993/11/02 07:48:44 markd Exp markd $
+ * $Id: tclXfilescan.c,v 3.0 1993/11/19 06:58:41 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,33 +42,24 @@ typedef struct scanContext_t {
 } scanContext_t;
 
 /*
- * Global data structure, pointer to by clientData.
- */
-
-typedef struct {
-    void_pt         tblHdrPtr;     /* Scan context handle table           */
-    char            curName [16];  /* Current context name.               */ 
-} scanGlob_t;
-
-/*
  * Prototypes of internal functions.
  */
 static void
-CleanUpContext _ANSI_ARGS_((scanGlob_t     *scanGlobPtr,
+CleanUpContext _ANSI_ARGS_((void_pt         scanTablePtr,
                             scanContext_t  *contextPtr));
 
 static int
 CreateScanContext _ANSI_ARGS_((Tcl_Interp  *interp,
-                               scanGlob_t  *scanGlobPtr));
+                               void_pt      scanTablePtr));
 
 static int
 SelectScanContext _ANSI_ARGS_((Tcl_Interp  *interp,
-                               scanGlob_t  *scanGlobPtr,
+                               void_pt      scanTablePtr,
                                char        *contextHandle));
 
 static int
 Tcl_Delete_scancontextCmd _ANSI_ARGS_((Tcl_Interp  *interp,
-                                       scanGlob_t  *scanGlobPtr,
+                                       void_pt      scanTablePtr,
                                        char        *contextHandle));
 
 static int
@@ -92,13 +83,13 @@ FileScanCleanUp _ANSI_ARGS_((ClientData  clientData,
  *-----------------------------------------------------------------------------
  * CleanUpContext --
  *
- *   Release all resources allocated to the specified scan context entry.  The
- *  entry itself is not released.
+ *   Release all resources allocated to the specified scan context.  Doesn't
+ * free the table entry.
  *-----------------------------------------------------------------------------
  */
 static void
-CleanUpContext (scanGlobPtr, contextPtr)
-    scanGlob_t    *scanGlobPtr;
+CleanUpContext (scanTablePtr, contextPtr)
+    void_pt        scanTablePtr;
     scanContext_t *contextPtr;
 {
     matchDef_t  *matchPtr, *oldMatchPtr;
@@ -111,13 +102,10 @@ CleanUpContext (scanGlobPtr, contextPtr)
         matchPtr = matchPtr->nextMatchDefPtr;
         ckfree ((char *) oldMatchPtr);
         }
-    contextPtr->matchListHead = NULL;
-    contextPtr->matchListTail = NULL;
-
     if (contextPtr->defaultAction != NULL) {
         ckfree(contextPtr->defaultAction);
-        contextPtr->defaultAction = NULL;
     }
+    ckfree (contextPtr);
 }
 
 /*
@@ -129,20 +117,24 @@ CleanUpContext (scanGlobPtr, contextPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-CreateScanContext (interp, scanGlobPtr)
+CreateScanContext (interp, scanTablePtr)
     Tcl_Interp  *interp;
-    scanGlob_t  *scanGlobPtr;
+    void_pt     *scanTablePtr;
 {
-    scanContext_t *contextPtr;
+    scanContext_t *contextPtr, **tableEntryPtr;
+    char           curName [16];
 
-    contextPtr = (scanContext_t *) Tcl_HandleAlloc (scanGlobPtr->tblHdrPtr, 
-                                                    scanGlobPtr->curName);
+    contextPtr = (scanContext_t *) ckalloc (sizeof (scanContext_t));
     contextPtr->flags = 0;
     contextPtr->matchListHead = NULL;
     contextPtr->matchListTail = NULL;
     contextPtr->defaultAction = NULL;
 
-    Tcl_SetResult (interp, scanGlobPtr->curName, TCL_STATIC);
+    tableEntryPtr = (scanContext_t **) Tcl_HandleAlloc (scanTablePtr,
+                                                        curName);
+    *tableEntryPtr = contextPtr;
+
+    Tcl_SetResult (interp, curName, TCL_STATIC);
     return TCL_OK;
 }
 
@@ -155,21 +147,21 @@ CreateScanContext (interp, scanGlobPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-DeleteScanContext (interp, scanGlobPtr, contextHandle)
+DeleteScanContext (interp, scanTablePtr, contextHandle)
     Tcl_Interp  *interp;
-    scanGlob_t  *scanGlobPtr;
+    void_pt      scanTablePtr;
     char        *contextHandle;
 {
-    scanContext_t *contextPtr;
+    scanContext_t **tableEntryPtr;
 
-    contextPtr = (scanContext_t *) Tcl_HandleXlate (interp,
-                                                    scanGlobPtr->tblHdrPtr, 
-                                                    contextHandle);
-    if (contextPtr == NULL)
+    tableEntryPtr = (scanContext_t **) Tcl_HandleXlate (interp,
+                                                        scanTablePtr,
+                                                        contextHandle);
+    if (tableEntryPtr == NULL)
         return TCL_ERROR;
 
-    CleanUpContext (scanGlobPtr, contextPtr);
-    Tcl_HandleFree (scanGlobPtr->tblHdrPtr, contextPtr);
+    CleanUpContext (scanTablePtr, *tableEntryPtr);
+    Tcl_HandleFree (scanTablePtr, tableEntryPtr);
 
     return TCL_OK;
 }
@@ -190,8 +182,6 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    scanGlob_t  *scanGlobPtr = (scanGlob_t *) clientData;
-
     if (argc < 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " option",
                           (char *) NULL);
@@ -206,7 +196,7 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
                               (char *) NULL);
             return TCL_ERROR;
         }
-        return CreateScanContext (interp, scanGlobPtr);        
+        return CreateScanContext (interp, (void_pt) clientData);
     }
     
     /*
@@ -218,7 +208,7 @@ Tcl_ScancontextCmd (clientData, interp, argc, argv)
                               "delete contexthandle", (char *) NULL);
             return TCL_ERROR;
         }
-        return DeleteScanContext (interp, scanGlobPtr, argv [2]);
+        return DeleteScanContext (interp, (void_pt) clientData, argv [2]);
     }
     
     Tcl_AppendResult (interp, "invalid argument, expected one of: ",
@@ -243,8 +233,7 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    scanGlob_t     *scanGlobPtr = (scanGlob_t *) clientData;
-    scanContext_t  *contextPtr;
+    scanContext_t  *contextPtr, **tableEntryPtr;
     char           *result;
     matchDef_t     *newmatch;
     int             compFlags = REXP_BOTH_ALGORITHMS;
@@ -264,11 +253,13 @@ Tcl_ScanmatchCmd (clientData, interp, argc, argv)
     if (((firstArg == 2) && (argc != 5)) || ((firstArg == 1) && (argc > 4)))
         goto argError;
 
-    contextPtr = (scanContext_t *) Tcl_HandleXlate (interp,
-                                                    scanGlobPtr->tblHdrPtr, 
-                                                    argv [firstArg]);
-    if (contextPtr == NULL)
+    tableEntryPtr = (scanContext_t **)
+        Tcl_HandleXlate (interp,
+                         (void_pt) clientData, 
+                         argv [firstArg]);
+    if (tableEntryPtr == NULL)
         return TCL_ERROR;
+    contextPtr = *tableEntryPtr;
 
     /*
      * Handle the default case (no regular expression).
@@ -431,8 +422,7 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    scanGlob_t       *scanGlobPtr = (scanGlob_t *) clientData;
-    scanContext_t    *contextPtr;
+    scanContext_t    *contextPtr, **tableEntryPtr;
     Tcl_DString       dynBuf, lowerDynBuf;
     FILE             *filePtr;
     matchDef_t       *matchPtr;
@@ -462,11 +452,13 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
 	}
     }
 
-    contextPtr = (scanContext_t *) Tcl_HandleXlate (interp,
-                                                    scanGlobPtr->tblHdrPtr, 
-                                                    argv [contextHandleIndex]);
-    if (contextPtr == NULL)
+    tableEntryPtr = (scanContext_t **)
+        Tcl_HandleXlate (interp,
+                         (void_pt) clientData, 
+                         argv [contextHandleIndex]);
+    if (tableEntryPtr == NULL)
         return TCL_ERROR;
+    contextPtr = *tableEntryPtr;
 
     if (Tcl_GetOpenFile (interp, argv [fileHandleIndex],
                          FALSE,  /* Read access  */
@@ -611,20 +603,19 @@ FileScanCleanUp (clientData, interp)
     ClientData  clientData;
     Tcl_Interp *interp;
 {
-    scanGlob_t    *scanGlobPtr = (scanGlob_t *) clientData;
-    scanContext_t *contextPtr;
-    int            walkKey;
+    scanContext_t **tableEntryPtr;
+    int             walkKey;
     
     walkKey = -1;
     while (TRUE) {
-        contextPtr = (scanContext_t *) Tcl_HandleWalk (scanGlobPtr->tblHdrPtr, 
-                                                       &walkKey);
-        if (contextPtr == NULL)
+        tableEntryPtr =
+            (scanContext_t **) Tcl_HandleWalk ((void_pt) clientData, 
+                                               &walkKey);
+        if (tableEntryPtr == NULL)
             break;
-        CleanUpContext (scanGlobPtr, contextPtr);
+        CleanUpContext ((void_pt) clientData, *tableEntryPtr);
     }
-    Tcl_HandleTblRelease (scanGlobPtr->tblHdrPtr);
-    ckfree ((char *) scanGlobPtr);
+    Tcl_HandleTblRelease ((void_pt) clientData);
 }
 
 /*
@@ -638,23 +629,22 @@ void
 Tcl_InitFilescan (interp)
     Tcl_Interp *interp;
 {
-    scanGlob_t  *scanGlobPtr;
-    void_pt      fileCbTblPtr;
+    void_pt  scanTablePtr;
 
-    scanGlobPtr = (scanGlob_t *) ckalloc (sizeof (scanGlob_t));
-    scanGlobPtr->tblHdrPtr = 
-        Tcl_HandleTblInit ("context", sizeof (scanContext_t), 5);
+    scanTablePtr = Tcl_HandleTblInit ("context",
+                                      sizeof (scanContext_t *),
+                                      10);
 
-    Tcl_CallWhenDeleted (interp, FileScanCleanUp, (ClientData) scanGlobPtr);
+    Tcl_CallWhenDeleted (interp, FileScanCleanUp, (ClientData) scanTablePtr);
 
     /*
      * Initialize the commands.
      */
     Tcl_CreateCommand (interp, "scanfile", Tcl_ScanfileCmd, 
-                       (ClientData) scanGlobPtr, (void (*)()) NULL);
+                       (ClientData) scanTablePtr, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "scanmatch", Tcl_ScanmatchCmd, 
-                       (ClientData) scanGlobPtr, (void (*)()) NULL);
+                       (ClientData) scanTablePtr, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "scancontext", Tcl_ScancontextCmd,
-                       (ClientData) scanGlobPtr, (void (*)()) NULL);
+                       (ClientData) scanTablePtr, (void (*)()) NULL);
 }
 
