@@ -1,11 +1,11 @@
-                           Extended Tcl (TclX) 7.5a
-                           ========================
+                           Extended Tcl (TclX) 7.5.0
+                           =========================
 
-TclX 7.5 Beta 2 Release
+TclX 7.5.0 Beta 3 Release
 ========================
 
-This is the first TclX beta release that is compatible with the Tcl 7.5 /
-Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 2 releases.
+This is the third TclX beta release that is compatible with the Tcl 7.5 /
+Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 3 releases.
 
 Shared library support has been added.  It needs a lot of testing
 on different platforms.  Please try it (configure --enable-shared).
@@ -22,26 +22,26 @@ INTRODUCTION
 ============
 
     Extended Tcl (TclX), is a set of extensions to Tcl 7.5, the Tool Command
-Language invented by Dr. John Ousterhout at the University of California at
-Berkeley.  Tcl is a powerful, yet simple embeddable programming language.
-Extended Tcl is oriented towards Unix system programming tasks and large
-application development.  Many additional interfaces to the Unix operating
-system are provided.  It is upwardly compatible with Tcl 7.5.  You take the
-Extended Tcl package, add it to Tcl 7.5, and from that you get Extended Tcl.
-(Tcl is not included in this distribution, obtain it from ftp.smli.com).
+Language invented by Dr. John Ousterhout.  Tcl is a powerful, yet simple
+embeddable programming language.  Extended Tcl is oriented towards Unix system
+programming tasks and large application development.  Many additional
+interfaces to the Unix operating system are provided.  It is upwardly
+compatible with Tcl 7.5.  You take the Extended Tcl package, add it to Tcl
+7.5, and from that you get Extended Tcl.  (Tcl is not included in this
+distribution, obtain it from ftp.smli.com).
 
-   Support is also included for building a Tk 4.0 wish shell (wishx)
-with the Extended Tcl command set.
+   Support is also included for building a Tk 4.1 wish shell (wishx)
+with the Extended Tcl command set and signal handling.
 
-   While this TclX distribution is tested with Tcl 7.5 and Tk 4.0, it will
+   While this TclX distribution is tested with Tcl 7.5 and Tk 4.1, it will
 probably work with new versions of Tcl & Tk with little or no changes.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
 (karl@NeoSoft.com) and Mark Diekhans (markd@Grizzly.com), with help
 in the early stages from Peter da Silva (peter@NeoSoft.com).
 
-   As with Berkeley Tcl, all of Extended Tcl is freely
-redistributable, including for commercial use and resale.
+   As with Tcl, all of Extended Tcl is freely redistributable, including for
+commercial use and resale.
 
 
 BUILDING TCLX
@@ -50,8 +50,8 @@ BUILDING TCLX
    For instructions on how to build TclX on Unix and Unix-like systems,
 see unix/INSTALL.
 
-CHANGES IN TCLX 7.5a
-====================
+CHANGES IN TCLX 7.5.0
+=====================
 
   o The TclX runtime is no longer independent of the standard Tcl and
     Tk runtimes.  Tcl & Tk must be installed (or the TCL_LIBRARY and
@@ -117,10 +117,9 @@ Tcl, see the manual page man/TclX.man.
 ON-LINE HELP
 ============
 
-    There is a help system included with Extended Tcl.  It contains
-some documentation on every command in Berkeley Tcl, Extended Tcl
-and Tk.  You can invoke it interactively from within Extended Tcl by
-typing "help".
+    There is a help system included with Extended Tcl.  It contains some
+documentation on every command in Tcl, Extended Tcl and Tk.  You can invoke it
+interactively from within Extended Tcl by typing "help".
 
     Once you bring Tcl up and have gotten it to pass all the tests,
 try typing "help help" to learn how to use help.
@@ -131,31 +130,15 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX7.5a/man.  Start with the
+the extensions in the directory tclX7.5.0/man.  Start with the
 TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
 ===========================
 
     Extended Tcl takes its version number from the corresponding
-version of Berkeley (Ousterhout) Tcl upon which it is based, with
-the addition of a trailing letter in case there are multiple
-releases of Extended Tcl within a single release of Berkeley Tcl.
-This release is TclX 7.5a.
-
-PACKAGE LIBRARIES
-=================
-
-    Package Libraries are a Tcl source code management tool included
-in this release.  Package libraries allow you to group Tcl
-procedures into logical bundles and create single files, libraries,
-that contain multiple packages.  The package code provides a
-low-overhead means of automatically demand-loading a package on the
-first attempt to execute one of the procedures defined within it.
-As such, package libraries provide a mechanism to accommodate the
-creation of Tcl applications and libraries of a substantial size.
-The TclX library mechanism is a super-set of the mechanism provided
-with standard Tcl.
+version of Tcl upon which it is based, with the addition of another
+decimal number.  This release is TclX 7.5.0.
 
 LINKING APPLICATIONS AND EXTENSION WITH TCLX
 ============================================
@@ -176,19 +159,19 @@ See the TclXInit.3 manual page for more details.
 SUPPORT FOR EXTENDED TCL
 ========================
 
-    We are committed to providing continuing support for Extended
-Tcl.  Please send questions, bug reports, and bug fixes to:
+    We are committed to providing continuing support for Extended Tcl.
+Please send questions, bug reports, and bug fixes to:
 
          tcl-project@NeoSoft.com
 
 WHERE TO GET IT
 ===============
 
-Extended Tcl 7.5a can be downloaded by anonymous FTP from:
+Extended Tcl 7.5.0 can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/distrib/tclX7.5a.tar.gz
+   ftp.neosoft.com:/pub/tcl/distrib/tclX7.5.0.tar.gz
 or
-   ftp.aud.alcatel.com:tcl/extensions/tclX7.5a.tar.gz
+   ftp.aud.alcatel.com:tcl/extensions/tclX7.5.0.tar.gz
 
 Always check ftp.neosoft.com first, as there is often a delay in
 updating the Alcatel archives.

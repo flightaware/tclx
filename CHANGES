@@ -1110,4 +1110,7 @@
     created the shell will enter an event loop at the end of the top level
     script instead of exiting.  Suggested by Jan Nijtmans
     <nijtmans@nici.kun.nl>.
+  o Changed TclX version numbering scheme to append a decimal and a number
+    to the base Tcl version instead of a letter.  This makes it compatible
+    with the Tcl package versioning mechanism.
 -------------------------------------------------------------------------------

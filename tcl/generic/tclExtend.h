@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.14 1996/03/04 23:11:55 markd Exp $
+ * $Id: tclExtend.h,v 5.15 1996/03/10 04:42:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -23,25 +23,29 @@
 #include "tcl.h"
 
 /*
- * The version for TclX and TkX.  This is based on the version of Tcl and Tk
- * that TclX was released against.  Its possible that TclX maybe running with a
- * different version of Tcl or Tk.  The full version includes the patchlevel
- * if its greater than zero.  The shared library versions are the version
- * suffixes for libraries (if supported).  It is made by using the Tcl or
- * Tk version as the major version and the TclX suffix, converted to a number,
- * as a minor. (a = 10, a-p1 = 11, b = 20).
+ * The versions for TclX and TkX.  This is based on the versions of Tcl and Tk
+ * that TclX was released against.  Its possible that TclX maybe running with
+ * a different version of Tcl or Tk.  The basic versions are used for package
+ * provide, the symbolic versions as used for file names and include beta
+ * release information.  The shared library versions are the version suffixes
+ * for libraries (if supported).  It is made by using the Tcl or Tk version as
+ * the major version and the TclX suffix, converted to a number, as a minor.
+ *
+ * Examples:
+ *   Release        _VERSION  _SYM_VERSION  _SHLIB_VERSION
+ *   7.5.0           7.5.0     7,5.0         75.0
+ *   7.5.1 beta 1    7.5.1     7,5.1-b1      75.1
  */
 
-#define TCLX_VERSION_SUFFIX "a-b2"
 #define TCLX_PATCHLEVEL      0
 
-#define TCLX_VERSION        "7.5a-b3"
-#define TCLX_FULL_VERSION   "7.5a-b3"
-#define TCLX_SHLIB_VERSION  "75.10"
+#define TCLX_VERSION        "7.5.0"
+#define TCLX_SYM_VERSION    "7.5.0-b3"    
+#define TCLX_SHLIB_VERSION  "75.0"
 
-#define TKX_VERSION         "4.1a-b3"
-#define TKX_FULL_VERSION    "4.1a-b3"
-#define TKX_SHLIB_VERSION   "41.10"
+#define TKX_VERSION         "4.1.0"
+#define TKX_SYM_VERSION     "4.1.0-b3"
+#define TKX_SHLIB_VERSION   "41.0"
 
 /*
  * Generic void pointer.

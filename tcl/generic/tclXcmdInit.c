@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.6 1996/02/20 01:13:09 markd Exp $
+ * $Id: tclXcmdInit.c,v 5.7 1996/02/20 09:10:06 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -162,7 +162,7 @@ Tclxcmd_SafeInit (interp)
     TclX_SetAppInfo (TRUE,
                      "TclX",
                      "Extended Tcl",
-                     TCLX_VERSION,
+                     TCLX_SYM_VERSION,
                      TCLX_PATCHLEVEL);
 
 

@@ -524,7 +524,7 @@ else
 fi
 
 
-# From configure.in Revision: 5.22 dnl
+# From configure.in Revision: 5.23 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -706,7 +706,7 @@ echo $ac_n "checking TclX versions""... $ac_c" 1>&6
 
 eval `egrep '^#define T.*_VERSION' $srcbasedir/tcl/generic/tclExtend.h | \
       sed -e 's/#define //' -e 's/ *"/="/'`
-echo "$ac_t""$TCLX_FULL_VERSION" 1>&6
+echo "$ac_t""$TCLX_SYM_VERSION" 1>&6
 
 
 
@@ -2706,9 +2706,9 @@ s%@TKX_INST_INCL@%$TKX_INST_INCL%g
 s%@TKX_INST_MAN@%$TKX_INST_MAN%g
 s%@srcbasedir@%$srcbasedir%g
 s%@bldbasedir@%$bldbasedir%g
-s%@TCLX_FULL_VERSION@%$TCLX_FULL_VERSION%g
+s%@TCLX_SYM_VERSION@%$TCLX_SYM_VERSION%g
 s%@TCLX_SHLIB_VERSION@%$TCLX_SHLIB_VERSION%g
-s%@TKX_FULL_VERSION@%$TKX_FULL_VERSION%g
+s%@TKX_SYM_VERSION@%$TKX_SYM_VERSION%g
 s%@TKX_SHLIB_VERSION@%$TKX_SHLIB_VERSION%g
 s%@TCL_DEFS@%$TCL_DEFS%g
 s%@TCL_LIBS@%$TCL_LIBS%g
