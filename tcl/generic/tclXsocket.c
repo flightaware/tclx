@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 8.3 1997/06/30 03:56:04 markd Exp $
+ * $Id: tclXsocket.c,v 8.4 1997/06/30 07:57:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -95,15 +95,15 @@ ReturnGetHostError (interp, host)
  * Used by the fstat command.
  *     
  * Parameters:
- *   o interp (O) - List is returned in the result.
+ *   o interp (O) - Error messages are returned in the result.
  *   o channel (I) - Channel associated with the socket.
  *   o remoteHost (I) -  TRUE to get remote host information, FALSE to get 
  *     local host info.
  * Returns:
- *   TCL_OK or TCL_ERROR.
+ *   An object with the list of information, or NULL if an error occured.
  *-----------------------------------------------------------------------------
  */
-int
+Tcl_Obj *
 TclXGetHostInfo (interp, channel, remoteHost)
     Tcl_Interp *interp;
     Tcl_Channel channel;
@@ -112,16 +112,16 @@ TclXGetHostInfo (interp, channel, remoteHost)
     struct sockaddr_in sockaddr;
     struct hostent *hostEntry;
     char *hostName;
-    char portText [32];
+    Tcl_Obj *listObjv [3];
 
     if (remoteHost) {
         if (TclXOSgetpeername (interp, channel,
                                &sockaddr, sizeof (sockaddr)) != TCL_OK)
-            return TCL_ERROR;
+            return NULL;
     } else {
         if (TclXOSgetsockname (interp, channel, &sockaddr,
                                sizeof (sockaddr)) != TCL_OK)
-            return TCL_ERROR;
+            return NULL;
     }
 
     hostEntry = gethostbyaddr ((char *) &(sockaddr.sin_addr),
@@ -132,14 +132,11 @@ TclXGetHostInfo (interp, channel, remoteHost)
     else
         hostName = "";
 
-    Tcl_AppendElement (interp, inet_ntoa (sockaddr.sin_addr));
-
-    Tcl_AppendElement (interp, hostName);
-
-    sprintf (portText, "%u", ntohs (sockaddr.sin_port));
-    Tcl_AppendElement (interp, portText);
-       
-    return TCL_OK;
+    listObjv [0] = Tcl_NewStringObj (inet_ntoa (sockaddr.sin_addr), -1);
+    listObjv [1] = Tcl_NewStringObj (hostName, -1);
+    listObjv [2] = Tcl_NewIntObj (ntohs (sockaddr.sin_port));
+    
+    return Tcl_NewListObj (3, listObjv);
 }
 
 /*-----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 8.0.4.1 1997/04/14 02:02:23 markd Exp $
+# $Id: fstat.test,v 8.1 1997/04/17 04:59:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -175,6 +175,7 @@ Test fstat-5.5 {error handling} {
     fstat $gorpFH stat foo baz
 } 1 {wrong # args: fstat fileId ?item?|?stat arrayVar?}
 
+# FIX: Need localhost/remotehost tests.
 
 catch {close $gorpFH}
 TestRemove gorp.file fstat.tmp

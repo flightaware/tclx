@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.2 1997/06/12 21:08:18 markd Exp $
+ * $Id: tclXfstat.c,v 8.3 1997/06/30 03:55:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -61,7 +61,7 @@ static int
 ReturnStatArray _ANSI_ARGS_((Tcl_Interp   *interp,
                              int           ttyDev,
                              struct stat  *statBufPtr,
-                             char         *arrayName));
+                             Tcl_Obj      *arrayObj));
 
 static int
 ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
@@ -71,7 +71,10 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
                             char         *itemName));
 
 static int 
-TclX_FstatCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+TclX_FstatObjCmd _ANSI_ARGS_((ClientData clientData, 
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -117,23 +120,33 @@ ReturnStatList (interp,ttyDev, statBufPtr)
     int           ttyDev;
     struct stat  *statBufPtr;
 {
-    char statList [200];
-
-    /* FIX: use keyedlist routines. */
-    sprintf (statList, 
-             "{atime %ld} {ctime %ld} {dev %ld} {gid %ld} {ino %ld} {mode %ld} ",
-              (long) statBufPtr->st_atime, (long) statBufPtr->st_ctime,
-              (long) statBufPtr->st_dev,   (long) statBufPtr->st_gid,
-              (long) statBufPtr->st_ino,   (long) statBufPtr->st_mode);
-    Tcl_AppendResult (interp, statList, (char *) NULL);
-
-    sprintf (statList, 
-             "{mtime %ld} {nlink %ld} {size %ld} {uid %ld} {tty %d} {type %s}",
-             (long) statBufPtr->st_mtime,  (long) statBufPtr->st_nlink,
-             (long) statBufPtr->st_size,   (long) statBufPtr->st_uid,
-             (int) ttyDev, StrFileType (statBufPtr));
-    Tcl_AppendResult (interp, statList, (char *) NULL);
-
+    Tcl_Obj *keylPtr = TclX_NewKeyedListObj ();
+    
+    TclX_KeyedListSet (interp, keylPtr, "atime",
+                       Tcl_NewLongObj ((long) statBufPtr->st_atime));
+    TclX_KeyedListSet (interp, keylPtr, "ctime",
+                       Tcl_NewLongObj ((long) statBufPtr->st_ctime));
+    TclX_KeyedListSet (interp, keylPtr, "dev",
+                       Tcl_NewIntObj ((int) statBufPtr->st_dev));
+    TclX_KeyedListSet (interp, keylPtr, "gid",
+                       Tcl_NewIntObj ((int) statBufPtr->st_gid));
+    TclX_KeyedListSet (interp, keylPtr, "ino",
+                       Tcl_NewIntObj ((int) statBufPtr->st_ino));
+    TclX_KeyedListSet (interp, keylPtr, "mode",
+                       Tcl_NewIntObj ((int) statBufPtr->st_mode));
+    TclX_KeyedListSet (interp, keylPtr, "mtime",
+                       Tcl_NewLongObj ((long) statBufPtr->st_mtime));
+    TclX_KeyedListSet (interp, keylPtr, "nlink",
+                       Tcl_NewIntObj ((int) statBufPtr->st_nlink));
+    TclX_KeyedListSet (interp, keylPtr, "size",
+                       Tcl_NewLongObj ((long) statBufPtr->st_size));
+    TclX_KeyedListSet (interp, keylPtr, "uid",
+                       Tcl_NewIntObj ((int) statBufPtr->st_uid));
+    TclX_KeyedListSet (interp, keylPtr, "tty",
+                       Tcl_NewBooleanObj (ttyDev));
+    TclX_KeyedListSet (interp, keylPtr, "type",
+                       Tcl_NewStringObj (StrFileType (statBufPtr), -1));
+    Tcl_SetObjResult (interp, keylPtr);
 }
 
 /*-----------------------------------------------------------------------------
@@ -146,81 +159,98 @@ ReturnStatList (interp,ttyDev, statBufPtr)
  *   o ttyDev (O) - A boolean indicating if the device is associated with a
  *     tty.
  *   o statBufPtr (I) - Pointer to a buffer initialized by stat or fstat.
- *   o arrayName (I) - The name of the array to return the info in.
+ *   o arrayObj (I) - The the array to return the info in.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatArray (interp, ttyDev, statBufPtr, arrayName)
+ReturnStatArray (interp, ttyDev, statBufPtr, arrayObj)
     Tcl_Interp   *interp;
     int           ttyDev;
     struct stat  *statBufPtr;
-    char         *arrayName;
+    Tcl_Obj      *arrayObj;
 {
-    char numBuf [30];
+    Tcl_Obj *idxObj = Tcl_NewObj ();
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_dev);
-    if  (Tcl_SetVar2 (interp, arrayName, "dev", numBuf, 
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
-
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_ino);
-    if  (Tcl_SetVar2 (interp, arrayName, "ino", numBuf,
+    Tcl_SetStringObj (idxObj, "dev", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewIntObj ((int) statBufPtr->st_dev),
                          TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_mode);
-    if  (Tcl_SetVar2 (interp, arrayName, "mode", numBuf, 
+    Tcl_SetStringObj (idxObj, "ino", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewIntObj ((int) statBufPtr->st_ino),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
+
+    Tcl_SetStringObj (idxObj, "mode", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewIntObj ((int) statBufPtr->st_mode),
                       TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_nlink);
-    if  (Tcl_SetVar2 (interp, arrayName, "nlink", numBuf,
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "nlink", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewIntObj ((int) statBufPtr->st_nlink),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_uid);
-    if  (Tcl_SetVar2 (interp, arrayName, "uid", numBuf,
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "uid", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewIntObj ((int) statBufPtr->st_uid),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_gid);
-    if  (Tcl_SetVar2 (interp, arrayName, "gid", numBuf,
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "gid", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewIntObj ((int) statBufPtr->st_gid),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_size);
-    if  (Tcl_SetVar2 (interp, arrayName, "size", numBuf,
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "size", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewLongObj ((long) statBufPtr->st_size),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_atime);
-    if  (Tcl_SetVar2 (interp, arrayName, "atime", numBuf,
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "atime", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewLongObj ((long) statBufPtr->st_atime),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_mtime);
-    if  (Tcl_SetVar2 (interp, arrayName, "mtime", numBuf,
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "mtime", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewLongObj ((long) statBufPtr->st_mtime),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    sprintf (numBuf, "%ld", (long) statBufPtr->st_ctime);
-    if  (Tcl_SetVar2 (interp, arrayName, "ctime", numBuf,
-                      TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "ctime", -1);
+    if  (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                         Tcl_NewLongObj ((long) statBufPtr->st_ctime),
+                         TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    if (Tcl_SetVar2 (interp, arrayName, "tty", 
-                     ttyDev ? "1" : "0",
-                     TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "tty", -1);
+    if (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                        Tcl_NewBooleanObj (ttyDev),
+                        TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
-    if (Tcl_SetVar2 (interp, arrayName, "type", StrFileType (statBufPtr),
-                     TCL_LEAVE_ERR_MSG) == NULL)
-        return TCL_ERROR;
+    Tcl_SetStringObj (idxObj, "type", -1);
+    if (Tcl_ObjSetVar2 (interp, arrayObj, idxObj,
+                        Tcl_NewStringObj (StrFileType (statBufPtr), -1),
+                        TCL_LEAVE_ERR_MSG) == NULL)
+        goto errorExit;
 
+    Tcl_DecrRefCount (idxObj);
     return TCL_OK;
 
+  errorExit:
+    Tcl_DecrRefCount (idxObj);
+    goto errorExit;
 }
 
 /*-----------------------------------------------------------------------------
@@ -247,78 +277,76 @@ ReturnStatItem (interp, channel, ttyDev, statBufPtr, itemName)
     struct stat  *statBufPtr;
     char         *itemName;
 {
-    char numBuf [32];
+    Tcl_Obj *objPtr;
 
-    numBuf [0] = '\0';
     if (STREQU (itemName, "dev"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_dev);
+        objPtr = Tcl_NewIntObj ((int) statBufPtr->st_dev);
     else if (STREQU (itemName, "ino"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_ino);
+        objPtr = Tcl_NewIntObj ((int) statBufPtr->st_ino);
     else if (STREQU (itemName, "mode"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_mode);
+        objPtr = Tcl_NewIntObj ((int) statBufPtr->st_mode);
     else if (STREQU (itemName, "nlink"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_nlink);
+        objPtr = Tcl_NewIntObj ((int) statBufPtr->st_nlink);
     else if (STREQU (itemName, "uid"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_uid);
+        objPtr = Tcl_NewIntObj ((int) statBufPtr->st_uid);
     else if (STREQU (itemName, "gid"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_gid);
+        objPtr = Tcl_NewIntObj ((int) statBufPtr->st_gid);
     else if (STREQU (itemName, "size"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_size);
+        objPtr = Tcl_NewLongObj ((long) statBufPtr->st_size);
     else if (STREQU (itemName, "atime"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_atime);
+        objPtr = Tcl_NewLongObj ((long) statBufPtr->st_atime);
     else if (STREQU (itemName, "mtime"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_mtime);
+        objPtr = Tcl_NewLongObj ((long) statBufPtr->st_mtime);
     else if (STREQU (itemName, "ctime"))
-        sprintf (numBuf, "%ld", (long) statBufPtr->st_ctime);
+        objPtr = Tcl_NewLongObj ((long) statBufPtr->st_ctime);
     else if (STREQU (itemName, "type"))
-        strcpy (numBuf, StrFileType (statBufPtr));
+        objPtr = Tcl_NewStringObj (StrFileType (statBufPtr), -1);
     else if (STREQU (itemName, "tty"))
-        strcpy (numBuf, ttyDev ? "1" : "0");
+        objPtr = Tcl_NewBooleanObj (ttyDev);
     else if (STREQU (itemName, "remotehost")) {
-        if (TclXGetHostInfo (interp, channel, TRUE) != TCL_OK)
+        objPtr = TclXGetHostInfo (interp, channel, TRUE);
+        if (objPtr == NULL)
             return TCL_ERROR;
     } else if (STREQU (itemName, "localhost")) {
-        if (TclXGetHostInfo (interp, channel, FALSE) != TCL_OK)
+        objPtr = TclXGetHostInfo (interp, channel, FALSE);
+        if (objPtr == NULL)
             return TCL_ERROR;
     } else {
-        Tcl_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
-                          "\"atime\", \"ctime\", \"dev\", \"gid\", \"ino\", ",
-                          "\"mode\", \"mtime\", \"nlink\", \"size\", ",
-                          "\"tty\", \"type\", \"uid\", \"remotehost\", or ",
-                          "\"localhost\"", (char *) NULL);
+        TclX_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
+                           "\"atime\", \"ctime\", \"dev\", \"gid\", \"ino\", ",
+                           "\"mode\", \"mtime\", \"nlink\", \"size\", ",
+                           "\"tty\", \"type\", \"uid\", \"remotehost\", or ",
+                           "\"localhost\"", (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (numBuf [0] != '\0')
-        Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
-
+    Tcl_SetObjResult (interp, objPtr);
     return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_FstatCmd --
+ * TclX_FstatObjCmd --
  *      Implements the fstat TCL command:
  *         fstat fileId ?item?|?stat arrayvar?
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_FstatCmd (clientData, interp, argc, argv)
+TclX_FstatObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
     Tcl_Channel channel;
     struct stat statBuf;
     int ttyDev;
 
-    if ((argc < 2) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " fileId ?item?|?stat arrayVar?", (char *) NULL);
-        return TCL_ERROR;
+    if ((objc < 2) || (objc > 4)) {
+        return TclX_WrongArgs (interp, objv [0], 
+                               "fileId ?item?|?stat arrayVar?");
     }
     
-    channel = TclX_GetOpenChannel (interp, argv [1], 0);
+    channel = TclX_GetOpenChannelObj (interp, objv [1], 0);
     if (channel == NULL)
         return TCL_ERROR;
     
@@ -329,17 +357,22 @@ TclX_FstatCmd (clientData, interp, argc, argv)
     /*
      * Return data in the requested format.
      */
-    if (argc == 4) {
-        if (!STREQU (argv [2], "stat")) {
-            Tcl_AppendResult (interp, "expected item name of \"stat\" when ",
-                              "using array name", (char *) NULL);
-            return TCL_ERROR;
-        }
-        return ReturnStatArray (interp, ttyDev, &statBuf, argv [3]);
-    }
-    if (argc == 3)
-        return ReturnStatItem (interp, channel, ttyDev, &statBuf, argv [2]);
+    if (objc >= 3) {
+        char *itemName = Tcl_GetStringFromObj (objv [2], NULL);
 
+        if (objc == 4) {
+            if (!STREQU (itemName, "stat")) {
+                TclX_AppendResult (interp,
+                                   "expected item name of \"stat\" when ",
+                                   "using array name", (char *) NULL);
+                return TCL_ERROR;
+            }
+            return ReturnStatArray (interp, ttyDev, &statBuf, objv [3]);
+        } else {
+            return ReturnStatItem (interp, channel, ttyDev, &statBuf,
+                                   itemName);
+        }
+    }
     ReturnStatList (interp, ttyDev, &statBuf);
     return TCL_OK;
 }
@@ -354,9 +387,9 @@ void
 TclX_FstatInit (interp)
     Tcl_Interp *interp;
 {
-    Tcl_CreateCommand (interp,
-		       "fstat",
-		       TclX_FstatCmd,
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp,
+                          "fstat",
+                          TclX_FstatObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
 }
