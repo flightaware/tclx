@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 1.1 1992/09/20 23:15:21 markd Exp markd $
+ * $Id: tclXchmod.c,v 1.2 1992/10/05 02:03:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -53,7 +53,7 @@ ConvSymMode (interp, symMode, modeVal)
 {
     int  user, group, other;
     char operator, *scanPtr;
-    int  rwxMask, setUID, sticky, locking;
+    int  rwxMask, ugoMask, setUID, sticky, locking;
     int  newMode;
 
     scanPtr = symMode;
@@ -136,12 +136,19 @@ ConvSymMode (interp, symMode, modeVal)
          */
 
         newMode = 0;
-        if (user)
+        ugoMask = 0;
+        if (user) {
             newMode |= rwxMask << 6;
-        if (group)
+            ugoMask |= 0700;
+        }
+        if (group) {
             newMode |= rwxMask << 3;
-        if (other)
+            ugoMask |= 0070;
+        }
+        if (other) {
             newMode |= rwxMask;
+            ugoMask |= 0007;
+        }
         if (setUID && user)
             newMode |= 04000;
         if ((setUID || locking) && group)
@@ -158,7 +165,7 @@ ConvSymMode (interp, symMode, modeVal)
         else if (operator == '-')
             modeVal &= ~newMode;
         else if (operator == '=')
-            modeVal = newMode;
+            modeVal |= (modeVal & ugoMask) | newMode;
         if (*scanPtr == ',')
             scanPtr++;
     }
