@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.1 1993/03/06 21:42:30 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -400,7 +400,6 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
     matchDef_pt     matchPtr;
     int             result;
     int             matchedAtLeastOne;
-    long            fileOffset;
     long            matchOffset;
     long            scanLineNum = 0;
     char           *fileHandle;
@@ -428,9 +427,7 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
 
     result = TCL_OK;  /* Assume the best */
 
-    fileOffset = ftell (filePtr->f);  /* Get starting offset */
-
-    while ((result == TCL_OK)) {
+    while (result == TCL_OK) {
         int storedThisLine = FALSE;
 
         switch (Tcl_DynamicFgets (&dynBuf, filePtr->f, FALSE)) {
@@ -442,8 +439,6 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
             goto scanExit;
         }
         scanLineNum++;
-        matchOffset = fileOffset;
-        fileOffset += strlen(dynBuf.ptr) + 1;
         storedThisLine = 0;
         matchedAtLeastOne = 0;
         if (contextPtr->flags & CONTEXT_A_CASE_INSENSITIVE_FLAG) {
@@ -460,11 +455,14 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
 
             matchedAtLeastOne = TRUE;
             if (!storedThisLine) {
+                matchOffset = ftell (filePtr->f) - (strlen(dynBuf.ptr) + 1);
                 result = SetMatchVar (interp, dynBuf.ptr, matchOffset, 
                                       scanLineNum, argv[2]);
                 if (result != TCL_OK)
                     goto scanExit;
                 storedThisLine = TRUE;
+
+
             }
 
             result = Tcl_Eval(interp, matchPtr->command, 0, (char **)NULL);
@@ -495,6 +493,7 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
          */
         if ((contextPtr->defaultAction != NULL) && (!matchedAtLeastOne)) {
 
+            matchOffset = ftell (filePtr->f) - (strlen(dynBuf.ptr) + 1);
             result = SetMatchVar (interp, dynBuf.ptr, matchOffset, 
                                   scanLineNum, argv[2]);
             if (result != TCL_OK)
