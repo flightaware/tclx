@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.test,v 7.1 1996/10/04 05:02:46 markd Exp $
+# $Id: setfuncs.test,v 8.0 1996/11/21 00:25:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -118,6 +118,23 @@ Test setfuncs-3.4 {intersect3 command} {
 Test setfuncs-3.5 {intersect3 command} {
     intersect3 "a p q d v m b n o z t d f b" "a b c"
 } 0 "{d f m n o p q t v z} {a b} c"
+
+# Multiple elements in a list.
+Test setfuncs-3.6 {intersect3 command} {
+    intersect3  {aa bb cc dd ee ff} {aa bb cc dd aa bb ee ff}
+} 0 {{} {aa bb cc dd ee ff} {}}
+
+Test setfuncs-3.7 {intersect3 command} {
+    intersect3  {aa bb cc dd aa bb ee ff} {aa bb cc dd ee ff}
+} 0 {{} {aa bb cc dd ee ff} {}}
+
+Test setfuncs-3.8 {intersect3 command} {
+    intersect3 {aa XX bb cc dd aa bb ee ff} {aa YY bb cc ZZ dd ee ff}
+} 0 {XX {aa bb cc dd ee ff} {YY ZZ}}
+
+Test setfuncs-3.9 {intersect3 command} {
+    intersect3 {aa YY bb cc ZZ dd ee ff} {aa XX bb cc dd aa bb ee ff}
+} 0 {{YY ZZ} {aa bb cc dd ee ff} XX}
 
 Test setfuncs-4.1 {lrmdups command} {
     lrmdups {a d b c eee b d 1}

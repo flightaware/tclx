@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 7.0 1996/06/16 05:31:33 markd Exp $
+# $Id: setfuncs.tcl,v 8.0 1996/11/21 00:24:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -54,21 +54,24 @@ proc lrmdups list {
 #
 
 proc intersect3 {list1 list2} {
-    set a1(0) {} ; unset a1(0)
-    set a2(0) {} ; unset a2(0)
-    set a3(0) {} ; unset a3(0)
+    set la1(0) {} ; unset la1(0)
+    set lai(0) {} ; unset lai(0)
+    set la2(0) {} ; unset la2(0)
     foreach v $list1 {
-        set a1($v) {}
+        set la1($v) {}
     }
     foreach v $list2 {
-        if [info exists a1($v)] {
-            set a2($v) {} ; unset a1($v)
-        } {
-            set a3($v) {}
+        set la2($v) {}
+    }
+    foreach elem [concat $list1 $list2] {
+        if {[info exists la1($elem)] && [info exists la2($elem)]} {
+            unset la1($elem)
+            unset la2($elem)
+            set lai($elem) {}
         }
     }
-    list [lsort [array names a1]] [lsort [array names a2]] \
-         [lsort [array names a3]]
+    list [lsort [array names la1]] [lsort [array names lai]] \
+         [lsort [array names la2]]
 }
 
 #
