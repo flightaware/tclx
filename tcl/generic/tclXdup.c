@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXdup.c,v 2.5 1993/07/18 05:59:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -280,6 +280,7 @@ Tcl_DupCmd (clientData, interp, argc, argv)
         if (fseek (newFilePtr, seekOffset, SEEK_SET) != 0)
             goto unixError;
     }
+    Tcl_ResetResult (interp);
     sprintf (interp->result, "file%d", fileno (newFilePtr));
     return TCL_OK;
 
