@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.1 1994/09/01 04:40:31 markd Exp markd $
+# $Id: Makefile.in,v 4.2 1994/11/25 19:00:41 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -28,8 +28,8 @@ srcdir            = @srcdir@
 srcbasedir        = @srcbasedir@
 bldbasedir        = @bldbasedir@
 VPATH             = @srcdir@
-prefix            = /usr/local
-exec_prefix       = /usr/local
+prefix            = @prefix@
+exec_prefix       = @exec_prefix@
 ARCH              = @TCL_ARCH@
 MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
 TCL_INST_MASTER   = ${TCL_MASTERDIR}/`tools/tclxversion`
@@ -375,5 +375,5 @@ distclean: clean
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	rm -f Makefile config.status
+	rm -f Makefile config.status config.cache
 

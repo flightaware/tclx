@@ -16,6 +16,9 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef mode_t
 
+/* Define to `long' if <sys/types.h> doesn't define.  */
+#undef off_t
+
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
@@ -171,5 +174,11 @@
 /* Define if you have the strcoll function.  */
 #undef HAVE_STRCOLL
 
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL

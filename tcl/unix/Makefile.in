@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.1 1994/11/25 19:00:41 markd Exp markd $
+# $Id: Makefile.in,v 4.2 1994/12/28 05:17:24 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -27,8 +27,8 @@ srcdir      = @srcdir@
 srcbasedir  = @srcbasedir@
 bldbasedir  = @bldbasedir@
 VPATH       = @srcdir@
-prefix      = /usr/local
-exec_prefix = /usr/local
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
 ARCH        = @TCL_ARCH@
 LIBS        = @LIBS@ @MATH_LIBS@
 
