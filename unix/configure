@@ -516,7 +516,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.5 dnl
+# From configure.in Revision: 8.6 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -557,7 +557,7 @@ DATE_OUT=`date`
 
 case `pwd` in
   */unix) ;;
-  *) echo '*** Error: Should be in a directory named "unix".  If you're using'
+  *) echo '*** Error: Should be in a directory named "unix".  If you are using'
      echo 'the --srcdir option, create a directory called "unix" and run'
      echo 'configure from there.  Other build directories will be created'
      echo 'under the parent directory of "unix".'
@@ -909,8 +909,8 @@ if test -f conftest..o; then
     CC_SHOBJ_FLAG='-o $@'
     echo "$ac_t""OK" 1>&6
 else
-    OBJ_SAVE='@b=`basename $@ ..o`; if test -f $$b.o ; then rm -f $$b.sav; mv $$
-    OBJ_RESTORE='@b=`basename $@ ..o`;mv $$b.o $@; if test -f $$b.sav ; then mv$
+    OBJ_SAVE='@b=`basename $@ ..o`; if test -f $$b.o ; then rm -f $$b.sav; mv $$b.o $$b.sav'
+    OBJ_RESTORE='@b=`basename $@ ..o`;mv $$b.o $@; if test -f $$b.sav ; then mv$$b.sav $$b'
     CC_SHOBJ_FLAG=""
     echo "$ac_t""buggy" 1>&6
 fi
