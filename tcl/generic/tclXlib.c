@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.6 1993/07/13 03:04:02 markd Exp markd $
+ * $Id: tclXlib.c,v 2.7 1993/07/20 08:20:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,22 +44,8 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
 typedef struct libInfo_t {
     Tcl_HashTable inProgressTbl;     /* List of cmds being loaded.       */
     int           doingIdxSearch;    /* Loading indexes on a path now.   */
-    char         *prevPath;          /* Previous path that was searched. */
-    char          prevPathBuf [128];
+    Tcl_DString   prevPath;          /* Previous path that was searched. */
 } libInfo_t;
-
-/*
- * Macros used to build internal buffers that keep strings in some of the
- * function frames.  The size of the strings are known in advance.  These
- * macros uses a supplied static buffer plus a pointer to the real buffer.
- * The static buffer is used unles the string will not fit, then the
- * a dynamic buffer is allocated.
- */
-
-#define TclX_QuickStrInit(staticBuf, size) \
-    ((size <= sizeof (staticBuf)) ? staticBuf : ckalloc (size))
-#define TclX_QuickStrFree(bufPtr, staticBuf) \
-    {if (bufPtr != staticBuf) ckfree (bufPtr);}
 
 /*
  * Prototypes of internal functions.
@@ -495,20 +481,18 @@ SetProcIndexEntry (interp, procName, package)
     char       *procName;
     char       *package;
 {
-    char *command, commandBuf [64], *result;
-    int   commandLen;
+    Tcl_DString  command;
+    char        *result;
 
-    commandLen = strlen (package) + 18;  /* "auto_load_pkg {}" */
-    command = TclX_QuickStrInit (commandBuf, commandLen);
-    
-    strcpy (command, "auto_load_pkg {");
-    strcat (command, package);
-    strcat (command, "}");
+    Tcl_DStringInit (&command);
+    Tcl_DStringAppend (&command, "auto_load_pkg {", -1);
+    Tcl_DStringAppend (&command, package, -1);
+    Tcl_DStringAppend (&command, "}", -1);
 
-    result = Tcl_SetVar2 (interp, AUTO_INDEX, procName, command,
+    result = Tcl_SetVar2 (interp, AUTO_INDEX, procName, command.string,
                           TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG);
 
-    TclX_QuickStrFree (command, commandBuf);
+    Tcl_DStringFree (&command);
 
     return (result == NULL) ? TCL_ERROR : TCL_OK;
 }
@@ -712,18 +696,16 @@ LoadPackageIndex (interp, tlibFilePath, overwrite)
      char       *tlibFilePath;
      int         overwrite;
 {
-    int          pathLen;
-    char        *tndxFilePath, tndxPathBuf [64];
+    Tcl_DString  tndxFilePath;
     struct stat  tlibStat;
     struct stat  tndxStat;
 
-    pathLen = strlen (tlibFilePath);
-    tndxFilePath = TclX_QuickStrInit (tndxPathBuf, pathLen);
+    Tcl_DStringInit (&tndxFilePath);
 
-    strcpy (tndxFilePath, tlibFilePath);
-    tndxFilePath [pathLen - 3] = 'n';
-    tndxFilePath [pathLen - 2] = 'd';
-    tndxFilePath [pathLen - 1] = 'x';
+    Tcl_DStringAppend (&tndxFilePath, tlibFilePath, -1);
+    tndxFilePath.string [tndxFilePath.length - 3] = 'n';
+    tndxFilePath.string [tndxFilePath.length - 2] = 'd';
+    tndxFilePath.string [tndxFilePath.length - 1] = 'x';
 
     /*
      * Get library's modification time.  If the file can't be accessed, set
@@ -737,21 +719,21 @@ LoadPackageIndex (interp, tlibFilePath, overwrite)
      * Get the time for the index.  If the file does not exists or is
      * out of date, rebuild it.
      */
-    if ((stat (tndxFilePath, &tndxStat) < 0) ||
+    if ((stat (tndxFilePath.string, &tndxStat) < 0) ||
         (tndxStat.st_mtime < tlibStat.st_mtime)) {
         if (BuildPackageIndex (interp, tlibFilePath) != TCL_OK)
             goto errorExit;
     }
 
-    if (ProcessIndexFile (interp, tlibFilePath, tndxFilePath,
+    if (ProcessIndexFile (interp, tlibFilePath, tndxFilePath.string,
                           overwrite) != TCL_OK)
         goto errorExit;
-    TclX_QuickStrFree (tndxFilePath, tndxPathBuf);
+    Tcl_DStringFree (&tndxFilePath);
     return TCL_OK;
 
   errorExit:
-    AddLibIndexErrorInfo (interp, tndxFilePath);
-    TclX_QuickStrFree (tndxFilePath, tndxPathBuf);
+    AddLibIndexErrorInfo (interp, tndxFilePath.string);
+    Tcl_DStringFree (&tndxFilePath);
 
     return TCL_ERROR;
 }
@@ -1064,16 +1046,14 @@ LoadAutoPath (interp, infoPtr)
      * Check if the path has changed.  If it has, load indexes, and
      * save the path if it succeeds.
      */
-    if (STREQU (path, infoPtr->prevPath))
+    if (STREQU (path, infoPtr->prevPath.string))
         return TCL_OK;
 
     if (LoadPackageIndexes (interp, infoPtr, path) != TCL_OK)
         return TCL_ERROR;
 
-    TclX_QuickStrFree (infoPtr->prevPath, infoPtr->prevPathBuf);
-    infoPtr->prevPath = TclX_QuickStrInit (infoPtr->prevPathBuf,
-                                           strlen (path) + 1);
-    strcpy (infoPtr->prevPath, path);
+    Tcl_DStringFree (&infoPtr->prevPath);
+    Tcl_DStringAppend (&infoPtr->prevPath, path, -1);
     return TCL_OK;
 }
 
@@ -1297,7 +1277,7 @@ TclLibCleanUp (clientData, interp)
     }
 
     Tcl_DeleteHashTable (&infoPtr->inProgressTbl);
-    TclX_QuickStrFree (infoPtr->prevPath, infoPtr->prevPathBuf);
+    Tcl_DStringFree (&infoPtr->prevPath);
     ckfree ((char *) infoPtr);
 }
 
@@ -1318,8 +1298,7 @@ Tcl_InitLibrary (interp)
 
     Tcl_InitHashTable (&infoPtr->inProgressTbl, TCL_STRING_KEYS);
     infoPtr->doingIdxSearch = FALSE;
-    infoPtr->prevPath = TclX_QuickStrInit (infoPtr->prevPathBuf, 1);
-    infoPtr->prevPath [0] = '\0';
+    Tcl_DStringInit (&infoPtr->prevPath);
 
     Tcl_CallWhenDeleted (interp, TclLibCleanUp, (ClientData) infoPtr);
 
