@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tkXshell.c,v 8.10 1999/06/26 03:15:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -206,27 +206,29 @@ TkX_MainEx(argc, argv, appInitProc, interp)
 	}
 	tty = 0;
     } else {
+        char* tcl_interactive = Tcl_GetVar(interp, "tcl_interactive",
+                                           TCL_GLOBAL_ONLY);
+        if ((tcl_interactive != NULL)
+            && (strcmp(tcl_interactive, "0") != 0)) {
+            /*
+             * Commands will come from standard input, so set up an event
+             * handler for standard input.  Evaluate the .rc file, if one
+             * has been specified, set up an event handler for standard
+             * input, and print a prompt if the input device is a terminal.
+             */
+            TclX_EvalRCFile (interp);
 
-	/*
-	 * Commands will come from standard input, so set up an event
-	 * handler for standard input.  Evaluate the .rc file, if one
-	 * has been specified, set up an event handler for standard
-	 * input, and print a prompt if the input device is a terminal.
-	 */
-
-        TclX_EvalRCFile (interp);
-
-	/*
-	 * Establish a channel handler for stdin.
-	 */
-
-	inChannel = Tcl_GetStdChannel(TCL_STDIN);
-	if (inChannel) {
-            if (TclX_AsyncCommandLoop (interp,
-                                       tty ? (TCLX_CMDL_INTERACTIVE |
-                                              TCLX_CMDL_EXIT_ON_EOF) : 0,
-                                       NULL, NULL, NULL) == TCL_ERROR)
-                goto error;
+            /*
+             * Establish a channel handler for stdin.
+             */
+            inChannel = Tcl_GetStdChannel(TCL_STDIN);
+            if (inChannel) {
+                if (TclX_AsyncCommandLoop (interp,
+                                           tty ? (TCLX_CMDL_INTERACTIVE |
+                                                  TCLX_CMDL_EXIT_ON_EOF) : 0,
+                                           NULL, NULL, NULL) == TCL_ERROR)
+                    goto error;
+            }
         }
     }
 
