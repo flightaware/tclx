@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.5 1997/07/01 02:58:05 markd Exp $
+ * $Id: tclXsignal.c,v 8.6 1997/07/04 09:24:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -206,15 +206,8 @@ typedef struct {
     char  *errorCode;
 } errState_t;
 
-/*
- * Table containing a interpreters and there Async handler cookie.
- */
-typedef struct {
-    Tcl_Interp       *interp;
-    Tcl_AsyncHandler  handler;
-} interpHandler_t;
-
-static interpHandler_t *interpTable = NULL;
+static Tcl_Interp	**interpTable = NULL;
+static Tcl_AsyncHandler asyncHandler = NULL;
 static int              interpTableSize  = 0;
 static int              numInterps  = 0;
 
@@ -618,16 +611,15 @@ static RETSIGTYPE
 SignalTrap (signalNum)
     int signalNum;
 {
-    int idx;
-
+    if (asyncHandler == NULL)
+	return;
     /*
      * Record the count of the number of this type of signal that has occured
      * and tell all the interpreters to call the async handler when safe.
      */
     signalsReceived [signalNum]++;
 
-    for (idx = 0; idx < numInterps; idx++)
-        Tcl_AsyncMark (interpTable [idx].handler);
+    Tcl_AsyncMark (asyncHandler);
 
 #ifdef NO_SIGACTION
     /*
@@ -950,7 +942,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
 {
     Tcl_Interp *sigInterp;
     errState_t *errStatePtr;
-    int         signalNum, result, idx;
+    int         signalNum, result;
 
     /*
      * Get the interpreter is it wasn't supplied, if none is available,
@@ -959,7 +951,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
     if (interp == NULL) {
         if (numInterps == 0)
             return cmdResultCode;
-        sigInterp = interpTable [0].interp;
+        sigInterp = interpTable [0];
     } else {
         sigInterp = interp;
     }
@@ -1000,8 +992,8 @@ ProcessSignals (clientData, interp, cmdResultCode)
             break;
     }
     if (signalNum < MAXSIG) {
-        for (idx = 0; idx < numInterps; idx++)
-            Tcl_AsyncMark (interpTable [idx].handler);
+	if (asyncHandler)
+	    Tcl_AsyncMark (asyncHandler);
     }
 
     /*
@@ -1612,13 +1604,12 @@ SignalCmdCleanUp (clientData, interp)
     int  idx;
 
     for (idx = 0; idx < numInterps; idx++) {
-        if (interpTable [idx].interp == interp)
+        if (interpTable [idx] == interp)
             break;
     }
     if (idx == numInterps)
         panic ("signal interp lost");
 
-    Tcl_AsyncDelete(interpTable[idx].handler);
     interpTable [idx] = interpTable [--numInterps];
 
     /*
@@ -1628,6 +1619,8 @@ SignalCmdCleanUp (clientData, interp)
         ckfree ((char *) interpTable);
         interpTable = NULL;
         interpTableSize = 0;
+
+	Tcl_AsyncDelete(asyncHandler);
 
         for (idx = 0; idx < MAXSIG; idx++) {
             if (signalTrapCmds [idx] != NULL) {
@@ -1685,21 +1678,21 @@ void
 TclX_SignalInit (interp)
     Tcl_Interp *interp;
 {
-    int              idx;
-    interpHandler_t *newTable;
+    int		idx;
 
     /*
      * If this is the first interpreter, set everything up.
      */
     if (numInterps == 0) {
         interpTableSize = 4;
-        interpTable = (interpHandler_t *)
-            ckalloc (sizeof (interpHandler_t) * interpTableSize);
+        interpTable = (Tcl_Interp **)
+            ckalloc (sizeof (Tcl_Interp *) * interpTableSize);
 
         for (idx = 0; idx < MAXSIG; idx++) {
             signalsReceived [idx] = 0;
             signalTrapCmds [idx] = NULL;
         }
+	asyncHandler = Tcl_AsyncCreate (ProcessSignals, (ClientData) NULL);
         /*
          * Get address of "unknown signal" message.
          */
@@ -1710,12 +1703,9 @@ TclX_SignalInit (interp)
      * If there is not room in this table for another interp, expand it.
      */
     if (numInterps == interpTableSize) {
-        newTable = (interpHandler_t *)
-            ckalloc (sizeof (interpHandler_t) * interpTableSize * 2);
-        memcpy (newTable, interpTable,
-                sizeof (interpHandler_t) * interpTableSize);
-        ckfree ((char *) interpTable);
-        interpTable = newTable;
+        interpTable = (Tcl_Interp **)
+			ckrealloc((char *)interpTable,
+				  sizeof(Tcl_Interp *) * interpTableSize * 2);
         interpTableSize *= 2;
     }
 
@@ -1723,9 +1713,7 @@ TclX_SignalInit (interp)
      * Add this interpreter to the list and set up a async handler.
      * Arange for clean up on the interpreter being deleted.
      */
-    interpTable [numInterps].interp = interp;
-    interpTable [numInterps].handler =
-        Tcl_AsyncCreate (ProcessSignals, (ClientData) NULL);
+    interpTable [numInterps] = interp;
     numInterps++;
 
     Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);
