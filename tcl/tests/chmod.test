@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 4.1 1995/01/01 19:46:29 markd Exp markd $
+# $Id: chmod.test,v 4.2 1995/05/15 00:04:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -511,54 +511,72 @@ if [infox have_fchmod] {
 
 # chown and chgrp tests
 
+set myUID [id userid]
+set myGID [id groupid]
+
+
 #
 # Some machines have problems with changing group ids on files (even to your
-# own) if you are not root. If thats the case, bail out here.
+# own) if you are not root. On some it works for chown but not fchown (Ultix).
 #
 
 SetUpTestFiles
 
 if {[catch {chown [id userid]  CHMOD.TMP} msg ] ||
     [catch {chgrp [id groupid] CHMOD.TMP} msg ]} {
-    puts "*************************************************************"
-    puts "Can't do chown or chgrp even when current and new group"
-    puts "id are ours.  chown/chgrp tests skipped on this system."
+    puts "********************************************************************"
+    puts "Can't do chown or chgrp even when current and new group id are"
+    puts " ours. Some chown/chgrp tests skipped on this system."
     puts "    $msg"
-    puts "*************************************************************"
-    unlink {CHECK.TMP CHMOD.TMP CHMOD2.TMP}
-    return
+    puts "********************************************************************"
+    set broken_chown 1
+} else {
+    set broken_chown 0
 }
 
-set myUID [id userid]
-set myGID [id groupid]
+set fh [open CHMOD.TMP w]
+if {[catch {chown -fileid [id userid]  $fh} msg ] ||
+    [catch {chgrp -fileid [id groupid] $fh} msg ]} {
+    puts "********************************************************************"
+    puts "Can't do chown or chgrp with -fileid even when current and new"
+    puts "groupid are ours.  chown/chgrp tests skipped on this system."
+    puts "    $msg"
+    puts "********************************************************************"
+    set broken_fchown 1
+} else {
+    set broken_fchown 0
+}
+close $fh
 
-Test chmod-5.1 {chown tests} {
-    SetUpTestFiles
-    chown [id user] {CHMOD.TMP CHMOD2.TMP}
-    list [GetUID CHMOD.TMP] [GetUID CHMOD2.TMP]
-} 0 [list $myUID $myUID]
+if !$broken_chown {
+    Test chmod-5.1 {chown tests} {
+        SetUpTestFiles
+        chown [id user] {CHMOD.TMP CHMOD2.TMP}
+        list [GetUID CHMOD.TMP] [GetUID CHMOD2.TMP]
+    } 0 [list $myUID $myUID]
 
-Test chmod-5.2 {chown tests} {
-    chown [id userid] {CHMOD.TMP CHMOD2.TMP}
-    list [GetUID CHMOD.TMP] [GetUID CHMOD2.TMP]
-} 0 [list $myUID $myUID]
+    Test chmod-5.2 {chown tests} {
+        chown [id userid] {CHMOD.TMP CHMOD2.TMP}
+        list [GetUID CHMOD.TMP] [GetUID CHMOD2.TMP]
+    } 0 [list $myUID $myUID]
 
-Test chmod-5.3 {chown tests} {
-    chown [list [id userid] [id groupid]] {CHMOD.TMP CHMOD2.TMP}
-    list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
-} 0 [list [list $myUID $myGID] [list $myUID $myGID]]
+    Test chmod-5.3 {chown tests} {
+        chown [list [id userid] [id groupid]] {CHMOD.TMP CHMOD2.TMP}
+        list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
+    } 0 [list [list $myUID $myGID] [list $myUID $myGID]]
 
-Test chmod-5.4 {chown tests} {
-    chown [list [id user] [id group]] {CHMOD.TMP CHMOD2.TMP}
-    list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
-} 0 [list [list $myUID $myGID] [list $myUID $myGID]]
+    Test chmod-5.4 {chown tests} {
+        chown [list [id user] [id group]] {CHMOD.TMP CHMOD2.TMP}
+        list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
+    } 0 [list [list $myUID $myGID] [list $myUID $myGID]]
 
-Test chmod-5.5 {chown tests} {
-    chown [list [id user] [id group]] {CHMOD.TMP CHMOD2.TMP}
-    list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
-} 0 [list [list $myUID $myGID] [list $myUID $myGID]]
+    Test chmod-5.5 {chown tests} {
+        chown [list [id user] [id group]] {CHMOD.TMP CHMOD2.TMP}
+        list [GetUIDGID CHMOD.TMP] [GetUIDGID CHMOD2.TMP]
+    } 0 [list [list $myUID $myGID] [list $myUID $myGID]]
+}
 
-if [infox have_fchown] {
+if {[infox have_fchown] && !$broken_fchown} {
     Test chmod-5.6 {chown tests} {
         SetUpTestFiles
         set fh1 [open CHMOD.TMP w]
@@ -638,17 +656,19 @@ if [infox have_fchown] {
     } 1 {Invalid option "-fid", expected "-fileid"}
 }
 
-Test chmod-7.1 {chgrp tests} {
-    chgrp [id group]  {CHMOD.TMP CHMOD2.TMP}
-    list [GetGID CHMOD.TMP] [GetGID CHMOD2.TMP]
-} 0 [list $myGID $myGID]
+if !$broken_chown {
+    Test chmod-7.1 {chgrp tests} {
+        chgrp [id group]  {CHMOD.TMP CHMOD2.TMP}
+        list [GetGID CHMOD.TMP] [GetGID CHMOD2.TMP]
+    } 0 [list $myGID $myGID]
 
-Test chmod-7.2 {chgrp tests} {
-    chgrp [id groupid] {CHMOD.TMP CHMOD2.TMP}
-    list [GetGID CHMOD.TMP] [GetGID CHMOD2.TMP]
-} 0 [list $myGID $myGID]
+    Test chmod-7.2 {chgrp tests} {
+        chgrp [id groupid] {CHMOD.TMP CHMOD2.TMP}
+        list [GetGID CHMOD.TMP] [GetGID CHMOD2.TMP]
+    } 0 [list $myGID $myGID]
+}
 
-if [infox have_fchown] {
+if {[infox have_fchown] && !$broken_fchown} {
     Test chmod-7.3 {chgrp tests} {
         set fh1 [open CHMOD.TMP w]
         set fh2 [open CHMOD2.TMP w]
