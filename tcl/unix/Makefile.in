@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.28 1993/10/01 04:02:24 markd Exp markd $
+# $Id: Makefile.in,v 2.29 1993/10/23 23:33:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -21,16 +21,17 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-CC         = @CC@
-RANLIB     = @RANLIB@
-MCS        = @MCS_CMD@
-srcdir     = @srcdir@
-srcbasedir = @srcbasedir@
-bldbasedir = @bldbasedir@
-VPATH      = @srcdir@
-prefix     = @prefix@
-execprefix = @execprefix@
-LIBS       = @LIBS@ -lm
+CC          = @CC@
+RANLIB      = @RANLIB@
+MCS         = @MCS_CMD@
+srcdir      = @srcdir@
+srcbasedir  = @srcbasedir@
+bldbasedir  = @bldbasedir@
+VPATH       = @srcdir@
+prefix      = /usr/local
+exec_prefix = /usr/local
+ARCH        = @TCL_ARCH@
+LIBS        = @LIBS@ -lm
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -39,14 +40,14 @@ LIBS       = @LIBS@ -lm
 
 #------------------------------------------------------------------------------
 
-LIBTCL.A      = ${bldbasedir}/tclmaster/lib/libtcl.a
-LIBTCLX.A     = ${bldbasedir}/tclmaster/lib/libtclx.a
-TCL           = ${bldbasedir}/tclmaster/bin/tcl
+LIBTCL.A      = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
+LIBTCLX.A     = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
+TCL           = ${bldbasedir}/tclmaster/bin${ARCH}/tcl
 TCLEXTEND.H   = ${bldbasedir}/tclmaster/include/tclExtend.h
 TCLPP_H       = ${bldbasedir}/tclmaster/include/tcl++.h
 APPINIT       = ${bldbasedir}/tclmaster/src/tclXAppInit.c
-SYSLIBS       = ${bldbasedir}/tclmaster/src/SYSLIBS
-TCLXMAINPP.O  = ${bldbasedir}/tclmaster/lib/tclXmain++.o
+SYSLIBS       = ${bldbasedir}/tclmaster/src/SYSLIBS${ARCH}
+TCLXMAINPP.O  = ${bldbasedir}/tclmaster/lib${ARCH}/tclXmain++.o
 
 LDLIBS = ${LIBTCLX.A} ${LIBTCL.A} ${LIBS}
 

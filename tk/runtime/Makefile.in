@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.14 1993/10/01 03:49:16 markd Exp markd $
+# $Id: Makefile.in,v 1.15 1993/10/23 23:33:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -24,8 +24,9 @@ srcdir            = @srcdir@
 srcbasedir        = @srcbasedir@
 bldbasedir        = @bldbasedir@
 VPATH             = @srcdir@
-prefix            = @prefix@
-execprefix        = @execprefix@
+prefix            = /usr/local
+exec_prefix       = /usr/local
+ARCH              = @TCL_ARCH@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -38,10 +39,11 @@ TK.TCL      = ${bldbasedir}/tkmaster/tk.tcl
 TK.TLIB     = ${bldbasedir}/tkmaster/tk.tlib
 TK.TNDX     = ${bldbasedir}/tkmaster/tk.tndx
 PROLOG.PS   = ${bldbasedir}/tkmaster/prolog.ps
-TCLHELP     = ${bldbasedir}/tkmaster/bin/tclhelp
+TCLHELP     = ${bldbasedir}/tkmaster/bin${ARCH}/tclhelp
 DEMOS       = ${bldbasedir}/tkmaster/demos
 HELP        = ${bldbasedir}/tkmaster/help
 TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
+INSTCOPY    = ../runtcl ../tools/instcopy
 BLDMANHELP  = ../runtcl ${srcbasedir}/tools/bldmanhelp
 
 #------------------------------------------------------------------------------
@@ -69,8 +71,7 @@ ${TCLHELP}: tclhelp.tcl
 
 ${DEMOS}:
 	mkdir ${DEMOS}
-	(cd ${TK_UCB_SRC}/library/demos;tar -cf - .) | \
-	    (cd ${DEMOS}; tar -xf -)
+	${INSTCOPY} ${TK_UCB_SRC}/library/demos/* ${DEMOS}
 
 #------------------------------------------------------------------------------
 # Copy help files if they don't appear to exist and we are in a different

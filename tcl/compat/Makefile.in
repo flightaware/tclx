@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.15 1993/10/01 03:49:16 markd Exp markd $
+# $Id: Makefile.in,v 2.16 1993/10/07 06:50:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -20,15 +20,16 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-CC         = @CC@
-RANLIB     = @RANLIB@
-srcdir     = @srcdir@
-srcbasedir = @srcbasedir@
-bldbasedir = @bldbasedir@
-VPATH      = @srcdir@
-prefix     = @prefix@
-execprefix = @execprefix@
-LIBOBJS    = @LIBOBJS@
+CC          = @CC@
+RANLIB      = @RANLIB@
+srcdir      = @srcdir@
+srcbasedir  = @srcbasedir@
+bldbasedir  = @bldbasedir@
+VPATH       = @srcdir@
+prefix      = /usr/local
+exec_prefix = /usr/local
+ARCH        = @TCL_ARCH@
+LIBOBJS     = @LIBOBJS@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -37,7 +38,7 @@ LIBOBJS    = @LIBOBJS@
 
 #------------------------------------------------------------------------------
 
-LIBTCLX.A = ../tclmaster/lib/libtclx.a
+LIBTCLX.A = ../tclmaster/lib${ARCH}/libtclx.a
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${TCL_UCB_SRC}
@@ -69,3 +70,4 @@ clean:
 
 distclean: clean
 	rm -f Makefile
+ 

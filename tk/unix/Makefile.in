@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.25 1993/10/01 04:02:24 markd Exp markd $
+# $Id: Makefile.in,v 2.26 1993/10/23 23:33:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -21,18 +21,19 @@ SHELL = /bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-CC         = @CC@
-RANLIB     = @RANLIB@
-MCS        = @MCS_CMD@
-srcdir     = @srcdir@
-srcbasedir = @srcbasedir@
-bldbasedir = @bldbasedir@
-VPATH      = @srcdir@
-prefix     = @prefix@
-execprefix = @execprefix@
-XINCLUDES  = @XINCLUDES@
-LIBS       = @LIBS@
-XLIBSW     = @XLIBSW@
+CC          = @CC@
+RANLIB      = @RANLIB@
+MCS         = @MCS_CMD@
+srcdir      = @srcdir@
+srcbasedir  = @srcbasedir@
+bldbasedir  = @bldbasedir@
+VPATH       = @srcdir@
+prefix      = /usr/local
+exec_prefix = /usr/local
+ARCH        = @TCL_ARCH@
+XINCLUDES   = @XINCLUDES@
+LIBS        = @LIBS@
+XLIBSW      = @XLIBSW@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -41,15 +42,15 @@ XLIBSW     = @XLIBSW@
 
 #------------------------------------------------------------------------------
 
-LIBTK.A      = ${bldbasedir}/tkmaster/lib/libtk.a
-LIBTKX.A     = ${bldbasedir}/tkmaster/lib/libtkx.a
-WISHX        = ${bldbasedir}/tkmaster/bin/wishx
+LIBTK.A      = ${bldbasedir}/tkmaster/lib${ARCH}/libtk.a
+LIBTKX.A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
+WISHX        = ${bldbasedir}/tkmaster/bin${ARCH}/wishx
 APPINIT      = ${bldbasedir}/tkmaster/src/tkXAppInit.c
-SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS
-TKXMAINPP.O  = ${bldbasedir}/tkmaster/lib/tkXmain++.o
+SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS${ARCH}
+TKXMAINPP.O  = ${bldbasedir}/tkmaster/lib${ARCH}/tkXmain++.o
 
-LIBTCL.A  = ${bldbasedir}/tclmaster/lib/libtcl.a
-LIBTCLX.A = ${bldbasedir}/tclmaster/lib/libtclx.a
+LIBTCL.A  = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
+LIBTCLX.A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
 
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the Tcl

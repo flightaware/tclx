@@ -9,7 +9,7 @@ in a directory parallel to the Tcl and Tk distributions:
                    tcl7.0      tk3.3      tclX7.0a
 
 
-The following directories are included under the tclX7.0a* directory:
+The following directories are included under the tclX7.0a directory:
 
     o man - Unformatted manual pages for TclX.
 
@@ -49,8 +49,84 @@ The following directories are included under the tclX7.0a* directory:
 THE EXTENDED TCL INSTALLATION MODELS
 ====================================
 
+Two installation models are supported by Extended Tcl.  You should decide which
+model you are going to use before building TclX.  We encourage use of the 
+"master directory" model, as it supports multiple versions of Extended Tcl and
+Tk being installed on the system at the same time and allows for easy copying
+to other systems.
+
+Standard Installation Model
+---------------------------
+
+The standard model follows the GNU standards.  Two variables are defined
+by configure, "prefix" and "exec_prefix".  The variable "prefix" is the
+path that will contain the directories containing hardware and system
+independent files:
+
+   o ${prefix}/tclX/7.0a - TclX runtime files.
+   o ${prefix}/tkX/3.3a - TkX runtime files.
+   o ${prefix}/include - Include files for TclX.
+   o ${prefix}/man - Manual pages for TclX.
+
+The variable "exec_prefix" is the path that will contain the directories
+containing hardware and system dependent files:
+
+   o ${exec_prefix}/bin - tcl, wishx and tclhelp programs.
+   o ${exec_prefix}/lib - libtclx.a and libtkx.a
+
+Both "exec_prefix" and "prefix" default to "/usr/local".  All of these
+directories can be changed independently by editing "Config.mk".  To set
+the prefix directories:
+
+    ./configure --prefix=/usr/site  --exec_prefix==/usr/site.cray
+
+With the standard model, only Extended Tcl files are installed.  Its is
+assumed that the Tcl & Tk standard libraries, include files and manual
+pages have been installed.
+
+Master Directory Installation Model
+-----------------------------------
+
+The master directory model installs *all* files required by TclX (including
+files from the Tcl and Tk distributions) in master directories.  
+
+   o ${prefix}/tclX/7.0a - TclX runtime files.
+   o ${prefix}/tclX/7.0a/include - Include files.
+   o ${prefix}/tclX/7.0a/man - Manual pages.
+   o ${prefix}/tclX/7.0a/bin - tcl program.
+   o ${prefix}/tclX/7.0a/lib - libtclx.a and libtcl.a
+
+   o ${prefix}/tkX/3.3a - TkX runtime files.
+   o ${prefix}/tkX/3.3a/include - Include files.
+   o ${prefix}/tkX/3.3a/man - Manual pages.
+   o ${prefix}/tkX/3.3a/bin - wishx and tclhelp programs.
+   o ${prefix}/tkX/3.3a/lib - libtkx.a and libtk.a
+
+Symbolic links are then built for executables from the standard locations
+to the files in the master directory.
+
+   /usr/local/bin/tcl   -> /usr/local/tclX/7.0a/bin/tcl
+   /usr/local/bin/wishx -> /usr/local/tkX/3.3a/bin/wishx
 
 
+If the --arch=ARCH option was specified to configure (see below), the bin and
+lib files are stored in architecture-dependent directories with the specified
+architecture as a suffix to the directory name:
+
+   o ${prefix}/tclX/7.0a/bin.arch
+   o ${prefix}/tclX/7.0a/lib.arch
+   o ${prefix}/tkX/3.3a/bin.arch
+   o ${prefix}/tkX/3.3a/lib.arch
+
+You may defined "arch" to be any string you like; it might include OS type or
+version as well as processor architecture.
+
+Symbolic links are still build from the standard locations of the machines
+of specified architecture to the master directory:
+
+   /usr/local/bin/tcl   -> /usr/local/tclX/7.0a/bin.sparc/tcl
+   /usr/local/bin/wishx -> /usr/local/tkX/3.3a/bin.sparc/wishx
+        
 HOW TO BUILD EXTENDED TCL
 =========================
 
@@ -70,6 +146,21 @@ HOW TO BUILD EXTENDED TCL
           Note: The source directory must be clean, it can't contain a built
           copy of TclX.
 
+        o --arch=ARCH
+          If your are using the master directory installation model, this
+          specifies the a suffix to use for the architecture-dependent
+          directories under the master directory.  Use the --execprefix
+          option for installing architecture-dependent under the standard
+          installation model.
+
+        o --prefix=PREFIX
+          Directory under which the "include" and "man" directories are
+          found for installation. 
+
+        o --execprefix=EXECPREFIX
+          Directory under which the "bin" and "lib" directories are
+          found for installation.  
+ 
     o Edit Config.mk in the build directory following the instructions in the
       file.  If the --srcdir option to configure is used, it is copied from
       the source directory to the build directory.  This file is used to
@@ -105,6 +196,9 @@ HOW TO BUILD EXTENDED TCL
       Tcl and TclX help pages and "make buildtkhelp" to build the Tk manual
       pages or "make buildhelp" to build both.
 
+    o Note that if you modify any files in the Tcl or Tk library directories
+      you need to do a "make clean" and a "make" to rebuild Extended Tcl,
+      as these changes are not detected by the TclX make files.
 
    We have a limited number of systems available to test Extended Tcl on,
 we need your help in supporting TclX on a wide range of platforms.  The nature
@@ -155,63 +249,34 @@ library.
 INSTALLING EXTENDED TCL
 =======================
 
-   TclX builds two master directories to hold all of the pieces of TclX that
-need to be installed.  The master directory includes all of the run-time
-library files, plus the executables and all other installed files.  This allows
-for easy NFS sharing on heterogeneous networks and moving built TclX to new
-machines.  The hierarchies are:
+Standard Installation Model
+---------------------------
 
-   o tclmaster - Contains Tcl code libraries and support files needed to run
-     TclX.
+To install Extended Tcl (and Tk if built) using the standard installation
+model, enter:
 
-     o bin - Contains the TclX shell.
+   su use-to-own-files
+   make install
 
-     o help - Contains the help pages for Tcl & TclX.  This directory is
-       shipped pre-built, but can be rebuilt if necessary.
+to only install the executable and library files (useful for installing on
+a multi-architecture server that has the rest of TclX already installed):
 
-     o include - Contains the Tcl and TclX exported include files.
+   su use-to-own-files
+   make install-exec
 
-     o lib - Contains the TclX library (libtclx.a).
+Master Directory Installation Model
+-----------------------------------
+To install Extended Tcl (and Tk if built) using the master directory
+installation model, enter:
 
-     o man - Contains the Tcl and TclX manual pages.
+   su use-to-own-files
+   make install-master
 
-   o tkmaster - Contains Tk code libraries and files needed to run wishx and
-     Tk applications built with Extended Tcl.
+to only install the executable and library files (useful for installing on
+a multi-architecture server that has the rest of TclX already installed):
 
-     o bin - Contains the wishx shell and tclhelp.
-
-     o demos - Contains the Tk demos.
-
-     o help - Contains the help pages for Tk.  This directory is shipped
-       pre-built, but can be rebuilt if necessary.
-
-     o include - Contains the Tk exported include files.
-
-     o lib - Contains the Tk library with Extended Tcl (libtkx.a).
-
-     o man - Contains the Tk manual pages.
-
-   The files built in the tclmaster and tkmaster directories must be installed
-in the directory specified at configuration time.
-
-   The installed tclmaster directory path is formed from the value of
-TCL_MASTERDIR define in Config.mk and the Tcl version number and TclX version
-suffix.  The default path would be /usr/local/tclX/7.0a.
-
-   The installed tkmaster directory path is formed from the value of
-TK_MASTERDIR define in Config.mk and the Tk version number and TclX version
-suffix.  The default path would be /usr/local/tkX/3.3a.
-
-  Symbolic links are built from the standard locations that external files
-are installed as in the master directory, for example:
-
-    ln -s /usr/local/bin/tcl /usr/local/tclX/7.0a/bin/tcl
-    ln -s /usr/local/bin/wishx /usr/local/tkX/3.3a/bin/wishx
-
-Install the Extended Tcl master directories by typing the command:
-
-    make install
-
+   su use-to-own-files
+   make install-master-exec
 
 PORTING NOTES
 =============
