@@ -143,6 +143,9 @@
 /* Define if you have bcopy.  */
 #undef HAVE_BCOPY
 
+/* Define if you have gethostbyname.  */
+#undef HAVE_GETHOSTBYNAME
+
 /* Define if you have gettimeofday.  */
 #undef HAVE_GETTIMEOFDAY
 

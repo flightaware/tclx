@@ -15,7 +15,7 @@
 
 #include "tclExtdInt.h"
 
-#ifndef NO_SYS_SOCKET_H
+#ifdef HAVE_GETHOSTBYNAME
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -220,4 +220,4 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-#endif /* TCL_NO_SOCKETS */
+#endif /* HAVE_GETHOSTBYNAME */
