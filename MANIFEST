@@ -301,6 +301,9 @@
 ./tcl/unix/tclXunixPort.h
 ./tcl/unix/tclXunixSock.c
 ./tcl/unix/tclxConfig.sh.in
+./tcl/win/makefile.vc
+./tcl/win/tclXwinOS.c
+./tcl/win/tclXwinPort.h
 ./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
@@ -360,6 +363,7 @@
 ./tk/tests/signal.test
 ./tk/unix/Makefile.in
 ./tk/unix/tkxConfig.sh.in
+./tk/win/makefile.vc
 ./unix/Common.mk.in
 ./unix/Config.mk
 ./unix/INSTALL
