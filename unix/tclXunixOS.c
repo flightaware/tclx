@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.2 2002/09/26 00:23:30 hobbs Exp $
+ * $Id: tclXunixOS.c,v 8.3 2004/04/29 23:06:47 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -578,7 +578,7 @@ TclXOSElapsedTime (realTime, cpuTime)
 
 /*-----------------------------------------------------------------------------
  * TclXOSkill --
- *   System dependent interface to functionality.
+ *   System dependent interface to send a signal to a process.
  *
  * Parameters:
  *   o interp - Errors returned in result.

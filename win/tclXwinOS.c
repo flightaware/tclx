@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 1.3 2002/09/26 00:23:30 hobbs Exp $
+ * $Id: tclXwinOS.c,v 1.4 2004/02/13 00:49:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -513,8 +513,9 @@ TclXOSsystem (Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * TclX_OSlink --
- *   System dependent interface to link functionality, which is not available
- * on windows.
+ *
+ *   System dependent interface to link functionality, which is not
+ *   available on windows.
  *
  * Parameters:
  *   o interp - Errors returned in result.
@@ -585,8 +586,8 @@ TclXOSElapsedTime (clock_t *realTime,
 
 /*-----------------------------------------------------------------------------
  * TclXOSkill --
- *   System dependent interface to functionality, which is not available
- * on windows.
+ *   System dependent interface to terminate a process.  Apparently,
+ *   it's not possible to send a specific signal in windows?
  *
  * Parameters:
  *   o interp - Errors returned in result.

@@ -1,3 +1,9 @@
+2004-05-24  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* doc/TclX.n: doc and comment fixes
+	* unix/tclXunixOS.c:
+	* win/tclXwinOS.c:
+
 2004-02-12  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* win/tclXwinOS.c (TclXOSkill): close process handle
