@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 2.4 1993/07/27 07:42:35 markd Exp markd $
+ * $Id: tclXchmod.c,v 2.5 1993/08/04 04:27:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -228,7 +228,7 @@ Tcl_ChmodCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (isdigit (argv [1][0])) {
+    if (ISDIGIT (argv [1][0])) {
         if (Tcl_GetInt (interp, argv [1], &modeVal) != TCL_OK)
             return TCL_ERROR;
         absMode = TRUE;

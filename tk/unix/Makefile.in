@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.14 1993/08/25 03:15:47 markd Exp markd $
+# $Id: Makefile.in,v 2.15 1993/08/26 04:55:13 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -58,14 +58,15 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS = tkXstartup.o tkXsignal.o
+OBJS = tkXstartup.o
 
 #------------------------------------------------------------------------------
 
 all: made.tmp ${WISHX}
 
-${WISHX}: tkMain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tkMain.o ${LDLIBS} ${XLDLIBS} -o ${WISHX}
+${WISHX}: tkXmain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXmain.o ${LDLIBS} ${XLDLIBS} \
+	    -o ${WISHX}
 	if ${DO_STRIPPING} ; then \
 	    strip ${WISHX}  ;\
 	    ${MCS} ${WISHX} ;\
@@ -84,7 +85,7 @@ tkXstartup.o: tkXstartup.c
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made.tmp ${WISHX} ${OBJS} tkMain.o
+	-rm -f made.tmp ${WISHX} ${OBJS} tkXmain.o
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

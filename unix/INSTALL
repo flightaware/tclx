@@ -18,11 +18,6 @@ The following directories are included under the tclX7.0a* directory:
     o osSupport - Library routines required by TclX that may not be available
       on all Unix versions.
 
-    o ucbsrc - A makefile and sed scripts used to modify source files that
-      are supplied with UCB Tcl to add signal handling.  The files are modified
-      with sed so you don't have to patch to build Tcl, however context
-      diffs are provided if problems occur porting to a new version of Tcl.
-
     o tclsrc - Tcl source that is built into the standard Tcl package library.
       The makefile also handles generation of help files and copying man files
       into the master directory
@@ -35,10 +30,6 @@ The following directories are included under the tclX7.0a* directory:
 
     o tksrc - A makefile that builds a version of the Tk wish shell containing
       Extended Tcl.
-
-    o tkucbsrc - A makefile and sed scripts used to modify source files that
-      are supplied with Tk to add signal handling.  Context diffs are also
-      provided.
 
     o tktclsrc - Tcl source that is built into the standard Tk package library.
       The makefile also handles generation of help files and copying man files

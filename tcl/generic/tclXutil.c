@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.8 1993/08/05 06:41:55 markd Exp markd $
+ * $Id: tclXutil.c,v 2.9 1993/08/19 16:08:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -247,7 +247,7 @@ Tcl_UpShift (targetStr, sourceStr)
         targetStr = ckalloc (strlen ((char *) sourceStr) + 1);
 
     for (; (theChar = *sourceStr) != '\0'; sourceStr++) {
-        if (islower (theChar))
+        if (ISLOWER (theChar))
             theChar = _toupper (theChar);
         *targetStr++ = theChar;
     }
@@ -478,7 +478,6 @@ Tcl_GetOpenFileStruct (interp, handle)
     Tcl_Interp *interp;
     char       *handle;
 {
-    Interp *iPtr = (Interp *) interp;
     FILE   *filePtr;
 
     if (Tcl_GetOpenFile (interp, handle,
@@ -486,7 +485,7 @@ Tcl_GetOpenFileStruct (interp, handle)
                          &filePtr) != TCL_OK)
         return NULL;
 
-    return iPtr->oFilePtrArray [fileno (filePtr)];
+    return tclOpenFiles [fileno (filePtr)];
 }
 
 /*
@@ -500,19 +499,18 @@ Tcl_GetOpenFileStruct (interp, handle)
  * Parameters:
  *   o interp (I) - Current interpreter.
  *   o fileNum (I) - File number to set up the entry for.
- *   o readable (I) - TRUE if read access to the file.
- *   o writable (I) - TRUE if  write access to the file.
+ *   o permissions (I) - Flags consisting of TCL_FILE_READABLE,
+ *     TCL_FILE_WRITABLE.
  * Returns:
  *   A pointer to the FILE structure for the file, or NULL if an error
  * occured.
  *-----------------------------------------------------------------------------
  */
 FILE *
-Tcl_SetupFileEntry (interp, fileNum, readable, writable)
+Tcl_SetupFileEntry (interp, fileNum, permissions)
     Tcl_Interp *interp;
     int         fileNum;
-    int         readable;
-    int         writable;
+    int         permissions;
 {
     Interp   *iPtr = (Interp *) interp;
     char     *mode;
@@ -521,20 +519,22 @@ Tcl_SetupFileEntry (interp, fileNum, readable, writable)
     /*
      * Set up a stdio FILE control block for the new file.
      */
-    if (readable && writable) {
-        mode = "r+";
-    } else if (writable) {
-        mode = "w";
+    if (permissions & TCL_FILE_WRITABLE) {
+        if (permissions & TCL_FILE_READABLE)
+            mode = "r+";
+        else
+            mode = "w";
     } else {
         mode = "r";
     }
+
     filePtr = fdopen (fileNum, mode);
     if (filePtr == NULL) {
         iPtr->result = Tcl_PosixError (interp);
         return NULL;
     }
     
-    Tcl_EnterFile (interp, filePtr, readable, writable);
+    Tcl_EnterFile (interp, filePtr, permissions);
 
     return filePtr;
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.7 1993/08/02 05:12:34 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.8 1993/08/05 06:41:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -145,7 +145,7 @@ Tcl_PrintResult (interp, intResult, checkCmd)
  *
  * Tcl_OutputPrompt --
  *     Outputs a prompt by executing either the command string in
- *     TCLENV(topLevelPromptHook) or TCLENV(downLevelPromptHook).
+ *     tcl_prompt1 or tcl_prompt2.
  *
  *-----------------------------------------------------------------------------
  */
@@ -159,9 +159,17 @@ Tcl_OutputPrompt (interp, topLevel)
     int   result;
     int   promptDone = FALSE;
 
-    hookName = topLevel ? "topLevelPromptHook" : "downLevelPromptHook";
+    /*
+     * If a signal came in, process it.  This prevents signals that are queued
+     * from generating prompt hook errors.
+     */
+    if (tcl_AsyncReady) {
+        Tcl_AsyncInvoke (interp, TCL_OK); 
+    }
 
-    promptHook = Tcl_GetVar2 (interp, "TCLENV", hookName, 1);
+    hookName = topLevel ? "tcl_prompt1" : "tcl_prompt2";
+
+    promptHook = Tcl_GetVar (interp, hookName, 1);
     if (promptHook != NULL) {
         result = Tcl_Eval (interp, promptHook);
         if (result == TCL_ERROR) {
@@ -190,13 +198,11 @@ Tcl_OutputPrompt (interp, topLevel)
  * Tcl_CommandLoop --
  *
  *   Run a Tcl command loop.  The command loop interactively prompts for,
- * reads and executes commands. Two entries in the global array TCLENV
- * contain prompt hooks.  A prompt hook is Tcl code that is executed and
- * its result is used as the prompt string.  The element `topLevelPromptHook'
- * is the hook that generates the main prompt.  The element
- * `downLevelPromptHook' is the hook to generate the prompt for reading
- * continuation lines for incomplete commands.  If a signal occurs while
- * in the command loop, it is reset and ignored.  EOF terminates the loop.
+ * reads and executes commands. Two global variables, "tcl_prompt1" and
+ * "tcl_prompt2" contain prompt hooks.  A prompt hook is Tcl code that is
+ * executed and its result is used as the prompt string. If a error generating
+ * signal occurs while in the command loop, it is reset and ignored.  EOF
+ * terminates the loop.
  *
  * Parameters:
  *   o interp (I) - A pointer to the interpreter
@@ -221,8 +227,8 @@ Tcl_CommandLoop (interp, interactive)
          * if a "error" signal occured since the last time we were
          * through here.
          */
-        if (tclReceivedSignal) {
-            Tcl_ProcessSignals (interp, TCL_OK); 
+        if (tcl_AsyncReady) {
+            Tcl_AsyncInvoke (interp, TCL_OK); 
         }
         if (tclGotErrorSignal) {
             tclGotErrorSignal = FALSE;
@@ -279,8 +285,8 @@ endOfFile:
  *     value, if it exists.
  *
  * Parameters:
- *   o hookVarName (I) - The name of the prompt hook, which is an element
- *     of the TCLENV array.  One of topLevelPromptHook or downLevelPromptHook.
+ *   o hookVarName (I) - The name of the global variable containing prompt
+ *     hook.
  *   o newHookValue (I) - The new value for the prompt hook.
  *   o oldHookValuePtr (O) - If not NULL, then a pointer to a copy of the
  *     old prompt value is returned here.  NULL is returned if there was not
@@ -301,13 +307,12 @@ SetPromptVar (interp, hookVarName, newHookValue, oldHookValuePtr)
     char *oldHookPtr = NULL;
 
     if (oldHookValuePtr != NULL) {
-        hookValue = Tcl_GetVar2 (interp, "TCLENV", hookVarName, 
-                                 TCL_GLOBAL_ONLY);
+        hookValue = Tcl_GetVar (interp, hookVarName, TCL_GLOBAL_ONLY);
         if (hookValue != NULL)
             oldHookPtr =  ckstrdup (hookValue);
     }
-    if (Tcl_SetVar2 (interp, "TCLENV", hookVarName, newHookValue, 
-                     TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL) {
+    if (Tcl_SetVar (interp, hookVarName, newHookValue, 
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL) {
         if (oldHookPtr != NULL)
             ckfree (oldHookPtr);
         return TCL_ERROR;
@@ -322,7 +327,7 @@ SetPromptVar (interp, hookVarName, newHookValue, oldHookValuePtr)
  *
  * Tcl_CommandloopCmd --
  *     Implements the TCL commandloop command:
- *       commandloop ?prompt? ?prompt2?
+ *       commandloop ?prompt1? ?prompt2?
  *
  * Results:
  *     Standard TCL results.
@@ -342,16 +347,16 @@ Tcl_CommandloopCmd(clientData, interp, argc, argv)
 
     if (argc > 3) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
-                          " ?prompt? ?prompt2?", (char *) NULL);
+                          " ?prompt1? ?prompt2?", (char *) NULL);
         return TCL_ERROR;
     }
     if (argc > 1) {
-        if (SetPromptVar (interp, "topLevelPromptHook", argv[1],
+        if (SetPromptVar (interp, "tcl_prompt1", argv[1],
                           &oldTopLevelHook) != TCL_OK)
             goto exitPoint;
     }
     if (argc > 2) {
-        if (SetPromptVar (interp, "downLevelPromptHook", argv[2], 
+        if (SetPromptVar (interp, "tcl_prompt2", argv[2], 
                           &oldDownLevelHook) != TCL_OK)
             goto exitPoint;
     }

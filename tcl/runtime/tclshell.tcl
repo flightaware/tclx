@@ -34,7 +34,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tclshell.tcl,v 1.2 1993/06/24 07:32:30 markd Exp markd $
+# $Id: tclshell.tcl,v 1.3 1993/08/02 04:43:08 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -48,48 +48,49 @@
 #
 
 proc tclx_unknown2 {cmd} {
-    global interactiveSession auto_noexec
+    global tcl_interactive auto_noexec
 
     set name [lindex $cmd 0]
 
     if ![info exists auto_noexec] {
-	if [auto_execok $name] {
-            if {!$interactiveSession || ([info level] > 2) ||
+        if [auto_execok $name] {
+            if {!$tcl_interactive || ([info level] > 2) ||
                 [info script] != ""} {
                 error "Auto execution of Unix commands only supported as interactive commands.\nUse \"exec\" to execute \"$name\""
             }
-	    uplevel 2 system [list $cmd]
+            uplevel 2 system [list $cmd]
             return
-	}
+        }
     }
 
-    if {!$interactiveSession || ([info level] > 2) || [info script] != ""} {
+    if {!$tcl_interactive || ([info level] > 2) || [info script] != ""} {
         error "invalid command name \"$name\""
     }
 
     # csh-style redo.
 
     if {([info level] == 2) && ([info script] == "")} {
-	if {$name == "!!"} {
-	    return [uplevel 2 {history redo}]
-	}
-	if [regexp {^!(.+)$} $name dummy event] {
-	    return [uplevel 2 [list history redo $event]]
-	}
-	if [regexp {^\^([^^]*)\^([^^]*)\^?$} $name dummy old new] {
-	    return [uplevel 2 [list history substitute $old $new]]
-	}
-	set cmds [info commands $name*]
-	if {[llength $cmds] == 1} {
-	    return [uplevel 2 [lreplace $args 0 0 $cmds]]
-	}
-	if {[llength $cmds] != 0} {
-	    if {$name == ""} {
-		error "empty command name \"\""
-	    } else {
-		error "ambiguous command name \"$name\": [lsort $cmds]"
-	    }
-	}
+        if {$name == "!!"} {
+            return [uplevel {history redo}]
+        }
+        if [regexp {^!(.+)$} $name dummy event] {
+            return [uplevel [list history redo $event]]
+        }
+        if [regexp {^\^([^^]*)\^([^^]*)\^?$} $name dummy old new] {
+            return [uplevel [list history substitute $old $new]]
+        }
+        set cmds [info commands $name*]
+        if {[llength $cmds] == 1} {
+            return [uplevel [lreplace $args 0 0 $cmds]]
+        }
+        if {[llength $cmds] != 0} {
+            if {$name == ""} {
+                return -code error "empty command name \"\""
+            } else {
+                return -code error \
+                        "ambiguous command name \"$name\": [lsort $cmds]"
+            }
+        }
     }
     error "invalid command name \"$name\""
 }
@@ -105,14 +106,14 @@ proc auto_execok name {
     global auto_execs env
 
     if [info exists auto_execs($name)] {
-	return $auto_execs($name)
+        return $auto_execs($name)
     }
     set auto_execs($name) 0
     foreach dir [split $env(PATH) :] {
-	if {[file executable $dir/$name] && ![file isdirectory $dir/$name]} {
-	    set auto_execs($name) 1
-	    return 1
-	}
+        if {[file executable $dir/$name] && ![file isdirectory $dir/$name]} {
+            set auto_execs($name) 1
+            return 1
+        }
     }
     return 0
 }

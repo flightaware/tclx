@@ -12,20 +12,13 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXstartup.c,v 1.3 1993/07/23 06:42:57 markd Exp markd $
+ * $Id: tkXstartup.c,v 1.4 1993/07/27 05:17:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tk.h"
 #include "tkX.h"
-
-/*
- * Code taken from wish.tcl that we still need for wishx.  Its so small that
- * we "rom" it here, rather than have another init file.
- */
-
-static char *wishRom = "if [info exists geometry] {wm geometry . $geometry}";
 
 
 /*
@@ -61,8 +54,9 @@ TkX_Startup (interp, interactive, errorSignalProc)
                       TCLSH_ABORT_STARTUP_ERR |
                           (interactive ? TCLSH_INTERACTIVE : 0));
 
+    tclSignalBackgroundError = Tk_BackgroundError;
     if (interactive)
-        tkXshellSignalProc = errorSignalProc;
+        tclErrorSignalProc = errorSignalProc;
 
     Tcl_SetLibraryDirEnvVar (interp,
                              "TK_LIBRARY",
@@ -77,8 +71,8 @@ TkX_Startup (interp, interactive, errorSignalProc)
  *
  * TkX_WishInit --
  *
- *   Do the rest of the wish initalization.  This sources the tk.tcl file,
- * sets up auto_path and does what ever else would be done in wish.tcl.
+ *   Do the rest of the wish initalization.  This sources the tk.tcl file and
+ * sets up auto_path.
  *
  * Parameters:
  *   o interp - A pointer to the interpreter.
@@ -96,8 +90,6 @@ TkX_WishInit (interp)
                              "tk.tcl")  == TCL_ERROR)
         goto errorExit;
 
-    if (Tcl_GlobalEval (interp, wishRom) == TCL_ERROR)
-        goto errorExit;
     return;
 
   errorExit:

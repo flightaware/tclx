@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.14 1993/08/18 06:39:38 markd Exp markd $
+# $Id: Makefile.in,v 2.15 1993/08/26 04:55:13 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -43,8 +43,8 @@ PASS_FLAGS = "CC=$(CC)" "CFLAGS=$(CFLAGS)"
 # it's .o files to a library.  We need to purge the right ones one a new
 # library is copied.
 
-TCLMADE.TMP = osSupport/made.tmp ucbsrc/made.tmp src/made.tmp
-TKMADE.TMP  = tksrc/made.tmp tkucbsrc/made.tmp
+TCLMADE.TMP = osSupport/made.tmp src/made.tmp
+TKMADE.TMP  = tksrc/made.tmp
 
 #------------------------------------------------------------------------------
 
@@ -56,7 +56,6 @@ all: TCLX runtcl ${TK_BUILD}
 
 TCLX: TCLCOPY runtcl
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
@@ -91,7 +90,6 @@ ${TCL.H}: ${TCL_UCB_LIB}/tcl.h
 #
 
 WISHX: TKCOPY runwishx
-	cd tkucbsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tksrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tktclsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
@@ -164,17 +162,29 @@ tcl++:
 test: ucbtests extdtests
 
 ucbtests: all
-	@echo "***"
+	@echo "***************************************************************"
 	@echo "*** Expect warnings about not having the following commands:"
-	@echo "***     testcmdinfo, testdcall & testlink"
-	@echo "***"
-	./runtcl -c "cd ${TCL_UCB_LIB}/tests;source all"
+	@echo "***     testasync"
+	@echo "***     testcmdinfo"
+	@echo "***     testdcall"
+	@echo "***     testlink"
+	@echo "***     testdstring"
+	@echo "*** Expect the following error:"
+	@echo "***     Uncaught error in expr.test: unknown math function T1"
+	@echo "***************************************************************"
+	@echo ""
+	./runtcl -c "cd ${TCL_UCB_LIB}/tests;source ${srcbasedir}/tests/all"
 
 extdtests: all
 	./runtcl -c "cd tests;source all"	
 
 tktest: all
-	cd tktests ; ../runwishx -f tktests.tcl -n wish ../${TK_UCB_LIB}
+	@echo "***************************************************************"
+	@echo "*** Expect warnings about not having the following commands:"
+	@echo "***     testmakexists"
+	@echo "***************************************************************"
+	@echo ""
+	cd tktests ; ../runwishx -f tktests.tcl -n wish ${TK_UCB_LIB}
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
@@ -240,11 +250,9 @@ WISHXMAYBE: TKXINSTALL
 
 partclean:
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} partclean
-	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} partclean
 	-rm -f runtcl runwishx
@@ -263,11 +271,9 @@ clean: partclean
 
 distclean: clean
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
-	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	rm -f Makefile config.status

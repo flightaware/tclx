@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.24 1993/08/04 15:20:50 markd Exp markd $
+.\" $Id: TclX.man,v 2.25 1993/08/18 05:23:56 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -91,7 +91,7 @@ This procedure lists the directories in the directory stack.
 '@help: tcl/control/commandloop
 '@brief: Create an interactive command loop.
 .TP
-.B commandloop ?\fIprompt\fR? ?\fIprompt2\fR?
+.B commandloop ?\fIprompt1\fR? ?\fIprompt2\fR?
 .br
 Create an interactive command loop for the current TCL interpreter.  This
 command receives commands from stdin and executes them.  It is
@@ -99,11 +99,15 @@ useful TCL scripts that do not normally converse interactively with
 a user through a Tcl command interpreter, but which sometimes want
 to enter this mode.
 .sp
-\fIPrompt\fR is a Tcl command string that is evaluated to determine
-the text of the prompt string.
+\fIPrompt1\fR is a Tcl command string that is evaluated to determine
+the text of the prompt string.  The old value of \fBtcl_prompt1\fR is
+saved and it is set to this value for the duration of the command loop.
 \fIPrompt2\fR is a command string that is evaluated to determine
 the ``downlevel prompt'', which is
-the prompt which is issued for continuation input.
+the prompt which is issued for continuation input.  The old value of
+\fBtcl_prompt2\fR is
+saved and it is set to this value for the duration of the command loop.
+.sp
 When the command
 terminates, the variables for the prompt hooks will be set to their old value.
 If these arguments are not specified, the prompt hooks use their current
@@ -2180,7 +2184,7 @@ A list containing the arguments passed in from the command line, excluding
 arguments used by the Tcl shell.  The first element is the first passed
 argument, not the program name.
 .TP
-.B interactiveSession
+.B tcl_interactive
 Set to \fB1\fR if Tcl shell is invoked interactively, or \fB0\fR if the
 Tcl shell is directly executing a script.  Normally checked by scripts so
 that they can function as a standalone application if specified on the
@@ -2192,21 +2196,20 @@ Path to search to locate Tcl scripts.  Used by the
 \fBauto_load\fR command and the TclX unknown command handler.
 The path is a Tcl list of directory names.
 .TP
-.B TCLENV
-Array that contains information used internally by various Tcl procedures that
-are part of the Tcl shell.  Entries that you might want to modify are defined
-here.  Don't change any other entries.
-.TP
-.B TCLENV(topLevelPromptHook)
+.B tcl_prompt1
 Contains code to run to generate the prompt used when interactively prompting
 for commands.  The code in this hook will be evaluated and the result will be
 used for the prompt.
 .TP
-.B TCLENV(downLevelPromptHook)
+.B tcl_prompt2
 Contains code to run to generate the prompt used when interactively prompting
 for continuation of an incomplete command.  The code in this hook
 will be evaluated and the result will be used for the prompt
 .TP
+.B TCLENV
+Array that contains information used internally by various Tcl procedures that
+are part of the Tcl shell..  Don't change this array or strange errors might
+result.
 '@endhelp
 '
 .SH "TCL SHELL PROCEDURES"

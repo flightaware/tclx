@@ -11,11 +11,11 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.4 1993/08/25 03:15:47 markd Exp markd $
+dnl $Id: configure.in,v 1.5 1993/08/26 04:55:13 markd Exp markd $
 dnl----------------------------------------------------------------------------
 
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.4 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.5 $),)dnl
 
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
@@ -291,7 +291,7 @@ echo checking for X11 header files
 XINCLUDES="# no special path needed"
 AC_TEST_CPP([#include <X11/Intrinsic.h>], , XINCLUDES="nope")
 if test "$XINCLUDES" = nope; then
-    dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include"
+    dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include /usr/X11/include"
     for i in $dirs ; do
         if test -r $i/X11/Intrinsic.h; then
             XINCLUDES=" -I$i"
@@ -300,6 +300,7 @@ if test "$XINCLUDES" = nope; then
 fi
 if test "$XINCLUDES" = nope; then
   echo "Warning:  couldn't find any X11 include files."
+  echo "          define XINCLUDES in Config.mk"
   XINCLUDES="# no include files found"
 fi
 AC_SUBST(XINCLUDES)
@@ -308,9 +309,11 @@ echo "checking for X11 library archive"
 AC_HAVE_LIBRARY(X11_s, XLIBSW="-lX11_s")
 AC_HAVE_LIBRARY(libX11.a, XLIBSW="$XLIBSW -lX11", XLIBSW=nope)
 if test "$XLIBSW" = nope; then
-    dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib"
+    dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib /usr/X11/lib"
     for i in $dirs ; do
-        if test -r $i/libX11.a; then
+        if test -r $i/libX11_s.a; then
+            XLIBSW="-L$i -lX11_s"
+        elif test -r $i/libX11.a; then
             XLIBSW="-L$i -lX11"
         fi
     done
@@ -353,4 +356,4 @@ AC_SUBST(bldbasedir)
 # Generate the make files.
 #------------------------------------------------------------------------------
 
-AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tkucbsrc/Makefile tools/Makefile ucbsrc/Makefile)
+AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile)

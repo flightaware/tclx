@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.21 1993/08/19 16:05:12 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.22 1993/08/21 17:19:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -167,9 +167,11 @@ extern char *tclXWrongArgs;
         (((str1) [0] == (str2) [0]) && (strncmp (str1, str2, cnt) == 0))
 
 /*
- * Macro to check for a space with 8 bit character sets.
+ * Macro to do ctype functions with 8 bit character sets.
  */
 #define ISSPACE(c) (isspace ((unsigned char) c))
+#define ISDIGIT(c) (isdigit ((unsigned char) c))
+#define ISLOWER(c) (islower ((unsigned char) c))
 
 /*
  * Macro that behaves like strdup, only uses ckalloc.
@@ -209,7 +211,8 @@ Tcl_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
                              char       *checkCmd));
 
 extern int
-Tcl_ProcessSignal _ANSI_ARGS_((Tcl_Interp *interp,
+Tcl_ProcessSignal _ANSI_ARGS_((ClientData  clientData,
+                               Tcl_Interp *interp,
                                int         cmdResultCode));
 
 extern void
@@ -247,8 +250,7 @@ Tcl_SetLibraryDirEnvVar _ANSI_ARGS_((Tcl_Interp  *interp,
 extern FILE *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
-                                int         readable,
-                                int         writable));
+                                int         permissions));
 
 extern void
 Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,

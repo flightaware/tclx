@@ -16,7 +16,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 2.9 1993/07/13 03:04:02 markd Exp markd $
+ * $Id: tcl++.h,v 2.10 1993/07/18 15:19:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -159,11 +159,10 @@ public:
     }
 
     inline void
-    EnterFile (FILE       *file,
-               int         readable,
-               int         writable)
+    EnterFile (FILE  *file,
+               int    permissions)
     {
-        Tcl_EnterFile (interp, file, readable, writable);
+        Tcl_EnterFile (interp, file, permissions);
     }
 
     inline void
@@ -263,13 +262,6 @@ public:
              int         flags = 0)
     { 
         return Tcl_GetVar2 (interp, (char *) part1, (char *) part2, flags); 
-    }
-
-    inline void
-    LinkedVarWritable (const char *varName,
-                       int         writable)
-    {
-        Tcl_LinkedVarWritable (interp, (char *) varName, writable);
     }
 
     inline int

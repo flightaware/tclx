@@ -24,8 +24,8 @@
 ./osSupport/strftime.c
 ./osSupport/system.c
 ./src/Makefile.in
-./src/main++.C
-./src/main.c
+./src/tclXmain++.C
+./src/tclXmain.c
 ./src/patchlevel.h
 ./src/tcl++.C
 ./src/tcl++.h
@@ -328,18 +328,14 @@
 ./tkmaster/help/tk/widgets/tk_menuBar
 ./tkmaster/help/tk/widgets/toplevel
 ./tksrc/Makefile.in
-./tksrc/tkMain.c
+./tksrc/tkXmain.c
 ./tksrc/tkX.h
-./tksrc/tkXsignal.c
 ./tksrc/tkXstartup.c
 ./tktclsrc/Makefile.in
 ./tktclsrc/tclhelp.tcl
 ./tktclsrc/tkdemo.tcl
 ./tktests/signal.test
 ./tktests/tktests.tcl
-./tkucbsrc/Makefile.in
-./tkucbsrc/tkEvent.cdiff
-./tkucbsrc/tkEvent.sed
 ./tools/Makefile.in
 ./tools/bldmanhelp.tcl
 ./tools/buildutil.tcl
@@ -348,6 +344,3 @@
 ./tools/installTcl.tcl
 ./tools/tclmanpages
 ./tools/tkmanpages
-./ucbsrc/Makefile.in
-./ucbsrc/tclBasic.cdiff
-./ucbsrc/tclBasic.sed

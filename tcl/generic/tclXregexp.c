@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 2.5 1993/07/23 02:19:27 markd Exp markd $
+ * $Id: tclXregexp.c,v 2.6 1993/08/03 06:13:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -401,7 +401,7 @@ Tcl_RegExpCompile (interp, regExpPtr, expression, flags)
      * Compile meta-character containing regular expression.
      */
     tclRegexpError = NULL;
-    regExpPtr->progPtr = regcomp (expBuf);
+    regExpPtr->progPtr = TclRegComp (expBuf);
     if (tclRegexpError != NULL) {
         if (flags & REXP_NO_CASE)
             ckfree (expBuf);
@@ -492,7 +492,7 @@ Tcl_RegExpExecute (interp, regExpPtr, matchStrIn, matchStrLower, subMatchInfo)
      * Give it a go with full regular expressions
      */
     progPtr = regExpPtr->progPtr;
-    result = regexec (progPtr, matchStr, matchStr);
+    result = TclRegExec (progPtr, matchStr, matchStr);
 
     /*
      * Return submatches if we found it.

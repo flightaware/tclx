@@ -6,7 +6,7 @@
   o Fixed use of invalid variable when reporting an error in 
     test/unixcmds.test.
   o Changed temporary files names so they are 14 characters or less in 
-    test/chmod.test..
+    test/chmod.test.
   o Changed TCL_MAN_SECTION for SCO Unix to be "TCL" instead of "tcl".
   o Modified src/main.c to be independent of the internal Tcl include files.
   o Changed ar to not use the 'u' option in makes.
@@ -31,7 +31,7 @@
   o Changed code in src/createExtd.c that is supposed to force math error to
     be included so that an optimizer doesn't decide to throw away the external
     reference.
-  o Modified commandloop to reset command buffer when a signal is recieved,
+  o Modified commandloop to reset command buffer when a signal is received,
     enabling interrupting the input of multi-line commands.
   o Fixed problem with math error tests were pow did not return an error on
     some systems.
@@ -155,7 +155,7 @@
    o Changed src/Makefile to use CCPLUSINCL.
    o Fixed cast problems in src/clock.c and src/tcl++.c
    o Added SGI and IBM RS6000 to Config.mk based on billa@msi.com (Bill
-     Alexander) porting.  Thses probably need more work..
+     Alexander) porting.
 -------------------------------------------------------------------------------
  4 May 92:
    o Added tcl 6.3 fixes to ucbsrc/tclBasic.c
@@ -573,16 +573,38 @@
     that can add the Extended Tcl commands to an existing interpreter.
   o Don't print shell prompts if not a tty.
 ===============================================================================
-2 Aug 93: Released TclX7.0c Beta 2.
+ 2 Aug 93: Released TclX7.0c Beta 2.
 ===============================================================================
-3 Aug 93:
+ 3 Aug 93:
   o Fixed core dump in chmod command.
   o Loop command now takes expressions.
 -------------------------------------------------------------------------------
-4 Aug 93:
+ 4 Aug 93:
   o Change the "yy" prefix in the code generated from tclXgetdate.y to be
     "TclXyy".  This is to allow apllications to include yacc code.
   o Call isascii before isspace to handle non-ASCII character sets.
 -------------------------------------------------------------------------------
-5 Aug 93: Released TclX7.0c Beta 3.
+ 5 Aug 93: Released TclX7.0c Beta 3.
 ===============================================================================
+17 Aug 93:
+  o Add -bytes and -maxbytes options to copyfile.
+  o Fixed configuration problems with including values.h and sys/time.h.
+  o Added "make partclean", that does not remove the manual pages that were
+    copied to the master directory.  Useful the for the debugging process.
+-------------------------------------------------------------------------------
+19 Aug 93:
+  o Fixed bug with convetclock not working in BST.
+-------------------------------------------------------------------------------
+24 Aug 93:
+  o Added configure check for MCS and time_t.
+  o Changed makefiles so that Config.mk can have absolute or relative paths
+    to files.
+-------------------------------------------------------------------------------
+30 Aug 93:
+  o Integrated with new Tcl Async functions for signal handling.  Signal
+    handling should now work with multiple interpreters.
+  o Change "interactiveSession" variable to "tcl_interactive" and moved
+    prompts from "TCLENV" array to "tcl_prompt1" and "tcl_prompt2".  These
+    changes were done for compatibility with UCB Tcl.
+    (*POTENTIAL INCOMPATIBILITY*)
+-------------------------------------------------------------------------------

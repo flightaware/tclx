@@ -88,7 +88,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     bzero (&server, sizeof (server));
     server.sin_family = AF_INET;
 
-    if (isdigit (*service)) {
+    if (ISDIGIT (*service)) {
         int  port;
         
         if (Tcl_GetInt (interp, service, &port) != TCL_OK)
@@ -109,7 +109,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     /*
      * Convert IP address or lookup host name.
      */
-    if (isdigit (*host)) {
+    if (ISDIGIT (*host)) {
         server.sin_addr.s_addr = inet_addr (host);
     } else {
         struct hostent *hostEntry;
@@ -155,7 +155,8 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
      * returned.  If not buffered, a single one is returned.
      */
     if (!buffered) {
-        filePtr = Tcl_SetupFileEntry (interp, socketFD, TRUE, TRUE);
+        filePtr = Tcl_SetupFileEntry (interp, socketFD,
+                                      TCL_FILE_READABLE | TCL_FILE_WRITABLE);
         if (filePtr == NULL)
             goto errorExit;
 
@@ -164,14 +165,14 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
 
-    if (Tcl_SetupFileEntry (interp, socketFD, TRUE, FALSE) == NULL)
+    if (Tcl_SetupFileEntry (interp, socketFD, TCL_FILE_READABLE) == NULL)
         goto errorExit;
 
     socketFD2 = dup (socketFD);
     if (socketFD2 < 0)
         goto unixError;
 
-    if (Tcl_SetupFileEntry (interp, socketFD2, FALSE, TRUE) == NULL)
+    if (Tcl_SetupFileEntry (interp, socketFD2, TCL_FILE_WRITABLE) == NULL)
         goto errorExit;
 
     sprintf (interp->result, "file%d file%d", socketFD, socketFD2);

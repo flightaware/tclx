@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.28 1993/08/18 14:34:24 markd Exp markd $
+# $Id: Config.mk,v 2.29 1993/08/26 04:55:13 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -48,8 +48,8 @@
 # The directory containing the UCB Tcl library (libtcl.a) and the UCB Tcl 
 # source distribution directory.  They default to the same directory.
 
-TCL_UCB_LIB=${bldbasedir}/../tcl7.0b2
-TCL_UCB_SRC=${srcbasedir}/../tcl7.0b2
+TCL_UCB_LIB=${bldbasedir}/../tcl7.0b3
+TCL_UCB_SRC=${srcbasedir}/../tcl7.0b3
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -58,8 +58,8 @@ TCL_UCB_SRC=${srcbasedir}/../tcl7.0b2
 # distribution directory.
 
 TK_BUILD=WISHX
-TK_UCB_LIB=${bldbasedir}/../tk3.3b2
-TK_UCB_SRC=${srcbasedir}/../tk3.3b2
+TK_UCB_LIB=${bldbasedir}/../tk3.3b3
+TK_UCB_SRC=${srcbasedir}/../tk3.3b3
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Also a macro that
@@ -82,6 +82,13 @@ YACC=yacc
 #YACC=bison -b y
 
 #------------------------------------------------------------------------------
+# X is often in strange places, override what configure figured out if
+# its wrong.
+
+#XINCLUDES=/usr/somewhere/include
+#XLIBSW=-L/usr/somewhere/lib -lX11
+
+#------------------------------------------------------------------------------
 # EXtra flags:
 #   o XCFLAGS - Extra compiler flags on all compiles and links
 #   o XLDFLAGS - Extra compiler flags to specify at link time.
@@ -92,11 +99,11 @@ XLDFLAGS=
 XLDLIBS=
 
 #------------------------------------------------------------------------------
-# If C++ is to be used these should be set.  Specifying CPLUSOBJS includes the
-# C++ support code in the Tcl library. CCPLUS is the command to run your C++
-# compiler.
+# If C++ is to be used these should be set.  Specifying TCL_PLUS_BUILD
+# includes the C++ support code in the Tcl library. CCPLUS is the command to
+# run your C++ compiler.
 
-#CPLUSOBJS=tcl++.o
+#TCL_PLUS_BUILD=TCL_PLUS
 CCPLUS=CC
 
 #------------------------------------------------------------------------------

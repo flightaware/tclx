@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 1.3 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXflock.c,v 1.4 1993/07/18 23:48:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -173,9 +173,9 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
                              &lockInfo) != TCL_OK)
         return TCL_ERROR;
 
-    if (readLock && !filePtr->readable)
+    if (readLock && ((filePtr->permissions & TCL_FILE_READABLE) == 0))
         goto notReadable;
-    if (writeLock && !filePtr->writable)
+    if (writeLock && ((filePtr->permissions & TCL_FILE_WRITABLE) == 0))
         goto notWritable;
 
     lockInfo.l_type = writeLock ? F_WRLCK : F_RDLCK;

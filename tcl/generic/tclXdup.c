@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 2.5 1993/07/18 05:59:41 markd Exp markd $
+ * $Id: tclXdup.c,v 2.6 1993/07/19 05:53:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -98,9 +98,8 @@ DoNormalDup (interp, oldFilePtr)
     if (newFileId < 0)
         goto unixError;
 
-    filePtr = Tcl_SetupFileEntry (interp, newFileId,
-                                  oldFilePtr->readable,
-                                  oldFilePtr->writable);
+    filePtr = Tcl_SetupFileEntry (interp, newFileId, oldFilePtr->permissions);
+
     return filePtr;
 
 unixError:
@@ -182,8 +181,7 @@ DoSpecialDup (interp, oldFilePtr, targetFileId)
      */
     if (targetFilePtr == NULL) {
         targetFilePtr = Tcl_SetupFileEntry (interp, targetFileNum,
-                                            oldFilePtr->readable,
-                                            oldFilePtr->writable);
+                                            oldFilePtr->permissions);
         if (targetFilePtr == NULL)
             goto unixError;
     }
@@ -248,11 +246,11 @@ Tcl_DupCmd (clientData, interp, argc, argv)
      * place.  The location is only recorded if the file is a reqular file,
      * since you cann't seek on other types of files.
      */
-    if (oldFilePtr->writable) {
+    if (oldFilePtr->permissions  & TCL_FILE_WRITABLE) {
         if (fflush (oldFilePtr->f) != 0)
             goto unixError;
     }
-    if (oldFilePtr->readable) {
+    if (oldFilePtr->permissions & TCL_FILE_READABLE) {
         struct stat statBuf;
         
         if (fstat (fileno (oldFilePtr->f), &statBuf) < 0)

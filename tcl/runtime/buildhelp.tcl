@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.7 1993/07/20 08:35:45 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.8 1993/08/13 15:01:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -359,8 +359,8 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
         if {$status != 0} {
             echo "Error extracting help from: $manFile"
             echo $msg
-            global errorInfo interactiveSession
-            if {!$interactiveSession} {
+            global errorInfo tcl_interactive
+            if {!$tcl_interactive} {
                 echo $errorInfo
                 exit 1
             }

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.15 1993/07/23 06:42:57 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.16 1993/08/02 05:12:34 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -343,7 +343,7 @@ Tcl_ProcessInitFile (interp, dirEnvVar, dir, version1, version2, initFile)
  *   o interp - A pointer to the interpreter.
  *   o options - Flags to control the behavior of this routine, the following
  *     options are supported:
- *       o TCLSH_INTERACTIVE - Set interactiveSession to 1.
+ *       o TCLSH_INTERACTIVE - Set tcl_interactive to 1.
  *       o TCLSH_QUICK_STARTUP - Don't source the Tcl initialization file.
  *       o TCLSH_ABORT_STARTUP_ERR - If set, abort the process if an error
  *         occurs.
@@ -362,7 +362,7 @@ Tcl_ShellEnvInit (interp, options)
     Tcl_Interp  *interp;
     unsigned     options;
 {
-    if (Tcl_SetVar (interp, "interactiveSession", 
+    if (Tcl_SetVar (interp, "tcl_interactive", 
                     (options & TCLSH_INTERACTIVE) ? "1" : "0",
                     TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
         goto errorExit;

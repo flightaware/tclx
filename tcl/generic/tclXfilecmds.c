@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.6 1993/07/21 04:00:58 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.7 1993/08/18 05:23:56 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -89,9 +89,9 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (Tcl_SetupFileEntry (interp, fileNums [0], TRUE,  FALSE) == NULL)
+    if (Tcl_SetupFileEntry (interp, fileNums [0], TCL_FILE_READABLE) == NULL)
         goto errorExit;
-    if (Tcl_SetupFileEntry (interp, fileNums [1], FALSE, TRUE) == NULL)
+    if (Tcl_SetupFileEntry (interp, fileNums [1], TCL_FILE_WRITABLE) == NULL)
         goto errorExit;
 
     if (argc == 1)      
@@ -265,7 +265,7 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
      * quote.
      */
     
-    while (isascii(*p) && isspace(*p)) {
+    while (ISSPACE(*p)) {
         p++;
     }
     if (*p == '{') {
@@ -305,7 +305,7 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
                     char *p2;
 
                     p++;
-                    if ((isascii(*p) && isspace(*p)) || (*p == 0)) {
+                    if (ISSPACE(*p) || (*p == 0)) {
                         goto done;
                     }
                     for (p2 = p; (*p2 != 0) && (!isspace(*p2)) && (p2 < p+20);
@@ -360,7 +360,7 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
                     char *p2;
 
                     p++;
-                    if ((isascii(*p) && isspace(*p)) || (*p == 0)) {
+                    if (ISSPACE(*p) || (*p == 0)) {
                         goto done;
                     }
                     for (p2 = p; (*p2 != 0) && (!isspace(*p2)) && (p2 < p+20);
@@ -418,7 +418,7 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
     }
 
     done:
-    while (isascii(*p) && isspace(*p)) {
+    while (ISSPACE(*p)) {
         p++;
     }
     *idxPtr = p - bufferPtr->string;

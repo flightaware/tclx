@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.12 1993/08/01 05:43:35 markd Exp markd $
+ * $Id: tclExtend.h,v 2.13 1993/08/05 06:41:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@
  * version to form the actual extended Tcl version.
  */
 
-#define TCL_EXTD_VERSION_SUFFIX "a-B3"   /* 7.0a */
+#define TCL_EXTD_VERSION_SUFFIX "a-B4"   /* 7.0a */
 
 typedef void *void_pt;
 
@@ -51,20 +51,21 @@ extern char *tclAppLongname;     /* Long, natural language application name */
 extern char *tclAppVersion;      /* Version number of the application       */
 
 /*
- * If non-zero, a signal was received.  Normally signals are handled in
- * Tcl_Eval, but if an application does not return to eval for some period
- * of time, then this should be checked and Tcl_ProcessSignals called if
- * this is set.
- */
-extern int tclReceivedSignal;
-
-/*
  * Flag user to indicate that a signal that was setup to return an error
  * occured (it may not have been processed yet).  This is used by interactive
  * command loops to flush input.  It should be explictly cleared by any routine
- * that cares about it.
+ * that cares about it.  Also an application-supplied function to call if a
+ * error signal occurs.  This normally flushes command input.
  */
 extern int tclGotErrorSignal;
+extern void (*tclErrorSignalProc) _ANSI_ARGS_((int signalNum));
+
+/*
+ * Pointer to background error handler for signals handled while not in an
+ * interpreter.
+ */
+extern void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp));
+
 
 /*
  * Exported Extended Tcl functions.
@@ -133,7 +134,8 @@ Tcl_ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *initFile));
 
 EXTERN int
-Tcl_ProcessSignals _ANSI_ARGS_((Tcl_Interp *interp,
+Tcl_ProcessSignals _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
                                 int         cmdResultCode));
 
 EXTERN int

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.11 1993/07/27 05:17:30 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.12 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -117,18 +117,34 @@ typedef RETSIGTYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
 #endif
 
 /*
- * Messages.
+ * Structure used to save error state of the interpreter.
  */
-static char *noPosix = "Posix signals are not available on this system";
+typedef struct {
+    char  *result;
+    char  *errorInfo;
+    char  *errorCode;
+} errState_t;
 
 /*
- * External globals that indicate that some signal was received.  Cleared
- * when no signals are pending.  Also a flag indicating that an "error"
- * signal has occured.  This is used to flush interactive input in commands and
- * is only cleared there.
+ * Table containing a interpreters and there Async handler cookie.
  */
-int tclReceivedSignal = FALSE;
+typedef struct {
+    Tcl_Interp       *interp;
+    Tcl_AsyncHandler  handler;
+} interpHandler_t;
+
+static interpHandler_t *interpTable = NULL;
+static int              interpTableSize  = 0;
+static int              numInterps  = 0;
+
+/*
+ * A flag indicating that an "error" signal has occured.  This is used to
+ * flush interactive input in commands and is only cleared there.  Also an
+ * application-supplied function to call if a error signal occurs.  This
+ * normally flushes command input.
+ */
 int tclGotErrorSignal = FALSE;
+void (*tclErrorSignalProc) _ANSI_ARGS_((int signalNum)) = NULL;
 
 /*
  * Counters of signals that have occured but have not been processed.
@@ -142,9 +158,13 @@ static unsigned signalsReceived [MAXSIG];
 static char *signalTrapCmds [MAXSIG];
 
 /*
+ * Pointer to background error handler (normally NULL or Tk_BackgroundError).
+ */
+void (*tclSignalBackgroundError) _ANSI_ARGS_((Tcl_Interp *interp)) = NULL;
+
+/*
  * Prototypes of internal functions.
  */
-
 static int
 SigNameToNum _ANSI_ARGS_((char *sigName));
 
@@ -163,6 +183,13 @@ static int
 FormatTrapCode  _ANSI_ARGS_((Tcl_Interp  *interp,
                              int          signalNum,
                              Tcl_DString *command));
+
+static errState_t *
+SaveErrorState _ANSI_ARGS_((Tcl_Interp *interp));
+
+static void
+RestoreErrorState _ANSI_ARGS_((Tcl_Interp *interp,
+                               errState_t *errStatePtr));
 
 static int
 EvalTrapCode _ANSI_ARGS_((Tcl_Interp *interp,
@@ -200,7 +227,8 @@ BlockSignals _ANSI_ARGS_((Tcl_Interp  *interp,
                           int          signalList [MAXSIG]));
 
 static void
-SignalCmdCleanUp _ANSI_ARGS_((ClientData clientData));
+SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
+                              Tcl_Interp *interp));
 
 
 /*
@@ -384,30 +412,35 @@ SetSignalAction (signalNum, sigFunc)
  *-----------------------------------------------------------------------------
  *
  * TclSignalTrap --
- *     Trap handler for UNIX signals.  Sets a flag indicating that the
- *     trap has occured, saves the name and rearms the trap.  The flag
- *     will be seen by the interpreter when its safe to trap.
- * Globals:
- *   o tclReceivedSignal (O) - Set to TRUE, to indicate a signal was received.
- *   o signalsReceived (O) - The count of each signal that was received.
+ *
+ *   Trap handler for UNIX signals.  Sets tells all registered interpreters
+ * that a trap has occured and saves the trap info.  The first interpreter to
+ * call it's async signal handler will process all pending signals.
  *-----------------------------------------------------------------------------
  */
 static RETSIGTYPE
 TclSignalTrap (signalNum)
     int signalNum;
 {
+    int idx;
+
     /*
-     * Set flags that are checked by the eval loop.
+     * Record the count of the number of this type of signal that has occured
+     * and tell all the interpreters to call the async handler when safe.
      */
     signalsReceived [signalNum]++;
-    tclReceivedSignal = TRUE;
+
+    for (idx = 0; idx < numInterps; idx++)
+        Tcl_AsyncMark (interpTable [idx].handler);
 
     /*
      * Flag used by command input functions to flush input.
      */
-    if (signalTrapCmds [signalNum] == NULL)
+    if (signalTrapCmds [signalNum] == NULL) {
         tclGotErrorSignal = TRUE;
-
+        if (tclErrorSignalProc != NULL)
+            (*tclErrorSignalProc) (signalNum);
+    }
 #ifndef HAVE_SIGACTION
     /*
      * For old-style Unix signals, the signal must be explictly re-enabled.
@@ -420,6 +453,92 @@ TclSignalTrap (signalNum)
             panic ("TclSignalTrap bug");
     }
 #endif
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * SaveErrorState --
+ *  
+ *   Save the error state of the interpreter (result, errorInfo and errorCode).
+ *
+ * Parameters:
+ *   o interp (I) - The interpreter to save. Result will be reset.
+ * Returns:
+ *   A dynamically allocated structure containing all three strings,  Its
+ * allocated as a single malloc block.
+ *-----------------------------------------------------------------------------
+ */
+static errState_t *
+SaveErrorState (interp)
+    Tcl_Interp *interp;
+{
+    errState_t *errStatePtr;
+    char       *errorInfo, *errorCode, *nextPtr;
+    int         len;
+
+    errorInfo = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
+    errorCode = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
+
+    len = sizeof (errState_t) + strlen (interp->result) + 1;
+    if (errorInfo != NULL)
+        len += strlen (errorInfo) + 1;
+    if (errorCode != NULL)
+        len += strlen (errorCode) + 1;
+
+
+    errStatePtr = (errState_t *) ckalloc (len);
+    nextPtr = ((char *) errStatePtr) + sizeof (errState_t);
+
+    errStatePtr->result = nextPtr;
+    strcpy (errStatePtr->result, interp->result);
+    nextPtr += strlen (interp->result) + 1;
+
+    errStatePtr->errorInfo = NULL;
+    if (errorInfo != NULL) {
+        errStatePtr->errorInfo = nextPtr;
+        strcpy (errStatePtr->errorInfo, errorInfo);
+        nextPtr += strlen (errorInfo) + 1;
+    }
+
+    errStatePtr->errorCode = NULL;
+    if (errorCode != NULL) {
+        errStatePtr->errorCode = nextPtr;
+        strcpy (errStatePtr->errorCode, errorCode);
+        nextPtr += strlen (errorCode) + 1;
+    }
+
+    Tcl_ResetResult (interp);
+    return errStatePtr;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * RestoreErrorState --
+ *  
+ *   Restore the error state of the interpreter that was saved by
+ * SaveErrorState.
+ *
+ * Parameters:
+ *   o interp (I) - The interpreter to save.
+ *   o errStatePtr (I) - Error state from SaveErrorState.  This structure will
+ *     be freed. 
+ * Returns:
+ *   A dynamically allocated structure containing all three strings,  Its
+ * allocated as a single malloc block.
+ *-----------------------------------------------------------------------------
+ */
+static void
+RestoreErrorState (interp, errStatePtr)
+    Tcl_Interp *interp;
+    errState_t *errStatePtr;
+{
+    Tcl_SetResult (interp, errStatePtr->result, TCL_VOLATILE);
+    Tcl_SetVar (interp, "errorInfo", errStatePtr->errorInfo, TCL_GLOBAL_ONLY);
+    Tcl_SetVar (interp, "errorCode", errStatePtr->errorCode, TCL_GLOBAL_ONLY);
+
+    ckfree (errStatePtr);
 }
 
 /*
@@ -461,7 +580,8 @@ FormatTrapCode (interp, signalNum, command)
             continue;
         }
         if (scanPtr [1] == '%') {
-            scanPtr += 2;            continue;
+            scanPtr += 2;
+            continue;
         }
         Tcl_DStringAppend (command, copyPtr, (scanPtr - copyPtr));
 
@@ -609,23 +729,27 @@ ProcessASignal (interp, signalNum)
  *
  * Tcl_ProcessSignals --
  *  
- *   Called by Tcl_Eval to check if a signal was received when Tcl_Eval is in
- * a safe state.  If the signal was received, this handles processing the
- * signal prehaps recursively eval-ing some code.  This is called just after a
- * command completes.  The results of the command are passed to this procedure
- * and may be altered by it.  If trap code is specified for the signal that
- * was received, then the trap will be executed, otherwise an error result
- * will be returned indicating that the signal occured.  If an error is
- * returned, clear the errorInfo variable.  This makes sure it exists and
- * that it is empty, otherwise bogus or non-existant information will be
- * returned if this routine was called somewhere besides Tcl_Eval.  If a
- * signal was received multiple times and a trap is set on it, then that
- * trap will be executed for each time the signal was received.
+ *   Called by Tcl_Eval, etc to process pending signals in a safe state
+ * interpreter state.  This is often called just after a command completes.
+ * The results of the command are passed to this procedure and may be altered
+ * by it.  If trap code is specified for the signal that was received, then
+ * the trap will be executed, otherwise an error result will be returned
+ * indicating that the signal occured.  If an error is returned, clear the
+ * errorInfo variable.  This makes sure it exists and that it is empty,
+ * otherwise bogus or non-existant information will be returned if this
+ * routine was called somewhere besides Tcl_Eval.  If a signal was received
+ * multiple times and a trap is set on it, then that trap will be executed for
+ * each time the signal was received.
  * 
  * Parameters:
+ *   o clientData (I) - Not used.
  *   o interp (I/O) - interp->result should contain the result for
  *     the command that just executed.  This will either be restored or
- *     replaced with a new result.
+ *     replaced with a new result.  If this is NULL, the no interpreter
+ *     is directly available (i.e. Tk event loop).  In this case, the first
+ *     interpreter in internal interpreter table is used.  If an error occurs,
+ *     it is handled via the error handler registerd in the global variable
+ *     "tclSignalBackgroundError"
  *   o cmdResultCode (I) - The integer result returned by the command that
  *     Tcl_Eval just completed.  Should be TCL_OK if not called from
  *     Tcl_Eval.
@@ -636,38 +760,28 @@ ProcessASignal (interp, signalNum)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ProcessSignals (interp, cmdResultCode)
+Tcl_ProcessSignals (clientData, interp, cmdResultCode)
+    ClientData  clientData;
     Tcl_Interp *interp;
     int         cmdResultCode;
 {
-    char   *varValue, *savedResult, *savedErrorInfo, *savedErrorCode;
-    int     signalNum, result;
-
-    if (!tclReceivedSignal)
-        return cmdResultCode;  /* No signal received */
+    Tcl_Interp *sigInterp;
+    errState_t *errStatePtr;
+    int         signalNum, result, idx;
 
     /*
-     * Clear so we don't call this routine recursively in the fault handler.
+     * Get the interpreter is it wasn't supplied, if none is available,
+     * bail out.
      */
-    tclReceivedSignal = FALSE;
-
-    /*
-     * Save the error state.
-     */
-    savedResult = ckstrdup (interp->result);
-    Tcl_ResetResult (interp);
-
-    savedErrorInfo = NULL;
-    varValue = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
-    if (varValue != NULL) {
-        savedErrorInfo = ckstrdup (varValue);
+    if (interp == NULL) {
+        if (numInterps == 0)
+            return cmdResultCode;
+        sigInterp = interpTable [0].interp;
+    } else {
+        sigInterp = interp;
     }
 
-    savedErrorCode = NULL;
-    varValue = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
-    if (varValue != NULL) {
-        savedErrorCode = ckstrdup (varValue);
-    }
+    errStatePtr = SaveErrorState (sigInterp);
 
     /*
      * Process all signals.  Don't process any more if one returns an error.
@@ -677,7 +791,7 @@ Tcl_ProcessSignals (interp, cmdResultCode)
     for (signalNum = 1; signalNum < MAXSIG; signalNum++) {
         if (signalsReceived [signalNum] == 0)
             continue;
-        result = ProcessASignal (interp, signalNum);
+        result = ProcessASignal (sigInterp, signalNum);
         if (result == TCL_ERROR)
             break;
     }
@@ -687,26 +801,10 @@ Tcl_ProcessSignals (interp, cmdResultCode)
      * handling.
      */
     if (result != TCL_ERROR) {
-        Tcl_SetResult (interp, savedResult, TCL_DYNAMIC);
-        savedResult = NULL;
-        result = cmdResultCode;
-
-        if (savedErrorInfo != NULL) {
-            Tcl_SetVar (interp, "errorInfo", savedErrorInfo, TCL_GLOBAL_ONLY);
-            ckfree (savedErrorInfo);
-        }
-
-        if (savedErrorCode != NULL) {
-            Tcl_SetVar (interp, "errorCode", savedErrorCode, TCL_GLOBAL_ONLY);
-            ckfree (savedErrorCode);
-        }
-
+        RestoreErrorState (sigInterp, errStatePtr);
     } else {
-        ckfree (savedResult);
-        if (savedErrorInfo != NULL)
-            ckfree (savedErrorInfo);
-        if (savedErrorCode != NULL)
-            ckfree (savedErrorCode);
+        ckfree (errStatePtr);
+        cmdResultCode = TCL_ERROR;
     }
 
     /*
@@ -714,9 +812,22 @@ Tcl_ProcessSignals (interp, cmdResultCode)
      */
     for (signalNum = 1; signalNum < MAXSIG; signalNum++) {
         if (signalsReceived [signalNum] != 0)
-            tclReceivedSignal = TRUE;
+            break;
     }
-    return result;
+    if (signalNum < MAXSIG) {
+        for (idx = 0; idx < numInterps; idx++)
+            Tcl_AsyncMark (interpTable [idx].handler);
+    }
+
+    /*
+     * If we got an error and an interpreter was not supplied, call the
+     * background error handler (if available).  Otherwise, lose the error.
+     */
+    if ((result == TCL_ERROR) && (interp == NULL) &&
+        (tclSignalBackgroundError != NULL))
+        (*tclSignalBackgroundError) (sigInterp);
+
+    return cmdResultCode;
 }
 
 /*
@@ -999,7 +1110,7 @@ BlockSignals (interp, action, signalListSize, signalList)
 
     return TCL_OK;
 #else
-    interp->result = noPosix;
+    interp->result = "Posix signals are not available on this system";
     return TCL_ERROR;
 #endif
 }
@@ -1105,24 +1216,46 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  *
  *  SignalCmdCleanUp --
- *      Clean up the signal table when the interpreter is deleted.  This
- *      is actually when the signal command is deleted.  It releases the
- *      all signal commands that have been allocated.
  *
+ *   Clean up the signal data structure when an interpreter is deleted. If
+ * this is the last interpreter, clean up all tables.
+ *
+ * Parameters:
+ *   o clientData (I) - Not used.
+ *   o interp (I) - Interp that is being deleted.
  *-----------------------------------------------------------------------------
  */
 static void
-SignalCmdCleanUp (clientData)
-    ClientData clientData;
+SignalCmdCleanUp (clientData, interp)
+    ClientData  clientData;
+    Tcl_Interp *interp;
 {
-    int idx;
+    int  idx;
 
-    for (idx = 0; idx < MAXSIG; idx++)
-        if (signalTrapCmds [idx] != NULL) {
-            ckfree (signalTrapCmds [idx]);
-            signalTrapCmds [idx] = NULL;
+    for (idx = 0; idx < numInterps; idx++) {
+        if (interpTable [idx].interp == interp)
+            break;
+    }
+    if (idx == numInterps)
+        panic ("signal interp lost");
+
+    interpTable [idx] = interpTable [--numInterps];
+
+    /*
+     * If there are no more interpreters, clean everything up.
+     */
+    if (numInterps == 0) {
+        ckfree (interpTable);
+        interpTable = NULL;
+        interpTableSize = 0;
+
+        for (idx = 0; idx < MAXSIG; idx++) {
+            if (signalTrapCmds [idx] != NULL) {
+                ckfree (signalTrapCmds [idx]);
+                signalTrapCmds [idx] = NULL;
+            }
         }
-
+    }
 }
 
 /*
@@ -1149,25 +1282,56 @@ Tcl_SetupSigInt ()
  *-----------------------------------------------------------------------------
  *
  * Tcl_InitSignalHandling --
- *      Initializes the TCL unix commands.
- *
- * Side effects:
- *    A catch trap is armed for the SIGINT signal.
- *
+ *      Initializes singal handling for a interpreter.
  *-----------------------------------------------------------------------------
  */
 void
 Tcl_InitSignalHandling (interp)
     Tcl_Interp *interp;
 {
-    int idx;
+    int              idx;
+    interpHandler_t *newTable;
 
-    for (idx = 0; idx < MAXSIG; idx++) {
-        signalsReceived [idx] = 0;
-        signalTrapCmds [idx] = NULL;
+    /*
+     * If this is the first interpreter, set everything up.
+     */
+    if (numInterps == 0) {
+        interpTableSize = 4;
+        interpTable = (interpHandler_t *)
+            ckalloc (sizeof (interpHandler_t) * interpTableSize);
+
+        for (idx = 0; idx < MAXSIG; idx++) {
+            signalsReceived [idx] = 0;
+            signalTrapCmds [idx] = NULL;
+        }
     }
-    Tcl_CreateCommand (interp, "kill", Tcl_KillCmd, (ClientData)NULL,
-                      (void (*)())NULL);
-    Tcl_CreateCommand (interp, "signal", Tcl_SignalCmd, (ClientData)NULL,
-                      SignalCmdCleanUp);
+
+    /*
+     * If there is not room in this table for another interp, expand it.
+     */
+    if (numInterps == interpTableSize) {
+        newTable = (interpHandler_t *)
+            ckalloc (sizeof (interpHandler_t) * interpTableSize * 2);
+        memcpy (newTable, interpTable,
+                sizeof (interpHandler_t) * interpTableSize);
+        ckfree (interpTable);
+        interpTable = newTable;
+        interpTableSize *= 2;
+    }
+
+    /*
+     * Add this interpreter to the list and set up a async handler.
+     * Arange for clean up on the interpreter being deleted.
+     */
+    interpTable [numInterps].interp = interp;
+    interpTable [numInterps].handler =
+        Tcl_AsyncCreate (Tcl_ProcessSignals, (ClientData) NULL);
+    numInterps++;
+
+    Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);
+
+    Tcl_CreateCommand (interp, "kill", Tcl_KillCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "signal", Tcl_SignalCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
 }

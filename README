@@ -5,7 +5,7 @@ BETA 3 RELEASE NOTES
 ====================
 
    This is the TclX7.0a Beta-3 release.  This release is tested and compatible
-with tcl7.0b2 and tk3.3b2.  Please forward questions/bugs/suggestions to
+with tcl7.0b3 and tk3.3b3.  Please forward questions/bugs/suggestions to
 tcl-project@NeoSoft.com.  This releases is not complete.  The following
 functionality is not complete:
 
@@ -13,6 +13,8 @@ functionality is not complete:
      directories installed by symbolic links are only made to the bin
      files.  If you need links to include or man files, you must build them
      by hand.
+
+   o TclX is not yet hooked up to the Tcl_AppInit mechanism.
 
    o A few other minor changes.
 
