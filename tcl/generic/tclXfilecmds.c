@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.1 1997/01/11 04:44:12 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.2 1997/02/06 18:14:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -584,7 +584,7 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
 
     Tcl_DStringInit (&buffer);
 
-    if ((argc != 2) && (argc != 3)) {
+    if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
                           " fileId ?varName?", (char *) NULL);
         goto errorExit;
@@ -633,7 +633,9 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
                                    TCLX_MODE_NONBLOCKING) == TCL_ERROR)
             goto errorExit;
     }
-    if (argc >= 2) {
+    if (argc == 2) {
+        Tcl_DStringResult (interp, &buffer);
+    } else {
         if (Tcl_SetVar (interp, argv[2], buffer.string,
                         TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
