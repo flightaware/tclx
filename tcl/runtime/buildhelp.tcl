@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 4.1 1995/01/01 19:49:52 markd Exp markd $
+# $Id: buildhelp.tcl,v 5.0 1995/07/25 06:00:20 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -340,6 +340,11 @@ proc CreateExtractScriptHelpContext {} {
     scanmatch $extractScriptHelpContext {^#@help:} {
         error {"@help" found within another help section"}
     }
+ 
+    scanmatch $extractScriptHelpContext {^#$} {
+        puts $helpFH ""
+    }
+
     scanmatch $extractScriptHelpContext {
         if {[clength $matchInfo(line)] > 1} {
             puts $helpFH " [csubstr $matchInfo(line) 1 end]"
@@ -355,7 +360,7 @@ proc CreateExtractScriptHelpContext {} {
 #    ScriptLine - The #@help: line starting the data to extract.
 #
 
-proc ExtractScriptHelp {ScriptPageFH ScriptLine} {
+proc ExtractScriptHelp {scriptPageFH scriptLine} {
     global helpDir briefHelpFH
     global extractScriptHelpContext
 
@@ -363,7 +368,7 @@ proc ExtractScriptHelp {ScriptPageFH ScriptLine} {
         CreateExtractScriptHelpContext
     }
 
-    set helpName [string trim [csubstr $ScriptLine 7 end]]
+    set helpName [string trim [csubstr $scriptLine 7 end]]
     set helpFile "$helpDir/$helpName"
     if {[file exists $helpFile]} {
         error "Help file already exists: $helpFile"
@@ -375,7 +380,7 @@ proc ExtractScriptHelp {ScriptPageFH ScriptLine} {
     set helpFH [open $helpFile w]
 
     set foundBrief 0
-    scanfile $extractScriptHelpContext $manPageFH
+    scanfile $extractScriptHelpContext $scriptPageFH
 
     close $helpFH
     chmod a-w,a+r $helpFile
