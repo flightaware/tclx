@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.8 1999/06/26 00:25:13 surles Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -82,11 +82,13 @@ TkX_MainEx(argc, argv, appInitProc, interp)
 {
     char *args, *msg, *fileName;
     char buf[20];
-    char buffer [MAX_PATH];
     int code;
     size_t length;
     Tcl_Channel inChannel, outChannel, errChannel;
     int tty;
+#if defined(WIN32) && !defined(BORLAND)
+    char buffer [MAX_PATH];
+#endif
 
     /* 
      * Initialize the stubs before making any calls to Tcl or Tk APIs.
@@ -109,8 +111,7 @@ TkX_MainEx(argc, argv, appInitProc, interp)
     Tcl_InitMemory(interp);
 #endif
 
-#ifdef WIN32
-#ifndef BORLAND
+#if defined(WIN32) && !defined(BORLAND)
     /*
      * Parse the command line. Since Windows programs don't get passed the
      * command name as the first argument, we need to fetch it explicitly.
@@ -119,7 +120,6 @@ TkX_MainEx(argc, argv, appInitProc, interp)
     TclX_SplitWinCmdLine (&argc, &argv);
     GetModuleFileName (NULL, buffer, sizeof (buffer));
     argv[0] = buffer;
-#endif
 #endif
 
     Tcl_FindExecutable(argv[0]);
