@@ -345,7 +345,7 @@
 ./tkhelp/tk/widgets/scale
 ./tkhelp/tk/widgets/scrollbar
 ./tkhelp/tk/widgets/text
-./tkhelp/tk/widgets/tk_listboxSingleSelect
+./tkhelp/tk/widgets/tk_dialog
 ./tkhelp/tk/widgets/tk_menuBar
 ./tkhelp/tk/widgets/tk_optionMenu
 ./tkhelp/tk/widgets/tk_popup
