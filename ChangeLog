@@ -1,3 +1,9 @@
+2005-03-24  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* Makefile.in, tclconfig/tcl.m4: Get AIX wide int type right.
+	* configure, configure.in:       Use 'tclx' PACKAGE_NAME, but load
+	'Tclx'.
+
 2005-03-23  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* Makefile.in, tclconfig/tcl.m4: Update to TEA 3.2, refactoring
