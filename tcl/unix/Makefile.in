@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.27 1993/10/01 03:49:16 markd Exp markd $
+# $Id: Makefile.in,v 2.28 1993/10/01 04:02:24 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -68,6 +68,8 @@ OBJS= \
     tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
     tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
     tclXunixcmds.o   tclXutil.o
+
+UCBOBJS=tclCmdIL.o
  
 #------------------------------------------------------------------------------
 # Compile the TclX library and link the shell.  If the link fails, purge
@@ -86,16 +88,25 @@ ${TCL}: tclXAppInit.o ${LIBTCLX.A} ${LIBTCL.A} made.tmp
 	    exit 0 ;\
 	fi
 
-made.tmp ${LIBTCLX.A}: ${OBJS}
-	${AR} cr ${LIBTCLX.A} ${OBJS} ${CPLUSOBJS}
+made.tmp ${LIBTCLX.A}: ${OBJS} ${UCBOBJS} ${CPLUSOBJS}
+	${AR} cr ${LIBTCLX.A} ${OBJS} ${UCBOBJS} ${CPLUSOBJS}
 	${RANLIB} ${LIBTCLX.A}
 	touch made.tmp
 
+tclCmdIL.o: tclCmdIL.c ${TCL_UCB_SRC}/patchlevel.h
+	MASTER=${TCL_MASTERDIR}/`../tools/tclxversion` ;\
+	${CC} -c ${CC_FLAGS} -DTCL_LIBRARY=\"$$MASTER\" tclCmdIL.c
+
+tclCmdIL.c: ${TCL_UCB_SRC}/tclCmdIL.c
+	rm -f tclCmdIL.c
+	cp ${TCL_UCB_SRC}/tclCmdIL.c tclCmdIL.c
+
 tclXinit.o: tclXinit.c
-	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"${TCL_MASTERDIR}\" \
+	MASTER=${TCL_MASTERDIR}/`../tools/tclxversion` ;\
+	${CC} -c ${CC_FLAGS} -DTCL_MASTERDIR=\"$$MASTER\" \
 	    ${srcdir}/tclXinit.c
 
-tclXcmdInit.o: tclXcmdInit.c patchlevel.h
+tclXcmdInit.o: tclXcmdInit.c tclXpatchl.h
 
 tclXgetdate.c: tclXgetdate.y
 	${YACC} $(srcdir)/tclXgetdate.y

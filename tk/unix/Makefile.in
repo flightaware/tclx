@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.24 1993/10/01 03:47:17 markd Exp markd $
+# $Id: Makefile.in,v 2.25 1993/10/01 04:02:24 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -66,7 +66,9 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS=tkXinit.o      tkXmain.o
+OBJS=tkXinit.o   tkXmain.o
+
+UCBOBJS=tkWindow.o
 
 #------------------------------------------------------------------------------
 # Compile the TkX library and link wishx.  If the link fails, purge
@@ -84,13 +86,23 @@ ${WISHX}: tkXAppInit.o ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} made.tmp
 	    exit 0 ;\
 	fi
 
-made.tmp ${LIBTKX.A}: ${OBJS}
-	${AR} cr ${LIBTKX.A} ${OBJS}
+made.tmp ${LIBTKX.A}: ${OBJS} ${UCBOBJS}
+	${AR} cr ${LIBTKX.A} ${OBJS} ${UCBOBJS}
 	${RANLIB} ${LIBTKX.A}
 	touch made.tmp
 
+tkWindow.o: tkWindow.c
+	MASTER=${TK_MASTERDIR}/`../tools/tkxversion` ;\
+	${CC} -c -I${TK_UCB_SRC} ${CC_FLAGS} -DTK_LIBRARY=\"$$MASTER\" \
+	    tkWindow.c
+
+tkWindow.c: ${TK_UCB_SRC}/tkWindow.c
+	rm -f tkWindow.c
+	cp ${TK_UCB_SRC}/tkWindow.c tkWindow.c
+
 tkXinit.o: tkXinit.c
-	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" \
+	MASTER=${TK_MASTERDIR}/`../tools/tkxversion` ;\
+	${CC} -c ${CC_FLAGS} -DTK_MASTERDIR=\"$$MASTERDIR\" \
             ${srcdir}/tkXinit.c
 
 ${APPINIT}: tkXAppInit.c

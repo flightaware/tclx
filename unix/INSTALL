@@ -91,11 +91,6 @@ HOW TO BUILD EXTENDED TCL
       is requested, an extended "libtkx.a" and "wishx" executable will be
       built in the tkmaster directory.
 
-    o Note that a fair amount of time is spent moving manual pages to the
-      master directories.  If you need to rebuild while debugging problems,
-      "make partclean" will removed everything but the manual pages and
-      Tk demo files.  This should make subsequent makes go much faster.
-
     o Until the Extended Tcl runtime files are installed, "tcl" and "wishx"
       can't be run directly.  To run them before installation, use "runtcl" or
       "runwishx".
@@ -245,8 +240,9 @@ SCO:
      of the command return a warning if used on COFF binaries.
 
 SGI:
-   o The strftime function appears to not work correctly on SGI (tested on
-     IRIX 4.0.5). The fmtclock command specifying the GMT argument (perhaps
+   o The strftime function does not work correctly on SGI (tested on
+     IRIX 4.0.5).  This is a known bug and will be fixed in the next IRIX
+     release.  The fmtclock command specifying the GMT argument (perhaps
      only during daylight) returns a formated time that is one hour off.  This
      causes the following clock tests to fail:
 
@@ -254,9 +250,10 @@ SGI:
         clock-4.0
         clock-4.1
      
-     If this is a problem, add the following macro to your Config.mk:
+     If this is a problem to your application, add the following macro to your
+     Config.mk:
  
          LIBOBJS=strftime.o
 
      This will cause a functioning (but not internationalized) strftime
-     to be built and added to 
+     to be built and added to libtclx.a.

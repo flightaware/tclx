@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.13 1993/09/23 05:40:51 markd Exp markd $
+# $Id: Makefile.in,v 1.14 1993/10/01 03:49:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -26,7 +26,6 @@ bldbasedir        = @bldbasedir@
 VPATH             = @srcdir@
 prefix            = @prefix@
 execprefix        = @execprefix@
-MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -41,19 +40,15 @@ TK.TNDX     = ${bldbasedir}/tkmaster/tk.tndx
 PROLOG.PS   = ${bldbasedir}/tkmaster/prolog.ps
 TCLHELP     = ${bldbasedir}/tkmaster/bin/tclhelp
 DEMOS       = ${bldbasedir}/tkmaster/demos
-MAN         = ${bldbasedir}/tkmaster/man
 HELP        = ${bldbasedir}/tkmaster/help
-CPMANPAGES  = ${srcbasedir}/tools/cpmanpages
-BLDMANHELP  = ${srcbasedir}/tools/bldmanhelp
 TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
+BLDMANHELP  = ../runtcl ${srcbasedir}/tools/bldmanhelp
 
 #------------------------------------------------------------------------------
 # Copy all files.
 #
 
-all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} \
-     ${MAN} HELPCP
-
+all: ${TK.TCL} ${TK.TLIB} ${TK.TNDX} ${PROLOG.PS} ${TCLHELP} ${DEMOS} HELPCP
 
 ${TK.TCL}: ${TK_UCB_SRC}/library/tk.tcl
 	rm -f ${TK.TCL}
@@ -78,12 +73,6 @@ ${DEMOS}:
 	    (cd ${DEMOS}; tar -xf -)
 
 #------------------------------------------------------------------------------
-# Copy manual pages to master directory.
-
-${MAN}:
-	../runtcl ${CPMANPAGES} TK ${TK_UCB_SRC}/doc ${MAN_DIR_SEPARATOR}
-
-#------------------------------------------------------------------------------
 # Copy help files if they don't appear to exist and we are in a different
 # directory from the srcdir.
 #
@@ -100,7 +89,7 @@ ${HELP}/Tk.brf:
 buildtkhelp:
 	rm -rf ${HELP}
 	mkdir ${HELP}
-	../runtcl ${BLDMANHELP} ${TK_UCB_SRC}/doc ${TKMANPAGES} ${HELP} Tk.brf
+	${BLDMANHELP} ${TK_UCB_SRC}/doc ${TKMANPAGES} ${HELP} Tk.brf
 
 #------------------------------------------------------------------------------
 # Clean up everything but the manual pages that we copied to the master

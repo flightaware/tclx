@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.31 1993/09/03 08:05:37 markd Exp markd $
+# $Id: Config.mk,v 2.32 1993/10/01 03:47:17 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ CCPLUS=CC
 # built from the outside. A directory whose name is the TclX version number
 # will be built in this directory.
 #
-TCL_MASTERDIR=/usr/local/tclX
+TCL_MASTERDIR=${prefix}/tclX
 
 #------------------------------------------------------------------------------
 # The master Tk directory that the Tk runtime files are installed into.
@@ -120,42 +120,35 @@ TCL_MASTERDIR=/usr/local/tclX
 # built from the outside. A directory whose name is the TkX version number
 # will be built in this directory.
 
-TK_MASTERDIR=/usr/local/tkX
+TK_MASTERDIR=${prefix}/tkX
 
 #------------------------------------------------------------------------------
 # # The directory to install the tcl, wishx and tclhelp binaries into.
 
-TCL_BINDIR=/usr/local/bin
+TCL_BINDIR=${execprefix}/bin
 
 #------------------------------------------------------------------------------
 # The directory to install the libtcl.a and libtclx.a libraries into.
 
-TCL_LIBDIR=/usr/local/lib
+TCL_LIBDIR=${execprefix}/lib
 
 #------------------------------------------------------------------------------
 # The directory the Tcl .h files go into.
 
-TCL_INCLUDEDIR=/usr/local/include
+TCL_INCLUDEDIR=${prefix}/include
 
 #==============================================================================
 # These defines specify where and how the manual pages are to be installed.
-# Install manual pages is somewhat problematic, so a global option not to
-# install manual pages is provided. Since there are so many manual pages
-# provided, they are placed together in one Tcl manual page directory, rather
-# than splitting into the standard manual pages directories.
-# You might want to modify these values.
+# Since there are so many manual pages provided, they are placed together in
+# one Tcl manual page directory by default, rather than splitting into the
+# standard manual pages directories. You might want to modify these values.
 #..............................................................................
-
-#------------------------------------------------------------------------------
-# Set to 1 to install manual files, to 0 to not install manual files.
-
-TCL_MAN_INSTALL=1
 
 #------------------------------------------------------------------------------
 # o TCL_MAN_BASEDIR - Base manual directory where all of the man* and cat*
 #   directories live.
 
-TCL_MAN_BASEDIR=/usr/local/man
+TCL_MAN_BASEDIR=${prefix}/man
 
 #------------------------------------------------------------------------------
 # o TCL_MAN_CMD_SECTION - Section for Tcl command  manual pages. Normal `1' or

@@ -12,45 +12,9 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 1.2 1993/07/30 15:05:15 markd Exp markd $
+# $Id: buildutil.tcl,v 1.3 1993/10/01 03:49:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
-
-#------------------------------------------------------------------------------
-# ParseMakeMacros --
-#
-#  Parse make macros out of the specified config file.
-#------------------------------------------------------------------------------
-
-proc ParseMakeMacros {configFile configVar} {
-    upvar $configVar config
-
-    set cfgFH [open $configFile]
- 
-    while {[gets $cfgFH line] >= 0} {
-        if {[string match {[A-Za-z]*} $line]} {
-            set idx [string first "=" $line]
-            if {$idx < 0} {
-                error "no `=' in: $line"}
-            set name  [string trim [csubstr $line 0 $idx]]
-            set value [string trim [crange  $line [expr $idx+1] end]]
-            set config($name) $value
-        }
-    }
-    close $cfgFH
-}
-
-#------------------------------------------------------------------------------
-# ParseConfigFile --
-#
-#  Parse the Config.mk file.  Includes parsing the system config file.
-#------------------------------------------------------------------------------
-
-proc ParseConfigFile {configFile configVar} {
-    upvar $configVar config
-
-    ParseMakeMacros $configFile config
-}
 
 #------------------------------------------------------------------------------
 # CopyFile -- 
@@ -67,7 +31,6 @@ proc CopyFile {sourceFile target} {
     } else {
         set targetFile $target
     }
-echo CopyFile $sourceFile $targetFile
 
     unlink -nocomplain $targetFile
     set sourceFH [open $sourceFile r]
@@ -134,7 +97,6 @@ proc CopyDir {sourceDir destDir} {
 
     if {![file exists $destDir]} {
         mkdir $destDir
-        GiveAwayFile $destDir
     }
     if ![file isdirectory $destDir] {
         error "\"$destDir\" isn't a directory"

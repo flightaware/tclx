@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.17 1993/10/01 03:47:17 markd Exp markd $
+# $Id: Makefile.in,v 2.18 1993/10/07 14:56:26 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -28,7 +28,6 @@ bldbasedir        = @bldbasedir@
 VPATH             = @srcdir@
 prefix            = @prefix@
 execprefix        = @execprefix@
-MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -42,11 +41,9 @@ TCL.TNDX       = ${bldbasedir}/tclmaster/tcl.tndx
 TCLINIT.TCL    = ${bldbasedir}/tclmaster/TclInit.tcl
 BUILDIDX.TCL   = ${bldbasedir}/tclmaster/buildidx.tcl
 LOADOUSTER.TCL = ${bldbasedir}/tclmaster/loadouster.tcl
-MAN            = ${bldbasedir}/tclmaster/man
 HELP           = ${bldbasedir}/tclmaster/help
-CPMANPAGES     = ${srcbasedir}/tools/cpmanpages
-BLDMANHELP     = ${srcbasedir}/tools/bldmanhelp
 TCLMANPAGES    = ${srcbasedir}/tools/tclmanpages
+BLDMANHELP     = ../runtcl ${srcbasedir}/tools/bldmanhelp
 
 #------------------------------------------------------------------------------
 
@@ -59,7 +56,7 @@ TCL_SRCS = arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl    \
 #------------------------------------------------------------------------------
 
 all: ${TCLINIT.TCL} ${BUILDHELP.TCL} ${BUILDIDX.TCL} ${LOADOUSTER.TCL} \
-     ${TCL.TLIB} ${MAN} HELPCP
+     ${TCL.TLIB} HELPCP
 
 ${TCLINIT.TCL}: TclInit.tcl
 	-rm -f ${TCLINIT.TCL} 
@@ -80,19 +77,6 @@ ${TCL.TLIB}: ${TCL_SRCS} ${BUILDIDX.TCL} ${TCLINIT.TCL}
 	../runtcl -c "buildpackageindex ${TCL.TLIB}"
 
 #------------------------------------------------------------------------------
-# Copy manual pages to master directory.
-
-${MAN}: ${TCLINIT.TCL} ${TCL.TLIB}
-	if [ ! -d ${MAN} ] ; then \
-	    ../runtcl ${CPMANPAGES} TCL ${TCL_UCB_SRC}/doc \
-                      ${MAN_DIR_SEPARATOR} ;\
-	    ../runtcl ${CPMANPAGES} TCLX ${srcbasedir}/man \
-                      ${MAN_DIR_SEPARATOR} ;\
-	else \
-	    exit 0 ;\
-	fi
-
-#------------------------------------------------------------------------------
 # Copy help files if they don't appear to exist and we are in a different
 # directory from the srcdir.
 #
@@ -109,8 +93,7 @@ ${HELP}/Tcl.brf ${HELP}/TclX.brf:
 buildtclhelp: ${TCLINIT.TCL} ${TCL.TLIB}
 	rm -rf ${HELP}
 	mkdir ${HELP}
-	../runtcl ${BLDMANHELP} ${TCL_UCB_SRC}/doc ${TCLMANPAGES} \
-                  ${HELP} Tcl.brf
+	${BLDMANHELP} ${TCL_UCB_SRC}/doc ${TCLMANPAGES} ${HELP} Tcl.brf
 	../runtcl -c "buildhelp ${HELP} TclX.brf ${srcbasedir}/man/TclX.n"
 
 #------------------------------------------------------------------------------

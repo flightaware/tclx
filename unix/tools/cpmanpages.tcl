@@ -7,8 +7,21 @@
 #
 # It is run in the following manner:
 #
-#     cpmanpages TCL|TCLX|TK sourceDir ?man-separator-char?
+#     cpmanpages ?flags? separator cmd func unix sourceDir targetDir
 #
+# flags are:
+#   o -rmcat - remove any existing "cat" files associated with man pages.
+#
+# arguments are:
+#   o separator - Either "." or "", the separator in the manual page directory
+#     name (/usr/man/man1 vs /usr/man/man.1).
+#   o cmd - Section to put the Tcl command manual pages in. (*.n pages).
+#   o func - Section to put the Tcl C function manual pages in. (*.3 pages).
+#   o unix - Section to put the Tcl Unix command manual pages in.
+#     Maybe empty. (*.1 pages).
+#   o sourceDir - directory containing manual pages to install.
+#   o targetDir - manual directory to install pages in.  This is the directory
+#     containing the section directories, e.g. /usr/local/man.
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -19,7 +32,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 1.6 1993/09/23 05:40:51 markd Exp markd $
+# $Id: cpmanpages.tcl,v 1.7 1993/10/01 03:49:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -126,14 +139,11 @@ proc GetManNames manFile {
 #   o sourceFile - Manual page source file path.
 #   o targetDir - Directory to install the file in.
 #   o extension - Extension to use for the installed file.
-# Globals:
-#   o config - configuration information.
 # Returns:
 #   A list of the man files created, relative to targetDir.
 #------------------------------------------------------------------------------
 
 proc InstallShortMan {sourceFile targetDir extension} {
-    global config
 
     set manFileName "[file tail [file root $sourceFile]].$extension"
 
@@ -150,15 +160,12 @@ proc InstallShortMan {sourceFile targetDir extension} {
 #   o sourceFile - Manual page source file path.
 #   o targetDir - Directory to install the file in.
 #   o extension - Extension to use for the installed file.
-# Globals:
-#   o config - configuration information.
 # Returns:
 #   A list of the man files created, relative to targetDir.  They are all links
 # to the same entry.
 #------------------------------------------------------------------------------
 
 proc InstallLongMan {sourceFile targetDir extension} {
-    global config
 
     set manNames [GetManNames $sourceFile]
     if [lempty $manNames] {
@@ -201,82 +208,92 @@ proc InstallLongMan {sourceFile targetDir extension} {
 #   o manDir - Directory to build the directoy containing the manual files in.
 #   o section - Section to install the manual page in.
 # Globals
-#   o config - configuration information.
-# Returns:
-#   A list of the man files created, relative to targetDir.  They are all links
-# to the same entry.
+#   o longNames - If long file names are supported.
+#   o manSeparator - Character used to seperate man directory name from the
+#     section name.
+#   o rmcat - true if cat files are to be removed.
 #------------------------------------------------------------------------------
 
 proc InstallManPage {sourceFile manDir section} {
-    global config manSeparator
+    global longNames manSeparator rmcat
 
     set targetDir "$manDir/man${manSeparator}${section}"
 
-    if {$config(TCL_MAN_STYLE) == "SHORT"} {
-        set files [InstallShortMan $sourceFile $targetDir $section]
-    } else {
+    if $longNames {
         set files [InstallLongMan $sourceFile $targetDir $section]
+    } else {
+        set files [InstallShortMan $sourceFile $targetDir $section]
     }
    
-    set created {}
-    foreach file $files {
-        lappend created man${manSeparator}${section}/$file
+    if $rmcat {
+        foreach file $files {
+            unlink -nocomplain \
+                [list $manDir/cat${manSeparator}${section}/$file]
+        }
     }
-    return $created
 }
 
 #------------------------------------------------------------------------------
 # main prorgam
 
-if {[llength $argv] < 2 || [llength $argv] > 3} {
-    puts stderr "wrong # args: cpmanpages TCL|TCLX|TK sourceDir ?manSeparator?"
+if {[llength $argv] < 6 || [llength $argv] > 7} {
+    puts stderr "wrong # args: cpmanpages ?flags? separator cmd func unix sourceDir targetDir"
     exit 1
 }
-set manType [lindex $argv 0]
-set sourceDir [lindex $argv 1]
-set manSeparator [lindex $argv 2]
 
-# Parse the configure files and then default missing values.
+umask 022
 
-ParseConfigFile ../Config.mk config
+# Parse command line args
 
-if ![info exists config(TCL_MAN_STYLE)] {
-    set config(TCL_MAN_STYLE) LONG
+set rmcat 0
+if {[lindex $argv 0] == "-rmcat"} {
+    set rmcat 1
+    lvarpop argv
+}
+
+set manSeparator    [lindex $argv 0]
+set sectionXRef(.n) [lindex $argv 1]
+set sectionXRef(.3) [lindex $argv 2]
+set sectionXRef(.1) [lindex $argv 3]
+set sourceDir       [lindex $argv 4]
+set targetDir       [lindex $argv 5]
+
+# Remove undefined sections from the array.
+
+foreach sec [array names sectionXRef] {
+   if [lempty sectionXRef($sec)] {
+       unset sectionXRef($sec)
+   }
+}
+
+puts stdout "Copying manual pages from $sourceDir to $targetDir"
+
+# Determine if long file names are available.
+
+if ![file exists $targetDir] {
+    mkdir -path $targetDir
+}
+set testName "$targetDir/TclX-long-test-file-name"
+
+if [catch {open $testName w} fh] {
+    puts stdout ""
+    puts stdout "*** NOTE: long file names do not appear to be available on"
+    puts stdout "*** this system. Attempt to create a long named file in
+    puts stdout "*** $targetDir returned the error: $errorCode"
+    puts stdout ""
+    set longNames 0
+} else {
+    close $fh
+    unlink $testName
+    set longNames 1
 }
 
 set sourceFiles [glob -nocomplain -- $sourceDir/*.man $sourceDir/*.n \
                       $sourceDir/*.1 $sourceDir/*.3]
 
-switch -- $manType {
-    TCL {
-        puts stdout "Copying Tcl manual pages to tclmaster/man"
-        set destDir   ../tclmaster/man
-        set sectionXRef(.n)   $config(TCL_MAN_CMD_SECTION)
-        set sectionXRef(.3)   $config(TCL_MAN_FUNC_SECTION)
-    }
-    TCLX {
-        puts stdout "Copying Extended Tcl manual pages to tclmaster/man"
-        set destDir   ../tclmaster/man
-        set sectionXRef(.n)   $config(TCL_MAN_CMD_SECTION)
-        set sectionXRef(.3)   $config(TCL_MAN_FUNC_SECTION)
-    }
-    TK {
-        puts stdout "Copying Tk manual pages to tkmaster/man"
-        set destDir ../tkmaster/man
-        set sectionXRef(.1)   $config(TK_MAN_UNIXCMD_SECTION)
-        set sectionXRef(.n)   $config(TK_MAN_CMD_SECTION)
-        set sectionXRef(.3)   $config(TK_MAN_FUNC_SECTION)
-    }
-    default {
-        puts stderr "Expected on of TCL, TCLX or TK, got \"$manType\""
-    }
-}
-
 set ignoreFiles {tclsh.1}
 
 # Actually install the files.
-
-set created {}
 
 foreach sourceFile $sourceFiles {
     if {[lsearch $ignoreFiles [file tail $sourceFile]] >= 0} continue
@@ -286,18 +303,6 @@ foreach sourceFile $sourceFiles {
         puts stderr "WARNING: Don't know how to handle section for $sourceFile,"
         continue
     }
-    set file [InstallManPage $sourceFile $destDir $sectionXRef($ext)]
-    lappend created $file
+    InstallManPage $sourceFile $targetDir $sectionXRef($ext)
 }
 
-#
-# For the TclX manual pages, create a file describing the files to install.
-#
-
-if {"$manType" == "TCLX"} {
-    set fh [open ../tools/TclXman.lst w]
-    foreach fileSet $created {
-        puts $fh $fileSet
-    }
-    close $fh
-}
