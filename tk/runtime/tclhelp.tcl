@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 8.4 1997/10/07 18:56:37 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ proc ButtonFrame {w title subject fileList} {
 
 proc DisplaySubject {subject} {
 
-    TclXHelp::ListSubject $subject [TclXHelp::ConvertPath $subject] subjects pages
+    TclXHelp::ListSubject $subject [TclXHelp::ConvertHelpFile $subject] subjects pages
     if {$subject != "/"} {
         lvarpush subjects ".."
     }
@@ -149,9 +149,9 @@ proc DisplayPage {page} {
     pack $w.frame.page -side top -expand 1 -fill both
 
     if [catch {
-            set contents [read_file [TclXHelp::ConvertPath $page]]
+            set contents [read_file [lindex [TclXHelp::ConvertHelpFile $page] 0]]
         } msg] {
-        set contents $msg
+        set contents "$msg\n$::errorInfo"
     }
     $w.frame.page insert 0.0 $contents
     $w.frame.page configure -state disabled

@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 8.7 1997/10/19 02:02:34 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 # FIX: Convert this to use namespaces.
@@ -27,7 +27,23 @@
 
 namespace eval TclXHelp {
 
-    variable curSubject "/"
+    # Determine the path separator.
+    switch $::tcl_platform(platform) {
+        unix {
+            variable pathSep /
+        }
+        windows {
+            variable pathSep \\
+        }
+        macintosh {
+            variable pathSep :
+        }
+        default {
+            error "unknown platform \"$::tcl_platform(platform)\""
+        }
+    }
+
+    variable curSubject $pathSep
 
     #----------------------------------------------------------------------
     # Return a list of help root directories.
@@ -36,8 +52,9 @@ namespace eval TclXHelp {
         global auto_path
         set roots {}
         foreach dir $auto_path {
-            if [file isdirectory $dir/help] {
-                lappend roots $dir/help
+            set fname [file join $dir help]
+            if {[file isdirectory $fname]} {
+                lappend roots $fname
             }
         }
         return $roots
@@ -48,34 +65,35 @@ namespace eval TclXHelp {
     # out.  Also removes trailing and adjacent "/", unless its the only
     # character.
 
-    proc FlattenPath pathName {
+    proc NormalizePath helpFile {
+        variable pathSep
         set newPath {}
-        foreach element [split $pathName /] {
-            if {"$element" == "." || [lempty $element]} continue
+        foreach element [file split $helpFile] {
+            if {[cequal $element  .] || [lempty $element]} continue
 
-            if {"$element" == ".."} {
-                if {[llength [join $newPath /]] == 0} {
+            if {[cequal $element ..]} {
+                if {[llength [file join $newPath]] == 0} {
                     error "Help: name goes above subject directory root" {} \
-                        [list TCLXHELP NAMEABOVEROOT $pathName]
+                        [list TCLXHELP NAMEABOVEROOT $helpFile]
                 }
-                lvarpop newPath [expr [llength $newPath]-1]
-                continue
+                lvarpop newPath [expr {[llength $newPath]-1}]
+            } else {
+                lappend newPath $element
             }
-            lappend newPath $element
+            
         }
-        set newPath [join $newPath /]
+        set newPath [eval file join $newPath]
 
         # Take care of the case where we started with something line "/" or "/."
-
-        if {("$newPath" == "") && [string match "/*" $pathName]} {
-            set newPath "/"
+        if {[lempty $newPath] && [cequal [file pathtype $helpFile] absolute]} {
+            set newPath $pathSep
         }
 
         return $newPath
     }
 
     #--------------------------------------------------------------------------
-    # Given a pathName relative to the virtual help root, convert it to a list
+    # Given a helpFile relative to the virtual help root, convert it to a list
     # of real file paths.  A list is returned because the path could be "/",
     # returning a list of all roots. The list is returned in the same order of
     # the auto_path variable. If path does not start with a "/", it is take as
@@ -83,101 +101,110 @@ namespace eval TclXHelp {
     # the name is not flattened.  This lets other commands pick out the part
     # relative to the one of the root directories.
 
-    proc ConvertPath pathName {
+    proc ConvertHelpFile helpFile {
         variable curSubject
+        variable pathSep
 
-        if {![string match "/*" $pathName]} {
-            if [cequal $curSubject "/"] {
-                set pathName "/$pathName"
+        if {![cequal [file pathtype $helpFile] absolute]} {
+            if {[cequal $curSubject $pathSep]} {
+                set helpFile [file join $pathSep $helpFile]
             } else {
-                set pathName "$curSubject/$pathName"
+                set helpFile [file join $curSubject $helpFile]
             }
         }
-        set pathName [FlattenPath $pathName]
+        set helpFile [NormalizePath $helpFile]
 
         # If the virtual root is specified, return a list of directories.
 
-        if {$pathName == "/"} {
+        if {[cequal $helpFile $pathSep]} {
             return [RootDirs]
         }
 
-        # Not the virtual root find the first match.
+        # Make help file name into a relative path for joining with real
+        # root.
+        set helpFile [eval file join [lrange [file split $helpFile] 1 end]]
 
+        # Search for the first match.
         foreach dir [RootDirs] {
-            if [file readable $dir/$pathName] {
-                return [list $dir/$pathName]
+            set fname [file join $dir $helpFile]
+            if {[file readable $fname]} {
+                return [list $fname]
             }
         }
 
 	# Not found, try to find a file matching only the file tail,
 	# for example if --> <helpDir>/tcl/control/if.
 
-	set fileTail [file tail $pathName]
+	set fileTail [file tail $helpFile]
         foreach dir [RootDirs] {
-	    set fileName [exec find $dir -name $fileTail | head -1]
-	    if {$fileName != {}} {
+	    set fileName [recursive_glob $dir $fileTail]
+	    if {![lempty $fileName]} {
                 return [list $fileName]
 	    }
 	}
 
-        error "\"$pathName\" does not exist" {} \
-            [list TCLXHELP NOEXIST $pathName]
+        error "\"$helpFile\" does not exist" {} \
+            [list TCLXHELP NOEXIST $helpFile]
     }
 
     #--------------------------------------------------------------------------
     # Return the virtual root relative name of the file given its absolute
-    # path.  The root part of the path should not have been flattened, as we
+    # path.  The root part of the path should not have been normalized, as we
     # would not be able to match it.
 
-    proc RelativePath pathName {
+    proc RelativePath helpFile {
+        variable pathSep
         foreach dir [RootDirs] {
-            if {[csubstr $pathName 0 [clength $dir]] == $dir} {
-                set name [csubstr $pathName [clength $dir] end]
-                if {$name == ""} {set name /}
+            if {[cequal [csubstr $helpFile 0 [clength $dir]] $dir]} {
+                set name [csubstr $helpFile [clength $dir] end]
+                if {[lempty $name]} {
+                    set name $pathSep
+                }
                 return $name
             }
         }
-        if ![info exists found] {
-            error "problem translating \"$pathName\"" {} [list TCLXHELP INTERROR]
+        if {![info exists found]} {
+            error "problem translating \"$helpFile\"" {} [list TCLXHELP INTERROR]
         }
     }
 
     #--------------------------------------------------------------------------
-    # Given a list of path names to subjects generated by ConvertPath, return
+    # Given a list of path names to subjects generated by ConvertHelpFile, return
     # the contents of the subjects.  Two lists are returned, subjects under
     # that subject and a list of pages under the subject.  Both lists are
     # returned sorted.  This merges all the roots into a virtual root.
-    # pathName is the string that was passed to ConvertPath and is used for
+    # helpFile is the string that was passed to ConvertHelpFile and is used for
     # error reporting.  *.brk files are not returned.
 
-    proc ListSubject {pathName pathList subjectsVar pagesVar} {
+    proc ListSubject {helpFile pathList subjectsVar pagesVar} {
         upvar $subjectsVar subjects $pagesVar pages
+        variable pathSep
 
         set subjects {}
         set pages {}
         set foundDir 0
         foreach dir $pathList {
-            if ![file isdirectory $dir] continue
-            if [cequal [file tail $dir] CVS] continue
+            if {![file isdirectory $dir]} continue
+            if {[cequal [file tail $dir] CVS]} continue
             set foundDir 1
-            foreach file [glob -nocomplain $dir/*] {
+            foreach file [glob -nocomplain [file join $dir *]] {
                 if {[lsearch {.brf .orig .diff .rej} [file extension $file]] \
                         >= 0} continue
-                if [file isdirectory $file] {
-                    lappend subjects [file tail $file]/
+                if {[file isdirectory $file]} {
+                    lappend subjects [file tail $file]$pathSep
                 } else {
                     lappend pages [file tail $file]
                 }
             }
         }
-        if !$foundDir {
-            if [cequal $pathName /] {
+        if {!$foundDir} {
+            if {[cequal $helpFile $pathSep]} {
                 global auto_path
                 error "no \"help\" directories found on auto_path ($auto_path)" {} \
                     [list TCLXHELP NOHELPDIRS]
             } else {
-                error "\"$pathName\" is not a subject" {} \
-                    [list TCLXHELP NOTSUBJECT $pathName]
+                error "\"$helpFile\" is not a subject" {} \
+                    [list TCLXHELP NOTSUBJECT $helpFile]
             }
         }
         set subjects [lsort $subjects]
@@ -235,7 +262,7 @@ namespace eval TclXHelp {
                 append outLine "   "}
             append outLine $name
             if {[incr count] < 4} {
-                set padLen [expr 17-[clength $name]]
+                set padLen [expr {17-[clength $name]}]
                 if {$padLen < 3} {
                    set padLen 3}
                 append outLine [replicate " " $padLen]
@@ -257,8 +284,9 @@ namespace eval TclXHelp {
     # the help root.
 
     proc HelpOnHelp {} {
-        set helpPage [lindex [ConvertPath /help] 0]
-        if [lempty $helpPage] {
+        variable pathSep
+        set helpPage [lindex [ConvertHelpFile ${pathSep}help] 0]
+        if {[lempty $helpPage]} {
             error "No help page on help found" {} \
                 [list TCLXHELP NOHELPPAGE]
         }
@@ -281,8 +309,8 @@ proc help {{what {}}} {
         return
     }
 
-    set pathList [TclXHelp::ConvertPath $what]
-    if [file isfile [lindex $pathList 0]] {
+    set pathList [TclXHelp::ConvertHelpFile $what]
+    if {[file isfile [lindex $pathList 0]]} {
         TclXHelp::DisplayPage [lindex $pathList 0]
         return
     }
@@ -305,17 +333,20 @@ proc help {{what {}}} {
 # helpcd command.  The name of the new current directory is assembled from the
 # current directory and the argument.
 
-proc helpcd {{dir /}} {
+proc helpcd {{dir {}}} {
     variable ::TclXHelp::curSubject
+    if {[lempty $dir]} {
+        set dir $TclXHelp::pathSep
+    }
 
-    set pathName [lindex [TclXHelp::ConvertPath $dir] 0]
+    set helpFile [lindex [TclXHelp::ConvertHelpFile $dir] 0]
 
-    if {![file isdirectory $pathName]} {
+    if {![file isdirectory $helpFile]} {
         error "\"$dir\" is not a subject" \
             [list TCLXHELP NOTSUBJECT $dir]
     }
 
-    set ::TclXHelp::curSubject [TclXHelp::RelativePath $pathName]
+    set ::TclXHelp::curSubject [TclXHelp::RelativePath $helpFile]
     return
 }
 
@@ -344,16 +375,16 @@ proc apropos {regexp} {
     }
     set stop 0
     foreach dir [TclXHelp::RootDirs] {
-        foreach brief [glob -nocomplain $dir/*.brf] {
+        foreach brief [glob -nocomplain [file join $dir *.brf]] {
             set briefFH [open $brief]
             try_eval {
                 scanfile $ch $briefFH
             } {} {
                 close $briefFH
             }
-            if $stop break
+            if {$stop} break
         }
-        if $stop break
+        if {$stop} break
     }
     scancontext delete $ch
 }
