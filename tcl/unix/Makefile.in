@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.11 1993/07/20 08:35:45 markd Exp markd $
+# $Id: Makefile.in,v 2.12 1993/07/30 15:05:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -56,7 +56,7 @@ OBJS= \
 all: made.tmp ${TCL}
 
 ${TCL}: main.o ${LIBTCLX.A} made.tmp 
-	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${XLDLIBS} ${LDLIBS} -o ${TCL}
+	${CC} ${CFLAGS} ${XLDFLAGS} main.o ${LDLIBS} ${XLDLIBS} -o ${TCL}
 	if ${DO_STRIPPING} ; then \
 	    strip ${TCL}; \
 	    ${MCS_CMD} ${TCL}; fi
@@ -82,7 +82,7 @@ tcl++.o: tcl++.C tcl++.h
 # This is just to test if it compiles.
 
 tcl++: main++.o made.tmp
-	${CCPLUS} ${CFLAGS} ${XLDFLAGS} main++.o ${XLDLIBS} ${LDLIBS} \
+	${CCPLUS} ${CFLAGS} ${XLDFLAGS} main++.o ${LDLIBS} ${XLDLIBS} \
         -o ../tcl++
 
 main++.o: tcl++.h main++.C
