@@ -15,23 +15,21 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 4.4 1995/01/01 19:51:01 markd Exp markd $
+ * $Id: tkXAppInit.c,v 4.5 1995/01/19 06:55:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtend.h"
 #include "tk.h"
-#include <math.h>
 
 /*
  * The following variable is a special hack that insures the tcl
  * version of matherr() is used when linking against shared libraries
- * Only define if matherr is used on this system.
+ * Even if matherr is not used on this system, there is a dummy version
+ * in libtcl.
  */
-#if defined(DOMAIN) && defined(SING)
-EXTERN int matherr _ANSI_ARGS_((struct exception *));
-int (*tclDummyMathPtr)() = (int (*)()) matherr;
-#endif
+EXTERN int matherr ();
+int (*tclDummyMathPtr)() = matherr;
 
 
 /*
