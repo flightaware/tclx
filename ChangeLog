@@ -1,3 +1,9 @@
+2000-07-12 Brent Welch <welch@ajubasolutions.com>
+	* tcl/win/configure.in, common.bc, common.vc
+	    Fixed version number to 8.3
+	* {tcl,tk}/unix/Makefile.in, tweaks to get references to LIB_RUNTIME_DIR
+	    properly expanded on irix builds.
+
 2000-07-10 Brent Welch <welch@ajubasolutions.com>
 	* tcl/win/tclXAppInit.c, tk/generic/tkXshell.c, tk/win/tkXAppInit.c
 	    - turn off USE_TCL_STUBS
