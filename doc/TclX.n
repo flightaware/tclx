@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.26 1993/08/31 23:03:20 markd Exp markd $
+.\" $Id: TclX.man,v 2.27 1993/08/31 23:52:02 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1956,7 +1956,8 @@ as described above.  If the \fB-fail\fR
 option is specified, an error is returned
 if the open fails.  The option \fB-nofail\fR specifies the default behavior
 of not returning an error when \fBcatopen\fR fails to open a specified
-message catalog.
+message catalog.  If the handle from a failed \fBcatopen\fR is passed to
+\fBcatgets\fR, the default string is returned.
 '@endhelp
 '
 '@help: tcl/internation/catgets
