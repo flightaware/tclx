@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.8 1995/01/23 23:41:30 markd Exp markd $
+.\" $Id: TclX.n,v 4.9 1995/03/18 07:10:22 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -774,6 +774,12 @@ Set the real and effective group ID to \fIname\fR or \fIgid\fR, if the
 name (or gid) is valid and permissions allow it.  If the group name
 (or gid) is not specified, the current group name (or gid) is returned.
 .TP
+.B id groups
+.TP
+.B id groupids
+Return the current group access list of the process.  The option
+\fBgroups\fR returns group names and \fBgroupids\fR returns id numbers.
+.TP
 .B id convert groupid \fIgid\fR
 .TP
 .B id convert group \fIname\fR
@@ -804,6 +810,10 @@ Return the process group ID of the current process.
 .B id process group set
 .br
 Set the process group ID of the current process to its process ID.
+.TP
+.B id host
+.br
+Returns the standard host name of the machine the process is executing on.
 .RE
 '\"@:
 '\"@:This command is provided by Extended Tcl.
@@ -1544,19 +1554,20 @@ the addresses will be tried until one can be connected to.  Use the
 '\"@help: tcl/files/server_info
 '\"@brief: Obtain information about a TCP/IP server.
 .TP
-.B server_info \fBaddresses\fR \fIhostname\fR
-.B server_info \fBofficial_name\fR \fIhostname\fR
-.B server_info \fBaliases_name\fR \fIhostname\fR
+.B server_info \fBaddresses\fR \fIhost\fR
+.B server_info \fBofficial_name\fR \fIhost\fR
+.B server_info \fBaliases\fR \fIhost\fR
 .br
-Optain information about a TCP/IP server.
+Optain information about a TCP/IP server. The argument \fBhost\fR can be either
+a host name or an IP address.
 .sp
 If the \fBaddresses\fR option is specified, the list of IP addresses for the
-\fIhostname\fR is returned.
+\fIhost\fR is returned.
 .sp
 If the \fBofficial_name\fR option is specified, the official name for
-\fIhostname\fR is returned.
+\fIhost\fR is returned.
 .sp
-If the \fBaliases\fR option is specified, a list of aliases for \fIhostname\fR
+If the \fBaliases\fR option is specified, a list of aliases for \fIhost\fR
 is returned.
 '\"@endhelp
 '

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 4.0 1994/07/16 05:27:09 markd Rel markd $
+ * $Id: tclXid.c,v 4.1 1995/01/01 19:49:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,6 +37,55 @@ static int
 GroupnameToGroupidResult _ANSI_ARGS_((Tcl_Interp *interp,
                                       char       *groupName));
 
+static int
+IdConvert _ANSI_ARGS_((Tcl_Interp *interp,
+                       int         argc,
+                       char      **argv));
+
+static int
+IdEffective  _ANSI_ARGS_((Tcl_Interp *interp,
+                          int         argc,
+                          char      **argv));
+
+static int
+IdProcess  _ANSI_ARGS_((Tcl_Interp *interp,
+                        int         argc,
+                        char      **argv));
+
+static int
+IdGroupids  _ANSI_ARGS_((Tcl_Interp *interp,
+                         int         argc,
+                         char      **argv,
+                         int         symbolic));
+
+static int
+IdHost _ANSI_ARGS_((Tcl_Interp *interp,
+                    int         argc,
+                    char      **argv));
+
+static int
+GetSetWrongArgs _ANSI_ARGS_((Tcl_Interp *interp,
+                             char      **argv));
+
+static int
+IdUser _ANSI_ARGS_((Tcl_Interp *interp,
+                    int         argc,
+                    char      **argv));
+
+static int
+IdUserId _ANSI_ARGS_((Tcl_Interp *interp,
+                      int         argc,
+                      char      **argv));
+
+static int
+IdGroup _ANSI_ARGS_((Tcl_Interp *interp,
+                     int         argc,
+                     char      **argv));
+
+static int
+IdGroupId _ANSI_ARGS_((Tcl_Interp *interp,
+                       int         argc,
+                       char      **argv));
 
 /*
  *-----------------------------------------------------------------------------
@@ -55,6 +104,10 @@ GroupnameToGroupidResult _ANSI_ARGS_((Tcl_Interp *interp,
  *
  *        id groupid ?gid?
  *        id convert groupid <gid>
+ *
+ *        id groupids
+ *
+ *        id host <name>
  *
  *        id process
  *        id process parent
@@ -86,7 +139,7 @@ UseridToUsernameResult (interp, userId)
         endpwent ();
         return TCL_ERROR;
     }
-    strcpy (interp->result, pw->pw_name);
+    Tcl_SetResult (interp, pw->pw_name, TCL_VOLATILE);
     endpwent ();
     return TCL_OK;
 }
@@ -122,7 +175,7 @@ GroupidToGroupnameResult (interp, groupId)
         endgrent ();
         return TCL_ERROR;
     }
-    strcpy (interp->result, grp->gr_name);
+    Tcl_SetResult (interp, grp->gr_name, TCL_VOLATILE);
     endgrent ();
     return TCL_OK;
 }
@@ -142,6 +195,366 @@ GroupnameToGroupidResult (interp, groupName)
     return TCL_OK;
 }
 
+/*
+ * id convert type value
+ */
+static int
+IdConvert (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    int uid, gid;
+
+    if (argc != 4) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " convert type value", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (STREQU (argv[2], "user"))
+        return UsernameToUseridResult (interp, argv[3]);
+    
+    if (STREQU (argv[2], "userid")) {
+        if (Tcl_GetInt (interp, argv[3], &uid) != TCL_OK) 
+            return TCL_ERROR;
+        return UseridToUsernameResult (interp, uid);
+    }
+    
+    if (STREQU (argv[2], "group"))
+        return GroupnameToGroupidResult (interp, argv[3]);
+    
+    if (STREQU (argv[2], "groupid")) {
+        if (Tcl_GetInt (interp, argv[3], &gid) != TCL_OK)
+            return TCL_ERROR;
+        return GroupidToGroupnameResult (interp, gid);
+        
+    }
+    Tcl_AppendResult (interp, "third arg must be \"user\", \"userid\", ",
+                      "\"group\" or \"groupid\", got \"", argv [2], "\"",
+                      (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ * id effective type
+ */
+static int
+IdEffective (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    if (argc != 3) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " effective type", (char *) NULL);
+        return TCL_ERROR;
+    }
+    
+    if (STREQU (argv[2], "user"))
+        return UseridToUsernameResult (interp, geteuid ());
+    
+    if (STREQU (argv[2], "userid")) {
+        sprintf (interp->result, "%d", geteuid ());
+        return TCL_OK;
+    }
+    
+    if (STREQU (argv[2], "group"))
+        return GroupidToGroupnameResult (interp, getegid ());
+    
+    if (STREQU (argv[2], "groupid")) {
+        sprintf (interp->result, "%d", getegid ());
+        return TCL_OK;
+    }
+
+    Tcl_AppendResult (interp, "third arg must be \"user\", \"userid\", ",
+                      "\"group\" or \"groupid\", got \"", argv [2], "\"",
+                      (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ * id process ?parent|group? ?set?
+ */
+static int
+IdProcess (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    pid_t  pid;
+
+    if (argc > 4) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " process ?parent|group? ?set?",
+                          (char *) NULL);
+        return TCL_OK;
+    }
+    if (argc == 2) {
+        sprintf (interp->result, "%d", getpid ());
+        return TCL_OK;
+    }
+
+    if (STREQU (argv[2], "parent")) {
+        if (argc != 3) {
+            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                              " process parent", (char *) NULL);
+            return TCL_ERROR;
+        }
+        sprintf (interp->result, "%d", getppid ());
+        return TCL_OK;
+    }
+    if (STREQU (argv[2], "group")) {
+        if (argc == 3) {
+            sprintf (interp->result, "%d", getpgrp ());
+            return TCL_OK;
+        }
+        if ((argc != 4) || !STREQU (argv[3], "set")) {
+            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                              " process group ?set?", (char *) NULL);
+            return TCL_ERROR;
+        }
+#ifdef HAVE_SETPGID
+        pid = getpid ();
+        setpgid (pid, pid);
+#else
+        setpgrp ();
+#endif
+        return TCL_OK;
+    }
+
+    Tcl_AppendResult (interp, "expected one of \"parent\" or \"group\" ",
+                      "got \"", argv [2], "\"", (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ * id groupids
+ * id groups
+ */
+static int
+IdGroupids (interp, argc, argv, symbolic)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+    int         symbolic;
+{
+#ifdef HAVE_GETGROUPS
+    gid_t         groups [NGROUPS];
+    int           nGroups;
+    char          numText [12];
+    int           groupIndex;
+    struct group *grp;
+
+    if (argc != 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", argv [1],
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    nGroups = getgroups (NGROUPS, groups);
+    if (nGroups < 0) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+
+    for (groupIndex = 0; groupIndex < nGroups; groupIndex++) {
+        if (symbolic) {
+            grp = getgrgid (groups [groupIndex]);
+            if (grp == NULL) {
+                sprintf (interp->result, "unknown group id: %d", 
+                         groups [groupIndex]);
+                endgrent ();
+                return TCL_ERROR;
+            }
+            Tcl_AppendElement (interp, grp->gr_name);
+        } else {
+            sprintf (numText, "%d", groups[groupIndex]);
+            Tcl_AppendElement (interp, numText);
+        }
+    }
+    if (symbolic)
+        endgrent ();
+    return TCL_OK;
+#else
+    Tcl_AppendResult (interp, "group id lists unavailable on this system ",
+                      "(no getgroups function)", (char *) NULL);
+    return TCL_ERROR;
+#endif
+}
+
+/*
+ * id host
+ */
+static int
+IdHost (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+#ifdef HAVE_GETHOSTNAME
+    if (argc != 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " host", (char *) NULL);
+        return TCL_ERROR;
+    }
+	if (gethostname (interp->result, TCL_RESULT_SIZE) < 0) {
+	    interp->result = Tcl_PosixError (interp);
+	    return TCL_ERROR;
+	}
+	return TCL_OK;
+#else
+        Tcl_AppendResult (interp, "host name unavailable on this system ",
+                          "(no gethostname function)", (char *) NULL);
+        return TCL_ERROR;
+#endif
+}
+
+/*
+ * Return error when a get set function has too many args (2 or 3 expected).
+ */
+static int
+GetSetWrongArgs (interp, argv)
+    Tcl_Interp *interp;
+    char      **argv;
+{
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", argv [1],
+                      " ?value?", (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ * id user
+ */
+static int
+IdUser (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    struct passwd *pw;
+
+    if (argc > 3)
+        return GetSetWrongArgs (interp, argv);
+
+    if (argc == 2) {
+        return UseridToUsernameResult (interp, getuid ());
+    }
+
+    pw = getpwnam (argv[2]);
+    if (pw == NULL) {
+        Tcl_AppendResult (interp, "user \"", argv[2], "\" does not exist",
+                          (char *) NULL);
+        goto errorExit;
+    }
+    if (setuid (pw->pw_uid) < 0) {
+        interp->result = Tcl_PosixError (interp);
+        goto errorExit;
+    }
+    endpwent ();
+    return TCL_OK;
+
+  errorExit:
+    endpwent ();
+    return TCL_OK;
+}
+
+/*
+ * id userid
+ */
+static int
+IdUserId (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    int  uid;
+
+    if (argc > 3)
+        return GetSetWrongArgs (interp, argv);
+
+    if (argc == 2) {
+        sprintf (interp->result, "%d", getuid ());
+        return TCL_OK;
+    }
+
+    if (Tcl_GetInt (interp, argv[2], &uid) != TCL_OK)
+        return TCL_ERROR;
+
+    if (setuid ((uid_t) uid) < 0) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+
+/*
+ * id group
+ */
+static int
+IdGroup (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    struct group *grp;
+
+    if (argc > 3)
+        return GetSetWrongArgs (interp, argv);
+
+    if (argc == 2) {
+        return GroupidToGroupnameResult (interp, getgid ());
+    }
+     
+    grp = getgrnam (argv[2]);
+    if (grp == NULL) {
+        Tcl_AppendResult (interp, "group \"", argv[2], "\" does not exist",
+                          (char *) NULL);
+        goto errorExit;
+    }
+    if (setgid (grp->gr_gid) < 0) {
+        interp->result = Tcl_PosixError (interp);
+        goto errorExit;
+    }
+    endgrent ();
+    return TCL_OK;
+
+  errorExit:
+    endgrent ();
+    return TCL_OK;
+}
+
+/*
+ * id groupid
+ */
+static int
+IdGroupId (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    int  gid;
+
+    if (argc > 3)
+        return GetSetWrongArgs (interp, argv);
+
+    if (argc == 2) {
+        sprintf (interp->result, "%d", getgid ());
+        return TCL_OK;
+    }
+
+    if (Tcl_GetInt (interp, argv[2], &gid) != TCL_OK)
+        return TCL_ERROR;
+
+    if (setgid ((gid_t) gid) < 0) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+
 int
 Tcl_IdCmd (clientData, interp, argc, argv)
     ClientData  clientData;
@@ -149,43 +562,17 @@ Tcl_IdCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    struct passwd *pw;
-    struct group *grp;
-    int           uid, gid;
-    pid_t         pid;
-
-    if (argc < 2) 
-        goto bad_args;
+    if (argc < 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " arg ?arg...?",
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
 
     /*
      * If the first argument is "convert", handle the conversion.
      */
     if (STREQU (argv[1], "convert")) {
-        if (argc != 4) {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                              " convert arg arg", (char *) NULL);
-            return TCL_ERROR;
-        }
-
-        if (STREQU (argv[2], "user"))
-            return UsernameToUseridResult (interp, argv[3]);
-
-        if (STREQU (argv[2], "userid")) {
-            if (Tcl_GetInt (interp, argv[3], &uid) != TCL_OK) 
-                return TCL_ERROR;
-            return UseridToUsernameResult (interp, uid);
-        }
-
-        if (STREQU (argv[2], "group"))
-            return GroupnameToGroupidResult (interp, argv[3]);
-
-        if (STREQU (argv[2], "groupid")) {
-            if (Tcl_GetInt (interp, argv[3], &gid) != TCL_OK)
-                return TCL_ERROR;
-            return GroupidToGroupnameResult (interp, gid);
-
-        }
-        goto bad_three_arg;
+        return IdConvert (interp, argc, argv);
     }
 
     /*
@@ -193,28 +580,7 @@ Tcl_IdCmd (clientData, interp, argc, argv)
      * name, group ID or name.
      */
     if (STREQU (argv[1], "effective")) {
-        if (argc != 3) {
-            Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                              " effective arg", (char *) NULL);
-            return TCL_ERROR;
-        }
-
-        if (STREQU (argv[2], "user"))
-            return UseridToUsernameResult (interp, geteuid ());
-
-        if (STREQU (argv[2], "userid")) {
-            sprintf (interp->result, "%d", geteuid ());
-            return TCL_OK;
-        }
-
-        if (STREQU (argv[2], "group"))
-            return GroupidToGroupnameResult (interp, getegid ());
-
-        if (STREQU (argv[2], "groupid")) {
-            sprintf (interp->result, "%d", getegid ());
-            return TCL_OK;
-        }
-        goto bad_three_arg;
+        return IdEffective (interp, argc, argv);
     }
 
     /*
@@ -222,129 +588,50 @@ Tcl_IdCmd (clientData, interp, argc, argv)
      * process ID, process group or set the process group depending on args.
      */
     if (STREQU (argv[1], "process")) {
-        if (argc == 2) {
-            sprintf (interp->result, "%d", getpid ());
-            return TCL_OK;
-        }
+        return IdProcess (interp, argc, argv);
+    }
 
-        if (STREQU (argv[2], "parent")) {
-            if (argc != 3) {
-                Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                                  " process parent", (char *) NULL);
-                return TCL_ERROR;
-            }
-            sprintf (interp->result, "%d", getppid ());
-            return TCL_OK;
-        }
-        if (STREQU (argv[2], "group")) {
-            if (argc == 3) {
-                sprintf (interp->result, "%d", getpgrp ());
-                return TCL_OK;
-            }
-            if ((argc != 4) || !STREQU (argv[3], "set")) {
-                Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                                  " process group ?set?", (char *) NULL);
-                return TCL_ERROR;
-            }
-#ifdef HAVE_SETPGID
-            pid = getpid ();
-            setpgid (pid, pid);
-#else
-            setpgrp ();
-#endif
-            return TCL_OK;
-        }
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " process ?parent|group|group? ?set?",
-                          (char *) NULL);
-        return TCL_ERROR;
+    /*
+     * Handle getting list of groups the user is a member of.
+     */
+    if (STREQU (argv[1], "groups")) {
+        return IdGroupids (interp, argc, argv, TRUE);
+    }
+
+    if (STREQU (argv[1], "groupids")) {
+        return IdGroupids (interp, argc, argv, FALSE);
+    }
+
+    /*
+     * Handle returning the host name if its available.
+     */
+    if (STREQU (argv[1], "host")) {
+        return IdHost (interp, argc, argv);
     }
 
     /*
      * Handle setting or returning the user ID or group ID (by name or number).
      */
-    if (argc > 3)
-        goto bad_args;
-
     if (STREQU (argv[1], "user")) {
-        if (argc == 2) {
-            return UseridToUsernameResult (interp, getuid ());
-        } else {
-            pw = getpwnam (argv[2]);
-            if (pw == NULL)
-                goto name_doesnt_exist;
-            if (setuid (pw->pw_uid) < 0)
-                goto cannot_set_name;
-            endpwent ();
-            return TCL_OK;
-        }
+        return IdUser (interp, argc, argv);
     }
 
     if (STREQU (argv[1], "userid")) {
-        if (argc == 2) {
-            sprintf (interp->result, "%d", getuid ());
-            return TCL_OK;
-        } else {
-            if (Tcl_GetInt (interp, argv[2], &uid) != TCL_OK)
-                return TCL_ERROR;
-            if (setuid ((uid_t) uid) < 0) 
-                goto cannot_set_name;
-            return TCL_OK;
-        }
+        return IdUserId (interp, argc, argv);
     }
 
     if (STREQU (argv[1], "group")) {
-        if (argc == 2) {
-            return GroupidToGroupnameResult (interp, getgid ());
-        } else {
-            grp = getgrnam (argv[2]);
-            if (grp == NULL)
-                goto name_doesnt_exist;
-            if (setgid (grp->gr_gid) < 0)
-                goto cannot_set_name;
-            endgrent ();
-            return TCL_OK;
-        }
+        return IdGroup (interp, argc, argv);
     }
 
     if (STREQU (argv[1], "groupid")) {
-        if (argc == 2) {
-            sprintf (interp->result, "%d", getgid ());
-            return TCL_OK;
-        } else {
-            if (Tcl_GetInt (interp, argv[2], &gid) != TCL_OK)
-                return TCL_ERROR;
-            if (setgid ((gid_t) gid) < 0)
-                goto cannot_set_name;
-            return TCL_OK;
-        }
+        return IdGroupId (interp, argc, argv);
     }
-    Tcl_AppendResult (interp, "bad arg: ", argv [0], 
-                      " second arg must be convert, effective, process, ",
-                      "user, userid, group or groupid", (char *) NULL);
-    return TCL_ERROR;
 
-
-  bad_three_arg:
-    Tcl_AppendResult (interp, "bad arg: ", argv [0], ": ", argv[1],
-                      ": third arg must be user, userid, group or groupid",
-                      (char *) NULL);
-    return TCL_ERROR;
-  bad_args:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " arg ?arg..?",
-                      (char *) NULL);
-    return TCL_ERROR;
-
-  name_doesnt_exist:
-    Tcl_AppendResult (interp, " \"", argv[2], "\" does not exists",
-                      (char *) NULL);
-    endpwent ();
-    endgrent ();
-    return TCL_ERROR;
-
-  cannot_set_name:
-    interp->result = Tcl_PosixError (interp);
-    endpwent ();
-    endgrent ();
+    Tcl_AppendResult (interp, "second arg must be one of \"convert\", ",
+                      "\"effective\", \"process\", ",
+                      "\"user\", \"userid\", \"group\", \"groupid\", ",
+                      "\"groups\", \"groupids\", ",
+                      "or \"host\"", (char *) NULL);
     return TCL_ERROR;
 }
