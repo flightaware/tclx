@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.4 1999/06/29 00:30:47 surles Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.5 1999/07/09 23:13:14 redman Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -36,8 +36,12 @@ DEPARG = "$(shell cygpath $(PATHTYPE) $<)"
 # at configure-time with the --exec-prefix and --prefix options
 # to the "configure" script.
 
+srcdir		= @srcdir@
+top_srcdir	= @top_srcdir@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
+bindir		= @bindir@
+libdir		= @libdir@
 
 # The following definition can be set to non-null for special systems
 # like AFS with replication.  It allows the pathnames used for installation
@@ -80,7 +84,7 @@ TCLX_COMPAT_DIR		= $(TCLX_ROOT_DIR)/compat
 TCLX_WIN_DIR		= $(TCLX_ROOT_DIR)/win
 TCLX_RUNTIME_DIR	= $(TCLX_ROOT_DIR)/runtime
 TCLX_TOOLS_DIR		= $(TCLX_ROOT_DIR)/../unix/tools
-TCLX_BIN_DIR		= $(PWD)
+TCLX_BIN_DIR		= .
 
 TKX_SRC_DIR		= @srcdir@
 TKX_ROOT_DIR		= $(TKX_SRC_DIR)/../tk
@@ -184,6 +188,7 @@ RMDIR		= rm -rf
 MKDIR		= mkdir -p
 RM		= rm -f
 COPY		= cp
+AUTOCONF	= autoconf
 
 TCLXSH		= tclxsh.exe
 WISHX		= wishx.exe
@@ -207,13 +212,13 @@ ${AC_FLAGS}
 
 STUB_CC_SWITCHES = ${CC_SWITCHES} -DUSE_TCL_STUBS
 
-RUN_TCLX_SETUP	= PATH="$(TCL_BIN_DIR)"; export PATH; \
+RUN_TCLX_SETUP	= PATH="$(bindir)"; export PATH; \
 		  TCL_LIBRARY="$(TCL_LIBRARY_DIR_NATIVE)"; export TCL_LIBRARY; \
 		  TCLX_LIBRARY="$(TCLX_BIN_DIR_NATIVE)"; export TCLX_LIBRARY; \
 		  TCL_PROGRAM="$(TCLX_BIN_DIR_NATIVE)/$(TCLXTEST)"; \
 		  export TCL_PROGRAM;
 
-RUN_TKX_SETUP	= PATH="$(TCL_BIN_DIR):$(TK_BIN_DIR)"; export PATH; \
+RUN_TKX_SETUP	= PATH="$(bindir)"; export PATH; \
 		  TCL_LIBRARY="$(TCL_LIBRARY_DIR_NATIVE)"; export TCL_LIBRARY; \
 		  TK_LIBRARY="$(TK_LIBRARY_DIR_NATIVE)"; export TK_LIBRARY; \
 		  TCLX_LIBRARY="$(TCLX_BIN_DIR_NATIVE)"; export TCLX_LIBRARY; \
@@ -549,27 +554,27 @@ install-libraries:
 	    done
 	@$(RM) ./tclXTempPkgIndexFile
 	@echo " \
-	lassign \$$argv indexPath dllName ; \
+	lassign \$$argv package indexPath dllName ; \
 	set dllPath  [file join .. bin \$$dllName] ; \
 	set fd       [open \$$indexPath w] ; \
 	set version  [package require Tcl] ; \
 	set xversion [package require Tclx] ; \
 	puts \$$fd \"# Tcl package index file, version 1.0\" ; \
 	puts \$$fd \"#\" ; \
-	puts \$$fd \"# Package index for TclX \$$xversion.\" ; \
+	puts \$$fd \"# Package index for \$$package \$$xversion.\" ; \
 	puts \$$fd \"#\" ; \
 	puts \$$fd \"if \{\[catch {package require Tcl \$$version\}\]\} \{\" ;\
 	puts \$$fd \"    return\" ; \
 	puts \$$fd \"}\" ; \
-	puts \$$fd \"package ifneeded Tclx \$$xversion \\\\\" ; \
-	puts \$$fd \"\\t\[list load \[file join \\$$dir \$$dllPath] Tclx]\" ; \
+	puts \$$fd \"package ifneeded \$$package \$$xversion \\\\\" ; \
+	puts \$$fd \"\\t\[list load \[file join \\$$dir \$$dllPath] \$$package]\" ; \
 	close \$$fd ; \
 	" >> ./tclXTempPkgIndexFile
 	@echo "installing into $(TCLX_SCRIPT_INSTALL_DIR) pkgIndex.tcl"
-	@$(RUN_TCLXSH) -q  ./tclXTempPkgIndexFile \
+	@$(RUN_TCLXSH) -q  ./tclXTempPkgIndexFile Tclx \
 		"$(TCLX_SCRIPT_INSTALL_NATIVE)/pkgIndex.tcl" "$(TCLX_DLL_FILE)"
 	@echo "installing into $(TKX_SCRIPT_INSTALL_DIR) pkgIndex.tcl"
-	@$(RUN_TCLXSH) -q  ./tclXTempPkgIndexFile \
+	@$(RUN_TCLXSH) -q  ./tclXTempPkgIndexFile Tkx \
 		"$(TKX_SCRIPT_INSTALL_NATIVE)/pkgIndex.tcl" "$(TKX_DLL_FILE)"
 	@$(RM) ./tclXTempPkgIndexFile
 
@@ -609,5 +614,10 @@ clean:
 distclean: clean
 	$(RM) Makefile config.status config.cache config.log
 
-Makefile: Makefile.in
-	./config.status
+Makefile: $(srcdir)/Makefile.in  config.status
+	CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+config.status: $(srcdir)/configure
+	$(SHELL) ./config.status --recheck
+$(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+	cd $(srcdir) && $(AUTOCONF)
