@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.9 1997/09/18 15:57:29 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -53,7 +53,7 @@ typedef struct {
 
 static char *
 BoyerMooreCompile _ANSI_ARGS_((char *pat,
-                                  int patlen));
+                               int patlen));
 
 static char *
 BoyerMooreExecute _ANSI_ARGS_((char     *text,

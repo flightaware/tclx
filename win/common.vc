@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 8.5 1997/12/14 21:33:07 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
@@ -32,8 +32,8 @@ PREFIXU=C:/tcl
 #
 # TclX and TkX versions.
 #
-TCLX_VERSION = 8.0.3
-TKX_VERSION  = 8.0.3
+TCLX_VERSION = 8.1.0
+TKX_VERSION  = 8.1.0
 
 #
 # Project directories
@@ -61,27 +61,27 @@ IDE32	= c:\Program Files\DevStudio\SharedIDE
 #
 # Tcl build directories and files.
 #
-TCL_DIR          = $(ROOT)\..\tcl8.0
+TCL_DIR          = $(ROOT)\..\tcl8.1
 TCL_GENERIC_DIR  = $(TCL_DIR)\generic
 TCL_WIN_DIR      = $(TCL_DIR)\win
 TCL_RUNTIME_DIR  = $(TCL_DIR)\library
 TCL_TESTS_DIR    = $(TCL_DIR)\tests
-TCL_LIB          = $(TCL_WIN_DIR)\tcl80.lib
-TCL_DLL          = $(TCL_WIN_DIR)\tcl80.dll
-TCL_SALIB        = $(TCL_WIN_DIR)\tcl80sa.lib
+TCL_LIB          = $(TCL_WIN_DIR)\tcl81.lib
+TCL_DLL          = $(TCL_WIN_DIR)\tcl81.dll
+TCL_SALIB        = $(TCL_WIN_DIR)\tcl81sa.lib
 
 #
 # TK build directories and files.
 #
-TK_DIR           = $(ROOT)\..\tk8.0
+TK_DIR           = $(ROOT)\..\tk8.1
 TK_GENERIC_DIR   = $(TK_DIR)\generic
 TK_WIN_DIR       = $(TK_DIR)\win
 TK_XLIB_DIR      = $(TK_DIR)\xlib
 TK_RUNTIME_DIR   = $(TK_DIR)\library
 TK_TESTS_DIR     = $(TK_DIR)\tests
-TK_LIB           = $(TK_WIN_DIR)\tk80.lib
-TK_DLL           = $(TK_WIN_DIR)\tk80.dll
-TK_SALIB         = $(TK_WIN_DIR)\tk80sa.dll
+TK_LIB           = $(TK_WIN_DIR)\tk81.lib
+TK_DLL           = $(TK_WIN_DIR)\tk81.dll
+TK_SALIB         = $(TK_WIN_DIR)\tk81sa.dll
 
 #
 # TclX directories.
@@ -89,9 +89,9 @@ TK_SALIB         = $(TK_WIN_DIR)\tk80sa.dll
 TCLX_WIN_DIR      = $(ROOT)\tcl\win
 TCLX_GENERIC_DIR  = $(ROOT)\tcl\generic
 TCLX_RUNTIME_DIR  = $(ROOT)\tcl\runtime
-TCLX_LIB          = $(TCLX_WIN_DIR)\tclx803.lib
-TCLX_DLL          = $(TCLX_WIN_DIR)\tclx803.dll
-TCLX_SALIB        = $(TCLX_WIN_DIR)\tclx803s.lib
+TCLX_LIB          = $(TCLX_WIN_DIR)\tclx810.lib
+TCLX_DLL          = $(TCLX_WIN_DIR)\tclx810.dll
+TCLX_SALIB        = $(TCLX_WIN_DIR)\tclx810s.lib
 TCLX_INST_BIN     = $(PREFIX)\bin
 TCLX_INST_INCL    = $(PREFIX)\include
 TCLX_INST_LIB     = $(PREFIX)\lib
@@ -105,9 +105,9 @@ TCLX_INST_RUNTIMEU= $(TCLX_INST_LIBU)/tclX$(TCLX_VERSION)
 TKX_WIN_DIR      = $(ROOT)\tk\win
 TKX_GENERIC_DIR  = $(ROOT)\tk\generic
 TKX_RUNTIME_DIR  = $(ROOT)\tk\runtime
-TKX_LIB          = $(TKX_WIN_DIR)\tkx803.lib
-TKX_DLL          = $(TKX_WIN_DIR)\tkx803.dll
-TKX_SALIB        = $(TKX_WIN_DIR)\tkx803sa.dll
+TKX_LIB          = $(TKX_WIN_DIR)\tkx810.lib
+TKX_DLL          = $(TKX_WIN_DIR)\tkx810.dll
+TKX_SALIB        = $(TKX_WIN_DIR)\tkx810sa.dll
 TKX_INST_BIN     = $(PREFIX)\bin
 TKX_INST_INCL    = $(PREFIX)\include
 TKX_INST_LIB     = $(PREFIX)\lib
