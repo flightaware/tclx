@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 3.4 1994/03/23 15:59:12 markd Exp markd $
+# $Id: tcllib.test,v 3.5 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -33,10 +33,10 @@ set auto_path {}
 catch {unset auto_path}
 
 if {[id user] == "root"} {
-    puts stderr "*************************************************************"
-    puts stderr "You are running as `root', certain tcllib tests will be"
-    puts stderr "skipped"
-    puts stderr "*************************************************************"
+    puts "*************************************************************"
+    puts "You are running as `root', certain tcllib tests will be"
+    puts "skipped"
+    puts "*************************************************************"
 }
 
 #

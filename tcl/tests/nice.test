@@ -22,11 +22,11 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 # Fork without exec will not work under Tk, skip this test
 #
 if ![lempty [info commands button]] {
-    puts stderr "*************************************************************"
-    puts stderr "Nice tests are constructed in a way that does not work"
-    puts stderr "under Tk.  Test skipped."
-    puts stderr "*************************************************************"
-    puts stderr ""
+    puts "*************************************************************"
+    puts "Nice tests are constructed in a way that does not work"
+    puts "under Tk.  Test skipped."
+    puts "*************************************************************"
+    puts ""
     return
 }
 
@@ -34,11 +34,11 @@ if ![lempty [info commands button]] {
 # Right now, we depend on the base priority being zero.
 #
 if {[nice] != 0} {
-    puts stderr "*************************************************************"
-    puts stderr "Nice priority is [nice], not zero.  Most \"nice\" command"
-    puts stderr "test will fail (but everything is probably ok)"
-    puts stderr "*************************************************************"
-    puts stderr ""
+    puts "*************************************************************"
+    puts "Nice priority is [nice], not zero.  Most \"nice\" command"
+    puts "test will fail (but everything is probably ok)"
+    puts "*************************************************************"
+    puts ""
 }
 
 Test nice-1.1 {nice tests} {
@@ -58,6 +58,8 @@ Test nice-1.2 {nice tests} {
 # to run the nice tests.  
 #
 
+flush stdout
+flush stderr
 set pid [fork]
 
 #
@@ -93,10 +95,10 @@ if {[id user] != "root"} {
         set stat
     } 0 1
 
-    puts stderr "*************************************************************"
-    puts stderr "You are not running as `root', certain nice tests will be"
-    puts stderr "skipped"
-    puts stderr "*************************************************************"
+    puts "*************************************************************"
+    puts "You are not running as `root', certain nice tests will be"
+    puts "skipped"
+    puts "*************************************************************"
     exit
 }
 

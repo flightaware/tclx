@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 3.0 1993/11/19 06:57:04 markd Rel markd $
+# $Id: chmod.test,v 3.1 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -332,11 +332,11 @@ SetUpTestFiles
 
 if {[catch {chown [id userid]  CHMOD.TMP} msg ] ||
     [catch {chgrp [id groupid] CHMOD.TMP} msg ]} {
-    puts stderr "*************************************************************"
-    puts stderr "Can't do chown or chgrp even when current and new group"
-    puts stderr "id are ours.  chown/chgrp tests skipped on this system."
-    puts stderr "    $msg"
-    puts stderr "*************************************************************"
+    puts "*************************************************************"
+    puts "Can't do chown or chgrp even when current and new group"
+    puts "id are ours.  chown/chgrp tests skipped on this system."
+    puts "    $msg"
+    puts "*************************************************************"
     unlink {CHECK.TMP CHMOD.TMP CHMOD2.TMP}
     return
 }
@@ -416,5 +416,5 @@ unlink {CHECK.TMP CHMOD.TMP CHMOD2.TMP}
 # tests.
 
 if {[file exists RCS] && ($chmodTestsSkipped > 0)} {
-    puts stderr "WARNING: $chmodTestsSkipped chmod tests skipped due to system strangeness"
+    puts "WARNING: $chmodTestsSkipped chmod tests skipped due to system strangeness"
 }

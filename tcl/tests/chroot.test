@@ -22,11 +22,11 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 # Fork without exec will not work under Tk, skip this test
 #
 if ![lempty [info commands button]] {
-    puts stderr "*************************************************************"
-    puts stderr "Chroot tests are constructed in a way that does not work"
-    puts stderr "under Tk.  Test skipped."
-    puts stderr "*************************************************************"
-    puts stderr ""
+    puts "*************************************************************"
+    puts "Chroot tests are constructed in a way that does not work"
+    puts "under Tk.  Test skipped."
+    puts "*************************************************************"
+    puts ""
     return
 }
 
@@ -39,10 +39,10 @@ Test chroot-1.2 {chroot tests} {
 } 1 {wrong # args: chroot path}
 
 if {[id user] != "root"} {
-    puts stderr "*************************************************************"
-    puts stderr "You are not running as `root', certain chroot tests will be"
-    puts stderr "skipped"
-    puts stderr "*************************************************************"
+    puts "*************************************************************"
+    puts "You are not running as `root', certain chroot tests will be"
+    puts "skipped"
+    puts "*************************************************************"
     return
 }
 

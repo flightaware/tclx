@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 3.2 1994/05/16 00:43:11 markd Exp markd $
+# $Id: signal.test,v 3.3 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -22,11 +22,11 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 # Fork without exec will not work under Tk, skip this test
 #
 if ![lempty [info commands button]] {
-    puts stderr "*************************************************************"
-    puts stderr "Signal tests are constructed in a way that does not work"
-    puts stderr "under Tk.  Test skipped."
-    puts stderr "*************************************************************"
-    puts stderr ""
+    puts "*************************************************************"
+    puts "Signal tests are constructed in a way that does not work"
+    puts "under Tk.  Test skipped."
+    puts "*************************************************************"
+    puts ""
     return
 }
 

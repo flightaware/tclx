@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 3.3 1994/05/17 06:00:07 markd Exp markd $
+# $Id: flock.test,v 3.4 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -30,11 +30,11 @@ unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
 # Fork without exec will not work under Tk, skip this test
 #
 if ![lempty [info commands button]] {
-    puts stderr "*************************************************************"
-    puts stderr "Flock tests are constructed in a way that does not work"
-    puts stderr "under Tk.  Test skipped."
-    puts stderr "*************************************************************"
-    puts stderr ""
+    puts "*************************************************************"
+    puts "Flock tests are constructed in a way that does not work"
+    puts "under Tk.  Test skipped."
+    puts "*************************************************************"
+    puts ""
     return
 }
 
@@ -149,13 +149,13 @@ puts $writeFH "This is some silly text to help prevent hangs"
 flush $writeFH
 if {[catch {flock $writeFH 0 8} msg] != 0} {
     alarm 0
-    puts stderr "*************************************************************"
-    puts stderr "Error acquiring file lock.  This is probably caused by an"
-    puts stderr "incorrectly configured system or bug in the system software."
-    puts stderr "If NFS is involved, make sure lockd is correctly configured"
-    puts stderr "The error message returned was:"
-    puts stderr "    $msg"
-    puts stderr "*************************************************************"
+    puts "*************************************************************"
+    puts "Error acquiring file lock.  This is probably caused by an"
+    puts "incorrectly configured system or bug in the system software."
+    puts "If NFS is involved, make sure lockd is correctly configured"
+    puts "The error message returned was:"
+    puts "    $msg"
+    puts "*************************************************************"
     catch {close $writeFH}
     catch {close $readFH}
     catch {close $rdwrFH}

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 3.1 1994/01/23 16:58:20 markd Exp markd $
+# $Id: help.test,v 3.2 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -33,11 +33,11 @@ if {"[glob -nocomplain ../tclmaster/help/*]" == ""} {
 # Fork without exec will not work under Tk, skip this test
 #
 if ![lempty [info commands button]] {
-    puts stderr "*************************************************************"
-    puts stderr "Help tests are constructed in a way that does not work"
-    puts stderr "under Tk.  Test skipped."
-    puts stderr "*************************************************************"
-    puts stderr ""
+    puts "*************************************************************"
+    puts "Help tests are constructed in a way that does not work"
+    puts "under Tk.  Test skipped."
+    puts "*************************************************************"
+    puts ""
     return
 }
 
