@@ -19,7 +19,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 4.1 1995/01/01 19:49:46 markd Exp $
+# $Id: checkup.tcl,v 1.1 1995/06/07 07:30:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -29,15 +29,15 @@
 #
 proc ReportError {chkfile cmd} {
     puts stderr "*************************************************************"
-    puts stderr "Unable to find $chkfile in the output of the TclX command    "
-    puts stderr "'$cmd' when run in the source directory.  This indicates     "
-    puts stderr "that $cmd is broken.  If your are running Solaris this       "
-    puts stderr "can be caused by compiling Tcl or TclX with the /usr/ucb/cc "
-    puts stderr "compiler.  If this is the case, move /usr/ucb to the end     "
+    puts stderr "Unable to find $chkfile in the output of the TclX command"
+    puts stderr "'$cmd' when run in the src directory.  This indicates"
+    puts stderr "that $cmd is broken.  If your are running Solaris this"
+    puts stderr "can be caused by compiling Tcl or TclX with the /usr/ucb/cc"
+    puts stderr "compiler.  If this is the case, move /usr/ucb to the end"
     puts stderr "of your path or see the INSTALL documentation for information"
-    puts stderr "on specifying a different C compiler.  Do a 'make clean',    "
-    puts stderr "'configure' and 'make' for both Tcl and TclX.               "
-    puts stderr "Good luck.                                                  "
+    puts stderr "on specifying a different C compiler.  Do a 'make clean',"
+    puts stderr "'configure' and 'make' for both Tcl and TclX."
+    puts stderr "Good luck."
     puts stderr "*************************************************************"
     exit 1
 }
