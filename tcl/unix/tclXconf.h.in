@@ -38,6 +38,9 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef uid_t
 
+/* Define if you don't have sys/socket.h */
+#undef NO_SYS_SOCKET_H
+
 /* Define if you have and need sys/select.h */
 #undef HAVE_SYS_SELECT_H
 

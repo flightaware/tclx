@@ -129,7 +129,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 3.0 
+# From configure.in Revision: 3.2 
 
 
 
@@ -300,6 +300,31 @@ DEFS="$DEFS -DNO_VALUES_H=1"
 SEDDEFS="${SEDDEFS}\${SEDdA}NO_VALUES_H\${SEDdB}NO_VALUES_H\${SEDdC}1\${SEDdD}
 \${SEDuA}NO_VALUES_H\${SEDuB}NO_VALUES_H\${SEDuC}1\${SEDuD}
 \${SEDeA}NO_VALUES_H\${SEDeB}NO_VALUES_H\${SEDeC}1\${SEDeD}
+"
+}
+
+fi
+rm -f conftest*
+
+echo checking for sys/socket.h
+cat > conftest.c <<EOF
+#include "confdefs.h"
+#include <sys/socket.h>
+EOF
+err=`eval "($CPP conftest.c >/dev/null) 2>&1"`
+if test -z "$err"; then
+  :
+else
+  rm -rf conftest*
+  
+{
+test -n "$verbose" && \
+echo "	defining NO_SYS_SOCKET_H"
+echo "#define" NO_SYS_SOCKET_H 1 >> confdefs.h
+DEFS="$DEFS -DNO_SYS_SOCKET_H=1"
+SEDDEFS="${SEDDEFS}\${SEDdA}NO_SYS_SOCKET_H\${SEDdB}NO_SYS_SOCKET_H\${SEDdC}1\${SEDdD}
+\${SEDuA}NO_SYS_SOCKET_H\${SEDuB}NO_SYS_SOCKET_H\${SEDuC}1\${SEDuD}
+\${SEDeA}NO_SYS_SOCKET_H\${SEDeB}NO_SYS_SOCKET_H\${SEDeC}1\${SEDeD}
 "
 }
 
