@@ -291,6 +291,7 @@
 ./tests/profile.test
 ./tests/pushd.test
 ./tests/select.test
+./tests/server.test
 ./tests/setfuncs.test
 ./tests/showproc.test
 ./tests/signal.test
