@@ -881,5 +881,43 @@
   o Added check for catclose having a return type of void, as found in NetBSD
     1.0.
 ===============================================================================
- 22 Jan 94: Released TclX7.4a-beta2.
+ 22 Jan 95: Released TclX7.4a-beta2.
 ===============================================================================
+ 23 Jan 95: 
+  o Added min and max expr math functions.
+-------------------------------------------------------------------------------
+ 26 Jan 95:
+  o Fixed bug in configure script checking for catgets.
+  o Fixed bug in tclhelp apropos.
+-------------------------------------------------------------------------------
+ 7 Feb 95:
+  o Changed the tclhelp program so that dismiss buttons will not disappear if
+    the window is resized by the user to a smaller size.
+-------------------------------------------------------------------------------
+20 Feb 95:
+  o Fixed bug using "return" with in a scanmatch command and with errors in
+    the default scanmatch.
+-------------------------------------------------------------------------------
+24 Feb 95:
+  o Make sure all files, except help files, will work on systems limited to
+    14 character names.
+-------------------------------------------------------------------------------
+28 Feb 95:
+  o Fixed failure of Boyer-Moore pattern matching (use by scanfile) when
+    the matched string has 8 bit characters.
+-------------------------------------------------------------------------------
+22 Mar 95:
+  o Added automatic configure check for a C++ compiler.
+  o Use of CC and CFLAGS macros is now follows autoconf guidelines.
+-------------------------------------------------------------------------------
+28 Mar 95:
+  o Added the subcommands "groups", "groupids" and "host" to the id command.
+  o Added server_create,  server_accept, server_send and server_receive
+    commands.
+  o Changed server_info to take IP addresses as well as host names.
+  o Added fstat localhost option.  Also return the port number in the
+    fstat remote host list.  (*POTENTIAL INCOMPATIBILITY*)
+  o Deprecated server_open, added server_connect.  The new command
+    can return a single file id for buffered files.  The server_open command
+    is now a compatibility proc in tcl.tlib.
+-------------------------------------------------------------------------------
