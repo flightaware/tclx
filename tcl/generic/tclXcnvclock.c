@@ -14,20 +14,20 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 4.0 1994/07/16 05:26:37 markd Rel markd $
+ * $Id: tclXcnvclock.c,v 4.1 1995/01/01 19:49:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
-int
-Tcl_GetTimeZone _ANSI_ARGS_((long  currentTime));
+static int
+GetTimeZone _ANSI_ARGS_((time_t  currentTime));
 
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_GetTimeZone --
+ * GetTimeZone --
  *   Determines the current timezone.  The method varies wildly between
  * different Unix implementations, so its hidden in this function.
  *
@@ -40,9 +40,9 @@ Tcl_GetTimeZone _ANSI_ARGS_((long  currentTime));
  *    Minutes east of GMT.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_GetTimeZone (currentTime)
-    long  currentTime;
+static int
+GetTimeZone (currentTime)
+    time_t  currentTime;
 {
 #ifdef TCL_USE_TM_TZADJ
     time_t      curTime = (time_t) currentTime;
@@ -143,7 +143,7 @@ Tcl_ConvertclockCmd (clientData, interp, argc, argv)
         }
         zone = -50000; /* Force GMT */
     } else {
-        zone = Tcl_GetTimeZone (baseClock);
+        zone = GetTimeZone (baseClock);
     }
 
     if (Tcl_GetDate (argv [1], baseClock, zone, &clockVal) < 0) {
