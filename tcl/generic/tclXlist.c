@@ -12,23 +12,20 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 5.0 1995/07/25 05:42:42 markd Rel $
+ * $Id: tclXlist.c,v 5.1 1996/02/12 18:16:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LvarcatCmd --
  *     Implements the TCL lvarcat command:
  *         lvarcat var string ?string...?
  *
  * Results:
  *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -89,16 +86,13 @@ Tcl_LvarcatCmd (clientData, interp, argc, argv)
     }
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LvarpopCmd --
  *     Implements the TCL lvarpop command:
  *         lvarpop var ?indexExpr? ?string?
  *
  * Results:
  *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -166,16 +160,13 @@ Tcl_LvarpopCmd (clientData, interp, argc, argv)
     return TCL_ERROR;;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LvarpushCmd --
  *     Implements the TCL lvarpush command:
  *         lvarpush var string ?indexExpr?
  *
  * Results:
  *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -244,16 +235,13 @@ Tcl_LvarpushCmd (clientData, interp, argc, argv)
     return TCL_ERROR;;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LemptyCmd --
  *     Implements the lempty TCL command:
  *         lempty list
  *
  * Results:
  *     Standard TCL result.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -279,16 +267,13 @@ Tcl_LemptyCmd (clientData, interp, argc, argv)
 
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_LassignCmd --
  *     Implements the TCL assign_fields command:
  *         lassign list varname ?varname...?
  *
  * Results:
  *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -332,9 +317,7 @@ Tcl_LassignCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
-/*
- *----------------------------------------------------------------------
- *
+/*----------------------------------------------------------------------
  * Tcl_LmatchCmd --
  *
  *      This procedure is invoked to process the "lmatch" Tcl command.
@@ -345,11 +328,8 @@ Tcl_LassignCmd (clientData, interp, argc, argv)
  *
  * Side effects:
  *      See the user documentation.
- *
  *----------------------------------------------------------------------
  */
-
-        /* ARGSUSED */
 int
 Tcl_LmatchCmd(notUsed, interp, argc, argv)
     ClientData notUsed;                 /* Not used. */
@@ -362,10 +342,8 @@ Tcl_LmatchCmd(notUsed, interp, argc, argv)
 #define REGEXP  2
     int listArgc;
     char **listArgv;
-    int matchArgc;
-    char **matchArgv;
+    Tcl_DString resultList;
     int i, match, mode;
-    char *resultList;
 
     mode = GLOB;
     if (argc == 4) {
@@ -388,34 +366,35 @@ Tcl_LmatchCmd(notUsed, interp, argc, argv)
     if (Tcl_SplitList(interp, argv[argc-2], &listArgc, &listArgv) != TCL_OK) {
         return TCL_ERROR;
     }
-
-    matchArgv = (char **) ckalloc (listArgc * sizeof (char *));
-    matchArgc = 0;
+    if (listArgc == 0) {
+        ckfree ((char *) listArgv);
+        return TCL_OK;
+    }
+    
+    Tcl_DStringInit (&resultList);
     for (i = 0; i < listArgc; i++) {
         match = 0;
         switch (mode) {
             case EXACT:
-                match = (STREQU(listArgv[i], argv[argc-1]));
+                match = (STREQU (listArgv [i], argv [argc-1]));
                 break;
             case GLOB:
-                match = Tcl_StringMatch(listArgv[i], argv[argc-1]);
+                match = Tcl_StringMatch (listArgv [i], argv [argc-1]);
                 break;
             case REGEXP:
-                match = Tcl_RegExpMatch(interp, listArgv[i], argv[argc-1]);
+                match = Tcl_RegExpMatch (interp, listArgv [i], argv [argc-1]);
                 if (match < 0) {
-                    ckfree((char *) listArgv);
-                    ckfree((char *) matchArgv);
+                    ckfree ((char *) listArgv);
+                    Tcl_DStringFree (&resultList);
                     return TCL_ERROR;
                 }
                 break;
         }
         if (match) {
-            matchArgv[matchArgc++] = listArgv[i];
+            Tcl_DStringAppendElement (&resultList, listArgv [i]);
         }
     }
-    resultList = Tcl_Merge (matchArgc, matchArgv);
-    Tcl_SetResult (interp, resultList, TCL_DYNAMIC);
-    ckfree((char *) listArgv);
-    ckfree((char *) matchArgv);
+    ckfree ((char *) listArgv);
+    Tcl_DStringResult (interp, &resultList);
     return TCL_OK;
 }

@@ -54,6 +54,10 @@ Test lmatch-1.4 {lmatch command} {
     lmatch $x *bc*
 } 0 "abcd bbcd"
 
+Test lmatch-1.5 {lmatch command} {
+    lmatch {} *bc*
+} 0 {}
+
 Test lmatch-2.1 {search modes} {
     lmatch -exact {xyz bbcc *bc*} *bc*
 } 0 "*bc*"
