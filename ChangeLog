@@ -1,3 +1,16 @@
+2002-12-17  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* generic/tclXkeylist.c (ValidateKey): move isPath check outside
+	of for loop.
+	(DupKeyedListInternalRep): duplicate value object instead of
+	directly incrementing refcount of existing object to stop memleak.
+	(TclX_KeyedListGetKeys): simplify list result obj creation.
+	(TclX_KeylkeysObjCmd): use obj-ified var set/get routines.
+
+	* Makefile.in: add valgrind and valgrindtest targets
+
+	* unix/INSTALL: remove references to Tk-required build
+
 2002-11-12  Karl Lehenbauer <karl@procplace.com>
 
 	* Makefile.in: Put some variables back in that were previously
