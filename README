@@ -149,7 +149,9 @@ The following directories are included under the tclX6.4c directory:
       on all Unix versions. 
 
     o ucbsrc - A makefile and sed scripts used to modify source files that
-      are supplied with UCB Tcl.
+      are supplied with UCB Tcl.  The files are modified with sed so you don't
+      have to have patch to build Tcl, however context diffs are provided if
+      problems occur porting to a new version of Tcl.
 
     o tclsrc - Tcl source that is built into the Tcl package library.
 
@@ -160,7 +162,8 @@ The following directories are included under the tclX6.4c directory:
     o tests - Tests for TclX.
 
     o tkucbsrc - A makefile and sed scripts used to modify source files that
-      are supplied with Tk to add in TclX functionality.
+      are supplied with Tk to add in TclX functionality.  Context diffs are
+      also provided.
 
     o tksrc - A makefile that builds a version of the Tk wish shell containing
       Extended Tcl.

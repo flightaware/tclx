@@ -330,9 +330,13 @@
 ./tests/unixcmds.test
 ./tksrc/Makefile
 ./tkucbsrc/Makefile
+./tkucbsrc/main.cdiff
 ./tkucbsrc/main.sed
+./tkucbsrc/tkEvent.cdiff
 ./tkucbsrc/tkEvent.sed
 ./tkucbsrc/wishx.sed
 ./ucbsrc/Makefile
+./ucbsrc/tclBasic.cdiff
 ./ucbsrc/tclBasic.sed
+./ucbsrc/tclExpr.cdiff
 ./ucbsrc/tclExpr.sed
