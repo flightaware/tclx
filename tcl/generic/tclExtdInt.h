@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.10 1993/07/12 05:26:12 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.11 1993/07/12 06:28:33 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -142,17 +142,17 @@ extern char *tclXWrongArgs;
 extern void 
 Tcl_CommandLoop _ANSI_ARGS_((Tcl_Interp *interp));
 
-int
+extern int
 Tcl_DStringGets _ANSI_ARGS_((FILE         *filePtr,
                              Tcl_DString  *dynStrPtr));
 
-int
+extern int
 Tcl_GetDate _ANSI_ARGS_((char   *p,
                          time_t  now,
                          long    zone,
                          time_t *timePtr));
 
-OpenFile *
+extern OpenFile *
 Tcl_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
                                    char       *handle));
 
@@ -165,45 +165,51 @@ Tcl_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
                              int         intResult,
                              char       *checkCmd));
 
-int
+extern int
 Tcl_ProcessSignal _ANSI_ARGS_((Tcl_Interp *interp,
                                int         cmdResultCode));
 
-void
+extern void
 Tcl_RegExpClean _ANSI_ARGS_((regexp_pt regExpPtr));
 
-int
+extern int
 Tcl_RegExpCompile _ANSI_ARGS_((Tcl_Interp  *interp,
                                regexp_pt    regExpPtr,
                                char        *expression,
                                int          flags));
 
-int
+extern int
 Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp  *interp,
                                regexp_pt    regExpPtr,
                                char        *matchStrIn,
                                char        *matchStrLower));
 
-int
+extern int
 Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
                               char        *cstringExpr,
                               long         stringLen,
                               long        *exprResultPtr));
 
-void
+extern void
 Tcl_ResetSignals ();
 
-FILE *
+void
+Tcl_SetLibraryDirEnvVar _ANSI_ARGS_((char  *envVar,
+                                     char  *dir1,
+                                     char  *dir2,
+                                     char  *dir3));
+
+extern FILE *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
                                 int         readable,
                                 int         writable));
 
-void
+extern void
 Tcl_CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
                                int         fileNum));
 
-void
+extern void
 Tcl_SetupSigInt _ANSI_ARGS_(());
 
 /*

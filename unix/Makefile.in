@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.6 1993/07/18 15:21:42 markd Exp markd $
+# $Id: Makefile,v 2.7 1993/07/18 21:14:28 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -21,6 +21,14 @@ include Config.mk
 include config/${TCL_CONFIG_FILE}
 
 SHELL=/bin/sh
+
+#------------------------------------------------------------------------------
+# The made.tmp files are used to indicate a makefile has successfully added
+# it's .o files to a library.  We need to purge the right ones one a new
+# library is copied.
+
+TCLMADE.TMP = osSupport/made.tmp ucbsrc/made.tmp src/made.tmp
+TKMADE.TMP  = tksrc/made.tmp tkucbsrc/made.tmp
 
 #------------------------------------------------------------------------------
 
@@ -61,6 +69,7 @@ ${LIBTCLX.A}: ${TCL_UCB_DIR}/libtcl.a
 	rm -f ${LIBTCLX.A}
 	cp ${TCL_UCB_DIR}/libtcl.a ${LIBTCLX.A}
 	${RANLIB_CMD} ${LIBTCLX.A}
+	rm -f ${TCLMADE.TMP}
 
 ${TCL.H}: ${TCL_UCB_DIR}/tcl.h
 	rm -f ${TCL.H}
@@ -80,7 +89,7 @@ WISHX: TKCOPY runwishx
 # tkmaster directory.
 #
 LIBTKX.A = tkmaster/lib/libtkx.a
-TK.H     = tclmaster/include/tk.h
+TK.H     = tkmaster/include/tk.h
 
 TKCOPY: MKTKDIRS ${LIBTKX.A} ${TK.H}
 
@@ -94,6 +103,7 @@ ${LIBTKX.A}: ${TK_UCB_DIR}/libtk.a
 	rm -f ${LIBTKX.A}
 	cp ${TK_UCB_DIR}/libtk.a ${LIBTKX.A}
 	${RANLIB_CMD} ${LIBTKX.A}
+	rm -f ${TKMADE.TMP}
 
 ${TK.H}: ${TK_UCB_DIR}/tk.h
 	rm -f ${TK.H}
@@ -166,13 +176,55 @@ buildtkhelp:
 #------------------------------------------------------------------------------
 # Install Tcl.
 
-install: all
-	./runtcl tclsrc/installTcl.tcl
+install: all TCLXINSTALL ${TK_BUILD}MAYBE
+	@echo ""
+	@echo "*************************************************************"
+	@echo "*** TclX currently builds symbolic links to the bin files ***"
+	@echo "*** in the master directories.  If you need links to the  ***"
+	@echo "*** include or man files you must build them by hand.     ***"
+	@echo "*************************************************************"
+	@echo ""
+
+TCLXINSTALL: INSTALLTOOLS
+	@echo "
+	@echo "   Install TclX master directory"
+	@echo "
+	set -x ;\
+	target=`tools/tclxversion ${TCL_MASTERDIR}` ;\
+	rm -rf $$target ;\
+	mkdir $$target 2>/dev/null ;\
+	(cd tclmaster ; tar -cf - .) | (cd $$target; tar -xf -) ;\
+	rm -f ${TCL_BINDIR}/tcl ;\
+	ln -s $$target/bin/tcl ${TCL_BINDIR}/tcl
+
+TKXINSTALL: INSTALLTOOLS
+	@echo "
+	@echo "   Install TkX master directory"
+	@echo "
+	set -x ;\
+	target=`tools/tkxversion ${TK_MASTERDIR}` ;\
+	rm -rf $$target ;\
+	mkdir $$target 2>/dev/null ;\
+	(cd tkmaster ; tar -cf - .) | (cd $$target; tar -xf -) ;\
+	rm -f ${TCL_BINDIR}/wishx ;\
+	ln -s $$target/bin/wishx ${TCL_BINDIR}/wishx ;\
+	rm -f ${TCL_BINDIR}/tclhelp ;\
+	ln -s $$target/bin/tclhelp ${TCL_BINDIR}/tclhelp
+
+INSTALLTOOLS:
+	cd tools; ${MAKE} -${MAKEFLAGS} installtools
+
+# Fake targets to decide if we install wishx or not.
+
+MAYBE:
+
+WISHXMAYBE: TKXINSTALL
 
 #------------------------------------------------------------------------------
 # Clean up the mess we made.
 
 clean:
+	cd tools;     ${MAKE} -${MAKEFLAGS} clean
 	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} clean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} clean
 	cd src;       ${MAKE} -${MAKEFLAGS} clean

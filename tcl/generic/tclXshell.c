@@ -13,14 +13,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.10 1993/07/12 05:26:12 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.11 1993/07/18 15:19:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "patchlevel.h"
 
-extern char * etenv ();
+extern char *getenv ();
 
 extern char *optarg;
 extern int   optind, opterr;
@@ -41,6 +41,11 @@ ParseCmdArgs _ANSI_ARGS_((Tcl_Interp  *interp,
                           char       **argv,
                           tclParms_t  *tclParmsPtr));
 
+static void
+MergeDirPath _ANSI_ARGS_((char        *dir1,
+                          char        *dir2,
+                          char        *dir3,
+                          Tcl_DString *dirPathPtr));
 
 /*
  *-----------------------------------------------------------------------------
@@ -175,13 +180,79 @@ usageError:
 
 /*
  *-----------------------------------------------------------------------------
+ * MergeDirPath --
+ *
+ *   Merge directory components and into a path name.  Used to generate
+ * a path containing a two-part version number.
+ *
+ * Parameters:
+ *   o dir1, dir2, dir3 (I) - 3 part directory name.  These strings are
+ *     concatinated together to form the directory path.  Any of these maybe
+ *     NULL.
+ *   o dirPathPtr (O) - Dynamic string containing the directory path.  Will
+ *     be initialized.
+ *-----------------------------------------------------------------------------
+ */
+static void
+MergeDirPath (dir1, dir2, dir3, dirPathPtr)
+    char        *dir1;
+    char        *dir2;
+    char        *dir3;
+    Tcl_DString *dirPathPtr;
+{
+    Tcl_DStringInit (dirPathPtr);
+
+    if (dir1 != NULL)
+        Tcl_DStringAppend (dirPathPtr, dir1, -1);
+    if (dir2 != NULL)
+        Tcl_DStringAppend (dirPathPtr, dir2, -1);
+    if (dir3 != NULL)
+        Tcl_DStringAppend (dirPathPtr, dir3, -1);
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ * Tcl_SetLibrayDirEnvVar --
+ *
+ *   Set an library (master) directory environment variable to override
+ * default that Tcl or TK were compiled with.  Only overrides if the variable
+ * does not exist.
+ *
+ * Parameters:
+ *   o envVar (I) - Environement variable to set if it does not exist.
+ *   o dir1, dir2, dir3 (I) - 3 part directory name.  These strings are
+ *     concatinated together to form the directory path.  Any of these maybe
+ *     NULL.
+ *-----------------------------------------------------------------------------
+ */
+void
+Tcl_SetLibraryDirEnvVar (envVar, dir1, dir2, dir3)
+    char  *envVar;
+    char  *dir1;
+    char  *dir2;
+    char  *dir3;
+{
+    Tcl_DString   masterDir;
+
+    if (getenv (envVar) != NULL)
+        return;
+
+    MergeDirPath (dir1, dir2, dir3, &masterDir);
+    setenv (envVar, masterDir.string);
+
+    Tcl_DStringFree (&masterDir);
+
+}
+
+/*
+ *-----------------------------------------------------------------------------
  * Tcl_ProcessInitFile --
  *
  *   Find and evaluate a Tcl init file.  This assumes that the init file
  * lives in a master directory and appends the directory name to the 
  * "auto_path" variable.
  *
- * Parameters
+ * Parameters:
  *   o interp  (I) - A pointer to the interpreter.
  *   o dirEnvVar (I) - Environment variable used to override the directory
  *     path.
@@ -193,10 +264,6 @@ usageError:
  *     dir2 & dir3.
  * Returns:
  *   TCL_OK if all is ok, TCL_ERROR if an error occured.
- *
- * Notes:
- *   A small amount of memory is lost on an error.  We figure we are going to
- * exit anyway.
  *-----------------------------------------------------------------------------
  */
 int
@@ -212,23 +279,15 @@ Tcl_ProcessInitFile (interp, dirEnvVar, dir1, dir2, dir3, initFile)
     Tcl_DString   filePath;
     struct stat   statBuf;
 
-    Tcl_DStringInit (&filePath);
-
     /*
-     * Determine the master directory name.
+     * Determine the master (library) directory name.
      */
-
     dirEnvValue = getenv (dirEnvVar);
-    
     if (dirEnvValue != NULL) {
+        Tcl_DStringInit (&filePath);
         Tcl_DStringAppend (&filePath, dirEnvValue, -1);
     } else {
-        if (dir1 != NULL)
-            Tcl_DStringAppend (&filePath, dir1, -1);
-        if (dir2 != NULL)
-            Tcl_DStringAppend (&filePath, dir2, -1);
-        if (dir3 != NULL)
-            Tcl_DStringAppend (&filePath, dir3, -1);
+        MergeDirPath (dir1, dir2, dir3, &filePath);
     }
 
     /*
@@ -281,7 +340,7 @@ Tcl_ProcessInitFile (interp, dirEnvVar, dir1, dir2, dir3, initFile)
  * error.  This routine is provided for the wishx shell or similar
  * environments where the Tcl_Startup command line parsing is not desired.
  *
- * Parameters
+ * Parameters:
  *   o interp - A pointer to the interpreter.
  *   o options - Flags to control the behavior of this routine, the following
  *     options are supported:
@@ -331,6 +390,10 @@ Tcl_ShellEnvInit (interp, options)
     if (tclAppVersion == NULL)
         tclAppVersion = tclxVersion;
 
+    Tcl_SetLibraryDirEnvVar ("TCL_LIBRARY",
+                             TCL_MASTERDIR,
+                             TCL_VERSION,
+                             TCL_EXTD_VERSION_SUFFIX);
 
     if ((options & TCLSH_QUICK_STARTUP) == 0) {
         if (Tcl_ProcessInitFile (interp,
@@ -364,7 +427,7 @@ errorExit:
  * line.  This functions calls Tcl_ShellEnvInit, so it should not be called
  * separately.
  *
- * Parameters
+ * Parameters:
  *   o interp - A pointer to the interpreter.
  *   o options (I) - Options that control startup behavior.  None are
  *     currently defined.

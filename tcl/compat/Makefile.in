@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.5 1993/07/18 15:21:42 markd Exp markd $
+# $Id: Makefile,v 2.6 1993/07/18 22:38:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -34,7 +34,7 @@ all: made.tmp
 made.tmp: ${SUPPORT_OBJS}
 	if [ "${SUPPORT_OBJS}" != "" ] ; then \
 	    ${AR} cvr ${LIBTCLX.A} ${SUPPORT_OBJS} ;\
-	    ${RANLIB_CMD} ${LIBTCLX.A}
+	    ${RANLIB_CMD} ${LIBTCLX.A} ;\
 	else \
 	    exit 0 ;\
 	fi

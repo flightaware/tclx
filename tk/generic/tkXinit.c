@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tkXstartup.c,v 1.1 1993/07/18 15:50:42 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,43 +26,6 @@
 
 static char *wishRom = "if [info exists geometry] {wm geometry . $geometry}";
 
-/*
- * Prototypes of internal functions.
- */
-static void
-SetTkLibrary _ANSI_ARGS_((void));
-
-
-
-/*
- *-----------------------------------------------------------------------------
- *
- * SetTkLibrary --
- * 
- *   Set the Tk library environment variable to point to the tkmaster
- * directory.  This way, Tk will use it rather than what its compiled with.
- * It TCL_LIBRARY is already set, do nothing.
- *-----------------------------------------------------------------------------
- */
-static void
-SetTkLibrary ()
-{
-    Tcl_DString   masterDir;
-
-    if (getenv ("TK_LIBRARY") != NULL)
-        return;
-
-    Tcl_DStringInit (&masterDir);
-
-    Tcl_DStringAppend (&masterDir, TK_MASTERDIR, -1);
-    Tcl_DStringAppend (&masterDir, TK_VERSION, -1);
-    Tcl_DStringAppend (&masterDir, TCL_EXTD_VERSION_SUFFIX, -1);
-
-    setenv ("TK_LIBRARY", masterDir.string);
-
-    Tcl_DStringFree (&masterDir);
-}
-
 
 /*
  *-----------------------------------------------------------------------------
@@ -72,10 +35,10 @@ SetTkLibrary ()
  *   Do basic startup for wishx.  This is called before Tk_CreateMainWindow.
  * It does the basic TclX shell environment intialization and then doctors
  * the TK_LIBRARY environment variable to point to our library.  This does
- * not source the Tk init file, that must be done abter the main window is
+ * not source the Tk init file, that must be done after the main window is
  * created.
  *
- * Parameters
+ * Parameters:
  *   o interp - A pointer to the interpreter.
  *   o interactive (I) - TRUE if this is interactive, FALSE otherwise.
  *-----------------------------------------------------------------------------
@@ -85,7 +48,6 @@ TkX_Startup (interp, interactive)
     Tcl_Interp *interp;
     int         interactive;
 {
-    SetTkLibrary ();
 
     tclAppName     = "Wishx";
     tclAppLongname = "Extended Tk Shell - Wishx";
@@ -93,6 +55,11 @@ TkX_Startup (interp, interactive)
     Tcl_ShellEnvInit (interp, 
                       TCLSH_ABORT_STARTUP_ERR |
                           (interactive ? TCLSH_INTERACTIVE : 0));
+
+    Tcl_SetLibraryDirEnvVar ("TK_LIBRARY",
+                             TK_MASTERDIR,
+                             TK_VERSION,
+                             TCL_EXTD_VERSION_SUFFIX);
 }
 
 
@@ -104,7 +71,7 @@ TkX_Startup (interp, interactive)
  *   Do the rest of the wish initalization.  This sources the tk.tcl file,
  * sets up auto_path and does what ever else would be done in wish.tcl.
  *
- * Parameters
+ * Parameters:
  *   o interp - A pointer to the interpreter.
  *-----------------------------------------------------------------------------
  */

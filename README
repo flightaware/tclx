@@ -1,6 +1,23 @@
 
                      *** README file for Extended Tcl ***
 
+BETA 1 RELEASE NOTES
+====================
+
+   This is the TclX7.0a Beta-1 release.  This release is tested and compatible
+with tcl7.0b1 and tk3.3b1.  Please forward questions/bugs/suggestions to 
+tcl-project@NeoSoft.com.  This releases is not complete.  The following
+functionality is not complete:
+
+   o autoconf - TclX does not yet use autoconf.  Its under development, you
+     still have to configure it by editing Config.mk.
+
+   o installation - "make install" only partially works.  The master
+     directories are installed by symbolic links are only made to the bin
+     files.  If you need links to include or man files, you must build them
+     by hand.
+
+   o A few other minor changes.
 
 EXTENDED TCL
 ============

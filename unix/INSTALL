@@ -145,30 +145,67 @@ library.
 
 INSTALLING EXTENDED TCL
 =======================
+ 
+   TclX builds two master directories to hold all of the pieces of TclX that
+need to be installed.  The master directory include all of the run-time
+library files, plus the executables and all other installed files.  This allows
+for easy NFS sharing on heterogeneous networks and moving built TclX to new
+machines. The hierarchies are:
 
+   o tclmaster - Contains Tcl code libraries and support files need to run
+     TclX.
 
-???Section not yet complete????
-   All
-  The Extended Tcl install script
-     install the Tcl manual pages and a super-set libtcl.a.  The standard
-     Tcl library procs will be added to a TclX .tlib library instead of being
-     installed as separate files.
+     o bin - Contains the TclX shell.
 
-    To install Extended Tcl, edit the tclX7.0a/Config.mk installation
-configuration section to match your preferences. Read the information in 
-Config.mk carefully before configuring it.  TCL_MASTERDIR must have been
-set before compiling TclX.
+     o help - Contains the help pages for Tcl & TclX.  This directory is
+       shipped pre-built, but can be rebuilt if necessary. 
 
-    The master directory name will have the Tcl version number appended to
-it, which allows multiple versions of Tcl to be installed.???
+     o include - Contains the Tcl and TclX exported include files.
 
-    Cd to the tclX7.0a directory and do a "make install" (normally as root).
-This will install include files and manual pages for Berkeley Tcl and TclX, as
-well as the TclX binary and library.
+     o lib - Contains the TclX library (libtclx.a).
+
+     o man - Contains the Tcl and TclX manual pages.
+
+   o tkmaster - Contains Tk code libraries and files need to run wishx and
+     Tk applications built with Extended Tcl.
+
+     o bin - Contains the wishx and tclhelp.
+
+     o demos - Contains the Tk demos.
+
+     o help - Contains the help pages for Tk.  This directory is shipped
+       pre-built, but can be rebuilt if necessary. 
+
+     o include - Contains the Tk exported include files.
+
+     o lib - Contains the Tk library with Extended Tcl (libtkx.a).
+
+     o man - Contains the Tk manual pages.
+
+   The contents of the tclmaster and tkmaster directories must be installed in
+the directory specified at compile time.
+
+   The installed tclmaster directory path is formed from the value of
+TCL_MASTERDIR define in Config.mk and the Tcl version number and TclX version
+suffix.  The default path would be /usr/local/tclX7.0a.
+
+   The installed tkmaster directory path is formed from the value of
+TK_MASTERDIR define in Config.mk and the Tk version number and TclX version
+suffix.  The default path would be /usr/local/tkX3.3a.
+
+  Symbolic links are built from the standard locations that external files
+are installed an the master directory, for example:
+
+    ln -s /usr/local/bin/tcl /usr/local/tclX7.0a/bin/tcl
+    ln -s /usr/local/bin/wishx /usr/local/tkX3.3a/bin/wishx
+
+Install the Extended Tcl master directories by typing the command:
+
+    make install
+
 
 PORTING NOTES
 =============
 
 DEC Ultrix:
-
    o Several tests fail when Tcl is run on an NFS mounted file system.

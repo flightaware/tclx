@@ -357,10 +357,12 @@
 ./tkucbsrc/tkEvent.cdiff
 ./tkucbsrc/tkEvent.good
 ./tkucbsrc/tkEvent.sed
+./tools/Makefile
 ./tools/bldmanhelp.tcl
 ./tools/buildutil.tcl
 ./tools/cpmanpages.tcl
 ./tools/editmkincl.sh
+./tools/getversion.c
 ./tools/installTcl.tcl
 ./tools/tclmanpages
 ./tools/tkmanpages
