@@ -22,7 +22,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 3.0 1993/11/19 06:59:30 markd Rel markd $
+ * $Id: tcl++.h,v 3.1 1993/11/25 23:14:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -669,6 +669,13 @@ public:
                  const  char *handle)
     {
         return Tcl_HandleXlate (interp, headerPtr, handle);
+    }
+
+    inline void
+    WalkKeyToHandle (int   walkKey,
+                     char *handle)
+    {
+        Tcl_WalkKeyToHandle (headerPtr, walkKey, handle);
     }
 };
 
