@@ -522,7 +522,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.18 dnl
+# From configure.in Revision: 8.19 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -1360,11 +1360,11 @@ if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
 fi
 eval "TKX_CC_SEARCH_FLAGS=\"$TCL_LD_SEARCH_FLAGS\""
 case $TCL_SHLIB_LD in
-    *cc*-shared*)
-	TKX_LD_SEARCH_FLAGS="${TKX_CC_SEARCH_FLAGS}"
+    *ld*)
+	TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
 	;;
     *)
-	TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
+	TKX_LD_SEARCH_FLAGS="${TKX_CC_SEARCH_FLAGS}"
 	;;
 esac
 
