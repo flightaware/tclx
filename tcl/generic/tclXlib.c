@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 1.1 1992/09/20 23:19:26 markd Exp markd $
+ * $Id: tclXlib.c,v 1.2 1992/10/03 18:04:11 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -286,7 +286,7 @@ MakeAbsFile (interp, fileName, buffer, bufferSize)
                           Tcl_UnixError (interp), (char *) NULL);
     }
 #endif
-    pathLen = strlen (curDir) + strlen (pathName) + 1;  /* For `/' */
+    pathLen = strlen (curDir) + strlen (fileName) + 1;  /* For `/' */
     if (pathLen < bufferSize)
         pathName = buffer;
     else
