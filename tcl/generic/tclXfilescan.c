@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.8 1993/08/03 06:13:44 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.9 1993/09/20 01:13:11 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -555,7 +555,8 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
             result = SetMatchVar (interp,
                                   dynBuf.string,
                                   scanLineNum,
-                                  filePtr);
+                                  filePtr,
+                                  copytoFilePtr);
             if (result != TCL_OK)
                 goto scanExit;
 
