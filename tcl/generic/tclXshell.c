@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 3.1 1993/12/02 03:56:12 markd Exp markd $
+ * $Id: tclXshell.c,v 3.2 1993/12/03 10:25:23 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -84,11 +84,25 @@ ParseCmdLine (interp, argc, argv)
     int    noDump   = FALSE;
 
     /*
+     * GNU libc redefined the behavior of getopt so that it attempts to
+     * do argument reordering.  This really messes up the TclX command
+     * line parser, since it stops parsing after the command or file so
+     * that the script itself can have "-" options or what ever it
+     * wants.  I wish they would have made the default behavior compatible
+     * with everyone else's getopt.
+     */
+#ifdef __GNU_LIBRARY__
+    static char *getoptSpec = "+qc:f:un";
+#else
+    static char *getoptSpec = "qc:f:un";
+#endif
+
+    /*
      * Scan arguments looking for flags to process here rather than to pass
      * on to the scripts.  The '-c' or '-f' must also be the last option to
      * allow for script arguments starting with `-'.
      */
-    while ((option = getopt (argc, argv, "qc:f:un")) != -1) {
+    while ((option = getopt (argc, argv, getoptSpec)) != -1) {
         switch (option) {
           case 'q':
             if (quick)
