@@ -39,13 +39,11 @@ The following directories are included under the tclX7.4a directory:
 
     o tools - Tools used for building and installing TclX.
 
-    o tclmaster - Tcl master directory.  All files required to run TclX are
-      built or copied into this directory.  This directory is created by the
-      build, it is not part of the distribution.
+    o tclmaster - Tcl master (library) directory for testing.  It is created
+      during the build.
 
-    o tkmaster - Tk master directory.  All files required to run wishxTk are
-      built or copied into this directory. This directory is created by the
-      build, it is not part of the distribution.
+    o tkmaster - Tk master (library) directory for testing.  It is created
+      during the build.
 
 THE EXTENDED TCL INSTALLATION MODELS
 ====================================
@@ -236,29 +234,9 @@ Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
     o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.4a directory.  The some of the UCB tests require a tcl shell with
-      added commands (tcltest in the tcl7.4 distribution).  Because the
-      Extended TCL shell (tcl) does not have these commands, the you will
-      receive warnings about not having the following commands:
+      tclX7.4a directory.
 
-        testasync
-        testcmdinfo
-        testdcall
-        testdstring
-        testlink
-
-      Your will also receive warning about not having the following math
-      functions:
-
-        T1
-        T2
-
-    o To run the Tk tests with wishx, type "make tktest".  The tests require
-      a tcl shell with added commands (tcltest in the tcl7.4 distribution).
-      Because the Extended TCL shell (tcl) does not have these commands, the
-      following tests will not run:
-
-        raise.test
+    o To run the Tk tests with wishx, type "make tktest".
 
     o The Extended Tcl tests may be run by themselves with "make extdtests".
 
