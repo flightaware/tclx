@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 2.8 1993/07/20 08:35:45 markd Exp markd $
+# $Id: clock.test,v 3.0 1993/11/19 06:57:09 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -75,8 +75,16 @@ Test clock-3.8 {convertclock tests} {
 } 0 {Oct 23,1992 15:00 GMT}
 
 
+# Test if local timezone works when not explicitly specified.
+
 Test clock-3.9 {convertclock tests} {
-    # Test if local timezone works when not explicitly specified.
+    # WARNING: This test might fail if your symbolic timezone name conflicts
+    # with names use in other parts of the world.  Known failures:
+    #
+    #    EST for Australian Eastern Summer Time.
+    #    EST for Australian Eastern Standard Time.
+    #
+    # Don't worry about these failures.
 
     set clock [getclock]
     set ourzone [fmtclock $clock %Z]
