@@ -11,6 +11,20 @@
  * to the constructor and is referenced by the object, but not owned by it.
  * When the object is deleted, the interpreter will not be deleted.
  *-----------------------------------------------------------------------------
+ * Important note:
+ *   Some of the string arguments specified as const in this class are actually
+ * temporarily modified by Tcl while code is being evaulated.  The string
+ * will be restored to its original state on exit. This can cause problems if
+ * the string is aliased or is in read-only memory, which will cause a access
+ * fault.  The gcc compiler will store string constants in read-only memory
+ * unless unless you use -fwritable-strings.  One trick to get around this is
+ * to have an non-const variable that the string is assigned to:
+ *
+ *   char cmd [] = "some command to pass to Tcl_Eval";
+ *
+ * The parameters that have this problem are marked with "WRITTEN" in this
+ * header file.
+ *-----------------------------------------------------------------------------
  * Copyright 1991-1995 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -22,7 +36,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 4.0 1994/07/16 05:28:10 markd Rel markd $
+ * $Id: tcl++.h,v 4.1 1995/01/01 19:49:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -204,7 +218,7 @@ class TclInterp_cl
     }
 
     inline int 
-    Eval (char  *cmd)
+    Eval (char  *cmd)  /* WRITTEN */
     {
         return Tcl_Eval (interp, cmd);
     }
@@ -392,8 +406,8 @@ class TclInterp_cl
     }
 
     inline const char *
-    SetVar (const char  *varName, 
-            const char  *newValue, 
+    SetVar (const char  *varName,      /* WRITTEN */
+            const char  *newValue,
             int          global = 0)
     { 
         return Tcl_SetVar (interp, (char *) varName, (char *) newValue, 
