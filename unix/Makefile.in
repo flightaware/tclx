@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.11 1996/03/14 06:11:37 markd Exp $
+# $Id: Makefile.in,v 5.12 1996/04/30 06:37:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -58,7 +58,8 @@ runtcl: Makefile
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtcl
 	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtcl
 	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${LD_LIBRARY_PATH}" >>runtcl
-	@echo "export LD_LIBRARY_PATH"                             >>runtcl
+	@echo "SHLIB_PATH=${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${SHLIB_PATH}" >>runtcl
+	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                  >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
 	@echo "then"                                               >>runtcl
 	@echo "    exec \$$TCL_PROGRAM"                            >>runtcl
@@ -79,7 +80,8 @@ runwishx: Makefile
 	@echo "export TCL_LIBRARY TCLX_LIBRARY"                   >>runwishx
 	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"         >>runwishx
 	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_UNIX_DIR}:${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${LD_LIBRARY_PATH}" >>runwishx
-	@echo "export LD_LIBRARY_PATH"                            >>runwishx
+	@echo "SHLIB_PATH=${bldbasedir}/tk/unix:${TK_UNIX_DIR}:${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${SHLIB_PATH}" >>runwishx
+	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                 >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx
 	@echo "    exec \$$WISHX"                                 >>runwishx

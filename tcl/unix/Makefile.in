@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.34 1996/04/25 14:32:34 markd Exp $
+# $Id: Makefile.in,v 5.35 1996/04/30 06:37:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -306,7 +306,8 @@ runtest: Makefile
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tclXtest"          >>runtest
 	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtest
 	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${LD_LIBRARY_PATH}" >>runtest
-	@echo "export LD_LIBRARY_PATH"                             >>runtest
+	@echo "SHLIB_PATH=${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${SHLIB_PATH}" >>runtest
+	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                  >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
 	@echo "    exec \$$TCL_PROGRAM"                            >>runtest
