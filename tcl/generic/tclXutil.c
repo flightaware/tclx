@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.18 1997/08/08 09:58:38 markd Exp $
+ * $Id: tclXutil.c,v 8.19 1997/08/10 22:18:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1255,7 +1255,8 @@ TclX_ShellExit (interp, exitCode)
     int deleteInterp;
 
     /*
-     * If TCLXENV(deleteInterpAtShellExit) is a true boolean, delete interpreter.
+     * If TCLXENV(deleteInterpAtShellExit) is a true boolean, delete
+     * interpreter.
      */
     deleteInterp = FALSE;
     varValue = TclX_ObjGetVar2S (interp, "TCLXENV", "deleteInterpAtShellExit",

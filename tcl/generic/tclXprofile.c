@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.11 1997/07/10 09:50:09 markd Exp $
+ * $Id: tclXprofile.c,v 8.12 1997/07/18 16:40:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -47,7 +47,6 @@ typedef struct profEntry_t {
     struct profEntry_t *prevScopePtr;     /* Procedure var scope chain.    */
     char                cmdName [1];      /* Command name. MUST BE LAST!   */
 } profEntry_t;
-
 
 /*
  * Data keeped on a stack snapshot.
@@ -130,7 +129,7 @@ static int
 ProfObjCommandEval _ANSI_ARGS_((ClientData    clientData,
                                 Tcl_Interp   *interp,
                                 int           objc,
-                                Tcl_Obj     *CONST objv[]));
+                                Tcl_Obj      *CONST objv[]));
 
 static void
 ProfTraceRoutine _ANSI_ARGS_((ClientData    clientData,
