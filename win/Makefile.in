@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.1 1999/06/23 00:39:12 surles Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.1 1999/06/26 00:18:13 surles Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -61,6 +61,9 @@ LIB_INSTALL_DIR = $(INSTALL_ROOT)$(exec_prefix)/lib
 # Path name to use when installing library scripts:
 TCLX_SCRIPT_INSTALL_DIR = $(INSTALL_ROOT)$(TCLX_LIBRARY)
 TKX_SCRIPT_INSTALL_DIR  = $(INSTALL_ROOT)$(TKX_LIBRARY)
+
+TCLX_SCRIPT_INSTALL_NATIVE= "$(shell cygpath $(PATHTYPE) $(INSTALL_ROOT)$(TCLX_LIBRARY)')"
+TKX_SCRIPT_INSTALL_NATIVE = "$(shell cygpath $(PATHTYPE) $(INSTALL_ROOT)$(TKX_LIBRARY)')"
 
 # Directory in which to install the include file tclx.h:
 INCLUDE_INSTALL_DIR = $(INSTALL_ROOT)$(prefix)/include
@@ -176,7 +179,7 @@ SHLIB_CFLAGS	= @SHLIB_CFLAGS@
 SHLIB_SUFFIX	= @SHLIB_SUFFIX@
 VER		= @TCLX_MAJOR_VERSION@@TCLX_MINOR_VERSION@@TCLX_PATCH_LEVEL@
 DOTVER	        = @TCLX_MAJOR_VERSION@.@TCLX_MINOR_VERSION@.@TCLX_PATCH_LEVEL@
-LIBS		= @LIBS@ Wsock32.lib
+LIBS		= @LIBS@ Wsock32.lib gdi32.lib comdlg32.lib
 RMDIR		= rm -rf
 MKDIR		= mkdir -p
 RM		= rm -f
@@ -466,7 +469,9 @@ tkx.tcl: ${TKX_RUNTIME_DIR}/tkx.tcl
 instcopy: $(TCLX_TOOLS_DIR)/buildutil.tcl $(TCLX_TOOLS_DIR)/instcopy.tcl \
 		$(CATTCL)${EXEEXT}
 	@$(RM) instcopy
-	./$(CATTCL)${EXEEXT} $(TCLX_TOOLS_DIR)/buildutil.tcl $(TCLX_TOOLS_DIR)/instcopy.tcl > $@
+	./$(CATTCL)${EXEEXT} \
+	    "$(shell cygpath $(PATHTYPE) '$(TCLX_TOOLS_DIR)/buildutil.tcl')" \
+	    "$(shell cygpath $(PATHTYPE) '$(TCLX_TOOLS_DIR)/instcopy.tcl')" >$@
 
 # Add the object extension to the implicit rules.  By default .obj is not
 # automatically added.
@@ -559,17 +564,17 @@ install-libraries:
 	" >> ./tclXTempPkgIndexFile
 	@echo "installing into $(TCLX_SCRIPT_INSTALL_DIR) pkgIndex.tcl"
 	@$(RUN_TCLXSH) -q  ./tclXTempPkgIndexFile \
-		"$(TCLX_SCRIPT_INSTALL_DIR)/pkgIndex.tcl" "$(TCLX_DLL_FILE)"
+		"$(TCLX_SCRIPT_INSTALL_NATIVE)/pkgIndex.tcl" "$(TCLX_DLL_FILE)"
 	@echo "installing into $(TKX_SCRIPT_INSTALL_DIR) pkgIndex.tcl"
 	@$(RUN_TCLXSH) -q  ./tclXTempPkgIndexFile \
-		"$(TKX_SCRIPT_INSTALL_DIR)/pkgIndex.tcl" "$(TKX_DLL_FILE)"
+		"$(TKX_SCRIPT_INSTALL_NATIVE)/pkgIndex.tcl" "$(TKX_DLL_FILE)"
 	@$(RM) ./tclXTempPkgIndexFile
 
 install-doc:
 	@echo "installing into $(TCLX_SCRIPT_INSTALL_DIR)/help help"
-	@$(INSTCOPY) $(TCLX_ROOT_DIR)/help "$(TCLX_SCRIPT_INSTALL_DIR)/help"
+	@$(INSTCOPY) $(TCLX_ROOT_DIR)/help "$(TCLX_SCRIPT_INSTALL_NATIVE)/help"
 	@echo "installing into $(TKX_SCRIPT_INSTALL_DIR)/help help"
-	@$(INSTCOPY) $(TKX_ROOT_DIR)/help "$(TKX_SCRIPT_INSTALL_DIR)/help";\
+	@$(INSTCOPY) $(TKX_ROOT_DIR)/help "$(TKX_SCRIPT_INSTALL_NATIVE)/help";\
 
 test: all $(TCLXTEST) $(TKXTEST) $(CAT32)${EXEEXT}
 	(cd "$(TKX_ROOT_DIR_NATIVE)\tests"; $(RUN_TKXTEST) all \
