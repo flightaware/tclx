@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 4.6 1995/06/29 16:26:53 markd Exp markd $
+ * $Id: tclXdup.c,v 5.0 1995/07/25 05:42:24 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,13 +26,13 @@ ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
                                char       *handle));
 
 static FILE *
-DoNormalDup _ANSI_ARGS_((Tcl_Interp *interp,
-                         OpenFile   *srcFilePtr));
+DoNormalDup _ANSI_ARGS_((Tcl_Interp  *interp,
+                         TclOpenFile *srcFilePtr));
 
 static FILE *
-DoSpecifiedDup _ANSI_ARGS_((Tcl_Interp *interp,
-                            OpenFile   *srcFilePtr,
-                            char       *newFileId));
+DoSpecifiedDup _ANSI_ARGS_((Tcl_Interp  *interp,
+                            TclOpenFile *srcFilePtr,
+                            char        *newFileId));
 
 static int
 DupFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
@@ -96,8 +96,8 @@ ConvertFileHandle (interp, handle)
  */
 static FILE *
 DoNormalDup (interp, srcFilePtr)
-    Tcl_Interp *interp;
-    OpenFile   *srcFilePtr;
+    Tcl_Interp  *interp;
+    TclOpenFile *srcFilePtr;
 {
     int    newFileId, newFile2Id;
     FILE  *filePtr;
@@ -145,9 +145,9 @@ unixError:
  */
 static FILE *
 DoSpecifiedDup (interp, srcFilePtr, targetFileId)
-    Tcl_Interp *interp;
-    OpenFile   *srcFilePtr;
-    char       *targetFileId;
+    Tcl_Interp  *interp;
+    TclOpenFile *srcFilePtr;
+    char        *targetFileId;
 {
     int       newFileNum = -1, newFile2Num = -1;
     FILE     *newFilePtr;
@@ -244,11 +244,11 @@ DupFileHandle (interp, srcFileId, targetFileId)
     char       *srcFileId;
     char       *targetFileId;
 {
-    OpenFile *srcFilePtr;
-    FILE     *newFilePtr;
-    off_t     seekOffset = -1;
+    TclOpenFile *srcFilePtr;
+    FILE        *newFilePtr;
+    off_t        seekOffset = -1;
 
-    srcFilePtr = Tcl_GetOpenFileStruct (interp, srcFileId);
+    srcFilePtr = TclX_GetOpenFileStruct (interp, srcFileId);
     if (srcFilePtr == NULL)
 	return TCL_ERROR;
 
@@ -342,7 +342,7 @@ BindFileNumber (interp, fileNumStr)
         return TCL_ERROR;
     }
 
-    if ((fileNum < tclNumFiles) && (tclOpenFiles [fileNum] != NULL)) {
+    if (TclX_FNumToFileStruct (interp, fileNum) != NULL) {
         Tcl_AppendResult (interp, "file number \"", fileNumStr,
                           "\" is already bound to a Tcl file  id",
                           (char *) NULL);

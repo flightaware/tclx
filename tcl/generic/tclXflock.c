@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 4.2 1995/01/01 19:49:44 markd Exp markd $
+ * $Id: tclXflock.c,v 5.0 1995/07/25 05:59:09 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,7 +26,7 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp    *interp,
                                  int            argc,
                                  char         **argv,
                                  int            argIdx,
-                                 OpenFile     **filePtrPtr,
+                                 TclOpenFile  **filePtrPtr,
                                  struct flock  *lockInfoPtr));
 
 /*
@@ -62,7 +62,7 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, filePtrPtr, lockInfoPtr)
     int            argc;
     char         **argv;
     int            argIdx;
-    OpenFile     **filePtrPtr;
+    TclOpenFile  **filePtrPtr;
     struct flock  *lockInfoPtr;
 {
 
@@ -70,7 +70,7 @@ ParseLockUnlockArgs (interp, argc, argv, argIdx, filePtrPtr, lockInfoPtr)
     lockInfoPtr->l_len    = 0;
     lockInfoPtr->l_whence = 0;
 
-    *filePtrPtr = Tcl_GetOpenFileStruct (interp, argv [argIdx]);
+    *filePtrPtr = TclX_GetOpenFileStruct (interp, argv [argIdx]);
     if (*filePtrPtr == NULL)
 	return TCL_ERROR;
     argIdx++;
@@ -132,7 +132,7 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
 {
     int           argIdx, stat;
     int           readLock = FALSE, writeLock = FALSE, noWaitLock = FALSE;
-    OpenFile     *filePtr;
+    TclOpenFile  *filePtr;
     struct flock  lockInfo;
 
     if (argc < 2)
@@ -250,7 +250,7 @@ Tcl_FunlockCmd (notUsed, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    OpenFile     *filePtr;
+    TclOpenFile  *filePtr;
     struct flock  lockInfo;
 
     if ((argc < 2) || (argc > 5))

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 4.3 1995/07/04 04:59:57 markd Exp markd $
+ * $Id: tclXdebug.c,v 5.0 1995/07/25 05:42:22 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -293,14 +293,16 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
      * point.
      */
     if (Tcl_Eval (interp, Tcl_DStringValue (&callback)) == TCL_ERROR) {
+        FILE *stderrPtr = TclX_Stdfile (interp, stderr);
+
         Tcl_AddErrorInfo (interp, "\n    (\"cmdtrace\" callback command)");
 
-        fprintf (TCL_STDERR,
+        fprintf (stderrPtr,
                  "cmdtrace callback command error: errorCode = %s\n",
                  Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY));
-        fprintf (TCL_STDERR, "%s\n",
+        fprintf (stderrPtr, "%s\n",
                  Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY));
-        fflush (TCL_STDERR);
+        fflush (stderrPtr);
         TraceDelete (interp, infoPtr);
     }
 

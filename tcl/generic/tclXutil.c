@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 4.10 1995/04/30 03:22:33 markd Exp markd $
+ * $Id: tclXutil.c,v 5.0 1995/07/25 05:59:00 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -750,7 +750,66 @@ Tcl_RelativeExpr (interp, cstringExpr, stringLen, exprResultPtr)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_GetOpenFileStruct --
+ * TclX_FNumToFileStruct--
+ *
+ *   Given a file number, get a pointer to the TclOpenFile structure.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o fnum (I) - File number.
+ * Returns:
+ *   A pointer to the file struct, or NULL if its not open.
+ *-----------------------------------------------------------------------------
+ */
+TclOpenFile *
+TclX_FNumToFileStruct (interp, fnum)
+    Tcl_Interp  *interp;
+    int          fnum;
+{
+#ifdef TCLX_7_4
+    return (((tclNumFiles <= fnum) || (tclOpenFiles [fnum] == NULL)) ? \
+            NULL : tclOpenFiles [fnum]);
+#else
+    char           buf [32], *handle;
+    TclOpenFile   *filePtr;
+    Tcl_HashTable *hTablePtr;
+    Tcl_HashEntry *hPtr;
+
+    switch (fnum) {
+      case 0:
+        handle = "stdin";
+        break;
+      case 1:
+        handle = "stdout";
+        break;
+      case 2:
+        handle = "stderr";
+        break;
+      default:
+        sprintf (buf, "file%d", fnum);
+        handle = buf;
+        break;
+    }
+
+    hTablePtr = (Tcl_HashTable *) Tcl_GetAssocData (interp, "tclFileTable",
+                                                    NULL);
+    if (hTablePtr != (Tcl_HashTable *) NULL) {
+        hPtr = Tcl_FindHashEntry (hTablePtr, handle);
+        if (hPtr != (Tcl_HashEntry *) NULL) {
+            filePtr = (TclOpenFile *) Tcl_GetHashValue (hPtr);
+            if (filePtr != (TclOpenFile *) NULL) {
+                return filePtr;
+            }
+        }
+    }
+    return NULL;
+#endif
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclX_GetOpenFileStruct --
  *
  *    Convert a file handle to a pointer to the internal Tcl file structure.
  *
@@ -762,19 +821,19 @@ Tcl_RelativeExpr (interp, cstringExpr, stringLen, exprResultPtr)
  * occured.
  *-----------------------------------------------------------------------------
  */
-OpenFile *
-Tcl_GetOpenFileStruct (interp, handle)
+TclOpenFile *
+TclX_GetOpenFileStruct (interp, handle)
     Tcl_Interp *interp;
     char       *handle;
 {
-    FILE   *filePtr;
+    FILE *filePtr;
 
     if (Tcl_GetOpenFile (interp, handle,
                          FALSE, FALSE,  /* No checking */
                          &filePtr) != TCL_OK)
         return NULL;
 
-    return tclOpenFiles [fileno (filePtr)];
+    return TclX_FNumToFileStruct (interp, fileno (filePtr));
 }
 
 /*
@@ -868,8 +927,8 @@ Tcl_SetupFileEntry2 (interp, readFileNum, writeFileNum, writeFilePtrPtr)
     int         writeFileNum;
     FILE      **writeFilePtrPtr;
 {
-    FILE     *readFilePtr, *writeFilePtr;
-    OpenFile *tclFilePtr;
+    FILE        *readFilePtr, *writeFilePtr;
+    TclOpenFile *tclFilePtr;
 
     /*
      * Set up dual FILE structs.
@@ -892,7 +951,7 @@ Tcl_SetupFileEntry2 (interp, readFileNum, writeFileNum, writeFilePtrPtr)
      */
     Tcl_EnterFile (interp, readFilePtr, TCL_FILE_READABLE);
 
-    tclFilePtr = tclOpenFiles [fileno (readFilePtr)];
+    tclFilePtr = TclX_FNumToFileStruct (interp, fileno (readFilePtr));
     tclFilePtr->permissions |= TCL_FILE_WRITABLE;
     tclFilePtr->f2 = writeFilePtr;
 
@@ -1121,8 +1180,7 @@ TclX_Eval (interp, options, string)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_VarEval (va_alist)
-    va_dcl
+TclX_VarEval TCL_VARARGS_DEF(Tcl_Interp *, arg1)
 {
     va_list      argList;
     Tcl_Interp  *interp;
@@ -1133,8 +1191,7 @@ TclX_VarEval (va_alist)
 
     Tcl_DStringInit (&cmdBuffer);
 
-    va_start (argList);
-    interp = va_arg (argList, Tcl_Interp *);
+    interp = TCL_VARARGS_START (Tcl_Interp * ,arg1, argList);
     options = va_arg (argList, unsigned);
 
     while (1) {
@@ -1143,9 +1200,52 @@ TclX_VarEval (va_alist)
             break;
         Tcl_DStringAppend (&cmdBuffer, str, -1);
     }
+    va_end (argList);
 
     result = TclX_Eval (interp, options, Tcl_DStringValue (&cmdBuffer));
     Tcl_DStringFree (&cmdBuffer);
     
     return result;
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclX_StdFile --
+ *
+ *   Get a pointer to stdin, stdout or stderr.  Use the interpreter file table
+ * if the handle is avaliable in it.  Otherwise, your the standard FILE *.
+ * This is used so that I/O will be redirected if the Tcl file table is
+ * changed.
+ *
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o stdfile (I) - stdin, stdout or stderr.
+ * Returns:
+ *   A pointer to the FILE.
+ *-----------------------------------------------------------------------------
+ */
+FILE *
+TclX_Stdfile (interp, stdfile)
+    Tcl_Interp  *interp;
+    FILE        *stdfile;
+{
+    int          fnum;
+    TclOpenFile *filePtr;
+
+    if (stdfile == stdin) {
+        fnum = 0;
+    } else if (stdfile == stdout) {
+        fnum = 1;
+    } else if (stdfile == stderr) {
+        fnum = 2;
+    }
+    
+    filePtr = TclX_FNumToFileStruct (interp, fnum);
+    if (filePtr == NULL)
+        return stdfile;
+    if ((fnum > 0) && (filePtr->f2 != NULL))
+        return filePtr->f2;
+    return filePtr->f;
 }

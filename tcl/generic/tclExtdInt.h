@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.1 1995/08/04 05:56:17 markd Exp markd $
+ * $Id: tclExtdInt.h,v 5.2 1995/08/08 15:47:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,6 +22,20 @@
 #include "tclExtend.h"
 #include "tclXconf.h"
 #include "tclInt.h"
+
+#if (TCL_MINOR_VERSION < 5)
+/*
+ * Hack for dual support of TclX 7.4 & TclX 7.5.
+ */
+#  define TCLX_7_4
+#  define TclOpenFile OpenFile
+#  define Tcl_AsyncReady() (tcl_AsyncReady)
+#  define TCL_VARARGS(type, name) ()
+#  define TCL_VARARGS_DEF(type, name) (va_alist)
+#  define TCL_VARARGS_START(type, name, list) \
+	(va_start(list), va_arg(list, type))
+#endif
+
 
 #include <sys/param.h>
 
@@ -43,7 +57,11 @@
  * Included the tcl file tclPort.h after other system files, as it checks
  * if certain things are defined.
  */
+#ifdef TCLX_7_4
 #include "tclPort.h"
+#else
+#include "tclUnixPort.h"
+#endif
 
 /*
  * Use the real functions, not the Tcl interface that hides signals.
@@ -190,26 +208,6 @@ extern char *tclXWrongArgs;
   (strcpy (ckalloc (strlen (sourceStr) + 1), sourceStr))
 
 
-/*
- * Macros to get the stdin, stdout and stderr pointers out of the interpreter
- * when error status is not desired.
- */
-#define TCL_STDIN \
-    (((tclNumFiles < 1) || (tclOpenFiles [0] == NULL)) ? \
-     stdin : tclOpenFiles [0]->f)
-
-#define TCL_STDOUT \
-    (((tclNumFiles < 2) || (tclOpenFiles [1] == NULL)) ? \
-     stdout : \
-      ((tclOpenFiles [1]->f2 != NULL) ? tclOpenFiles [1]->f2 : \
-       tclOpenFiles [1]->f))
-
-#define TCL_STDERR \
-    (((tclNumFiles < 3) || (tclOpenFiles [2] == NULL)) ? \
-     stderr : \
-      ((tclOpenFiles [2]->f2 != NULL) ? tclOpenFiles [2]->f2 : \
-       tclOpenFiles [2]->f))
-
 
 /*
  * Prototypes for utility procedures.
@@ -237,7 +235,11 @@ TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
                        char        *cmd));
 
 extern int
-TclX_VarEval ();
+TclX_VarEval _ANSI_ARGS_(TCL_VARARGS(Tcl_Interp *, arg1));
+
+FILE *
+TclX_Stdfile _ANSI_ARGS_((Tcl_Interp  *interp,
+                          FILE        *stdfile));
 
 extern int
 Tcl_GetDate _ANSI_ARGS_((char   *p,
@@ -245,9 +247,13 @@ Tcl_GetDate _ANSI_ARGS_((char   *p,
                          long    zone,
                          time_t *timePtr));
 
-extern OpenFile *
-Tcl_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
-                                   char       *handle));
+TclOpenFile *
+TclX_FNumToFileStruct _ANSI_ARGS_((Tcl_Interp  *interp,
+                                   int          fnum));
+
+extern TclOpenFile *
+TclX_GetOpenFileStruct _ANSI_ARGS_((Tcl_Interp *interp,
+                                    char       *handle));
 
 extern int
 Tcl_GetTime _ANSI_ARGS_((Tcl_Interp *interp,

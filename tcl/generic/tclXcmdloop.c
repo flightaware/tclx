@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 4.1 1995/01/01 19:49:20 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 5.0 1995/07/25 05:42:16 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -98,7 +98,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
     if ((checkCmd != NULL) && (intResult == TCL_OK) && IsSetVarCmd (checkCmd))
         return;
 
-    stdoutPtr = TCL_STDOUT;
+    stdoutPtr = TclX_Stdfile (interp, stdout);
 
     if (intResult == TCL_OK) {
         if (interp->result [0] != '\0') {
@@ -106,9 +106,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
             fputs ("\n", stdoutPtr);
         }
     } else {
-        FILE *stderrPtr;
-        
-        stderrPtr = TCL_STDERR;
+        FILE *stderrPtr = TclX_Stdfile (interp, stderr);
 
         fflush (stdoutPtr);
         if (intResult == TCL_ERROR)  
@@ -145,7 +143,7 @@ TclX_OutputPrompt (interp, topLevel)
      * If a signal came in, process it.  This prevents signals that are queued
      * from generating prompt hook errors.
      */
-    if (tcl_AsyncReady) {
+    if (Tcl_AsyncReady ()) {
         Tcl_AsyncInvoke (interp, TCL_OK); 
     }
 
@@ -157,7 +155,7 @@ TclX_OutputPrompt (interp, topLevel)
         if (result == TCL_ERROR) {
             FILE *stderrPtr;
 
-            stderrPtr = TCL_STDERR;
+            stderrPtr = TclX_Stdfile (interp, stderr);
 
             fputs ("Error in prompt hook: ", stderrPtr);
             fputs (interp->result, stderrPtr);
@@ -168,7 +166,7 @@ TclX_OutputPrompt (interp, topLevel)
         }
     } 
 
-    stdoutPtr = TCL_STDOUT;
+    stdoutPtr = TclX_Stdfile (interp, stdout);
 
     if (!promptDone) {
         if (topLevel)
@@ -217,7 +215,7 @@ Tcl_CommandLoop (interp, interactive)
          * if a "error" signal occured since the last time we were
          * through here.
          */
-        if (tcl_AsyncReady) {
+        if (Tcl_AsyncReady ()) {
             Tcl_AsyncInvoke (interp, TCL_OK); 
         }
         if (tclGotErrorSignal) {
@@ -229,8 +227,8 @@ Tcl_CommandLoop (interp, interactive)
         /*
          * Output a prompt and input a command.
          */
-        stdinPtr = TCL_STDIN;
-        stdoutPtr = TCL_STDOUT;
+        stdinPtr = TclX_Stdfile (interp, stdin);
+        stdoutPtr = TclX_Stdfile (interp, stdout);
 
         clearerr (stdinPtr);
         clearerr (stdoutPtr);

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.10 1995/07/02 15:28:28 markd Exp markd $
+ * $Id: tkXshell.c,v 5.0 1995/07/25 06:00:47 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -117,9 +117,7 @@ TkX_Main (argc, argv, appInitProc)
     char buf[20];
     int code;
     size_t length;
-    FILE *stderrPtr;
-
-    stderrPtr = TCL_STDERR;
+    FILE *stderrPtr = TclX_Stdfile (interp, stderr);
 
     interp = Tcl_CreateInterp();
 #ifdef TCL_MEM_DEBUG
@@ -269,7 +267,7 @@ TkX_Main (argc, argv, appInitProc)
     }
     tclSignalBackgroundError = Tk_BackgroundError;
 
-    fflush(TCL_STDOUT);
+    fflush (TclX_Stdfile (interp, stdout));
     Tcl_DStringInit(&command);
 
     /*
@@ -343,7 +341,7 @@ SignalProc (signalNum)
     Tcl_DStringFree (&command);
     gotPartial = 0;
     if (tty) {
-        fputc ('\n', TCL_STDOUT);
+        fputc ('\n', TclX_Stdfile (interp, stdout));
         TclX_OutputPrompt (interp, !gotPartial);
     }
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.0 1995/07/25 05:59:07 markd Rel markd $
+ * $Id: tclXinit.c,v 5.1 1995/08/28 02:10:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -58,8 +58,8 @@ TclX_ErrorExit (interp, exitCode)
     char  numBuf [32];
     FILE *stdoutPtr, *stderrPtr;
 
-    stdoutPtr = TCL_STDOUT;
-    stderrPtr = TCL_STDERR;
+    stdoutPtr = TclX_Stdfile (interp, stdout);
+    stderrPtr = TclX_Stdfile (interp, stderr);
 
     fflush (stdoutPtr);
 
@@ -266,22 +266,34 @@ TclX_EvalRCFile (interp)
     Tcl_Interp  *interp;
 {
     Tcl_DString  buffer;
-    char        *fullName;
+    char        *path;
 
-    if (tcl_RcFileName != NULL) {
-        fullName = Tcl_TildeSubst (interp, tcl_RcFileName, &buffer);
-        if (fullName == NULL)
+    path = Tcl_GetVar (interp, "tcl_rcFileName", TCL_GLOBAL_ONLY);
+    if (path == NULL)
+        return;
+
+    /*
+     * Since we will be passing the file name into Tcl_EvalFile, we
+     * need to make sure it gets copied into the buffer.  Tcl_TildeSubst
+     * doesn't copy the string if it doesn't start with `~'.
+     */
+    Tcl_DStringInit (&buffer);
+
+    if (path [0] == '~') {
+        path = Tcl_TildeSubst (interp, path, &buffer);
+        if (path == NULL)
             TclX_ErrorExit (interp, 1);
-        
-        if (access(fullName, R_OK) == 0) {
-            if (TclX_Eval (interp,
-                           TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
-                           TCLX_EVAL_ERR_HANDLER,
-                           fullName) == TCL_ERROR) {
-                Tcl_DStringFree(&buffer);
-                TclX_ErrorExit (interp, 1);
-            }
-        }
-	Tcl_DStringFree(&buffer);
+    } else {
+        Tcl_DStringAppend (&buffer, path, -1);
     }
+        
+    if (access (path, R_OK) == 0) {
+        if (TclX_Eval (interp,
+                       TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE |
+                       TCLX_EVAL_ERR_HANDLER,
+                       path) == TCL_ERROR) {
+            TclX_ErrorExit (interp, 1);
+        }
+    }
+    Tcl_DStringFree(&buffer);
 }

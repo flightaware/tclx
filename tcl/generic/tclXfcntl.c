@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 4.5 1995/07/02 20:00:53 markd Exp markd $
+ * $Id: tclXfcntl.c,v 5.0 1995/07/25 05:42:25 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -115,9 +115,9 @@ XlateFcntlAttr  _ANSI_ARGS_((Tcl_Interp  *interp,
                              fcntlAttr_t *attrPtr));
 
 static int
-GetFcntlAttr _ANSI_ARGS_((Tcl_Interp *interp,
-                          OpenFile   *tclFilePtr,
-                          char       *attrName));
+GetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
+                          TclOpenFile *tclFilePtr,
+                          char        *attrName));
 
 static int
 SetAttrOnFile _ANSI_ARGS_((Tcl_Interp *interp,
@@ -126,10 +126,10 @@ SetAttrOnFile _ANSI_ARGS_((Tcl_Interp *interp,
                            int         value));
 
 static int
-SetFcntlAttr _ANSI_ARGS_((Tcl_Interp *interp,
-                          OpenFile   *tclFilePtr,
-                          char       *attrName,
-                          char       *valueStr));
+SetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
+                          TclOpenFile *tclFilePtr,
+                          char        *attrName,
+                          char        *valueStr));
 
 /*
  *-----------------------------------------------------------------------------
@@ -231,9 +231,9 @@ XlateFcntlAttr (interp, attrName, attrPtr)
  */
 static int
 GetFcntlAttr (interp, tclFilePtr, attrName)
-    Tcl_Interp *interp;
-    OpenFile   *tclFilePtr;
-    char       *attrName;
+    Tcl_Interp  *interp;
+    TclOpenFile *tclFilePtr;
+    char        *attrName;
 {
     fcntlAttr_t attrib;
     int         current;
@@ -396,10 +396,10 @@ SetAttrOnFile (interp, filePtr, attrib, value)
  */
 static int
 SetFcntlAttr (interp, tclFilePtr, attrName, valueStr)
-    Tcl_Interp *interp;
-    OpenFile   *tclFilePtr;
-    char       *attrName;
-    char       *valueStr;
+    Tcl_Interp  *interp;
+    TclOpenFile *tclFilePtr;
+    char        *attrName;
+    char        *valueStr;
 {
     fcntlAttr_t attrib;
     int         value;
@@ -453,8 +453,8 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    OpenFile *tclFilePtr;
-    FILE     *filePtr;
+    TclOpenFile *tclFilePtr;
+    FILE        *filePtr;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -462,11 +462,9 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (Tcl_GetOpenFile (interp, argv [1], 
-                         FALSE, FALSE,   /* No access checking */
-                         &filePtr) != TCL_OK)
+    tclFilePtr = TclX_GetOpenFileStruct (interp, argv [1]);
+    if (tclFilePtr == NULL)
 	return TCL_ERROR;
-    tclFilePtr = tclOpenFiles [fileno (filePtr)];
 
     /*
      * Get or set attributes.  These functions handle more than

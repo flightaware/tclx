@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 4.6 1995/06/30 22:37:25 markd Exp markd $
+ * $Id: tclXAppInit.c,v 5.0 1995/07/25 05:59:17 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -107,7 +107,10 @@ Tcl_AppInit (interp)
      * where "app" is the name of the application.  If this line is deleted
      * then no user-specific startup file will be run under any conditions.
      */
-
+#if (TCL_MINOR_VERSION < 5)
     tcl_RcFileName = "~/.tclrc";
+#else
+    Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclrc", TCL_GLOBAL_ONLY);
+#endif
     return TCL_OK;
 }
