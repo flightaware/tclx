@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.7 2004/11/23 00:13:38 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.8 2004/11/23 05:54:14 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -82,6 +82,7 @@ GENERIC_HDRS	= $(srcdir)/generic/tclExtend.h
 #========================================================================
 
 HELP_DIR	= @HELP_DIR@/tcl
+HELP_DIR_NATIVE	= `@CYGPATH@ ${HELP_DIR}`
 
 #========================================================================
 # Nothing of the variables below this line need to be changed.  Please
@@ -171,10 +172,10 @@ TCLSH_PROG	= @TCLSH_PROG@
 TCLSH		= $(TCLSH_ENV) $(TCLSH_PROG)
 SHARED_BUILD	= @SHARED_BUILD@
 
-TCLX_TOOLS_SRC_DIR = $(srcdir)/unix/tools
-TCLX_DOC_DIR = $(srcdir)/doc
-TCLX_INSTCOPY = ${TCLSH} ${TCLX_TOOLS_SRC_DIR}/instcopy.tcl
-TCLX_HELP_INST_DIR = $(DESTDIR)$(pkglibdir)/help
+TCLX_TOOLS_SRC_DIR = `@CYGPATH@ $(srcdir)/unix/tools`
+TCLX_DOC_DIR	   = `@CYGPATH@ $(srcdir)/doc`
+TCLX_INSTCOPY	   = ${TCLSH} ${TCLX_TOOLS_SRC_DIR}/instcopy.tcl
+TCLX_HELP_INST_DIR = `@CYGPATH@ $(DESTDIR)$(pkglibdir)/help`
 
 TCLX_INCLUDES	= @TCLX_INCLUDES@
 INCLUDES	= $(TCLX_INCLUDES) @TCL_INCLUDES@
@@ -498,14 +499,15 @@ buildhelp:
 	if test ! -d "${HELP_DIR}" ; then \
 	    mkdir -p "${HELP_DIR}" ; \
 	fi
-	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/bldmanhelp.tcl ${TCL_SRC_DIR}/doc \
-	    ${TCLX_TOOLS_SRC_DIR}/tclmanpages ${HELP_DIR} Tcl.brf
-	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/runbuildhelp.tcl ${HELP_DIR} \
+	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/bldmanhelp.tcl \
+	    `@CYGPATH@ ${TCL_SRC_DIR}/doc` \
+	    ${TCLX_TOOLS_SRC_DIR}/tclmanpages ${HELP_DIR_NATIVE} Tcl.brf
+	${TCLSH} ${TCLX_TOOLS_SRC_DIR}/runbuildhelp.tcl ${HELP_DIR_NATIVE} \
 	    TclX.brf ${TCLX_DOC_DIR}/TclX.n
 
 install-help:
 	@if test -d "${HELP_DIR}" ; then \
 	     echo "Installing TclX help files in ${TCLX_HELP_INST_DIR}"; \
 	     mkdir -p ${TCLX_HELP_INST_DIR}; \
-	     ${TCLX_INSTCOPY} ${HELP_DIR} ${TCLX_HELP_INST_DIR}; \
+	     ${TCLX_INSTCOPY} ${HELP_DIR_NATIVE} ${TCLX_HELP_INST_DIR}; \
 	fi

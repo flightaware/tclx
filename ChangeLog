@@ -1,3 +1,11 @@
+2004-12-02  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* Makefile.in: cygpath a few required buildhelp vars
+	* configure, configure.in: refactor --with-help check to add 'col'
+	prog check and defer them until TclX help is requested.
+	* library/buildhelp.tcl (buildhelp): convert system call to exec
+	to allow it to work on Windows
+
 2004-12-01  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* unix/tools/tclmanpages: note resource.n last appears and lset.n

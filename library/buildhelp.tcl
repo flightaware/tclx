@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 8.3 1999/03/31 06:37:47 markd Exp $
+# $Id: buildhelp.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -440,7 +440,7 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
     echo "Begin building help tree"
 
     # Determine version of col command to use (no -x on BSD)
-    if {[system {col -bx </dev/null >/dev/null 2>&1}] != 0} {
+    if {[catch {exec col -bx </dev/null >/dev/null 2>&1}]} {
         set colArgs {-b}
     } else {
         set colArgs {-bx}
@@ -451,10 +451,10 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
     }
 
     if {![file isdirectory $helpDir]} {
-        error [concat "$helpDir is not a directory or does not exist. "  
-                      "This should be the help root directory"]
+        error "$helpDir is not a directory or does not exist.\n \
+                      This should be the help root directory"
     }
-        
+
     set status [catch {set tmpFH [open $helpDir/AVeryVeryBigFileName w]}]
     if {$status != 0} {
         set truncFileNames 1

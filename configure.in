@@ -3,7 +3,7 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.8 2004/11/23 05:54:14 hobbs Exp $
+# RCS: @(#) $Id: configure.in,v 1.9 2004/11/23 19:16:16 hobbs Exp $
 
 AC_PREREQ(2.13)
 
@@ -272,37 +272,34 @@ if test "$found_floor" = "NO"; then
     AC_DEFINE(NO_FLOOR_PROTO)
 fi
 
-#------------------------------------------------------------------------------
-# Determine if we have enough tools to generate the help files.
-# Allow --with-helpdir to specify help file outputs
-#------------------------------------------------------------------------------
-
-AC_PATH_PROGS(NROFF, nroff, :, ${PATH})
-
-if test "x${NROFF}" = "x:" ; then
-    AC_MSG_WARN(No nroff executable found.  Cannot build help files.) ;
-    BUILDHELP=
-else
-    BUILDHELP=buildhelp
-fi
-AC_SUBST(BUILDHELP)
-
-# Allow for --without-help to disable building of help
+#-------------------------------------------------------------------------
+# Allow --with-help to specify help file outputs
+#-------------------------------------------------------------------------
 AC_MSG_CHECKING([where to place TclX help files])
 AC_ARG_WITH(help, [  --with-help              directory containing generated help files], with_help=${withval}, with_help=no)
 HELP_DIR=`pwd`/help
-if test x"${with_help}" = x"no" -o x"${BUILDHELP}" = x ; then
-    BUILDHELP=
-elif test x"${with_help}" != x -a x"${with_help}" != x"yes" ; then
-    # Ensure that we don't catch --with-help by itself
-    HELP_DIR=${with_help}
-fi
-AC_SUBST(HELP_DIR)
-if test x"${BUILDHELP}" != x ; then
-    AC_MSG_RESULT([${HELP_DIR}])
-else
+BUILDHELP=
+if test x"${with_help}" = x"no" ; then
     AC_MSG_RESULT([do not build help files])
+else
+    if test x"${with_help}" != x -a x"${with_help}" != x"yes" ; then
+	# Ensure that we don't catch --with-help by itself
+	HELP_DIR=${with_help}
+    fi
+    #-------------------------------------------------------------------------
+    # Determine if we have enough tools to generate the help files.
+    #-------------------------------------------------------------------------
+    AC_MSG_RESULT([${HELP_DIR}])
+    AC_CHECK_PROG(NROFF, nroff, yes, no)
+    AC_CHECK_PROG(COL, col, yes, no)
+    if test "x${NROFF}" = "xno" -o "x${COL}" = "xno" ; then
+	AC_MSG_WARN([nroff or col executable missing. Cannot build TclX help.])
+    else
+	BUILDHELP=buildhelp
+    fi
 fi
+AC_SUBST(BUILDHELP)
+AC_SUBST(HELP_DIR)
 
 #--------------------------------------------------------------------
 # END Special case checks
