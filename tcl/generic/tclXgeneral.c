@@ -12,23 +12,69 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 5.3 1996/02/12 18:15:49 markd Exp $
+ * $Id: tclXgeneral.c,v 5.4 1996/02/16 07:51:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
- * These globals must be set by main for the information to be defined.
+ * Values returned by the infox command.
  */
 
 char *tclxVersion       = NULL;  /* Extended Tcl version number.            */
 int   tclxPatchlevel    = 0;     /* Extended Tcl patch level.               */
 
-char *tclAppName        = NULL;  /* Application name                        */
-char *tclAppLongname    = NULL;  /* Long, natural language application name */
-char *tclAppVersion     = NULL;  /* Version number of the application       */
-int   tclAppPatchlevel  = 0;     /* Patch level of the application          */
+static char *tclAppName        = NULL;
+static char *tclAppLongName    = NULL;
+static char *tclAppVersion     = NULL;
+static int   tclAppPatchlevel  = -1;
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_SetAppInfo --
+ *   Store the application information returned by infox.
+ *
+ * Parameters:
+ *   o defaultValues (I) - If true, then the values are assigned only if they
+ *     are not already defined (defaulted).  If false, the values are always
+ *     set.
+ *   o appName (I) - Application symbolic name.  
+ *   o appLongName (I) - Long, natural language application name.
+ *   o appVersion (I) - Version number of the application.
+ *   o appPatchlevel (I) - Patch level of the application.  If less than
+ *     zero, don't change.
+ * Notes:
+ *   String pointers are saved without copying, don't release the memory.
+ * If the arguments are NULL, don't change the values.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
+                 appPatchlevel)
+    int   defaultValues;
+    char *appName;
+    char *appLongName;
+    char *appVersion;
+    int   appPatchlevel;
+{
+    if ((appName != NULL) &&
+        ((!defaultValues) || (tclAppName == NULL))) {
+        tclAppName = appName;
+    }
+    if ((appLongName != NULL) &&
+        ((!defaultValues) || (tclAppLongName == NULL))) {
+        tclAppLongName = appLongName;
+    }
+    if ((appVersion != NULL) &&
+        ((!defaultValues) || (tclAppVersion == NULL))) {
+        tclAppVersion = appVersion;
+    }
+    if ((appPatchlevel >= 0) &&
+        ((!defaultValues) || (tclAppPatchlevel < 0))) {
+        tclAppPatchlevel = appPatchlevel;
+    }
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -188,8 +234,8 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("applongname", argv [1])) {
-        if (tclAppLongname != NULL)
-            Tcl_SetResult (interp, tclAppLongname, TCL_STATIC);
+        if (tclAppLongName != NULL)
+            Tcl_SetResult (interp, tclAppLongName, TCL_STATIC);
         return TCL_OK;
     }
     if (STREQU ("appversion", argv [1])) {
@@ -198,7 +244,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("apppatchlevel", argv [1])) {
-        sprintf (numBuf, "%d", tclAppPatchlevel);
+        sprintf (numBuf, "%d", (tclAppPatchlevel >= 0) ? tclAppPatchlevel : 0);
         Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
         return TCL_OK;
     }

@@ -1083,4 +1083,6 @@
     unnecessary.  Note: the comparibility procedure doesn't support the
     -dontroute and -outofband options (which had never been tested anyway).
     (* potential incompatibility *)
+  o Use a function to set appname values returned by infox instead of global
+    variables. (* potential incompatibility *)
 -------------------------------------------------------------------------------

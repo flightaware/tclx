@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 5.4 1996/02/16 07:51:09 markd Exp $
+.\" $Id: TclXInit.3,v 5.5 1996/02/16 08:08:54 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -26,11 +26,6 @@ Tclx_Init, Tclxcmd_Init, TclX_Main, Tkx_Init, TkX_Main - Extended Tcl initializa
 -ltclx -ltcl
 
 #include "tclExtend.h"
-
-extern char *tclAppName;
-extern char *tclAppLongname;
-extern char *tclAppVersion;
-extern int   tclAppPatchlevel;
 
 int
 Tclx_Init (Tcl_Interp *interp);
@@ -52,32 +47,19 @@ TkX_Main (int               argc,
           char            **argv,
           Tcl_AppInitProc  *appInitProc);
 
+void
+TclX_SetAppInfo (int   defaultValues,
+                 char *appName,
+                 char *appLongName,
+                 char *appVersion,
+                 int   appPatchlevel);
+
 .ft R
 .fi
 .SH DESCRIPTION
 These functions are used to initialize Extended Tcl and applications based
 on Extended Tcl.  This manual page also discusses various issues and approaches
 of integrating TclX into other applications.
-'
-.SS tclAppName
-The application name to be returned by the \fBinfox\fR
-command. This should be a short mnemonic.  This value maybe altered from
-the default by the application.
-'
-.SS tclAppLongname
-The application long name to be returned by the \fBinfox\fR command.
-This should be a natural language string.  This value maybe altered from
-the default by the application.
-'
-.SS tclAppVersion
-The application version string to be returned by the \fBinfox\fR command.
-procedures are called.  This value maybe altered from
-the default by the application.
-'
-.SS tclAppPatchlevel
-The application patchlevel to be returned by the \fBinfox\fR command.
-procedures are called.  This value maybe altered from
-the default by the application.
 '
 .SS tclX_library
 The path to the TclX runtime library.
@@ -177,6 +159,29 @@ or enters an interactive command loop.
 This procedure never returns, it exits the process when it's done.  Using
 the TclX wish shell gives you SIGINT handling in interactive shells,
 otherwise it is identical to standard wish.
+'
+.SS TclX_SetAppInfo
+.PP
+Store the application information returned by infox.
+.PP
+Parameters
+.RS 2
+\fBo \fIdefaultValues\fR - If true, then the values are assigned only if they
+are not already defined (defaulted).  If false, the values are always
+set.
+.br
+\fBo \fIappName\fR - Application symbolic name.  
+.br
+\fBo \fIappLongName\fR - Long, natural language application name.
+.br
+\fBo \fIappVersion\fR - Version number of the application.
+.br
+\fBo \fIappPatchlevel\fR - Patch level of the application.  If less than
+zero, don't change.
+.RE
+.PP
+String pointers are saved without copying, don't release the memory.
+If the arguments are NULL, don't change the values.
 '
 .SH "INTEGRATING TCLX WITH OTHER EXTENSIONS AND APPLICATIONS"
 .PP

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.4 1996/02/12 18:15:32 markd Exp $
+ * $Id: tclXcmdInit.c,v 5.5 1996/02/16 07:51:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,16 +44,13 @@ InitTclXGlobals ()
                            strlen (TCL_EXTD_VERSION_SUFFIX) + 1);
     strcpy (tclxVersion, TCL_VERSION);
     strcat (tclxVersion, TCL_EXTD_VERSION_SUFFIX);
-
     tclxPatchlevel = TCLX_PATCHLEVEL;
-    if (tclAppName == NULL)
-        tclAppName = "TclX";
-    if (tclAppLongname == NULL)
-        tclAppLongname = "Extended Tcl";
-    if (tclAppVersion == NULL) {
-        tclAppVersion = tclxVersion;
-        tclAppPatchlevel = tclxPatchlevel;
-    }
+
+    TclX_SetAppInfo (TRUE,
+                     "TclX",
+                     "Extended Tcl",
+                     tclxVersion,
+                     tclxPatchlevel);
 }
 
 

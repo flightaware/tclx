@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.9 1996/02/12 18:15:26 markd Exp $
+ * $Id: tclExtend.h,v 5.10 1996/02/16 07:51:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,17 +32,11 @@
 typedef void *void_pt;
 
 /*
- * These globals are used by the infox command.  Should be set before
- * initializing the TclX shell.
+ * TclX version and patch level.
  */
 
 extern char *tclxVersion;        /* Extended Tcl version number.            */
 extern int   tclxPatchlevel;     /* Extended Tcl patch level.               */
-
-extern char *tclAppName;         /* Application name                        */
-extern char *tclAppLongname;     /* Long, natural language application name */
-extern char *tclAppVersion;      /* Version number of the application       */
-extern int   tclAppPatchlevel;   /* Patchlevel of the application           */
 
 /*
  * Used to override the init file name, which is either library relative or
@@ -119,6 +113,13 @@ TclX_PrintResult _ANSI_ARGS_((Tcl_Interp *interp,
 
 EXTERN void
 Tcl_SetupSigInt _ANSI_ARGS_((void));
+
+EXTERN void
+TclX_SetAppInfo _ANSI_ARGS_((int   defaultValues,
+                             char *appName,
+                             char *appLongName,
+                             char *appVersion,
+                             int   appPatchlevel));
 
 /*
  * Exported utility functions.
