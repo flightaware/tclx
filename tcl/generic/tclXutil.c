@@ -58,7 +58,6 @@ char *tclXWrongArgs = "wrong # args: ";
  *
  * Returns:
  *      Returns 1 if the string was a valid number, 0 invalid.
- * FIX: Delete when done with objs.
  *-----------------------------------------------------------------------------
  */
 int
@@ -119,7 +118,6 @@ TclX_StrToInt (string, base, intPtr)
  *
  * Returns:
  *      Returns 1 if the string was a valid number, 0 invalid.
- * FIX: Delete when done with objs.
  *-----------------------------------------------------------------------------
  */
 int
@@ -166,7 +164,6 @@ TclX_StrToUnsigned (string, base, unsignedPtr)
  *
  * Returns:
  *      Returns 1 if the string was a valid number, 0 invalid.
- * FIX: Delete when done with objs.
  *-----------------------------------------------------------------------------
  */
 int
@@ -228,7 +225,7 @@ TclX_StrToOffset (string, base, offsetPtr)
  *
  * Returns:
  *   A pointer to the down-shifted string
- * FIX: Make object based.
+ * FIX: Make object based interface.
  *-----------------------------------------------------------------------------
  */
 char *
@@ -265,7 +262,7 @@ TclX_DownShift (targetStr, sourceStr)
  * Returns:
  *   A pointer to the up-shifted string.
  * FIX: Get strcasecmp and replace this with it.
- * FIX: Make object based.
+ * FIX: Make object based interface
  *-----------------------------------------------------------------------------
  */
 char *

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 8.2 1997/06/30 06:54:02 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
@@ -206,12 +206,12 @@ Test flock-4.4 {flock/unlock of a file that is not locked} {
 #
 set fh [open FLOCK.PRG w]
 puts $fh {
+    fconfigure stdout -buffering line
     set writeFH [open FLOCKW.TMP WRONLY]
     set rdwrFH [open FLOCKRW.TMP RDWR]
     flock $writeFH
     flock $rdwrFH 0 10
     puts "*I am ready*"
-    flush stdout
     if {[gets stdin line] < 0} {
         puts stderr "unexpected EOF in flock child"
         exit 1

@@ -225,14 +225,13 @@ static ClientData                 appSigErrorClientData = NULL;
 /*
  * Counters of signals that have occured but have not been processed.
  */
-static unsigned signalsReceived [MAXSIG];
+static unsigned signalsReceived[MAXSIG];
 
 /*
  * Table of commands to evaluate when a signal occurs.  If the command is
  * NULL and the signal is received, an error is returned.
  */
-/*FIX: need to allow binary data in commands */
-static char *signalTrapCmds [MAXSIG];
+static char *signalTrapCmds[MAXSIG];
 
 /*
  * Prototypes of internal functions.

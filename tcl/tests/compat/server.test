@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 8.4 1997/08/23 18:56:07 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
@@ -251,9 +251,10 @@ if [catch {
 #
 
 proc TestServer {toClient} {
+    signal ignore SIGPIPE
     set reqFH [server_create]
+    fconfigure $toClient -buffering line
     puts $toClient [lindex [fstat $reqFH localhost] 2]
-    flush $toClient
     set readIds $reqFH
 
     while 1 {

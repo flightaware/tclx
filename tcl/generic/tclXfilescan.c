@@ -25,22 +25,17 @@
  * along with a match default command to apply to a file on a scan.
  */
  
-#define CONTEXT_A_CASE_INSENSITIVE_FLAG 2
-#define MATCH_CASE_INSENSITIVE_FLAG 4
-
 typedef struct matchDef_t {
     Tcl_RegExp          regExp;
     Tcl_Obj            *regExpObj;
     Tcl_Obj            *command;
     struct matchDef_t  *nextMatchDefPtr;
-    short               matchflags;
 } matchDef_t;
 
 typedef struct scanContext_t {
     matchDef_t  *matchListHead;
     matchDef_t  *matchListTail;
     Tcl_Obj     *defaultAction;
-    short        flags;
     char         contextHandle [16];
     Tcl_Channel  copyFileChannel;
     int          fileOpen;
@@ -176,7 +171,6 @@ ScanContextCreate (interp, scanTablePtr)
     scanContext_t *contextPtr, **tableEntryPtr;
 
     contextPtr = (scanContext_t *) ckalloc (sizeof (scanContext_t));
-    contextPtr->flags = 0;
     contextPtr->matchListHead = NULL;
     contextPtr->matchListTail = NULL;
     contextPtr->defaultAction = NULL;
@@ -407,8 +401,6 @@ TclX_ScancontextObjCmd (clientData, interp, objc, objv)
  *
  *   Implements the TCL command:
  *         scanmatch ?-nocase? contexthandle ?regexp? command
- *
- *   This uses both Boyer_Moore and regular expressions matching.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -468,13 +460,7 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
      */
 
     newmatch = (matchDef_t *) ckalloc(sizeof (matchDef_t));
-    newmatch->matchflags = 0;  /*FIX: Not needed???*/
 
-    if (regExpFlags & REG_ICASE) {
-        /*FIX: This is probably not needed unless BM is fixed*/
-        contextPtr->flags |= CONTEXT_A_CASE_INSENSITIVE_FLAG;
-    }
-    
     newmatch->regExp = (Tcl_RegExp )TclRegCompObj(interp, objv[firstArg + 1],
                                                   regExpFlags);
     if (newmatch->regExp == NULL) {

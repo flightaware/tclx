@@ -2438,7 +2438,7 @@ Message catalogs are global to the process, an application with multiple
 Tcl interpreters within the same process may pass and share message catalog
 handles.
 '
-'\"@help: tcl/internation/catopen
+'\"@help: tcl/intl/catopen
 '\"@brief: Open a message catalog.
 .TP
 .B catopen\fR ?\fB\-fail\fR | \fB\-nofail\fR? \fIcatname\fR
@@ -2460,7 +2460,7 @@ message catalog.  If the handle from a failed \fBcatopen\fR is passed to
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-'\"@help: tcl/internation/catgets
+'\"@help: tcl/intl/catgets
 '\"@brief: Retrieve a message from a message catalog.
 .TP
 .B catgets \fIcatHandle setnum msgnum defaultstr\fR
@@ -2475,7 +2475,7 @@ string, \fIdefaultstr\fR, is returned.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-'\"@help: tcl/internation/catclose
+'\"@help: tcl/intl/catclose
 '\"@brief: Close a message catalog.
 .TP
 .B catclose\fR ?\fB\-fail\fR | \fB\-nofail\fR? \fIcathandle\fR

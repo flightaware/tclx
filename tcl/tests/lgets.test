@@ -289,15 +289,6 @@ Test lgets-6.0 {lgets corner cases} {
     set inlist
 } 0 [list {\\server} {\home} {foo\}}]
 
-Test lgets-6.1 {lgets corner cases} {
-    set fh [open test2.tmp w+]
-    puts $fh {set res [esi wait 120 APMSKORD=1,DWFILORD=1,SLMSKORD=1,HATCHPOS=closed]}
-    seek $fh 0
-    lgets $fh inlist
-    close $fh
-    set inlist
-} 0 {set res [esi wait 120 APMSKORD=1,DWFILORD=1,SLMSKORD=1,HATCHPOS=closed]}
-
 
 TestRemove test1.tmp test2.tmp
 

@@ -18,7 +18,6 @@
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
 
-
 # auto_load_index --
 # Loads the contents of tclIndex files on the auto_path directory
 # list.  This is usually invoked within auto_load to load the index

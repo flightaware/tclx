@@ -976,6 +976,7 @@ TclX_LibraryInit (interp)
 {
     int result;
 
+    /* Hack in our own auto-loading */
     result = TclX_Eval (interp, TCLX_EVAL_GLOBAL, autoloadCmd);
     if (result == TCL_ERROR) {
         return TCL_ERROR;

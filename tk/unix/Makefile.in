@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.24 1997/12/16 17:08:30 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
@@ -201,7 +201,7 @@ test.verbose: all
 # not rebuilt by users.
 #
 buildhelp:
-	rm -rf ${HELP_DIR} help
+	rm -rf ${HELP_DIR} help help.tmp
 	mkdir ${HELP_DIR}
 	${BLDMANHELP} ${TK_SRC}/doc ${srcbasedir}/unix/tools/tkmanpages \
 	    ${HELP_DIR} Tk.brf

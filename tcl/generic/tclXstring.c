@@ -279,7 +279,7 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     char *string2;
     int string2Len;
 
-    /*FIX: Not utf clean */
+    /*FIX: Not utf clean (FIXUTF) */
     if ((objc < 3) || (objc > 4))
         return TclX_WrongArgs (interp, objv[0], "?options? string1 string2");
 
@@ -381,7 +381,7 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     int           tokenStrLen;
     Tcl_Obj      *newVarValueObj;
 
-    /*FIX: Not UTF safe */
+    /*FIX: Not UTF safe (FIXUTF) */
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "strvar separators");
     
@@ -557,7 +557,7 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     int            idx;
     int            stringIndex;
 
-    /*FIX: Not UTF-safe. */
+    /*FIX: Not UTF-safe.(FIXUTF) */
 
     if (objc != 4)
         return TclX_WrongArgs (interp, objv[0], "from to string");
@@ -669,9 +669,8 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
         panic("TclX_CtypeObjCmd: UTF character longer than a int");
     }
 
-    /*FIX:  UTF-safe not finished. */
-    /*FIX: Split into multiple procs; this is looking like one of JO's 
-      functions */
+    /*FIX:  UTF-safe not finished.(FIXUTF) */
+    /*FIX: Split into multiple procs */
 
     if (objc < 3)
         goto wrongNumArgs;

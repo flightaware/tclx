@@ -290,7 +290,7 @@ testx.verbose: all
 # distribution and not rebuilt by users.
 #
 buildhelp: tcl tcl.tndx
-	rm -rf ${HELP_DIR} help
+	rm -rf ${HELP_DIR} help help.tmp
 	mkdir ${HELP_DIR}
 	${BLDMANHELP} ${TCL_SRC}/doc ${srcbasedir}/unix/tools/tclmanpages \
 	    ${HELP_DIR} Tcl.brf
