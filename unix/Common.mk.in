@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 8.7.2.1 1998/08/09 06:46:36 markd Exp $
+# $Id: Common.mk.in,v 8.7.2.2 1998/12/03 04:30:10 suresh Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -37,7 +37,7 @@ TKX_FULL_VERSION   = @TKX_FULL_VERSION@
 # Autoconfig defines that can be overridden in Config.mk.
 #
 CC           = @CC@
-CFLAGS       = @CFLAGS@
+CFLAGS       = @CFLAGS@ @TCL_EXTRA_CFLAGS@
 SYSCFLAGS    = @SYSCFLAGS@
 RANLIB       = @RANLIB@
 LN_S         = ln -s
