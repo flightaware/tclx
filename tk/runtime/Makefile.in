@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.7 1995/06/30 22:39:15 markd Exp markd $
+# $Id: Makefile.in,v 4.8 1995/07/01 00:12:12 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -130,7 +130,9 @@ buildtkhelp:
 
 #------------------------------------------------------------------------------
 
-install:
+install: install-exec install-library
+
+install-library:
 	${INSTCOPY} ${TKTCL} ${TKTLIB} ${TKTNDX} ${INST_MASTER}
 	${INSTCOPY} ${TK_UCB_SRC}/library/prolog.ps  ${INST_MASTER}
 	${INSTCOPY} ${HELPSRC} ${INST_MASTER}/help
