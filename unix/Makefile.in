@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.21 1993/09/21 05:11:18 markd Exp markd $
+# $Id: Makefile.in,v 2.22 1993/09/23 05:40:51 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -27,11 +27,22 @@ srcdir     = @srcdir@
 srcbasedir = @srcbasedir@
 bldbasedir = @bldbasedir@
 VPATH      = @srcdir@
+prefix     = @prefix@
+execprefix = @execprefix@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
 @MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
+
+#------------------------------------------------------------------------------
+# Other macros.
+
+LIBTCL.A = tclmaster/lib/libtcl.a
+TCL.H    = tclmaster/include/tcl.h
+LIBTK.A  = tkmaster/lib/libtk.a
+TK.H     = tkmaster/include/tk.h
+INSTCOPY = runtcl tools/instcopy
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
@@ -65,9 +76,6 @@ TCLX: TCLCOPY runtcl
 # Copy include and library files from the UCB Tcl distribution to the
 # tclmaster directory.
 #
-LIBTCL.A = tclmaster/lib/libtcl.a
-TCL.H    = tclmaster/include/tcl.h
-
 TCLCOPY: MKTCLDIRS ${LIBTCL.A} ${TCL.H}
 
 MKTCLDIRS:
@@ -98,8 +106,6 @@ WISHX: TKCOPY runwishx
 # Copy include and library files from the UCB Tk distribution to the
 # tkmaster directory.
 #
-LIBTK.A = tkmaster/lib/libtk.a
-TK.H    = tkmaster/include/tk.h
 
 TKCOPY: MKTKDIRS ${LIBTK.A} ${TK.H}
 
@@ -168,10 +174,12 @@ ucbtests: all
 	@echo "***     testasync"
 	@echo "***     testcmdinfo"
 	@echo "***     testdcall"
-	@echo "***     testlink"
 	@echo "***     testdstring"
-	@echo "*** Expect the following error:"
-	@echo "***     Uncaught error in expr.test: unknown math function T1"
+	@echo "***     testlink"
+	@echo "***"
+	@echo "*** Expect warnings about not having the following math functions:"
+	@echo "***     T1"
+	@echo "***     T2"
 	@echo "***************************************************************"
 	@echo ""
 	./runtcl -c "cd ${TCL_UCB_SRC}/tests;source ${srcbasedir}/tests/all"
@@ -201,9 +209,38 @@ buildtkhelp:
 	cd tktclsrc; ${MAKE} -${MAKEFLAGS} buildtkhelp
 
 #------------------------------------------------------------------------------
-# Install Tcl.
+# Install Extended Tcl using the standard model
 
 install: all TCLXINSTALL ${TK_BUILD}MAYBE
+
+TCLXINSTALL:
+	@echo ""
+	@echo "   Install Extended Tcl using standard model"
+	@echo ""
+	set -x ;\
+	target=${TCL_MASTERDIR}/`tools/tclxversion` ;\
+	rm -rf $$target ;\
+        ${INSTCOPY} tclmaster/*.tcl tclmaster/*.tlib tclmaster/*.tndx \
+	   tclmaster/help tclmaster/src $$target
+	${INSTCOPY}  ${TCL_MAN_BASEDIR}
+
+TKXINSTALL:
+	set -x ;\
+	target=${TK_MASTERDIR}/`tools/tkxversion` ;\
+	rm -rf $$target ;\
+        ${INSTCOPY} tkmaster/*.tcl tkmaster/*.tlib tkmaster/*.tndx \
+	   tkmaster/help tkmaster/src tkmaster/*.ps tkmaster/demos $$target
+
+# Fake targets to decide if we install wishx or not.
+
+MAYBE:
+
+WISHXMAYBE: TKXINSTALL
+
+#------------------------------------------------------------------------------
+# Install Extended Tcl using the master directory model.
+
+install-master: all TCLXMINSTALL ${TK_BUILD}MMAYBE
 	@echo ""
 	@echo "*************************************************************"
 	@echo "*** TclX currently builds symbolic links to the bin files ***"
@@ -212,7 +249,7 @@ install: all TCLXINSTALL ${TK_BUILD}MAYBE
 	@echo "*************************************************************"
 	@echo ""
 
-TCLXINSTALL:
+TCLXMINSTALL:
 	@echo ""
 	@echo "   Install TclX master directory"
 	@echo ""
@@ -225,7 +262,7 @@ TCLXINSTALL:
 	rm -f ${TCL_BINDIR}/tcl ;\
 	ln -s $$target/bin/tcl ${TCL_BINDIR}/tcl
 
-TKXINSTALL:
+TKXMINSTALL:
 	@echo ""
 	@echo "   Install TkX master directory"
 	@echo ""
@@ -242,9 +279,9 @@ TKXINSTALL:
 
 # Fake targets to decide if we install wishx or not.
 
-MAYBE:
+MMAYBE:
 
-WISHXMAYBE: TKXINSTALL
+WISHXMMAYBE: TKXMINSTALL
 
 #------------------------------------------------------------------------------
 # Clean up everything but the manual pages that we copied to the master
@@ -272,7 +309,7 @@ clean: partclean
 # Restore to the distributed state.
 
 distclean: clean
-	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
+	cd toolsg;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} distclean

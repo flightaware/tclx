@@ -13,12 +13,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.9 1993/09/20 01:13:11 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.10 1993/09/21 05:41:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-#include "regexp.h"
 
 /*
  * A scan context describes a collection of match patterns and commands,

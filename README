@@ -5,7 +5,7 @@ BETA 5 RELEASE NOTES
 ====================
 
    This is the TclX7.0a Beta-5 release.  This release is tested and compatible
-with tcl7.0b3 and tk3.3b3.  Please forward questions/bugs/suggestions to
+with tcl7.0 and tk3.3.  Please forward questions/bugs/suggestions to
 tcl-project@NeoSoft.com.  This releases is not complete.  The following
 functionality is not complete:
 
@@ -13,8 +13,6 @@ functionality is not complete:
      directories installed by symbolic links are only made to the bin
      files.  If you need links to include or man files, you must build them
      by hand.
-
-   o TclX is not yet hooked up to the Tcl_AppInit mechanism.
 
    o A few other minor changes.
 
@@ -110,9 +108,18 @@ single release of Berkeley Tcl.  This release is TclX 7.0a.
 INTERFACING TCL AND C++
 =======================
 
-C++ programmers can include the file "tcl++.h" to define C++ classes
-that can be used to access a Tcl interpreter.  This is based on Tcl
-C++ classes originally developed by Parag Patel.
+C++ programmers can include the file "tcl++.h" to define C++ classes that can
+be used to access a Tcl interpreter.  This is based on Tcl C++ classes
+originally developed by Parag Patel.  The files
+
+        src/tclXmain.c
+and
+        tksrc/tkXmain.c
+
+will compile under both C and C++.  If your have a C++ compiler that requires
+the main to be compiled with C++ (g++ does not have this restriction), use
+these files renamed to have the correct suffix for C++ (usually .C).
+
 
 PACKAGE LIBRARIES
 =================
@@ -130,10 +137,26 @@ with standard Tcl.
 LINKING TCL APPLICATIONS
 ========================
 
-   To build a TclX based application containing C code, start with either
-src/main.c (for just Tcl) or tksrc/tkMain.c (for Tk) and add your application
-initialization.  There are comments in the code to guide you.  These need
-to be linked with libtclx.a and libtkx.a.  These libraries are use
+   To build a TclX based application containing C code, start with either:
+
+        tclmaster/src/tclXAppInit.c for just TclX
+or
+        tkmaster/src/tkXAppInit.c for TclX & Tk
+
+and add your application initialization.  There are comments in the code to
+guide you. The "main" object file is already in the libraries, all you have
+to do is link a customized tclXAppInit.o or tkXAppInit.o file with your
+application and the Tcl libraries.  For example:
+
+  cc tclXAppInit.o mystuff.a libtclx.a libtcl.a ${SYSLIBS} -o myapp
+
+  cc tkXAppInit.o mystuff.a libtkx.a libtk.a libtclx.a libtcl.a ${SYSLIBS} \
+     -o myapp
+
+Each of those directories has a file SYSLIBS that contains the system
+libraries that the TclX configure script thinks you should use for linking
+programs.  These are in a form that can be included from a make file.  These
+file are in a format that can be included from a make file.
 
 SUPPORT FOR EXTENDED TCL
 ========================

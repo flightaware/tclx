@@ -140,6 +140,9 @@
 /* Define if you have bzero.  */
 #undef HAVE_BZERO
 
+/* Define if you have bcopy.  */
+#undef HAVE_BCOPY
+
 /* Define if you have gettimeofday.  */
 #undef HAVE_GETTIMEOFDAY
 
@@ -157,6 +160,9 @@
 
 /* Define if you have the c_s library (-lc_s).  */
 #undef HAVE_C_S
+
+/* Define if you have the X11_s library (-lX11_s).  */
+#undef HAVE_X11_S
 
 /* Define if you have the X11 library (-lX11).  */
 #undef HAVE_X11

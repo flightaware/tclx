@@ -610,3 +610,48 @@
 ===============================================================================
  1 Sep 93: Released TclX7.0c Beta 4.
 ===============================================================================
+ 4 Sep 93:
+  o Fixed problem with TCL_LIBRARY and TK_LIBRARY being set to the standard
+    paths rather than the TclX paths.
+-------------------------------------------------------------------------------
+ 7 Sep 93:
+  o Added lmatch command.
+  o Changed libtclx.a and libtk.a to be supplements to libtcl.a and libtk.a
+    rather than super-sets.
+  o Its now ok for files that are the target of a dup to be close.
+-------------------------------------------------------------------------------
+ 8 Sep 93:
+  o Added notes about Tk applications and the fork & execl commands.
+  o Added full set of signal names that can be used on signal and kill.
+  o Added -pgroup to kill.
+-------------------------------------------------------------------------------
+15 Sep 93:
+  o Initialization now uses a TclX_AppInit mechanism similar to that used by
+    Tcl/Tk.   (*POTENTIAL INCOMPATIBILITY for C code*)
+  o Make sure to use real waitpid, rather than the wrapper internal to Tcl
+    that hides signals.
+-------------------------------------------------------------------------------
+19 Sep 93:
+  o Added -copyfile option to scanfile.
+  o Updated tcl++.h with all new Tcl & TclX functions. 
+  o Changed the tcl & wishx *main.c files so they will compiler with both C
+    and C++.
+-------------------------------------------------------------------------------
+22 Sep 93:
+  o Added support for the configure --srcdir option.
+-------------------------------------------------------------------------------
+24 Sep 93:
+  o Clear errors/EOF before doing a file read so old state does not get
+    returned.
+  o Redesigned recursive_glob and for_recursive_glob to fix  broken semantics.
+    The arguments have changed. (*POTENTIAL INCOMPATIBILITY*)
+  o Added option to "ctype" to return the index of character that failed the
+    specified classification.  Based on code developed by John Robert LoVerso
+    <loverso@osf.org>
+-------------------------------------------------------------------------------
+27 Sep 93:
+  o Added support for old format tclIndex files.
+-------------------------------------------------------------------------------
+30 Sep 93:
+  o Integrated with Tcl 7.0 and Tk 3.3.
+-------------------------------------------------------------------------------

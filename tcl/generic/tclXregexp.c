@@ -16,12 +16,11 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 2.6 1993/08/03 06:13:44 markd Exp markd $
+ * $Id: tclXregexp.c,v 2.7 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-#include "regexp.h"
 
 /*
  * This is declared in tclUtil.c.  Must be set to NULL before compiling

@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.15 1993/09/23 05:40:51 markd Exp markd $
+# $Id: Makefile.in,v 2.16 1993/09/25 16:06:44 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -26,6 +26,8 @@ srcdir            = @srcdir@
 srcbasedir        = @srcbasedir@
 bldbasedir        = @bldbasedir@
 VPATH             = @srcdir@
+prefix            = @prefix@
+execprefix        = @execprefix@
 MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
 
 #------------------------------------------------------------------------------
@@ -42,8 +44,8 @@ BUILDIDX.TCL   = ${bldbasedir}/tclmaster/buildidx.tcl
 LOADOUSTER.TCL = ${bldbasedir}/tclmaster/loadouster.tcl
 MAN            = ${bldbasedir}/tclmaster/man
 HELP           = ${bldbasedir}/tclmaster/help
-CPMANPAGES     = ${srcbasedir}/tools/cpmanpages.tcl
-BLDMANHELP     = ${srcbasedir}/tools/bldmanhelp.tcl
+CPMANPAGES     = ${srcbasedir}/tools/cpmanpages
+BLDMANHELP     = ${srcbasedir}/tools/bldmanhelp
 TCLMANPAGES    = ${srcbasedir}/tools/tclmanpages
 
 #------------------------------------------------------------------------------
@@ -98,7 +100,7 @@ ${MAN}: ${TCLINIT.TCL} ${TCL.TLIB}
 HELPCP: ${HELP}/Tcl.brf ${HELP}/TclX.brf
 
 ${HELP}/Tcl.brf ${HELP}/TclX.brf:
-	sh ${srcbasedir}/tools/cphelpdir.sh ${srcbasedir}/tclmaster/help \
+	${srcbasedir}/tools/cphelpdir ${srcbasedir}/tclmaster/help \
            ${bldbasedir}/tclmaster/help
 
 #------------------------------------------------------------------------------
