@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 3.0 1993/11/19 06:58:51 markd Rel markd $
+ * $Id: tclXkeylist.c,v 3.1 1994/01/05 06:16:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -450,7 +450,7 @@ Tcl_SetKeyedListField (interp, fieldName, fieldValue, keyedList)
     fieldInfo_t  fieldInfo;
     char        *elemArgv [2];
 
-    if (fieldName [0] == '0') {
+    if (fieldName [0] == '\0') {
         Tcl_AppendResult (interp, "empty field name", (char *) NULL);
         return NULL;
     }
