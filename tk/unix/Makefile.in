@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.24 1996/03/14 06:11:57 markd Exp $
+# $Id: Makefile.in,v 5.25 1996/03/17 06:52:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -210,10 +210,12 @@ buildhelp:
 #------------------------------------------------------------------------------
 
 install: install-exec install-runtime
+	${INSTCOPY} ${TKX_GENERIC_DIR}/tkXAppInit.c \
+	    ${INSTALL_ROOT}${TKX_INST_RUNTIME}
+	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
 
 install-runtime:
 	${INSTCOPY} tkx.tcl ${INSTALL_ROOT}${TKX_INST_RUNTIME}
-	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
 
 install-exec:
 	${INSTCOPY} wishx ${INSTALL_ROOT}${TKX_INST_BIN}

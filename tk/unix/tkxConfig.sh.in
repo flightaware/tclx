@@ -3,12 +3,14 @@
 # assist in linking with TclX Tk support (libtkx.a).  It is a shell scripted
 # designed to be sourced by configure scripts.  The system libraries defined
 # in here need to be used in addition to those defined in tclConfig.sh,
-# tclxConfig.sh and tkConfig.sh
+# tclxConfig.sh and tkConfig.sh.  See tclExtend.h for a full expanation of the
+# version numbers.  No values are currently filled in for TKX_LIBS.  Its just
+# kept for future expansibility.
 #
 # System: @UNAME_OUT@
 # Date:   @DATE_OUT@
 #
 
 TKX_FULL_VERSION='@TKX_FULL_VERSION@'
-TKX_DEFS='@TKX_DEFS@'
-TKX_LIBS='@TKX_LIBS@'
+TKX_DEFS='@DEFS@'
+TKX_LIBS=''

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.10 1996/03/11 06:16:10 markd Exp $
+ * $Id: tkXshell.c,v 5.11 1996/03/17 06:52:15 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -90,7 +90,7 @@ TkX_Main(argc, argv, appInitProc)
     TclX_SetAppInfo (TRUE,
                      "wishx",
                      "Extended Wish",
-                     TKX_VERSION,
+                     TKX_FULL_VERSION,
                      TCLX_PATCHLEVEL);
 
     Tcl_FindExecutable(argv[0]);

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 5.7 1996/03/10 22:16:43 markd Exp $
+ * $Id: tclXgeneral.c,v 5.8 1996/03/11 08:14:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,7 +22,7 @@
  * Values returned by the infox command.
  */
 
-static char *tclxVersion       = TCLX_SYM_VERSION;
+static char *tclxVersion       = TCLX_FULL_VERSION;
 static int   tclxPatchlevel    = TCLX_PATCHLEVEL;
 static char *tclAppName        = NULL;
 static char *tclAppLongName    = NULL;
