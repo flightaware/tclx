@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.2 1992/11/15 06:59:52 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.3 1992/11/17 06:26:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -306,6 +306,9 @@ ProcessInitFile (interp)
  * which has the path of the full initialization file. The default file can
  * also set things such as path variables.  
  *
+ * If this is an interactive Tcl session, SIGINT is set to generate a Tcl
+ * error.
+ *
  * Parameters
  *   o interp - A pointer to the interpreter.
  *   o options - Flags to control the behavior of this routine, the following
@@ -429,6 +432,10 @@ Tcl_ShellEnvInit (interp, options, programName, argc, argv, interactive,
     }
     if (defaultFilePath != defaultFile)
         ckfree (defaultFilePath);
+
+    if (interactive)
+        Tcl_SetupSigInt ();
+
     return TCL_OK;
 
 errorExit:
@@ -503,7 +510,6 @@ Tcl_Startup (interp, argc, argv, defaultFile, options)
         if (result != TCL_OK)
             goto errorAbort;
     } else {
-        Tcl_SetupSigInt ();
         Tcl_CommandLoop (interp, stdin, stdout, tclShellCmdEvalProc, 0);
     }
 
