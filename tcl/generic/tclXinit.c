@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.3 1997/04/17 04:58:42 markd Exp $
+ * $Id: tclXinit.c,v 8.4 1997/06/12 21:08:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -203,9 +203,9 @@ TclX_ErrorExit TCL_VARARGS_DEF(Tcl_Interp *, interpArg)
     va_list argList;
     Tcl_Interp  *interp;
     int exitCode;
-    char *message, *errorStack, *noDump;
+    char *message, *errorStack, *noDump, *strResult;
     Tcl_Channel stdoutChan, stderrChan;
-    Tcl_DString savedResult;
+    Tcl_Obj *savedResult;
 
     interp = TCL_VARARGS_START (Tcl_Interp *, interpArg, argList);
     exitCode = va_arg (argList, int);
@@ -218,8 +218,9 @@ TclX_ErrorExit TCL_VARARGS_DEF(Tcl_Interp *, interpArg)
     }
     va_end (argList);
 
-    Tcl_DStringInit (&savedResult);
-    Tcl_DStringAppend (&savedResult, interp->result, -1);
+    savedResult = Tcl_GetObjResult (interp);
+    Tcl_IncrRefCount (savedResult);
+    strResult = Tcl_GetStringFromObj (savedResult, NULL);
 
     stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
     stderrChan = Tcl_GetStdChannel (TCL_STDERR);
@@ -246,9 +247,8 @@ TclX_ErrorExit TCL_VARARGS_DEF(Tcl_Interp *, interpArg)
          * Don't output the result if its the first thing on the error stack.
          */
         if ((errorStack == NULL) || 
-            (strncmp (Tcl_DStringValue (&savedResult),
-                      errorStack, Tcl_DStringLength (&savedResult) != 0))) {
-            TclX_WriteStr (stderrChan, Tcl_DStringValue (&savedResult));
+            (strncmp (strResult, errorStack, strlen (strResult) != 0))) {
+            TclX_WriteStr (stderrChan, strResult);
             TclX_WriteNL (stderrChan);
         }
         if (errorStack != NULL) {
@@ -258,6 +258,7 @@ TclX_ErrorExit TCL_VARARGS_DEF(Tcl_Interp *, interpArg)
         Tcl_Flush (stderrChan);
     }
 
+    Tcl_DecrRefCount (savedResult);
     Tcl_Exit (exitCode);
 }
 

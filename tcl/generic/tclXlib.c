@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.7 1997/06/30 07:57:48 markd Exp $
+ * $Id: tclXlib.c,v 8.8 1997/06/30 16:47:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1524,12 +1524,12 @@ TclX_Auto_loadObjCmd (clientData, interp, objc, objv)
 
   found:
     RemoveInProgress (interp, infoPtr, command);
-    interp->result = "1";
+    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
     return TCL_OK;
 
   notFound:
     RemoveInProgress (interp, infoPtr, command);
-    interp->result = "0";
+    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), FALSE);
     return TCL_OK;
 
   errorExit:

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.2 1997/06/12 21:08:14 markd Exp $
+ * $Id: tclXdebug.c,v 8.3 1997/06/30 16:05:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -418,7 +418,7 @@ TclX_CmdtraceObjCmd (clientData, interp, objc, objv)
     if (STREQU (argStr, "depth")) {
         if (objc != 2)
             goto argumentError;
-        sprintf(interp->result, "%d", infoPtr->depth);
+        Tcl_SetIntObj (Tcl_GetObjResult (interp),  infoPtr->depth);
         return TCL_OK;
     }
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 8.5 1997/06/29 19:13:25 markd Exp $
+ * $Id: tclXcmdloop.c,v 8.6 1997/06/30 03:55:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -132,6 +132,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
     char       *checkCmd;
 {
     Tcl_Channel stdoutChan,  stderrChan;
+    char *resultStr;
 
     /*
      * If the command was supplied and it was a successful set of a variable,
@@ -146,10 +147,11 @@ TclX_PrintResult (interp, intResult, checkCmd)
     if (intResult == TCL_OK) {
         if (stdoutChan == NULL)
             return;
-        if (interp->result [0] != '\0') {
+        resultStr = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
+        if (resultStr [0] != '\0') {
             if (stderrChan != NULL)
                 Tcl_Flush (stderrChan);
-            TclX_WriteStr (stdoutChan, interp->result);
+            TclX_WriteStr (stdoutChan, resultStr);
             TclX_WriteNL (stdoutChan);
             Tcl_Flush (stdoutChan);
         }
@@ -166,8 +168,9 @@ TclX_PrintResult (interp, intResult, checkCmd)
         } else {
             sprintf (msg, "Bad return code (%d): ", intResult);
         }
+        resultStr = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
         TclX_WriteStr (stderrChan, msg);
-        TclX_WriteStr (stderrChan, interp->result);
+        TclX_WriteStr (stderrChan, resultStr);
         TclX_WriteNL (stderrChan);
         Tcl_Flush (stderrChan);
     }
@@ -198,7 +201,7 @@ OutputPrompt (interp, topLevel, prompt1, prompt2)
     char       *prompt1;
     char       *prompt2;
 {
-    char *promptHook;
+    char *promptHook, *resultStr;
     int result, useResult, promptDone = FALSE;
     Tcl_Channel stdoutChan, stderrChan;
 
@@ -239,15 +242,16 @@ OutputPrompt (interp, topLevel, prompt1, prompt2)
 
     if (promptHook != NULL) {
         result = Tcl_Eval (interp, promptHook);
+        resultStr = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
         if (result == TCL_ERROR) {
             if (stderrChan != NULL) {
                 TclX_WriteStr (stderrChan, "Error in prompt hook: ");
-                TclX_WriteStr (stderrChan, interp->result);
+                TclX_WriteStr (stderrChan, resultStr);
                 TclX_WriteNL (stderrChan);
             }
         } else {
             if (useResult && (stdoutChan != NULL))
-                TclX_WriteStr (stdoutChan, interp->result);
+                TclX_WriteStr (stdoutChan, resultStr);
             promptDone = TRUE;
         }
     } 
@@ -323,7 +327,7 @@ AsyncCommandHandler (clientData, mask)
 {
     asyncLoopData_t *dataPtr = (asyncLoopData_t *) clientData;
     int code;
-    char *cmd;
+    char *cmd, *resultStr;
 
     /*
      * Make sure that we are the current signal error handler.  This
@@ -375,7 +379,10 @@ AsyncCommandHandler (clientData, mask)
     code = Tcl_RecordAndEval (dataPtr->interp, cmd, TCL_EVAL_GLOBAL);
     Tcl_CreateChannelHandler (dataPtr->channel, TCL_READABLE,
                               AsyncCommandHandler, clientData);
-    if (dataPtr->interp->result [0] != '\0') {
+
+    resultStr = Tcl_GetStringFromObj (Tcl_GetObjResult (dataPtr->interp),
+                                      NULL);
+    if (resultStr [0] != '\0') {
         if (dataPtr->options & TCLX_CMDL_INTERACTIVE) {
             TclX_PrintResult (dataPtr->interp, code, cmd);
         }

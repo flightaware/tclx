@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.3 1997/06/30 01:29:02 markd Exp $
+ * $Id: tclXfilescan.c,v 8.4 1997/06/30 07:57:45 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -650,7 +650,8 @@ ScanFile (interp, contextPtr, channel)
         if (Tcl_Gets (channel, &buffer) < 0) {
             if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))
                 goto scanExit;
-            interp->result = Tcl_PosixError (interp);
+            Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                              Tcl_PosixError (interp), -1);
             result = TCL_ERROR;
             goto scanExit;
         }
@@ -735,7 +736,8 @@ ScanFile (interp, contextPtr, channel)
 	    if ((Tcl_Write (contextPtr->copyFileChannel,
                             buffer.string, buffer.length) < 0) ||
                 (TclX_WriteNL (contextPtr->copyFileChannel) < 0)) {
-		interp->result = Tcl_PosixError (interp);
+                Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                                  Tcl_PosixError (interp), -1);
 		return TCL_ERROR;
 	    }
 	}

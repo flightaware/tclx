@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.2 1997/06/12 21:08:31 markd Exp $
+ * $Id: tclXsignal.c,v 8.3 1997/06/30 03:56:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -201,7 +201,7 @@ static char *SIGACT_UNKNOWN = "unknown";
  * Structure used to save error state of the interpreter.
  */
 typedef struct {
-    char  *result;
+    char  *result;   /*FIX: Save results objects*/
     char  *errorInfo;
     char  *errorCode;
 } errState_t;
@@ -480,8 +480,8 @@ BlockSignals (interp, action, signals)
 
     return TCL_OK;
 #else
-    interp->result =
-       "Posix signals are not available on this system, can not block signals";
+    TclX_AppendResult (interp,
+      "Posix signals are not available on this system, can not block signals");
     return TCL_ERROR;
 #endif
 }
@@ -665,13 +665,14 @@ SaveErrorState (interp)
     Tcl_Interp *interp;
 {
     errState_t *errStatePtr;
-    char       *errorInfo, *errorCode, *nextPtr;
+    char       *result, *errorInfo, *errorCode, *nextPtr;
     int         len;
 
+    result = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
     errorInfo = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
     errorCode = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
 
-    len = sizeof (errState_t) + strlen (interp->result) + 1;
+    len = sizeof (errState_t) + strlen (result) + 1;
     if (errorInfo != NULL)
         len += strlen (errorInfo) + 1;
     if (errorCode != NULL)
@@ -682,8 +683,8 @@ SaveErrorState (interp)
     nextPtr = ((char *) errStatePtr) + sizeof (errState_t);
 
     errStatePtr->result = nextPtr;
-    strcpy (errStatePtr->result, interp->result);
-    nextPtr += strlen (interp->result) + 1;
+    strcpy (errStatePtr->result, result);
+    nextPtr += strlen (result) + 1;
 
     errStatePtr->errorInfo = NULL;
     if (errorInfo != NULL) {

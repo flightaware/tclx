@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 8.5 1997/06/30 03:56:02 markd Exp $
+ * $Id: tclXprocess.c,v 8.6 1997/06/30 07:57:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -171,7 +171,8 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
     int idx, options = 0, pgroup = FALSE;
     char *argStr;
     pid_t returnedPid, pid;
-    int tmpPid, status;    
+    int tmpPid, status;
+    Tcl_Obj *resultList [3];
 
     for (idx = 1; idx < objc; idx++) {
         argStr = Tcl_GetStringFromObj (objv [idx], NULL);
@@ -250,17 +251,21 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
      */
     if (returnedPid == 0)
         return TCL_OK;
-    
-    if (WIFEXITED (status))
-        sprintf (interp->result, "%d %s %d", returnedPid, "EXIT", 
-                 WEXITSTATUS (status));
-    else if (WIFSIGNALED (status))
-        sprintf (interp->result, "%d %s %s", returnedPid, "SIG", 
-                 Tcl_SignalId (WTERMSIG (status)));
-    else if (WIFSTOPPED (status))
-        sprintf (interp->result, "%d %s %s", returnedPid, "STOP", 
-                 Tcl_SignalId (WSTOPSIG (status)));
 
+    resultList [0] = Tcl_NewIntObj (returnedPid);
+    if (WIFEXITED (status)) {
+        resultList [1] = Tcl_NewStringObj ("EXIT", -1);
+        resultList [2] = Tcl_NewIntObj (WEXITSTATUS (status));
+    } else if (WIFSIGNALED (status)) {
+        resultList [1] = Tcl_NewStringObj ("SIG", -1);
+        resultList [2] = Tcl_NewStringObj (Tcl_SignalId (WTERMSIG (status)),
+                                           -1);
+    } else if (WIFSTOPPED (status)) {
+        resultList [1] = Tcl_NewStringObj ("STOP", -1);
+        resultList [2] = Tcl_NewStringObj (Tcl_SignalId (WSTOPSIG (status)),
+                                           -1);
+    }
+    Tcl_SetListObj (Tcl_GetObjResult (interp), 3, resultList);
     return TCL_OK;
 
   usage:
