@@ -12,15 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.7 1997/07/04 08:41:04 markd Exp $
+ * $Id: tclXstring.c,v 8.8 1997/07/04 20:24:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * FIX: Eliminate use of TclSetObjResultFromStrResult.
- */
 
 /*
  * Prototypes of internal functions.

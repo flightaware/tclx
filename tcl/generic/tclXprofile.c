@@ -12,12 +12,8 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.10 1997/07/08 16:39:34 markd Exp $
+ * $Id: tclXprofile.c,v 8.11 1997/07/10 09:50:09 markd Exp $
  *-----------------------------------------------------------------------------
- */
-
-/*
- * FIX: What about compiled commands???
  */
 
 #include "tclExtdInt.h"
