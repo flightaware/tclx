@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 4.1 1995/01/01 19:49:46 markd Exp markd $
+# $Id: buildutil.tcl,v 5.0 1995/07/25 05:59:34 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -59,6 +59,9 @@ proc CopyFile {sourceFile target} {
 proc CopySubDir {sourceDir destDir} {
     foreach sourceFile [readdir $sourceDir] {
         if [file isdirectory $sourceDir/$sourceFile] {
+          if [cequal [file tail $sourceFile ] "CVS"] {
+                  continue
+          }
             set destFile $destDir/$sourceFile
             if {![file exists $destFile]} {
                 mkdir $destFile}
@@ -82,6 +85,9 @@ proc CopyDir {sourceDir destDir} {
     }
     if ![file isdirectory $sourceDir] {
         error "\"$sourceDir\" isn't a directory"
+    }
+    if [cequal [file tail $sourceDir] "CVS"] {
+          return
     }
     
     # Dirs must be absolutes paths, as we are going to change directories.
