@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 1.17 1993/11/09 07:50:37 markd Exp markd $
+dnl $Id: configure.in,v 1.18 1993/11/10 06:47:40 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.17 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.18 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
 
@@ -109,6 +109,12 @@ AC_SUBST(MAKEQUOTE)
 
 AC_HAVE_FUNCS(catgets getcwd select setitimer setlinebuf sigaction setpgid)
 AC_HAVE_FUNCS(bzero bcopy gethostbyname fsync getpriority)
+
+#------------------------------------------------------------------------------
+#       Check for system header files.
+#------------------------------------------------------------------------------
+
+AC_HEADER_CHECK(values.h, , AC_DEFINE(NO_VALUES_H))
 
 #------------------------------------------------------------------------------
 #       Check for missing functions that we need.  They will be

@@ -337,3 +337,28 @@ SGI:
 
      This will cause a functioning (but not internationalized) strftime
      to be built and added to libtclx.a.
+
+BSDI:
+   o The BSDI make is broken.  It does not correctly handle the setting of
+     ${MAKEFLAGS} and quits on an error when an empty make flags set is passed
+     to the next level of make.  GNU make is advised instead.  Use the
+     following make command to work around the problem:
+
+          make -k MAKEFLAGS=k
+
+   o Also seee the 386BSD/BSDI section below.
+
+386BSD/NetBSD:
+   o Expect round off errors in floating point math tests.
+   o Expect errors in floating point math error handling tests.
+   o Expect errors in format command tests.
+   o The installation of the manual pages fails because make can't handle
+     passing a empty string as an argument to a program (it deletes the
+     string).  Try GNU make.
+   o Also seee the 386BSD/BSDI section below.
+
+386BSD/BSDI
+   o There is some problem in the configure parsing of the --arch option.  
+     The syntax "./configure --arch=XXX" will not work, use
+     "./configure --arch XXX" instead.
+    

@@ -124,7 +124,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.17 
+# From configure.in Revision: 1.18 
 
 
 
@@ -432,12 +432,10 @@ done
 
 
 #------------------------------------------------------------------------------
-#       Check for missing functions that we need.  They will be
-#       compiled in the osSupport directory. Must check for SCO
-#       -lintl, which is were strftime is hidden.
+#       Check for system header files.
 #------------------------------------------------------------------------------
 
-echo checking for SCO UNIX libintl
+echo checking for values.h
 echo checking how to run the C preprocessor
 if test -z "$CPP"; then
   # This must be in double quotes, not single quotes, because CPP may get
@@ -458,6 +456,35 @@ rm -f conftest*
 fi
 test ".${verbose}" != "." && echo "	setting CPP to $CPP"
 
+cat > conftest.c <<EOF
+#include <values.h>
+EOF
+err=`eval "($CPP \$DEFS conftest.c >/dev/null) 2>&1"`
+if test -z "$err"; then
+  :
+else
+  
+{
+test -n "$verbose" && \
+echo "	defining NO_VALUES_H"
+DEFS="$DEFS -DNO_VALUES_H=1"
+SEDDEFS="${SEDDEFS}\${SEDdA}NO_VALUES_H\${SEDdB}NO_VALUES_H\${SEDdC}1\${SEDdD}
+\${SEDuA}NO_VALUES_H\${SEDuB}NO_VALUES_H\${SEDuC}1\${SEDuD}
+\${SEDeA}NO_VALUES_H\${SEDeB}NO_VALUES_H\${SEDeC}1\${SEDeD}
+"
+}
+
+fi
+rm -f conftest*
+
+
+#------------------------------------------------------------------------------
+#       Check for missing functions that we need.  They will be
+#       compiled in the osSupport directory. Must check for SCO
+#       -lintl, which is were strftime is hidden.
+#------------------------------------------------------------------------------
+
+echo checking for SCO UNIX libintl
 cat > conftest.c <<EOF
 #if defined(M_UNIX)
   yes
