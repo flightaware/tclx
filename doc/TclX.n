@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.1 1993/11/25 03:21:14 markd Exp markd $
+.\" $Id: TclX.n,v 3.2 1993/11/25 05:03:37 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1725,7 +1725,7 @@ Returns the argument that has the lowest numeric value. The arguments,
 '\"@help: tcl/math/random
 '\"@brief: Return a pseudorandom integer or set the seed.
 .TP
-.B random \fBlimit\fR | \fBseed\fR ?\fIseedval\fR?
+.B random \fIlimit\fR | \fBseed\fR ?\fIseedval\fR?
 .br
 Generate a pseudorandom integer number greater than or equal to zero and
 less than \fIlimit\fR.  If \fBseed\fR is specified, then the command
