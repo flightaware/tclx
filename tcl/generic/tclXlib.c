@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.3 1996/07/26 05:55:55 markd Exp $
+ * $Id: tclXlib.c,v 7.4 1996/08/03 02:12:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -225,6 +225,7 @@ EvalFilePart (interp, fileName, offset, length)
     Tcl_DString pathBuf, cmdBuf;
     char *oldScriptFile, *buf;
     Tcl_Channel channel = NULL;
+
     Tcl_ResetResult (interp);
     Tcl_DStringInit (&pathBuf);
     Tcl_DStringInit (&cmdBuf);
@@ -277,10 +278,11 @@ EvalFilePart (interp, fileName, offset, length)
     iPtr->scriptFile = fileName;
     result = Tcl_GlobalEval (interp, cmdBuf.string);
     iPtr->scriptFile = oldScriptFile;
-                         
+    
+    Tcl_DStringFree (&pathBuf);
+    Tcl_DStringFree (&cmdBuf);
+
     if (result != TCL_ERROR) {
-        Tcl_DStringFree (&pathBuf);
-        Tcl_DStringFree (&cmdBuf);
         return TCL_OK;
     }
 
