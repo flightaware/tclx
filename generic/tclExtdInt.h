@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 1.2 2002/04/03 02:50:35 hobbs Exp $
+ * $Id: tclExtdInt.h,v 1.3 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,17 +21,15 @@
 
 #include "tclExtend.h"
 
+/* Keep it before tcl*Port, otherwise a clash in TclpPanic.
+ */
+#include "tclInt.h"
+
 #if defined(__WIN32__) || defined(_WIN32)
 #   include "tclXwinPort.h"
 #else
 #   include "tclXunixPort.h"
 #endif
-
-/*
- * After above, since some of our port definitions affect what gets defined
- * tclInt.h and the Tcl port file.
- */
-#include "tclInt.h"
 
 /*
  * Assert macro for use in TclX.  Some GCCs libraries are missing a function

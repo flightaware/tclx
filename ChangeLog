@@ -1,3 +1,13 @@
+2004-06-04  Andreas Kupries  <andreask@activestate.com>
+
+	* generic/tclExtdInt.h: Changed when 'tclInt.h' is included. Have
+	  to be done before 'tcl*Port.h', to prevent a clash over
+	  'TclpPanic'. Don Porter claims that this is ok in general as
+	  well. A comment in the file seems to contradict this, but the
+	  compilation I tried was ok. If this becomes truly a problem then
+	  we may have to refactor the TclX headers to ensure that both Tcl
+	  and TclX dependencies are resolved correctly.
+
 2004-05-24  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclXsocket.c (InfoGetHost): read host after arg count
