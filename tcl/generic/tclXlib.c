@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 4.5 1995/01/16 07:39:53 markd Exp markd $
+ * $Id: tclXlib.c,v 4.6 1995/06/30 17:04:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -49,7 +49,7 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
  * This is a global rather than a local so it will work with K&R compilers.
  * Its writable so it works with gcc.
  */
-static char loadOusterCmd [] = "source [info library]/loadouster.tcl";
+static char loadOusterCmd [] = "source $tclx_library/loadouster.tcl";
 
 
 /*
@@ -615,15 +615,13 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
  * BuildPackageIndex --
  *
  * Call the "buildpackageindex" Tcl procedure to rebuild a package index.
- * This is found with the [info library] command.
+ * This is found in the directory pointed to by the $tclx_library variable.
  *
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o tlibFilePath (I) - Absolute path name to the library file.
  * Returns:
  *   TCL_OK or TCL_ERROR.
- *
- * ????Change name to auto something.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -636,7 +634,7 @@ BuildPackageIndex (interp, tlibFilePath)
 
     Tcl_DStringInit (&command);
 
-    Tcl_DStringAppend (&command, "source [info library]/buildidx.tcl;", -1);
+    Tcl_DStringAppend (&command, "source $tclx_library/buildidx.tcl;", -1);
     Tcl_DStringAppend (&command, "buildpackageindex ", -1);
     Tcl_DStringAppend (&command, tlibFilePath, -1);
 
@@ -726,7 +724,7 @@ LoadPackageIndex (interp, tlibFilePath)
  *   The real work of loading an index is done by a procedure that is defined
  * in a seperate file.  Its not possible to put this file in the standard
  * tcl.tlib as a tclIndex might get loaded before the tcl.tndx file is found
- * on the search path.  The function sources [info library]/loadouster.tcl
+ * on the search path.  The function sources $tclx_library/loadouster.tcl
  * if it has not been loaded before.
  *-----------------------------------------------------------------------------
  */

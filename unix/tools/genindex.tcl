@@ -14,10 +14,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: genindex.tcl,v 4.0 1994/07/16 05:29:17 markd Rel markd $
+# $Id: genindex.tcl,v 4.1 1995/01/01 19:49:47 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
-source [info library]/buildidx.tcl
+global tclx_library
+source $tclx_library/buildidx.tcl
 
 buildpackageindex $argv
