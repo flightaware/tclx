@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.28 1993/11/05 05:33:10 markd Exp markd $
+# $Id: Makefile.in,v 2.29 1993/11/11 03:57:52 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh

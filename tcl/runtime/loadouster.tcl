@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: loadouster.tcl,v 1.2 1993/09/28 06:43:46 markd Exp markd $
+# $Id: loadouster.tcl,v 1.3 1993/10/29 04:16:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

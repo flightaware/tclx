@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: stringfile.tcl,v 2.1 1993/03/14 18:37:30 markd Exp markd $
+# $Id: stringfile.tcl,v 2.2 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

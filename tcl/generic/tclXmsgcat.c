@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 2.5 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXmsgcat.c,v 2.6 1993/11/02 07:48:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profrep.tcl,v 2.2 1993/05/13 06:07:08 markd Exp markd $
+# $Id: profrep.tcl,v 2.3 1993/05/19 03:41:57 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkdemo.tcl,v 1.3 1993/04/07 02:42:32 markd Exp markd $
+# $Id: tkdemo.tcl,v 1.4 1993/07/18 21:14:28 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

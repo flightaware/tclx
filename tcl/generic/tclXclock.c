@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 2.8 1993/09/21 05:11:18 markd Exp markd $
+ * $Id: tclXclock.c,v 2.9 1993/11/18 06:14:51 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

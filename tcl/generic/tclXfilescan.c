@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.12 1993/10/07 06:35:45 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.13 1993/11/02 07:48:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

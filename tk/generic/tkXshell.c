@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 1.1 1993/11/11 03:56:52 markd Exp markd $
+ * $Id: tkXshell.c,v 1.2 1993/11/17 15:16:25 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

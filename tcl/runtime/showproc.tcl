@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showproc.tcl,v 2.3 1993/06/24 07:28:33 markd Exp markd $
+# $Id: showproc.tcl,v 2.4 1993/09/29 04:10:08 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

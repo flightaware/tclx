@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 1.3 1993/10/01 03:49:16 markd Exp markd $
+# $Id: buildutil.tcl,v 1.4 1993/10/23 23:33:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

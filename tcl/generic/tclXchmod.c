@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 2.5 1993/08/04 04:27:48 markd Exp markd $
+ * $Id: tclXchmod.c,v 2.6 1993/08/31 23:06:06 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

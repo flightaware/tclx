@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 1.3 1993/11/17 15:16:25 markd Exp markd $
+ * $Id: tkXAppInit.c,v 1.4 1993/11/18 04:37:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.3 1993/11/17 15:16:25 markd Exp markd $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.4 1993/11/18 04:37:17 markd Exp markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"

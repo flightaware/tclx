@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 2.6 1993/09/16 05:37:54 markd Exp markd $
+# $Id: help.tcl,v 2.7 1993/10/07 05:49:51 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

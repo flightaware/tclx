@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: parray.tcl,v 1.1 1993/04/07 02:36:37 markd Exp markd $
+# $Id: parray.tcl,v 1.2 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #@package: Tcl-parray parray

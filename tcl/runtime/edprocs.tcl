@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: edprocs.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
+# $Id: edprocs.tcl,v 2.2 1993/10/04 06:41:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
