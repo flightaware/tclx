@@ -217,6 +217,7 @@
 ./tclmaster/help/tcl/strings/clength
 ./tclmaster/help/tcl/strings/crange
 ./tclmaster/help/tcl/strings/csubstr
+./tclmaster/help/tcl/strings/ctoken
 ./tclmaster/help/tcl/strings/ctype
 ./tclmaster/help/tcl/strings/format
 ./tclmaster/help/tcl/strings/regexp

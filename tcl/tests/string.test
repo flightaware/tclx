@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 2.2 1993/07/12 06:28:33 markd Exp markd $
+# $Id: string.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -172,3 +172,31 @@ Test string-6.3 {translit tests} {
     translit
 } 1 {wrong # args: translit from to string}
 
+# Test the ctoken command
+
+Test string-7.1 {ctoken tests} {
+    ctoken
+} 1 {wrong # args: ctoken strvar separators}
+
+Test string-7.2 {ctoken tests} {
+    ctoken a b c
+} 1 {wrong # args: ctoken strvar separators}
+
+Test string-7.3 {ctoken tests} {
+    set orgstr "  \t  this\tis \n  a   test   "
+    set s1 [ctoken orgstr " \t\n"]
+    set s1v $orgstr
+    set s2 [ctoken orgstr " \t\n"]
+    set s2v $orgstr
+    set s3 [ctoken orgstr " \t\n"]
+    set s3v $orgstr
+    set s4 [ctoken orgstr " \t\n"]
+    set s4v $orgstr
+    set s5 [ctoken orgstr " \t\n"]
+    set s5v $orgstr
+    list $s1 $s1v $s2 $s2v $s3 $s3v $s4 $s4v $s5 $s5v
+} 0 [list "this"  "\tis \n  a   test   " \
+          "is"    " \n  a   test   " \
+          "a"     "   test   " \
+          "test"  "   " \
+          ""      ""]

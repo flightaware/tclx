@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.20 1993/07/18 19:08:27 markd Exp markd $
+.\" $Id: TclX.man,v 2.21 1993/07/20 08:35:45 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -119,6 +119,7 @@ may be a \fBreturn\fR) will be used as the prompt.
 .br
 Writes zero or more strings to standard output, followed by a newline.
 '@endhelp
+'
 '@help: tcl/status/infox
 '@brief: Return information about Extended Tcl, or the current application.
 .TP
@@ -599,6 +600,7 @@ is specified, the time will be formated as Greenwich Mean Time. If the
 argument is not specified or is empty, then the local timezone will be used as
 defined by the TIMEZONE environment variable.
 '@endhelp
+'
 '@help: tcl/processes/fork
 '@brief: Fork the current Tcl process.
 .TP
@@ -617,6 +619,7 @@ open output file before doing the \fBfork\fR. Otherwise characters from the
 parent process pending in the buffers will be output by both the parent
 and child processes.
 '@endhelp
+'
 '@help: tcl/time/getclock
 '@brief: Return current date and time as an integer value.
 .TP
@@ -626,6 +629,7 @@ Return the current date and time as a system-dependent integer value.  The
 unit of the value is seconds, allowing it to be used for relative time
 calculations.
 '@endhelp
+'
 '@help: tcl/status/id
 '@brief: Access, set or convert process, user and group information.
 .TP
@@ -700,6 +704,7 @@ is optional
 when the signal is specified by its symbolic name.
 The default for \fIsigno\fR is 15, SIGTERM.
 '@endhelp
+'
 '@help: tcl/files/link
 '@brief: Create a link to a file.
 .TP
@@ -710,6 +715,7 @@ Create a directory entry, \fIdestpath\fR, linking it to the existing file,
 a hard link, is created.  (The \fB-sym\fR option is only available
 on systems that support symbolic links.)
 '@endhelp
+'
 '@help: tcl/files/mkdir
 '@brief: Create a new directory
 .TP
@@ -720,6 +726,7 @@ new directories is 777, modified by the umask.  If \fB-path\fR is specified,
 then any non-existent parent directories in the specified path(s) are also
 created.
 '@endhelp
+'
 '@help: tcl/files/rmdir
 '@brief: Remove directories
 .TP
@@ -728,6 +735,7 @@ created.
 Remove each of the directories in the list \fIdirList\fR.
 If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@endhelp
+'
 '@help: tcl/signals/signal
 '@brief: Specify action to take when a signal is received.
 .TP
@@ -791,6 +799,7 @@ Tcl sessions leave \fBSIGINT\fR unchanged from when the process started
 (normally \fBdefault\fR for foreground processes and \fBignore\fR for
 processes in the background).
 '@endhelp
+'
 '@help: tcl/time/sleep
 '@brief: Sleep for the specified number of seconds.
 .TP
@@ -798,6 +807,7 @@ processes in the background).
 .br
 Sleep the Extended Tcl process for \fIseconds\fR seconds.
 '@endhelp
+'
 '@help: tcl/processes/system
 '@brief: Execute command via `system' call.
 .TP
@@ -812,6 +822,7 @@ expansion, redirection, etc,
 as is normal from an \fBsh\fR command line.  The exit code of
 the command is returned.
 '@endhelp
+'
 '@help: tcl/time/times
 '@brief: Get process and child execution times.
 .TP
@@ -824,6 +835,7 @@ Return a list containing the process and child execution times in the form:
 Also see the \fItimes\fR(2) system call manual page.
 The values are in milliseconds.
 '@endhelp
+'
 '@help: tcl/status/umask
 '@brief: Get or set the file-creation mode mask.
 .TP
@@ -832,6 +844,7 @@ The values are in milliseconds.
 Sets file-creation mode mask to the octal value of \fIoctalmask\fR.
 If \fIoctalmask\fR is omitted, the current mask is returned.
 '@endhelp
+'
 '@help: tcl/files/unlink
 '@brief: Delete (unlink) files.
 .TP
@@ -840,6 +853,7 @@ If \fIoctalmask\fR is omitted, the current mask is returned.
 Delete (unlink) the files whose names are in the list \fIfilelist\fR.
 If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@endhelp
+'
 '@help: tcl/processes/wait
 '@brief: Wait for a child process to terminate.
 .TP
@@ -1713,6 +1727,7 @@ This command is a shortcut for:
 .ft R
 .fi
 '@endhelp
+'
 '@help: tcl/strings/crange
 '@brief: Return range of characters from string.
 .TP
@@ -1727,6 +1742,7 @@ If the expression \fIfirstExpr\fR or \fBlastExpr\fR starts with the string
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
 '@endhelp
+'
 '@help: tcl/strings/csubstr
 '@brief: Return a substring from within a string.
 .TP
@@ -1741,6 +1757,21 @@ If the expression \fIfirstExpr\fR or \fBlengthExpr\fR starts with the string
 the string.  If the expression starts with \fBlen\fR, then \fBlen\fR is
 replaced with the length of the string.
 '@endhelp
+'
+'@help: tcl/strings/ctoken
+'@brief: Parse a token from a character string.
+.TP
+.B ctoken \fIstrvar separators\fR
+.br
+Parse a token out of a character string.
+The string to parse is contained in the variable named \fIstrvar\fR.
+The string \fIseparators\fR contains all of the valid separator characters
+for tokens in the string.
+All leading separators are skipped and the first token is returned.
+The variable \fIstrvar\fR will be modified to contain the remainder of
+the string following the token.
+'@endhelp
+'
 '@help: tcl/strings/ctype
 '@brief: Determine if a string has various characteristics.
 .TP
@@ -1814,6 +1845,7 @@ Tests that all characters are valid hexadecimal digits, that is \fI0\fR
 through \fI9\fR, a through \fIf\fR or \fIA\fR through \fIF\fR.
 .RE
 '@endhelp
+'
 '@help: tcl/strings/replicate
 '@brief: Replicate string a number of times.
 .TP
@@ -2167,6 +2199,7 @@ generally useful:
 Source a file, as with the \fBsource\fR command, except search
 \fBauto_path\fR for the file.
 '@endhelp
+'
 .TP
 '@help: tcl/libraries/searchpath
 '@brief: Search a path list for a file.
@@ -2234,7 +2267,6 @@ to the next \fIpackage\fR line or the end of the file is a package named
 \fBdirectory_stack\fR and that an attempt to execute either \fIpushd\fR,
 \fIpopd\fR or \fIdirs\fR when the routine is not already defined will cause 
 the \fBdirectory_stack\fR portion of the package file to be loaded.
-'
 '@endhelp
 '
 .SS "PACKAGE LIBRARY MANAGEMENT COMMANDS"
@@ -2326,4 +2358,5 @@ Returns a list of the names of all defined packages. If \fI-location\fR
 is specified, a list of pairs of package name and the \fB.tlib\fR path
 name, offset and length of the package within the library.
 '@endhelp
+'
 .TP

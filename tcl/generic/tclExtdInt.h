@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.13 1993/07/19 15:30:04 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.14 1993/07/23 06:42:57 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -434,6 +434,9 @@ Tcl_TranslitCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
 Tcl_CtypeCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_CtokenCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
  * from tclXlib.c

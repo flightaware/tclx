@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcreate.c,v 2.3 1993/04/07 05:55:07 markd Exp markd $
+ * $Id: tclXcreate.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -236,6 +236,8 @@ Tcl_CreateExtendedInterp ()
     Tcl_CreateCommand (interp, "translit", Tcl_TranslitCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "ctype", Tcl_CtypeCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "ctoken", Tcl_CtokenCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 
     /*

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.3 1993/07/12 06:28:33 markd Exp markd $
+ * $Id: tclXstring.c,v 2.4 1993/07/18 05:59:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -169,7 +169,6 @@ Tcl_CrangeCmd (clientData, interp, argc, argv)
  * Tcl_ReplicateCmd --
  *     Implements the replicate TCL command:
  *         replicate string countExpr
- *     See the string(TCL) manual page.
  *
  * Results:
  *      Returns string replicated count times.
@@ -210,6 +209,57 @@ Tcl_ReplicateCmd (clientData, interp, argc, argv)
 
     return TCL_OK;
 
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_CtokenCmd --
+ *     Implements the clength TCL command:
+ *         ctoken strvar separators
+ *
+ * Results:
+ *      Returns the first token and removes it from the string variable.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_CtokenCmd (clientData, interp, argc, argv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          argc;
+    char       **argv;
+{
+    Tcl_DString  string;
+    char        *varValue, *startPtr;
+    int          tokenLen;
+
+    if (argc != 3) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                          " strvar separators", (char *) NULL);
+        return TCL_ERROR;
+    }
+    
+    varValue = Tcl_GetVar (interp, argv [1], TCL_LEAVE_ERR_MSG);
+    if (varValue == NULL)
+        return TCL_ERROR;
+
+    Tcl_DStringInit (&string);
+    Tcl_DStringAppend (&string, varValue, -1);
+
+    startPtr = string.string + strspn (string.string, argv [2]);
+    tokenLen = strcspn (startPtr, argv [2]);
+
+    if (Tcl_SetVar (interp, argv [1], startPtr + tokenLen,
+                    TCL_LEAVE_ERR_MSG) == NULL) {
+        Tcl_DStringFree (&string);
+        return TCL_ERROR;
+    }
+    startPtr [tokenLen] = '\0';
+    Tcl_SetResult (interp, startPtr, TCL_VOLATILE);
+    Tcl_DStringFree (&string);
+
+    return TCL_OK;
 }
 
 /*
