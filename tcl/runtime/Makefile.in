@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.3 1993/04/07 02:40:03 markd Exp markd $
+# $Id: Makefile,v 2.4 1993/04/07 06:50:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,26 +23,50 @@ SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
 
-TCL.TLIB=../tcllib/tcl.tlib
-TCL.TNDX=../tcllib/tcl.tndx
+TCL.TLIB=      ../tclmaster/tcl.tlib
+TCL.TNDX=      ../tclmaster/tcl.tndx
+TCLINIT.TCL=   ../tclmaster/TclInit.tcl
+BUILDHELP.TCL= ../tclmaster/buildhelp.tcl
+BUILDIDX.TCL=  ../tclmaster/buildidx.tcl
+LOADOUSTER.TCL=../tclmaster/loadouster.tcl
 
 #------------------------------------------------------------------------------
 
 TCL_SRCS=arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl     \
          forfile.tcl      forrecur.tcl     globrecur.tcl    help.tcl        \
-         packages.tcl     profrep.tcl      pushd.tcl        setfuncs.tcl    \
-         showprocs.tcl    stringfile.tcl  tkdemo.tcl        ucblib.tcl      \
+         profrep.tcl      pushd.tcl        setfuncs.tcl     showprocs.tcl   \
+         stringfile.tcl   tkdemo.tcl        tcllib.tcl      fmath.tcl       \
+         tclshell.tcl \
          parray.tcl       ../$(TCL_UCB_DIR)/library/parray.tcl
 
 #------------------------------------------------------------------------------
 
 all: made.tmp
 
-made.tmp: $(TCL.TLIB)
+made.tmp: $(TCLINIT.TCL) $(BUILDHELP.TCL) $(BUILDIDX.TCL) $(LOADOUSTER.TCL) \
+          $(TCL.TLIB)
 	touch made.tmp
 
-$(TCL.TLIB): $(TCL_SRCS)
-	 cat $(TCL_SRCS) | egrep -v '^#$$|^#  *|^#-|^#=|^  *#' > $@
+$(TCLINIT.TCL): TclInit.tcl
+	-rm -f $(TCLINIT.TCL) 
+	cp TclInit.tcl $(TCLINIT.TCL)
+
+$(BUILDHELP.TCL): buildhelp.tcl
+	-rm -f $(BUILDHELP.TCL)
+	cp buildhelp.tcl $(BUILDHELP.TCL)
+
+$(BUILDIDX.TCL): buildidx.tcl
+	-rm -f $(BUILDIDX.TCL)
+	cp buildidx.tcl $(BUILDIDX.TCL)
+
+$(LOADOUSTER.TCL): loadouster.tcl
+	-rm -f $(LOADOUSTER.TCL)
+	cp loadouster.tcl $(LOADOUSTER.TCL)
+
+$(TCL.TLIB): $(TCL_SRCS) $(BUILDIDX.TCL) $(TCLINIT.TCL)
+	-rm -f $(TCL.TLIB) $(TCL.TNDX)
+	cat $(TCL_SRCS) | egrep -v '^#$$|^#  *|^#-|^#=|^  *#' > $@
+#???	../runtcl -c "buildpackageindex $(TCL.TLIB)"
 
 #------------------------------------------------------------------------------
 

@@ -12,25 +12,27 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showprocs.tcl,v 2.0 1992/10/16 04:52:11 markd Rel markd $
+# $Id: showprocs.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-show_procedures showproc showprocs
 
 proc showproc {procname} {
-    if [lempty [info procs $procname]] {demand_load $procname}
-	set arglist [info args $procname]
-	set nargs {}
-	while {[llength $arglist] > 0} {
-	    set varg [lvarpop arglist 0]
-	    if [info default $procname $varg defarg] {
-		lappend nargs [list $varg $defarg]
-	    } else {
-		lappend nargs $varg
-	    }
+    if [lempty [info procs $procname]] {
+        auto_load $procname
     }
-    format "proc %s \{%s\} \{%s\}\n" $procname $nargs [info body $procname]
+    set arglist [info args $procname]
+    set nargs {}
+    while {[llength $arglist] > 0} {
+        set varg [lvarpop arglist 0]
+        if [info default $procname $varg defarg] {
+            lappend nargs [list $varg $defarg]
+        } else {
+            lappend nargs $varg
+        }
+    }
+    return "proc $procname \{$nargs\} \{[info body $procname]\}\n"
 }
 
 proc showprocs {args} {

@@ -1,96 +1,21 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 2.2 1993/06/06 15:05:35 markd Exp markd $
+# $Id: TclInit.tcl,v 2.3 1993/06/09 06:05:29 markd Exp markd $
 #-----------------------------------------------------------------------------
-
-set TCLENV(inUnknown) 0
-
-# TCLPATH can be modified here.
 
 #
 # Unknown command trap handler.
 #
-proc unknown {cmdName args} {
-    global TCLENV
-    if $TCLENV(inUnknown) {
-        error "recursive unknown command trap: \"$cmdName\""}
-    set TCLENV(inUnknown) 1
-    
-    set stat [catch {demand_load $cmdName} ret]
-    if {$stat == 0 && $ret} {
-        set TCLENV(inUnknown) 0
-        return [uplevel 1 [list eval $cmdName $args]]
+proc unknown {args} {
+    if [auto_load [lindex $args 0]] {
+        return [uplevel $args]
     }
-
-    if {$stat != 0} {
-        global errorInfo errorCode
-        set TCLENV(inUnknown) 0
-        error $ret $errorInfo $errorCode
+    if {([info proc tclx_unknown2] == "") && ![auto_load tclx_unknown2]} {
+        error "can't find tclx_unknown2 on auto_path"
     }
-
-    global env interactiveSession noAutoExec
-
-    if {$interactiveSession && ([info level] == 1) && ([info script] == "") &&
-            (!([info exists noAutoExec] && [set noAutoExec]))} {
-        if {[file rootname $cmdName] == "$cmdName"} {
-            if [info exists env(PATH)] {
-                set binpath [searchpath [split $env(PATH) :] $cmdName]
-            } else {
-                set binpath [searchpath "." $cmdName]
-            }
-        } else {
-            set binpath $cmdName
-        }
-        if {($binpath != "") && [file executable $binpath]} {
-            set TCLENV(inUnknown) 0
-            uplevel 1 [list system [concat $cmdName $args]]
-            return
-        }
-    }
-    set TCLENV(inUnknown) 0
-    error "invalid command name: \"$cmdName\""
+    return [tclx_unknown2 $args]
 }
-
-#
-# Search a path list for a file. (catch is for bad ~user)
-#
-proc searchpath {pathlist file} {
-    foreach dir $pathlist {
-        if {$dir == ""} {set dir .}
-        if {[catch {file exists $dir/$file} result] == 0 && $result}  {
-            return $dir/$file
-        }
-    }
-    return {}
-}
-
-#
-# Define a proc to be available for demand_load.
-#
-proc autoload {filenam args} {
-    global TCLENV
-    foreach i $args {
-        set TCLENV(PROC:$i) [list F $filenam]
-    }
-}
-
-#
-# Search TCLPATH for a file to source.
-#
-proc load {name} {
-    global TCLPATH errorCode
-    if {[string first / $name] >= 0} {
-        return  [uplevel #0 source $name]
-    }
-    set where [searchpath $TCLPATH $name]
-    if [lempty $where] {
-        error "couldn't find $name in Tcl search path" "" "TCLSH FILE_NOT_FOUND"
-    }
-    uplevel #0 source $where
-}
-
-autoload buildidx.tcl buildpackageindex
 
 # == Put any code you want all Tcl programs to include here. ==
 
