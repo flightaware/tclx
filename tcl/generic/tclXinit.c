@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 4.8 1995/07/05 01:17:36 markd Exp markd $
+ * $Id: tclXinit.c,v 5.0 1995/07/25 05:59:07 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -65,7 +65,7 @@ TclX_ErrorExit (interp, exitCode)
 
     if (Tcl_GetVar2 (interp, "TCLXENV", "noDump", TCL_GLOBAL_ONLY) == NULL) {
         errorStack = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
-        if (errorStack != NULL)
+        if ((errorStack != NULL) && (errorStack [0] != '\0'))
             fprintf (stderrPtr, "Error: %s\n", errorStack);
         else
             fprintf (stderrPtr, "Error: %s\n", interp->result);
