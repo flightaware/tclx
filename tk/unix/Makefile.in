@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.33 1999/07/10 00:56:28 redman Exp $
+# $Id: Makefile.in,v 8.34 1999/12/12 07:47:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -80,9 +80,9 @@ TCL = ../../tcl/unix/tcl
 
 HELP_DIR = ${srcbasedir}/tk/help
 
-TEST_OBJS = tkTest.o tkSquare.o @TCL_THREAD_TEST@ tkXunixTest.o
+TEST_OBJS = tkTest.o tkSquare.o tclThreadTest.o tkXunixTest.o
 
-TEST_SAOBJS = tkTest.o tkSquare.o @TCL_THREAD_TEST@ tkXunixTestSA.o
+TEST_SAOBJS = tkTest.o tkSquare.o tclThreadTest.o tkXunixTestSA.o
 
 #------------------------------------------------------------------------------
 # Dependencies for generating the libraries and linking the executable.
@@ -184,8 +184,8 @@ tkSquare.o: ${TK_SRC_DIR}/generic/tkSquare.c
 tkXtest.o: ${TKX_GENERIC_DIR}/tkXtest.c
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXtest.c
 
-tclThreadTest.o: ${TCL_SRC}/generic/tclThreadTest.c
-	${CC} -c ${CC_SWITCHES} ${TCL_SRC}/generic/tclThreadTest.c
+tclThreadTest.o: ${TCL_SRC_DIR}/generic/tclThreadTest.c
+	${CC} -c ${CC_SWITCHES} ${TCL_SRC_DIR}/generic/tclThreadTest.c
 
 #------------------------------------------------------------------------------
 # If test directory in not in build tree, copy it from the source tree.
@@ -198,16 +198,9 @@ ${bldbasedir}/tk/tests:
 # Run the UCB tests with wishx.
 
 test: all
-	echo "cd ${TK_SRC_DIR}/tests; source all.tcl; exit" | \
-	    ./runtest -geometry +0+0
-
+	dir=`pwd` && cd ${TK_SRC_DIR}/tests && $${dir}/runtest -geometry +0+0 all.tcl
 test.static: all
-	echo "cd ${TK_SRC_DIR}/tests; source all.tcl; exit" | \
-	    ./runtest.static -geometry +0+0
-
-test.verbose: all
-	echo "cd ${TK_SRC_DIR}/tests; set VERBOSE 1; source all.tcl; exit" | \
-	    ./runtest -geometry +0+0
+	dir=`pwd` && cd ${TK_SRC_DIR}/tests && $${dir}/runtest.static -geometry +0+0 all.tcl
 
 #------------------------------------------------------------------------------
 # Build help for Tk.  These files are normally part of the distribution and
