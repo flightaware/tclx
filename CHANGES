@@ -564,8 +564,6 @@
   o Fixed problems with owner/group not being validated if large number.
 -------------------------------------------------------------------------------
 29 Jul 93:
-  o Change the "yy" prefix in the code generated from tclXgetdate.y to be
-    "tclyy".  This is to allow apllications to include yacc code.
   o Fixed bug in select that caused it to return an empty list when data is
     pending in the stdio buffer.
   o Added TclX autoconf configuration.
@@ -574,4 +572,17 @@
   o Provided the functions Tcl_AddExtendedCmds and Tcl_AddExtendedLibCmds
     that can add the Extended Tcl commands to an existing interpreter.
   o Don't print shell prompts if not a tty.
+===============================================================================
+2 Aug 93: Released TclX7.0c Beta 2.
+===============================================================================
+3 Aug 93:
+  o Fixed core dump in chmod command.
+  o Loop command now takes expressions.
 -------------------------------------------------------------------------------
+4 Aug 93:
+  o Change the "yy" prefix in the code generated from tclXgetdate.y to be
+    "TclXyy".  This is to allow apllications to include yacc code.
+  o Call isascii before isspace to handle non-ASCII character sets.
+-------------------------------------------------------------------------------
+5 Aug 93: Released TclX7.0c Beta 3.
+===============================================================================
