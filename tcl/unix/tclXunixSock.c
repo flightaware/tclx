@@ -34,11 +34,65 @@
 
 extern int h_errno;
 
+/*
+ * Prototypes of internal functions.
+ */
+static int
+ReturnGetHostError _ANSI_ARGS_((Tcl_Interp *interp,
+                                char       *host));
+
+static struct hostent *
+InfoGetHostByName _ANSI_ARGS_((Tcl_Interp *interp,
+                               int         argc,
+                               char      **argv));
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ServerOpen --
+ * ReturnGetHostError --
+ *
+ *   Return an error message when gethostbyname or gethostbyaddr fails.
+ *
+ * Parameters:
+ *   o interp (O) - The error message is returned in the result.
+ *   o host (I) - Host name or address that got the error.
+ * Globals:
+ *   o h_errno (I) - The list of file handles to parse, may be empty.
+ * Returns:
+ *   Always returns TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+ReturnGetHostError (interp, host)
+    Tcl_Interp *interp;
+    char       *host;
+{
+    char  *errorMsg;
+
+    switch (h_errno) {
+      case HOST_NOT_FOUND:
+        errorMsg = "host not found";
+        break;
+      case TRY_AGAIN:
+        errorMsg = "try again";
+        break;
+      case NO_RECOVERY:
+        errorMsg = "unrecordable server error";
+        break;
+      case NO_DATA:
+        errorMsg = "no data";
+        break;
+    }
+    Tcl_AppendResult (interp, "host lookup failure: ",
+                      host, " (", errorMsg, ")",
+                      (char *) NULL);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_ServerOpenCmd --
  *     Implements the TCL server_open command:
  *
  *        server_open ?option? host service
@@ -60,6 +114,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
 {
     char               *host, *service;
     int                 socketFD = -1, socketFD2 = -1, nextArg, buffered;
+    struct hostent     *hostEntry;
     struct sockaddr_in  server;
     FILE               *filePtr;
 
@@ -95,9 +150,8 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
      * Convert service number or lookup the service name.
      */
     bzero (&server, sizeof (server));
-    server.sin_family = AF_INET;
 
-    if (ISDIGIT (*service)) {
+    if (ISDIGIT (service [0])) {
         int  port;
         
         if (Tcl_GetInt (interp, service, &port) != TCL_OK)
@@ -118,46 +172,44 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     /*
      * Convert IP address or lookup host name.
      */
-    if (ISDIGIT (*host)) {
-        server.sin_addr.s_addr = inet_addr (host);
+    server.sin_addr.s_addr = inet_addr (host);
+    if (server.sin_addr.s_addr != INADDR_NONE) {
+        server.sin_family = AF_INET;
+        hostEntry = NULL;
     } else {
-        struct hostent *hostEntry;
-
         hostEntry = gethostbyname (host);
-        if (hostEntry == NULL) {
-            char  *errorMsg;
+        if (hostEntry == NULL)
+            return ReturnGetHostError (interp, host);
 
-            switch (h_errno) {
-              case HOST_NOT_FOUND:
-                errorMsg = "host not found";
-                break;
-              case TRY_AGAIN:
-                errorMsg = "try again";
-                break;
-              case NO_RECOVERY:
-                errorMsg = "unrecordable server error";
-                break;
-              case NO_DATA:
-                errorMsg = "no data";
-                break;
-            }
-            Tcl_AppendResult (interp, "host name lookup failure: ",
-                              host, " (", errorMsg, ")",
-                              (char *) NULL);
-            return TCL_ERROR;
-        }
-        bcopy (hostEntry->h_addr, &server.sin_addr, hostEntry->h_length);
+        server.sin_family = hostEntry->h_addrtype;
+        bcopy (hostEntry->h_addr_list [0], &server.sin_addr,
+               hostEntry->h_length);
+        hostEntry->h_addr_list++;
     }
 
     /*
-     * Open a socket and connect to the server.
+     * Open a socket and connect to the server.  If the connect fails and
+     * other addresses are available, try them.
      */
-    socketFD = socket (AF_INET, SOCK_STREAM, 0);
+    socketFD = socket (server.sin_family, SOCK_STREAM, 0);
     if (socketFD < 0)
         goto unixError;
 
-    if (connect (socketFD, (struct sockaddr *) &server, sizeof (server)) < 0)
-        goto unixError;
+    while (TRUE) {
+        if (connect (socketFD, (struct sockaddr *) &server,
+                     sizeof (server)) >= 0)
+            break;  /* Got it */
+
+        if ((hostEntry == NULL) || (hostEntry->h_addr_list [0] == NULL))
+            goto unixError;
+
+        /*
+         * Try next address.
+         */
+        bcopy (hostEntry->h_addr_list [0], &server.sin_addr,
+               hostEntry->h_length);
+        hostEntry->h_addr_list++;
+    }
 
     /*
      * Set up stdio FILE structures.  If buffered, a pair (read/write) is 
@@ -200,12 +252,118 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
         Tcl_CloseForError (interp, socketFD2);
     return TCL_ERROR;
 }
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * InfoGetHostByName --
+ *
+ *   Validate arguments and call gethostbyname for the server_info options
+ * that return info about a host name.
+ *
+ * Parameters:
+ *   o interp (O) - The error message is returned in the result.
+ *   o argc, argv (I) - Command argments.
+ * Returns:
+ *   Pointer to the host entry or NULL if an error occured.
+ *-----------------------------------------------------------------------------
+ */
+static struct hostent *
+InfoGetHostByName (interp, argc, argv)
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    struct hostent *hostEntry;
+
+    if (argc != 3) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", argv [1],
+                          " hostname", (char *) NULL);
+        return NULL;
+    }
+
+    hostEntry = gethostbyname (argv [2]);
+    if (hostEntry == NULL) {
+        ReturnGetHostError (interp, argv [2]);
+        return NULL;
+    }
+    return hostEntry;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_ServerInfoCmd --
+ *     Implements the TCL server_info command:
+ *
+ *        server_info addresses hostname
+ *        server_info addresses hostname
+ *
+ * Results:
+ *   For hostname, a list of address associated with the host.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_ServerInfoCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    struct hostent *hostEntry;
+    struct in_addr  inAddr;
+    int             idx;
+
+    if (argc < 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0],
+                          " option ...", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (STREQU (argv [1], "addresses")) {
+        hostEntry = InfoGetHostByName (interp, argc, argv);
+        if (hostEntry == NULL)
+            return TCL_ERROR;
+
+        for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
+            bcopy (hostEntry->h_addr_list [idx], &inAddr,
+                   hostEntry->h_length);
+            Tcl_AppendElement (interp, inet_ntoa (inAddr));
+        }
+        return TCL_OK;
+    }
+
+    if (STREQU (argv [1], "official_name")) {
+        hostEntry = InfoGetHostByName (interp, argc, argv);
+        if (hostEntry == NULL)
+            return TCL_ERROR;
+
+        Tcl_SetResult (interp, hostEntry->h_name, TCL_STATIC);
+        return TCL_OK;
+    }
+
+    if (STREQU (argv [1], "aliases")) {
+        hostEntry = InfoGetHostByName (interp, argc, argv);
+        if (hostEntry == NULL)
+            return TCL_ERROR;
+
+        for (idx = 0; hostEntry->h_aliases [idx] != NULL; idx++) {
+            Tcl_AppendElement (interp, hostEntry->h_aliases [idx]);
+        }
+        return TCL_OK;
+    }
+
+    Tcl_AppendResult (interp, "invalid option \"", argv [1],
+                      "\", expected on of \"addresses\", \"official_name\"",
+                      " or \"aliases\"", (char *) NULL);
+    return TCL_ERROR;
+}
 #else
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ServerOpen --
+ * Tcl_ServerOpenCmd --
  *     Version of this command that return an error on systems that don't have
  * sockets.
  *-----------------------------------------------------------------------------
@@ -220,6 +378,24 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     Tcl_AppendResult (interp, argv [0], " not available on this system",
                       (char *) NULL);
     return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_ServerInfoCmd --
+ *     Version of this command that return an error on systems that don't have
+ * sockets.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_ServerInfoCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    return Tcl_ServerOpenCmd (clientData, interp, argc, argv);
 }
 
 #endif /* HAVE_GETHOSTBYNAME */

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.8 1994/05/17 06:00:07 markd Exp markd $
+.\" $Id: TclX.n,v 3.9 1994/05/28 03:38:22 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -158,8 +158,8 @@ options available for the signal command).  \fB0\fR is returned if Posix
 signals are not available.
 .TP
 .B have_sockets
-Return \fB1\fR if sockets are available (\fBserver_open\fR command and
-\fBfstat removehost\fR option).
+Return \fB1\fR if sockets are available (\fBserver_open\fR and
+\fBserver_info\fR commands and \fBfstat removehost\fR option).
 \fB0\fR is returned if sockets are not available.
 .TP
 .B appname
@@ -1555,11 +1555,33 @@ significantly better performance when reading data and will also improve
 a series of writes being done with out intermixed reads.  The \fIfcntl\fR
 command may be used to make one of these files unbuffered.
 .sp
-if \fB-nobuf\fR is specified, then the file is unbuffered and a single file id,
+If \fB-nobuf\fR is specified, then the file is unbuffered and a single file id,
 open for both reading and writing, is returned.
+.sp
+If a host name is supplied and more that one address is valid for the host,
+the addresses will be tried until one can be connected to.  Use the
+\fBserver_info\fR command to obtain the list of valid address.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
+'
+'\"@help: tcl/files/server_info
+'\"@brief: Obtain information about a TCP/IP server.
+.TP
+.B server_info \fBaddresses\fR \fIhostname\fR
+.B server_info \fBofficial_name\fR \fIhostname\fR
+.B server_info \fBaliases_name\fR \fIhostname\fR
+.br
+Optain information about a TCP/IP server.
+.sp
+If the \fBaddresses\fR option is specified, the list of IP addresses for the
+\fIhostname\fR is returned.
+.sp
+If the \fBofficial_name\fR option is specified, the official name for
+\fIhostname\fR is returned.
+.sp
+If the \fBaliases\fR option is specified, a list of aliases for \fIhostname\fR
+is returned.
 '
 .SH "FILE SCANNING COMMANDS"
 .PP
