@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: tclmanpages,v 8.6 1999/03/31 06:37:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 return {
@@ -31,6 +31,7 @@ return {
     {close.n        tcl/files/close}
     {concat.n       tcl/lists/concat}
     {continue.n     tcl/control/continue}
+    {dde.n          tcl/control/dde}
     {encoding.n     tcl/intl/encoding}
     {eof.n          tcl/files/eof}
     {error.n        tcl/control/error}

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: tkmanpages,v 8.5 1999/03/31 06:37:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 return {
@@ -26,7 +26,6 @@ return {
     {checkbutton.n  tk/widgets/checkbutton}
     {chooseColor.n  tk/widgets/tk_chooseColor}
     {clipboard.n    tk/control/clipboard}
-    {dde.n          tk/control/dde}
     {destroy.n      tk/control/destroy}
     {dialog.n       tk/widgets/tk_dialog}
     {entry.n        tk/widgets/entry}
