@@ -546,3 +546,6 @@
     fixes bugs with signals received in a signal handler.
    (*POTENTIAL INCOMPATIBILITY*)
 -------------------------------------------------------------------------------
+20 Jul 93:
+  o Fixed bug with lgets not handling backslashes correctly.
+-------------------------------------------------------------------------------
