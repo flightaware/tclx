@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 1.4 1993/11/18 04:37:17 markd Exp markd $
+ * $Id: tkXAppInit.c,v 3.0 1993/11/19 07:01:33 markd Rel markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 1.4 1993/11/18 04:37:17 markd Exp markd $ SPRITE (Berkeley)";
+static char rcsid[] = "$Header: /u/markd/tcl/develop/extended/tksrc/RCS/tkXAppInit.c,v 3.0 1993/11/19 07:01:33 markd Rel markd $ SPRITE (Berkeley)";
 #endif /* not lint */
 
 #include "tclExtend.h"
@@ -60,7 +60,7 @@ int *tclDummyMainPtr = (int *) main;
 /*
  * The following variable is a special hack that insures the tcl
  * version of matherr() is used when linking against shared libraries
- * Only define if the matherr if it seems to be in math.h.
+ * Only define if matherr is used on this system.
  */
 
 #if defined(DOMAIN) && defined(SING)

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 1.4 1993/11/18 04:37:17 markd Exp markd $
+ * $Id: tclXAppInit.c,v 3.0 1993/11/19 06:59:49 markd Rel markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -55,7 +55,7 @@ int *tclXDummyMainPtr = (int *) main;
 /*
  * The following variable is a special hack that insures the tcl
  * version of matherr() is used when linking against shared libraries.
- * Only define if the matherr if it seems to be in math.h.
+ * Only define if matherr is used on this system.
  */
 
 #if defined(DOMAIN) && defined(SING)
