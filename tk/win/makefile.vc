@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 8.3 1997/08/23 18:56:20 markd Exp $
+# $Id: makefile.vc,v 8.4 1997/11/28 20:33:00 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -152,10 +152,10 @@ clean:
 #------------------------------------------------------------------------------
 # Special case object file targets
 #
-$(TMP_DIR)\tkXinit.obj: $(TKX_GENERIC_DIR)}\tkXinit.c
+$(TMP_DIR)\tkXinit.obj: $(TKX_GENERIC_DIR)\tkXinit.c
         $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TKX_INCLUDES) \
             $(TKX_DEFINES) -DTKX_LIBRARY=\"$(TKX_INST_RUNTIMEU)\"\
-            -Fo$(TMP_DIR) tkXinit.c
+            -Fo$(TMP_DIR)\ $(TKX_GENERIC_DIR)\tkXinit.c
 
 $(TMP_DIR)\tkConsole.obj: $(TK_GENERIC_DIR)\tkConsole.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TKX_INCLUDES) \

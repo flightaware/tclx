@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 8.3 1997/08/17 04:08:34 markd Exp $
+# $Id: makefile.vc,v 8.4 1997/11/28 20:32:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -153,7 +153,7 @@ $(TCLXTEST): $(TCLXTESTOBJS) $(TCLX_LIB) $(TMP_DIR)\tcl.res
 $(TMP_DIR)\tclXinit.obj: $(TCLX_GENERIC_DIR)\tclXinit.c
         $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
           $(TCLX_DEFINES) -DTCLX_LIBRARY=\"$(TCLX_INST_RUNTIMEU)\" \
-          -Fo$(TMP_DIR) $(TCLX_GENERIC_DIR)\tclXinit.c
+          -Fo$(TMP_DIR)\ $(TCLX_GENERIC_DIR)\tclXinit.c
 
 $(TMP_DIR)\tclXwinTest.obj: $(TCLX_WIN_DIR)\tclXwinTest.c
         $(cc32) $(cdebug) $(cflags) $(cvars) $(TCLX_INCLUDES) \
@@ -198,4 +198,101 @@ $(TMP_DIR)\cattcl.obj: $(TCLX_WIN_DIR)\cattcl.c
         $(rc32) -fo $@ -r -i $(TCLX_GENERIC_DIR) -i $(TCLX_WIN_DIR) $<
 
 
+
+#------------------------------------------------------------------------------
+# Generate script used to run programs before DLLs and runtime is installed.
+#
+runtcl.bat: makefile.vc ..\..\win\common.vc
+        -del runtcl.bat
+        @echo echo off>>runtcl.bat
+        @echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtcl.bat
+        @echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtcl.bat
+        @echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtcl.bat
+        @echo set TCL_PROGRAM=$(TCLX_WIN_DIR)\tcl.exe>>runtcl.bat
+        @echo $(TCLX_WIN_DIR)\tcl.exe %1 %2 %3 %4 %5 %6 %7>>runtcl.bat
+        @echo runtcl.bat created
+
+runtest.bat: makefile.vc ..\..\win\common.vc
+        -del runtest.bat
+        @echo echo off>>runtest.bat
+        @echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
+        @echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
+        @echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
+        @echo set TCL_PROGRAM=$(TCLX_WIN_DIR)\tclXtest.exe>>runtest.bat
+        @echo $(TCLX_WIN_DIR)\tclXtest.exe %1 %2 %3 %4 %5 %6 %7>>runtest.bat
+        @echo runtcl.bat created
+
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Installation.
+
+install:
+        $(INSTCOPY) $(TCL) $(TCLX_INST_BIN)
+        $(INSTCOPY) $(TCLX_DLL) $(TCLX_INST_BIN)
+        $(INSTCOPY) $(TCLX_LIB) $(TCLX_INST_LIB)
+        $(INSTCOPY) ..\generic\tclExtend.h $(TCLX_INST_INCL)
+        $(INSTCOPY) tcl.tlib tcl.tndx tclx.tcl $(TCLX_INST_RUNTIME)
+        $(INSTCOPY) buildidx.tcl loadouster.tcl $(TCLX_INST_RUNTIME)
+        $(INSTCOPY) ..\help $(TCLX_INST_RUNTIME)
+
+#------------------------------------------------------------------------------
+clean:
+        -del *.exp
+        -del *.lib
+        -del *.dll
+        -del *.exe
+        -del $(TMP_DIR)\*.obj
+        -del *.def
+        -del *.res
+        -del tcl.tlib
+        -del tcl.tndx
+        -del tclx.tcl
+        -del buildidx.tcl
+        -del loadouster.tcl
+        -del runtcl.bat
+        -del runtest.bat
+        -del instcopy
+
+#------------------------------------------------------------------------------
+# Generate the runtime .tlib library in the current directory.  Copy other
+# runtime files into this directory so it can be used as a temporary runtime
+# directory before installation.
+#
+RUNTIME: autoload.tcl tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl instcopy
+
+tcl.tlib: $(TLIB_SRCS) cattcl.exe
+        -del tcl.tlib
+        cattcl $(TLIB_SRCS) >tcl.tlib
+
+autoload.tcl: $(TCLX_RUNTIME_DIR)\autoload.tcl
+        -del autoload.tcl
+        copy $(TCLX_RUNTIME_DIR)\autoload.tcl autoload.tcl
+
+tcl.tndx: tcl.tlib tclx.tcl buildidx.tcl $(TCL) runtcl.bat
+        -del tcl.tndx
+        .\runtcl -q $(ROOT)\unix\tools\genindex.tcl tcl.tlib
+
+tclx.tcl: $(TCLX_RUNTIME_DIR)\tclx.tcl
+        -del tclx.tcl
+        copy $(TCLX_RUNTIME_DIR)\tclx.tcl tclx.tcl
+
+buildidx.tcl: $(TCLX_RUNTIME_DIR)\buildidx.tcl
+        -del buildidx.tcl
+        copy $(TCLX_RUNTIME_DIR)\buildidx.tcl buildidx.tcl
+
+loadouster.tcl: $(TCLX_RUNTIME_DIR)\loadouster.tcl
+        -del loadouster.tcl
+        copy $(TCLX_RUNTIME_DIR)\loadouster.tcl loadouster.tcl
+
+# FIX: Move instcopy, etc to main win directoruy
+TOOLS=$(ROOT)\unix\tools
+instcopy: $(TOOLS)\buildutil.tcl $(TOOLS)\instcopy.tcl cattcl.exe
+        -del instcopy
+        cattcl $(TOOLS)\buildutil.tcl $(TOOLS)\instcopy.tcl >instcopy
+
+cattcl.exe: $(TMP_DIR)\cattcl.obj
+        set LIB=$(LIB)
+        $(link) $(conlflags) -out:cattcl.exe  $(TMP_DIR)\cattcl.obj \
+                $(guilibs) $(libc)
 
