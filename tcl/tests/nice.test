@@ -70,11 +70,11 @@ if {$pid > 0} {
 
 Test nice-1.4 {nice tests} {
     list [nice 3] [nice]
-} 0 [list $niceBase [expr $niceBase+3]]
+} 0 [list [expr $niceBase+3] [expr $niceBase+3]]
 
 Test nice-1.5 {nice tests} {
     list [nice 4] [nice]
-} 0 [list [expr $niceBase+3] [expr $niceBase+3+4]]
+} 0 [list [expr $niceBase+3+4] [expr $niceBase+3+4]]
 
 if {[id user] != "root"} {
 
@@ -98,18 +98,18 @@ if {[id user] != "root"} {
 
 Test nice-1.8 {nice tests} {
     list [nice -1] [nice]
-} 0 [list [expr $niceBase+3+4] [expr $niceBase+3+4-1]]
+} 0 [list [expr $niceBase+3+4-1] [expr $niceBase+3+4-1]]
 
 Test nice-1.10 {nice tests} {
     list [nice -9] [nice]
-} 0 [list [expr $niceBase+3+4-1] [expr $niceBase+3+4-1-9]]
+} 0 [list [expr $niceBase+3+4-1-9] [expr $niceBase+3+4-1-9]]
 
 Test nice-1.11 {nice tests} {
     list [nice -10] [nice]
-} 0 [list [expr $niceBase+3+4-1-9] [expr $niceBase+3+4-1-9-10]]
+} 0 [list [expr $niceBase+3+4-1-9-10] [expr $niceBase+3+4-1-9-10]]
 
 Test nice-1.12 {nice tests} {
     list [nice -1] [nice]
-} 0 [list [expr $niceBase+3+4-1-9-10] [expr $niceBase+3+4-1-9-10-1]]
+} 0 [list [expr $niceBase+3+4-1-9-10-1] [expr $niceBase+3+4-1-9-10-1]]
 
 exit

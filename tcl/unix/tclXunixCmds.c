@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 4.2 1995/01/01 19:49:42 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 4.3 1995/02/08 00:22:38 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -195,9 +195,9 @@ Tcl_NiceCmd (clientData, interp, argc, argv)
     errno = 0;  /* Old priority might be -1 */
 
 #ifdef HAVE_GETPRIORITY
-    priority = getpriority (PRIO_PROCESS, 0);
+    priority = getpriority (PRIO_PROCESS, 0) + priorityIncr;
     if (errno == 0) {
-        setpriority (PRIO_PROCESS, 0, priority + priorityIncr);
+        setpriority (PRIO_PROCESS, 0, priority);
     }
 #else
     priority = nice (priorityIncr);
