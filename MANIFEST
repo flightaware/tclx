@@ -126,6 +126,7 @@
 ./tclhelp/tcl/files/read
 ./tclhelp/tcl/files/read_file
 ./tclhelp/tcl/files/recursive_glob
+./tclhelp/tcl/files/readdir
 ./tclhelp/tcl/files/rmdir
 ./tclhelp/tcl/files/seek
 ./tclhelp/tcl/files/select

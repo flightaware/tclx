@@ -726,4 +726,40 @@
 ===============================================================================
  1 Dec 93:
    o Modify to allow initializing TclX without an Tcl_AppInit function.
+   o Added a C variable to force the interpreter to be delete before an exit.
+     Useful for applications trying to find memory leaks.
 -------------------------------------------------------------------------------
+ 9 Dec 93:
+   o Support correct HZ conversion on cray (thanks to Joanne Pelkey
+     <pelkey@craycos.com>.
+-------------------------------------------------------------------------------
+15 Dec 93:
+   o Fixed problem with tclIndex libraries latter in the search path overriding
+     earlier ones.
+   o Fixed auto_reset, which left TclX autoloading in an invalid state.
+-------------------------------------------------------------------------------
+17 Dec 93:
+   o Changed make process to work around Ultrix non-standardisms.
+   o Fixed alignment problems in scanfile and handle table that broke
+     DEC Alphas.
+-------------------------------------------------------------------------------
+21 Dec 93:
+   o Fixed system command to return exit status rather than wait status.
+     This is what the command was documented to do.
+     (*POTENTIAL INCOMPATIBILITY*)     
+-------------------------------------------------------------------------------
+ 4 Jan 94:
+   o Fixed potential memory corruption when loadlibindex cann't read a file.
+   o Don't let keylset set an empty key name since keylget can't access it.
+-------------------------------------------------------------------------------
+10 Jan 94:
+   o Added check for GNU libc to work around the GNU getopt non-standard
+     behavior.  This should make things happy for Linux.
+   o Improved tclhelp error handling.
+   o Code in tcl_prompt variables must now output the prompt rather than 
+     return it.  This is for compatibility with tclsh.
+     (*POTENTIAL INCOMPATIBILITY*)
+   o Added "readdir" command.
+===============================================================================
+23 Jan 94: Released TclX7.2a-p1 (patch and full release).
+===============================================================================
