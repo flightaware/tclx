@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.7 1997/07/04 08:41:01 markd Exp $
+ * $Id: tclXlist.c,v 8.8 1997/07/04 20:23:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -527,7 +527,7 @@ TclX_LcontainObjCmd (clientData, interp, objc, objv)
     for (idx = 0; idx < listObjc; idx++) {
         elementStr = Tcl_GetStringFromObj (listObjv [idx], &elementLen);
         if ((elementLen == checkLen) &&
-            (memcmp (elementStr, checkStr, elementLen)))
+            (memcmp (elementStr, checkStr, elementLen) == 0))
             break;
     }
     Tcl_SetBooleanObj (Tcl_GetObjResult (interp), (idx < listObjc));
