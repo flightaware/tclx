@@ -13,9 +13,11 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 8.0.4.1 1997/04/14 02:02:01 markd Exp $
+# $Id: buildidx.tcl,v 8.1 1997/04/17 04:59:01 markd Exp $
 #------------------------------------------------------------------------------
 #
+
+# FIX: Convert this to use namespaces.
 
 #------------------------------------------------------------------------------
 # The following code passes around a array containing information about a

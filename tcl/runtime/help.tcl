@@ -18,9 +18,10 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 8.2 1997/04/17 04:59:06 markd Exp $
+# $Id: help.tcl,v 8.3 1997/06/12 21:08:35 markd Exp $
 #------------------------------------------------------------------------------
 #
+# FIX: Convert this to use namespaces.
 
 #@package: TclX-help help helpcd helppwd apropos
 
