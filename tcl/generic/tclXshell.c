@@ -13,12 +13,19 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.12 1993/07/19 06:25:21 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.13 1993/07/19 15:30:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
+/*
+ * Note: on BSD 4.4 based machines setenv has a third parameter.  Tcl's
+ * setenv doesn't have this argument.  The #define games make sure that
+ * the prototype doesn't cause the compile to bomb.
+ */
+#define setenv IGNORE_SETENV
 #include "tclExtdInt.h"
 #include "patchlevel.h"
+#undef setenv
 
 extern char *getenv ();
 
