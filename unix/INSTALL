@@ -458,3 +458,7 @@ LINUX:
      This does not follow the XPG/3 standard.  You must edit src/tclXmsgcat.c
      to ignore the return of catclose.  Also, please send mail to the Linux
      maintainers to get them to fix this.
+
+CRAY:
+   o catgets does not return the default string, causing failure of 
+     some msgcat tests.
