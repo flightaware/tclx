@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 6.1 1996/05/17 01:33:45 markd Exp $
+# $Id: Makefile.in,v 7.0 1996/06/16 05:34:15 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -57,8 +57,8 @@ runtcl: Makefile
 	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtcl
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtcl
 	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtcl
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${LD_LIBRARY_PATH}" >>runtcl
-	@echo "SHLIB_PATH=${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${SHLIB_PATH}" >>runtcl
+	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_BUILD}/unix:${LD_LIBRARY_PATH}" >>runtcl
+	@echo "SHLIB_PATH=${bldbasedir}/tcl/unix:${TCL_DIR}/unix:${SHLIB_PATH}" >>runtcl
 	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                  >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
 	@echo "then"                                               >>runtcl
@@ -79,8 +79,8 @@ runwishx: Makefile
 	@echo "WISHX=${TKX_UNIX_BLD_DIR}/wishx"                   >>runwishx
 	@echo "export TCL_LIBRARY TCLX_LIBRARY"                   >>runwishx
 	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"         >>runwishx
-	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_UNIX_DIR}:${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${LD_LIBRARY_PATH}" >>runwishx
-	@echo "SHLIB_PATH=${bldbasedir}/tk/unix:${TK_UNIX_DIR}:${bldbasedir}/tcl/unix:${TCL_UNIX_DIR}:${SHLIB_PATH}" >>runwishx
+	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_DIR}/unix:${bldbasedir}/tcl/unix:${TCL_DIR}/unix:${LD_LIBRARY_PATH}" >>runwishx
+	@echo "SHLIB_PATH=${bldbasedir}/tk/unix:${TK_DIR}/unix:${bldbasedir}/tcl/unix:${TCL_DIR}/unix:${SHLIB_PATH}" >>runwishx
 	@echo "export LD_LIBRARY_PATH SHLIB_PATH"                 >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx

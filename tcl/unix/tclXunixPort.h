@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 7.2 1996/07/22 17:10:17 markd Exp $
+ * $Id: tclXunixPort.h,v 7.3 1996/07/26 05:56:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -71,6 +71,17 @@ extern int h_errno;
 #    else
 #        define CLK_TCK 60
 #    endif
+#endif
+
+/*
+ * Defines needed for socket code.
+ */
+#ifndef INADDR_NONE
+#    define INADDR_NONE  ((long) -1)
+#endif
+
+#ifdef NO_BCOPY
+#    define bcopy(from, to, length)    memmove((to), (from), (length))
 #endif
 
 /*

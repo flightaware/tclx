@@ -1,10 +1,9 @@
 /* 
  * tkXAppInit.c --
  *
- *      Provides a default version of the Tcl_AppInit procedure for use with
- *      applications built with Extended Tcl and Tk.  This is based on the
- *      the UCB Tk file tkAppInit.c
- *
+ * Provides a default version of the Tcl_AppInit procedure for use with
+ * applications built with Extended Tcl and Tk on Unix systems.  This is based
+ * on the the UCB Tk file tkAppInit.c
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -15,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 6.2 1996/05/23 22:37:46 markd Exp $
+ * $Id: tkXAppInit.c,v 7.0 1996/06/16 05:33:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,13 +31,11 @@ EXTERN int matherr ();
 int (*tclDummyMathPtr)() = matherr;
 
 
-/*
- *----------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * main --
  *
- *	This is the main program for the application.
- *----------------------------------------------------------------------
+ * This is the main program for the application.
+ *-----------------------------------------------------------------------------
  */
 #ifdef __cplusplus
 int
@@ -52,22 +49,20 @@ main (argc, argv)
 #endif
 {
     TkX_Main(argc, argv, Tcl_AppInit);
-    return 0;			/* Needed only to prevent compiler warning. */
+    return 0;                   /* Needed only to prevent compiler warning. */
 }
 
-/*
- *----------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_AppInit --
  *
- *	This procedure performs application-specific initialization.
- *	Most applications, especially those that incorporate additional
- *	packages, will have their own version of this procedure.
+ * This procedure performs application-specific initialization. Most
+ * applications, especially those that incorporate additional packages, will
+ * have their own version of this procedure.
  *
  * Results:
- *	Returns a standard Tcl completion code, and leaves an error
- *	message in interp->result if an error occurs.
- *----------------------------------------------------------------------
+ *    Returns a standard Tcl completion code, and leaves an error message in
+ * interp->result if an error occurs.
+ *-----------------------------------------------------------------------------
  */
 #ifdef __cplusplus
 int
@@ -82,7 +77,7 @@ Tcl_AppInit (interp)
         return TCL_ERROR;
     }
     if (Tclx_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
+        return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Tclx", Tclx_Init, Tclx_SafeInit);
     if (Tk_Init(interp) == TCL_ERROR) {

@@ -2,7 +2,7 @@
  * tclXAppInit.c --
  *
  * Provides a default version of the Tcl_AppInit procedure for use with
- * applications built with Extended Tcl on Win32 systems.
+ * applications built with Extended Tcl on  Windows 95/NT systems.
  *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 1.1 1996/07/22 17:04:56 markd Exp $
+ * $Id: tclXAppInit.c,v 7.1 1996/07/25 04:42:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,7 +33,7 @@ main (int    argc,
 {
     TclX_SplitWinCmdLine (&argc, &argv);
     TclX_Main (argc, argv, Tcl_AppInit);
-    return 0;			/* Needed only to prevent compiler warning. */
+    return 0;                   /* Needed only to prevent compiler warning. */
 }
 
 

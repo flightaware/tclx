@@ -7,28 +7,16 @@
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
- * that the above copyright notice appear in all copies.  Karl Lehenbauer and
+x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * Mark Diekhans make no representations about the suitability of this
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 1.2 1996/07/26 05:55:58 markd Exp $
+ * $Id: tclXsocket.c,v 1.3 1996/08/04 18:21:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-#ifndef INADDR_NONE
-#    define INADDR_NONE  ((long) -1)
-#endif
-
-#ifdef NO_BCOPY
-#    define bcopy(from, to, length)    memmove((to), (from), (length))
-#endif
-
-#ifndef NO_DATA
-#   define NO_DATA NO_ADDRESS
-#endif
 
 /*
  * Prototypes of internal functions.
@@ -78,10 +66,12 @@ ReturnGetHostError (interp, host)
         errorCode = "NO_RECOVERY";
         errorMsg = "unrecordable server error";
         break;
+#ifdef NO_DATA
       case NO_DATA:
         errorCode = "NO_DATA";
         errorMsg = "no data";
         break;
+#endif
     }
     Tcl_SetErrorCode (interp, "INET", errorCode, errorMsg, (char *)NULL);
     Tcl_AppendResult (interp, "host lookup failure: ",
