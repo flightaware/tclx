@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.22 1993/07/25 00:56:25 markd Exp markd $
+.\" $Id: TclX.man,v 2.23 1993/08/03 06:13:44 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -206,6 +206,9 @@ execution of \fIbody\fR.  For instance, if the original \fBloop\fR parameters
 would cause \fBloop\fR to terminate, say \fIfirst\fR was one, \fIlimit\fR was
 zero and \fIincrement\fR was not specified or was non-negative, \fIbody\fR is
 not executed at all and \fBloop\fR returns.
+.sp
+The \fIfirst\fR, \fIlimit\fR and \fIincrement\fR are integer expressions.
+They are only evaulated once at the beginning of the loop.
 .sp
 If a \fBcontinue\fR command is invoked within \fIbody\fR then
 any remaining commands in the current execution of \fIbody\fR are skipped,

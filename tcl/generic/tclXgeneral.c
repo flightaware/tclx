@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 2.4 1993/07/13 03:04:02 markd Exp markd $
+ * $Id: tclXgeneral.c,v 2.5 1993/07/30 15:05:15 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -153,14 +153,14 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    if (Tcl_GetLong (interp, argv[2], &first) != TCL_OK)
+    if (Tcl_ExprLong (interp, argv[2], &first) != TCL_OK)
         return TCL_ERROR;
-    if (Tcl_GetLong (interp, argv[3], &limit) != TCL_OK)
+    if (Tcl_ExprLong (interp, argv[3], &limit) != TCL_OK)
         return TCL_ERROR;
-    if (argc == 5)
+    if (argc == 5) {
         command = argv[4];
-    else {
-        if (Tcl_GetLong (interp, argv[4], &incr) != TCL_OK)
+    } else {
+        if (Tcl_ExprLong (interp, argv[4], &incr) != TCL_OK)
             return TCL_ERROR;
         command = argv[5];
     }
