@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 3.0 1993/11/19 06:58:56 markd Rel markd $
+ * $Id: tclXlib.c,v 3.1 1993/12/13 04:36:14 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,11 +22,16 @@
  * The following data structures are kept as Tcl variables so they can be
  * accessed from Tcl:
  *
+ *   o auto_path - The directory path to search for libraries.
+ *   o auto_oldpath - The previous value of auto_path.  Use to check if 
+ *     the path needs to be searched again. Maybe unset to force searching
+ *     of auto_path.
  *   o auto_index - An array indexed by command name and contains code to
  *     execute to make the command available.  Normally contains either:
  *       "source file"
  *       "auto_pkg_load package"
  *   o auto_pkg_index - Indexed by package name.
+ *  
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -36,6 +41,7 @@
  */
 static char *AUTO_INDEX     = "auto_index";
 static char *AUTO_PATH      = "auto_path";
+static char *AUTO_OLDPATH   = "auto_oldpath";
 static char *AUTO_PKG_INDEX = "auto_pkg_index";
 
 /*
@@ -44,7 +50,6 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
 typedef struct libInfo_t {
     Tcl_HashTable inProgressTbl;     /* List of cmds being loaded.       */
     int           doingIdxSearch;    /* Loading indexes on a path now.   */
-    Tcl_DString   prevPath;          /* Previous path that was searched. */
 } libInfo_t;
 
 /*
@@ -823,8 +828,7 @@ LoadDirIndexes (interp, dirName)
              * Process the index according to its type.
              */
             if (entryPtr->d_name [nameLen - 5] == '.') {
-                if (LoadPackageIndex (interp, filePath.string,
-                                      FALSE) != TCL_OK)
+                if (LoadPackageIndex (interp, filePath.string) != TCL_OK)
                     goto errorExit;
             } else {
                 if (LoadOusterIndex (interp, filePath.string) != TCL_OK)
@@ -1020,24 +1024,28 @@ LoadAutoPath (interp, infoPtr)
     Tcl_Interp  *interp;
     libInfo_t   *infoPtr;
 {
-    char  *path;
+    char  *path, *oldPath;
 
     path = Tcl_GetVar (interp, AUTO_PATH, TCL_GLOBAL_ONLY);
     if (path == NULL)
         return TCL_OK;
-    
+
+    oldPath = Tcl_GetVar (interp, AUTO_OLDPATH, TCL_GLOBAL_ONLY);
+
     /*
      * Check if the path has changed.  If it has, load indexes, and
      * save the path if it succeeds.
      */
-    if (STREQU (path, infoPtr->prevPath.string))
+    if ((oldPath != NULL) && STREQU (path, oldPath))
         return TCL_OK;
 
     if (LoadPackageIndexes (interp, infoPtr, path) != TCL_OK)
         return TCL_ERROR;
 
-    Tcl_DStringFree (&infoPtr->prevPath);
-    Tcl_DStringAppend (&infoPtr->prevPath, path, -1);
+    if (Tcl_SetVar (interp, AUTO_OLDPATH, path,
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        return TCL_ERROR;
+
     return TCL_OK;
 }
 
@@ -1261,7 +1269,6 @@ TclLibCleanUp (clientData, interp)
     }
 
     Tcl_DeleteHashTable (&infoPtr->inProgressTbl);
-    Tcl_DStringFree (&infoPtr->prevPath);
     ckfree ((char *) infoPtr);
 }
 
@@ -1282,7 +1289,6 @@ TclXLib_Init (interp)
 
     Tcl_InitHashTable (&infoPtr->inProgressTbl, TCL_STRING_KEYS);
     infoPtr->doingIdxSearch = FALSE;
-    Tcl_DStringInit (&infoPtr->prevPath);
 
     Tcl_CallWhenDeleted (interp, TclLibCleanUp, (ClientData) infoPtr);
 
