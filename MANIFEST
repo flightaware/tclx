@@ -304,7 +304,6 @@
 ./tk/help/tk/control/clipboard
 ./tk/help/tk/control/destroy
 ./tk/help/tk/control/exit
-./tk/help/tk/control/fileevent
 ./tk/help/tk/control/focus
 ./tk/help/tk/control/grab
 ./tk/help/tk/control/grid
