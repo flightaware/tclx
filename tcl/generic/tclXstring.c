@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.10 1993/11/09 06:35:19 markd Exp markd $
+ * $Id: tclXstring.c,v 2.11 1993/11/18 04:37:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -266,13 +266,12 @@ Tcl_CtokenCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  *
  * Tcl_CexpandCmd --
- *     Implements the cindex TCL command:
+ *     Implements the cexpand TCL command:
  *         cexpand string
  *
  * Results:
  *   Returns the character with backslash sequences expanded into actual
  * characters.
- *
  *-----------------------------------------------------------------------------
  */
 int
@@ -313,6 +312,33 @@ Tcl_CexpandCmd (clientData, interp, argc, argv)
     Tcl_DStringAppend (&expanded, lastPtr, scanPtr - lastPtr);
     
     Tcl_DStringResult (interp, &expanded);
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_CequalCmd --
+ *     Implements the cexpand TCL command:
+ *         cequal string1 string2
+ *
+ * Results:
+ *   "0" or "1".
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_CequalCmd (clientData, interp, argc, argv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          argc;
+    char       **argv;
+{
+    if (argc != 3) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                          " string1 string2", (char *) NULL);
+        return TCL_ERROR;
+    }
+    interp->result = (strcmp (argv [1], argv [2]) == 0) ? "1" : "0";
     return TCL_OK;
 }
 

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.51 1993/11/10 06:47:40 markd Exp markd $
+.\" $Id: TclX.n,v 2.52 1993/11/18 04:37:17 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2026,6 +2026,20 @@ characters between character and numeric values, index into a string,
 determine the length of a string, extract a range of character from a string,
 replicate a string a number of times, and transliterate a string (similar to
 the Unix \fItr\fR program).
+'
+'\"@help: tcl/strings/cequal
+'\"@brief: String equality convenience command.
+.TP
+.B cequal \fIstring1 string2\fR
+.br
+This command compares two strings for equality.
+Returns \fB1\fR if \fIstring1\fR and \fIstring2\fR are the identical
+and \fB0\fR if they are not.
+This command is a short-cut for \fBstring compare\fR and avoids the
+problems with string expressions being treated unintentionally as numbers.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
 '
 '\"@help: tcl/strings/cindex
 '\"@brief: Return indexed character from string.

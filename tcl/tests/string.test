@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 2.4 1993/07/25 00:56:25 markd Exp markd $
+# $Id: string.test,v 2.5 1993/11/18 04:37:17 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -220,3 +220,21 @@ Test string-8.4 {cexpand tests} {
 Test string-8.5 {cexpand tests} {
     cexpand "[replicate a 100]$\\n\\t$\\\[[replicate b 100]"
 } 0 "[replicate a 100]$\n\t$\[[replicate b 100]"
+
+Test string-9.1 {cequal tests} {
+    cequal
+} 1 {wrong # args: cequal string1 string2}
+
+Test string-9.2 {cequal tests} {
+    cequal a b c
+} 1 {wrong # args: cequal string1 string2}
+
+Test string-9.3 {cequal tests} {
+    cequal ab c
+} 0 0
+
+Test string-9.3 {cequal tests} {
+    cequal abcded abcded
+} 0 1
+
+
