@@ -1,0 +1,124 @@
+#
+# Makefile --
+#
+# Makefile for Extended Tcl.  This requires Tcl 6.1 or Tcl 6.2 from Berkeley,
+# which should be compiled before running this makefile.  Its location is
+# configured below.
+# 
+#------------------------------------------------------------------------------
+# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id$
+#------------------------------------------------------------------------------
+#
+
+SHELL=/bin/sh
+
+include Config.mk
+include config/$(TCL_CONFIG_FILE)
+
+# List of files that are touched by secondary makefiles when something changes.
+
+MADE.FILES=ucbsrc/made.tmp ossupport/made.tmp src/made.tmp
+
+CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) \
+        $(SYS_DEP_FLAGS)
+
+all: ExtendedObjs tcl TCLDEFAULT $(TCL_TK_SHELL)
+
+#
+# Generate the Tcl shell.
+#
+tcl: libtcl.a $(MADE.FILES)
+	$(RANLIB_CMD) libtcl.a
+	$(CC) $(CFLAGS) src/main.o libtcl.a $(LIBS) $(XLDFLAGS) -o tcl
+	if $(DO_STRIPPING) ; then \
+	    strip tcl; \
+	    $(MCS_CMD) tcl; fi
+
+#
+# Generate a wish shell with Extended Tcl commands.  Also a libtk.a that
+# handles TclX signals.
+#
+wish: libtcl.a libtk.a $(MADE.FILES) tkSupport/made.tmp
+
+tkSupport/made.tmp:
+	cd tkSupport;$(MAKE) -$(MAKEFLAGS) all
+	$(RANLIB_CMD) libtk.a
+	$(CC) $(CFLAGS) tkSupport/main.o libtk.a libtcl.a \
+            $(XLDFLAGS) $(TCL_TK_LIBS) -o wish
+	if $(DO_STRIPPING) ; then \
+	    strip wish; \
+	    $(MCS_CMD) wish; fi
+
+libtk.a: $(TCL_TK_DIR)/libtk.a
+	cp $(TCL_TK_DIR)/libtk.a libtk.a
+	rm -f tkSupport/made.tmp
+
+#
+# Objects in the lower-level directorys
+#
+ExtendedObjs: libtcl.a
+	cd ucbsrc;$(MAKE) -$(MAKEFLAGS) all
+	cd ossupport;$(MAKE) -$(MAKEFLAGS) all
+	cd src;$(MAKE) -$(MAKEFLAGS) all
+	cd tclsrc;$(MAKE) -$(MAKEFLAGS) all
+
+
+#
+# Generate a temporary TCLDEFAULT file so Tcl can be run in this directory.
+#
+TCLDEFAULT:
+	@echo "	- Generating temporary TCLDEFAULT file -"
+	@echo '# Temporary TCLDEFAULT file for debugging'  >TCLDEFAULT
+	@echo "set TCLPATH `pwd`/tcllib"                  >>TCLDEFAULT
+	@echo "set TCLINIT `pwd`/tcllib/TclInit.tcl"      >>TCLDEFAULT
+
+
+#
+# Copy the baseline libtcl.a file.  Force the other Makefiles to add their
+# .o files to the library by nuking their made.tmp file.
+#
+libtcl.a:$(TCL_UCB_DIR)/libtcl.a
+	cp $(TCL_UCB_DIR)/libtcl.a .
+	rm -f ossupport/made.tmp ucbsrc/made.tmp src/made.tmp
+
+#
+# This just test to see if the C++ include file compiles and links
+#
+tcl++:
+	cd src;$(MAKE) -$(MAKEFLAGS) main++.o
+	$(CCPLUS) $(CFLAGS) src/main++.o libtcl.a $(LIBS) $(XLDFLAGS) -o tcl++
+
+#
+# Run the UCB and Extended Tcl tests.
+#
+test: ucbtests extdtests
+
+ucbtests: all
+	./tcl -c "cd $(TCL_UCB_DIR)/tests;source all"
+
+extdtests: all
+	./tcl -c "cd tests;source all"	
+
+#
+# Install Tcl.
+#
+install: all
+	./tcl tclsrc/installTcl.tcl
+
+
+clean:
+	cd ucbsrc;$(MAKE) -$(MAKEFLAGS) clean
+	cd ossupport;$(MAKE) -$(MAKEFLAGS) clean
+	cd src;$(MAKE) -$(MAKEFLAGS) clean
+	cd tclsrc;$(MAKE) -$(MAKEFLAGS) clean
+	cd tkSupport; $(MAKE) -$(MAKEFLAGS) clean
+	-rm -f libtcl.a TCLDEFAULT tcl tcl++ wish
