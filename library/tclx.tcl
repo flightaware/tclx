@@ -1,28 +1,47 @@
 #-----------------------------------------------------------------------------
 # tclx.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: tclx.tcl,v 8.3 1999/05/03 17:30:36 markd Exp $
+# $Id: tclx.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
 #-----------------------------------------------------------------------------
 
-if {[info exists tclx_library] && ![cequal $tclx_library {}]} {
-    set auto_index(buildpackageindex) {source [file join $tclx_library buildidx.tcl]}
-    if {![info exists auto_path] || ![lcontain $auto_path $tclx_library]} {
-	lappend auto_path $tclx_library
+namespace eval ::tclx {
+    global auto_path auto_index tclx_library
+
+    if {[info exists tclx_library] && [string compare {} $tclx_library]} {
+	set auto_index(buildpackageindex) \
+		{source [file join $tclx_library buildidx.tcl]}
+	if {![info exists auto_path] || ![lcontain $auto_path $tclx_library]} {
+	    lappend auto_path $tclx_library
+	}
     }
-}
+
+    array set libfiles {
+	arrayprocs.tcl	1
+	autoload.tcl	0
+	buildhelp.tcl	0
+	buildidx.tcl	0
+	compat.tcl	1
+	convlib.tcl	1
+	edprocs.tcl	1
+	events.tcl	1
+	fmath.tcl	1
+	forfile.tcl	1
+	globrecur.tcl	1
+	help.tcl	0
+	profrep.tcl	1
+	pushd.tcl	1
+	setfuncs.tcl	1
+	showproc.tcl	1
+	stringfile.tcl	1
+	tcllib.tcl	0
+	tclx.tcl	0
+    }
+    set dir [file dirname [info script]]
+    foreach file [array names libfiles] {
+	if {$libfiles($file)} {
+	    uplevel #0 [list source [file join $dir $file]]
+	}
+    }
+}; # end namespace tclx
+
 # == Put any code you want all Tcl programs to include here. ==
-
-if !$tcl_interactive return
-
-# == Interactive Tcl session initialization ==
-
-# Replace standard Tcl prompt with out prompt if its the TclX shell
-
-if ![info exists tcl_prompt1] {
-    set tcl_prompt1 {global argv0; puts -nonewline stdout [file tail $argv0]>}
-}
-if ![info exists tcl_prompt2] {
-    set tcl_prompt2 {puts -nonewline stdout =>}
-}
-
-
