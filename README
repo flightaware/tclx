@@ -80,6 +80,8 @@ page man/TclX.man.
 
     o A simple command for accessing TCP/IP based servers.
 
+    o X/PG based internationalization commands.
+
 ON-LINE HELP
 ============
 
