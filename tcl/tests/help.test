@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 2.4 1993/06/21 05:43:53 markd Exp markd $
+# $Id: help.test,v 2.5 1993/06/24 07:30:29 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -24,7 +24,7 @@ if {[info procs test] != "test"} then {source testlib.tcl}
 #
 if {"[glob -nocomplain ../tclmaster/help/*]" == ""} {
     echo "****"
-    echo "**** No help pages in tcllib/help - help not available test not run"
+    echo "**** No help pages in tclmaster/help - help test not run"
     echo "****"
     return
 }
