@@ -42,10 +42,10 @@
 #define TCLX_PATCHLEVEL      0
 
 #define TCLX_VERSION        "8.0.3"
-#define TCLX_FULL_VERSION   "8.0.3a2"
+#define TCLX_FULL_VERSION   "8.0.3"
 
 #define TKX_VERSION         "8.0.3"
-#define TKX_FULL_VERSION    "8.0.3a2"
+#define TKX_FULL_VERSION    "8.0.3"
 
 #define TCLX_DEBUG
 

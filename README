@@ -1,52 +1,7 @@
-                           Extended Tcl (TclX) 8.0.2
+                           Extended Tcl (TclX) 8.0.3
                            =========================
 
 
-PREFACE TO THE EIGHTH EDITION
-=============================
-
-When the first alpha release of Tcl 8.0 came out near the end of 1996, 
-we were excited by the possibilities that were present in the new system.  
-The on-the-fly bytecode compiler and internal object system promised major 
-performance improvements for Tcl.  Even though very few of the Tcl commands 
-had been converted to use the object system (which is still true in the 
-formal released version of Tcl 8.0), Tcl's performance was almost always at 
-least doubled, and many programs ran five, ten, and even hundreds of times
-faster than they did under Tcl 7.
-
-We made a commitment to embrace the object system and bytecode compiler
-in TclX, and the results of that effort sit before you now.
-
-TclX 8.0.1 has been extensively integrated with Tcl 8's new features.
-One metric is that 95% of TclX's commands have been converted to use the 
-new object model.
-
-TclX commands that evaluate code repeatedly have been recoded to use Tcl 
-objects to contain the code to be eval'ed  (as opposed to simple strings), 
-allowing the bytecode compiler to compile the code and then reuse the 
-compiled version on each subsequent iteration -- a major performance win.
-These changes principally speed up file scanning, and the "try_eval" and 
-"loop" commands.
-
-Beyond the recoding of the command interfaces and adoption of the practice
-of executing code in objects instead of strings, another of our goals was
-to adopt the object system's capabilities throughout the extensions, rather 
-than just in their interfaces.  As a result, keyed lists, for example, 
-are now contained in a new object type, added to Tcl through the
-C-level new-object-type-registration functions now standard in Tcl 8.
-The performance improvement for programs that make extensive use of large 
-keyed lists can be as much as a thousandfold.
-
-Use of the new Tcl list objects to contain lists speeds TclX's keyed lists, 
-readdir, scanmatch, fstat, and lgets routines, package handling code, list 
-extensions such as lvarpop, lvarpush, lempty, lassign, lmatch, and lcontain, 
-plus a host of other commands.
-
-Because TclX is one of few packages that make use of a number of Tcl's
-more arcane capabilities, such as getting C callbacks as Tcl commands are
-executed, we discovered over time a number of bugs in the bytecode compiler,
-and worked e-closely with Brian and others at Sun to get the issues resolved
-and to help move things forward.
 INTRODUCTION
 ============
 
@@ -81,44 +36,6 @@ in the earliest stages from Peter da Silva (peter@NeoSoft.com).
 commercial use and resale.
 
 
-
-PREFACE TO THE EIGHTH EDITION
-=============================
-
-When the first alpha release of Tcl 8.0 came out near the end of 1996, 
-we were excited by the possibilities that were present in the new system.  
-The on-the-fly bytecode compiler and internal object system promised major 
-performance improvements for Tcl.  Even though very few of the Tcl commands 
-had been converted to use the object system (which is still true in the 
-formal released version of Tcl 8.0), Tcl's performance was almost always at 
-least doubled, and many programs ran five, ten, and even hundreds of times
-faster than they did under Tcl 7.
-
-TclX 8.0.1 has been extensively integrated with Tcl 8's new features.
-One metric is that 95% of TclX's commands have been converted to use the 
-new object model.
-
-TclX commands that evaluate code repeatedly have been recoded to use Tcl 
-objects to contain the code to be eval'ed  (as opposed to simple strings), 
-allowing the bytecode compiler to compile the code and then reuse the 
-compiled version on each subsequent iteration -- a major performance win.
-These changes principally speed up file scanning, and the "try_eval" and 
-"loop" commands.
-
-Beyond the recoding of the command interfaces and adoption of the practice
-of executing code in objects instead of strings, another of our goals was
-to adopt the object system's capabilities throughout the extensions, rather 
-than just in their interfaces.  As a result, keyed lists, for example, 
-are now contained in a new object type, added to Tcl through the
-C-level new-object-type-registration functions now standard in Tcl 8.
-The performance improvement for programs that make extensive use of large 
-keyed lists can be as much as a thousandfold.
-
-Use of the new Tcl list objects to contain lists speeds TclX's keyed lists, 
-readdir, scanmatch, fstat, and lgets routines, package handling code, list 
-extensions such as lvarpop, lvarpush, lempty, lassign, lmatch, and lcontain, 
-plus a host of other commands.
-
 BUILDING TCLX
 =============
 
@@ -126,14 +43,12 @@ BUILDING TCLX
 see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.  A binary
 release for Windows 95/NT is also available.
 
-CHANGES IN TCLX 8.0.2
+Tcl 8.0p2 and Tk 8.0p2 are required.  TclX does not yet work with
+the Tcl8.1a series.
+
+CHANGES IN TCLX 8.0.3
 =====================
-  o Compability with Tcl 8.0p2 and Tk 8.0p2.
-
-  o Extensive internal use of Tcl 8.0's new object structures makes
-    TclX execute very quickly.
-
-  o New try_eval command, similar to Java try/catch/finally.
+  o This is a bug fix release.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -191,7 +106,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX8.0.2/doc.  Start with the
+the extensions in the directory tclX8.0.3/doc.  Start with the
 TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
@@ -199,7 +114,7 @@ EXTENDED TCL VERSION NAMING
 
     Extended Tcl takes its version number from the corresponding
 version of Tcl upon which it is based, with the addition of another
-decimal number.  This release is TclX 8.0.2.
+decimal number.  This release is TclX 8.0.3.
 
 LINKING APPLICATIONS AND EXTENSION WITH TCLX
 ============================================
@@ -241,9 +156,9 @@ in the body of the mail.  Send messages to this list at tclx-win@grizzly.com.
 WHERE TO GET IT
 ===============
 
-Extended Tcl 8.0.2 can be downloaded by anonymous FTP from:
+Extended Tcl 8.0.3 can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/TclX/tclX8.0.2.tar.gz
+   ftp.neosoft.com:/pub/tcl/TclX/tclX8.0.3.tar.gz
 
 A contributed sources archive resides on ftp.neosoft.com.com.
 A Frequently Asked Questions (FAQ) document exists in this archive.
