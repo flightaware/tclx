@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.9 1997/07/05 01:40:54 markd Exp $
+ * $Id: tclXlist.c,v 8.10 1997/08/08 09:58:36 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -145,7 +145,7 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj *listVarPtr, *listPtr, *returnElemPtr = NULL;
+    Tcl_Obj *listVarPtr, *newVarObj, *returnElemPtr = NULL;
     int listIdx, listLen;
 
     if ((objc < 2) || (objc > 4)) {
@@ -158,23 +158,16 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
         return TCL_ERROR;
     }
     if (Tcl_IsShared (listVarPtr)) {
-        listPtr = Tcl_DuplicateObj (listVarPtr);
-        listVarPtr = Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
-                                     TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG);
-        if (listVarPtr == NULL) {
-            Tcl_DecrRefCount (listPtr);
-            return TCL_ERROR;
-        }
-        if (listVarPtr != listPtr)
-            Tcl_DecrRefCount (listPtr);
+        listVarPtr = newVarObj = Tcl_DuplicateObj (listVarPtr);
+    } else {
+        newVarObj = NULL;
     }
-    listPtr = listVarPtr;
 
     /*
      * Get the index of the entry in the list we are doing to replace/delete.
      * Just ignore out-of bounds requests, like standard Tcl.
      */
-    if (Tcl_ListObjLength (interp, listPtr, &listLen) != TCL_OK)
+    if (Tcl_ListObjLength (interp, listVarPtr, &listLen) != TCL_OK)
         goto errorExit;
 
     if (objc == 2) {
@@ -190,7 +183,7 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
     /*
      * Get the element that is doing to be deleted/replaced.
      */
-    if (Tcl_ListObjIndex (interp, listPtr, listIdx, &returnElemPtr) != TCL_OK)
+    if (Tcl_ListObjIndex (interp, listVarPtr, listIdx, &returnElemPtr) != TCL_OK)
         goto errorExit;
     Tcl_IncrRefCount (returnElemPtr);
 
@@ -198,13 +191,21 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
      * Either replace or delete the element.
      */
     if (objc == 4) {
-        if (Tcl_ListObjReplace (interp, listPtr, listIdx, 1,
+        if (Tcl_ListObjReplace (interp, listVarPtr, listIdx, 1,
                                 1, &(objv [3])) != TCL_OK)
             goto errorExit;
     } else {
-        if (Tcl_ListObjReplace (interp, listPtr, listIdx, 1,
+        if (Tcl_ListObjReplace (interp, listVarPtr, listIdx, 1,
                                 0, NULL) != TCL_OK)
             goto errorExit;
+    }
+
+    /*
+     * Update variable.
+     */
+    if (Tcl_ObjSetVar2 (interp, objv [1], NULL, listVarPtr,
+                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+        goto errorExit;
     }
 
     Tcl_SetObjResult (interp, returnElemPtr);
@@ -215,8 +216,13 @@ TclX_LvarpopObjCmd (clientData, interp, objc, objv)
     return TCL_OK;
 
   errorExit:
-    if (returnElemPtr != NULL)
+    if (newVarObj != NULL) {
+        Tcl_DecrRefCount (newVarObj);
+        return TCL_ERROR;
+    }
+    if (returnElemPtr != NULL) {
         Tcl_DecrRefCount (returnElemPtr);
+    }
     return TCL_ERROR;
 }
 
@@ -233,7 +239,7 @@ TclX_LvarpushObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj *listVarPtr, *listPtr;
+    Tcl_Obj *listVarPtr, *newVarObj;
     int listIdx, listLen;
 
     if ((objc < 3) || (objc > 4)) {
@@ -243,27 +249,21 @@ TclX_LvarpushObjCmd (clientData, interp, objc, objv)
     listVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_PARSE_PART1);
     if ((listVarPtr == NULL) || (Tcl_IsShared (listVarPtr))) {
         if (listVarPtr == NULL) {
-            listPtr = Tcl_NewListObj (0, NULL);
+            listVarPtr = Tcl_NewListObj (0, NULL);
         } else {
-            listPtr = Tcl_DuplicateObj (listVarPtr);
+            listVarPtr = Tcl_DuplicateObj (listVarPtr);
         }
-        listVarPtr = Tcl_ObjSetVar2 (interp, objv [1], NULL, listPtr,
-                                     TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG);
-        if (listVarPtr == NULL) {
-            Tcl_DecrRefCount (listPtr);
-            return TCL_ERROR;
-        }
-        if (listVarPtr != listPtr)
-            Tcl_DecrRefCount (listPtr);
+        newVarObj = listVarPtr;
+    } else {
+        newVarObj = NULL;
     }
-    listPtr = listVarPtr;
 
     /*
      * Get the index of the entry in the list we are doing to replace/delete.
      * Out-of-bounds request go to the start or end, as with most of Tcl
      * commands.
      */
-    if (Tcl_ListObjLength (interp, listPtr, &listLen) != TCL_OK)
+    if (Tcl_ListObjLength (interp, listVarPtr, &listLen) != TCL_OK)
         goto errorExit;
 
     if (objc == 3) {
@@ -279,13 +279,20 @@ TclX_LvarpushObjCmd (clientData, interp, objc, objv)
             listIdx = listLen;
     }
 
-    if (Tcl_ListObjReplace (interp, listPtr, listIdx, 0,
+    if (Tcl_ListObjReplace (interp, listVarPtr, listIdx, 0,
                             1, &(objv [2])) != TCL_OK)
         goto errorExit;
 
+    if (Tcl_ObjSetVar2 (interp, objv [1], NULL, listVarPtr,
+                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+        goto errorExit;
+    }
     return TCL_OK;
 
   errorExit:
+    if (newVarObj != NULL) {
+        Tcl_DecrRefCount (newVarObj);
+    }
     return TCL_ERROR;
 }
 

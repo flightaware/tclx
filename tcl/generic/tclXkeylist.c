@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.9 1997/07/26 02:01:04 markd Exp $
+ * $Id: tclXkeylist.c,v 8.10 1997/07/26 02:04:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1033,7 +1033,7 @@ TclX_KeylsetObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj     *CONST objv[];
 {
-    Tcl_Obj *keylVarPtr, *keylPtr;
+    Tcl_Obj *keylVarPtr, *newVarObj;
     char *key;
     int idx, keyLen;
 
@@ -1050,32 +1050,37 @@ TclX_KeylsetObjCmd (clientData, interp, objc, objv)
     keylVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_PARSE_PART1);
     if ((keylVarPtr == NULL) || (Tcl_IsShared (keylVarPtr))) {
         if (keylVarPtr == NULL) {
-            keylPtr = TclX_NewKeyedListObj ();
+            keylVarPtr = TclX_NewKeyedListObj ();
         } else {
-            keylPtr = Tcl_DuplicateObj (keylVarPtr);
+            keylVarPtr = Tcl_DuplicateObj (keylVarPtr);
         }
-        keylVarPtr = Tcl_ObjSetVar2 (interp, objv [1], NULL, keylPtr,
-                                     TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG);
-        if (keylVarPtr == NULL) {
-            Tcl_DecrRefCount (keylPtr);
-            return TCL_ERROR;
-        }
-        if (keylVarPtr != keylPtr)
-            Tcl_DecrRefCount (keylPtr);
+        newVarObj = keylVarPtr;
+    } else {
+        newVarObj = NULL;
     }
-    keylPtr = keylVarPtr;
 
     for (idx = 2; idx < objc; idx += 2) {
         key = Tcl_GetStringFromObj (objv [idx], &keyLen);
         if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
-            return TCL_ERROR;
+            goto errorExit;
         }
+        if (TclX_KeyedListSet (interp, keylVarPtr, key, objv [idx+1]) != TCL_OK) {
+            goto errorExit;
+        }
+    }
 
-        if (TclX_KeyedListSet (interp, keylPtr, key, objv [idx+1]) != TCL_OK)
-            return TCL_ERROR;
+    if (Tcl_ObjSetVar2 (interp, objv [1], NULL, keylVarPtr,
+                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+        goto errorExit;
     }
 
     return TCL_OK;
+
+  errorExit:
+    if (newVarObj != NULL) {
+        Tcl_DecrRefCount (newVarObj);
+    }
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------

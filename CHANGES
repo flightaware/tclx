@@ -1348,9 +1348,13 @@
 ===============================================================================
  6 Oct 97: Released TclX 8.0.0
 ===============================================================================
-18 Oct 97
+18 Oct 97:
   o Fixed several minor bugs.
   o Added change to help proc to search for command if full path is not
     found.  Contributed by Massimo Dal Zotto <dz@cs.unitn.it>.
+-------------------------------------------------------------------------------
+22 Oct 97:
+  o Fixed failure to run variable traces in lvarpush, lvarpop and loop
+    commands.
 -------------------------------------------------------------------------------
   

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.9 1997/08/08 10:04:24 markd Exp $
+ * $Id: tclXgeneral.c,v 8.10 1997/08/17 08:44:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -313,7 +313,7 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
 {
     int       result = TCL_OK;
     long      i, first, limit, incr = 1;
-    Tcl_Obj  *command, *iObj;
+    Tcl_Obj  *command, *iObj, *newVarObj;
 
     if ((objc < 5) || (objc > 6)) {
         return TclX_WrongArgs (interp, objv [0], 
@@ -338,18 +338,25 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
          (((i < limit) && (incr >= 0)) || ((i > limit) && (incr < 0)));
          i += incr) {
         
-        
+        /*
+         * Set loop counter.  The newVarObj var is used to determine if object should be
+         * deleted on error.
+         */
         iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
                                TCL_PARSE_PART1);
         if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
-            iObj = Tcl_NewLongObj (first);
-            if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
-                                TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
-                Tcl_DecrRefCount (iObj);
-                return TCL_ERROR;
-            }
+            iObj = newVarObj = Tcl_NewLongObj (first);
+        } else {
+            newVarObj = NULL;
         }
         Tcl_SetLongObj (iObj, i);
+        if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
+                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+            if (newVarObj != NULL) {
+                Tcl_DecrRefCount (newVarObj);
+            }
+            return TCL_ERROR;
+        }
 
         result = Tcl_EvalObj (interp, command);
         if (result == TCL_CONTINUE) {
@@ -370,20 +377,25 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
     }
 
     /*
-     * Set variable to its final value.
+     * Set loop counter to its final value.
      */
     iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
                            TCL_PARSE_PART1);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
-        iObj = Tcl_NewLongObj (first);
-        if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
-                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
-            Tcl_DecrRefCount (iObj);
-            return TCL_ERROR;
-        }
+        iObj = newVarObj = Tcl_NewLongObj (first);
+    } else {
+        newVarObj = NULL;
     }
+
     Tcl_SetLongObj (iObj, i);
 
+    if (Tcl_ObjSetVar2 (interp, objv [1], (Tcl_Obj *) NULL, iObj,
+                        TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+        if (newVarObj != NULL) {
+            Tcl_DecrRefCount (newVarObj);
+        }
+        return TCL_ERROR;
+    }
     return result;
 }
 
