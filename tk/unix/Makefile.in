@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.2 1996/08/17 02:10:19 markd Exp $
+# $Id: Makefile.in,v 7.3 1996/09/25 01:56:57 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,7 +27,7 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCLX_USE_SHLIB_CFLAGS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
               ${TK_DEFS} \
 	      -I${TKX_GENERIC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
@@ -46,13 +46,16 @@ LDLIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
 	 ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
 	 ${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
 
-
 #------------------------------------------------------------------------------
 # Source and target macros.
 #
 GENERIC_OBJS = tkXinit.o tkXshell.o
 
+GENERIC_SOBJS = tkXinit@SHOBJ_SUFFIX@ tkXshell@SHOBJ_SUFFIX@
+
 OBJS = ${GENERIC_OBJS}
+
+SOBJS = ${GENERIC_SOBJS}
 
 RUNTIME_DIR = ${srcbasedir}/tk/runtime
 
@@ -74,19 +77,19 @@ wishx: tkXAppInit.o libtkx.a ${LIBTK} ${LIBTCLX}
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
 	    (rm -f wishx; exit 1)
 
-libtkx.a: ${OBJS}
+${TKX_STLIB_NAME}: ${OBJS}
 	${AR} cr libtkx.a ${OBJS}
 	${RANLIB} libtkx.a
 
-SHLIB_YES: ${TKX_SHLIB_NAME}
+SHLIB_YES: ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION}
 	touch SHLIB_YES
 
-${TKX_SHLIB_NAME}: ${OBJS}
-	rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME}
-	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${OBJS} ${SHLIBLIBS}
-	if test "${TKX_SHLIB_NAME}" != "${TKX_SHLIB_BASE_NAME}"; then \
-	    ln ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME} ;\
-	fi
+${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION}: ${SOBJS}
+	rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION}
+	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} ${SHLIBLIBS}
+	mv ${TKX_SHLIB_BASE_NAME} ${TKX_SHLIB_BASE_NAME}.${TKX_SHLIB_VERSION}
+	rm -f ${TKX_SHLIB_BASE_NAME}
+	${LN_S} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION} ${TKX_SHLIB_BASE_NAME}
 
 SHLIB_NO:
 	touch SHLIB_NO
@@ -103,6 +106,17 @@ tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
 
 tkXAppInit.o: ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
 	${CC} -c ${CC_SWITCHES} ${TKX_UNIX_SRC_DIR}/tkXAppInit.c
+
+tkXinit..o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
+	@SAVE@
+	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} -DTKX_LIBRARY=\"${TKX_INST_RUNTIME}\" \
+	  ${TKX_GENERIC_DIR}/tkXinit.c
+	@RESTORE@
+
+tkXshell..o: ${TKX_GENERIC_DIR}/tkXshell.c
+	@SAVE@
+	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TKX_GENERIC_DIR}/tkXshell.c
+	@RESTORE@
 
 #------------------------------------------------------------------------------
 # We need the "help" directory here so that the help command will work before
@@ -212,12 +226,10 @@ install-exec:
 	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TKX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/libtkx.a
 	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB} ;\
-	    if test "${TKX_SHLIB_NAME}" != "${TKX_SHLIB_BASE_NAME}"; then \
-		rm -f ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME};\
-	        ln ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_NAME} \
-		   ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME} ;\
-	    fi ;\
+	    ${INSTCOPY} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION} ${INSTALL_ROOT}${TKX_INST_LIB} ;\
+	    rm -f ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME};\
+	    ${LN_S} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION} \
+		${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME} ;\
 	fi
 	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
 	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}

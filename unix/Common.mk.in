@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 6.0 1996/05/10 16:19:37 markd Exp $
+# $Id: Common.mk.in,v 7.0 1996/06/16 05:34:09 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -35,6 +35,7 @@ TKX_SHLIB_VERSION  = @TKX_SHLIB_VERSION@
 CC           = @CC@
 CFLAGS       = @CFLAGS@
 RANLIB       = @RANLIB@
+LN_S         = ln -s
 srcbasedir   = @srcbasedir@
 bldbasedir   = @bldbasedir@
 VPATH        = ${srcdir}
@@ -56,8 +57,11 @@ TCLX_LIBS    = @TCLX_LIBS@
 #
 TCLX_SHLIB_BASE_NAME = @TCLX_SHLIB_BASE_NAME@
 TCLX_SHLIB_NAME      = @TCLX_SHLIB_NAME@
+TCLX_STLIB_NAME      = @TCLX_STLIB_NAME@
+
 TKX_SHLIB_BASE_NAME  = @TKX_SHLIB_BASE_NAME@
 TKX_SHLIB_NAME       = @TKX_SHLIB_NAME@
+TKX_STLIB_NAME       = @TKX_STLIB_NAME@
 
 #------------------------------------------------------------------------------
 # Compiler argument required if the objects are going to be placed into a
@@ -89,6 +93,7 @@ TCL_SHLIB_LD         = @TCL_SHLIB_LD@
 TCL_BUILD_LIB_SPEC   = @TCL_BUILD_LIB_SPEC@
 TCL_LIB_SPEC         = @TCL_LIB_SPEC@
 TCL_LD_SEARCH_FLAGS  = @TCL_LD_SEARCH_FLAGS@
+TCL_BIN_DIR          = @TCL_BIN_DIR@
 
 TK_DEFS              = @TK_DEFS@
 TK_LIBS              = @TK_LIBS@

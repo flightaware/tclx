@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.1 1996/07/22 17:10:21 markd Exp $
+dnl $Id: configure.in,v 7.2 1996/09/17 22:29:05 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.1 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.2 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -72,6 +72,21 @@ fi
 if test ! -d ../tk/unix ; then
    mkdir ../tk/unix || exit 1
 fi
+
+#------------------------------------------------------------------------------
+# See if there was a command-line option for where Tcl is;  if	not, assume
+# that its top-level directory is a sibling of ours.
+#------------------------------------------------------------------------------
+
+AC_ARG_WITH(tcl, [  --with-tcl=DIR          use Tcl 7.5 binaries from DIR],
+	TCL_BIN_DIR=$withval, TCL_BIN_DIR=`echo "${TCL_CONFIG}" |sed -e "s|/tclConfig.sh||"`)
+if test ! -d $TCL_BIN_DIR; then
+    AC_MSG_ERROR(Tcl directory $TCL_BIN_DIR doesn't exist)
+fi
+TCL_SRC_DIR=`MAKELEVEL=0; cd $TCL_BIN_DIR; make topDirName`
+
+AC_SUBST(TCL_BIN_DIR)
+AC_SUBST(TCL_SRC_DIR)
 
 #------------------------------------------------------------------------------
 # Check command line looking for the --with-tk=YES/NO option.
@@ -284,21 +299,26 @@ AC_PROG_RANLIB
 #------------------------------------------------------------------------------
 # Determine the names of the shared libraries to build.
 #
+
+TCLX_STLIB_NAME=libtclx.a
+TKX_STLIB_NAME=libtkx.a
+
 case "$TCL_SHLIB_SUFFIX" in
    *.so) TCLX_SHLIB_BASE_NAME=libtclx.so
-         TCLX_SHLIB_NAME=libtclx.so.${TCLX_SHLIB_VERSION}
+         TCLX_SHLIB_NAME=libtclx.so
          TKX_SHLIB_BASE_NAME=libtkx.so
-         TKX_SHLIB_NAME=libtkx.so.${TKX_SHLIB_VERSION}
+         TKX_SHLIB_NAME=libtkx.so
          ;;
    *.sl) TCLX_SHLIB_BASE_NAME=libtclx.sl
          TCLX_SHLIB_NAME=libtclx.sl
          TKX_SHLIB_BASE_NAME=libtkx.sl
          TKX_SHLIB_NAME=libtkx.sl
          ;;
-   *..o) TCLX_SHLIB_BASE_NAME=libtclx..o
-         TCLX_SHLIB_NAME=libtclx..o
+   *..o) VERSION=""
+         TCLX_SHLIB_BASE_NAME=libtclx..o
+         eval "TCLX_SHLIB_NAME=libtclx${TCL_SHARED_LIB_SUFFIX}"
          TKX_SHLIB_BASE_NAME=libtkx..o
-         TKX_SHLIB_NAME=libtkx..o
+         eval "TKX_SHLIB_NAME=libtkx${TCL_SHARED_LIB_SUFFIX}"
          ;;
       *) TCLX_SHLIB_BASE_NAME=""
          TCLX_SHLIB_NAME=""
@@ -309,6 +329,46 @@ case "$TCL_SHLIB_SUFFIX" in
          fi
          ;;
 esac
+
+if test "x$TCLX_STLIB_NAME" = "x$TCLX_SHLIB_NAME"; then
+    TCLX_STLIB_NAME=dont_build_this
+    TKX_STLIB_NAME=dont_build_this
+fi
+
+if test "x${TCL_SHLIB_CFLAGS}" != "x"; then
+    SHOBJ_SUFFIX="..o"
+else
+    SHOBJ_SUFFIX=".o"
+fi
+AC_SUBST(SHOBJ_SUFFIX)
+AC_SUBST(TCLX_STLIB_NAME)
+AC_SUBST(TKX_STLIB_NAME)
+
+#
+# Test for UnixWare -o bug
+#
+AC_MSG_CHECKING([for UnixWare -o bug])
+rm -rf conftest*
+cat > conftest.$ac_ext <<EOF
+int main() { return 0; }
+EOF
+${CC-cc} -c -o conftest..o conftest.$ac_ext
+if test -f conftest..o; then
+    SAVE="@:"
+    RESTORE="@:"
+    O_FLAG='-o $@'
+    AC_MSG_RESULT([OK])
+else
+    SAVE='@if test -f $*o ; then rm -f $*sav; mv $*o $*sav; fi;'
+    RESTORE='@mv $*o $@; if test -f $*save ; then mv $*save $*o; fi;'
+    O_FLAG=""
+    AC_MSG_RESULT([buggy])
+fi
+rm -rf conftest*
+
+AC_SUBST(SAVE)
+AC_SUBST(RESTORE)
+AC_SUBST(O_FLAG)
 
 AC_SUBST(TCLX_SHLIB_BASE_NAME)
 AC_SUBST(TCLX_SHLIB_NAME)
@@ -526,6 +586,9 @@ AC_CHECK_FUNC(random, ,[LIBOBJS="$LIBOBJS random.o"]
               AC_DEFINE(NO_RANDOM))
 AC_CHECK_FUNC(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
 AC_SUBST(LIBOBJS)
+
+LIBSOBJS=`echo $LIBOBJS |sed -e s/\\\\.o/$SHOBJ_SUFFIX/g`
+AC_SUBST(LIBSOBJS)
 
 #------------------------------------------------------------------------------
 # Determine if random is declared in stdlib.h or math.h.  If it is, we don't

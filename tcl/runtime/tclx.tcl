@@ -1,12 +1,14 @@
 #-----------------------------------------------------------------------------
 # tclx.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: tclx.tcl,v 6.0 1996/05/10 16:16:50 markd Exp $
+# $Id: tclx.tcl,v 7.0 1996/06/16 05:31:39 markd Exp $
 #-----------------------------------------------------------------------------
 
-set auto_index(buildpackageindex) {source $tclx_library/buildidx.tcl}
-if {[info exists tclx_library] && ([lsearch $auto_path $tclx_library] < 0)} {
-    lappend auto_path $tclx_library
+if {[info exists tclx_library] && ![cequal $tclx_library {}]} {
+    set auto_index(buildpackageindex) {source [file join $tclx_library buildidx.tcl]}
+    if [lcontain $auto_path $tclx_library] {
+	lappend auto_path $tclx_library
+    }
 }
 
 # == Put any code you want all Tcl programs to include here. ==

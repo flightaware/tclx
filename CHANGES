@@ -1212,4 +1212,9 @@
   o Added -eval option to the profile command, allowing capturing eval stacks
     instead of scope stacks.
 -------------------------------------------------------------------------------
+ 3 Oct 96:
+  o Integrated support for building both shared and static libraries at the
+    same time from Jan Nijtmans' <nijtmans@nici.kun.nl> TclX plus patch.
+  o Added --with-tcl option to configure from the plus patch.
+-------------------------------------------------------------------------------
 

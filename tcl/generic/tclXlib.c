@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 7.5 1996/08/21 06:56:56 markd Exp $
+ * $Id: tclXlib.c,v 7.6 1996/09/03 23:39:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -49,7 +49,7 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
  * This is a global rather than a local so it will work with K&R compilers.
  * Its writable so it works with gcc.
  */
-static char loadOusterCmd [] = "source $tclx_library/loadouster.tcl";
+static char loadOusterCmd [] = "source [file join $tclx_library loadouster.tcl]";
 
 /*
  * Indicates the type of library index.
@@ -681,7 +681,7 @@ BuildPackageIndex (interp, tlibFilePath)
 
     Tcl_DStringInit (&command);
 
-    Tcl_DStringAppend (&command, "source $tclx_library/buildidx.tcl;", -1);
+    Tcl_DStringAppend (&command, "source [file join $tclx_library buildidx.tcl];", -1);
     Tcl_DStringAppend (&command, "buildpackageindex ", -1);
     Tcl_DStringAppend (&command, tlibFilePath, -1);
 

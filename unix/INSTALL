@@ -5,10 +5,10 @@ This section is a quick set of step by step instructions for building TclX
 in the manner that addresses the needs of most users.   If you:
 
     o have built and installed  both Tcl and Tk and the built trees are in
-     directories adjacent to the TclX source directory.  i.e.
+      directories adjacent to the TclX source directory.  i.e.
 
                             mybuilddir/
-                 tcl7.5/      tk4.1/      tclX7.5.2/
+                 tcl7.6/      tk4.2/      tclX7.6.0/
  
     o are installing under /usr/local.
 
@@ -18,7 +18,7 @@ in the manner that addresses the needs of most users.   If you:
 
 then the following steps will build, test and installed TclX:
 
-    cd tclX7.5.2/unix
+    cd tclX7.6.0/unix
     configure          # add --enable-shared to build shared libraries
     make
     make test          # Run both standard and extended Tcl tests
@@ -35,8 +35,8 @@ EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 =======================================
 
 Building the Extended Tcl requires access to built Tcl and Tk source
-directories.  Their location relative to the tclX7.5.2 directory is
-configured by editing tclX7.5.2/unix/Config.mk.
+directories.  Their location relative to the tclX7.6.0 directory is
+configured by editing tclX7.6.0/unix/Config.mk.
 
 The following directories are included under the TclX directory:
 
@@ -68,7 +68,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
     o If you are going to be using Tk and want to build an Extended Tcl wish
       shell (wishx), configure, compile and install Tk 4.1.
 
-    o cd to tclX7.5.2/unix
+    o cd to tclX7.6.0/unix
 
     o Edit Config.mk in the build directory following the instructions in the
       file.  You normally don't need to do this, only if special configuration
@@ -87,6 +87,9 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
         o --enable-shared=YES|NO
           If "YES", build and link with shared libraries if "NO", no shared
           libraries will be compiled.  Default is "NO".
+
+        o -with-tcl=DIR - Specify location of Tcl build directory.  If not
+           specified ../tcl7.6 is assumed.
  
         o --with-tk=YES|NO
           If "YES", compile Tk specific code and wishx, if "NO", no Tk related
@@ -97,7 +100,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           use this to compile in a separate directory from the source.  You
           must create a directory called "unix" in your build tree and run
           configure while in the "unix" directory.  The --srcdir argument must
-          specify the "tclX7.5.2/unix" directory, not the top-level TclX 
+          specify the "tclX7.6.0/unix" directory, not the top-level TclX 
           directory.
           Note: The source directory must be clean, it can't contain a built
           copy of TclX.
@@ -162,7 +165,7 @@ Tk and the tests for Extended Tcl, which test both the new commands added by
 Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
-    o Run TclX tests by typing "make test" in the tclX7.5.2/unix directory.
+    o Run TclX tests by typing "make test" in the tclX7.6.0/unix directory.
       This runs both the TclX specific tests and an the Tcl tests though
       a interpreter built with TclX.
 
@@ -181,8 +184,8 @@ library.
 
     o If you're having trouble with the Berkeley tests, and you suspect that
       the extensions might be involved, you can build a special minimal
-      version of Berkeley Tcl by cd'ing to the tcl7.5 directory and doing
-      a "make test".  Similarly, you can do "make test" in the tk4.1 directory.
+      version of Berkeley Tcl by cd'ing to the tcl7.6 directory and doing
+      a "make test".  Similarly, you can do "make test" in the tk4.2 directory.
       If the test works with standard Tcl or Tk and fails with TclX, contact
       us.
 
