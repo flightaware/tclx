@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 1.3 1992/10/05 22:01:14 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.0 1992/10/16 04:51:40 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -329,7 +329,7 @@ proc GenerateHelp {helpDirPath briefFile mergeTree sourceFiles} {
                       "This should be the help root directory"]
     }
         
-    set status [catch {set tmpFH [open xxx $G_helpDir/AVeryVeryBigFileName w]}]
+    set status [catch {set tmpFH [open $G_helpDir/AVeryVeryBigFileName w]}]
     if {$status != 0} {
         set G_truncFileNames 1
     } else {
