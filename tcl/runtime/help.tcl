@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 1.2 1992/10/05 22:01:14 markd Exp markd $
+# $Id: help.tcl,v 2.0 1992/10/16 04:52:01 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -119,7 +119,9 @@ proc help:ListDir {dirPath} {
         if [file isdirectory $fileName] {
             lappend dirList "[file tail $fileName]/"
         } else {
-            lappend fileList [file tail $fileName]
+            if {[file ext $fileName] != ".brf"} {
+                lappend fileList [file tail $fileName]
+            }
         }
     }
    return [list [lsort $dirList] [lsort $fileList]]
