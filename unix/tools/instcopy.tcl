@@ -15,16 +15,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 4.0 1994/07/16 05:29:04 markd Rel markd $
+# $Id: instcopy.tcl,v 4.1 1995/01/01 19:49:49 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
 #
 #  instcopy file1 file2 ... targetdir
-#  instcopy -dirname file1 targetdir
+#  instcopy -filename file1 targetfile
 #
-#  o -dirname - If specified, then a directory is copies as the target
-#     directory rather than to it.
+#  o -filename - If specified, then the last file is the name of a file rather
+#    than a directory. 
 #  o files - List of files to copy. If one of directories are specified, they
 #    are copied.
 #  o targetdir - Target directory to copy the files to.  If the directory does
@@ -40,37 +40,32 @@ proc Usage {{msg {}}} {
     if {"$msg" != ""} {
         puts stderr "Error: $msg"
     }
-    puts stderr {usage: instcopy ?-dirname? file1 file2 ... targetdir}
+    puts stderr {usage: instcopy ?-filename? file1 file2 ... targetdir}
     exit 1
 }
 
 #------------------------------------------------------------------------------
 # DoACopy --
-#
-# 
 #------------------------------------------------------------------------------
 
-proc DoACopy {file targetDir} {
-    global dirNameMode
+proc DoACopy {file target mode} {
+
+    if {$mode == "FILENAME"} {
+        set targetDir [file dirname $target]
+        if [file exists $target] {
+            unlink $target
+        }
+    } else {
+        set targetDir $target
+    }
+    if ![file exists $targetDir] {
+        mkdir -path  $targetDir
+    }
 
     if [file isdirectory $file] {
-        if $dirNameMode {
-            set target $targetDir
-        } else {
-            set target $targetDir/[file tail $file]
-        }
-        puts stdout ""
-        puts stdout "Copying directory hierarchy $file to $target"
-        puts stdout ""
-        if ![file exists $target] {
-            mkdir -path  $target
-        }
         CopyDir $file $target
     } else {
-        puts stdout ""
-        puts stdout "Copying $file to $targetDir"
-        puts stdout ""
-        CopyFile $file $targetDir
+        CopyFile $file $target
     }
 }
 
@@ -86,28 +81,30 @@ if {$argc < 2} {
     Usage "Not enough arguments"
 }
 
-set dirNameMode 0
-if {[lindex $argv 0] == "-dirname"} {
-    lvarpop argv
-    incr argc -1
-    set dirNameMode 1
+switch -exact -- [lindex $argv 0] {
+    -filename {
+        set mode FILENAME
+        lvarpop argv
+        incr argc -1
+    }
+    default {
+        set mode {}
+    }
 }
 
 set files [lrange $argv 0 [expr $argc-2]]
 set targetDir [lindex $argv [expr $argc-1]]
 
-if {[file exists $targetDir] && ![file isdirectory $targetDir]} {
+if {[file exists $targetDir] && ![file isdirectory $targetDir] &&
+    ($mode != "FILENAME")} {
    Usage "Target is not a directory: $targetDir"
 }
 
 umask 022
 
 if [catch {
-    if ![file exists $targetDir] {
-        mkdir -path $targetDir
-    }
     foreach file $files {
-        DoACopy $file $targetDir
+        DoACopy $file $targetDir $mode
     }
 } msg] {
     puts stderr "Error: $msg"

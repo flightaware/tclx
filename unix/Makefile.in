@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.8 1995/03/23 06:05:19 markd Exp markd $
+# $Id: Makefile.in,v 4.9 1995/03/23 07:40:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -34,25 +34,11 @@ VPATH             = @srcdir@
 prefix            = @prefix@
 exec_prefix       = @exec_prefix@
 ARCH              = @TCL_ARCH@
-MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
-TCL_INST_MASTER   = ${TCL_MASTERDIR}/`tools/tclxversion`
-TK_INST_MASTER    = ${TK_MASTERDIR}/`tools/tkxversion`
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
 
 @MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
-
-#------------------------------------------------------------------------------
-# Other macros.
-
-LIBTCL_A   = tclmaster/lib${ARCH}/libtcl.a
-TCL_H      = tclmaster/include/tcl.h
-LIBTK_A    = tkmaster/lib${ARCH}/libtk.a
-TK_H       = tkmaster/include/tk.h
-INSTCOPY   = ./runtcl tools/instcopy
-CPMANPAGES = ./runtcl ${bldbasedir}/tools/cpmanpages
-SYMLINKEXT = ${bldbasedir}/tools/symlinkext
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
@@ -77,7 +63,7 @@ all: TCLX runtcl ${TK_BUILD}
 # Compile the Extended Tcl library and link the Tcl shell.
 #
 
-TCLX: TCLCOPY runtcl
+TCLX: runtcl
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} all
@@ -85,58 +71,13 @@ TCLX: TCLCOPY runtcl
 	cd tests;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
-# Copy include and library files from the UCB Tcl distribution to the
-# tclmaster directory.
-#
-TCLCOPY: MKTCLDIRS ${LIBTCL_A} ${TCL_H}
-
-MKTCLDIRS:
-	-mkdir tclmaster                2>/dev/null; exit 0
-	-mkdir tclmaster/lib${ARCH}     2>/dev/null; exit 0
-	-mkdir tclmaster/include        2>/dev/null; exit 0
-	-mkdir tclmaster/bin${ARCH}     2>/dev/null; exit 0
-	-mkdir tclmaster/src            2>/dev/null; exit 0
-
-${LIBTCL_A}: ${TCL_UCB_LIB}/libtcl.a
-	rm -f ${LIBTCL_A}
-	cp ${TCL_UCB_LIB}/libtcl.a ${LIBTCL_A}
-	${RANLIB} ${LIBTCL_A}
-
-${TCL_H}: ${TCL_UCB_SRC}/tcl.h
-	rm -f ${TCL_H}
-	cp ${TCL_UCB_SRC}/tcl.h ${TCL_H}
-
-#------------------------------------------------------------------------------
 # Generate a wish shell {wishx} with Extended Tcl commands.
 #
 
-WISHX: TKCOPY runwishx
+WISHX: runwishx
 	cd tksrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tktclsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tktests;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
-
-#------------------------------------------------------------------------------
-# Copy include and library files from the UCB Tk distribution to the
-# tkmaster directory.
-#
-
-TKCOPY: MKTKDIRS ${LIBTK_A} ${TK_H}
-
-MKTKDIRS:
-	-mkdir tkmaster                2>/dev/null; exit 0
-	-mkdir tkmaster/lib${ARCH}     2>/dev/null; exit 0
-	-mkdir tkmaster/include        2>/dev/null; exit 0
-	-mkdir tkmaster/bin${ARCH}     2>/dev/null; exit 0
-	-mkdir tkmaster/src            2>/dev/null; exit 0
-
-${LIBTK_A}: ${TK_UCB_LIB}/libtk.a
-	rm -f ${LIBTK_A}
-	cp ${TK_UCB_LIB}/libtk.a ${LIBTK_A}
-	${RANLIB} ${LIBTK_A}
-
-${TK_H}: ${TK_UCB_SRC}/tk.h
-	rm -f ${TK_H}
-	cp ${TK_UCB_SRC}/tk.h ${TK_H}
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at
@@ -146,7 +87,7 @@ runtcl:
 	@echo ':'                                                   >runtcl
 	@echo '# script for testing Tcl before installation'       >>runtcl
 	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"                >>runtcl
-	@echo "TCL_PROGRAM=${bldbasedir}/tclmaster/bin${ARCH}/tcl" >>runtcl
+	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runtcl
 	@echo "export TCL_LIBRARY TCL_PROGRAM"                     >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
 	@echo "then"                                               >>runtcl
@@ -159,10 +100,10 @@ runtcl:
 runwishx:
 	@echo ':'                                                  >runwishx
 	@echo '# script for testing wishx before installation'    >>runwishx
-	@echo "TCL_LIBRARY=`pwd`/tclmaster"                       >>runwishx
-	@echo "TK_LIBRARY=`pwd`/tkmaster"                         >>runwishx
-	@echo "TCL_PROGRAM=`pwd`/tclmaster/bin${ARCH}/tcl"        >>runwishx
-	@echo "WISHX=`pwd`/tkmaster/bin${ARCH}/wishx"             >>runwishx
+	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"               >>runwishx
+	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                 >>runwishx
+	@echo "TK_LIBRARY=${bldbasedir}/tktclsrc"                 >>runwishx
+	@echo "WISHX=${bldbasedir}/tksrc/wishx"                   >>runwishx
 	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"         >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx
@@ -200,10 +141,8 @@ buildtkhelp:
 	cd tktclsrc; ${MAKE} -${MAKEFLAGS} buildtkhelp
 
 #------------------------------------------------------------------------------
-# Install Extended Tcl using the standard model
 
-install: all TCLXINSTALL TCLXINSTALL-EXEC \
-             ${TK_BUILD}MAYBE ${TK_BUILD}MAYBE-EXEC
+install: all TCLXINSTALL ${TK_BUILD}MAYBE
 
 install-exec: all TCLXINSTALL-EXEC ${TK_BUILD}MAYBE-EXEC
 
@@ -211,33 +150,25 @@ TCLXINSTALL:
 	@echo ""
 	@echo "   Install Extended Tcl using standard model"
 	@echo ""
-	${INSTCOPY} tclmaster/*.tcl tclmaster/*.tlib tclmaster/*.tndx \
-	   tclmaster/help tclmaster/src ${TCL_INST_MASTER}
-	${INSTCOPY} tclmaster/include/tclExtend.h tclmaster/include/tcl++.h \
-	   ${TCL_INCLUDEDIR}
-	${CPMANPAGES} -rmcat @${MAN_DIR_SEPARATOR}@ \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${srcbasedir}/man ${TCL_MAN_BASEDIR}
+	cd src;       ${MAKE} -${MAKEFLAGS} install
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} install
+	cd man;       ${MAKE} -${MAKEFLAGS} install
 
 TCLXINSTALL-EXEC:
-	${INSTCOPY} tclmaster/bin${ARCH}/tcl ${TCL_BINDIR}
-	${STRIP} ${TCL_BINDIR}/tcl
-	${INSTCOPY} tclmaster/lib${ARCH}/libtclx.a ${TCL_LIBDIR}
-	${RANLIB} ${TCL_LIBDIR}/libtclx.a
+	@echo ""
+	@echo "   Install Extended Tcl executables using standard model"
+	@echo ""
+	cd src;       ${MAKE} -${MAKEFLAGS} install-exec
 
 TKXINSTALL:
-	${INSTCOPY} tkmaster/*.tcl tkmaster/*.tlib tkmaster/*.tndx \
-	   tkmaster/help tkmaster/src tkmaster/*.ps tkmaster/demos \
-	   ${TK_INST_MASTER}
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} install
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install
 
 TKXINSTALL-EXEC:
-	${INSTCOPY} tkmaster/bin${ARCH}/wishx ${TCL_BINDIR}
-	${STRIP} ${TCL_BINDIR}/wishx
-	${INSTCOPY} tkmaster/bin${ARCH}/tclhelp ${TCL_BINDIR}
-	${INSTCOPY} tkmaster/lib${ARCH}/libtkx.a ${TCL_LIBDIR}
-	${RANLIB} ${TCL_LIBDIR}/libtkx.a
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} install-exec
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install-exec
 
-# Fake targets to decide if we install wishx or not.
+# Targets to decide if we install wishx or not.
 
 MAYBE:
 MAYBE-EXEC:
@@ -263,57 +194,26 @@ MASTER-NOTE:
 
 TCLXMINSTALL:
 	@echo ""
-	@echo "   Install TclX master directory"
+	@echo "   Install TclX using master directory model"
 	@echo ""
-	${INSTCOPY} -dirname tclmaster ${TCL_INST_MASTER}
-	${STRIP} ${TCL_INST_MASTER}/bin${ARCH}/tcl
-	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
-	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${TCL_UCB_SRC}/doc ${TCL_INST_MASTER}/man
-	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${srcbasedir}/man ${TCL_INST_MASTER}/man
-	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TCL_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
-	${SYMLINKEXT} ${TCL_INST_MASTER}/include/* ${TCL_INCLUDEDIR}
+	cd src;       ${MAKE} -${MAKEFLAGS} install-master
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} install-master
+	cd man;       ${MAKE} -${MAKEFLAGS} install-master
 
 TCLXMINSTALL-EXEC:
 	@echo ""
-	@echo "   Install TclX executables only"
+	@echo "   Install TclX executables using master directory model"
 	@echo ""
-	${INSTCOPY} tclmaster/bin${ARCH} ${TCL_INST_MASTER}
-	${STRIP} ${TCL_INST_MASTER}/bin${ARCH}/tcl
-	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
-	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
-	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TCL_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
+	cd src;       ${MAKE} -${MAKEFLAGS} install-master-exec
 
 TKXMINSTALL:
-	@echo ""
-	@echo "   Install TkX master directory"
-	@echo ""
-	${INSTCOPY} -dirname tkmaster ${TK_INST_MASTER}
-	${STRIP} ${TK_INST_MASTER}/bin${ARCH}/wishx
-	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
-	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
-	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
-	    ${TK_MAN_UNIXCMD_SECTION} \
-	    ${TK_UCB_SRC}/doc ${TK_INST_MASTER}/man
-	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TK_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
-	${SYMLINKEXT} ${TK_INST_MASTER}/include/* ${TCL_INCLUDEDIR}
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} install-master
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install-master
+	cd man;       ${MAKE} -${MAKEFLAGS} install-master
 
 TKXMINSTALL-EXEC:
-	@echo ""
-	@echo "   Install TkX executables only"
-	@echo ""
-	${INSTCOPY} tkmaster/bin${ARCH} ${TK_INST_MASTER}
-	${STRIP} ${TK_INST_MASTER}/bin${ARCH}/wishx
-	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
-	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
-	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TK_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
+	cd tksrc;     ${MAKE} -${MAKEFLAGS} install-master-exec
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install-master-exec
 
 # Fake targets to decide if we install wishx or not.
 

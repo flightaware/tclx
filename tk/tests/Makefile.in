@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.3 1995/02/25 02:54:53 markd Exp markd $
+# $Id: Makefile.in,v 1.4 1995/03/31 21:33:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -40,12 +40,13 @@ XLIBSW      = @XLIBSW@
 
 #------------------------------------------------------------------------------
 
-LIBTCL_A     = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
-LIBTCLX_A    = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
-LIBTK_A      = ${bldbasedir}/tkmaster/lib${ARCH}/libtk.a
-LIBTKX_A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
+LIBTK        = ${TK_UCB_LIB}/libtk.a
+LIBTKX       = ../tksrc/libtkx.a
+LIBTCL       = ${TCL_UCB_LIB}/libtcl.a
+LIBTCLX      = ../src/libtclx.a
 
-LDLIBS = ${LIBTKX_A} ${LIBTK_A} ${XLIBSW} ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
+LDLIBS = -L../tksrc -ltkx -L${TK_UCB_LIB} -ltk ${XLIBSW} \
+	 -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
@@ -92,15 +93,16 @@ tkSquare.c: ${TK_UCB_SRC}/tkSquare.c
 
 runtest:
 	@echo ':'                                                   >runtest
-	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"                >>runtest
-	@echo "TCL_PROGRAM=${bldbasedir}/tktests/tkXtest"          >>runtest
-	@echo "TK_LIBRARY=${bldbasedir}/tkmaster"                  >>runtest
+	@echo "TCL_LIBRARY=${bldbasedir}/tclsrc"                   >>runtest
+	@echo "TK_LIBRARY=${bldbasedir}/tktclsrc"                  >>runtest
+	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runwishx
+	@echo "TESTWISH=${bldbasedir}/tktests/tkXtest"             >>runtest
 	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"          >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
-	@echo "    exec \$$TCL_PROGRAM"                            >>runtest
+	@echo "    exec \$$TESTWISH"                               >>runtest
 	@echo "else"                                               >>runtest
-	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                   >>runtest
+	@echo "    exec \$$TESTWISH \"\$$@\""                      >>runtest
 	@echo "fi"                                                 >>runtest
 	chmod a+rx runtest
 

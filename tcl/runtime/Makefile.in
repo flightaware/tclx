@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.2 1994/12/29 06:21:39 markd Exp markd $
+# $Id: Makefile.in,v 4.3 1995/01/01 19:50:03 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -36,16 +36,20 @@ exec_prefix       = @exec_prefix@
 
 #------------------------------------------------------------------------------
 
-TCL.TLIB       = ${bldbasedir}/tclmaster/tcl.tlib
-TCL.TNDX       = ${bldbasedir}/tclmaster/tcl.tndx
-TCLINIT.TCL    = ${bldbasedir}/tclmaster/TclInit.tcl
-BUILDIDX.TCL   = ${bldbasedir}/tclmaster/buildidx.tcl
-LOADOUSTER.TCL = ${bldbasedir}/tclmaster/loadouster.tcl
-HELP           = ${bldbasedir}/tclmaster/help
-HELPSRC        = ${srcbasedir}/tclhelp
-TCLMANPAGES    = ${srcbasedir}/tools/tclmanpages
-GENINDEX       = ../runtcl ${srcbasedir}/tools/genindex.tcl
-BLDMANHELP     = ../runtcl ${srcbasedir}/tools/bldmanhelp
+HELPSRC      = ${srcbasedir}/tclhelp
+TCLMANPAGES  = ${srcbasedir}/tools/tclmanpages
+GENINDEX     = ../runtcl ${srcbasedir}/tools/genindex.tcl
+BLDMANHELP   = ../runtcl ${srcbasedir}/tools/bldmanhelp
+INST_MASTER  = ${TCL_MASTERDIR}/`../tools/tclxversion`
+INSTCOPY     = ../runtcl ../tools/instcopy
+
+TMPMASTER    = ../tclmaster
+TCLINIT      = ${TMPMASTER}/TclInit.tcl
+BUILDIDX     = ${TMPMASTER}/buildidx.tcl
+TCLTLIB      = ${TMPMASTER}/tcl.tlib
+TCLTNDX      = ${TMPMASTER}/tcl.tndx
+LOADOUSTER   = ${TMPMASTER}/loadouster.tcl
+TMPHELP      = ${TMPMASTER}/help
 
 #------------------------------------------------------------------------------
 
@@ -57,49 +61,73 @@ TCL_SRCS = arrayprocs.tcl   compat.tcl       convlib.tcl      edprocs.tcl    \
 
 #------------------------------------------------------------------------------
 
-all: ${TCLINIT.TCL} ${BUILDHELP.TCL} ${BUILDIDX.TCL} ${LOADOUSTER.TCL} \
-     ${TCL.TLIB} HELPCP
+all: made.tmp ${TCLINIT} ${BUILDIDX} ${TCLTLIB} ${TCLTNDX} ${LOADOUSTER} \
+     ${TMPHELP}
 
-${TCLINIT.TCL}: TclInit.tcl
-	-rm -f ${TCLINIT.TCL} 
-	cp ${srcdir}/TclInit.tcl ${TCLINIT.TCL}
+made.tmp:
+	test -d ${TMPMASTER} || mkdir ${TMPMASTER}
+	touch made.tmp
 
-${BUILDIDX.TCL}: buildidx.tcl
-	-rm -f ${BUILDIDX.TCL}
-	cp ${srcdir}/buildidx.tcl ${BUILDIDX.TCL}
+${TCLINIT}: ${srcdir}/TclInit.tcl made.tmp
+	rm -f ${TCLINIT}
+	cp ${srcdir}/TclInit.tcl ${TCLINIT}
 
-${LOADOUSTER.TCL}: loadouster.tcl
-	-rm -f ${LOADOUSTER.TCL}
-	cp ${srcdir}/loadouster.tcl ${LOADOUSTER.TCL}
+${BUILDIDX}: buildidx.tcl made.tmp
+	rm -f ${BUILDIDX}
+	cp ${srcdir}/buildidx.tcl ${BUILDIDX}
 
-${TCL.TLIB}: ${TCL_SRCS} ${BUILDIDX.TCL} ${TCLINIT.TCL}
-	-rm -f ${TCL.TLIB} ${TCL.TNDX}
+${TCLTLIB}: ${TCL_SRCS} made.tmp
+	-rm -f ${TCLTLIB} ${TCLTNDX}
 	(cd ${srcdir}; cat ${TCL_SRCS}) | \
 	    grep -v '^#[^@].*' | grep -v '#$$' > $@
-	${GENINDEX} ${TCL.TLIB}
+
+${TCLTNDX}: ${TCLTLIB} ${TCLINIT} ${BUILDIDX} made.tmp
+	${GENINDEX} ${TCLTLIB}
+
+${LOADOUSTER}: loadouster.tcl made.tmp
+	rm -f ${LOADOUSTER}
+	cp ${srcdir}/loadouster.tcl ${LOADOUSTER}
 
 #------------------------------------------------------------------------------
-# Copy help files to the master directory.
-#
+# Need a "help" directory in the tmp master so that the help command will
+# work before installation.  Normally just symlink, unless we don't have them.
+# (Must enforce master dir being there, as a dependency on make.tmp causes
+# it to be always rebuilt).
 
-HELPCP: ${HELP}/Tcl.brf ${HELP}/TclX.brf
-
-${HELP}/Tcl.brf ${HELP}/TclX.brf: ${HELPSRC}/Tcl.brf ${HELPSRC}/TclX.brf
-	${bldbasedir}/tools/cphelpdir ${HELPSRC} ${HELP}
+${TMPMASTER}/help:
+	test -d ${TMPMASTER} || mkdir ${TMPMASTER}
+	if [ "@HAVE_SYML@" = "YES" ]; then \
+	    rm -rf ${TMPHELP} ;\
+	    ln -s ${HELPSRC} ${TMPHELP} ;\
+	else \
+	    rm -rf ${TMPHELP} ;\
+	    mkdir ${TMPHELP} ;\
+	    (cd ${HELPSRC}; tar -cf -) | (cd ${TMPHELP}; tar -xf -) ;\
+	fi
 
 #------------------------------------------------------------------------------
 # Build help for Tcl & TclX.
 
-buildtclhelp: ${TCLINIT.TCL} ${TCL.TLIB}
-	rm -rf ${HELPSRC}
+buildtclhelp: ${TCLINITTCL} ${TCLTLIB}
+	rm -rf ${HELPSRC} ${TMPHELP}
 	mkdir ${HELPSRC}
 	${BLDMANHELP} ${TCL_UCB_SRC}/doc ${TCLMANPAGES} ${HELPSRC} Tcl.brf
 	../runtcl -c "buildhelp ${HELPSRC} TclX.brf ${srcbasedir}/man/TclX.n"
 	rm -rf ${HELP}	
 
 #------------------------------------------------------------------------------
-# Nothing to clean here, tclmaster is cleaned at the top level.
+
+install:
+	${INSTCOPY} ${srcdir}/TclInit.tcl ${TCLTLIB} ${TCLTNDX} \
+	    ${srcdir}/buildidx.tcl ${srcdir}/loadouster.tcl ${INST_MASTER}
+	${INSTCOPY} ${HELPSRC} ${INST_MASTER}/help
+
+install-master: install
+
+#------------------------------------------------------------------------------
+
 clean:
+	rm -rf ${TMPMASTER} made.tmp
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

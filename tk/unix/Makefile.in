@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.11 1995/04/02 21:53:13 markd Exp markd $
+# $Id: Makefile.in,v 4.12 1995/04/07 15:44:39 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -42,21 +42,19 @@ XLIBSW      = @XLIBSW@
 
 #------------------------------------------------------------------------------
 
-LIBTK_A      = ${bldbasedir}/tkmaster/lib${ARCH}/libtk.a
-LIBTKX_A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
-WISHX        = ${bldbasedir}/tkmaster/bin${ARCH}/wishx
-APPINIT      = ${bldbasedir}/tkmaster/src/tkXAppInit.c
-SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS${ARCH}
-
-LIBTCL_A  = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
-LIBTCLX_A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
+LIBTK        = ${TK_UCB_LIB}/libtk.a
+LIBTCL       = ${TCL_UCB_LIB}/libtcl.a
+LIBTCLX      = ../src/libtclx.a
+INST_MASTER  = ${TK_MASTERDIR}/`../tools/tkxversion`
+INSTCOPY     = ../runtcl ../tools/instcopy
+SYMLINKEXT   = ../tools/symlinkext
 
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the Tcl
 # library if it was brought in.
 
-LDLIBS = -L${bldbasedir}/tkmaster/lib${ARCH} -ltkx -ltk ${XLIBSW} \
-	 -L${bldbasedir}/tclmaster/lib${ARCH} -ltclx -ltcl ${LIBS}
+LDLIBS = -L. -ltkx -L${TK_UCB_LIB} -ltk ${XLIBSW} \
+	 -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS}
 
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
@@ -74,33 +72,48 @@ OBJS=tkXinit.o tkXshell.o
 # Compile the TkX library and link wishx.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS}
+all: made.tmp wishx
 
-${WISHX}: tkXAppInit.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A} made.tmp
+wishx: tkXAppInit.o libtkx.a ${LIBTK} ${LIBTCLX} ${LIBTCL} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
-	    -o ${WISHX} || (rm -f ${WISHX}; exit 1)
+	    -o wishx || (rm -f wishx; exit 1)
 
-made.tmp ${LIBTKX_A}: ${OBJS}
-	${AR} cr ${LIBTKX_A} ${OBJS} ${UCBOBJS}
-	${RANLIB} ${LIBTKX_A}
+made.tmp libtkx.a: ${OBJS}
+	${AR} cr libtkx.a ${OBJS} ${UCBOBJS}
+	${RANLIB} libtkx.a
 	touch made.tmp
 
 tkXinit.o: ${srcdir}/tkXinit.c
-	MASTER=${TK_MASTERDIR}/`../tools/tkxversion` ;\
 	${CC} -c -I${TK_UCB_SRC} ${CC_FLAGS} ${DEFS} \
-	    -DTKX_LIBRARY=\"$$MASTER\" ${srcdir}/tkXinit.c
+	    -DTKX_LIBRARY=\"${INST_MASTER}\" ${srcdir}/tkXinit.c
 
-${APPINIT}: ${srcdir}/tkXAppInit.c
-	rm -f ${APPINIT}
-	cp ${srcdir}/tkXAppInit.c ${APPINIT}
+#------------------------------------------------------------------------------
 
-${SYSLIBS}: SYSLIBS
-	rm -f ${SYSLIBS}
-	cp SYSLIBS ${SYSLIBS}
+install: install-exec
+
+install-exec:
+	${INSTCOPY} wishx ${TCL_BINDIR}
+	${STRIP} ${TCL_BINDIR}/wishx
+	${INSTCOPY} libtkx.a ${TCL_LIBDIR}
+	${RANLIB} ${TCL_LIBDIR}/libtkx.a
+	${INSTCOPY} -filename SYSLIBS ${INST_MASTER}/src/SYSLIBS${ARCH}
+
+install-master: install-master-exec
+	${INSTCOPY} ${TK_UCB_SRC}/tk.h ${INST_MASTER}/include
+	${SYMLINKEXT} ${INST_MASTER}/include/* ${TCL_INCLUDEDIR}
+
+install-master-exec:
+	${INSTCOPY} wishx ${INST_MASTER}/bin${ARCH}
+	${STRIP} ${INST_MASTER}/bin${ARCH}/wishx
+	${INSTCOPY} ${LIBTK} libtkx.a ${INST_MASTER}/lib${ARCH}
+	${RANLIB} ${INST_MASTER}/lib${ARCH}/*.a
+	${INSTCOPY} -filename SYSLIBS ${INST_MASTER}/src/SYSLIBS${ARCH}
+	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
+	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
 
 #------------------------------------------------------------------------------
 clean:
-	-rm -f made.tmp tkXAppInit.o ${OBJS} ${WISHX}
+	-rm -f made.tmp tkXAppInit.o ${OBJS} wishx libtkx.a
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

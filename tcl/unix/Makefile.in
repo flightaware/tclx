@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.12 1995/04/02 21:53:13 markd Exp markd $
+# $Id: Makefile.in,v 4.13 1995/04/07 15:44:39 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -44,15 +44,12 @@ LIBS        = @LIBS@ @MATH_LIBS@
 
 #------------------------------------------------------------------------------
 
-LIBTCL_A      = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
-LIBTCLX_A     = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
-TCL           = ${bldbasedir}/tclmaster/bin${ARCH}/tcl
-TCLEXTEND_H   = ${bldbasedir}/tclmaster/include/tclExtend.h
-TCLPP_H       = ${bldbasedir}/tclmaster/include/tcl++.h
-APPINIT       = ${bldbasedir}/tclmaster/src/tclXAppInit.c
-SYSLIBS       = ${bldbasedir}/tclmaster/src/SYSLIBS${ARCH}
+LIBTCL        = ${TCL_UCB_LIB}/libtcl.a
+INST_MASTER   = ${TCL_MASTERDIR}/`../tools/tclxversion`
+INSTCOPY      = ../runtcl ../tools/instcopy
+SYMLINKEXT    = ../tools/symlinkext
 
-LDLIBS = -L${bldbasedir}/tclmaster/lib${ARCH} -ltclx -ltcl ${LIBS}
+LDLIBS = -L. -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${bldbasedir}/src -I${TCL_UCB_SRC}
@@ -82,21 +79,19 @@ UCBOBJS=tclCmdIL.o
 # Compile the TclX library and link the shell.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${APPINIT} ${SYSLIBS} \
-     TCLXX_${TCLXX}
+all: made.tmp tcl TCLXX_${TCLXX}
 
-${TCL}: tclXAppInit.o ${LIBTCLX_A} ${LIBTCL_A} made.tmp 
+tcl: tclXAppInit.o libtclx.a ${LIBTCL} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
-	      -o ${TCL} || (rm -f ${TCL}; exit 1)
+	      -o tcl || (rm -f tcl; exit 1)
 
-made.tmp ${LIBTCLX_A}: ${OBJS} ${UCBOBJS}
-	${AR} cr ${LIBTCLX_A} ${OBJS} ${UCBOBJS}
-	${RANLIB} ${LIBTCLX_A}
+made.tmp libtclx.a: ${OBJS} ${UCBOBJS}
+	${AR} cr libtclx.a ${OBJS} ${UCBOBJS}
+	${RANLIB} libtclx.a
 	touch made.tmp
 
 tclCmdIL.o: tclCmdIL.c ${TCL_UCB_SRC}/patchlevel.h
-	MASTER=${TCL_MASTERDIR}/`../tools/tclxversion` ;\
-	${CC} -c ${CC_FLAGS} -DTCL_LIBRARY=\"$$MASTER\" tclCmdIL.c
+	${CC} -c ${CC_FLAGS} -DTCL_LIBRARY=\"${INST_MASTER}\" tclCmdIL.c
 
 tclCmdIL.c: ${TCL_UCB_SRC}/tclCmdIL.c
 	rm -f tclCmdIL.c
@@ -104,8 +99,7 @@ tclCmdIL.c: ${TCL_UCB_SRC}/tclCmdIL.c
 	cat ${TCL_UCB_SRC}/tclCmdIL.c   >> tclCmdIL.c
 
 tclXlibInit.o: ${srcdir}/tclXlibInit.c
-	MASTER=${TCL_MASTERDIR}/`../tools/tclxversion` ;\
-	${CC} -c ${CC_FLAGS} -DTCLX_LIBRARY=\"$$MASTER\" \
+	${CC} -c ${CC_FLAGS} -DTCLX_LIBRARY=\"${INST_MASTER}\" \
 	    ${srcdir}/tclXlibInit.c
 
 tclXcmdInit.o: ${srcdir}/tclXcmdInit.c ${srcdir}/tclXpatchl.h
@@ -117,29 +111,9 @@ tclXgetdate.c: ${srcdir}/tclXgetdate.y
 
 tcl++.o: ${srcdir}/tcl++.C ${srcdir}/tcl++.h
 	${CXX} -c ${CXX_FLAGS} ${srcdir}/tcl++.C
-	${AR} cr ${LIBTCLX_A} tcl++.o
-	${RANLIB} ${LIBTCLX_A}
+	${AR} cr libtclx.a tcl++.o
+	${RANLIB} libtclx.a
 	touch made.tmp
-
-#------------------------------------------------------------------------------
-# Copy include files, etc to the master directory.
-#
-
-${TCLEXTEND_H}: ${srcdir}/tclExtend.h
-	rm -f ${TCLEXTEND_H}
-	cp ${srcdir}/tclExtend.h ${TCLEXTEND_H}
-
-${TCLPP_H}: ${srcdir}/tcl++.h
-	rm -f ${TCLPP_H}
-	cp ${srcdir}/tcl++.h ${TCLPP_H}
-
-${APPINIT}: ${srcdir}/tclXAppInit.c
-	rm -f ${APPINIT}
-	cp ${srcdir}/tclXAppInit.c ${APPINIT}
-
-${SYSLIBS}: SYSLIBS
-	rm -f ${SYSLIBS}
-	cp SYSLIBS ${SYSLIBS}
 
 #------------------------------------------------------------------------------
 # Make sure we can link a C++ program (the result is not install).  Target
@@ -161,9 +135,35 @@ tclXAppInit++.C: ${srcdir}/tclXAppInit.c
 
 #------------------------------------------------------------------------------
 
+install: install-exec
+	${INSTCOPY} ${srcdir}/tclExtend.h ${srcdir}/tcl++.h ${TCL_INCLUDEDIR}
+
+install-exec:
+	${INSTCOPY} tcl ${TCL_BINDIR}
+	${STRIP} ${TCL_BINDIR}/tcl
+	${INSTCOPY} libtclx.a ${TCL_LIBDIR}
+	${RANLIB} ${TCL_LIBDIR}/libtclx.a
+	${INSTCOPY} -filename SYSLIBS ${INST_MASTER}/src/SYSLIBS${ARCH}
+
+install-master: install-master-exec
+	${INSTCOPY} ${TCL_UCB_SRC}/tcl.h ${srcdir}/tclExtend.h \
+	    ${srcdir}/tcl++.h ${INST_MASTER}/include
+	${SYMLINKEXT} ${INST_MASTER}/include/* ${TCL_INCLUDEDIR}
+
+install-master-exec:
+	${INSTCOPY} tcl ${INST_MASTER}/bin${ARCH}
+	${STRIP} ${INST_MASTER}/bin${ARCH}/tcl
+	${INSTCOPY} ${LIBTCL} libtclx.a ${INST_MASTER}/lib${ARCH}
+	${RANLIB} ${INST_MASTER}/lib${ARCH}/*.a
+	${INSTCOPY} -filename SYSLIBS ${INST_MASTER}/src/SYSLIBS${ARCH}
+	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
+	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
+
+#------------------------------------------------------------------------------
+
 clean:
 	-rm -f made.tmp tclXgetdate.c tclXAppInit++.C tclXAppInit.o tclCmdIL.c
-	-rm -f ${OBJS} ${UCBOBJS} tclXAppInit++.o tcl++.o ${TCL} tcl++
+	-rm -f ${OBJS} ${UCBOBJS} tclXAppInit++.o tcl++.o tcl tcl++ libtclx.a
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

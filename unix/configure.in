@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.18 1995/04/12 07:23:56 markd Exp markd $
+dnl $Id: configure.in,v 4.19 1995/04/15 19:49:30 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.18 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.19 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -63,13 +63,25 @@ fi
 AC_SUBST(TCLXX)
 
 #------------------------------------------------------------------------------
-# Purge the specific set of files that must be rebuild if the arch or prefix
-# flags are changed.
+# Determine if we have symbolic links on the filesystem we are building
+# on.  They are needed the setup the help so the help test will work.
+# If we don't have them, we have to copy the files.
+#------------------------------------------------------------------------------
+AC_PROG_LN_S
+if test "$LN_S" = "ln"; then
+    HAVE_SYML="NO"
+else
+    HAVE_SYML="YES"
+fi
+AC_SUBST(HAVE_SYML)
+
+#------------------------------------------------------------------------------
+# Purge the specific set of files that must be rebuild if the prefix is
+# changed or the build directory is moved.
 #------------------------------------------------------------------------------
 
-rm -f tclmaster/bin*/* tclmaster/lib*/* tclmaster/src/SYSLIBS* 2>/dev/null
-rm -f tkmaster/bin*/* tkmaster/lib*/* tkmaster/src/SYSLIBS* 2>/dev/null
-rm -f src/tclCmdIL.o src/tclXinit.o tksrc/tkWindow.o  */*.tmp 2>/dev/null
+rm -f runtcl runwishx tests/runtest tktests/runtest 2>/dev/null
+rm -f src/tclCmdIL.o src/tclXinit.o tksrc/tkXinit.o */made*.tmp 2>/dev/null
 
 #------------------------------------------------------------------------------
 #       Some make programs require includes to be 
@@ -614,5 +626,5 @@ fi
 AC_SUBST(prefix)
 AC_SUBST(execprefix)
 
-AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile tests/Makefile tktests/Makefile src/SYSLIBS tksrc/SYSLIBS)
+AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile tests/Makefile tktests/Makefile man/Makefile src/SYSLIBS tksrc/SYSLIBS)
 

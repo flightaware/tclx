@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.2 1995/01/01 19:50:03 markd Exp markd $
+# $Id: Makefile.in,v 4.3 1995/03/23 07:40:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -39,7 +39,7 @@ LIBOBJS     = @LIBOBJS@
 
 #------------------------------------------------------------------------------
 
-LIBTCLX_A = ../tclmaster/lib${ARCH}/libtclx.a
+LIBTCLX = ../src/libtclx.a
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${TCL_UCB_SRC}
@@ -51,10 +51,10 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
 
 all: made.tmp
 
-made.tmp ${LIBTCLX_A}: ${LIBOBJS}
+made.tmp ${LIBTCLX}: ${LIBOBJS}
 	if [ "${LIBOBJS}" != "" ] ; then \
-	    ${AR} cvr ${LIBTCLX_A} ${LIBOBJS} ;\
-	    ${RANLIB} ${LIBTCLX_A} ;\
+	    ${AR} cvr ${LIBTCLX} ${LIBOBJS} ;\
+	    ${RANLIB} ${LIBTCLX} ;\
 	else \
 	    exit 0 ;\
 	fi

@@ -40,14 +40,12 @@ The following directories are included under the tclX7.4a directory:
     o tools - Tools used for building and installing TclX.
 
     o tclmaster - Tcl master directory.  All files required to run TclX are
-      built or copied into this directory.  The part or all of the contents of
-      this directory are installed.  This directory is created by the build, it
-      is not part of the distribution.
+      built or copied into this directory.  This directory is created by the
+      build, it is not part of the distribution.
 
-    o tkmaster - Tk master directory.  All files required to run Tk are
-      built or copied into this directory.  The part or all of the contents of
-      this directory are installed.  This directory is created by the build, it
-      is not part of the distribution.
+    o tkmaster - Tk master directory.  All files required to run wishxTk are
+      built or copied into this directory. This directory is created by the
+      build, it is not part of the distribution.
 
 THE EXTENDED TCL INSTALLATION MODELS
 ====================================
