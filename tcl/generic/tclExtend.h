@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.12.2.5 1998/09/22 02:52:48 markd Exp $
+ * $Id: tclExtend.h,v 8.12.2.6 1998/11/25 08:04:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -88,6 +88,22 @@ typedef int
                                            ClientData  clientData,
                                            int         background,
                                            int         signalNum));
+
+EXTERN void
+TclX_ShellExit _ANSI_ARGS_((Tcl_Interp *interp,
+                            int         exitCode));
+
+EXTERN int
+TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
+                       unsigned     options,
+                       char        *cmd));
+
+EXTERN int
+TclXRuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
+                             char       *which,
+                             char       *defaultLib,
+                             char       *version));
+
 /*
  * Exported TclX initialization functions.
  */
