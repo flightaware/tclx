@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXfilecmds.c,v 2.5 1993/07/20 08:20:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -191,7 +191,7 @@ unixError:
  *   o idxPtr (I/O) - Pointer to the index of the next element in the buffer.
  *     initialize to zero before the first call.
  * Returns:
- *   o TCL_OK if a element was validated but there are more in the buffer.
+ *   o TCL_OK if an element was validated but there are more in the buffer.
  *   o TCL_BREAK if the end of the list was reached.
  *   o TCL_ERROR if an error occured.
  *-----------------------------------------------------------------------------
@@ -206,7 +206,6 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
     register char *p;
     int openBraces = 0;
     int inQuotes = 0;
-    int cnt = 0; /*??????*/
 
     p = bufferPtr->string + *idxPtr;
 
@@ -232,12 +231,6 @@ GetsListElement (interp, filePtr, bufferPtr, idxPtr)
      */
 
     while (1) {
-        cnt ++;
-        if (cnt > 0x1063)
-            sin (1.0);
-        if (p < bufferPtr->string || p >
-            (bufferPtr->string + bufferPtr->length))
-            abort();  /*????*/
         switch (*p) {
 
             /*
