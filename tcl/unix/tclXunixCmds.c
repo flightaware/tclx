@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 3.0 1993/11/19 06:59:25 markd Rel markd $
+ * $Id: tclXunixcmds.c,v 3.1 1993/12/10 05:14:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -314,7 +314,8 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int exitCode;
+    int               sysStatus;
+    WAIT_STATUS_TYPE  waitStatus;
 
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " command",
@@ -322,13 +323,37 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    exitCode = system (argv [1]);
-    if (exitCode == -1) {
+    sysStatus = system (argv [1]);
+    if (sysStatus == -1) {
         interp->result = Tcl_PosixError (interp);
         return TCL_ERROR;
     }
-    sprintf (interp->result, "%d", exitCode);
-    return TCL_OK;
+    waitStatus = (WAIT_STATUS_TYPE) sysStatus;
+    if (WIFEXITED (waitStatus)) {
+        sprintf (interp->result, "%d", WEXITSTATUS (waitStatus));
+        return TCL_OK;
+    }
+
+    /*
+     * Return status based on wait result.
+     */
+    if (WIFSIGNALED (waitStatus)) {
+        Tcl_SetErrorCode (interp, "SYSTEM", "SIG",
+                          Tcl_SignalId (WTERMSIG (waitStatus)), (char *) NULL);
+        Tcl_AppendResult (interp, "system command terminate with signal ",
+                          Tcl_SignalId (WTERMSIG (waitStatus)), (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     * Should never get this status back unless the implementation is
+     * really brain-damaged.
+     */
+    if (WIFSTOPPED (waitStatus)) {
+        Tcl_AppendResult (interp, "system command child stopped",
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
 }
 
 /*
