@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixCmds.c,v 8.4 1997/06/30 07:57:56 markd Exp $
+ * $Id: tclXunixCmds.c,v 8.5 1997/07/04 20:24:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -92,10 +92,10 @@ TclX_TimesObjCmd (clientData, interp, objc, objv)
     times (&tm);
 
     sprintf (timesBuf, "%ld %ld %ld %ld", 
-             TclXOSTicksToMS (tm.tms_utime),
-             TclXOSTicksToMS (tm.tms_stime),
-             TclXOSTicksToMS (tm.tms_cutime),
-             TclXOSTicksToMS (tm.tms_cstime));
+             (long) TclXOSTicksToMS (tm.tms_utime),
+             (long) TclXOSTicksToMS (tm.tms_stime),
+             (long) TclXOSTicksToMS (tm.tms_cutime),
+             (long) TclXOSTicksToMS (tm.tms_cstime));
 
     Tcl_SetStringObj (Tcl_GetObjResult (interp), timesBuf, -1);
     return TCL_OK;

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.13 1997/08/30 22:30:06 markd Exp $
+# $Id: Makefile.in,v 8.14 1997/09/01 00:59:01 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -136,10 +136,7 @@ tclhelp: ${srcdir}/../runtime/tclhelp.tcl
 	@cat ${srcdir}/../runtime/tclhelp.tcl 		>>tclhelp
 	@chmod +rx tclhelp
 
-help.tmp: help
-	touch help.tmp
-
-help:
+help.tmp:
 	if [ "@HAVE_SYML@" = "YES" ]; then \
 	    rm -rf help ;\
 	    ln -s ${HELP_DIR} help ;\
@@ -147,6 +144,7 @@ help:
 	    rm -rf help ;\
 	    (cd ${HELP_DIR}; tar -cf - help) | tar -xf - ;\
 	fi
+	touch help.tmp
 
 #------------------------------------------------------------------------------
 # Generate the test program.

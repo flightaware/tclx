@@ -516,7 +516,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.15 dnl
+# From configure.in Revision: 8.16 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -1111,8 +1111,8 @@ if test "x$TCLX_STLIB_BUILD" = "x$TCLX_SHLIB_BUILD"; then
 else
 	TCLX_BUILD_STANDALONE="tclXinitSA.o"
 	TKX_BUILD_STANDALONE="tkXinitSA.o"
-	TCLX_BUILD_DUMMY_STANDALONE="tclXinitDSA.${SHOBJ_SUFFIX}"
-	TKX_BUILD_DUMMY_STANDALONE="tkXinitDSA.${SHOBJ_SUFFIX}"
+	TCLX_BUILD_DUMMY_STANDALONE="tclXinitDSA${SHOBJ_SUFFIX}"
+	TKX_BUILD_DUMMY_STANDALONE="tkXinitDSA${SHOBJ_SUFFIX}"
 fi
 
 

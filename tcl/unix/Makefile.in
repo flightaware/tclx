@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.13 1997/08/23 18:56:08 markd Exp $
+# $Id: Makefile.in,v 8.14 1997/08/30 22:30:01 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -196,10 +196,7 @@ loadouster.tcl: ${RUNTIME_DIR}/loadouster.tcl
 	rm -f loadouster.tcl
 	cp ${RUNTIME_DIR}/loadouster.tcl loadouster.tcl
 
-help.tmp: help
-	touch help.tmp
-
-help:
+help.tmp:
 	if [ "@HAVE_SYML@" = "YES" ] ; then \
 	    rm -rf help ;\
 	    ln -s ${HELP_DIR} help ;\
@@ -207,6 +204,7 @@ help:
 	    rm -rf help ;\
 	    (cd ${HELP_DIR}; tar -cf - help) | tar -xf - ;\
 	fi
+	touch help.tmp
 
 #------------------------------------------------------------------------------
 # Generate the test programs.
