@@ -14,4 +14,6 @@ foreach i [lsort [glob *.test]] {
     }
 }
 
-exit
+if !$tcl_interactive {
+    exit
+}
