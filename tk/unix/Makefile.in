@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.4 1994/03/09 16:05:31 markd Exp markd $
+# $Id: Makefile.in,v 3.5 1994/03/18 15:42:26 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -61,7 +61,7 @@ LDLIBS = ${LIBTKX_A} ${LIBTK_A} ${XLIBSW} ${LIBTCLX_A} ${LIBTCL_A} -lm ${LIBS}
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
            -I${TK_UCB_SRC} -I${TCL_UCB_SRC} ${XINCLUDES}
- 
+
 .c.o:
 	${CC} ${CC_FLAGS} -c $<
 
