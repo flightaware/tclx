@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.7 1996/10/27 00:34:15 markd Exp $
+# $Id: Makefile.in,v 7.8 1996/11/16 08:05:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -252,7 +252,7 @@ install-exec:
 clean:
 	-rm -f tkXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} wishx libtkx.a
 	-rm -rf tkx.tcl tclhelp help help.tmp SHLIB_YES SHLIB_NO
-	-rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME}
+	-rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_BASE_NAME} pkgIndex.tcl
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
