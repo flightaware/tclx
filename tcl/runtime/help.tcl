@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 2.7 1993/10/07 05:49:51 markd Exp markd $
+# $Id: help.tcl,v 3.0 1993/11/19 07:00:21 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -49,7 +49,9 @@ proc help:FlattenPath pathName {
 
         if {"$element" == ".."} {
             if {[llength [join $newPath /]] == 0} {
-                error "Help: name goes above subject directory root"}
+                error "Help: name goes above subject directory root" {} \
+                    [list TCLXHELP NAMEABOVEROOT $pathName]
+            }
             lvarpop newPath [expr [llength $newPath]-1]
             continue
         }
@@ -100,7 +102,8 @@ proc help:ConvertPath pathName {
             return [list $dir/$pathName]
         }
     }
-    error "\"$pathName\" does not exist"
+    error "\"$pathName\" does not exist" {} \
+        [list TCLXHELP NOEXIST $pathName]
 }
 
 #------------------------------------------------------------------------------
@@ -117,9 +120,8 @@ proc help:RelativePath pathName {
         }
     }
     if ![info exists found] {
-        error "problem translating \"$pathName\""
+        error "problem translating \"$pathName\"" {} [list TCLXHELP INTERROR]
     }
-
 }
 
 #------------------------------------------------------------------------------
@@ -149,7 +151,14 @@ proc help:ListSubject {pathName pathList subjectsVar pagesVar} {
         }
     }
     if !$foundDir {
-        error "\"$pathName\" is not a subject"
+        if [cequal $pathName /] {
+            global auto_path
+            error "no \"help\" directories found on auto_path ($auto_path)" {} \
+                [list TCLXHELP NOHELPDIRS]
+        } else {
+            error "\"$pathName\" is not a subject" {} \
+                [list TCLXHELP NOTSUBJECT $pathName]
+        }
     }
     set subjects [lsort $subjects]
     set pages [lsort $pages]
@@ -224,7 +233,8 @@ proc help:DisplayColumns {nameList} {
 proc help:HelpOnHelp {} {
     set helpPage [lindex [help:ConvertPath /help] 0]
     if [lempty $helpPage] {
-        error "No help page on help found"
+        error "No help page on help found" {} \
+            [list TCLXHELP NOHELPPAGE]
     }
     help:DisplayPage $helpPage
 }
@@ -274,7 +284,9 @@ proc helpcd {{dir /}} {
     set pathName [lindex [help:ConvertPath $dir] 0]
 
     if {![file isdirectory $pathName]} {
-        error "Helpcd: \"$dir\" is not a subject"}
+        error "\"$dir\" is not a subject" \
+            [list TCLXHELP NOTSUBJECT $dir]
+    }
 
     set TCLXENV(help:curSubject) [help:RelativePath $pathName]
     return

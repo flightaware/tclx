@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tclhelp.tcl,v 1.4 1993/11/09 06:35:19 markd Exp $
+# $Id: tclhelp.tcl,v 3.1 1993/11/23 15:53:57 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -285,13 +285,13 @@ proc CreateCommandButtons {frameName} {
 # Tk base help command for Tcl/Tk/TclX.  Directories in args are pushed on the
 # path so that they are included in help search.
 
-proc tkhelp args {
+proc tkhelp addPaths {
     global auto_path
     if ![auto_load help] {
         puts stderr "couldn't auto_load TclX 'help' command"
         exit 255
     }
-    foreach dir $args {
+    foreach dir $addPaths {
         lvarpush auto_path $dir
     }
     CreateCommandButtons .command
@@ -306,5 +306,9 @@ proc tkhelp args {
 }
 
 if !$tcl_interactive {
-    tkhelp $argv
+    if [catch {
+        tkhelp $argv
+    } msg] {
+        tkerror $msg
+    }
 }
