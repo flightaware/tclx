@@ -1,3 +1,10 @@
+2001-08-01  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* doc/TclX.n: 
+	* tcl/generic/tclXoscmds.c: allowed sleep to accept double values,
+	to match the Expect sleep command.  This prevents conflicts that
+	depended on the order of package requires.  [Patch #444332]
+
 2001-05-24  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* unix/tools/tclmanpages: Added "re_syntax.n" to the list of

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.17 1999/03/31 06:37:42 markd Exp $
+.\" $Id: TclX.n,v 8.18 2001/06/30 23:07:34 andreas_kupries Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -926,6 +926,8 @@ processes in the background).
 .B sleep \fIseconds\fR
 .br
 Sleep the Extended Tcl process for \fIseconds\fR seconds.
+\fISeconds\FR, if specified as a decimal number, 
+is truncated to an integer value. 
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

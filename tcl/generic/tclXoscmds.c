@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 8.9 1999/03/31 06:37:46 markd Exp $
+ * $Id: tclXoscmds.c,v 8.10 2001/05/19 16:45:23 andreas_kupries Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -230,15 +230,15 @@ TclX_SleepObjCmd (clientData, interp, objc, objv)
     int         objc;
     Tcl_Obj   *CONST objv[];
 {
-    int time;
+    double time;
 
     if (objc != 2)
 	return TclX_WrongArgs (interp, objv [0], "seconds");
 
-    if (Tcl_GetIntFromObj (interp, objv [1], &time) != TCL_OK)
+    if (Tcl_GetDoubleFromObj (interp, objv [1], &time) != TCL_OK)
         return TCL_ERROR;
 
-    TclXOSsleep (time);
+    TclXOSsleep ((int) time);
     return TCL_OK;
 }
 
