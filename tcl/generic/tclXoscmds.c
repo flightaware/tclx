@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 8.4 1997/06/30 03:56:02 markd Exp $
+ * $Id: tclXoscmds.c,v 8.5 1997/06/30 07:57:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -304,8 +304,6 @@ TclX_SystemObjCmd (clientData, interp, objc, objv)
     if (objc != 2)
 	return TclX_WrongArgs (interp, objv [0], "command");
 
-    /*FIX: Not binary clean */
-    /*FIX: Append strings together to generate command.*/
     systemString = Tcl_GetStringFromObj (objv [1], NULL);
     if (TclXOSsystem (interp, systemString, &exitCode) != TCL_OK)
         return TCL_ERROR;

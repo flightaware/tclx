@@ -13,11 +13,16 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.4 1997/06/30 07:57:45 markd Exp $
+ * $Id: tclXfilescan.c,v 8.5 1997/06/30 17:21:39 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * FIX: Does not support binary data.  Can't fix until the regexp facility
+ * handles it.
+ */
 
 /*
  * A scan context describes a collection of match patterns and commands,

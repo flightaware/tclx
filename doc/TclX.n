@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.4 1997/04/17 04:58:27 markd Exp $
+.\" $Id: TclX.n,v 8.5 1997/07/01 02:26:10 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1033,6 +1033,8 @@ matches the line, or greater than zero if the key is greater than the line.
 The file must be sorted in ascending order according to the same criteria
 \fIcompare_proc\fR uses to compare the key with the line, or erroneous
 results will occur.
+.sp
+This command does not work on files containing binary data (bytes of zero).
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1632,6 +1634,8 @@ is a file ID to which all lines not matched by any pattern (excluding
 the default pattern) are to be written.  If the copy file is specified with
 this flag, instead of using the \fBscancontext copyfile\fR command, the 
 file is disassociated from the scan context at the end of the scan.
+.sp
+This command does not work on files containing binary data (bytes of zero).
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -1905,6 +1909,8 @@ each list element using the same rules as the \fBregexp\fR command.
 .RE
 .IP
 If \fImode\fR is omitted then it defaults to \fB\-glob\fR.
+.sp
+Only the \fB-exact\fR comparison will work on binary data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2120,6 +2126,8 @@ they are equal and \fB1\fR if \fIstring1\fR is greater than \fIstring2\fR.
 .sp
 If \fB\-local\fR is specified, the strings are compared according to the
 collation environment of the current locale.
+.sp
+This command does not work with binary data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2230,6 +2238,8 @@ for tokens in the string.
 All leading separators are skipped and the first token is returned.
 The variable \fIstrvar\fR will be modified to contain the remainder of
 the string following the token.
+.sp
+This command does not work with binary data.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

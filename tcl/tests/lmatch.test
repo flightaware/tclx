@@ -60,11 +60,15 @@ Test lmatch-1.5 {lmatch command} {
 
 Test lmatch-2.1 {search modes} {
     lmatch -exact {xyz bbcc *bc*} *bc*
-} 0 "*bc*"
+} 0 {*bc*}
 
 Test lmatch-2.2 {search modes} {
     lmatch -exact {b.x ^bc xy bcx ^bc} ^bc
-} 0 "^bc ^bc"
+} 0 {^bc ^bc}
+
+Test lmatch-2.2.1 {search modes} {
+    lmatch -exact [list a\0A a b\0a a\0A] a\0A
+} 0 [list a\0A  a\0A]
 
 Test lmatch-2.3 {search modes} {
     lmatch -regexp {xyz bbcc *bc*} *bc*
@@ -72,15 +76,15 @@ Test lmatch-2.3 {search modes} {
 
 Test lmatch-2.4 {search modes} {
     lmatch -regexp {b.x ^bc xy bcx bca} ^bc
-} 0 "bcx bca"
+} 0 {bcx bca}
 
 Test lmatch-2.5 {search modes} {
     lmatch -glob {xyz bbcc *bc* abcd} *bc*
-} 0 "bbcc *bc* abcd"
+} 0 {bbcc *bc* abcd}
 
 Test lmatch-2.6 {search modes} {
     lmatch -glob {b.x ^bc xy bcx} ^bc
-} 0 "^bc"
+} 0 {^bc}
 
 Test lmatch-2.7 {search modes} {
     lmatch -glib {b.x bx xy bcx} b.x

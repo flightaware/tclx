@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.5 1997/06/30 07:57:49 markd Exp $
+ * $Id: tclXlist.c,v 8.6 1997/07/03 21:13:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -396,11 +396,13 @@ TclX_LassignObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 }
 
-/*----------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TclX_LmatchObjCmd --
  *   Implements the TclX lmatch command:
  *       lmatch ?-exact|-glob|-regexp? list pattern
- *----------------------------------------------------------------------
+ *
+ * FIX: Only binary-clean for -exact option.
+ *-----------------------------------------------------------------------------
  */
 static int
 TclX_LmatchObjCmd (clientData, interp, objc, objv)
@@ -412,14 +414,13 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
 #define EXACT   0
 #define GLOB    1
 #define REGEXP  2
-    int listObjc, idx, match, mode, strLen;
+    int listObjc, idx, match, mode, patternLen, valueLen;
     char *modeStr, *patternStr, *valueStr;
     Tcl_Obj **listObjv, *matchedListPtr = NULL;
 
-/*FIX: Not binary clean (at least on -exact)*/
     mode = GLOB;
     if (objc == 4) {
-        modeStr = Tcl_GetStringFromObj (objv [1], &strLen);
+        modeStr = Tcl_GetStringFromObj (objv [1], NULL);
         if (STREQU (modeStr, "-exact")) {
             mode = EXACT;
         } else if (STREQU (modeStr, "-glob")) {
@@ -440,24 +441,36 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
                                 &listObjc, &listObjv) != TCL_OK)
         return TCL_ERROR;
 
-    patternStr = Tcl_GetStringFromObj (objv [objc - 1], &strLen);
+    patternStr = Tcl_GetStringFromObj (objv [objc - 1], &patternLen);
+    if ((mode != EXACT) && (strlen (patternStr) != patternLen)) {
+        goto binData;
+    }
 
     for (idx = 0; idx < listObjc; idx++) {
         match = 0;
-        valueStr = Tcl_GetStringFromObj (listObjv [idx], &strLen);
+        valueStr = Tcl_GetStringFromObj (listObjv [idx], &valueLen);
         switch (mode) {
-            case EXACT:
-                match = STREQU (valueStr, patternStr);
-                break;
-            case GLOB:
-                match = Tcl_StringMatch (valueStr, patternStr);
-                break;
-            case REGEXP:
-                match = Tcl_RegExpMatch (interp, valueStr, patternStr);
-                if (match < 0) {
-                    goto errorExit;
-                }
-                break;
+          case EXACT:
+            match = (valueLen == patternLen) &&
+                (memcmp (valueStr, patternStr, valueLen) == 0);
+            break;
+
+          case GLOB:
+            if (strlen (valueStr) != valueLen) {
+                goto binData;
+            }
+            match = Tcl_StringMatch (valueStr, patternStr);
+            break;
+
+          case REGEXP:
+            if (strlen (valueStr) != valueLen) {
+                goto binData;
+            }
+            match = Tcl_RegExpMatch (interp, valueStr, patternStr);
+            if (match < 0) {
+                goto errorExit;
+            }
+            break;
         }
         if (match) {
             if (matchedListPtr == NULL)
@@ -476,6 +489,11 @@ TclX_LmatchObjCmd (clientData, interp, objc, objv)
     if (matchedListPtr != NULL)
         Tcl_DecrRefCount (matchedListPtr);
     return TCL_ERROR;
+
+  binData:
+    TclX_AppendResult (interp, "The ", mode, " option does not support ",
+                       "binary data", (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*----------------------------------------------------------------------
@@ -491,26 +509,25 @@ TclX_LcontainObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    int listObjc, idx, strLen;
+    int listObjc, idx;
     Tcl_Obj **listObjv;
     char *elementStr, *checkStr;
+    int elementLen, checkLen;
 
     if (objc != 3) {
-        return TclX_WrongArgs (interp, objv [0], 
-                               "list element");
+        return TclX_WrongArgs (interp, objv [0], "list element");
     }
 
-/*FIX: Not binary clean */
-/*FIX: Could optimize to not convert to string. */
     if (Tcl_ListObjGetElements (interp, objv [1],
                                 &listObjc, &listObjv) != TCL_OK)
         return TCL_ERROR;
 
-    checkStr = Tcl_GetStringFromObj (objv [2], &strLen);
+    checkStr = Tcl_GetStringFromObj (objv [2], &checkLen);
     
     for (idx = 0; idx < listObjc; idx++) {
-        elementStr = Tcl_GetStringFromObj (listObjv [idx], &strLen);
-        if (STREQU (elementStr, checkStr))
+        elementStr = Tcl_GetStringFromObj (listObjv [idx], &elementLen);
+        if ((elementLen == checkLen) &&
+            (memcmp (elementStr, checkStr, elementLen)))
             break;
     }
     Tcl_SetBooleanObj (Tcl_GetObjResult (interp), (idx < listObjc));

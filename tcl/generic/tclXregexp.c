@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.5 1997/06/25 16:58:55 markd Exp $
+ * $Id: tclXregexp.c,v 8.6 1997/06/30 07:57:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -422,8 +422,7 @@ PreParseRegExp (expression, infoPtr)
  *           not contain any meta-characters.  This is slows compiling, but
  *           speeds up large searches.
  *
- * Results:
- *     Standard TCL results.
+ * FIX: Not binary clean.  Need regexps to be binary clean first.
  *-----------------------------------------------------------------------------
  */
 int
@@ -439,7 +438,6 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
     int             expressionLen;
     preParseInfo_t  preParseInfo;
 
-/*FIX: Not binary clean */
     expression = Tcl_GetStringFromObj (expressionObj, &expressionLen);
     if (expressionLen == 0) {
         TclX_AppendResult (interp, "Null regular expression", (char *) NULL);

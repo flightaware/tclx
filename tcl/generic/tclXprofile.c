@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.6 1997/06/25 16:58:54 markd Exp $
+ * $Id: tclXprofile.c,v 8.7 1997/06/30 07:57:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -709,16 +709,13 @@ InitializeProcStack (infoPtr, framePtr)
     profInfo_t *infoPtr;
     CallFrame  *framePtr;
 {
-    int nameLen;  /* FIX: remove when NULL is allowed in GetString */
-
     if (framePtr == NULL)
         return;
     InitializeProcStack (infoPtr, framePtr->callerPtr);
     
        
-/*FIX: Not binary clean */
     PushEntry (infoPtr,
-               Tcl_GetStringFromObj (framePtr->objv [0], &nameLen),
+               Tcl_GetStringFromObj (framePtr->objv [0], NULL),
                TRUE,
                infoPtr->stackPtr->procLevel + 1,
                framePtr->level,

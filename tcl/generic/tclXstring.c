@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.5 1997/06/30 07:57:54 markd Exp $
+ * $Id: tclXstring.c,v 8.6 1997/07/04 07:53:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -270,12 +270,11 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
 {
     int argIndex, result, local = FALSE;
     char *optionString;
-    char *string1Ptr;
+    char *string1;
     int string1Len;
-    char *string2Ptr;
+    char *string2;
     int string2Len;
 
-/*FIX: Not binary clean  */
     if ((objc < 3) || (objc > 4))
         return TclX_WrongArgs (interp, objv[0], "?options? string1 string2");
 
@@ -290,16 +289,23 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     }
     argIndex = objc - 2;
     
-    string1Ptr = Tcl_GetStringFromObj (objv [argIndex], &string1Len);
-    string2Ptr = Tcl_GetStringFromObj (objv [argIndex + 1], &string2Len);
+    string1 = Tcl_GetStringFromObj (objv [argIndex], &string1Len);
+    string2 = Tcl_GetStringFromObj (objv [argIndex + 1], &string2Len);
+    if ((strlen (string1) != string1Len) || (strlen (string1) != string1Len)) {
+        TclX_AppendResult (interp, "The " ,
+                           Tcl_GetStringFromObj (objv [0], NULL),
+                           " command does not support binary data",
+                           (char *) NULL);
+        return TCL_ERROR;
+    }
     if (local) {
 #ifndef NO_STRCOLL
-        result = strcoll (string1Ptr, string2Ptr);
+        result = strcoll (string1, string2);
 #else
-        result = strcmp (string1Ptr, string2Ptr);
+        result = strcmp (string1, string2);
 #endif
     } else {
-        result = strcmp (string1Ptr, string2Ptr);
+        result = strcmp (string1, string2);
     }
     Tcl_SetIntObj (Tcl_GetObjResult (interp),
                    ((result == 0) ? 0 : ((result < 0) ? -1 : 1)));
@@ -367,7 +373,6 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     int           tokenStrLen;
     Tcl_Obj      *newVarValueObj;
 
-/*FIX: Not binary clean */
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "strvar separators");
     
@@ -383,6 +388,15 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     Tcl_DStringAppend (&string, varValue, varValueLen);
 
     tokenString = Tcl_GetStringFromObj (objv [2], &tokenStrLen);
+
+    if ((strlen (varValue) != varValueLen) ||
+        (strlen (tokenString) != tokenStrLen)) {
+        TclX_AppendResult (interp, "The ",
+                           Tcl_GetStringFromObj (objv [0], NULL),
+                           " command does not support binary data",
+                           (char *) NULL);
+        return TCL_ERROR;
+    }
 
     startPtr = string.string + strspn (string.string, tokenString);
     tokenLen = strcspn (startPtr, tokenString);
