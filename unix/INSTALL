@@ -381,8 +381,12 @@ General:
      well.  These are probably due to an incorrectly configured NFS lockd.
      The tests have been modified to try and report problems rather than
      hang.  It might hang anyway, in this case, rename tests/flock.test to
-     tests/flock.bad to prevent them from being run.  If anyone can gives
+     tests/flock.bad to prevent them from being run.  If anyone can give
      any clues into what is going on, we would love to detect this.
+
+   o glob failures:  Don't add tcl7.3/compat/opendir.o to your libtcl.a unless
+     you really don't have opendir on your system.  This will cause the glob
+     command and TclX package libraries to fail.
 
 DEC Ultrix:
    o Several tests fail when Tcl is run on an NFS mounted file system.
@@ -436,3 +440,7 @@ BSDI:
    o There is some problem in the configure parsing of the --with-arch option.
      The syntax "./configure --arch=XXX" will not work, use
      "./configure --arch XXX" instead.
+
+CONVEX:
+   o Set both NOBUF and NONBLOCK on a pipe will result in read returning the
+     the error "Errno is zero".
