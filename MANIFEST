@@ -1,12 +1,6 @@
 ./CHANGES
 ./MANIFEST
 ./README
-./TCL-REQUIRED_PATCHES/cmdtrace.patch
-./TCL-REQUIRED_PATCHES/compile_80b1.patch
-./TCL-REQUIRED_PATCHES/namesp_80b1.patch
-./TCL-REQUIRED_PATCHES/proc_80b1.patch
-./TCL-REQUIRED_PATCHES/result.patch
-./TCL-REQUIRED_PATCHES/unixnotfy_80b1.patch
 ./doc/CONVERSION-NOTES
 ./doc/CmdWrite.3
 ./doc/Handles.3
