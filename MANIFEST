@@ -1,3 +1,4 @@
+./tclhelp/tcl/files/frename
 ./CHANGES
 ./Config.mk
 ./INSTALL
@@ -14,7 +15,6 @@
 ./experimental/getkey.c
 ./experimental/tcldbm.c
 ./man/CmdWrite.3
-./man/CreateExte.3
 ./man/Handles.3
 ./man/Keylist.3
 ./man/TclX.n
@@ -26,6 +26,7 @@
 ./osSupport/system.c
 ./src/Makefile.in
 ./src/SYSLIBS.in
+./src/tclXpatchl.h
 ./src/tcl++.C
 ./src/tcl++.h
 ./src/tclExtdInt.h
@@ -56,7 +57,6 @@
 ./src/tclXmain.c
 ./src/tclXmath.c
 ./src/tclXmsgcat.c
-./src/tclXpatchl.h
 ./src/tclXprocess.c
 ./src/tclXprofile.c
 ./src/tclXregexp.c
@@ -109,7 +109,6 @@
 ./tclhelp/tcl/files/flush
 ./tclhelp/tcl/files/for_file
 ./tclhelp/tcl/files/for_recursive_glob
-./tclhelp/tcl/files/frename
 ./tclhelp/tcl/files/fstat
 ./tclhelp/tcl/files/funlock
 ./tclhelp/tcl/files/gets

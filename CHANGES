@@ -678,3 +678,6 @@
   o Change help marker for nroff manual pages from '@ to '\"@, since this
     is a true comment. (*POTENTIAL INCOMPATIBILITY*) 
 -------------------------------------------------------------------------------
+ 4 Nov 93:
+   o Added "infox apppatchlvel" and tclAppPatchlevel C global.
+-------------------------------------------------------------------------------
