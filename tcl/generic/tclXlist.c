@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 2.7 1993/10/01 13:48:02 markd Exp markd $
+ * $Id: tclXlist.c,v 2.8 1993/10/07 06:51:11 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -298,7 +298,7 @@ Tcl_LassignCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int        listArgc, listIdx, idx;
+    int        listArgc, listIdx, idx, remaining;
     char     **listArgv;
     char      *varValue;
 
@@ -312,12 +312,17 @@ Tcl_LassignCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
 
     for (idx = 2, listIdx = 0; idx < argc; idx++, listIdx++) {
-
         varValue = (listIdx < listArgc) ? listArgv[listIdx] : "" ;
         if (Tcl_SetVar (interp, argv[idx], varValue,
-           TCL_LEAVE_ERR_MSG) == NULL) {
+                        TCL_LEAVE_ERR_MSG) == NULL) {
             goto error_exit;
         }
+    }
+    remaining = listArgc - argc + 2;
+    if (remaining > 0) {
+        Tcl_SetResult (interp,
+                       Tcl_Merge (remaining, listArgv + argc - 2),
+                       TCL_DYNAMIC);
     }
     ckfree((char *) listArgv);
     return TCL_OK;
