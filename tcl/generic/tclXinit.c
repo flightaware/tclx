@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.12 1997/11/11 05:33:15 markd Exp $
+ * $Id: tclXinit.c,v 8.12.2.1 1998/09/22 02:52:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,23 +45,27 @@ static char tclx_findinit [] =
     upvar #0 env env ${w}x_library libDir tcl_platform tcl_platform\n\
     set dirs {}\n\
     set envVar [string toupper ${w}X_LIBRARY]\n\
-    if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
-    if [info exists env(EXT_FOLDER)] {\n\
-	lappend dirs [file join $env(EXT_FOLDER) \"Tool Command Language\" ${w}X$version]\n\
+    if {[info exists libDir]} {\n\
+        lappend dirs $libDir\n\
+    } else {\n\
+        if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
+        if [info exists env(EXT_FOLDER)] {\n\
+	    lappend dirs [file join $env(EXT_FOLDER) \"Tool Command Language\" ${w}X$version]\n\
+        }\n\
+        lappend dirs $defaultLib\n\
+        set libDir {}\n\
+        if ![catch {uplevel #0 source -rsrc ${w}x}] {\n\
+	    uplevel #0 source -rsrc ${w}x:tclIndex\n\
+	    return\n\
+        }\n\
+        set prefix [file dirname [info nameofexecutable]]\n\
+        set plat [file tail $prefix]\n\
+        set prefix [file dirname $prefix]\n\
+        lappend dirs [file join $prefix lib ${w}X$version]\n\
+        set prefix [file dirname $prefix]\n\
+        lappend dirs [file join $prefix ${w}X${version} $w $plat]\n\
+        lappend dirs [file join [file dirname $prefix] ${w}X${version} $w $plat]\n\
     }\n\
-    lappend dirs $defaultLib\n\
-    set libDir {}\n\
-    if ![catch {uplevel #0 source -rsrc ${w}x}] {\n\
-	uplevel #0 source -rsrc ${w}x:tclIndex\n\
-	return\n\
-    }\n\
-    set prefix [file dirname [info nameofexecutable]]\n\
-    set plat [file tail $prefix]\n\
-    set prefix [file dirname $prefix]\n\
-    lappend dirs [file join $prefix lib ${w}X$version]\n\
-    set prefix [file dirname $prefix]\n\
-    lappend dirs [file join $prefix ${w}X${version} $w $plat]\n\
-    lappend dirs [file join [file dirname $prefix] ${w}X${version} $w $plat]\n\
     foreach libDir $dirs {\n\
         set init [file join $libDir ${w}x.tcl]\n\
         if [file exists $init] {\n\
