@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 3.0 1993/11/19 06:59:49 markd Rel markd $
+ * $Id: tclXAppInit.c,v 3.1 1993/11/21 01:19:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  * Copyright (c) 1993 The Regents of the University of California.
  * All rights reserved.
@@ -50,7 +50,7 @@
 
 EXTERN int main _ANSI_ARGS_((int     argc,
                              char  **argv));
-int *tclXDummyMainPtr = (int *) main;
+int (*tclXDummyMainPtr)() = (int (*)()) main;
 
 /*
  * The following variable is a special hack that insures the tcl
@@ -60,7 +60,7 @@ int *tclXDummyMainPtr = (int *) main;
 
 #if defined(DOMAIN) && defined(SING)
 EXTERN int matherr _ANSI_ARGS_((struct exception *));
-int *tclDummyMathPtr = (int *) matherr;
+int (*tclDummyMathPtr)() = (int (*)()) matherr;
 #endif
 
 
