@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.1 1993/11/19 07:41:10 markd Exp markd $
+# $Id: Makefile.in,v 3.2 1993/11/19 08:22:02 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -27,6 +27,7 @@ VPATH       = @srcdir@
 prefix      = /usr/local
 exec_prefix = /usr/local
 XINCLUDES   = @XINCLUDES@
+LIBS        = @LIBS@ -lm
 
 @MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
 
@@ -43,13 +44,13 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
 all: tclxversion $(TK_BUILD) instcopy bldmanhelp cpmanpages cphelpdir
 
 tclxversion: getversion.c
-	$(CC) $(CC_FLAGS) ${srcdir}/getversion.c -o tclxversion
+	$(CC) $(CC_FLAGS) ${srcdir}/getversion.c -o tclxversion ${LIBS}
 
 WISHX: tkxversion
 
 tkxversion: getversion.c
 	$(CC) $(CC_FLAGS) -I$(TK_UCB_SRC) -DTK_GET_VERSION \
-	   ${srcdir}/getversion.c -o tkxversion
+	   ${srcdir}/getversion.c -o tkxversion ${LIBS}
 
 instcopy: instcopy.tcl buildutil.tcl
 	rm -f instcopy
