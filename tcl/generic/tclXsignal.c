@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.6 1997/07/04 09:24:46 markd Exp $
+ * $Id: tclXsignal.c,v 8.7 1997/07/04 09:30:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -197,15 +197,6 @@ static char *SIGACT_ERROR   = "error";
 static char *SIGACT_TRAP    = "trap";
 static char *SIGACT_UNKNOWN = "unknown";
 
-/*
- * Structure used to save error state of the interpreter.
- */
-typedef struct {
-    char  *result;   /*FIX: Save results objects*/
-    char  *errorInfo;
-    char  *errorCode;
-} errState_t;
-
 static Tcl_Interp	**interpTable = NULL;
 static Tcl_AsyncHandler asyncHandler = NULL;
 static int              interpTableSize  = 0;
@@ -276,13 +267,6 @@ static int
 FormatTrapCode  _ANSI_ARGS_((Tcl_Interp  *interp,
                              int          signalNum,
                              Tcl_DString *command));
-
-static errState_t *
-SaveErrorState _ANSI_ARGS_((Tcl_Interp *interp));
-
-static void
-RestoreErrorState _ANSI_ARGS_((Tcl_Interp *interp,
-                               errState_t *errStatePtr));
 
 static int
 EvalTrapCode _ANSI_ARGS_((Tcl_Interp *interp,
@@ -641,93 +625,6 @@ SignalTrap (signalNum)
 }
 
 /*-----------------------------------------------------------------------------
- * SaveErrorState --
- *  
- *   Save the error state of the interpreter (result, errorInfo and errorCode).
- *
- * Parameters:
- *   o interp (I) - The interpreter to save. Result will be reset.
- * Returns:
- *   A dynamically allocated structure containing all three strings,  Its
- * allocated as a single malloc block.
- *-----------------------------------------------------------------------------
- */
-static errState_t *
-SaveErrorState (interp)
-    Tcl_Interp *interp;
-{
-    errState_t *errStatePtr;
-    char       *result, *errorInfo, *errorCode, *nextPtr;
-    int         len;
-
-    result = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
-    errorInfo = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
-    errorCode = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
-
-    len = sizeof (errState_t) + strlen (result) + 1;
-    if (errorInfo != NULL)
-        len += strlen (errorInfo) + 1;
-    if (errorCode != NULL)
-        len += strlen (errorCode) + 1;
-
-
-    errStatePtr = (errState_t *) ckalloc (len);
-    nextPtr = ((char *) errStatePtr) + sizeof (errState_t);
-
-    errStatePtr->result = nextPtr;
-    strcpy (errStatePtr->result, result);
-    nextPtr += strlen (result) + 1;
-
-    errStatePtr->errorInfo = NULL;
-    if (errorInfo != NULL) {
-        errStatePtr->errorInfo = nextPtr;
-        strcpy (errStatePtr->errorInfo, errorInfo);
-        nextPtr += strlen (errorInfo) + 1;
-    }
-
-    errStatePtr->errorCode = NULL;
-    if (errorCode != NULL) {
-        errStatePtr->errorCode = nextPtr;
-        strcpy (errStatePtr->errorCode, errorCode);
-        nextPtr += strlen (errorCode) + 1;
-    }
-
-    Tcl_ResetResult (interp);
-    return errStatePtr;
-}
-
-/*-----------------------------------------------------------------------------
- * RestoreErrorState --
- *  
- *   Restore the error state of the interpreter that was saved by
- * SaveErrorState.
- *
- * Parameters:
- *   o interp (I) - The interpreter to save.
- *   o errStatePtr (I) - Error state from SaveErrorState.  This structure will
- *     be freed. 
- * Returns:
- *   A dynamically allocated structure containing all three strings,  Its
- * allocated as a single malloc block.
- *-----------------------------------------------------------------------------
- */
-static void
-RestoreErrorState (interp, errStatePtr)
-    Tcl_Interp *interp;
-    errState_t *errStatePtr;
-{
-    Tcl_SetResult (interp, errStatePtr->result, TCL_VOLATILE);
-    if (errStatePtr->errorInfo != NULL)
-        Tcl_SetVar (interp, "errorInfo", errStatePtr->errorInfo,
-                    TCL_GLOBAL_ONLY);
-    if (errStatePtr->errorCode != NULL)
-        Tcl_SetVar (interp, "errorCode", errStatePtr->errorCode,
-                    TCL_GLOBAL_ONLY);
-
-    ckfree ((char *) errStatePtr);
-}
-
-/*-----------------------------------------------------------------------------
  * FormatTrapCode --
  *     Format the signal name into the signal trap command.  Replacing %S with
  * the signal name.
@@ -941,7 +838,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
     int         cmdResultCode;
 {
     Tcl_Interp *sigInterp;
-    errState_t *errStatePtr;
+    Tcl_Obj    *errStateObjPtr;
     int         signalNum, result;
 
     /*
@@ -956,7 +853,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
         sigInterp = interp;
     }
 
-    errStatePtr = SaveErrorState (sigInterp);
+    errStateObjPtr = TclX_SaveResultErrorInfo (interp);
 
     /*
      * Process all signals.  Don't process any more if one returns an error.
@@ -978,9 +875,9 @@ ProcessSignals (clientData, interp, cmdResultCode)
      * handling.
      */
     if (result != TCL_ERROR) {
-        RestoreErrorState (sigInterp, errStatePtr);
+        TclX_RestoreResultErrorInfo (interp, errStateObjPtr) ;
     } else {
-        ckfree ((char *) errStatePtr);
+        Tcl_DecrRefCount (errStateObjPtr);
         cmdResultCode = TCL_ERROR;
     }
 

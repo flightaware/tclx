@@ -1284,5 +1284,7 @@
  4 Jul 97:
   o Converted all commands that can be converted to work with binary data;
     documented those that don't support binary data.
-  o
+  o Modified signals to be better behaved with multiple interpreters.
+    Thanks to Viktor Dukhovni <viktor@esm.com> for the patch.
+  o Fix trap signal handler overwriting interp result.
 -------------------------------------------------------------------------------
