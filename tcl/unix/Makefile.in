@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.1 1996/12/17 08:16:19 markd Exp $
+# $Id: Makefile.in,v 8.2 1997/02/06 18:15:12 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -117,22 +117,24 @@ all: ${TCLX_STLIB_NAME} tcl checkup RUNTIME tclXtest \
 
 static:	tcl.static
 
-tcl: tclXAppInit.o ${TCLX_SHLIB_NAME} ${TCLX_STLIB_NAME}
+tcl: tclXAppInit.o ${TCLX_SHLIB_BUILD} ${TCLX_STLIB_BUILD}
 	${CC} ${LD_SWITCHES} tclXAppInit.o  ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
-tcl.static: tclXAppInit.o ${TCLX_STLIB_NAME}
+tcl.static: tclXAppInit.o ${TCLX_STLIB_BUILD}
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
 
-${TCLX_STLIB_BUILD}: ${OBJS}
+${TCLX_STLIB_NAME}: ${OBJS}
 	${AR} cr ${TCLX_STLIB_NAME} ${OBJS}
 	${RANLIB} ${TCLX_STLIB_NAME}
 
-${TCLX_SHLIB_BUILD}: ${SOBJS}
+${TCLX_SHLIB_NAME}: ${SOBJS}
 	rm -f ${TCLX_SHLIB_NAME}
 	${TCL_SHLIB_LD} -o ${TCLX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
+
+dont_build_this:
 
 #------------------------------------------------------------------------------
 # Dependencies for generating objects.
@@ -546,7 +548,7 @@ help:
 #------------------------------------------------------------------------------
 # Generate the test program.
 #
-tclXtest: ${TEST_OBJS} ${TCLX_SHLIB_NAME} ${TCLX_STLIB_NAME}
+tclXtest: ${TEST_OBJS} ${TCLX_SHLIB_BUILD} ${TCLX_STLIB_BUILD}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -655,7 +657,7 @@ install-exec:
 clean:
 	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} tcl tcl.static libtclx*
 	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
-	-rm -f checkup.done SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME}
+	-rm -f checkup.done ${TCLX_SHLIB_NAME}
 	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
 
 #------------------------------------------------------------------------------

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.1 1996/12/17 08:16:26 markd Exp $
+# $Id: Makefile.in,v 8.2 1997/02/06 18:15:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -81,7 +81,7 @@ all: ${TKX_STLIB_NAME} wishx RUNTIME tktest runtest \
 
 static: wishx.static
 
-wishx: tkXAppInit.o ${TKX_SHLIB_NAME} ${TKX_STLIB_NAME} ${LIBTCLX}
+wishx: tkXAppInit.o ${TKX_SHLIB_BUILD} ${TKX_STLIB_BUILD} ${LIBTCLX}
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
@@ -93,15 +93,11 @@ ${TKX_STLIB_NAME}: ${OBJS}
 	${AR} cr ${TKX_STLIB_NAME} ${OBJS}
 	${RANLIB} ${TKX_STLIB_NAME}
 
-SHLIB_YES: ${TKX_SHLIB_NAME}
-	touch SHLIB_YES
-
 ${TKX_SHLIB_NAME}: ${SOBJS}
 	rm -f ${TKX_SHLIB_NAME}
 	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
 
-SHLIB_NO:
-	touch SHLIB_NO
+dont_build_this:
 
 #------------------------------------------------------------------------------
 # Dependencies for generating objects.
