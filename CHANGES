@@ -797,8 +797,25 @@
 -------------------------------------------------------------------------------
  1 Jul 94:
    o Changes to support DEC Alpha.
-   o When using master install model, lib and include files are not symbolicly
+   o When using master install model, lib and include files are now symbolicly
      link to the external directories.
 ===============================================================================
  2 Jul 94: Released TclX7.3b-beta1.
 ===============================================================================
+ 4 Jul 94:
+   o Fixed warnings on machines that have `free (char *)'.
+-------------------------------------------------------------------------------
+ 8 Jul 94:
+   o Fixed problem with truncating long lines that are typed interactively.
+   o Moved striping of binaries to install step.
+   o Configure script will remove files that must be rebuilt if the install
+     location is changed.  This allows for quicker rebuild if the prefix
+     or arch was not set correctly.
+-------------------------------------------------------------------------------
+11 Jul 94:
+   o Always install tclXmain++.C and tkXmain++.C, even if tcl++.h support is
+     not built in.
+   o Due to a difficult to fix bug, the profrep stack depth summary option
+     has been removed.  This changes the calling sequence of profrep.
+     (*POTENTIAL INCOMPATIBILITY*)
+-------------------------------------------------------------------------------
