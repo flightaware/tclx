@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.17 1995/05/15 00:04:20 markd Exp markd $
+.\" $Id: TclX.n,v 4.18 1995/05/24 05:27:12 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1463,9 +1463,7 @@ what really happened.
 .B frename \fIoldPath newPath\fR
 .br
 Renames \fIoldPath\fR to \fInewPath\fR.  This command does not support
-renaming across file systems unless the \fBrename\fR system call supports
-them.  If renaming accross file systems is desired, \fBexec\fR the \fBmv\fR
-command.
+renaming across file systems.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
