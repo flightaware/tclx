@@ -1,3 +1,13 @@
+2002-12-17  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	** Backported from 8.4 head **
+	* tcl/generic/tclXkeylist.c (ValidateKey): move isPath check outside
+	of for loop.
+	(DupKeyedListInternalRep): duplicate value object instead of
+	directly incrementing refcount of existing object to stop memleak.
+	(TclX_KeyedListGetKeys): simplify list result obj creation.
+	(TclX_KeylkeysObjCmd): use obj-ified var set/get routines.
+
 2002-11-01  Karl Lehenbauer  <karl@procplace.com>
 
 	*** 8.3.5 TAGGED FOR RELEASE ***
