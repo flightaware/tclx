@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.7 1996/02/12 18:15:55 markd Exp $
+ * $Id: tclXinit.c,v 5.8 1996/02/16 07:51:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -223,6 +223,7 @@ InitSetup (interp)
         return TCL_ERROR;
     if (InsureVarExists (interp, "tcl_interactive", "0") == TCL_ERROR)
         return TCL_ERROR;
+    return TCL_OK;
 }
 
 
