@@ -143,7 +143,9 @@ CHANGES file for full details.  These are the major incompatible changes:
    o Removed oytdated execvp proc, use execl directly.
    o Removed "flush" option on "cmdtrace".  Output lines are now flushed after
      each command is traced.
-
+   o Changed "signal trap" to edit the command, replacing %S with the signal
+     name rather than storing in the global variable. "signalReceived".  This
+     fixes bugs with signals received in a signal handler.
 
 
 CAVEATS

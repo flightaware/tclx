@@ -540,3 +540,9 @@
     formating time as GMT correctly.
   o Added our own version of wish main, with programmable prompts, etc.
 -------------------------------------------------------------------------------
+18 Jul 93:
+  o Changed "signal trap" to edit the command, replacing %S with the signal
+    name rather than storing in the global variable. "signalReceived".  This
+    fixes bugs with signals received in a signal handler.
+   (*POTENTIAL INCOMPATIBILITY*)
+-------------------------------------------------------------------------------

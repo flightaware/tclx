@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 2.2 1993/06/21 05:43:53 markd Exp markd $
+# $Id: signal.test,v 2.3 1993/07/18 16:33:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -63,11 +63,26 @@ Test signal-1.3 {signal tests} {
 
 Test signal-1.4 {signal tests} {
     set signalWeGot {}
-    signal trap 1 {set signalWeGot $signalReceived} 
+    signal trap 1 {set signalWeGot %S}
     kill SIGHUP [id process]
     signal default 1
     set signalWeGot
 } 0 {SIGHUP}
+
+Test signal-1.41 {signal tests} {
+    set signalWeGot {}
+    set signalTrash {}
+    signal trap 1 {set signalWeGot %S; set signalTrash "%%"}
+    kill SIGHUP [id process]
+    signal default 1
+    list $signalWeGot $signalTrash
+} 0 {SIGHUP %%}
+
+Test signal-1.42 {signal tests} {
+    signal trap 1 {set signalWeGot %s; set signalTrash "%%"}
+    kill SIGHUP [id process]
+} 1 {bad signal trap command formatting specification "%s", expected one of "%%" or "%S"}
+signal default SIGHUP
 
 Test signal-1.5 {signal tests} {
     signal default {SIGHUP SIGINT}

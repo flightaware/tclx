@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.8 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.9 1993/07/13 03:04:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -155,9 +155,13 @@ static SIG_PROC_RET_TYPE
 TclSignalTrap _ANSI_ARGS_((int signalNum));
 
 static int
+FormatTrapCode  _ANSI_ARGS_((Tcl_Interp  *interp,
+                             int          signalNum,
+                             Tcl_DString *command));
+
+static int
 EvalTrapCode _ANSI_ARGS_((Tcl_Interp *interp,
-                          int         signalNum,
-                          char       *command));
+                          int         signalNum));
 
 static int
 ParseSignalList _ANSI_ARGS_((Tcl_Interp *interp,
@@ -406,37 +410,23 @@ TclSignalTrap (signalNum)
 /*
  *-----------------------------------------------------------------------------
  *
- * EvalTrapCode --
- *     Run code as the result of a signal.  The code will be run in the
- *     global context, with the symbolic signal name in a global variable.
- *     signalReceived.  If an error occured, then the result will be
- *     left in the interp, if no error occured, the result will be reset.
+ * FormatTrapCode --
+ *     Format the signal name into the signal trap command.  Replacing %S with
+ * the signal name.
+ *
  * Parameters:
- *   o interp (I/O) - The interpreter to run the signal in.
+ *   o interp (I/O) - The interpreter to return errors in.
  *   o signalNum (I) - The signal number of the signal that occured.
- *   o command (I) - The command string to execute.
- * Return:
- *   TCL_OK or TCL_ERROR.
+ *   o command (O) - The resulting command adter the formatting.
  *-----------------------------------------------------------------------------
  */
 static int
-EvalTrapCode (interp, signalNum, command)
-    Tcl_Interp *interp;
-    int         signalNum;
-    char       *command;
+FormatTrapCode (interp, signalNum, command)
+    Tcl_Interp  *interp;
+    int          signalNum;
+    Tcl_DString *command;
 {
-    Interp        *iPtr = (Interp *) interp;
-    char          *signalName;
-    int            result;
-    CallFrame     *savedVarFramePtr;
-
-    Tcl_ResetResult (interp);
-
-    /*
-     * Modify the interpreter state to execute in the global frame.
-     */
-    savedVarFramePtr = iPtr->varFramePtr;
-    iPtr->varFramePtr = NULL;
+    char  *signalName, *copyPtr, *scanPtr, prevChar;
 
     /*
      * Force name to always be SIGCHLD, even if system defines only SIGCLD.
@@ -446,31 +436,103 @@ EvalTrapCode (interp, signalNum, command)
     else
         signalName = Tcl_SignalId (signalNum);
 
-    if (Tcl_SetVar (interp, "signalReceived", signalName,
-                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
-        result = TCL_ERROR;
-    else
-        result = TCL_OK;
-    if (result == TCL_OK);
-        result = Tcl_Eval (interp, signalTrapCmds [signalNum]);
+    Tcl_DStringInit (command);
+
+    copyPtr = scanPtr = signalTrapCmds [signalNum];
+
+    while (*scanPtr != '\0') {
+        if (*scanPtr != '%') {
+            scanPtr++;
+            continue;
+        }
+        if (scanPtr [1] == '%') {
+            scanPtr += 2;            continue;
+        }
+        Tcl_DStringAppend (command, copyPtr, (scanPtr - copyPtr));
+
+        switch (scanPtr [1]) {
+          case 'S': {
+              Tcl_DStringAppend (command, signalName, -1);
+              break;
+          }
+          default:
+            goto badSpec;
+        }
+        scanPtr += 2;
+        copyPtr = scanPtr;
+    }
+    Tcl_DStringAppend (command, copyPtr, copyPtr - scanPtr);
+
+    return TCL_OK;
 
     /*
-     * Restore the frame pointer and return the result (only OK or ERROR).
+     * Handle bad % specification currently pointed to by scanPtr.
      */
-    iPtr->varFramePtr = savedVarFramePtr;
+  badSpec:
+    {
+        char badSpec [2];
+        
+        badSpec [0] = scanPtr [1];
+        badSpec [1] = '\0';
+        Tcl_AppendResult (interp, "bad signal trap command formatting ",
+                          "specification \"%", badSpec,
+                          "\", expected one of \"%%\" or \"%S\"",
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * EvalTrapCode --
+ *     Run code as the result of a signal.  The symbolic signal name is
+ * formatted into the command replacing %S with the symbolic signal name.
+ *
+ * Parameters:
+ *   o interp (I) - The interpreter to run the signal in. If an error
+ *     occures, then the result will be left in the interp.
+ *   o signalNum (I) - The signal number of the signal that occured.
+ * Return:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+EvalTrapCode (interp, signalNum)
+    Tcl_Interp *interp;
+    int         signalNum;
+{
+    int          result;
+    Tcl_DString  command;
+
+    Tcl_ResetResult (interp);
+
+    /*
+     * Format the signal name into the command.  This also allows the signal
+     * to be reset in the command.
+     */
+
+    result = FormatTrapCode (interp,
+                             signalNum,
+                             &command);
+    if (result == TCL_OK)
+        result = Tcl_GlobalEval (interp, 
+                                 command.string);
+
+    Tcl_DStringFree (&command);
 
     if (result == TCL_ERROR) {
-        char errorInfo [TCL_RESULT_SIZE];
+        char errorInfo [64];
 
         sprintf (errorInfo, "\n    while executing signal trap code for %s%s",
-                 signalName, " signal");
+                 Tcl_SignalId (signalNum), " signal");
         Tcl_AddErrorInfo (interp, errorInfo);
 
         return TCL_ERROR;
-    } else {
-        Tcl_ResetResult (interp);
-        return TCL_OK;
     }
+    
+    Tcl_ResetResult (interp);
+    return TCL_OK;
 }
 
 /*
@@ -482,9 +544,6 @@ EvalTrapCode (interp, signalNum, command)
  * occured.  This is used by the shell at the beginning of each interactive
  * command
  *
- * Globals:
- *   o tclReceivedSignal (O) - Will be cleared.
- *   o signalsReceived (O) - The count of each signal that was received.
  *-----------------------------------------------------------------------------
  */
 void
@@ -523,9 +582,6 @@ Tcl_ResetSignals ()
  *   o cmdResultCode (I) - The integer result returned by the command that
  *     Tcl_Eval just completed.  Should be TCL_OK if not called from
  *     Tcl_Eval.
- * Globals:
- *   o tclReceivedSignal (I/O) - Will be cleared.
- *   o signalsReceived (I/O) - The count of each signal that was received.
  * Returns:
  *   Either the original result code, an error result if one of the
  *   trap commands returned an error, or an error indicating the
@@ -543,6 +599,11 @@ Tcl_CheckForSignal (interp, cmdResultCode)
     if (!tclReceivedSignal)
         return cmdResultCode;  /* No signal received */
 
+    /*
+     * Clear so we don't call this routine recursively in the fault handler.
+     */
+    tclReceivedSignal = 0;
+
     savedResult = ckstrdup (interp->result);
     Tcl_ResetResult (interp);
 
@@ -558,8 +619,7 @@ Tcl_CheckForSignal (interp, cmdResultCode)
             signalsReceived [signalNum] = 0;
             
             while (sigCnt-- > 0) {
-                result = EvalTrapCode (interp, signalNum,
-                                       signalTrapCmds [signalNum]);
+                result = EvalTrapCode (interp, signalNum);
                 if (result == TCL_ERROR)
                     goto exitPoint;
             }

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.18 1993/07/12 06:28:33 markd Exp markd $
+.\" $Id: TclX.man,v 2.19 1993/07/15 06:41:15 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -752,10 +752,13 @@ that was running returned an error.  The error code will be in the form:
 For the death of child signal, \fIsigname\fR will always be SIGCHLD, rather
 than SIGCLD, to allow writing portable code.
 .IP
-\fBtrap\fR - When the signal occures, execute \fIcommand\fR and continue
-execution if an error is not returned by \fIcommand\fR.  If will be executed
-in the global context and the symbolic signal name (e.g. SIGINT) will be
-supplied in a global variable \fBsignalReceived\fR.  If an error is returned,
+\fBtrap\fR - When the signal occurs, execute \fIcommand\fR and continue
+execution if an error is not returned by \fIcommand\fR.  The command will
+be executed in the global context.  The command will be edited before
+execution, replacing occurrences of "%S" with the signal name.
+Occurrences of "%%" result in a single "%".  This editing occurs just before
+the trap command is evaluated. 
+If an error is returned,
 then follow the standard Tcl error mechanism.  Often \fIcommand\fR will just
 do an \fBexit\fR.
 .IP
