@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 3.3 1994/06/28 15:44:52 markd Exp markd $
+ * $Id: tclXinit.c,v 4.0 1994/07/16 05:28:21 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -122,15 +122,22 @@ ProcessInitFile (interp, initFile, overrideEnv)
                           initFile, "\".\n", 
                           "  Override directory containing this file with ",
                           "the environment variable: \"",
-                          overrideEnv, "\"", (char *) NULL);
-        return TCL_ERROR;
+                          overrideEnv, "\" (",
+                          Tcl_PosixError (interp), ")", (char *) NULL);
+        goto errorExit;
     }
 
     if (Tcl_EvalFile (interp, initFile) != TCL_OK)
-        return TCL_ERROR;
+        goto errorExit;
         
     Tcl_ResetResult (interp);
     return TCL_OK;
+
+  errorExit:
+    Tcl_AddErrorInfo (interp,
+                     "\n    (while processing TclX initialization file)");
+    return TCL_ERROR;
+
 }
 
 /*
@@ -149,13 +156,13 @@ TclX_Init (interp)
     char        *value;
     Tcl_DString  libDir;
 
+    Tcl_DStringInit (&libDir);
+
     if (TclXCmd_Init (interp) == TCL_ERROR)
-        return TCL_ERROR;
+        goto errorExit;
 
     if (TclXLib_Init (interp) == TCL_ERROR)
-        return TCL_ERROR;
-
-    Tcl_DStringInit (&libDir);
+        goto errorExit;
 
     /*
      * Get the path to the master (library) directory.
@@ -191,6 +198,8 @@ TclX_Init (interp)
 
   errorExit:
     Tcl_DStringFree (&libDir);
+    Tcl_AddErrorInfo (interp,
+                     "\n    (while initializing TclX)");
     return TCL_ERROR;
 }
 
