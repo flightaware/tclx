@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: pushd.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -25,40 +25,45 @@ set CWD [pwd]
 
 cd /tmp
 
-test pushd-1.1 {pushd command} {
+#
+# Get actual location of /tmp incase its symbolicly linked.
+#
+set TMP [pwd]
+
+Test pushd-1.1 {ppushd command} {
     pushd
-} ""
+} 0 {}
 
-test pushd-1.2 {pushd command} {
+Test pushd-1.2 {pushd command} {
     set dummy $TCLENV(dirPushList)
-} /tmp
+} 0 $TMP
 
-test pushd-1.3 {pushd command} {
+Test pushd-1.3 {pushd command} {
     pushd /
-} ""
+} 0 {}
 
-test pushd-1.4 {pushd command} {
-    set dummy $TCLENV(dirPushList)
-} "/tmp /tmp"
+Test pushd-1.4 {pushd command} {
+    set TCLENV(dirPushList)
+} 0 "$TMP $TMP"
 
 cd $CWD
 
-test popd-1.1 {popd command} {
+Test popd-1.1 {popd command} {
     popd
-} "/tmp"
+} 0 $TMP
 
-test popd-1.2 {popd command} {
-    set dummy $TCLENV(dirPushList)
-} "/tmp"
+Test popd-1.2 {popd command} {
+    set TCLENV(dirPushList)
+} 0 $TMP
 
-test popd-1.3 {popd command} {
+Test popd-1.3 {popd command} {
     popd
-    list [catch popd msg] $msg
-} {1 {directory stack empty}}
+    popd
+} 1 {directory stack empty}
 
-test popd-1.4 {popd command} {
-    set dummy $TCLENV(dirPushList)
-} ""
+Test popd-1.4 {popd command} {
+    set TCLENV(dirPushList)
+} 0 {}
 
 cd $CWD
 rename unknown SAVED_UNKNOWN
