@@ -12,7 +12,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.38 2002/03/29 05:07:05 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.1 2002/04/02 03:02:04 hobbs Exp $
 
 #========================================================================
 # Edit the following few lines when writing a new extension
@@ -32,7 +32,7 @@ tclx_SOURCES = \
     tclXdebug.c      tclXdup.c        tclXfcntl.c      tclXfilecmds.c \
     tclXfilescan.c   tclXflock.c      tclXfstat.c      tclXgeneral.c  \
     tclXhandles.c    tclXinit.c       tclXkeylist.c    tclXlib.c      \
-    tclXlist.c       tclXmath.c       tclXmsgcat.c     tclXlibInit.c  \
+    tclXlist.c       tclXmath.c       tclXmsgcat.c  \
     tclXprocess.c    tclXprofile.c    tclXselect.c     tclXsignal.c   \
     tclXstring.c     tclXsocket.c     tclXutil.c     \
     tclXoscmds.c     tclXlgets.c \
