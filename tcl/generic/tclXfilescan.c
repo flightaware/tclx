@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.11 1998/02/27 06:38:37 markd Exp $
+ * $Id: tclXfilescan.c,v 8.12 1998/03/19 10:02:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,7 +34,7 @@
 #define MATCH_CASE_INSENSITIVE_FLAG 4
 
 typedef struct matchDef_t {
-    TclRegexp          *regExp;
+    Tcl_RegExp          regExp;
     Tcl_Obj            *regExpObj;
     Tcl_Obj            *command;
     struct matchDef_t  *nextMatchDefPtr;
@@ -60,6 +60,8 @@ typedef struct {
     scanContext_t    *contextPtr;   /* Current scan context. */
     Tcl_Channel       channel;      /* The channel being scanned. */
     char             *line;         /* The line from the file. */
+    Tcl_UniChar      *uniLine;      /* UniCode (wide) char line. */
+    int               uniLineLen;
     off_t             offset;       /* The offset into the file. */
     long              bytesRead;    /* Number of translated bytes read.*/
     long              lineNum;      /* Current scanned line in the file. */
@@ -113,8 +115,8 @@ static void
 ClearCopyFile _ANSI_ARGS_((scanContext_t *contextPtr));
 
 static int
-SetMatchInfoVar _ANSI_ARGS_((Tcl_Interp       *interp,
-                             scanData_t       *scanData));
+SetMatchInfoVar _ANSI_ARGS_((Tcl_Interp *interp,
+                             scanData_t *scanData));
 
 static int
 ScanFile _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -243,9 +245,9 @@ CopyFileCloseHandler (clientData)
  * SetCopyFileObj --
  *   Set the copy file handle for a context.
  * Parameters:
- *   o interp  n     (O) - The Tcl interpreter, errors are returned in result.
- *   o contextPtr    (I) - Pointer to the scan context.
- *   o fileHandleObj (I) - Object containing file handle of the copy file.
+ *   o interp - The Tcl interpreter, errors are returned in result.
+ *   o contextPtr - Pointer to the scan context.
+ *   o fileHandleObj - Object containing file handle of the copy file.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -478,7 +480,7 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
         contextPtr->flags |= CONTEXT_A_CASE_INSENSITIVE_FLAG;
     }
     
-    newmatch->regExp = (TclRegexp*)TclRegCompObj(interp, objv[firstArg + 1],
+    newmatch->regExp = (Tcl_RegExp )TclRegCompObj(interp, objv[firstArg + 1],
                                                   regExpFlags);
     if (newmatch->regExp == NULL) {
         ckfree ((char *) newmatch);
@@ -515,10 +517,10 @@ argError:
  * only once.
  *
  * Parameters:
- *   o interp (O) - The Tcl interpreter to set the matchInfo variable in.
+ *   o interp - The Tcl interpreter to set the matchInfo variable in.
  *     Errors are returned in result.
- *   o scanData (I/O) - Data about the current line being scanned.
- *     been stored.  Should be set to FALSE when a new line is read.
+ *   o scanData - Data about the current line being scanned.
+ *     been stored.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -528,9 +530,13 @@ SetMatchInfoVar (interp, scanData)
 {
     static char *MATCHINFO = "matchInfo";
     int idx, start, end;
-    char *startStr, *endStr;
+    char *value;
+    Tcl_DString valueBuf;
     char key [32];
     Tcl_Obj *valueObjPtr, *indexObjv [2];
+    TclRegexp *regExpPtr;
+
+    Tcl_DStringInit(&valueBuf);
 
     /*
      * Save information about the current line, if it hasn't been saved.
@@ -542,13 +548,13 @@ SetMatchInfoVar (interp, scanData)
         
         if (Tcl_SetVar2 (interp, MATCHINFO, "line", scanData->line, 
                          TCL_LEAVE_ERR_MSG) == NULL)
-            return TCL_ERROR;
+            goto errorExit;
 
         valueObjPtr = Tcl_NewLongObj ((long) scanData->offset);
         if (Tcl_SetObjVar2 (interp, MATCHINFO, "offset", valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
-            return TCL_ERROR;
+            goto errorExit;
         }
 
 #if 0
@@ -561,25 +567,25 @@ SetMatchInfoVar (interp, scanData)
         if (Tcl_SetObjVar2 (interp, MATCHINFO, "bytesread", valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
-            return TCL_ERROR;
+            goto errorExit;
         }
 #endif
         valueObjPtr = Tcl_NewIntObj ((long) scanData->lineNum);
         if (Tcl_SetObjVar2 (interp, MATCHINFO, "linenum", valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
-            return TCL_ERROR;
+            goto errorExit;
         }
 
         if (Tcl_SetVar2 (interp, MATCHINFO, "context",
                          scanData->contextPtr->contextHandle,
                          TCL_LEAVE_ERR_MSG) == NULL)
-            return TCL_ERROR;
+            goto errorExit;
 
         if (Tcl_SetVar2 (interp, MATCHINFO, "handle", 
                          Tcl_GetChannelName (scanData->channel),
                          TCL_LEAVE_ERR_MSG) == NULL)
-            return TCL_ERROR;
+            goto errorExit;
 
     }
 
@@ -587,38 +593,48 @@ SetMatchInfoVar (interp, scanData)
         if (Tcl_SetVar2 (interp, MATCHINFO, "copyHandle", 
                          Tcl_GetChannelName (scanData->contextPtr->copyFileChannel),
                          TCL_LEAVE_ERR_MSG) == NULL)
-            return TCL_ERROR;
+            goto errorExit;
     }
 
-    if (scanData->matchPtr == NULL)
-        return TCL_OK;
+    if (scanData->matchPtr == NULL) {
+        goto exitPoint;
+    }
+    regExpPtr = (TclRegexp *) scanData->matchPtr->regExp;
 
-    for (idx = 0; idx < scanData->matchPtr->regExp->re.re_nsub; idx++) {
-        start = scanData->matchPtr->regExp->matches[idx].rm_so;
-        end = scanData->matchPtr->regExp->matches[idx].rm_eo;
+    for (idx = 0; idx < regExpPtr->re.re_nsub; idx++) {
+	start = regExpPtr->matches[idx].rm_so;
+	end = regExpPtr->matches[idx].rm_eo;
 
         sprintf (key, "subindex%d", idx);
         indexObjv [0] = Tcl_NewIntObj (start);
-        indexObjv [1] = Tcl_NewIntObj (end);
+        indexObjv [1] = Tcl_NewIntObj (end-1);
         valueObjPtr = Tcl_NewListObj (2, indexObjv);
-        if (Tcl_SetObjVar2 (interp, "matchInfo", key, valueObjPtr,
+        if (Tcl_SetObjVar2 (interp, MATCHINFO, key, valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
-            return TCL_ERROR;
+            goto errorExit;
         }
 
         sprintf (key, "submatch%d", idx);
-        startStr = Tcl_UtfAtIndex(scanData->line, start);
-        endStr = Tcl_UtfAtIndex(scanData->line, end);
+        Tcl_DStringSetLength(&valueBuf, 0);
+        value = TclUniCharToUtfDString(scanData->uniLine + start, end - start,
+                                       &valueBuf);
+        valueObjPtr = Tcl_NewStringObj(value, (end - start));
 
-        valueObjPtr = Tcl_NewStringObj(startStr, (endStr - startStr) + 1);
-        if (Tcl_SetObjVar2 (interp, "matchInfo", key, valueObjPtr,
+        if (Tcl_SetObjVar2 (interp, MATCHINFO, key, valueObjPtr,
                             TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valueObjPtr);
-            return TCL_ERROR;
+            goto errorExit;
         }
     }
+
+  exitPoint:
+    Tcl_DStringFree(&valueBuf);
     return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree(&valueBuf);
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -633,9 +649,10 @@ ScanFile (interp, contextPtr, channel)
     scanContext_t *contextPtr;
     Tcl_Channel    channel;
 {
-    Tcl_DString buffer;
+    Tcl_DString lineBuf, uniLineBuf;
     int result, matchedAtLeastOne;
     scanData_t data;
+    int matchStat;
     
     if (contextPtr->matchListHead == NULL) {
         TclX_AppendObjResult (interp, "no patterns in current scan context",
@@ -649,7 +666,8 @@ ScanFile (interp, contextPtr, channel)
     data.bytesRead = 0;
     data.lineNum = 0;
     
-    Tcl_DStringInit (&buffer);
+    Tcl_DStringInit (&lineBuf);
+    Tcl_DStringInit (&uniLineBuf);
 
     result = TCL_OK;
     while (TRUE) {
@@ -657,8 +675,8 @@ ScanFile (interp, contextPtr, channel)
             goto scanExit;  /* Closed by a callback */
 
         data.offset = Tcl_Tell (channel);
-        Tcl_DStringSetLength (&buffer, 0);
-        if (Tcl_Gets (channel, &buffer) < 0) {
+        Tcl_DStringSetLength (&lineBuf, 0);
+        if (Tcl_Gets (channel, &lineBuf) < 0) {
             if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))
                 goto scanExit;
             Tcl_SetStringObj (Tcl_GetObjResult (interp),
@@ -666,26 +684,38 @@ ScanFile (interp, contextPtr, channel)
             result = TCL_ERROR;
             goto scanExit;
         }
-        data.line = buffer.string;
-        data.bytesRead += (buffer.length + 1);  /* Include EOLN */
+
+
+        data.line = Tcl_DStringValue(&lineBuf);
+        data.bytesRead += (lineBuf.length + 1);  /* Include EOLN */
         data.lineNum++;
         data.storedLine = FALSE;
+
+        /* Convert to UTF to UniCode */
+        Tcl_DStringSetLength (&uniLineBuf, 0);
+        data.uniLine =
+            TclUtfToUniCharDString(Tcl_DStringValue(&lineBuf), Tcl_DStringLength(&lineBuf),
+                                   &uniLineBuf);
+        data.uniLineLen = Tcl_DStringLength(&uniLineBuf) / sizeof(Tcl_UniChar);
+
         matchedAtLeastOne = FALSE;
 
         for (data.matchPtr = contextPtr->matchListHead; 
              data.matchPtr != NULL; 
              data.matchPtr = data.matchPtr->nextMatchDefPtr) {
 
-            if (!Tcl_RegExpExec(interp,
-                                (Tcl_RegExp) data.matchPtr->regExp,
-                                data.line,
-                                data.line))
+            matchStat = TclRegExpExecUniChar(interp, data.matchPtr->regExp,
+                                             data.uniLine, data.uniLineLen, 0);
+            if (matchStat < 0) {
+                result = TCL_ERROR;
+                goto scanExit;
+            }
+            if (matchStat == 0) {
                 continue;  /* Try next match pattern */
-
+            }
             matchedAtLeastOne = TRUE;
 
-            result = SetMatchInfoVar (interp,
-                                      &data);
+            result = SetMatchInfoVar (interp, &data);
             if (result != TCL_OK)
                 goto scanExit;
 
@@ -737,8 +767,8 @@ ScanFile (interp, contextPtr, channel)
         }
 
 	if ((contextPtr->copyFileChannel != NULL) && (!matchedAtLeastOne)) {
-	    if ((Tcl_Write (contextPtr->copyFileChannel,
-                            buffer.string, buffer.length) < 0) ||
+	    if ((Tcl_Write (contextPtr->copyFileChannel, Tcl_DStringValue(&lineBuf),
+                            Tcl_DStringLength(&lineBuf)) < 0) ||
                 (TclX_WriteNL (contextPtr->copyFileChannel) < 0)) {
                 Tcl_SetStringObj (Tcl_GetObjResult (interp),
                                   Tcl_PosixError (interp), -1);
@@ -748,7 +778,8 @@ ScanFile (interp, contextPtr, channel)
     }
 
   scanExit:
-    Tcl_DStringFree (&buffer);
+    Tcl_DStringFree (&lineBuf);
+    Tcl_DStringFree (&uniLineBuf);
     if (result == TCL_ERROR)
         return TCL_ERROR;
     return TCL_OK;

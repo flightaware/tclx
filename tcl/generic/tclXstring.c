@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.17 1998/02/01 08:52:07 markd Exp $
+ * $Id: tclXstring.c,v 8.18 1998/02/28 02:33:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -654,7 +654,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
     class = Tcl_GetStringFromObj (classObj, NULL);
 
     /*
-     * Handle conversion requests.  Works onm UTF-8, not unicode.
+     * Handle conversion requests.  Works on UTF-8, not unicode.
      */
     if (STREQU (class, "char")) {
         static int maxCharValue = TCL_UTF_MAX * 255;

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 8.5 1997/09/18 15:57:31 markd Exp $
+# $Id: filescan.test,v 8.6 1998/04/04 21:04:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -326,11 +326,11 @@ proc ChkSubMatch {id matchInfoVar} {
 set testFH [open TEST.TMP r]
 
 set testCH [scancontext create]
-scanmatch $testCH {\A*(x*)B*(c*)DD} {
+scanmatch $testCH {A*(x*)B*(c*)DD} {
     ChkSubMatch 4 matchInfo
 }
 
-scanmatch -nocase $testCH {\Aa(x*)B(C*)Dd} {
+scanmatch -nocase $testCH {Aa(x*)B(C*)Dd} {
     ChkSubMatch 5 matchInfo
 }
 
@@ -401,7 +401,7 @@ set testCH [scancontext create]
 
 Test filescan-7.1 {filescan tests} {
     scanmatch $testCH {a[} {}
-} 1 {error in regular expression: unmatched []}
+} 1 {couldn't compile regular expression pattern: unmatched []}
 
 #
 # Test the copy file manipulation by sorting a file of numbered lines into two
