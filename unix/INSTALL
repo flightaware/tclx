@@ -129,6 +129,10 @@ of specified architecture to the master directory:
 
    /usr/local/bin/tcl   -> /usr/local/tclX/7.3b/bin.sparc/tcl
    /usr/local/bin/wishx -> /usr/local/tkX/3.6b/bin.sparc/wishx
+
+Symbolic links are also built for the include and library files in a similar
+manner.  Due to the difficulty in getting it right, manual pages must be linked
+by hand.
         
 HOW TO BUILD EXTENDED TCL
 =========================
@@ -396,6 +400,8 @@ DEC Ultrix:
      above.
 
 DEC Alpha:
+   o message-cat-1.3 test fails due to broken catopen.  This is should not
+     affect actual use of this command.
    o On OSF/1 V2.0 Rev 240 it has been noted that strtod segmentation faults
      when the first character of a string has the high order bit set. This
      breaks string expressions and eight bit characters.
@@ -405,7 +411,8 @@ SUN:
 
     
 SOLARIS:
-   o message-cat-1.3 test appears to fail due to broken catopen.
+   o message-cat-1.3 test fails due to broken catopen.  This is should not
+     affect actual use of this command.
    o tcllib-4.1 test fails.
 
 
