@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 5.0 1995/07/25 05:58:58 markd Rel markd $
+ * $Id: tclXunixcmds.c,v 5.1 1995/08/04 05:56:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -316,7 +316,8 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int              status;
+    int              errPipes [2], childErrno;
+    pid_t            pid;
     WAIT_STATUS_TYPE waitStatus;
 
     if (argc != 2) {
@@ -324,23 +325,57 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
                           (char *) NULL);
         return TCL_ERROR;
     }
+    
+    errPipes [0] = errPipes [1] = -1;
 
-    status = system (argv [1]);
-    if (status == -1) {
-        interp->result = Tcl_PosixError (interp);
-        return TCL_ERROR;
+    /*
+     * Create a close on exec pipe to get status back from the child if
+     * the exec fails.
+     */
+    if (pipe (errPipes) != 0) {
+        Tcl_AppendResult (interp, "couldn't create pipe: ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        goto errorExit;
+    }
+    if (fcntl (errPipes [1], F_SETFD, FD_CLOEXEC) != 0) {
+        Tcl_AppendResult (interp, "couldn't set close on exec for pipe: ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        goto errorExit;
     }
 
-    waitStatus = (WAIT_STATUS_TYPE) status;
+    pid = fork ();
+    if (pid == -1) {
+        Tcl_AppendResult (interp, "couldn't fork child process: ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        goto errorExit;
+    }
+    if (pid == 0) {
+        close (errPipes [0]);
+        execl ("/bin/sh", "sh", "-c", argv [1], (char *) NULL);
+        write (errPipes [1], &errno, sizeof (errno));
+        _exit (127);
+    }
 
+    close (errPipes [1]);
+    if (read (errPipes [0], &childErrno, sizeof (childErrno)) > 0) {
+        errno = childErrno;
+        Tcl_AppendResult (interp, "couldn't execing /bin/sh: ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        waitpid (pid, (int *) &waitStatus, 0);
+        goto errorExit;
+    }
+    close (errPipes [0]);
+
+    waitpid (pid, (int *) &waitStatus, 0);
+    
+    /*
+     * Return status based on wait result.
+     */
     if (WIFEXITED (waitStatus)) {
         sprintf (interp->result, "%d", WEXITSTATUS (waitStatus));
         return TCL_OK;
     }
 
-    /*
-     * Return status based on wait result.
-     */
     if (WIFSIGNALED (waitStatus)) {
         Tcl_SetErrorCode (interp, "SYSTEM", "SIG",
                           Tcl_SignalId (WTERMSIG (waitStatus)), (char *) NULL);
@@ -358,7 +393,11 @@ Tcl_SystemCmd (clientData, interp, argc, argv)
                           (char *) NULL);
         return TCL_ERROR;
     }
-    return TCL_ERROR;  /* Should never reach here */
+
+  errorExit:
+    close (errPipes [0]);
+    close (errPipes [1]);
+    return TCL_ERROR;
 }
 
 /*
