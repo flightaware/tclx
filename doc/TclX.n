@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id$
+.\" $Id: TclX.man,v 1.1 1992/09/20 23:09:47 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1271,6 +1271,17 @@ If empty, 1 is returned, otherwise, 0 is returned.  This command is an
 alternative to comparing a list to an empty string.
 '@endhelp
 '
+'@help: extended/lvarcat
+'@brief: Concatenate the contents lists or strings into a variable
+.TP
+\fBllvarcat\fI var string [\fR\fIstring...\fR]
+.br
+This command treats each \fIstring\fR argument as a list and concatenates them
+to the end of the contents of \fIvar\fR, forming a a single list.  The list is
+stored back into \fIvar\fR and also returned as the result.  if \fIvar\fR does
+not exist, it is created.
+'@endhelp
+'
 '@help: extended/lvarpop
 '@brief: Pop or replace the specified element from a list.
 .TP
@@ -1293,7 +1304,7 @@ argv to contain the remainder of the string.
 The \fBlvarpush\fR command pushes (inserts) \fIstring\fR as an element in the
 list contained in the variable \fIvar\fR.  The element is inserted before
 position \fIindex\fR in the list. If \fIindex\fR is omitted, then 0 is
-assumed.
+assumed.  If \fIvar\fR does not exists, it is created.
 '@endhelp
 '
 '@help: extended/keyedlists
@@ -1667,7 +1678,7 @@ The \fBtcl\fR command, issued without any arguments,
 invokes an interactive Tcl shell, allowing the user to interact
 directly with Tcl, executing any Tcl commands at will and viewing
 their results.
-.P
+.PP
 If \fIscript\fR is specified, then the script is executed noninteractively
 with any additional arguments, \fIargs\fR, being supplied in the
 global Tcl
@@ -1675,7 +1686,7 @@ variable `\fBargv\fR'.  If
 \fIcommand\fR is supplied, then this command (or semicolon-separated
 series of commands) is executed, with `\fBargv\fR' containing
 any \fIargs\fR.
-.P
+.PP
 The Tcl shell is intended as an environment for Tcl program development and
 execution.  While it is not a full-featured interactive shell, it provides a
 comfortable environment for the interactive development of Tcl code.  Note
@@ -2064,7 +2075,7 @@ been loaded for all package libraries in \fBTCLPATH\fR, they will be loaded.
 Out-of-date library indexes will be rebuilt if they are writable.  The
 procedure returns \fB1\fR if the procedure was sucessfully
 loaded, or \fB0\fR if it was not.
-.P
+.PP
 Duplicated package names are skipped, the first package of a given name found
 in the path is loaded.
 '@endhelp
@@ -2081,7 +2092,7 @@ explicitly load libraries that are not in the path.  If the index file (with
 a \fI.tndx\fR suffix)
 does not exists or is out of date, it will be rebuilt if the user has
 directory permissions to create it. Duplicated package names are skipped.
-.P
+.PP
 This command will also load an index built by \fBmkindex.tcl\fR program
 supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 '@endhelp

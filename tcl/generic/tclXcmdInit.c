@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXcreate.c,v 1.1 1992/09/20 23:16:39 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -201,6 +201,8 @@ Tcl_CreateExtendedInterp ()
     /*
      * from tclXlist.c
      */
+    Tcl_CreateCommand(interp, "lvarcat", Tcl_LvarcatCmd, 
+                     (ClientData)NULL, (void (*)())NULL);
     Tcl_CreateCommand(interp, "lvarpop", Tcl_LvarpopCmd, 
                      (ClientData)NULL, (void (*)())NULL);
     Tcl_CreateCommand(interp, "lvarpush", Tcl_LvarpushCmd, 
