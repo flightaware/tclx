@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 2.0 1992/10/16 04:50:17 markd Rel markd $
+# $Id: tcllib.test,v 2.1 1993/05/04 02:57:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -226,7 +226,8 @@ Test tcllib-6.3 {successful library access} {
 } 0 {@nukearray@}
 
 #
-# Test skipping of duplicate packages.
+# Test skipping of duplicate packages.  Also make sure loadlibindex overrides
+# existing package definitions.
 #
 TclLibCleanUp
 mkdir {tcllib1.dir tcllib2.dir}
@@ -244,6 +245,15 @@ PutFile tcllib2.dir/test2.tlib \
 Test tcllib-7.1 {Duplicate package handling} {
     DupPkgTest
 } 0 {Version-1}
+
+TclLibReset
+rename DupPkgTest {}
+
+Test tcllib-7.2 {Duplicate package handling} {
+    lrmdups {a b c}  ;# Force load of indices.
+    loadlibindex tcllib2.dir/test2.tlib
+    DupPkgTest
+} 0 {Version-2}
 
 #
 # Test backslash parsing in #@package: line.

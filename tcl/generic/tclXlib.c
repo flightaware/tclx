@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.1 1992/11/19 06:01:41 markd Exp markd $
+ * $Id: tclXlib.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -89,7 +89,8 @@ SetTCLENVPkgEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                char       *packageName,
                                fileId_t    fileId,
                                char       *offset,
-                               char       *length));
+                               char       *length,
+                               int         overwrite));
 
 static int
 GetTCLENVPkgEntry _ANSI_ARGS_((Tcl_Interp *interp,
@@ -113,7 +114,8 @@ GetTCLENVProcEntry  _ANSI_ARGS_((Tcl_Interp *interp,
 static int
 ProcessIndexFile _ANSI_ARGS_((Tcl_Interp *interp,
                               char       *tlibFilePath,
-                              char       *tndxFilePath));
+                              char       *tndxFilePath,
+                              int         overwrite));
 
 static int
 BuildPackageIndex  _ANSI_ARGS_((Tcl_Interp *interp,
@@ -123,7 +125,8 @@ static int
 LoadPackageIndex _ANSI_ARGS_((Tcl_Interp *interp,
                               char       *tlibFilePath,
                               int         pathLen,
-                              int         dirLen));
+                              int         dirLen,
+                              int         overwrite));
 
 static int
 LoadOusterIndex _ANSI_ARGS_((Tcl_Interp *interp,
@@ -479,26 +482,29 @@ GetTCLENVFileIdEntry (interp, fileId)
  *
  *     TCLENV(PKG:$packageName) [list $fileId $offset $length]
  *
- * Duplicate package names are rejected.
+ * Duplicate package names are rejected unless overwrite is TRUE.
  *
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o packageName (I) - Package name.
  *   o fileId (I) - File id for the file.
  *   o offset (I) - String containing the numeric start of the package.
- *   o length (I) - Strign containing the numeric length of the package.
+ *   o length (I) - String containing the numeric length of the package.
+ *   o overwrite (I) - If TRUE, then overwrite existing definitions of the
+ *     package, if FALSE, reject this package if its a duplicate.
  * Returns:
- *   TCL_OK,r TCL_ERROR of TCL_CONTINUE if the package name is already defined
- * and should be skipped.
+ *   TCL_OK, TCL_ERROR or TCL_CONTINUE if the package name is already defined
+ * and is not to be overwritten.
  *-----------------------------------------------------------------------------
  */
 static int
-SetTCLENVPkgEntry (interp, packageName, fileId, offset, length)
+SetTCLENVPkgEntry (interp, packageName, fileId, offset, length, overwrite)
      Tcl_Interp *interp;
      char       *packageName;
      fileId_t    fileId;
      char       *offset;
      char       *length;
+     int         overwrite;
 {
     int   nameLen;
     char  indexBuffer [64], *indexPtr;
@@ -514,14 +520,16 @@ SetTCLENVPkgEntry (interp, packageName, fileId, offset, length)
     strcpy (indexPtr + 4, packageName);
 
     /*
-     * Check for duplicate package name.
+     * Check for duplicate package name, if overwrite is not allowed.
      */
-    if (Tcl_GetVar2 (interp, "TCLENV", indexPtr, TCL_GLOBAL_ONLY) != NULL) {
-        if (indexPtr != indexBuffer)
-            ckfree (indexPtr);
-        return TCL_CONTINUE;
+    if (!overwrite) {
+        if (Tcl_GetVar2 (interp, "TCLENV", indexPtr,
+                         TCL_GLOBAL_ONLY) != NULL) {
+            if (indexPtr != indexBuffer)
+                ckfree (indexPtr);
+            return TCL_CONTINUE;
+        }
     }
-
     pkgDataArgv [0] = fileId;
     pkgDataArgv [1] = offset;
     pkgDataArgv [2] = length;
@@ -779,21 +787,24 @@ GetTCLENVProcEntry (interp, procName, typePtr, locationPtr)
  *     TCLENV(PROC:$proc) [list P $packageName]
  *
  * for each entry procedure in a package.   If the package is already defined,
- * it it skipped.
+ * it it skipped unless overwrite is TRUE.
  *
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o tlibFilePath (I) - Absolute path name to the library file.
  *   o tndxFilePath (I) - Absolute path name to the library file index.
+ *   o overwrite (I) - If TRUE, then overwrite existing definitions of
+ *     packages, if FALSE, skip packages that are duplicate.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
+ProcessIndexFile (interp, tlibFilePath, tndxFilePath, overwrite)
      Tcl_Interp *interp;
      char       *tlibFilePath;
      char       *tndxFilePath;
+     int         overwrite;
 {
     fileId_t      fileId;
     FILE         *indexFilePtr;
@@ -832,7 +843,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
          * lineArgv [3-n] are the entry procedures for the package.
          */
         result = SetTCLENVPkgEntry (interp, lineArgv [0], fileId, lineArgv [1],
-                                    lineArgv [2]);
+                                    lineArgv [2], overwrite);
         if (result == TCL_ERROR)
             goto errorExit;
 
@@ -954,16 +965,19 @@ BuildPackageIndex (interp, tlibFilePath)
  *   o tlibFilePath (I) - Absolute path name to the library file.
  *   o pathLen (I) - Length of tlibFilePath.
  *   o dirLen (I) - The length of the leading directory path in the name.
+ *   o overwrite (I) - If TRUE, then overwrite existing definitions of
+ *     packages, if FALSE, skip packages that are duplicate.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-LoadPackageIndex (interp, tlibFilePath, pathLen, dirLen)
+LoadPackageIndex (interp, tlibFilePath, pathLen, dirLen, overwrite)
      Tcl_Interp *interp;
      char       *tlibFilePath;
      int         pathLen;
      int         dirLen;
+     int         overwrite;
 {
     char        *tndxFilePath, tndxPathBuf [64], *msg;
     struct stat  tlibStat;
@@ -997,7 +1011,8 @@ LoadPackageIndex (interp, tlibFilePath, pathLen, dirLen)
             goto errorExit;
     }
 
-    if (ProcessIndexFile (interp, tlibFilePath, tndxFilePath) != TCL_OK)
+    if (ProcessIndexFile (interp, tlibFilePath, tndxFilePath,
+                          overwrite) != TCL_OK)
         goto errorExit;
     if (tndxFilePath != tndxPathBuf)
         ckfree (tndxFilePath);
@@ -1197,7 +1212,7 @@ LoadDirIndexes (interp, dirName)
 
             if (entryPtr->d_name [nameLen - 5] == '.') {
                 if (LoadPackageIndex (interp, filePath, dirLen + nameLen + 1,
-                                      dirLen) != TCL_OK)
+                                      dirLen, FALSE) != TCL_OK)
                     goto errorExit;
             } else {
                 if (LoadOusterIndex (interp, filePath, dirLen) != TCL_OK)
@@ -1380,7 +1395,7 @@ LoadProc (interp, procName, foundPtr)
  *      loadlibindex libfile
  *
  * which loads the index for a package library (.tlib) or a Ousterhout
- * "tclIndex" file.
+ * "tclIndex" file.  New package definitions will override existing ones.
  *
  * Results:
  *    A standard Tcl result.  Tcl array variable TCLENV is updated to
@@ -1424,7 +1439,8 @@ Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
     if ((pathLen > 5) && (pathName [pathLen - 5] == '.')) {
         if (!STREQU (pathName + pathLen - 5, ".tlib"))
             goto invalidName;
-        if (LoadPackageIndex (interp, pathName, pathLen, dirLen) != TCL_OK)
+        if (LoadPackageIndex (interp, pathName, pathLen, dirLen,
+                              TRUE) != TCL_OK)
             goto errorExit;
     } else {
         if (!STREQU (pathName + dirLen, "/tclIndex"))

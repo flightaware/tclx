@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.9 1993/03/15 06:39:07 markd Exp markd $
+.\" $Id: TclX.man,v 2.10 1993/04/07 06:47:50 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2224,15 +2224,20 @@ in the path is loaded.
 .TP
 '@help: libraries/loadlibindex
 '@brief: Load the index of a package library
-.B loadlibindex \fIlibfile\fR
+.B loadlibindex \fIlibfile.tlib\fR
 .br
 Load the package library index of the library file \fBlibfile\fR (which must
 have the suffix \fI.tlib\fR).  Package library indexes along the \fBTCLPATH\fR
-are loaded automatically on the first demand_load; this command is provided to
+are loaded automatically on the first \fBdemand_load\fR; this command is
+provided to
 explicitly load libraries that are not in the path.  If the index file (with
 a \fI.tndx\fR suffix)
 does not exists or is out of date, it will be rebuilt if the user has
-directory permissions to create it. Duplicated package names are skipped.
+directory permissions to create it. If a package with the same name as
+a package in \fIlibfile.tlib\fR has already been loaded, its definition will
+be overridden by the new package.
+However, if any procedure has actually been used from the previously defined
+package, the procedures from \fIlibfile.tlib\fR will not be loaded.
 .PP
 This command will also load an index built by \fBmkindex.tcl\fR program
 supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
