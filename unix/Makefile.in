@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.5 1994/01/23 04:41:38 markd Exp markd $
+# $Id: Makefile.in,v 3.6 1994/03/06 03:23:23 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -42,10 +42,10 @@ TK_INST_MASTER    = ${TK_MASTERDIR}/`tools/tkxversion`
 #------------------------------------------------------------------------------
 # Other macros.
 
-LIBTCL_A   = tclmaster/lib${ARCH}/LIBTCL_A
-TCL_H      = tclmaster/include/TCL_H
-LIBTK_A    = tkmaster/lib${ARCH}/LIBTK_A
-TK_H       = tkmaster/include/TK_H
+LIBTCL_A   = tclmaster/lib${ARCH}/libtcl.a
+TCL_H      = tclmaster/include/tcl.h
+LIBTK_A    = tkmaster/lib${ARCH}/libtk.a
+TK_H       = tkmaster/include/tk.h
 INSTCOPY   = ./runtcl tools/instcopy
 CPMANPAGES = ./runtcl ${bldbasedir}/tools/cpmanpages
 
@@ -90,14 +90,14 @@ MKTCLDIRS:
 	-mkdir tclmaster/bin${ARCH}     2>/dev/null; exit 0
 	-mkdir tclmaster/src            2>/dev/null; exit 0
 
-${LIBTCL_A}: ${TCL_UCB_LIB}/LIBTCL_A
+${LIBTCL_A}: ${TCL_UCB_LIB}/libtcl.a
 	rm -f ${LIBTCL_A}
-	cp ${TCL_UCB_LIB}/LIBTCL_A ${LIBTCL_A}
+	cp ${TCL_UCB_LIB}/libtcl.a ${LIBTCL_A}
 	${RANLIB} ${LIBTCL_A}
 
-${TCL_H}: ${TCL_UCB_SRC}/TCL_H
+${TCL_H}: ${TCL_UCB_SRC}/tcl.h
 	rm -f ${TCL_H}
-	cp ${TCL_UCB_SRC}/TCL_H ${TCL_H}
+	cp ${TCL_UCB_SRC}/tcl.h ${TCL_H}
 
 #------------------------------------------------------------------------------
 # Generate a wish shell {wishx} with Extended Tcl commands.
@@ -121,14 +121,14 @@ MKTKDIRS:
 	-mkdir tkmaster/bin${ARCH}     2>/dev/null; exit 0
 	-mkdir tkmaster/src            2>/dev/null; exit 0
 
-${LIBTK_A}: ${TK_UCB_LIB}/LIBTK_A
+${LIBTK_A}: ${TK_UCB_LIB}/libtk.a
 	rm -f ${LIBTK_A}
-	cp ${TK_UCB_LIB}/LIBTK_A ${LIBTK_A}
+	cp ${TK_UCB_LIB}/libtk.a ${LIBTK_A}
 	${RANLIB} ${LIBTK_A}
 
-${TK_H}: ${TK_UCB_SRC}/TK_H
+${TK_H}: ${TK_UCB_SRC}/tk.h
 	rm -f ${TK_H}
-	cp ${TK_UCB_SRC}/TK_H ${TK_H}
+	cp ${TK_UCB_SRC}/tk.h ${TK_H}
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCL_LIBRARY/TK_LIBRARY environment variable at

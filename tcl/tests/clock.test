@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 3.0 1993/11/19 06:57:09 markd Rel markd $
+# $Id: clock.test,v 3.1 1994/01/11 04:35:36 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -79,11 +79,14 @@ Test clock-3.8 {convertclock tests} {
 
 Test clock-3.9 {convertclock tests} {
     # WARNING: This test might fail if your symbolic timezone name conflicts
-    # with names use in other parts of the world.  Known failures:
+    # with names use in other parts of the world or if the symbolic zone is
+    # returns an incorrect value.
     #
-    #    EST for Australian Eastern Summer Time.
-    #    EST for Australian Eastern Standard Time.
-    #
+    #  o EST for Australian Eastern Summer Time.
+    #  o EST for Australian Eastern Standard Time.
+    #  o On some systems, a "TZ=GMT+2" results in strftime returning a
+    #    time zone of just "GMT".
+    #  
     # Don't worry about these failures.
 
     set clock [getclock]

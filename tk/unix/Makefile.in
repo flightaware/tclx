@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.2 1993/12/02 03:56:12 markd Exp markd $
+# $Id: Makefile.in,v 3.3 1994/02/07 02:47:51 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -49,14 +49,14 @@ APPINIT      = ${bldbasedir}/tkmaster/src/tkXAppInit.c
 SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS${ARCH}
 TKXMAINPP.O  = ${bldbasedir}/tkmaster/lib${ARCH}/tkXmain++.o
 
-LIBTCL.A  = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
-LIBTCLX.A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
+LIBTCL_A  = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
+LIBTCLX_A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
 
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the Tcl
 # library if it was brought in.
 
-LDLIBS = ${LIBTKX.A} ${LIBTK.A} ${XLIBSW} ${LIBTCLX.A} ${LIBTCL.A} -lm ${LIBS}
+LDLIBS = ${LIBTKX_A} ${LIBTK_A} ${XLIBSW} ${LIBTCLX_A} ${LIBTCL_A} -lm ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
@@ -77,7 +77,7 @@ UCBOBJS=tkWindow.o
 
 all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TCL_PLUS_BUILD}
 
-${WISHX}: tkXAppInit.o ${LIBTKX.A} ${LIBTK.A} ${LIBTCLX.A} ${LIBTCL.A} made.tmp
+${WISHX}: tkXAppInit.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	    -o ${WISHX} || (rm -f ${WISHX}; exit 1)
 	if ${DO_STRIPPING} ; then \

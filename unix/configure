@@ -129,7 +129,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 3.8 
+# From configure.in Revision: 3.9 
 
 
 
@@ -844,6 +844,7 @@ cat > conftest.c <<EOF
 
 int main() { exit(0); }
 int t() { 
+#include <time.h>
 extern long timezone;
 timezone += 1;
 exit (0);

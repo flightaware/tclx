@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.2 1993/12/02 03:56:12 markd Exp markd $
+# $Id: Makefile.in,v 3.3 1994/03/06 03:23:23 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -40,16 +40,16 @@ LIBS        = @LIBS@ -lm
 
 #------------------------------------------------------------------------------
 
-LIBTCL.A      = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
-LIBTCLX_A     = ${bldbasedir}/tclmaster/lib${ARCH}/LIBTCLX_A
+LIBTCL_A      = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
+LIBTCLX_A     = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
 TCL           = ${bldbasedir}/tclmaster/bin${ARCH}/tcl
-TCLEXTEND_H   = ${bldbasedir}/tclmaster/include/TCLEXTEND_H
+TCLEXTEND_H   = ${bldbasedir}/tclmaster/include/tclExtend.h
 TCLPP_H       = ${bldbasedir}/tclmaster/include/tcl++.h
 APPINIT       = ${bldbasedir}/tclmaster/src/tclXAppInit.c
 SYSLIBS       = ${bldbasedir}/tclmaster/src/SYSLIBS${ARCH}
 TCLXMAINPP_O  = ${bldbasedir}/tclmaster/lib${ARCH}/tclXmain++.o
 
-LDLIBS = ${LIBTCLX_A} ${LIBTCL.A} ${LIBS}
+LDLIBS = ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${bldbasedir}/src -I${TCL_UCB_SRC}
@@ -79,7 +79,7 @@ UCBOBJS=tclCmdIL.o
 all: made.tmp ${TCL} ${TCLEXTEND_H} ${TCLPP_H} ${APPINIT} ${SYSLIBS} \
      ${TCL_PLUS_BUILD}
 
-${TCL}: tclXAppInit.o ${LIBTCLX_A} ${LIBTCL.A} made.tmp 
+${TCL}: tclXAppInit.o ${LIBTCLX_A} ${LIBTCL_A} made.tmp 
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
 	      -o ${TCL} || (rm -f ${TCL}; exit 1)
 	if ${DO_STRIPPING} ; then \

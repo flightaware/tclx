@@ -403,11 +403,15 @@ SCO:
      of the command return a warning if used on COFF binaries.
 
 SGI:
+   o There appears to be a compiler bug with some SGI compilers.
+     If you see core dumps during the tests, recompile both Tcl and TclX
+     without -O (make CFLAGS=).  This was seen on IRIX 4.0.5.
+
    o The strftime function does not work correctly on SGI (tested on
      IRIX 4.0.5).  This is a known bug and will be fixed in the next IRIX
      release.  The fmtclock command specifying the GMT argument (perhaps
-     only during daylight) returns a formated time that is one hour off.  This
-     causes the following clock tests to fail:
+     only during daylight  savings time) returns a formated time that is one
+     hour off.  This causes the following clock tests to fail:
 
         clock-3.2
         clock-4.0
