@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 2.2 1993/07/18 05:52:24 markd Exp markd $
+# $Id: process.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -72,7 +72,7 @@ Test process-1.4 {fork, execl, wait tests} {
 
 Test process-1.5 {fork, execl, wait tests} {
     wait baz
-} 1 {expected integer but got "baz"}
+} 1 {invalid pid or process group id "baz"}
 
 Test process-1.6 {fork, execl, wait tests} {
     set testPid [ForkLoopingChild]
@@ -107,7 +107,7 @@ Test process-2.2 {fork, execl, wait tests} {
 } 0 {{} {SIG SIGTERM}}
 
 Test process-2.3 {fork, execl, wait tests} {
-    set testPid [ForkLoopingChild]
+    set testPid [ForkLoopingChild 1]
     set result1 [wait -nohang -pgroup -untraced $testPid]
     kill $testPid
     set result2 [wait -pgroup -untraced $testPid]

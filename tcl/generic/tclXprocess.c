@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXprocess.c,v 2.6 1993/07/18 15:19:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -148,8 +148,8 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int      pid, returnedPid, status, idx;
-    int      options = 0, pgroup = FALSE;
+    int   status, idx, tmpPid, options = 0, pgroup = FALSE;
+    pid_t pid, returnedPid;
     
     for (idx = 1; idx < argc; idx++) {
         if (argv [idx][0] != '-')
@@ -181,15 +181,15 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
     if (idx < argc - 1)
         goto usage;  
     if (idx < argc) {
-        if (Tcl_GetInt (interp, argv [idx], &pid) != TCL_OK)
-            return TCL_ERROR;
-        if (pid <= 0) {
-            Tcl_AppendResult (interp, "pid or process group must be greater ",
-                              "than zero", (char *) NULL);
-            return TCL_ERROR;
-        }
+        if (!Tcl_StrToInt (argv [idx], 10, &tmpPid))
+            goto invalidPid;
+        if (tmpPid <= 0)
+            goto negativePid;
+        pid = (pid_t) tmpPid;
+        if ((int) pid != tmpPid)
+            goto invalidPid;
     } else {
-        pid = -1;  /* pid not supplied */
+        pid = -1;  /* pid or pgroup not supplied */
     }
 
     /*
@@ -206,7 +206,7 @@ Tcl_WaitCmd (clientData, interp, argc, argv)
 
     if (pgroup) {
         if (pid > 0)
-            pid = -pgroup;
+            pid = -pid;
         else
             pid = 0;
     }
@@ -241,5 +241,15 @@ usage:
     Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ", 
                       "?-nohang? ?-untraced? ?-pgroup? ?pid?",
                       (char *) NULL);
+    return TCL_ERROR;
+
+  invalidPid:
+    Tcl_AppendResult (interp, "invalid pid or process group id \"",
+                      argv [idx], "\"", (char *) NULL);
+    return TCL_ERROR;
+
+  negativePid:
+    Tcl_AppendResult (interp, "pid or process group id must be greater ",
+                      "than zero", (char *) NULL);
     return TCL_ERROR;
 }
