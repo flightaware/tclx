@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXcmdloop.c,v 1.1 1992/09/20 23:15:51 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,8 +27,6 @@
  */
 
 int (*tclShellCmdEvalProc) () = Tcl_Eval;
-
-extern int tclReceivedSignal;  /* Set when a signal comes in */
 
 /*
  * Prototypes of internal functions.
@@ -242,10 +240,10 @@ Tcl_CommandLoop (interp, inFile, outFile, evalProc, options)
 
     while (TRUE) {
         /*
-         * If a signal came in, reset the signals and drop any pending command.
+         * If a signal came in, process it and drop any pending command.
          */
         if (tclReceivedSignal) {
-            Tcl_ResetSignals ();
+            Tcl_CheckForSignal (interp, TCL_OK);
             Tcl_DeleteCmdBuf(cmdBuf);
             cmdBuf = Tcl_CreateCmdBuf();
             topLevel = TRUE;
