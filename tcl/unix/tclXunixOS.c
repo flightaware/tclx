@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.13 1996/09/09 22:52:45 markd Exp $
+ * $Id: tclXunixOS.c,v 7.14 1996/09/17 22:29:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -462,31 +462,6 @@ TclXOSsystem (interp, command, exitCode)
     close (errPipes [0]);
     close (errPipes [1]);
     return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * TclXOSmkdir --
- *   System dependent interface to mkdir functionallity.
- *
- * Parameters:
- *   o interp - Errors returned in result.
- *   o path - Directory to create.
- * Results:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXOSmkdir (interp, path)
-    Tcl_Interp *interp;
-    char       *path;
-{
-    if (mkdir (path, S_IFDIR | 0777) < 0) {
-        Tcl_AppendResult (interp, "creating directory \"", path,
-                          "\" failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------

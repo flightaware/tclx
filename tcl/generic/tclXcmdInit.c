@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 7.3 1996/07/26 05:55:52 markd Exp $
+ * $Id: tclXcmdInit.c,v 7.4 1996/09/28 16:14:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -85,8 +85,6 @@ Tclxcmd_Init (interp)
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "lgets", Tcl_LgetsCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "frename", Tcl_FrenameCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "ftruncate", Tcl_FtruncateCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "readdir", Tcl_ReaddirCmd,
@@ -117,11 +115,7 @@ Tclxcmd_Init (interp)
      */
     Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "mkdir", Tcl_MkdirCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "nice", Tcl_NiceCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
                        (ClientData) NULL,(Tcl_CmdDeleteProc*) NULL);
@@ -130,8 +124,6 @@ Tclxcmd_Init (interp)
     Tcl_CreateCommand (interp, "system", Tcl_SystemCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "umask", Tcl_UmaskCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "unlink", Tcl_UnlinkCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
     /*

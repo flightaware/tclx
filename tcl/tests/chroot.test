@@ -60,8 +60,8 @@ if {[id user] != "root"} {
 #
 # clean up and create an empty test directory
 #
-exec rm -rf CHROOTDIR
-mkdir CHROOTDIR
+catch {file delete -force CHROOTDIR}
+file mkdir CHROOTDIR
 
 #
 # since you can't chroot back up, we spawn a child process to do the
@@ -74,7 +74,7 @@ set pid [fork]
 #
 if {$pid > 0} {
     wait $pid
-    exec rm -rf CHROOTDIR
+    file delete -force CHROOTDIR
     return
 }
 

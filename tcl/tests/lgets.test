@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lgets.test,v 7.2 1996/07/28 00:38:41 markd Exp $
+# $Id: lgets.test,v 7.3 1996/10/04 05:02:39 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -197,5 +197,5 @@ catch {close $rpipe}
 catch {close $wpipe}
 unset data
 
-unlink -nocomplain {test1.tmp test2.tmp}
+TestRemove test1.tmp test2.tmp
 

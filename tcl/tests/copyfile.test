@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: copyfile.test,v 1.1 1996/09/28 16:25:41 markd Exp $
+# $Id: copyfile.test,v 1.2 1996/10/04 05:02:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -36,7 +36,7 @@ proc TestCompareFiles {fn1 fn2} {
 
 # Create a test file
 
-unlink -nocomplain {COPYFILE1.TMP COPYFILE2.TMP}
+TestRemove COPYFILE1.TMP COPYFILE2.TMP
 
 set testFH [open COPYFILE1.TMP w]
 set testFileSize 0
@@ -140,4 +140,4 @@ Test copyfile-1.7 {copyfile tests} {
 
 # FIX: Need copy test on sockets.
 
-unlink -nocomplain {COPYFILE1.TMP COPYFILE2.TMP}
+TestRemove COPYFILE1.TMP COPYFILE2.TMP

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 6.0 1996/05/10 16:16:27 markd Exp $
+# $Id: compat.tcl,v 7.0 1996/06/16 05:31:14 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -157,5 +157,95 @@ proc convertclock {dateString {zone {}} {baseClock {}}} {
 # Added TclX 7.5a
 
 proc getclock {} {
-    return [eval clock seconds]
+    return [clock seconds]
 }
+
+#@package: TclX-FileCompat mkdir rmdir unlink frename
+
+# Added TclX 7.6.0
+
+proc mkdir args {
+    set path 0
+    if {[llength $args] > 1} {
+        lvarpop args
+        set path 1
+    }
+    foreach dir [lindex $args 0] {
+        if {((!$path) && [file isdirectory $dir]) || \
+                ([file exists $dir] && ![file isdirectory $dir])} {
+            error "creating directory \"$dir\" failed: file already exists" \
+                    {} {POSIX EEXIST {file already exists}}
+        }
+        file mkdir $dir
+    }
+    return
+}
+
+# Added TclX 7.6.0
+
+proc rmdir args {
+    set nocomplain 0
+    if {[llength $args] > 1} {
+        lvarpop args
+        set nocomplain 1
+        global errorInfo errorCode
+        set saveErrorInfo $errorInfo
+        set saveErrorCode $errorCode
+    }
+    foreach dir [lindex $args 0] {
+        if $nocomplain {
+            catch {file delete $dir}
+        } else {
+            if {[file exists $dir] && ![file isdirectory $dir]} {
+                error "$dir: not a directory" {} \
+                        {POSIX ENOTDIR {not a directory}}
+            }
+            file delete $dir
+        }
+    }
+    if $nocomplain {
+        set errorInfo $saveErrorInfo 
+        set errorCode $saveErrorCode
+    }
+    return
+}
+
+# Added TclX 7.6.0
+
+proc unlink args {
+    set nocomplain 0
+    if {[llength $args] > 1} {
+        lvarpop args
+        set nocomplain 1
+        global errorInfo errorCode
+        set saveErrorInfo $errorInfo
+        set saveErrorCode $errorCode
+    }
+    foreach file [lindex $args 0] {
+        if [file isdirectory $file] {
+            if !$nocomplain {
+                error "$file: not owner" {} {POSIX EPERM {not owner}}
+            }
+        } elseif $nocomplain {
+            catch {file delete $file}
+        } else {
+            file delete $file
+        }
+    }
+    if $nocomplain {
+        set errorInfo $saveErrorInfo 
+        set errorCode $saveErrorCode
+    }
+    return
+}
+
+# Added TclX 7.6.0
+
+proc frename {old new} {
+    if {[file isdirectory $new] && ![lempty [readdir $new]]} {
+        error "rename \"foo\" to \"baz\" failed: directory not empty" {} \
+                POSIX ENOTEMPTY {directory not empty}
+    }
+    file rename $old $new
+}
+

@@ -37,7 +37,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 6.0 1996/05/10 16:20:07 markd Exp $
+# $Id: cpmanpages.tcl,v 7.0 1996/06/16 05:34:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -88,7 +88,7 @@ proc CopyManPage {sourceFile targetFile} {
     if ![file exists [file dirname $targetFile]] {
         mkdir -path [file dirname $targetFile]
     }
-    unlink -nocomplain $targetFile
+    catch {file delete $targetFile}
 
     set targetFH [open $targetFile w]
     CopyManFile $sourceFile $targetFH
@@ -202,7 +202,7 @@ proc InstallLongMan {sourceFile targetDir extension} {
 
     foreach manName $manNames {
         set targetFile  $targetDir/$manName.$extension
-        unlink -nocomplain $targetFile
+        catch {file delete $targetFile}
         if {[catch {
                 link $firstFilePath $targetFile
             } msg] != 0} {
@@ -243,8 +243,9 @@ proc InstallManPage {sourceFile manDir section} {
    
     if $rmcat {
         foreach file $files {
-            unlink -nocomplain \
-                [list $manDir/cat${manSeparator}${section}/$file]
+            catch {
+                file delete [list $manDir/cat${manSeparator}${section}/$file]
+            }
         }
     }
 }
@@ -300,7 +301,7 @@ if [catch {open $testName w} fh] {
     set longNames 0
 } else {
     close $fh
-    unlink $testName
+    file delete $testName
     set longNames 1
 }
 

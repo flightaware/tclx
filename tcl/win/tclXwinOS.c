@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.10 1996/09/03 23:39:11 markd Exp $
+ * $Id: tclXwinOS.c,v 7.11 1996/09/09 22:13:45 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -411,30 +411,6 @@ TclXOSsystem (Tcl_Interp *interp,
     WaitForSingleObject (pi.hProcess, INFINITE);
     GetExitCodeProcess (pi.hProcess, exitCode);
     CloseHandle (pi.hProcess);
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * TclXOSmkdir --
- *   System dependent interface to mkdir functionallity.
- *
- * Parameters:
- *   o interp - Errors returned in result.
- *   o path - Directory to create.
- * Results:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclXOSmkdir (Tcl_Interp *interp,
-             char       *path)
-{
-    if (mkdir (path) < 0) {
-        Tcl_AppendResult (interp, "creating directory \"", path,
-                          "\" failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
     return TCL_OK;
 }
 

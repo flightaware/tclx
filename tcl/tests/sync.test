@@ -18,7 +18,7 @@
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
-unlink -nocomplain SYNC.TMP
+TestRemove SYNC.TMP
 
 Test sync-1.1 {sync tests} {
     sync
@@ -36,4 +36,4 @@ Test sync-1.3 {sync tests} {
     close $fh
 } 0 {}
 
-unlink -nocomplain SYNC.TMP
+TestRemove SYNC.TMP

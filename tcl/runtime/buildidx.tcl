@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 7.1 1996/07/26 05:56:11 markd Exp $
+# $Id: buildidx.tcl,v 7.2 1996/08/03 02:12:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -69,7 +69,7 @@ proc TCLSH:CreateLibIndex {libName} {
     }
     set idxName "[file root $libName].tndx"
 
-    unlink -nocomplain $idxName
+    catch {file delete $idxName}
     set libFH [open $libName r]
     set idxFH [open $idxName w]
     set packageCnt 0
@@ -113,11 +113,11 @@ proc TCLSH:CreateLibIndex {libName} {
             error "No \"#@package:\" definitions found in $libName"
         }   
     } msg] != 0} {
-       global errorInfo errorCode
-       close $libFH
-       close $idxFH
-       unlink -nocomplain $idxName
-       error $msg $errorInfo $errorCode
+        global errorInfo errorCode
+        close $libFH
+        close $idxFH
+        catch {file delete idxName}
+        error $msg $errorInfo $errorCode
     }
     if ![lempty $pkgInfo] {
         TCLSH:PutIdxEntry $idxFH $pkgInfo

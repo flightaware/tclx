@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 7.4 1996/08/03 01:50:30 markd Exp $
+# $Id: filescan.test,v 7.5 1996/10/04 05:02:32 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -98,7 +98,8 @@ set maxRec        200
 #   {key fileOffset fileLineNumber matchType}
 # Also build a file to diff against for the -copyfile option.
 
-unlink -nocomplain {TEST.TMP TEST2.TMP TESTCHK.TMP}
+TestRemove TEST.TMP TEST2.TMP TESTCHK.TMP
+
 set testFH [open TEST.TMP w]
 set testChkFH [open TESTCHK.TMP w]
 
@@ -465,7 +466,8 @@ loop cnt 1 101 2 {
 close $testChkFH
 close $testChk2FH
 
-unlink {TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP}
+TestRemove TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP
+
 rename GenScanRec {}
 rename ValMatch {}
 rename ValScan {}

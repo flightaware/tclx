@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 7.2 1996/07/26 05:56:26 markd Exp $
+# $Id: testlib.tcl,v 7.3 1996/09/03 23:39:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -180,7 +180,7 @@ proc GenRec {id} {
 proc ForkLoopingChild {{setPGroup 0}} {
     global TCL_PROGRAM tcl_platform
 
-    set childProg {unlink CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}
+    set childProg {file delete CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}
 
     # Create semaphore (it also contains the program to run for windows).
     set fh [open CHILD.RUN w]
@@ -220,10 +220,16 @@ proc ForkLoopingChild {{setPGroup 0}} {
 #
 # Create a file.  If the directory doesn't exist, create it.
 #
-proc tcltouch file {
-    if ![file exists [file dirname $file]] {
-        mkdir -path [file dirname $file]
-    }
+proc TestTouch file {
+    file mkdir [file dirname $file]
     close [open $file w]
 }
 
+#
+# Remove files and directories with out errors.
+#
+proc TestRemove args {
+    foreach f $args {
+        catch {file delete -force $f}
+    }
+}

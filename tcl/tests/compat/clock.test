@@ -1,7 +1,8 @@
 #
 # clock.test
 #
-# Tests for the getclock, fmtclock and convertclock commands.
+# Tests for deprecated TclX clock commands: getclock, fmtclock and
+# convertclock.
 #---------------------------------------------------------------------------
 # Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
 #
@@ -12,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 7.1 1996/07/26 05:56:16 markd Exp $
+# $Id: clock.test,v 1.1 1996/10/04 05:03:00 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -20,7 +21,6 @@
 # dumps on MS VC++.  Remove constraints when base Tcl works around the problem.
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
-
 eval $SAVED_UNKNOWN
 
 # Try getclock, hard to test the result, make sure its a number

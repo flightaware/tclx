@@ -12,13 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 7.3 1996/09/03 23:39:08 markd Exp $
+# $Id: fstat.test,v 7.4 1996/10/04 05:02:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
-unlink -nocomplain gorp.file
+TestRemove gorp.file
 set gorpFH [open gorp.file w]
 puts $gorpFH "Test string"
 close $gorpFH
@@ -177,4 +177,4 @@ Test fstat-5.5 {error handling} {
 
 
 catch {close $gorpFH}
-unlink -nocomplain {gorp.file fstat.tmp}
+TestRemove gorp.file fstat.tmp

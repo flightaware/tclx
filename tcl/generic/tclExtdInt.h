@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.13 1996/09/09 22:13:41 markd Exp $
+ * $Id: tclExtdInt.h,v 7.14 1996/09/28 16:14:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -335,9 +335,6 @@ Tcl_CopyfileCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 extern int 
 Tcl_LgetsCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
-extern int 
-Tcl_FrenameCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
 extern int
 Tcl_FtruncateCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
@@ -520,9 +517,6 @@ extern int
 Tcl_LinkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
-Tcl_MkdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
- 
-extern int 
 Tcl_NiceCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
@@ -536,12 +530,6 @@ Tcl_SystemCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
 Tcl_UmaskCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_UnlinkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_RmdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
  * from tclXunixCmds.c or tclXwinCmds.c
@@ -630,9 +618,6 @@ extern int
 TclXOSsystem _ANSI_ARGS_((Tcl_Interp *interp,
                           char       *command,
                           int        *exitCode));
-extern int
-TclXOSmkdir _ANSI_ARGS_((Tcl_Interp *interp,
-                          char       *path));
 
 extern int
 TclX_OSlink _ANSI_ARGS_((Tcl_Interp *interp,

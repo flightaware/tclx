@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.6 1996/09/28 16:14:55 markd Exp $
+.\" $Id: TclX.n,v 7.7 1996/09/28 21:02:36 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -747,18 +747,6 @@ on systems that support symbolic links.)
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-'\"@help: tcl/files/mkdir
-'\"@brief: Create a new directory.
-.TP
-.B mkdir ?-path? \fIdirList\fR
-.br
-Create each of the directories in the list \fIdirList\fR.  The mode on the
-new directories is 777, modified by the umask.  If \fB-path\fR is specified,
-then any non-existent directories in the specified path(s) are created.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
 '\"@help: tcl/processes/nice
 '\"@brief: Change or return the process priority.
 .TP
@@ -789,17 +777,6 @@ directory entries "." and ".." are not returned.
 .br
 On MS Windows systems, \fB-hidden\fR maybe specified include hidden files
 in the result.  This flag is ignored on Unix systems.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/files/rmdir
-'\"@brief: Remove directories
-.TP
-.B rmdir ?\fB-nocomplain\fR? \fIdirList\fR
-.br
-Remove each of the directories in the list \fIdirList\fR.
-If \fB-nocomplain\fR is specified, then errors will be ignored.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -950,17 +927,6 @@ If \fIoctalmask\fR is omitted, the current mask is returned.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
-'\"@help: tcl/files/unlink
-'\"@brief: Delete (unlink) files.
-.TP
-.B unlink ?\fB-nocomplain\fR? \fIfilelist\fR
-.br
-Delete (unlink) the files whose names are in the list \fIfilelist\fR.
-If \fB-nocomplain\fR is specified, then errors will be ignored.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
 '\"@help: tcl/processes/wait
 '\"@brief: Wait for a child process to terminate.
 .TP
@@ -1011,8 +977,7 @@ These commands provide extended file access and manipulation.
 This includes searching ASCII-sorted data files, copying files,
 duplicating file descriptors, control of file access options, retrieving open
 file status, and creating pipes with the \fBpipe\fR system call.  Also linking
-and unlinking files, setting file, process, and user attributes
-and truncating files.
+files, setting file, process, and user attributes and truncating files.
 An interface to the \fBselect\fR system call is available on Unix systems that
 support
 it.
@@ -1402,17 +1367,6 @@ file should be writing entire lists in one write operation.   The only
 difficulty that might arise is if non-blocking I/O was being used to
 keep two processes from deadlocking while exchanging large amounts of
 data.
-'\"@:
-'\"@:This command is provided by Extended Tcl.
-'\"@endhelp
-'
-'\"@help: tcl/files/frename
-'\"@brief: Renames a file.
-.TP
-.B frename \fIoldPath newPath\fR
-.br
-Renames \fIoldPath\fR to \fInewPath\fR.  This command does not support
-renaming across file systems.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

@@ -1,10 +1,9 @@
 #
 # server.test
 #
-# Test for server commands.  Some tests will be skipped if we are not on a
-# known development machine, due to difficutly in certain environments.
-# Set the environment variable TCLX_FULL_TESTS to override.  This includes
-# tests of deprecated functions.
+# Test for deprecated TclX server commands.  Some tests will be skipped if we
+# are not on a known development machine, due to difficutly in certain
+# environments.  Set the environment variable TCLX_FULL_TESTS to override.
 #------------------------------------------------------------------------------
 # Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
 #
@@ -15,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: server.test,v 7.1 1996/07/26 05:56:24 markd Exp $
+# $Id: server.test,v 1.1 1996/10/04 05:03:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 

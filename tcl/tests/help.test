@@ -13,13 +13,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 7.2 1996/09/28 16:17:15 markd Exp $
+# $Id: help.test,v 7.3 1996/10/04 05:02:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
-unlink -nocomplain {HELP.PRG}
+TestRemove HELP.PRG
 
 #
 # Only run help test if help has been built.
@@ -224,5 +224,5 @@ Test help-1.10 {help tests} {
 puts $helpServerFH "exit 0"
 close $helpServerFH
 
-unlink -nocomplain {HELP.PRG}
+TestRemove HELP.PRG
 

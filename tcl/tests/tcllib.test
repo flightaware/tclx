@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 7.2 1996/07/26 05:56:25 markd Exp $
+# $Id: tcllib.test,v 7.3 1996/10/04 05:02:51 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -44,10 +44,10 @@ if ![cequal $tcl_platform(platform) "unix"] {
 # Test library directories.
 #
 if ![file isdirectory tcllib1.dir] {
-    mkdir tcllib1.dir
+    file mkdir tcllib1.dir
 }
 if ![file isdirectory tcllib2.dir] {
-    mkdir tcllib2.dir
+    file mkdir tcllib2.dir
 }
 
 #
@@ -61,9 +61,10 @@ proc TclLibReset {} {
 
 #
 proc TclLibCleanUp {} {
-    catch {chmod u=wrx {tcllib1.dir tcllib2.dir}}
-    unlink [glob -nocomplain tcllib1.dir/*]
-    unlink [glob -nocomplain tcllib2.dir/*]
+    catch {chmod u=wrx tcllib1.dir}
+    catch {chmod u=wrx tcllib2.dir}
+    eval TestRemove [glob -nocomplain tcllib1.dir/*]
+    eval TestRemove [glob -nocomplain tcllib2.dir/*]
     TclLibReset
 }
 
@@ -331,8 +332,8 @@ Test tcllib-8.3 {backslash parsing in package headers} {
 } 0 {CCC}
 
 TclLibCleanUp
-catch {rmdir tcllib1.dir}
-catch {rmdir tcllib2.dir}
+catch {file delte -force tcllib1.dir}
+catch {file delte -force tcllib2.dir}
 
 rename TclLibCleanUp {}
 rename PutFile {}

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 7.2 1996/09/28 16:17:15 markd Exp $
+# $Id: flock.test,v 7.3 1996/10/04 05:02:33 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,12 +27,11 @@ if ![infox have_flock] {
     return
 }
 
-unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP FLOCK.PRG}
+TestRemove FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP FLOCK.PRG
 
 #
 # Create and open a read file and a write file.
 #
-unlink -nocomplain {FLOCKR.TMP FLOCKW.TMP FLOCKRW.TMP}
 
 foreach X {R W RW} {
     set fh [open FLOCK${X}.TMP w]
@@ -150,7 +149,7 @@ if {[catch {flock $writeFH 0 8} msg] != 0} {
     catch {close $writeFH}
     catch {close $readFH}
     catch {close $rdwrFH}
-    unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
+    TestRemove FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP
     return
 }
 alarm 0
@@ -259,4 +258,4 @@ close $childFH
 catch {close $readFH}
 catch {close $writeFH}
 catch {close $rdwrFH}
-unlink -nocomplain {FLOCKR.TMP FLOCKW.TMP FLOCKRW.TMP FLOCK.PRG}
+TestRemove FLOCKR.TMP FLOCKW.TMP FLOCKRW.TMP FLOCK.PRG

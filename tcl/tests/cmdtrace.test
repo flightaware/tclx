@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 7.2 1996/07/26 05:56:16 markd Exp $
+# $Id: cmdtrace.test,v 7.3 1996/10/04 05:02:28 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -216,4 +216,4 @@ can't read "NOTDEFINED": no such variable
 "foo $NOTDEFINED..."
     ("cmdtrace" callback command)} {tempNotPc}
 
-unlink CMDTRACE.OUT
+TestRemove CMDTRACE.OUT

@@ -97,7 +97,6 @@
 ./tcl/help/tcl/files/flush
 ./tcl/help/tcl/files/for_file
 ./tcl/help/tcl/files/for_recursive_glob
-./tcl/help/tcl/files/frename
 ./tcl/help/tcl/files/fstat
 ./tcl/help/tcl/files/ftruncate
 ./tcl/help/tcl/files/funlock
@@ -105,7 +104,6 @@
 ./tcl/help/tcl/files/glob
 ./tcl/help/tcl/files/lgets
 ./tcl/help/tcl/files/link
-./tcl/help/tcl/files/mkdir
 ./tcl/help/tcl/files/open
 ./tcl/help/tcl/files/pipe
 ./tcl/help/tcl/files/puts
@@ -113,12 +111,10 @@
 ./tcl/help/tcl/files/read_file
 ./tcl/help/tcl/files/readdir
 ./tcl/help/tcl/files/recursive_glob
-./tcl/help/tcl/files/rmdir
 ./tcl/help/tcl/files/seek
 ./tcl/help/tcl/files/select
 ./tcl/help/tcl/files/sync
 ./tcl/help/tcl/files/tell
-./tcl/help/tcl/files/unlink
 ./tcl/help/tcl/files/write_file
 ./tcl/help/tcl/filescan/scancontext
 ./tcl/help/tcl/filescan/scanfile
@@ -255,9 +251,11 @@
 ./tcl/tests/chartype.test
 ./tcl/tests/chmod.test
 ./tcl/tests/chroot.test
-./tcl/tests/compat/clock.test
 ./tcl/tests/cmdloop.test
 ./tcl/tests/cmdtrace.test
+./tcl/tests/compat/clock.test
+./tcl/tests/compat/file.test
+./tcl/tests/compat/server.test
 ./tcl/tests/convlib.test
 ./tcl/tests/copyfile.test
 ./tcl/tests/dup.test
@@ -266,7 +264,6 @@
 ./tcl/tests/flock.test
 ./tcl/tests/fmath.test
 ./tcl/tests/forfile.test
-./tcl/tests/frename.test
 ./tcl/tests/fstat.test
 ./tcl/tests/ftrunc.test
 ./tcl/tests/globrecur.test
@@ -287,7 +284,6 @@
 ./tcl/tests/pushd.test
 ./tcl/tests/readdir.test
 ./tcl/tests/select.test
-./tcl/tests/compat/server.test
 ./tcl/tests/setfuncs.test
 ./tcl/tests/shell.test
 ./tcl/tests/showproc.test

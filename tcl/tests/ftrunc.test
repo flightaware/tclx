@@ -12,13 +12,13 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: ftrunc.test,v 1.1 1996/09/28 16:25:43 markd Exp $
+# $Id: ftrunc.test,v 1.2 1996/10/04 05:02:35 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
-unlink -nocomplain TRUNCATE.TMP
+TestRemove TRUNCATE.TMP
 
 proc CreateTmpFile {name size} {
     set fh [open $name w]
@@ -113,4 +113,4 @@ Test filecmds-7.10.1 {ftruncate tests} {
 } 0 {1 {-fileid option is not available on MS Windows}} pcOnly
 
 rename CreateTmpFile {}
-unlink -nocomplain TRUNCATE.TMP
+TestRemove TRUNCATE.TMP

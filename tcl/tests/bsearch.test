@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bsearch.test,v 7.0 1996/06/16 05:31:49 markd Exp $
+# $Id: bsearch.test,v 7.1 1996/10/04 05:02:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -20,7 +20,7 @@ if [cequal [info procs Test] {}] {source testlib.tcl}
 
 # Create a test file
 
-catch {unlink {BSEARCH.TMP}}
+TestRemove BSEARCH.TMP
 
 set testFH [open BSEARCH.TMP w]
 for {set cnt 0} {$cnt < 100} {incr cnt} {
@@ -64,5 +64,6 @@ for {set cnt 0} {$cnt < 100} {incr cnt} {
 }
 close $testFH
 
-catch {unlink {BSEARCH.TMP}}
+TestRemove BSEARCH.TMP
+
 

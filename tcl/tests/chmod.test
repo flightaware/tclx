@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: chmod.test,v 7.1 1996/07/26 05:56:13 markd Exp $
+# $Id: chmod.test,v 7.2 1996/10/04 05:02:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -98,7 +98,10 @@ if {[catch {id group}] != 0} {
 #
 proc SetUpTestFiles {} {
     foreach f {CHECK.TMP CHMOD.TMP CHMOD2.TMP} {
-        unlink -nocomplain $f
+        catch {
+            chmod a+w $f
+            file delete $f
+        }
         close [open $f w]
     }
 }
@@ -714,7 +717,7 @@ if [infox have_fchown] {
 }
 
 
-unlink {CHECK.TMP CHMOD.TMP CHMOD2.TMP}
+TestRemove CHECK.TMP CHMOD.TMP CHMOD2.TMP
 
 # If this is a TclX development system, then give a warning about skipped
 # tests.

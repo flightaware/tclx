@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.4 1996/08/09 04:12:27 markd Exp $
+ * $Id: tclXfilecmds.c,v 7.5 1996/08/19 07:40:41 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -633,60 +633,6 @@ Tcl_LgetsCmd (notUsed, interp, argc, argv)
                                    TCLX_MODE_NONBLOCKING) == TCL_ERROR)
             return TCL_ERROR;
     }
-    return TCL_ERROR;
-}
-
-
-/*-----------------------------------------------------------------------------
- * Tcl_FrenameCmd --
- *     Implements the frename TCL command:
- *         frename oldPath newPath
- *
- * Results:
- *      Standard TCL result.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_FrenameCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
-{
-    Tcl_DString pathBuf1, pathBuf2;
-    char *oldPath, *newPath;
-
-    if (argc != 3) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " oldPath newPath", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    Tcl_DStringInit (&pathBuf1);
-    Tcl_DStringInit (&pathBuf2);
-    
-    oldPath = Tcl_TranslateFileName (interp, argv [1], &pathBuf1);
-    if (oldPath == NULL)
-        goto errorExit;
-
-    newPath = Tcl_TranslateFileName (interp, argv [2], &pathBuf2);
-    if (newPath == NULL)
-        goto errorExit;
-
-    if (rename (oldPath, newPath) != 0) {
-        Tcl_AppendResult (interp, "rename \"", argv [1], "\" to \"", argv [2],
-                          "\" failed: ", Tcl_PosixError (interp),
-                          (char *) NULL);
-        return TCL_ERROR;
-    }
-    
-    Tcl_DStringFree (&pathBuf1);
-    Tcl_DStringFree (&pathBuf2);
-    return TCL_OK;
-
-  errorExit:
-    Tcl_DStringFree (&pathBuf1);
-    Tcl_DStringFree (&pathBuf2);
     return TCL_ERROR;
 }
 

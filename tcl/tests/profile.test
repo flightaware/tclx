@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 7.4 1996/10/03 19:38:22 markd Exp $
+# $Id: profile.test,v 7.5 1996/10/04 05:02:44 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -614,7 +614,7 @@ proc GetProfRep {fileName} {
     set fh [open $fileName]
     set data [read $fh]
     close $fh
-    unlink $fileName
+    file delete $fileName
     return $data
 }
 
