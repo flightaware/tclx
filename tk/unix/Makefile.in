@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.9 1994/06/30 02:14:53 markd Exp markd $
+# $Id: Makefile.in,v 3.10 1994/07/09 03:11:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -46,7 +46,8 @@ LIBTKX_A     = ${bldbasedir}/tkmaster/lib${ARCH}/libtkx.a
 WISHX        = ${bldbasedir}/tkmaster/bin${ARCH}/wishx
 APPINIT      = ${bldbasedir}/tkmaster/src/tkXAppInit.c
 SYSLIBS      = ${bldbasedir}/tkmaster/src/SYSLIBS${ARCH}
-TKXMAINPP.O  = ${bldbasedir}/tkmaster/lib${ARCH}/tkXmain++.o
+TKXMAINPP_C  = ${bldbasedir}/tkmaster/src/tkXmain++.C
+TKXMAINPP_O  = ${bldbasedir}/tkmaster/lib${ARCH}/tkXmain++.o
 
 LIBTCL_A  = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
 LIBTCLX_A = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
@@ -74,7 +75,7 @@ UCBOBJS=tkWindow.o
 # Compile the TkX library and link wishx.  If the link fails, purge
 # the executable, as some systems leave invalid executables around.
 
-all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TCL_PLUS_BUILD}
+all: made.tmp ${WISHX} ${APPINIT} ${SYSLIBS} ${TKXMAINPP_C} ${TCL_PLUS_BUILD}
 
 ${WISHX}: tkXAppInit.o ${LIBTKX_A} ${LIBTK_A} ${LIBTCLX_A} ${LIBTCL_A} made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
@@ -103,10 +104,14 @@ ${SYSLIBS}: SYSLIBS
 	rm -f ${SYSLIBS}
 	cp SYSLIBS ${SYSLIBS}
 
+${TKXMAINPP_C}: tkXmain++.C
+	rm -f ${TKXMAINPP_C}
+	cp tkXmain++.C ${TKXMAINPP_C}
+
 #------------------------------------------------------------------------------
 # Make sure tkXmain.c compiles and links with C++.
 
-TCL_PLUS: wishx++ ${TKXMAINPP.O}
+TCL_PLUS: wishx++ ${TKXMAINPP_O}
 
 wishx++: tkXmain++.o made.tmp
 	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
@@ -119,9 +124,9 @@ tkXmain++.C: tkXmain.c
 	rm -f tkXmain++.C
 	cp ${srcdir}/tkXmain.c tkXmain++.C
 
-${TKXMAINPP.O}: tkXmain++.o
-	rm -f ${TKXMAINPP.O}
-	cp tkXmain++.o ${TKXMAINPP.O}
+${TKXMAINPP_O}: tkXmain++.o
+	rm -f ${TKXMAINPP_O}
+	cp tkXmain++.o ${TKXMAINPP_O}
 
 #------------------------------------------------------------------------------
 clean:
