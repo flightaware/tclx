@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+# $Id: buildhelp.tcl,v 1.2 2004/12/02 20:49:37 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -440,7 +440,7 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
     echo "Begin building help tree"
 
     # Determine version of col command to use (no -x on BSD)
-    if {[catch {exec col -bx </dev/null >/dev/null 2>&1}]} {
+    if {[catch {exec col -bx </dev/null >/dev/null 2>/dev/null}]} {
         set colArgs {-b}
     } else {
         set colArgs {-bx}
