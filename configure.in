@@ -3,7 +3,9 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.5 2002/10/15 18:51:14 hobbs Exp $
+# RCS: @(#) $Id: configure.in,v 1.6 2002/11/12 21:35:30 karll Exp $
+
+AC_PREREQ(2.13)
 
 #--------------------------------------------------------------------
 # Sample configure.in for Tcl Extensions.  The only places you should
@@ -118,6 +120,12 @@ if test "${TEA_PLATFORM}" = "unix" ; then
     
     AC_TYPE_SIGNAL
     
+    #-------------------------------------------------------------------------
+    #       Find out all about time handling differences.
+    #-------------------------------------------------------------------------
+
+    TEA_TIME_HANDLER
+
     #-------------------------------------------------------------------------
     # Test to see if "times" returns a status or the amount of elapsed real
     # time.

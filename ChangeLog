@@ -1,8 +1,18 @@
 2004-11-22  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* Makefile.in: remove TCL_DEFS dependency
+	* configure.in: add TEA_TIME_HANDLER checks to no longer rely on
+	TCL_DEFS (not good for 8.5).
+
+	* generic/tclXprofile.c (ProfStrCommandEval): CONST84-ify it
+
+	* unix/tclXunixSock.c (BindFileHandles): remove impotent channel
+	code on channel2.
+
 	* doc/TclX.n: minor typo fixes
 
-	* generic/tclExtdInt.h: [Bug 1066799] (dgp)
+	* generic/tclExtdInt.h: compat defines to support building against
+	Tcl 8.5a2+. [Bug 1066799] (dgp)
 
 2004-07-14  Jeff Hobbs  <jeffh@ActiveState.com>
 
