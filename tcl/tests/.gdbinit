@@ -7,6 +7,7 @@ set env TCL_PROGRAM ../../tcl/unix/tclXtest
 
 set env MALLOC_OPTIONS A
 
+handle SIGTERM SIGHUP SIGKILL SIGCHLD pass nostop
 dir ../../tcl/unix ../../tcl/generic ../../tk/unix ../../tk/generic ../../../tcl8.0b2/generic ../../../tcl8.0b2/generic ../../../tk8.0b2/unix ../../../tk8.0b2/unix
 
 
