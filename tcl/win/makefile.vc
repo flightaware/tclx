@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.4 1996/07/26 05:56:29 markd Exp $
+# $Id: makefile.vc,v 7.5 1996/07/28 00:39:12 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -85,7 +85,6 @@ TCLXOBJS = \
         $(TMPDIR)\tclXcmdInit.obj \
         $(TMPDIR)\tclXcmdloop.obj \
         $(TMPDIR)\tclXdebug.obj \
-        $(TMPDIR)\tclXdup.obj \
         $(TMPDIR)\tclXfilecmds.obj \
         $(TMPDIR)\tclXfilescan.obj \
         $(TMPDIR)\tclXflock.obj \
@@ -103,7 +102,6 @@ TCLXOBJS = \
         $(TMPDIR)\tclXprocess.obj \
         $(TMPDIR)\tclXprofile.obj \
         $(TMPDIR)\tclXregexp.obj \
-        $(TMPDIR)\tclXselect.obj \
         $(TMPDIR)\tclXshell.obj \
         $(TMPDIR)\tclXsignal.obj \
         $(TMPDIR)\tclXsocket.obj \
@@ -168,13 +166,6 @@ tclXvc.def: dumpexts.exe $(TCLXOBJS)
         dumpexts.exe -o $@ $(TCLXDLL) @<<
         $(TCLXOBJS)
 <<
-
-#????
-arf:
-        echo    tclDeleteInterpAtEnd >> tclXvc.def
-        echo    tclErrorSignalProc >> tclXvc.def
-        echo    tclGotErrorSignal >> tclXvc.def
-        echo    tclSignalBackgroundError >> tclXvc.def
 
 dumpexts.exe: $(DUMPEXTSOBJS)
         set LIB=$(LIB)

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 7.2 1996/07/26 05:56:30 markd Exp $
+ * $Id: tclXwinCmds.c,v 7.3 1996/08/04 07:30:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,12 +22,7 @@
 
 /*-----------------------------------------------------------------------------
  * Tcl_ChrootCmd --
- *     Implements the TCL chroot command:
- *         chroot path
- *
- * Results:
- *      Standard TCL results, may return the UNIX system error message.
- *
+ *   Stub to return an error if the chroot command is used on Windows.
  *-----------------------------------------------------------------------------
  */
 int
@@ -41,12 +36,7 @@ Tcl_ChrootCmd (ClientData  clientData,
 
 /*-----------------------------------------------------------------------------
  * Tcl_TimesCmd --
- *     Implements the TCL times command:
- *     times
- *
- * Results:
- *  Standard TCL results.
- *
+ *   Stub to return an error if the times command is used on Windows.
  *-----------------------------------------------------------------------------
  */
 int
@@ -54,6 +44,34 @@ Tcl_TimesCmd (ClientData  clientData,
               Tcl_Interp *interp,
               int         argc,
               char      **argv)
+{
+    return TclXNotAvailableError (interp, argv [0]);
+}
+
+/*-----------------------------------------------------------------------------
+ * Tcl_DupCmd --
+ *   Stub to return an error if the dup command is used on Windows.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_DupCmd (ClientData  clientData,
+            Tcl_Interp *interp,
+            int         argc,
+            char      **argv)
+{
+    return TclXNotAvailableError (interp, argv [0]);
+}
+
+/*-----------------------------------------------------------------------------
+ * Tcl_SelectCmd --
+ *   Stub to return an error if the select command is used on Windows.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_SelectCmd (ClientData  clientData,
+               Tcl_Interp *interp,
+               int         argc,
+               char      **argv)
 {
     return TclXNotAvailableError (interp, argv [0]);
 }

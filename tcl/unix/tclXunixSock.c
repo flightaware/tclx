@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 7.1 1996/07/22 17:10:18 markd Exp $
+ * $Id: tclXunixSock.c,v 7.2 1996/08/04 07:30:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -204,8 +204,6 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
 
   unixError:
     interp->result = Tcl_PosixError (interp);
-
-  errorExit:
     Tcl_CloseForError (interp, channel, socketFD);
     return TCL_ERROR;
 }

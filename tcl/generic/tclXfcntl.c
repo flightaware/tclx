@@ -12,35 +12,28 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 7.0 1996/06/16 05:30:14 markd Exp $
+ * $Id: tclXfcntl.c,v 7.1 1996/08/04 18:21:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
- * Attributes sets used by fcntl command.  Also a structure to return parsed
- * attribute information in.
+ * Attributes sets used by fcntl command.
  */
-#define ATTR_NONE             0  /* No attributes in this class */
+#define ATTR_ERROR           -1  /* Error parsing attributes.   */
 
 #define ATTR_RDONLY           1  /* Access checks desired.      */
 #define ATTR_WRONLY           2
 #define ATTR_RDWR             3
 #define ATTR_READ             4
 #define ATTR_WRITE            5
-
-#define ATTR_CLOEXEC          1  /* Other attributes */
-#define ATTR_NOBUF            2
-#define ATTR_LINEBUF          3
-#define ATTR_NONBLOCK         4
-#define ATTR_KEEPALIVE        5
-
-typedef struct {
-    int  access;
-    int  fcntl;
-    int  other;
-} fcntlAttr_t;
+#define ATTR_APPEND           6
+#define ATTR_CLOEXEC          7
+#define ATTR_NOBUF            8
+#define ATTR_LINEBUF          9
+#define ATTR_NONBLOCK        10
+#define ATTR_KEEPALIVE       11
 
 /*
  * The maximum length of any attribute name.
@@ -48,121 +41,96 @@ typedef struct {
 #define MAX_ATTR_NAME_LEN  20
 
 /*
+ * Table of attribute names and values.
+ */
+struct {
+    char *name;
+    int   id;
+    int   modifiable;
+} attrNames [] = {
+    {"RDONLY",    ATTR_RDONLY,    FALSE},
+    {"WRONLY",    ATTR_WRONLY,    FALSE},
+    {"RDWR",      ATTR_RDWR,      FALSE},
+    {"READ",      ATTR_READ,      FALSE},
+    {"WRITE",     ATTR_WRITE,     FALSE},
+    {"APPEND",    ATTR_APPEND,    TRUE},
+    {"CLOEXEC",   ATTR_CLOEXEC,   TRUE},
+    {"NONBLOCK",  ATTR_NOBUF,     TRUE},
+    {"LINEBUF",   ATTR_LINEBUF,   TRUE},
+    {"NOBUF",     ATTR_NONBLOCK,  TRUE},
+    {"KEEPALIVE", ATTR_KEEPALIVE, TRUE},
+    {NULL,        0,              FALSE}};
+
+/*
  * Prototypes of internal functions.
  */
 static int
 XlateFcntlAttr  _ANSI_ARGS_((Tcl_Interp  *interp,
                              char        *attrName,
-                             fcntlAttr_t *attrPtr));
+                             int          modify));
 
 static int
 GetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
                           Tcl_Channel  channel,
-                          int          readFileNum,
-                          int          writeFileNum,
-                          char        *attrName));
-
-static int
-SetAttrOnFile _ANSI_ARGS_((Tcl_Interp *interp,
-                           Tcl_Channel  channel,
-                           int          fileNum,
-                           fcntlAttr_t attrib,
-                           int         value));
+                          int          mode,
+                          int          attrib));
 
 static int
 SetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
                           Tcl_Channel  channel,
-                          int          readFileNum,
-                          int          writeFileNum,
-                          char        *attrName,
+                          int          attrib,
                           char        *valueStr));
 
 /*-----------------------------------------------------------------------------
  * XlateFcntlAttr --
- *    Translate an fcntl attribute.
+ *    Translate an fcntl attribute to an numberic id.
  *
  * Parameters:
- *   o interp (I) - Tcl interpreter.
- *   o attrName (I) - The attrbute name to translate, maybe upper or lower
- *     case.
- *   o attrPtr (O) - Structure containing the parsed attributes.  Only one of
- *     the fields will be set, the others will be set to ATTR_NONE.
+ *   o interp - Tcl interp, errors in result
+ *   o attrName - The attrbute name to translate, maybe upper or lower case.
+ *   o modify - Will the attribute be modified
  * Result:
- *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
+ *   The number associated with the attirbute, or ATTR_ERROR is an error
+ * occures.
  *-----------------------------------------------------------------------------
  */
 static int
-XlateFcntlAttr (interp, attrName, attrPtr)
+XlateFcntlAttr (interp, attrName, modify)
     Tcl_Interp  *interp;
     char        *attrName;
-    fcntlAttr_t *attrPtr;
+    int          modify;
 {
     char attrNameUp [MAX_ATTR_NAME_LEN];
-
-    attrPtr->access = ATTR_NONE;
-    attrPtr->fcntl = ATTR_NONE;
-    attrPtr->other = ATTR_NONE;
+    int idx;
 
     if (strlen (attrName) >= MAX_ATTR_NAME_LEN)
         goto invalidAttrName;
-
+    
     Tcl_UpShift (attrNameUp, attrName);
-
-    if (STREQU (attrNameUp, "RDONLY")) {
-        attrPtr->access = ATTR_RDONLY;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "WRONLY")) {
-        attrPtr->access = ATTR_WRONLY;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "RDWR")) {
-        attrPtr->access = ATTR_RDWR;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "READ")) {
-        attrPtr->access = ATTR_READ;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "WRITE")) {
-        attrPtr->access = ATTR_WRITE;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "APPEND")) {
-        attrPtr->fcntl = O_APPEND;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "CLOEXEC")) {
-        attrPtr->other = ATTR_CLOEXEC;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "NONBLOCK")) {
-        attrPtr->other = ATTR_NONBLOCK;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "KEEPALIVE")) {
-        attrPtr->other = ATTR_KEEPALIVE;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "NOBUF")) {
-        attrPtr->other = ATTR_NOBUF;
-        return TCL_OK;
-    }
-    if (STREQU (attrNameUp, "LINEBUF")) {
-        attrPtr->other = ATTR_LINEBUF;
-        return TCL_OK;
+    
+    for (idx = 0; attrNames [idx].name != NULL; idx++) {
+        if (STREQU (attrNameUp, attrNames [idx].name)) {
+            if (modify && !attrNames [idx].modifiable) {
+                Tcl_AppendResult (interp, "Attribute \"", attrName,
+                                  "\" may not be altered after open",
+                                  (char *) NULL);
+                return ATTR_ERROR;
+            }
+            return attrNames [idx].id;
+        }
     }
 
     /*
-     * Error return code.
+     * Invalid attribute.
      */
   invalidAttrName:
     Tcl_AppendResult (interp, "unknown attribute name \"", attrName,
-                      "\", expected one of APPEND, CLOEXEC, LINEBUF, ",
-                      "NONBLOCK, NOBUF, READ, RDONLY, RDWR, WRITE, WRONLY, ",
-                      "or KEEPALIVE", 
-                      (char *) NULL);
-    return TCL_ERROR;
+                      "\", expected one of ", (char *) NULL);
+    for (idx = 0; attrNames [idx + 1].name != NULL; idx++) {
+        Tcl_AppendResult (interp, attrNames [idx].name, ", ", (char *) NULL);
+    }
+    Tcl_AppendResult (interp, "or ", attrNames [idx].name, (char *) NULL);
+    return ATTR_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -170,250 +138,155 @@ XlateFcntlAttr (interp, attrName, attrPtr)
  *    Return the value of a specified fcntl attribute.
  *
  * Parameters:
- *   o interp (I) - Tcl interpreter, value is returned in the result
- *   o channel (I) - The channel to check.
- *   o readFileNum (I) - The read file number associated with the channel or
- *     -1 if no channel.
- *   o writeFileNum (I) - The read file number associated with the channel or
- *     -1 if no channel.
- *   o attrName (I) - The attrbute name to translate, maybe upper or lower
- *     case.
+ *   o interp - Tcl interpreter, value is returned in the result
+ *   o channel - The channel to check.
+ *   o mode - Channel access mode.
+ *   o attrib - Attribute to get.
  * Result:
- *   Returns TCL_OK if all is well, TCL_ERROR if fcntl returns an error.
+ *   TCL_OK or TCL_ERROR
  *-----------------------------------------------------------------------------
  */
 static int
-GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
+GetFcntlAttr (interp, channel, mode, attrib)
     Tcl_Interp  *interp;
     Tcl_Channel  channel;
-    int          readFileNum;
-    int          writeFileNum;
-    char        *attrName;
+    int          mode;
+    int          attrib;
 {
-    fcntlAttr_t attrib;
-    int aFileNum, current, value;
+    int current, value;
 
-    if (XlateFcntlAttr (interp, attrName, &attrib) != TCL_OK)
-        return TCL_ERROR;
-    
-    /*
-     * If both file numbers are specified, pick one for the checking.  They
-     * will be in sync for most options if the attributes were set by us.
-     */
-    aFileNum = (readFileNum >= 0) ? readFileNum : writeFileNum;
-
-    /*
-     * Access check.  Assumes Tcl channel is configured correctly.
-     */
-    if (attrib.access != ATTR_NONE) {
-        switch (attrib.access) {
-          case ATTR_RDONLY:
-            value = (readFileNum >= 0) && (writeFileNum < 0);
-            break;
-          case ATTR_WRONLY:
-            value = (readFileNum < 0) && (writeFileNum >= 0);
-            break;
-          case ATTR_RDWR:
-            value = (readFileNum >= 0) && (writeFileNum >= 0);
-            break;
-          case ATTR_READ:
-            value = (readFileNum >= 0);
-            break;
-          case ATTR_WRITE:
-            value = (writeFileNum >= 0);
-            break;
-        default:
-            panic ("fcntl bad attrib");
-        }
-        interp->result =  value ? "1" : "0";
-        return TCL_OK;
-    }
-
-    /*
-     * Get fcntl attributes.
-     */
-    if (attrib.fcntl != ATTR_NONE) {
-        current = fcntl (aFileNum, F_GETFL, 0);
+    switch (attrib) {
+      case ATTR_RDONLY:
+        value = (mode & TCL_READABLE) && !(mode & TCL_WRITABLE);
+        break;
+      case ATTR_WRONLY:
+        value = (mode & TCL_WRITABLE) && !(mode & TCL_READABLE);
+        break;
+      case ATTR_RDWR:
+        value = (mode & TCL_READABLE) && (mode & TCL_WRITABLE);
+        break;
+      case ATTR_READ:
+        value =  (mode & TCL_READABLE);
+        break;
+      case ATTR_WRITE:
+        value = (mode & TCL_WRITABLE);
+        break;
+      case ATTR_APPEND:
+        current = fcntl (TclX_ChannelFnum (channel, 0), F_GETFL, 0);
         if (current == -1)
             goto unixError;
-        interp->result = (current & attrib.fcntl) ? "1" : "0";
-        return TCL_OK;
-    }
-
-    if (attrib.other == ATTR_CLOEXEC) {
-        current = fcntl (aFileNum, F_GETFD, 0);
+        value = ((current & O_APPEND) != 0);
+        break;
+      case ATTR_CLOEXEC:
+        current = fcntl (TclX_ChannelFnum (channel, 0), F_GETFD, 0);
         if (current == -1)
             goto unixError;
-        interp->result = (current & 1) ? "1" : "0";
-        return TCL_OK;
-    }
-
-    /*
-     * Get attributes maintained by the channel.
-     */
-    if (attrib.other == ATTR_NONBLOCK) {
-        if (TclX_GetChannelOption (channel, TCLX_COPT_BLOCKING) ==
-            TCLX_MODE_NONBLOCKING)
-            interp->result = "1";
-        else
-            interp->result = "0";
-        return TCL_OK;
-    }
-    if (attrib.other == ATTR_NOBUF) {
-        if (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
-            TCLX_BUFFERING_NONE)
-            interp->result = "1";
-        else
-            interp->result = "0";
-        return TCL_OK;
-    }
-    if (attrib.other == ATTR_LINEBUF) {
-        if (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
-            TCLX_BUFFERING_LINE)
-            interp->result = "1";
-        else
-            interp->result = "0";
-        return TCL_OK;
-    }
-
-    if (attrib.other == ATTR_KEEPALIVE) {
+        value = ((current & 1) != 0);
+        break;
+      case ATTR_NONBLOCK:
+        value  = (TclX_GetChannelOption (channel, TCLX_COPT_BLOCKING) ==
+                  TCLX_MODE_NONBLOCKING);
+        break;
+      case ATTR_NOBUF:
+        value = (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
+                 TCLX_BUFFERING_NONE);
+        break;
+      case ATTR_LINEBUF:
+        value = (TclX_GetChannelOption (channel, TCLX_COPT_BUFFERING) ==
+                 TCLX_BUFFERING_LINE);
+        break;
+      case ATTR_KEEPALIVE:
         if (TclXOSgetsockopt (interp, channel, SO_KEEPALIVE, &value) != TCL_OK)
             return TCL_ERROR;
-        interp->result = value ? "1" : "0";
-        return TCL_OK;
+      default:
+        panic ("fcntl get attrib");
     }
+
+    Tcl_SetResult (interp, (value ? "1" : "0"), TCL_STATIC);
+    return TCL_OK;
 
   unixError:
-    interp->result = Tcl_PosixError (interp);
+    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * SetAttrOnFile --
- *    Set the the attributes on a file.  This is called twice for dual file
- * channel.
- *
- * Parameters:
- *   o interp (I) - Tcl interpreter, value is returned in the result
- *   o channel (I) - The channel to check.
- *   o fileNum (I) - The file number associated with the channel direction.
- *     -1 if no channel.
- *   o attrib (I) - Structure describing attribute to set.
- *   o value (I) - Boolean value to set the attributes to.
- * Result:
- *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
- *-----------------------------------------------------------------------------
- */
-static int
-SetAttrOnFile (interp, channel, fileNum, attrib, value)
-    Tcl_Interp  *interp;
-    fcntlAttr_t  attrib;
-    Tcl_Channel  channel;
-    int          fileNum;
-    int          value;
-{
-    int current;
- 
-    if (attrib.fcntl != ATTR_NONE) {
-        current = fcntl (fileNum, F_GETFL, 0);
-        if (current == -1)
-            goto unixError;
-        current &= ~attrib.fcntl;
-        if (value)
-            current |= attrib.fcntl;
-        if (fcntl (fileNum, F_SETFL, current) == -1)
-            goto unixError;
-
-        return TCL_OK;
-    }
-
-    if (attrib.other == ATTR_CLOEXEC) {
-        if (fcntl (fileNum, F_SETFD, value) == -1)
-            goto unixError;
-        return TCL_OK;
-    }
-
-    if (attrib.other == ATTR_NONBLOCK) {
-        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
-                                      value ? TCLX_MODE_NONBLOCKING :
-                                              TCLX_MODE_BLOCKING);
-    }
-    if (attrib.other == ATTR_NOBUF) {
-        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
-                                      value ? TCLX_BUFFERING_NONE :
-                                              TCLX_BUFFERING_FULL);
-    }
-
-    if (attrib.other == ATTR_LINEBUF) {
-        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
-                                      value ? TCLX_BUFFERING_LINE :
-                                              TCLX_BUFFERING_FULL);
-    }
-
-    if (attrib.other == ATTR_KEEPALIVE) {
-        return TclXOSsetsockopt (interp, channel, SO_KEEPALIVE, value);
-    }
-
-  unixError:
-    interp->result = Tcl_PosixError (interp);
-    return TCL_ERROR;
-   
 }
 
 /*-----------------------------------------------------------------------------
  * SetFcntlAttr --
- *    Set the specified fcntl attr to the given value.
+ *    Set the the attributes on a channel.
  *
  * Parameters:
- *   o interp (I) - Tcl interpreter, value is returned in the result
- *   o channel (I) - The channel to check.
- *   o readFileNum (I) - The read file number associated with the channel or
- *     -1 if no channel.
- *   o writeFileNum (I) - The read file number associated with the channel or
- *     -1 if no channel.
- *   o valueStr (I) - The string value to set the attribiute to.
+ *   o interp - Tcl interpreter, value is returned in the result
+ *   o channel - The channel to check.
+ *   o attrib - Atrribute to set.
+ *   o valueStr - String value (all are boolean now).
  * Result:
- *   Returns TCL_OK if all is well, TCL_ERROR if there is an error.
+ *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-SetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName, valueStr)
+SetFcntlAttr (interp, channel, attrib, valueStr)
     Tcl_Interp  *interp;
     Tcl_Channel  channel;
-    int          readFileNum;
-    int          writeFileNum;
-    char        *attrName;
+    int          attrib;
     char        *valueStr;
 {
-    fcntlAttr_t attrib;
-    int         value;
-
-    if (XlateFcntlAttr (interp, attrName, &attrib) != TCL_OK)
-        return TCL_ERROR;
+    int value, current, readFnum, writeFnum;
 
     if (Tcl_GetBoolean (interp, valueStr, &value) != TCL_OK)
         return TCL_ERROR;
 
-    /*
-     * Validate that this the attribute may be set (or cleared).
-     */
-    if (attrib.access != ATTR_NONE) {
-        Tcl_AppendResult (interp, "Attribute \"", attrName, "\" may not be ",
-                          "altered after open", (char *) NULL);
-        return TCL_ERROR;
+    if ((attrib == ATTR_APPEND) || (attrib == ATTR_CLOEXEC)) {
+        readFnum = TclX_ChannelFnum (channel, TCL_READABLE);
+        writeFnum = TclX_ChannelFnum (channel, TCL_WRITABLE);
     }
-    
-    if (readFileNum >= 0) {
-        if (SetAttrOnFile (interp, channel, readFileNum, attrib,
-                           value) == TCL_ERROR)
-            return TCL_ERROR;
+
+    switch (attrib) {
+      case ATTR_APPEND:
+        if (writeFnum < 0)
+            goto notWriteAccess;
+        current = fcntl (writeFnum, F_GETFL, 0);
+        if (current == -1)
+            goto unixError;
+        current = (current & ~O_APPEND) | (value ? O_APPEND : 0);
+        if (fcntl (writeFnum, F_SETFL, current) == -1)
+            goto unixError;
+
+      case ATTR_CLOEXEC:
+        if (readFnum > 0) {
+            if (fcntl (readFnum, F_SETFD, value) == -1)
+                goto unixError;
+        }
+        if ((writeFnum > 0) && (readFnum != writeFnum)) {
+            if (fcntl (writeFnum, F_SETFD, value) == -1)
+                goto unixError;
+        }
+        return TCL_OK;
+      case ATTR_NONBLOCK:
+        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BLOCKING,
+                                      value ? TCLX_MODE_NONBLOCKING :
+                                              TCLX_MODE_BLOCKING);
+      case ATTR_NOBUF:
+        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
+                                      value ? TCLX_BUFFERING_NONE :
+                                              TCLX_BUFFERING_FULL);
+      case ATTR_LINEBUF:
+        return TclX_SetChannelOption (interp, channel, TCLX_COPT_BUFFERING,
+                                      value ? TCLX_BUFFERING_LINE :
+                                              TCLX_BUFFERING_FULL);
+      case ATTR_KEEPALIVE:
+        return TclXOSsetsockopt (interp, channel, SO_KEEPALIVE, value);
+      default:
+        panic ("fcntl set attrib");
     }
-    if (writeFileNum >= 0) {
-        if (SetAttrOnFile (interp, channel, writeFileNum, attrib,
-                           value) == TCL_ERROR)
-            return TCL_ERROR;
-    }
-    return TCL_OK;
+
+  unixError:
+    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+    return TCL_ERROR;
+
+  notWriteAccess:
+    Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
+                      " not open for write access", (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -430,7 +303,7 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     Tcl_Channel channel;
-    int readFileNum, writeFileNum;
+    int mode, attrib;
 
     if ((argc < 3) || (argc > 4)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -438,23 +311,19 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
         return TCL_ERROR;
     }
 
-    channel = TclX_GetOpenChannel (interp, argv [1], 0);
+    channel = Tcl_GetChannel (interp, argv [1], &mode);
     if (channel == NULL)
 	return TCL_ERROR;
 
-    readFileNum = TclX_ChannelFnum (channel, TCL_READABLE);
-    writeFileNum = TclX_ChannelFnum (channel, TCL_WRITABLE);
+    attrib = XlateFcntlAttr (interp, argv [2], (argc == 4));
+    if (attrib == ATTR_ERROR)
+        return TCL_ERROR;
 
-    /*
-     * Get or set attributes.
-     */
     if (argc == 3) {    
-        if (GetFcntlAttr (interp, channel, readFileNum, writeFileNum,
-                          argv [2]) != TCL_OK)
+        if (GetFcntlAttr (interp, channel, mode, attrib) != TCL_OK)
             return TCL_ERROR;
     } else {
-        if (SetFcntlAttr (interp, channel, readFileNum, writeFileNum,
-                          argv [2], argv [3]) != TCL_OK)
+        if (SetFcntlAttr (interp, channel, attrib, argv [3]) != TCL_OK)
             return TCL_ERROR;
     }
     return TCL_OK;

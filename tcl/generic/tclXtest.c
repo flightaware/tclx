@@ -13,11 +13,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 7.0 1996/06/16 05:30:58 markd Exp $
+ * $Id: tclXtest.c,v 7.1 1996/07/22 17:10:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtend.h"
+
+extern int
+Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * Error handler proc that causes errors to come out in the same format as

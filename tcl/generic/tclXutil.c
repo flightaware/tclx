@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 7.2 1996/07/22 17:10:13 markd Exp $
+ * $Id: tclXutil.c,v 7.3 1996/07/26 05:55:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -986,6 +986,7 @@ ParseTranslationOption (strValue)
         return TCLX_TRANSLATE_PLATFORM;
     }
     panic ("ParseTranslationOption bug");
+    return TCL_ERROR;  /* Not reached */
 }
 
 /*-----------------------------------------------------------------------------
@@ -1018,6 +1019,7 @@ FormatTranslationOption (value)
       default:
         panic ("FormatTranslationOption bug");
     }
+    return NULL;  /* Not reached */
 }
 
 
@@ -1121,6 +1123,7 @@ TclX_GetChannelOption (channel, option)
 
   fatalError:
     panic ("TclX_GetChannelOption bug");
+    return 0;  /* Not reached */
 }
 
 /*-----------------------------------------------------------------------------
@@ -1216,6 +1219,7 @@ TclX_SetChannelOption (interp, channel, option, value)
 
   fatalError:
     panic ("TclX_SetChannelOption bug");
+    return TCL_ERROR;  /* Not reached */
 }
 
 /*-----------------------------------------------------------------------------

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.4 1996/08/04 07:30:01 markd Exp $
+ * $Id: tclXunixOS.c,v 7.5 1996/08/04 18:21:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1033,7 +1033,7 @@ TclXOSgetsockopt (interp, channel, option, valuePtr)
 {
     int valueLen = sizeof (*valuePtr);
 
-    if (getsockopt (TclX_ChannelFnum (channel, 0), SOL_SOCKET, option, 
+    if (getsockopt (ChannelToFnum (channel, 0), SOL_SOCKET, option, 
                     (void*) valuePtr, &valueLen) != 0) {
         Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
                           Tcl_PosixError (interp), (char *) NULL);
@@ -1064,7 +1064,7 @@ TclXOSsetsockopt (interp, channel, option, value)
 {
     int valueLen = sizeof (value);
 
-    if (setsockopt (TclX_ChannelFnum (channel, 0), SOL_SOCKET, option,
+    if (setsockopt (ChannelToFnum (channel, 0), SOL_SOCKET, option,
                     (void*) &value, valueLen) != 0) {
         Tcl_AppendResult (interp, Tcl_GetChannelName (channel), ": ",
                           Tcl_PosixError (interp), (char *) NULL);
@@ -1257,11 +1257,10 @@ TclXOSChangeOwnGrp (interp, options, ownerStr, groupStr, files, funcName)
     char       **files;
     char       *funcName;
 {
-    int idx, fnum;
+    int idx;
     struct stat fileStat;
     uid_t ownerId;
     gid_t groupId;
-    Tcl_Channel channel;
     char *filePath;
     Tcl_DString pathBuf;
 

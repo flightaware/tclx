@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fcntl.test,v 7.0 1996/06/16 05:32:08 markd Exp $
+# $Id: fcntl.test,v 7.1 1996/07/26 05:56:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -149,7 +149,7 @@ Test fcntl-5.1 {fcntl tests} {
 
 Test fcntl-5.2 {fcntl tests} {
     fcntl $testRWFH BAZ 1
-} 1 {unknown attribute name "BAZ", expected one of APPEND, CLOEXEC, LINEBUF, NONBLOCK, NOBUF, READ, RDONLY, RDWR, WRITE, WRONLY, or KEEPALIVE}
+} 1 {unknown attribute name "BAZ", expected one of RDONLY, WRONLY, RDWR, READ, WRITE, APPEND, CLOEXEC, NONBLOCK, LINEBUF, NOBUF, or KEEPALIVE}
 
 Test fcntl-5.3 {fcntl tests} {
     fcntl $testRWFH APPEND FOO

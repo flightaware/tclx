@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 7.3 1996/07/26 05:55:56 markd Exp $
+ * $Id: tclXoscmds.c,v 7.4 1996/08/04 07:29:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -198,10 +198,9 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int           idx, dirArgc, result;
-    char        **dirArgv, *dirName, *scanPtr;
-    struct stat   statBuf;
-    Tcl_DString   pathBuf;
+    int idx, dirArgc;
+    char **dirArgv, *dirName;
+    Tcl_DString pathBuf;
 
     if ((argc < 2) || (argc > 3) || 
         ((argc == 3) && !STREQU (argv [1], "-path"))) {

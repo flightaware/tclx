@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 7.1 1996/08/03 02:12:42 markd Exp $
+ * $Id: tclXchmod.c,v 7.2 1996/08/04 07:29:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,8 +27,6 @@ typedef struct {
 } modeInfo_t;
 
 static char *FILE_ID_OPT = "-fileid";
-static char *FILE_ID_NOT_AVAIL =
-    "The -fileid option is not available on this system";
 
 /*
  * Prototypes of internal functions.
@@ -367,7 +365,7 @@ Tcl_ChownCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    int argIdx, ownerArgc, fileArgc, idx, fileIds;
+    int argIdx, ownerArgc, fileArgc, fileIds;
     char **ownerArgv = NULL, **fileArgv = NULL, *owner, *group;
     unsigned options;
 

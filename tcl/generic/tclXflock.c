@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 6.0 1996/05/10 16:15:33 markd Exp $
+ * $Id: tclXflock.c,v 7.0 1996/06/16 05:30:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -127,9 +127,8 @@ Tcl_FlockCmd (notUsed, interp, argc, argv)
     char       **argv;
 {
     int argIdx, stat, fnum;
-    int readLock = FALSE, writeLock = FALSE, noWaitLock = FALSE;
-    int access = 0;
-    struct flock  lockInfo;
+    int access = 0, noWaitLock = FALSE;
+    struct flock lockInfo;
 
     if (argc < 2)
         goto invalidArgs;
