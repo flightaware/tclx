@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.12 1996/11/18 07:46:17 markd Exp $
+# $Id: Makefile.in,v 7.13 1996/11/20 00:50:55 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -43,14 +43,14 @@ LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 LIBS = ${TK_LIB} ${TK_XLIBSW} @SHARED_LIBS@ ${TKX_LD_SEARCH_FLAGS}
 
-ALL_LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} ${TCLX_BUILD_LIB_SPEC} \
-       ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-       ${TKX_CC_SEARCH_FLAGS}
+ALL_LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
+	   ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS} \
+	   ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} ${TKX_CC_SEARCH_FLAGS}
 
-STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_UNIX_DIR}/${TK_STLIB_NAME} ${TK_XLIBSW} \
-       ${TCLX_UNIX_SRC_DIR}/${TCLX_STLIB_NAME} ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} \
-       ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-       ${TKX_CC_SEARCH_FLAGS}
+STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_LIB} ${TK_XLIBSW} \
+              ${TCLX_UNIX_SRC_DIR}/${TCLX_STLIB_NAME} ${TCL_LIB} \
+              ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+              ${TKX_CC_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
