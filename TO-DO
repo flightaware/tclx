@@ -1,8 +1,16 @@
                          TclX bug, idea and task list
 *** Serious Bugs ***
 o objcmd writing man page not installed.
+o common.vc added -DTCLX_LIBRARY to all cc calls.  This breaks tclXlib.c
+   as it has a variable by the same name.
 
 *** Minor bugs and enhancements ***
+From: ellson@hotair.hobl.lucent.com
+    Just a small gripe.   Could you please arrange the tclX Makefiles
+    so that they don't depend on libtcl8.0.so in tcl's build area?
+    This is causing me some problems when building tclX on my laptop with 
+    limited disk space.  You should be able to use the installed versions
+    of the libraries so that the tcl and tk build areas can be kept clean.
 
 o add man compress install
 o Need to either document how namspaces are used in #@package or normalize
