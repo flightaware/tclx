@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: tcllib.test,v 1.2 1992/10/06 03:23:39 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -24,6 +24,13 @@ set SAVE_TCLPATH $TCLPATH
 set TCLPATH {}
 global TCLENV
 catch {unset auto_path}
+
+if {[id user] == "root"} {
+    puts stderr "*************************************************************"
+    puts stderr "You are running as `root', certain tcllib tests will be"
+    puts stderr "skipped"
+    puts stderr "*************************************************************"
+}
 
 #
 # Since we have libraries coming and going in this test, we need to
@@ -158,16 +165,18 @@ TestReg tcllib-3.4 {bogus package library index} {
 
 set TCLPATH [list [pwd]/tcllib2.dir [pwd]/../tcllib]
 
-Test tcllib-4.1 {bad rebuild package library index} {
-    global errorCode errorInfo
-    mkdir tcllib2.dir
-    BuildTestLib tcllib2.dir/test1.tlib TclLibAB
-    chmod -w tcllib2.dir
-    list [catch {TclLibABB} msg] [crange $msg 0 25] $TCLENV(inUnknown) \
-         [lrange $errorCode 0 1] \
-         [string match "*while loading Tcl package library*" $errorInfo] \
-         [string match "*while demand loading \"TclLibABB\"*" $errorInfo]
-} 0 {1 {building package index for} 0 {UNIX EACCES} 1 1}
+if {[id user] != "root"} {
+    Test tcllib-4.1 {bad rebuild package library index} {
+        global errorCode errorInfo
+        mkdir tcllib2.dir
+        BuildTestLib tcllib2.dir/test1.tlib TclLibAB
+        chmod -w tcllib2.dir
+        list [catch {TclLibABB} msg] [crange $msg 0 25] $TCLENV(inUnknown) \
+             [lrange $errorCode 0 1] \
+             [string match "*while loading Tcl package library*" $errorInfo] \
+             [string match "*while demand loading \"TclLibABB\"*" $errorInfo]
+    } 0 {1 {building package index for} 0 {UNIX EACCES} 1 1}
+}
 
 TclLibCleanUp
 mkdir tcllib1.dir
@@ -190,9 +199,11 @@ TestReg tcllib-5.2 {missing file found with Ousterhout library index} {
 PutFile tcllib1.dir/nukearray.tmp {proc nukearray {} {}}
 chmod 000 tcllib1.dir/nukearray.tmp
 
-TestReg tcllib-5.3 {missing file found with Ousterhout library index} {
-    nukearray
-} 1 {couldn't read file}
+if {[id user] != "root"} {
+    TestReg tcllib-5.3 {missing file found with Ousterhout library index} {
+        nukearray
+    } 1 {couldn't read file}
+}
 
 TclLibCleanUp
 mkdir tcllib1.dir
