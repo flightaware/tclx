@@ -24,15 +24,6 @@ fixes result and continue failing to clear the result as the commands did.
   			codePtr);
   		if (rangePtr == NULL) {
 ***************
-*** 2712,2717 ****
---- 2714,2720 ----
-  	     * execution and return TCL_BREAK.
-  	     */
-  	
-+             Tcl_ResetResult(interp);
-  	    rangePtr = TclGetExceptionRangeForPc(pc, /*catchOnly*/ 0,
-  		    codePtr);
-  	    if (rangePtr == NULL) {
 ***************
 *** 2744,2749 ****
 --- 2747,2753 ----

@@ -1272,9 +1272,11 @@
   o TclX_ErrorExit now has a description field that says why the exit path
     was taken, making startup failures easier to debug.
 -------------------------------------------------------------------------------
-06 Jun 96:
+06 Jun 97:
   o Fixed frename compat function to overwrite existing files.
 -------------------------------------------------------------------------------
-13 Jun 96:
+13 Jun 97:
   o Converted more commands to object system.
--------------------------------------------------------------------------------
+===============================================================================
+16 Jun 97: Released TclX 8.0.0 Beta 1
+===============================================================================

@@ -407,6 +407,7 @@
 ./unix/Common.mk.in
 ./unix/Config.mk
 ./unix/INSTALL
+./unix/INSTALL.generic
 ./unix/Makefile.in
 ./unix/configure
 ./unix/configure.in
