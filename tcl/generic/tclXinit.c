@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.9 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXinit.c,v 1.1 1993/09/16 05:39:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -36,7 +36,7 @@ ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
  *
  * Display error information and abort when an error is returned in the
  * interp->result. It uses TCLXENV(noDump) to determine if the stack should be
- * dumped.
+ * dumped.  Attempts to use the "exit" command to exit, so cleanup can be done.
  *
  * Parameters:
  *   o interp - A pointer to the interpreter, should contain the
@@ -50,6 +50,7 @@ TclX_ErrorExit (interp, exitCode)
     int          exitCode;
 {
     char *errorStack;
+    char  numBuf [32];
 
     fflush (stdout);
     fprintf (stderr, "Error: %s\n", interp->result);
@@ -59,6 +60,16 @@ TclX_ErrorExit (interp, exitCode)
         if (errorStack != NULL)
             fprintf (stderr, "%s\n", errorStack);
     }
+
+    /*
+     * Use "exit" command to exit.
+     */
+    sprintf (numBuf, "%d", exitCode);
+    Tcl_VarEval (interp, "exit ", numBuf, (char *) NULL);
+    
+    /*
+     * If that failed, really exit.
+     */
     exit (exitCode);
 }
 
