@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 4.2 1995/01/23 23:41:30 markd Exp markd $
+ * $Id: tclXmath.c,v 4.3 1995/03/30 05:42:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -312,8 +312,10 @@ void
 Tcl_InitMath (interp)
     Tcl_Interp *interp;
 {
-    Tcl_ValueType minMaxArgTypes [2] = 
-        {TCL_EITHER, TCL_EITHER};
+    Tcl_ValueType minMaxArgTypes [2];
+
+    minMaxArgTypes [0] = TCL_EITHER;
+    minMaxArgTypes [1] = TCL_EITHER;
 
     Tcl_CreateCommand (interp, "max", Tcl_MaxCmd,
                        (ClientData) NULL, (void (*)()) NULL);
