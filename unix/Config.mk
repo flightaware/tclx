@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.7 1995/03/23 07:40:06 markd Exp markd $
+# $Id: Config.mk,v 4.8 1995/03/28 18:10:09 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ XLDLIBS=
 # line, but can also be changed here.
 #
 
-#TCLCXX=YES
+#TCLXX=YES
 #CXX=CC
 #CXXFLAGS=-O
 
