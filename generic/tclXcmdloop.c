@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 8.12 1999/03/31 06:37:43 markd Exp $
+ * $Id: tclXcmdloop.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -131,19 +131,19 @@ TclX_PrintResult (interp, intResult, checkCmd)
     if ((checkCmd != NULL) && (intResult == TCL_OK) && IsSetVarCmd (checkCmd))
         return;
 
-    stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
-    stderrChan = Tcl_GetStdChannel (TCL_STDERR);
+    stdoutChan = Tcl_GetStdChannel(TCL_STDOUT);
+    stderrChan = Tcl_GetStdChannel(TCL_STDERR);
 
     if (intResult == TCL_OK) {
         if (stdoutChan == NULL)
             return;
-        resultStr = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
+        resultStr = Tcl_GetStringFromObj(Tcl_GetObjResult(interp), NULL);
         if (resultStr [0] != '\0') {
             if (stderrChan != NULL)
                 Tcl_Flush (stderrChan);
-            TclX_WriteStr (stdoutChan, resultStr);
-            TclX_WriteNL (stdoutChan);
-            Tcl_Flush (stdoutChan);
+            Tcl_WriteChars(stdoutChan, resultStr, -1);
+            TclX_WriteNL(stdoutChan);
+            Tcl_Flush(stdoutChan);
         }
     } else {
         char msg [64];
@@ -154,15 +154,15 @@ TclX_PrintResult (interp, intResult, checkCmd)
             Tcl_Flush (stdoutChan);
 
         if (intResult == TCL_ERROR) {
-            strcpy (msg, "Error: ");
+            strcpy(msg, "Error: ");
         } else {
-            sprintf (msg, "Bad return code (%d): ", intResult);
+            sprintf(msg, "Bad return code (%d): ", intResult);
         }
-        resultStr = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
-        TclX_WriteStr (stderrChan, msg);
-        TclX_WriteStr (stderrChan, resultStr);
-        TclX_WriteNL (stderrChan);
-        Tcl_Flush (stderrChan);
+        resultStr = Tcl_GetStringFromObj(Tcl_GetObjResult(interp), NULL);
+        Tcl_WriteChars(stderrChan, msg, -1);
+        Tcl_WriteChars(stderrChan, resultStr, -1);
+        TclX_WriteNL(stderrChan);
+        Tcl_Flush(stderrChan);
     }
 }
 
@@ -235,13 +235,13 @@ OutputPrompt (interp, topLevel, prompt1, prompt2)
         resultStr = Tcl_GetStringFromObj (Tcl_GetObjResult (interp), NULL);
         if (result == TCL_ERROR) {
             if (stderrChan != NULL) {
-                TclX_WriteStr (stderrChan, "Error in prompt hook: ");
-                TclX_WriteStr (stderrChan, resultStr);
+                Tcl_WriteChars(stderrChan, "Error in prompt hook: ", -1);
+                Tcl_WriteChars(stderrChan, resultStr, -1);
                 TclX_WriteNL (stderrChan);
             }
         } else {
             if (useResult && (stdoutChan != NULL))
-                TclX_WriteStr (stdoutChan, resultStr);
+                Tcl_WriteChars(stdoutChan, resultStr, -1);
             promptDone = TRUE;
         }
     } 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXinit.c,v 1.2 2002/04/02 03:01:01 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,7 +29,7 @@ static char initScript[] = "if {[info proc ::tclx::Init]==\"\"} {\n\
 "    source -rsrc tclx.tcl\n"
 #else
 "    global tclx_library\n\
-    tcl_findLibrary tclx " TCLX_VERSION " " TCLX_FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
+    tcl_findLibrary tclx " VERSION " " FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
 #endif
 "  }\n\
 }\n\

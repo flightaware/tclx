@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.27 2001/05/19 16:45:23 andreas_kupries Exp $
+ * $Id: tclExtdInt.h,v 1.1 2001/10/24 23:31:47 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,7 +35,7 @@
 
 /*
  * Assert macro for use in TclX.  Some GCCs libraries are missing a function
- * used by their macro, so we define out own.
+ * used by their macro, so we define our own.
  */
 #ifdef TCLX_DEBUG
 #   define TclX_Assert(expr) ((expr) ? (void)0 : \
@@ -83,13 +83,6 @@
 #    define TRUE   (1)
 #    define FALSE  (0)
 #endif
-
-/*
- * Flags used by TclX_Eval and friends.
- */
-#define TCLX_EVAL_GLOBAL          1  /* Evaluate in the global environment.*/
-#define TCLX_EVAL_FILE            2  /* Read and evaluate a file.          */
-#define TCLX_EVAL_ERR_HANDLER     4  /* Call error handler on error.       */
 
 /*
  * Defines used by TclX_Get/SetChannelOption.  Defines name TCLX_COPT_ are the
@@ -157,15 +150,15 @@ extern Tcl_Obj *tclXWrongArgsObj;
  */
 
 #define STREQU(str1, str2) \
-        (((str1) [0] == (str2) [0]) && (strcmp (str1, str2) == 0))
+        (((str1)[0] == (str2)[0]) && (strcmp(str1, str2) == 0))
 #define STRNEQU(str1, str2, cnt) \
-        (((str1) [0] == (str2) [0]) && (strncmp (str1, str2, cnt) == 0))
+        (((str1)[0] == (str2)[0]) && (strncmp(str1, str2, cnt) == 0))
 
 #define OBJSTREQU(obj1, str1) \
-	(strcmp (Tcl_GetStringFromObj (obj1, NULL), str1) == 0)
+	(strcmp(Tcl_GetStringFromObj(obj1, NULL), str1) == 0)
 
 #define OBJSTRNEQU(obj1, str1, cnt) \
-	(strncmp (Tcl_GetStringFromObj (obj1, NULL), str1, cnt) == 0)
+	(strncmp(Tcl_GetStringFromObj(obj1, NULL), str1, cnt) == 0)
 /*
  * Macro to do ctype functions with 8 bit character sets.
  */
@@ -205,9 +198,17 @@ TclX_CreateObjCommand _ANSI_ARGS_((Tcl_Interp* interp, char* cmdName,
 /* Special flags for "TclX_CreateObjCommand".
  */
 
-#define TCLX_CMD_NOPREFIX	1	/* don't define with "exp_" prefix */
-#define TCLX_CMD_REDEFINE	2	/* stomp on old commands with same name */
+#define TCLX_CMD_NOPREFIX	1  /* don't define with "exp_" prefix */
+#define TCLX_CMD_REDEFINE	2  /* stomp on old commands with same name */
 
+/*
+ * UTF-8 compatibility handling
+ */
+#ifndef TCL_UTF_MAX
+#define Tcl_WriteChars	Tcl_Write
+#endif
+
+#define TclX_WriteNL(channel) (Tcl_Write (channel, "\n", 1))
 
 extern int
 TclX_StrToOffset _ANSI_ARGS_((CONST char *string,
@@ -218,16 +219,6 @@ int
 TclX_GetUnsignedFromObj _ANSI_ARGS_((Tcl_Interp *interp,
                                      Tcl_Obj    *objPtr,
                                      unsigned   *valuePtr));
-
-extern int
-TclX_VarEval _ANSI_ARGS_(TCL_VARARGS(Tcl_Interp *, arg1));
-
-extern int
-TclX_WriteStr _ANSI_ARGS_((Tcl_Channel  channel,
-                           char        *str));
-
-#define TclX_WriteNL(channel) (Tcl_Write (channel, "\n", 1))
-
 
 extern int
 TclX_GetChannelOption _ANSI_ARGS_((Tcl_Interp  *interp,

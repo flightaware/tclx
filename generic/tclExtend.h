@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclExtend.h,v 1.2 2002/04/02 03:01:00 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,28 +32,14 @@
 #endif
 
 /*
- * The versions for TclX.  This was based on the versions of Tcl that TclX was
- * released against, but 8.4+ is all stubs-based and reworked to be more
- * version independent.  Its possible that TclX maybe running with a different
- * version of Tcl.  The basic versions are used for package provide, the
- * full versions as used for file names and include beta release information
- * and patch information.  The TCLX_DEBUG flag turns on asserts etc.  Its an
- * internal flag, however its normally true for alpha and beta release and
- * false for final releases, so we put the flag right by the version numbers
- * in hopes that we will remember to change it.
- *
- * Examples:
- *   Release        _VERSION  _FULL_VERSION  _PATCHLEVEL
- *   8.2            8.2       8.2            0
- *   8.2 beta 1     8.2       8.2b2          0
- *   8.2 patch 1 8.2 8.2.1 1 */
-
-#define TCLX_PATCHLEVEL     0
-
-#define TCLX_VERSION        "8.4"
-#define TCLX_FULL_VERSION   VERSION
-
+ * The TCLX_DEBUG flag turns on asserts etc.  Its an internal flag, however
+ * its normally true for alpha and beta release and false for final releases,
+ * so we put the flag right by the version numbers in hopes that we will
+ * remember to change it.
 #define TCLX_DEBUG
+ */
+
+#define TCLX_PATCHLEVEL		0
 
 /*
  * Generic void pointer.
@@ -63,8 +49,8 @@ typedef void *void_pt;
 /*
  * Flags to command loop functions.
  */
-#define TCLX_CMDL_INTERACTIVE  (1<<0)
-#define TCLX_CMDL_EXIT_ON_EOF  (1<<1)
+#define TCLX_CMDL_INTERACTIVE	(1<<0)
+#define TCLX_CMDL_EXIT_ON_EOF	(1<<1)
 
 /*
  * Application signal error handler.  Called after normal signal processing,
@@ -80,8 +66,6 @@ typedef int
 					   ClientData  clientData,
 					   int	       background,
 					   int	       signalNum));
-EXTERN int	TclX_Eval _ANSI_ARGS_((Tcl_Interp  *interp,
-		       unsigned options, char *cmd));
 
 /*
  * Exported TclX initialization functions.

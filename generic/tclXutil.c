@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.29 2001/05/19 16:45:23 andreas_kupries Exp $
+ * $Id: tclXutil.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,9 +26,6 @@
 /*
  * Prototypes of internal functions.
  */
-static int
-CallEvalErrorHandler _ANSI_ARGS_((Tcl_Interp  *interp));
-
 static int
 ParseTranslationOption _ANSI_ARGS_((char *strValue));
 
@@ -476,171 +473,6 @@ TclX_GetOpenChannelObj (interp, handleObj, chanAccess)
     }
 
     return chan;
-}
-
-/*-----------------------------------------------------------------------------
- * CallEvalErrorHandler --
- *
- *   Call the error handler function tclx_errorHandler, if it exists.  Passing
- * it the result of the failed command.
- *
- * Parameters:
- *   o interp - A pointer to the interpreter.
- * Returns:
- *   The Tcl result code from the handler.  TCL_ERROR is returned and
- * result unchanged if no handler is available.
- *-----------------------------------------------------------------------------
- */
-static int
-CallEvalErrorHandler (interp)
-    Tcl_Interp  *interp;
-{
-    static char *ERROR_HANDLER = "tclx_errorHandler";
-    Tcl_CmdInfo cmdInfo;
-    Tcl_Obj *errorHandler;
-    Tcl_Obj *command;
-    int result;
-
-
-    /*
-     * Check if the tclx_errorHandler function exists.  For backwards
-     * compatibility with TclX 7.4 we check to see if there is a variable
-     * by the same name holding the name of a procedure.  Build up the command
-     * based on what we found.  The variable functionality is deprectated and
-     * should be removed eventually. FIX: Delete.
-     */
-    if (!Tcl_GetCommandInfo (interp, ERROR_HANDLER, &cmdInfo)) {
-        errorHandler = Tcl_GetVar2Ex(interp, ERROR_HANDLER, NULL,
-                                     TCL_GLOBAL_ONLY);
-        if (errorHandler == NULL)
-            return TCL_ERROR;  /* No handler specified */
-    } else {
-        errorHandler = Tcl_NewStringObj (ERROR_HANDLER, -1);
-    }
-    command = Tcl_NewListObj (0, NULL);
-    Tcl_IncrRefCount (command);
-    Tcl_ListObjAppendElement (NULL, command, errorHandler);
-    Tcl_ListObjAppendElement (NULL, command,
-                              Tcl_GetObjResult (interp));
-                              
-    result = Tcl_EvalObjEx (interp, command, TCL_EVAL_GLOBAL);
-    if (result == TCL_ERROR) {
-        Tcl_AddErrorInfo (interp,
-                          "\n    (while processing tclx_errorHandler)");
-    }
-
-    Tcl_DecrRefCount (command);
-    return result;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_Eval --
- *
- *   Evaluate a Tcl command string with various options.
- *
- * Parameters:
- *   o interp - A pointer to the interpreter.
- *   o options - Options controling the evaluation:
- *     o TCLX_EVAL_GLOBAL - Evaulate in the global context.
- *     o TCLX_EVAL_FILE - Treat the string as the name of a file to eval.
- *     o TCLX_EVAL_ERR_HANDLER - Call the user-specified error callback 
- *       specified in the global variable tclx_errorHandler if an error
- *       occurs.
- *   o string - The command or name of file to evaluate.
- * Returns:
- *   The Tcl result code.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_Eval (interp, options, string)
-    Tcl_Interp  *interp;
-    unsigned     options;
-    char        *string;
-{
-    Interp      *iPtr = (Interp *) interp;
-    CallFrame   *savedVarFramePtr = NULL;
-    int          result;
-
-    if (options & TCLX_EVAL_GLOBAL) {
-        savedVarFramePtr = iPtr->varFramePtr;
-        iPtr->varFramePtr = NULL;
-    }
-
-    if (options & TCLX_EVAL_FILE) {
-        result = Tcl_EvalFile (interp, string);
-    } else {
-        result = Tcl_Eval (interp, string);
-    }
-
-    if ((result == TCL_ERROR) && (options & TCLX_EVAL_ERR_HANDLER)) {
-        result = CallEvalErrorHandler (interp);
-    }
-
-    if (options & TCLX_EVAL_GLOBAL) {
-        iPtr->varFramePtr = savedVarFramePtr;
-    }
-    return result;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_VarEval --
- *
- *   Evaluate a Tcl command string with various options.
- *
- * Parameters:
- *   o interp - A pointer to the interpreter.
- *   o options - Options controling the evaluation, see TclX_Eval.
- *   o str, ... - String arguments, terminated by a NULL.  They will
- *     be concatenated together to form a single string.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_VarEval TCL_VARARGS_DEF(Tcl_Interp *, arg1)
-{
-    va_list      argList;
-    Tcl_Interp  *interp;
-    unsigned     options;
-    char        *str;
-    Tcl_DString  cmdBuffer;
-    int          result;
-
-    Tcl_DStringInit (&cmdBuffer);
-
-    interp = TCL_VARARGS_START (Tcl_Interp * ,arg1, argList);
-    options = va_arg (argList, unsigned);
-
-    while (1) {
-        str = va_arg (argList, char *);
-        if (str == NULL)
-            break;
-        Tcl_DStringAppend (&cmdBuffer, str, -1);
-    }
-    va_end (argList);
-
-    result = TclX_Eval (interp, options, Tcl_DStringValue (&cmdBuffer));
-    Tcl_DStringFree (&cmdBuffer);
-    
-    return result;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_WriteStr --
- *
- *   Write a string to a channel.
- *
- * Parameters:
- *   o channel - Channel to write to.
- *   o str - The string to write.
- * Returns:
- *   Same as for Tcl_Write, -1 is an error.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_WriteStr (channel, str)
-    Tcl_Channel  channel;
-    char        *str;
-{
-    return Tcl_Write (channel, str, strlen (str));
 }
 
 /*-----------------------------------------------------------------------------
@@ -1145,66 +977,7 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
 
     Tcl_DecrRefCount (saveObjPtr);
 }
-
 
-/*-----------------------------------------------------------------------------
- * TclX_ShellExit --
- *
- *   Handles exiting a shell.  Normally just does an exit, but deletes the
- * interp if compiled with TCL_MEM_DEBUG or the Tcl global
- * TCLXENV(deleteInterpAtShellExit) is a true boolean value.  Deleting the
- * interp before exiting is useful for tracking down memory leaks.  If 
- * TCL_MEM_DEBUG is set, a list of allocated memory is written to 
- * "tclmem.$pid.lst" on Unix systems.
- *
- * Parameters:
- *   o interp - Interpreter.
- *   o exitCode - Code to pass to exit call.
- *-----------------------------------------------------------------------------
- */
-void
-TclX_ShellExit (interp, exitCode)
-    Tcl_Interp *interp;
-    int         exitCode;
-{
-#if defined(TCL_MEM_DEBUG)
-    /*
-     * On Unix, Tcl_Exit will dump a list of leaked ckalloc's if this
-     * variable is set.  On Win32, we can't set it, since its in another
-     * DLL.
-     */
-#ifndef __WIN32__
-    extern char *tclMemDumpFileName;
-    static char dumpFileName [128];
-    sprintf (dumpFileName, "tclmem.%d.lst", getpid ());
-    tclMemDumpFileName = dumpFileName;
-#endif
-    Tcl_DeleteInterp (interp);
-    Tcl_Exit (0);
-#else
-    Tcl_Obj *varValue;
-    int deleteInterp;
-
-    /*
-     * If TCLXENV(deleteInterpAtShellExit) is a true boolean, delete
-     * interpreter.
-     */
-    deleteInterp = FALSE;
-    varValue = Tcl_GetVar2Ex(interp, "TCLXENV", "deleteInterpAtShellExit",
-                             TCL_GLOBAL_ONLY);
-    if (varValue != NULL) {
-        Tcl_GetBooleanFromObj (NULL, varValue, &deleteInterp);
-    }
-    
-    if (deleteInterp) {
-        Tcl_DeleteInterp (interp);
-        Tcl_Exit (0);
-    } else {
-        Tcl_Exit (0);
-    }
-#endif    
-}
-
 /*-----------------------------------------------------------------------------
  * TclX_CreateObjCommand --
  *
@@ -1230,22 +1003,15 @@ TclX_CreateObjCommand (interp, cmdName, proc, clientData, deleteProc, flags)
   char cmdnamebuf[80];
 
   if ((flags & TCLX_CMD_REDEFINE) ||
-      !(Tcl_FindHashEntry(&globalNsPtr->cmdTable,cmdName) ||
-	Tcl_FindHashEntry(&currNsPtr->cmdTable,cmdName))) {
-
-      Tcl_CreateObjCommand(interp,cmdName,
-			   proc,clientData,deleteProc);
+	  !(Tcl_FindHashEntry(&globalNsPtr->cmdTable, cmdName) ||
+		  Tcl_FindHashEntry(&currNsPtr->cmdTable, cmdName))) {
+      Tcl_CreateObjCommand(interp, cmdName, proc, clientData, deleteProc);
   }
 
-  if (!(cmdName[0] == 't' &&
-	cmdName[1] == 'c' &&
-	cmdName[2] == 'l' &&
-	cmdName[3] == 'x')
-      && !(flags & TCLX_CMD_NOPREFIX)) {
-
-      sprintf(cmdnamebuf,"tclx_%s",cmdName);
-      Tcl_CreateObjCommand(interp,cmdnamebuf,proc,clientData,
-			   deleteProc);
+  if (!(cmdName[0] == 't' && cmdName[1] == 'c' && cmdName[2] == 'l' &&
+	  cmdName[3] == 'x') && !(flags & TCLX_CMD_NOPREFIX)) {
+      sprintf(cmdnamebuf, "tclx_%s", cmdName);
+      Tcl_CreateObjCommand(interp, cmdnamebuf, proc, clientData, deleteProc);
   }
 
   return TCL_OK;

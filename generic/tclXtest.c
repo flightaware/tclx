@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 8.10 1999/03/31 06:37:47 markd Exp $
+ * $Id: tclXtest.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -173,13 +173,6 @@ int
 Tclxtest_Init (interp)
     Tcl_Interp *interp;
 {
-    /*
-     * Force interpreter to be deleted at the end.  Helps find corruption and
-     * memory leaks.
-     */
-    Tcl_SetVar2Ex(interp,  "TCLXENV", "deleteInterpAtShellExit",
-                  Tcl_NewBooleanObj(TRUE), TCL_GLOBAL_ONLY);
-
     Tcl_CreateCommand (interp, "tclx_test_eval", TclxTestEvalCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 

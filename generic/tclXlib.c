@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.25 1999/03/31 06:37:45 markd Exp $
+ * $Id: tclXlib.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -977,7 +977,7 @@ TclX_LibraryInit (interp)
     int result;
 
     /* Hack in our own auto-loading */
-    result = TclX_Eval (interp, TCLX_EVAL_GLOBAL, autoloadCmd);
+    result = Tcl_EvalEx(interp, autoloadCmd, -1, TCL_EVAL_GLOBAL);
     if (result == TCL_ERROR) {
         return TCL_ERROR;
     }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.10 1999/03/31 06:37:43 markd Exp $
+ * $Id: tclXdebug.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -206,7 +206,7 @@ TraceCode (infoPtr, level, command, argc, argv)
     char buf [32];
 
     sprintf (buf, "%2d:", level);
-    TclX_WriteStr (infoPtr->channel, buf); 
+    Tcl_Write(infoPtr->channel, buf, -1); 
 
     if (level > 20)
         level = 20;
