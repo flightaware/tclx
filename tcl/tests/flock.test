@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 7.3 1996/10/04 05:02:33 markd Exp $
+# $Id: flock.test,v 7.4 1996/10/04 15:30:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -25,6 +25,12 @@ if ![infox have_flock] {
         puts "File locking is not available on this version of Windows"
     }
     return
+}
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The flock tests have not been ported to Win32" 
+    echo Trying anyway
+    #return
 }
 
 TestRemove FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP FLOCK.PRG
@@ -134,11 +140,15 @@ Test flock-2.8 {funlock argument checking} {
 # a file and only locking part of it will cause this test to fail rather
 # than hang on a confused system.
 #
+if [cequal $tcl_platform(platform) "unix"] { ;# FIX: port to win
 alarm 10
+}
 puts $writeFH "This is some silly text to help prevent hangs"
 flush $writeFH
 if {[catch {flock $writeFH 0 8} msg] != 0} {
+    if [cequal $tcl_platform(platform) "unix"] { ;# FIX: port to win
     alarm 0
+    }
     puts "*************************************************************"
     puts "Error acquiring file lock.  This is probably caused by an"
     puts "incorrectly configured system or bug in the system software."
@@ -152,7 +162,9 @@ if {[catch {flock $writeFH 0 8} msg] != 0} {
     TestRemove FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP
     return
 }
+if [cequal $tcl_platform(platform) "unix"] { ;# FIX: port to win
 alarm 0
+}
 funlock $writeFH
 
 #

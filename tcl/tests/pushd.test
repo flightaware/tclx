@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.test,v 7.1 1996/07/26 05:56:23 markd Exp $
+# $Id: pushd.test,v 7.2 1996/10/04 05:02:45 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -30,7 +30,11 @@ switch $tcl_platform(platform) {
         set tmp /tmp
     }
     windows {
-        set tmp C:/dos
+        if [cequal $tcl_platform(os) {Windows NT}] {
+            set tmp {C:/Program Files}
+        } else {
+            set tmp C:/dos
+        }
     }
 }
 if ![file isdirectory $tmp] {
@@ -55,7 +59,7 @@ Test pushd-1.1 {pushd command} {
 Test pushd-1.2 {pushd command} {
     pushd $TMP
     set TCLXENV(dirPushList)
-} 0 $TMP
+} 0 [list $TMP]
 
 Test pushd-1.3 {pushd command} {
     pushd $CWDROOT
@@ -82,7 +86,7 @@ Test popd-1.2 {popd command} {
 
 Test popd-1.3 {popd command} {
     list [popd] [popd] [dirs]
-} 0 [list $TMP $TMP $TMP]
+} 0 [list $TMP $TMP [list $TMP]]
 
 Test popd-1.4 {popd command} {
     popd

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.12 1996/10/25 04:55:31 markd Exp $
+# $Id: makefile.vc,v 7.13 1996/10/27 00:34:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -170,23 +170,26 @@ cattcl.exe: $(TMP_DIR)\cattcl.obj
 
 #------------------------------------------------------------------------------
 # Generate script used to run programs before DLLs and runtime is installed.
-# To prevent %var% from get
 #
 runtcl.bat: makefile.vc ..\..\win\common.vc
         -del runtcl.bat
-        echo echo off>>runtcl.bat
-        echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtcl.bat
-        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtcl.bat
-        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtcl.bat
-        echo $(TCLX_WIN_DIR)\tcl.exe %1 %2 %3 %4>>runtcl.bat
+        @echo echo off>>runtcl.bat
+        @echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtcl.bat
+        @echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtcl.bat
+        @echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtcl.bat
+        @echo set TCL_PROGRAM=$(TCLX_WIN_DIR)\tclXtest.exe>>runtcl.bat
+        @echo $(TCLX_WIN_DIR)\tcl.exe %1 %2 %3 %4>>runtcl.bat
+        @echo runtcl.bat created
 
 runtest.bat: makefile.vc ..\..\win\common.vc
         -del runtest.bat
-        echo echo off>>runtest.bat
-        echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
-        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
-        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
-        echo $(TCLX_WIN_DIR)\tclXtest.exe %1 %2 %3 %4>>runtest.bat
+        @echo echo off>>runtest.bat
+        @echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
+        @echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
+        @echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
+        @echo set TCL_PROGRAM=$(TCLX_WIN_DIR)\tclXtest.exe>>runtest.bat
+        @echo $(TCLX_WIN_DIR)\tclXtest.exe %1 %2 %3 %4>>runtest.bat
+        @echo runtcl.bat created
 
 #------------------------------------------------------------------------------
 clean:

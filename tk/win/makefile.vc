@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.3 1996/10/25 04:55:37 markd Exp $
+# $Id: makefile.vc,v 7.4 1996/10/27 00:34:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -93,27 +93,28 @@ tkx.tcl: $(TKX_RUNTIME_DIR)\tkx.tcl
 
 #------------------------------------------------------------------------------
 # Generate script used to run programs before DLLs and runtime is installed.
-# To prevent %var% from get
 #
 runwishx.bat: makefile.vc ..\..\win\common.vc
         -del runwishx.bat
-        echo echo off>>runwishx.bat
-        echo PATH $(TKX_WIN_DIR);$(TK_WIN_DIR);$(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runwishx.bat
-        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runwishx.bat
-        echo set TK_LIBRARY=$(TK_RUNTIME_DIR)>>runwishx.bat
-        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runwishx.bat
-        echo set TKX_LIBRARY=$(TKX_WIN_DIR)>>runwishx.bat
-        echo $(TKX_WIN_DIR)\wishx.exe %1 %2 %3 %4>>runwishx.bat
+        @echo echo off>>runwishx.bat
+        @echo PATH $(TKX_WIN_DIR);$(TK_WIN_DIR);$(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runwishx.bat
+        @echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runwishx.bat
+        @echo set TK_LIBRARY=$(TK_RUNTIME_DIR)>>runwishx.bat
+        @echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runwishx.bat
+        @echo set TKX_LIBRARY=$(TKX_WIN_DIR)>>runwishx.bat
+        @echo $(TKX_WIN_DIR)\wishx.exe %1 %2 %3 %4>>runwishx.bat
+        @echo runwishx.bat created
 
 runtest.bat: makefile.vc ..\..\win\common.vc
         -del runtest.bat
-        echo echo off>>runtest.bat
-        echo PATH $(TKX_WIN_DIR);$(TK_WIN_DIR);$(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
-        echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
-        echo set TK_LIBRARY=$(TK_RUNTIME_DIR)>>runtest.bat
-        echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
-        echo set TKX_LIBRARY=$(TKX_WIN_DIR)>>runtest.bat
-        echo $(TKX_WIN_DIR)\tktest.exe %1 %2 %3 %4>>runtest.bat
+        @echo echo off>>runtest.bat
+        @echo PATH $(TKX_WIN_DIR);$(TK_WIN_DIR);$(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtest.bat
+        @echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtest.bat
+        @echo set TK_LIBRARY=$(TK_RUNTIME_DIR)>>runtest.bat
+        @echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtest.bat
+        @echo set TKX_LIBRARY=$(TKX_WIN_DIR)>>runtest.bat
+        @echo $(TKX_WIN_DIR)\tktest.exe %1 %2 %3 %4>>runtest.bat
+        @echo runtest.bat created
 
 #------------------------------------------------------------------------------
 # Tcl script to actually run the tests.
