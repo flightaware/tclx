@@ -2,4 +2,5 @@
 # 
 # Package index for TkX @TKX_FULL_VERSION@.
 #
-package ifneeded Tkx @TKX_VERSION@ "package require Tclx @TCLX_VERSION@; package require Tk @TK_VERSION@; load $dir/../@TKX_SHLIB_NAME@"
+if {[info tclversion] < @TCL_VERSION@} return
+package ifneeded Tkx @TKX_VERSION@ "package require Tclx @TCLX_VERSION@; package require Tk @TK_VERSION@; load [list $dir/../@TKX_SHLIB_NAME@]"

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.17 1996/11/17 08:52:59 markd Exp $
+# $Id: Makefile.in,v 7.18 1996/11/18 07:46:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -34,8 +34,14 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
-LIBS = ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-       ${TCL_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
+LIBS = @SHARED_LIBS@ ${TCLX_LD_SEARCH_FLAGS}
+
+ALL_LIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
+	       ${TCL_DL_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
+
+STATIC_LIBS = ${TCLX_STLIB_NAME} ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} \
+	      ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+	      ${TCLX_CC_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -107,17 +113,17 @@ TEST_OBJS = tclTest.o tclUnixTest.o tclXtest.o tclXunixTest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: ${TCLX_STLIB_NAME} SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest \
+all: ${TCLX_STLIB_NAME} tcl checkup RUNTIME tclXtest \
      runtest
 
 static:	tcl.static
 
-tcl: tclXAppInit.o ${TCLX_STLIB_NAME} SHLIB_@BUILD_SHARED@
-	${CC} ${LD_SWITCHES} tclXAppInit.o  ${TCLX_BUILD_LIB_SPEC} ${LIBS} \
+tcl: tclXAppInit.o SHLIB_@BUILD_SHARED@
+	${CC} ${LD_SWITCHES} tclXAppInit.o  ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
 tcl.static: tclXAppInit.o ${TCLX_STLIB_NAME}
-	${CC} ${LD_SWITCHES} tclXAppInit.o ${TCLX_STLIB_NAME} ${LIBS} \
+	${CC} ${LD_SWITCHES} tclXAppInit.o ${STATIC_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
 
@@ -547,8 +553,8 @@ help:
 #------------------------------------------------------------------------------
 # Generate the test program.
 #
-tclXtest: ${TEST_OBJS} ${TCLX_STLIB_NAME}
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${TCLX_BUILD_LIB_SPEC} ${LIBS} \
+tclXtest: ${TEST_OBJS}  SHLIB_@BUILD_SHARED@
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
 tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c

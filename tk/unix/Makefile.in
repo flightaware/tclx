@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.11 1996/11/17 17:23:52 markd Exp $
+# $Id: Makefile.in,v 7.12 1996/11/18 07:46:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,9 +41,16 @@ LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LIBS = ${TK_LIB} ${TK_XLIBSW} ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} \
-       ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-       ${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
+LIBS = ${TK_LIB} ${TK_XLIBSW} @SHARED_LIBS@ ${TKX_LD_SEARCH_FLAGS}
+
+ALL_LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} ${TCLX_BUILD_LIB_SPEC} \
+       ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+       ${TKX_CC_SEARCH_FLAGS}
+
+STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_UNIX_DIR}/${TK_STLIB_NAME} ${TK_XLIBSW} \
+       ${TCLX_UNIX_SRC_DIR}/${TCLX_STLIB_NAME} ${TCL_UNIX_DIR}/${TCL_STLIB_NAME} \
+       ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+       ${TKX_CC_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -69,17 +76,17 @@ TEST_OBJS = tkTest.o tkSquare.o tkXunixTest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: ${TKX_STLIB_NAME} SHLIB_@BUILD_SHARED@ wishx RUNTIME tktest runtest \
+all: ${TKX_STLIB_NAME} wishx RUNTIME tktest runtest \
      ${bldbasedir}/tk/tests
 
 static: wishx.static
 
-wishx: tkXAppInit.o ${TKX_STLIB_NAME} ${LIBTCLX}
-	${CC} ${LD_SWITCHES} tkXAppInit.o ${TKX_BUILD_LIB_SPEC} ${LIBS} \
+wishx: tkXAppInit.o SHLIB_@BUILD_SHARED@ ${LIBTCLX}
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
 wishx.static: tkXAppInit.o ${TKX_STLIB_NAME} ${LIBTCLX}
-	${CC} ${LD_SWITCHES} tkXAppInit.o ${TKX_STLIB_NAME} ${LIBS} -o $@ || \
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${STATIC_LIBS} -o $@ || \
 	    (rm -f $@; exit 1)
 
 ${TKX_STLIB_NAME}: ${OBJS}
@@ -159,8 +166,8 @@ help:
 # Generate the test program.
 #
 
-tktest: ${TEST_OBJS} ${TKX_STLIB_NAME} ${LIBTCLX}
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${TKX_BUILD_LIB_SPEC} ${LIBS} \
+tktest: ${TEST_OBJS} SHLIB_@BUILD_SHARED@  ${LIBTCLX}
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${ALL_LIBS} \
 	    -o $@ || (rm -f $@; exit 1)
 
 tkTest.o: ${TK_SRC}/generic/tkTest.c

@@ -2,4 +2,5 @@
 # 
 # Package index for TclX @TCLX_FULL_VERSION@.
 #
-package ifneeded Tclx @TCLX_VERSION@ "load $dir/../@TCLX_SHLIB_NAME@"
+if {[info tclversion] < @TCL_VERSION@} return
+package ifneeded Tclx @TCLX_VERSION@ "load [list $dir/../@TCLX_SHLIB_NAME@]"

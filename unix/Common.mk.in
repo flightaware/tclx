@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 7.5 1996/11/17 08:53:02 markd Exp $
+# $Id: Common.mk.in,v 7.6 1996/11/18 07:46:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -51,6 +51,9 @@ TCLX_LIBS    = @TCLX_LIBS@
 #------------------------------------------------------------------------------
 # Shared library names if BUILD_SHARED is YES.
 #
+TCL_STLIB_NAME       = @TCL_STLIB_NAME@
+TK_STLIB_NAME        = @TK_STLIB_NAME@
+
 TCLX_SHLIB_NAME      = @TCLX_SHLIB_NAME@
 TCLX_STLIB_NAME      = @TCLX_STLIB_NAME@
 
@@ -69,6 +72,9 @@ CC_SHOBJ_FLAG = @CC_SHOBJ_FLAG@
 TCLX_BUILD_LIB_SPEC  = @TCLX_BUILD_LIB_SPEC@
 TKX_BUILD_LIB_SPEC   = @TKX_BUILD_LIB_SPEC@
 TCLX_LD_SEARCH_FLAGS = @TCLX_LD_SEARCH_FLAGS@
+TCLX_CC_SEARCH_FLAGS = @TCLX_CC_SEARCH_FLAGS@
+TKX_LD_SEARCH_FLAGS  = @TKX_LD_SEARCH_FLAGS@
+TKX_CC_SEARCH_FLAGS  = @TKX_CC_SEARCH_FLAGS@
 
 #------------------------------------------------------------------------------
 # Configuration information from tclConfig.sh and tkConfig.sh.

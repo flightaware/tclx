@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.11 1996/11/17 08:53:04 markd Exp $
+dnl $Id: configure.in,v 7.12 1996/11/18 07:46:20 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.11 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.12 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -202,17 +202,11 @@ AC_SUBST(TKX_INST_LIB)
 
 LIBS=$TCL_LIBS   # Need for tests.
 
+# 
+# Work around incorrect value being determined by Tcl for TCL_SHLIB_CFLAGS on
+# MIPS and AIX that result in reduntant ..o files being created. Supplied by
+# Jan Nijtmans <nijtmans@nici.kun.nl>). Should be removed when Tcl is fixed.
 #
-# Make TCL_LD_SEARCH_FLAGS a full value.  It is normally contains a value
-# with the path LIB_RUNTIME_DIR.  Expand this to be the value of the 
-# TCL_EXEC_PREFIX.  Also, save the original search flags, we will need them
-# later.
-#
-ORIG_TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
-LIB_RUNTIME_DIR=$TCL_EXEC_PREFIX
-TCL_LD_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS`
-
-# Hack for MIPS (from plus patch).
 if test "x`uname -p 2>/dev/null`" = "xmips" -o "x$TCL_SHARED_LIB_SUFFIX" = 'x${VERSION}.a' ; then
     TCL_SHLIB_CFLAGS=""
 fi
@@ -273,6 +267,12 @@ AC_PROG_RANLIB
 #
 SHLIB_SUFFIX=${TCL_SHLIB_SUFFIX}
 
+VERSION=$TCL_VERSION
+eval "TCL_STLIB_NAME=libtcl${TCL_UNSHARED_LIB_SUFFIX}"
+
+VERSION=$TK_VERSION
+eval "TK_STLIB_NAME=libtk${TCL_UNSHARED_LIB_SUFFIX}"
+
 VERSION=$TCLX_VERSION
 eval "TCLX_STLIB_NAME=libtclx${TCL_UNSHARED_LIB_SUFFIX}"
 eval "TCLX_SHLIB_NAME=libtclx${TCL_SHARED_LIB_SUFFIX}"
@@ -326,6 +326,8 @@ case "$BUILD_SHARED" in
 esac
 
 AC_SUBST(SHOBJ_SUFFIX)
+AC_SUBST(TCL_STLIB_NAME)
+AC_SUBST(TK_STLIB_NAME)
 AC_SUBST(TCLX_STLIB_NAME)
 AC_SUBST(TCLX_SHLIB_NAME)
 AC_SUBST(TKX_STLIB_NAME)
@@ -363,14 +365,81 @@ AC_SUBST(OBJ_RESTORE)
 AC_SUBST(CC_SHOBJ_FLAG)
 
 #------------------------------------------------------------------------------
+# Test if there are shared versions of the socket, math and c libraries.
+#------------------------------------------------------------------------------
+
+SHARED_LIBS=""
+if test "x${SHLIB_SUFFIX}" = "x..o"; then
+    if test "x${SHLIB_CFLAGS}" = "x-G 0"; then
+	TEST_SUFFIX="_G0.a"
+    else
+	TEST_SUFFIX=".a"
+    fi
+else
+    if test "x${TCL_SHARED_LIB_SUFFIX}" = 'x${VERSION}.a' -a "x${SHLIB_SUFFIX}" = "x.so"; then
+	TEST_SUFFIX=".a"
+	SHARED_LIBS="${TCL_LIB_SPEC}"
+    else
+	TEST_SUFFIX="${SHLIB_SUFFIX}"
+    fi
+fi
+
+dirs="/lib/libsocket${TEST_SUFFIX}* /usr/lib/libsocket${TEST_SUFFIX}*"
+for i in $dirs ; do
+    if test -f $i; then
+	SHARED_LIBS="${SHARED_LIBS} -lsocket"
+	break;
+    fi
+done
+dirs="/lib/libm${TEST_SUFFIX}* /usr/lib/libm${TEST_SUFFIX}*"
+for i in $dirs ; do
+    if test -f $i; then
+	SHARED_LIBS="${SHARED_LIBS} -lm"
+	break;
+    fi
+done
+dirs="/lib/libc${TEST_SUFFIX}* /usr/lib/libc${TEST_SUFFIX}*"
+for i in $dirs ; do
+    if test -f $i; then
+	SHARED_LIBS="${SHARED_LIBS} -lc"
+	break;
+    fi
+done
+AC_SUBST(SHARED_LIBS)
+
+#------------------------------------------------------------------------------
 # Determine the search path argument for the installed TclX libraries. 
 #-----------------------------------------------------------------------------
 
-if test "X$ORIG_TCL_LD_SEARCH_FLAGS" != "X"; then
-    LIB_RUNTIME_DIR=$TCLX_INST_LIB
-    TCLX_LD_SEARCH_FLAGS=`eval echo $ORIG_TCL_LD_SEARCH_FLAGS` 
+if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
+    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib:$TCLX_INST_LIB"
+    TCLX_CC_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS` 
 fi
+if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
+    LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
+fi
+TCLX_LD_SEARCH_FLAGS=`echo ${TCLX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
 AC_SUBST(TCLX_LD_SEARCH_FLAGS)
+AC_SUBST(TCLX_CC_SEARCH_FLAGS)
+
+#------------------------------------------------------------------------------
+# Determine the search path argument for the installed TkX libraries. 
+#-----------------------------------------------------------------------------
+
+if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
+    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib:$TCLX_INST_LIB:$TKX_INST_LIB"
+    X11_LIB_DIR=`echo ${TK_XLIBSW} |sed -e "s|-L||" -e "s/ .*$//g" -e "s/-l.*$//g"`
+    if test "x${X11_LIB_DIR}" != "x"; then
+	LIB_RUNTIME_DIR="${LIB_RUNTIME_DIR}:${X11_LIB_DIR}"
+    fi
+    if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
+	LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
+    fi
+    TKX_CC_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS` 
+fi
+TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
+AC_SUBST(TKX_LD_SEARCH_FLAGS)
+AC_SUBST(TKX_CC_SEARCH_FLAGS)
 
 #------------------------------------------------------------------------------
 # Determine if we have symbolic links on the filesystem we are building
