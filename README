@@ -1,5 +1,16 @@
                            Extended Tcl (TclX) 8.0.0
                            =========================
+
+BETA 1 Release
+==============
+This release is compatible with the Tcl/Tk 8.0b1 releases.
+
+                              **** WARNING *****
+You must install the patches to Tcl 8.0b1 that are in TCL-REQUIRED_PATCHES.
+You may have some of these as most where posted to comp.lang.tcl by the
+SunScript team.
+
+
 INTRODUCTION
 ============
 
@@ -44,18 +55,6 @@ CHANGES IN TCLX 8.0.0
 =====================
   o Extensive internal use of Tcl 8.0's new object structures makes
     TclX execute very quickly.
-
-CHANGES IN TCLX 8.0.0
-=====================
-  o Partial support for Windows 95/NT.
-
-  o New commands cconcat and lcontain.
-
-  o Improved profiling.
-
-  o Package index files are built and installed shared libraries are
-    generated.  If the same installation prefix is used as was used
-    for Tcl, TclX can be loaded with the package require command.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================

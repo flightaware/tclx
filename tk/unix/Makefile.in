@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: Makefile.in,v 8.5 1997/04/17 05:00:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -253,7 +253,7 @@ install-exec:
 #------------------------------------------------------------------------------
 clean:
 	-rm -f tkXAppInit.o ${OBJS} ${SOBJS} ${TEST_OBJS} wishx wishx.static
-	-rm -rf libtkx* tkx.tcl tclhelp help help.tmp
+	-rm -rf libtkx* tkx.tcl tclhelp help help.tmp tktest
 	-rm -f SHLIB_YES SHLIB_NO
 
 #------------------------------------------------------------------------------
