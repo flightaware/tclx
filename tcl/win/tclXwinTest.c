@@ -13,12 +13,17 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 7.2 1996/08/17 02:10:18 markd Exp $
+ * $Id: tclXwinTest.c,v 7.1 1996/10/25 04:55:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtend.h"
 
+extern int
+Tcltest_Init (Tcl_Interp *interp);
+
+extern int
+Tclxtest_Init (Tcl_Interp *interp);
 
 
 /*-----------------------------------------------------------------------------
@@ -55,22 +60,23 @@ Tcl_AppInit (Tcl_Interp *interp)
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
+
     if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
     Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
 
-    /*
-     * Call Tcl_CreateCommand for application-specific commands, if
-     * they weren't already created by the init procedures called above.
-     */
+    if (Tcltest_Init (interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
+                      (Tcl_PackageInitProc *) NULL);
 
-    /*
-     * Specify a user-specific startup file to invoke if the application
-     * is run interactively.  Typically the startup file is "~/.apprc"
-     * where "app" is the name of the application.  If this line is deleted
-     * then no user-specific startup file will be run under any conditions.
-     */
-    Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclrc", TCL_GLOBAL_ONLY);
+    if (Tclxtest_Init (interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tclxtest", Tclxtest_Init,
+                      (Tcl_PackageInitProc *) NULL);
+
     return TCL_OK;
 }

@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.11 1996/09/09 22:13:45 markd Exp $
+ * $Id: tclXwinOS.c,v 7.13 1996/11/04 22:31:00 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -1380,7 +1380,7 @@ LockUnlockSetup (Tcl_Interp     *interp,
         startPtr->Offset = GetFileSize (handle, NULL);
         if (startPtr->Offset < 0)
             goto winError;
-        startPtr->Offset -= lockInfoPtr->start;
+        startPtr->Offset += lockInfoPtr->start;
         break;
     }
     startPtr->Internal = 0;
@@ -1394,16 +1394,10 @@ LockUnlockSetup (Tcl_Interp     *interp,
      */
     *lengthHighPtr = 0;
     if (lockInfoPtr->len == 0) {
-        *lengthLowPtr = GetFileSize (handle, NULL);
-        if (*lengthLowPtr < 0)
-            goto winError;
-        *lengthLowPtr -= startPtr->Offset;
-    } else {
-        *lengthLowPtr = lockInfoPtr->len;
-    }
-    if (*lengthLowPtr == 0) {
         *lengthHighPtr = 0x7FFFFFFF;
         *lengthLowPtr = 0xFFFFFFFF;
+    } else {
+        *lengthLowPtr = lockInfoPtr->len;
     }
     return handle;
 
@@ -1450,11 +1444,11 @@ TclXOSFlock (interp, lockInfoPtr)
     flags = 0;
     if (lockInfoPtr->access == TCL_WRITABLE)
         flags |= LOCKFILE_EXCLUSIVE_LOCK;
-    if (lockInfoPtr->block)
+    if (!lockInfoPtr->block)
         flags |= LOCKFILE_FAIL_IMMEDIATELY;
 
     if (!LockFileEx (handle, flags, 0, lengthLow, lengthHigh, &start)) {
-        if (GetLastError () == ERROR_LOCK_FAILED) {
+        if (GetLastError () == ERROR_LOCK_VIOLATION) {
             lockInfoPtr->gotLock = FALSE;
             return TCL_OK;
         }

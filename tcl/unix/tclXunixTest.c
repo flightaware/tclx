@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXtest.c,v 7.3 1996/09/28 16:22:38 markd Exp $
+ * $Id: tclXunixTest.c,v 7.1 1996/10/25 04:55:31 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -65,15 +65,18 @@ Tcl_AppInit (interp)
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
+
     if (Tclx_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
     Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
+
     if (Tcltest_Init (interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
     Tcl_StaticPackage(interp, "Tcltest", Tcltest_Init,
                       (Tcl_PackageInitProc *) NULL);
+
     if (Tclxtest_Init (interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }

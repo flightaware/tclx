@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 7.3 1996/09/03 23:39:08 markd Exp $
+# $Id: testlib.tcl,v 7.4 1996/10/04 15:30:28 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -59,6 +59,7 @@ set testXConfig(unixOrPc) [expr $testXConfig(unixOnly) || $testXConfig(pcOnly)]
 #   o Environment variable TCL_PROGRAM
 #   o If $argv0 can be found, use it.  Generate an absolute path.
 #   o Use a name "tcl", hopefully on the path.
+# Then normallize path for the platform.
 #
 if ![info exists TCL_PROGRAM] {
     if [info exists env(TCL_PROGRAM)] {
@@ -70,6 +71,8 @@ if ![info exists TCL_PROGRAM] {
         puts "    * as the program to use for running subprocesses in the tests."
     }
 }
+
+set TCL_PROGRAM [eval file join [file split $TCL_PROGRAM]]
 
 if {([info command unknown] == "") && ![info exists SAVED_UNKNOWN]} {
     error "can't find either unknown or SAVED_UNKNOWN"

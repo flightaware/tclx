@@ -13,18 +13,27 @@ message to majordomo@grizzly.com with the body of the message containing:
 
 To send mail to the list, user tclx-win@grizzly.com.
 
-The beta release is available in:
-        ftp://ftp.neosoft.com/pub/tcl/tclx-distrib/tclX7.6.0b2.tar.gz
-
 To build the release:
    o You need Visual C++ 4.0 (per standard Tcl instructions).  Contributions
      of a Borland C++ makefile would be welcome (and a donation of a licensed
      copy of the current Borland C++ even more welcome).
      
-   o Tcl 7.6 should be in a directory adjacent to the tclX7.6.0b2 directory
-     or the paths in makefile.vc need to be changed.
+   o Tcl 7.6 and Tk 4.2 should be in a directory adjacent to the tclX7.6.0
+     directory or the paths in common.vc need to be changed.
 
-   o To compile, cd to tclX7.6.0b2/tcl/win and enter the command:
+   o Edit tclX7.6.0/win/common.vc to set the macro TOOLS32 to the path to the
+     install directory for MS Visual C++ 4.o.  By default, this is c:\msdev.
+
+   o Edit tclX7.6.0/win/common.vc to set the macro PREFIX to the location
+     you want TclX installed.  This PREFIX's parent directory must exist, all
+     other directories, including PREFIX will be built if they don't exist.
+     The resulting directories that will be used for installation are:
+        $(PREFIX)/bin - Executables and DLLs.
+        $(PREFIX)/lib/tclX7.6.0 - Runtime Tcl code and help files for TclX.
+        $(PREFIX)/lib/tkX4.2.0 - Runtime Tcl code and help files for TkX.
+        $(PREFIX)/include - Include files.
+
+   o To compile, cd to tclX7.6.0/win and enter the command:
 
         nmake -f makefile.vc
 
@@ -47,12 +56,9 @@ To build the release:
         o Press "Save".
         o You can now use File->Open Workspace to open "tclx.mdp".
 
-In the beta 1 release, the following restrictions apply:
+In this release, the following restrictions apply:
 
     o Support is only provided for Visual C++ 4.0.
-
-    o No wishx is built, but you should able to load the TclX DLL into a
-      standard wish.
 
     o The following commands are not supported:
        o fork
@@ -88,5 +94,5 @@ In the beta 1 release, the following restrictions apply:
 
     o Documentation has not been updated to indicate windows differences.
 
-    o fork does not work, but execl creates a process and returns its
-      process id.
+    o The fork command is not implemented, but the execl command creates a
+      process and returns its process id.

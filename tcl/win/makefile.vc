@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 7.13 1996/10/27 00:34:13 markd Exp $
+# $Id: makefile.vc,v 7.14 1996/11/04 22:30:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -24,7 +24,7 @@ TCLX_INCLUDES = \
         -I$(TCL_GENERIC_DIR) -I$(TCL_WIN_DIR)
 
 TCLX_DEFINES = \
-    -nologo $(DEBUGDEFINES) $(TCLX_LIBRARY)
+    -nologo $(DEBUGDEFINES) -DTCLX_LIBRARY=\"$(TCLX_INST_RUNTIME)\"
 
 TCLOBJS = \
         $(TMP_DIR)\tclXAppInit.obj
@@ -102,7 +102,6 @@ TLIB_SRCS = $(TCLX_RUNTIME_DIR)/arrayprocs.tcl \
 all: $(DUMPEXTS) $(TCLX_DLL) $(TCL) $(TCLXTEST) runtcl.bat runtest.bat RUNTIME
 
 test: all $(TCLXTEST) runtest.bat
-        set TCL_PROGRAM=..\win\tcl
         cd ..\tests
         ..\win\runtest.bat all
 
@@ -177,7 +176,7 @@ runtcl.bat: makefile.vc ..\..\win\common.vc
         @echo PATH $(TCLX_WIN_DIR);$(TCL_WIN_DIR);%PATH%>>runtcl.bat
         @echo set TCL_LIBRARY=$(TCL_RUNTIME_DIR)>>runtcl.bat
         @echo set TCLX_LIBRARY=$(TCLX_WIN_DIR)>>runtcl.bat
-        @echo set TCL_PROGRAM=$(TCLX_WIN_DIR)\tclXtest.exe>>runtcl.bat
+        @echo set TCL_PROGRAM=$(TCLX_WIN_DIR)\tcl.exe>>runtcl.bat
         @echo $(TCLX_WIN_DIR)\tcl.exe %1 %2 %3 %4>>runtcl.bat
         @echo runtcl.bat created
 
@@ -190,6 +189,21 @@ runtest.bat: makefile.vc ..\..\win\common.vc
         @echo set TCL_PROGRAM=$(TCLX_WIN_DIR)\tclXtest.exe>>runtest.bat
         @echo $(TCLX_WIN_DIR)\tclXtest.exe %1 %2 %3 %4>>runtest.bat
         @echo runtcl.bat created
+
+#------------------------------------------------------------------------------
+# Installtion.
+
+install:
+        -mkdir $(PREFIX)
+        -mkdir $(TCLX_INST_BIN)
+        -mkdir $(TCLX_INST_LIB)
+        -mkdir $(TCLX_INST_RUNTIME)
+        copy $(TCL) $(TCLX_INST_BIN)
+        copy $(TCLX_DLL) $(TCLX_INST_BIN)
+        copy ..\generic\tclExtend.h $(TCLX_INST_INCL)
+        copy tcl.tlib tcl.tndx tclx.tcl $(TCLX_INST_RUNTIME)
+        copy buildidx.tcl loadouster.tcl $(TCLX_INST_RUNTIME)
+        copy ..\help $(TCLX_INST_RUNTIME)
 
 #------------------------------------------------------------------------------
 clean:

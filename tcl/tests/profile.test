@@ -12,19 +12,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 7.6 1996/10/04 15:30:25 markd Exp $
+# $Id: profile.test,v 7.7 1996/10/08 07:18:57 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
 
-if [cequal $tcl_platform(platform) windows] {
-    echo "    * The profile command has not been ported to Win32" 
-    return
-}
-
 # Make sure we that real time is not zero.  If so, suggest compiling with a
-# different parameter.
+# different parameter.  However, its always zero on windows
 
 proc ProcA1 {} {sleep 1}
 profile on
@@ -34,7 +29,8 @@ foreach idx [array names profData] {
    if [string match "ProcA1 *" $idx] break
 }
 
-if {[lindex $profData($idx) 1] == 0} {
+if {([lindex $profData($idx) 1] == 0) && \
+        ![cequal $tcl_platform(platform) windows]} {
     puts "*** The profile command is returning real time values of"
     puts "*** zero.  This suggests that your `times' system call does"
     puts "*** not return elapsed real time.  The configure script"
@@ -538,7 +534,8 @@ Test profile-6.4 {profile count tests} {
 # Function to build a list from the profile output data with each entry
 # contain the call stack and call count.  The list is returned sorted by
 # CPU time.  CPU time is not included in the return, since it can't be
-# verified exactly, only approximately.
+# verified exactly, only approximately.  CPU time testing is not done
+# for Windows as there is no way to determine it.
 #
 
 proc SumCpuData {profDataVar} {
@@ -557,6 +554,7 @@ proc SumCpuData {profDataVar} {
     }
     return [lsort $retData]
 }
+
 
 proc EatTime {amount} {
     set end   [expr [lindex [times] 0]+$amount]
@@ -582,7 +580,8 @@ Test profile-10.1 {profile CPU time tests} {
           {{ProcA10 <global>} 1} \
           {{ProcB10 ProcA10 <global>} 1} \
           {{ProcC10 ProcA10 <global>} 1} \
-          {{ProcD10 ProcA10 <global>} 1}]
+          {{ProcD10 ProcA10 <global>} 1}] \
+    unixOnly
 
 Test profile-10.2 {profile CPU time tests} {
    profile -eval on
@@ -594,7 +593,8 @@ Test profile-10.2 {profile CPU time tests} {
           {{EatTime ProcC10 ProcA10 <global>} 1} \
           {{EatTime ProcD10 ProcA10 <global>} 1} \
           {{ProcA10 <global>} 1} {{ProcB10 ProcA10 <global>} 1} \
-          {{ProcC10 ProcA10 <global>} 1} {{ProcD10 ProcA10 <global>} 1}]
+          {{ProcC10 ProcA10 <global>} 1} {{ProcD10 ProcA10 <global>} 1}] \
+    unixOnly
 
 proc ProcA1 {} {ProcB1;set a 1;incr a}
 proc ProcB1 {} {ProcC1;ProcC1}
