@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: convlib.tcl,v 8.3 1997/08/23 18:55:19 markd Exp $
+# $Id: convlib.tcl,v 8.4 1997/08/30 22:29:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,9 +27,9 @@ namespace eval TclX {
     # Parse a tclIndex file, returning an array of file names with the list of
     # procedures in each package. This is done by sourcing the file and then
     # going through the local auto_index array that was created. Issues
-    # warnings for lines that can't be converted.  tclIndex should be an
-    # absolute path name.  Returns 1 if all lines are converted, 0 if some
-    # failed.
+    # warnings for lines that can't be converted. 
+    #
+    # Returns 1 if all lines are converted, 0 if some failed.
     #
 
     proc ParseTclIndex {tclIndex fileTblVar ignore} {
@@ -40,8 +40,8 @@ namespace eval TclX {
 
         set tclIndexFH [open $tclIndex r]
         set hdr [gets $tclIndexFH]
-        if {!(($hdr == {# Tcl autoload index file, version 2.0}) ||
-              ($hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}))} {
+        if {!([cequal $hdr {# Tcl autoload index file, version 2.0}] ||
+              [cequal $hdr == {# Tcl autoload index file, version 2.0 for [incr Tcl]}])} {
             error "can only convert version 2.0 Tcl auto-load files"
         }
         set dir [file dirname $tclIndex]  ;# Expected by the script.
@@ -78,13 +78,6 @@ proc convert_lib {tclIndex packageLib {ignore {}}} {
         error "Tail file name must be `tclIndex': $tclIndex"}
     if ![file readable $tclIndex] {
         error "File not readable: $tclIndex"
-    }
-
-    # Expand to root relative file name.
-
-    set tclIndex [glob $tclIndex]
-    if ![string match "/*" $tclIndex] {
-        set tclIndex "[pwd]/$tclIndex"
     }
 
     # Parse the file.

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 8.4 1997/08/17 05:31:55 markd Exp $
+# $Id: tcllib.test,v 8.5 1997/08/23 18:55:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -204,8 +204,8 @@ Test tcllib-5.1 {bogus Ousterhout library index} {
 } 0 {1 {IS OK}}
 
 PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
-        {set auto_index(parray)   " source $dir/parray.tcl"} \
-        {set auto_index(nukearray) "source $dir/spazzzzzzzz"} \
+        {set auto_index(parray)   " source [file join $dir parray.tcl]"} \
+        {set auto_index(nukearray) "source [file join $dir spazzzzzzzz]"} \
 
 TestReg tcllib-5.2 {missing file found with Ousterhout library index} {
     nukearray
@@ -226,8 +226,8 @@ BuildTestLib  tcllib1.dir/test2.tlib TclLibAC
 set auto_path [list [pwd]/tcllib1.dir $tclx_library]
 
 PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
-        {set auto_index(parray)   " source $dir/parray.tcl"} \
-        {set auto_index(nukearray) "source $dir/nukearray.tmp"}
+        {set auto_index(parray)   " source [file join $dir parray.tcl]"} \
+        {set auto_index(nukearray) "source [file join $dir nukearray.tmp]"}
 PutFile tcllib1.dir/nukearray.tmp {proc nukearray {} {return "@nukearray@"}}
 
 Test tcllib-6.1 {successful library access} {
@@ -275,14 +275,14 @@ TclLibCleanUp
 set auto_path [list [pwd]/tcllib1.dir [pwd]/tcllib2.dir $tclx_library]
 
 PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
-        {set auto_index(DupPkgTest)  " source $dir/test1.tcl"}
+        {set auto_index(DupPkgTest)  " source [file join $dir test1.tcl]"}
 
 PutFile tcllib1.dir/test1.tcl \
     {proc DupPkgTest {} {return {Version-1}}
 }
 
 PutFile tcllib2.dir/tclIndex "# Tcl autoload index file, version 2.0" \
-        {set auto_index(DupPkgTest)  " source $dir/test1.tcl"}
+        {set auto_index(DupPkgTest)  " source [file join $dir test1.tcl]"}
 
 PutFile tcllib2.dir/test1.tcl \
     {proc DupPkgTest {} {return {Version-2}}
