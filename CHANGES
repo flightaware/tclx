@@ -276,4 +276,6 @@
      a path are loaded.
    o Added the -location options to the packages command.
    o Changed write_file to take multiple strings.
+   o Added lvarcat command.
+   o Reorganized Makefiles to simplify and fix some make problems.
 -------------------------------------------------------------------------------
