@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 7.11 1996/08/20 03:49:59 markd Exp $
+ * $Id: tclXunixOS.c,v 7.12 1996/09/09 22:13:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -767,8 +767,9 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
    
     while (TRUE) {
         entryPtr = readdir (handle);
-        if (entryPtr == NULL)
-            return TCL_BREAK;
+        if (entryPtr == NULL) {
+            break;
+        }
         if (entryPtr->d_name [0] == '.') {
             if (entryPtr->d_name [1] == '\0')
                 continue;
