@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 2.4 1993/05/16 16:24:02 markd Exp markd $
+ * $Id: tclXprofile.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -41,6 +41,8 @@ typedef struct profStackEntry_t {
  */
 
 typedef struct saveStackEntry_t {
+    long                      realTime;      /* Real and CPU time this when  */
+    long                      cpuTime;       /* stack section was saved.     */
     profStackEntry_t         *topPtr;        /* Top of saved stack section   */
     profStackEntry_t         *bottomPtr;     /* Bottom of saved stack        */
     struct saveStackEntry_t  *prevEntryPtr;  /* Previous saved stack section */
@@ -335,6 +337,10 @@ StackSync (infoPtr, procLevel, evalLevel)
     int         procLevel;
     int         evalLevel;
 {
+    long              cpuDelta;
+    long              realDelta;
+    profStackEntry_t *endPtr;
+    profStackEntry_t *scanPtr;
     saveStackEntry_t *saveEntryPtr;
     
     while (TRUE) {
@@ -348,6 +354,24 @@ StackSync (infoPtr, procLevel, evalLevel)
             ((infoPtr->stackPtr == NULL) || 
              (saveEntryPtr->topPtr->evalLevel >
               infoPtr->stackPtr->evalLevel))) {
+
+	    /*
+	     * To prevent the saved entries from getting `charged' with
+	     * with the time they've been idling here in limbo, advance
+	     * their 'start' times by the amount of time they'be been
+	     * idling.  This prevents time spent executing uplevel-ed
+	     * code from being counted twice.
+	     */
+	    cpuDelta  = infoPtr->cpuTime  - saveEntryPtr->cpuTime;
+	    realDelta = infoPtr->realTime - saveEntryPtr->realTime;
+	    endPtr    = saveEntryPtr->bottomPtr->prevEntryPtr;
+	    scanPtr   = saveEntryPtr->topPtr;
+	    while (scanPtr != endPtr) {
+		scanPtr->cpuTime  += cpuDelta;
+		scanPtr->realTime += realDelta;
+
+		scanPtr = scanPtr->prevEntryPtr;
+	    }
 
             infoPtr->stackPtr = saveEntryPtr->topPtr;
             infoPtr->saveStackPtr = saveEntryPtr->prevEntryPtr;
@@ -402,6 +426,8 @@ DoUplevel (infoPtr, procLevel)
      * Save the stack entries in the save stack.
      */
     saveEntryPtr = (saveStackEntry_t *) ckalloc (sizeof (saveStackEntry_t));
+    saveEntryPtr->cpuTime      = infoPtr->cpuTime;
+    saveEntryPtr->realTime     = infoPtr->realTime;
     saveEntryPtr->topPtr       = infoPtr->stackPtr;
     saveEntryPtr->bottomPtr    = bottomPtr;
     saveEntryPtr->prevEntryPtr = infoPtr->saveStackPtr;;
