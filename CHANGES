@@ -1248,5 +1248,9 @@
   o Fixed bug that caused some scanmatch regular expression to fail to match
     due to problems with the BoyerMoore pre-parse.
 -------------------------------------------------------------------------------
+20 Dec 96:
+  o Fixed bug that caused intersect3 to return bogus results if a list item
+    was duplicated in the second list.
+-------------------------------------------------------------------------------
 
  
