@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXdebug.c,v 1.1 1992/09/20 23:17:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -60,7 +60,7 @@ CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              Tcl_Interp   *interp,
                              int           level,
                              char         *command,
-                             int           (*cmdProc)(),
+                             Tcl_CmdProc  *cmdProc,
                              ClientData    cmdClientData,
                              int           argc,
                              char        **argv));
@@ -198,7 +198,7 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
     Tcl_Interp   *interp;
     int           level;
     char         *command;
-    int           (*cmdProc)();
+    Tcl_CmdProc  *cmdProc;
     ClientData    cmdClientData;
     int           argc;
     char        **argv;
