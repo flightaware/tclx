@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: signal.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -312,30 +312,30 @@ Test signal-2.6 {kill tests} {
     kill SIGFOO [id process]
 } 1 {invalid signal "SIGFOO"}
 
-Test signal-2.7 {kill tests} {
+test signal-2.7 {kill tests} {
     kill 0 [id process]
-} 0 {}
+} {}
 
 if [infox have_posix_signals] {
-    Test signal-2.8 {kill tests} {
+    test signal-2.8 {kill tests} {
         set pgrp [ForkLoopingChild 1]
         kill -pgroup SIGKILL $pgrp
         lrange [wait -pgroup $pgrp] 1 2
-    } 0 {SIG SIGKILL}
+    } {SIG SIGKILL}
 }
 
 # Check -restart
 if ![infox have_signal_restart] {
     echo Notice: restarting of interrupted system calls is not available on this system.
 } else {
-    Test signal-3.0 {kill tests} {
+    test signal-3.0 {kill tests} {
         # Start program on a pipe, but don't doing anything until we send it
         # something to make timing issues smaller.
         set fh [open sigprog.tmp w]
-        puts $fh "gets stdin; sleep 5; puts HELLO;flush stdout"
+        puts $fh "gets stdin; after 5000; update; puts HELLO; flush stdout"
         close $fh
 
-        set sp [open "|$TCL_PROGRAM sigprog.tmp" r+]
+        set sp [open "|[list $::tcltest::tcltest sigprog.tmp]" r+]
         try_eval {
             set resp BYE
             fconfigure $sp -buffering none
@@ -352,7 +352,7 @@ if ![infox have_signal_restart] {
 
         # Note this this is somewhat timing dependent and might fail
         # on a heavly loaded system.
-    } 0 {HELLO 1}
+    } {HELLO 1}
 }
 
 file delete sigprog.tmp

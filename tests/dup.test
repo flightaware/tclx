@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: dup.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -32,32 +32,32 @@ for {set cnt 0} {$cnt < 100} {incr cnt} {
 }
 close $testFH
 
-Test dup-1.1 {dup argument checking} {
-    dup
-} 1 {wrong # args: dup channelId ?targetChannelId?}
+test dup-1.1 {dup argument checking} {
+    list [catch {dup} msg] $msg
+} {1 {wrong # args: dup channelId ?targetChannelId?}}
 
-Test dup-1.2 {dup argument checking} {
-    dup a b c
-} 1 {wrong # args: dup channelId ?targetChannelId?}
+test dup-1.2 {dup argument checking} {
+    list [catch {dup a b c} msg] $msg
+} {1 {wrong # args: dup channelId ?targetChannelId?}}
 
-Test dup-1.3 {dup argument checking} {
-    dup a
-} 1 {can not find channel named "a"}
+test dup-1.3 {dup argument checking} {
+    list [catch {dup a} msg] $msg
+} {1 {can not find channel named "a"}}
 
-Test dup-1.4 {dup argument checking} {
-    dup stdin a
-} 1 {invalid channel id: a}
+test dup-1.4 {dup argument checking} {
+    list [catch {dup stdin a} msg] $msg
+} {1 {invalid channel id: a}}
 
-Test dup-2.1 {dup tests} {
+test dup-2.1 {dup tests} {
     set testFH [open DUP.TMP]
     set testFH2 [dup $testFH]
     gets $testFH2 testRec
     close $testFH
     close $testFH2
     set testRec
-} 0 [GenRec 0]
+} [GenRec 0]
 
-Test dup-2.2 {dup tests} {
+test dup-2.2 {dup tests} {unixOnly} {
     set testFH [open DUP.TMP]
     set testFH2 [open DUP2.TMP w]
     set testFH2 [dup $testFH $testFH2]
@@ -65,21 +65,21 @@ Test dup-2.2 {dup tests} {
     close $testFH
     close $testFH2
     set testRec
-} 0 [GenRec 0] unixOnly
+} [GenRec 0]
 
-Test dup-2.3 {dup tests} {
+test dup-2.3 {dup tests} {pcOnly} {
     set testFH [open DUP.TMP]
     set testFH2 [open DUP2.TMP w]
     set result [list [catch {dup $testFH $testFH2} msg] $msg]
     close $testFH
     close $testFH2
     set result
-} 0 {1 {on MS Windows, only stdin, stdout or stderr maybe the dup target}} pcOnly
+} {1 {on MS Windows, only stdin, stdout or stderr maybe the dup target}}
 
 #
 # Test to channels to the same file, including duping of some channel options.
 #
-Test dup-3.0 {dup tests} {
+test dup-3.0 {dup tests} {
     set testFH1 [open DUP2.TMP w]
     fconfigure $testFH1 -buffering line
     set testFH2 [dup $testFH1]
@@ -98,7 +98,7 @@ Test dup-3.0 {dup tests} {
     }
     close $testFH1
     set result
-} 0 {line {line 1} {line 2} {line 3} {line 4} {line 5} {line 6}}
+} {line {line 1} {line 2} {line 3} {line 4} {line 5} {line 6}}
 
 #
 # Test passing a file via dup to a child process.
@@ -129,22 +129,23 @@ if [cequal $tcl_platform(platform) unix] {
         dup $outFH stdout
         close $outFH
 
-        catch {
-            execl $TCL_PROGRAM [list -qc {commandloop -prompt1 {} -prompt2 {}}]
-        } msg
+	removeFile script
+	makeFile {package require Tclx; commandloop -prompt1 {} -prompt2 {}} \
+		script
+        catch {execl $::tcltest::tcltest script} msg
         puts stderr "execl failed: $msg"
         exit 1
     }
 
-    Test dup-4.1 {dup tests} {
+    test dup-4.1 {dup tests} {
         wait $childPid
-    } 0 "$childPid EXIT 0"
+    } [list $childPid EXIT 0]
 
     set outFH [open OUTPUT.TMP r]
     foreach line $data {
-        Test dup-4.2 {dup tests} {
+        test dup-4.2 {dup tests} {
             gets $outFH
-        } 0 $line
+        } $line
     }
     close $outFH
 }
@@ -165,25 +166,30 @@ if [cequal $tcl_platform(platform) unix] {
             close $toChild
             set toParent [crange $toParent 4 end]
             set fromParent [crange $fromParent 4 end]
-            set prog {}
-            append prog "set toParent \[dup $toParent\]" \n
-            append prog "set fromParent \[dup $fromParent\]" \n
-            append prog {if ![fcntl $fromParent RDWR] } "{\n"
-            append prog {    puts $toParent "DOING ACCESS CHECK"} \n
-            append prog {    flush $toParent} \n
-            append prog {    catch {puts $fromParent arf} msg} \n
-            append prog {    puts $toParent "msg1: $msg"} \n
-            append prog {    flush $toParent} \n
-            append prog {    catch {gets $toParent} msg} \n
-            append prog {    puts $toParent "msg2: $msg"} \n
-            append prog {    flush $toParent} \n
-            append prog "} else {\n"
-            append prog {    puts $toParent "SKIPPING ACCESS CHECK"} \n
-            append prog {    flush $toParent} \n
-            append prog "}\n"
-            append prog {while {[gets $fromParent msg] >= 0} {
-                puts $toParent "got: $msg"; flush $toParent}}
-            execl $TCL_PROGRAM [list -qc $prog]
+	    removeFile script
+	    makeFile [subst {
+		package require Tclx
+		set toParent \[dup $toParent\]
+		set fromParent \[dup $fromParent\]
+		if {!\[fcntl \$fromParent RDWR\]} {
+		    puts \$toParent "DOING ACCESS CHECK"
+		    flush \$toParent
+		    catch {puts \$fromParent arf} msg
+		    puts \$toParent "msg1: \$msg"
+		    flush \$toParent
+		    catch {gets \$toParent} msg
+		    puts \$toParent "msg2: \$msg"
+		    flush \$toParent
+		} else {
+		    puts \$toParent "SKIPPING ACCESS CHECK"
+		    flush \$toParent
+		}
+		while {\[gets \$fromParent msg\] >= 0} {
+		    puts \$toParent "got: \$msg"
+		    flush \$toParent
+		}
+	    }] {script}
+            execl $::tcltest::tcltest script
         } msg
         puts stderr "child failed: $msg"
         exit 1
@@ -191,7 +197,7 @@ if [cequal $tcl_platform(platform) unix] {
     close $toParent
     close $fromParent
 
-    Test dup-5.1 {dup tests} {
+    test dup-5.1 {dup tests} {
         set line [gets $fromChild]
         switch $line {
             {DOING ACCESS CHECK} {
@@ -207,63 +213,63 @@ if [cequal $tcl_platform(platform) unix] {
                 list $line
             }
         }
-    } 0 OK
-
+    } OK
 
     if ![fcntl $toChild RDWR] {
-        Test dup-5.2 {dup tests} {
-            gets $toChild
-        } 1 "channel \"$toChild\" wasn't opened for reading"
+        test dup-5.2 {dup tests} {
+            list [catch {gets $toChild} msg] $msg
+        } [list 1 "channel \"$toChild\" wasn't opened for reading"]
 
-        Test dup-5.3 {dup tests} {
-            puts $fromChild arf
-        } 1 "channel \"$fromChild\" wasn't opened for writing"
+        test dup-5.3 {dup tests} {
+            list [catch {puts $fromChild arf} msg] $msg
+        } [list 1 "channel \"$fromChild\" wasn't opened for writing"]
     }
 
     if $doingAccess {
-        Test dup-5.4 {dup tests} {
+        test dup-5.4 {dup tests} {
             gets $fromChild line
             if [string match {msg1: channel "*" wasn't opened for writing} $line] {
                 list OK
             } else {
                 list $line
             }
-        } 0 OK
-        Test dup-5.5 {dup tests} {
+        } OK
+        test dup-5.5 {dup tests} {
             gets $fromChild line
             if [string match {msg2: channel "*" wasn't opened for reading} $line] {
                 list OK
             } else {
                 list $line
             }
-        } 0 OK
+        } OK
     }
 
-    Test dup-5.6 {dup tests} {
+    test dup-5.6 {dup tests} {
         puts $toChild "test 5.2"
         flush $toChild
         gets $fromChild
-    } 0 {got: test 5.2}
+    } {got: test 5.2}
 
-    Test dup-5.7 {dup tests} {
+    test dup-5.7 {dup tests} {
         puts $toChild "test 3.3"
         flush $toChild
         gets $fromChild
-    } 0 {got: test 3.3}
+    } {got: test 3.3}
 
-    Test dup-5.8 {dup tests} {
+    test dup-5.8 {dup tests} {
         close $toChild
         close $fromChild
         wait $childPid
-    } 0 [list $childPid EXIT 0]
+    } [list $childPid EXIT 0]
 
-    Test dup-5.9 {dup tests} {
+    test dup-5.9 {dup tests} {
        set stat [catch {dup 100}]
        list $stat [lrange $errorCode 0 1]
-    } 0 {1 {POSIX EBADF}}
+    } {1 {POSIX EBADF}}
 }
 
 TestRemove DUP.TMP DUP2.TMP INCMDS.TMP OUTPUT.TMP
 
-
-
+# cleanup
+::tcltest::cleanupTests
+return

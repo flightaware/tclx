@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: cmdtrace.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -212,13 +212,16 @@ Test cmdtrace-3.1 {command trace argument error checking} {
 ERRORINFO \
 ERRORCODE]
 
-test cmdtrace-3.2 {command trace argument error checking} {tclxShell} {
-    exec $TCL_PROGRAM -qc {
+test cmdtrace-3.2 {command trace argument error checking} {
+    removeFile script
+    makeFile {
+	package require Tclx
         puts [list [catch {
-            cmdtrace on command {foo $NOTDEFINED}
-            info globals
-        } msg] $msg $errorInfo]
-    }
+	    cmdtrace on command {foo $NOTDEFINED}
+	    info globals
+	} msg] $msg $errorInfo]
+    } {script}
+    exec $::tcltest::tcltest script
 } {1 {can't read "NOTDEFINED": no such variable} {can't read "NOTDEFINED": no such variable
     while executing
 "foo $NOTDEFINED {{info globals}} {{info globals}} 2 0"
@@ -228,4 +231,6 @@ test cmdtrace-3.2 {command trace argument error checking} {tclxShell} {
 
 TestRemove CMDTRACE.OUT
 
-
+# cleanup
+::tcltest::cleanupTests
+return

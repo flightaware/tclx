@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: testlib.tcl,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -30,7 +30,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 
 set ::tcltest::testConstraints(have_fchown) [infox have_fchown]
 
-global TCL_PROGRAM env TEST_ERROR_INFO tcl_platform testXConfig
+global env TEST_ERROR_INFO tcl_platform testXConfig
 global TEST_VERBOSE
 
 if [info exists env(TEST_ERROR_INFO)] {
@@ -65,27 +65,6 @@ if {$tcl_platform(platform) == "windows"} {
     set testXConfig(pcOnly) 0
 }
 set testXConfig(unixOrPc) [expr $testXConfig(unixOnly) || $testXConfig(pcOnly)]
-
-#
-# Save path to Tcl program to exec, use it when running children in the
-# tests.  Order of checking:
-#   o Environment variable TCL_PROGRAM
-#   o If $argv0 can be found, use it.  Generate an absolute path.
-#   o Use a name "tcl", hopefully on the path.
-# Then normallize path for the platform.
-#
-if ![info exists TCL_PROGRAM] {
-    if [info exists env(TCL_PROGRAM)] {
-       set TCL_PROGRAM $env(TCL_PROGRAM)
-    } else {
-        set TCL_PROGRAM [info nameofexecutable]
-        puts "    * WARNING: No environment variable TCL_PROGRAM, Using the"
-        puts "    * command \"$TCL_PROGRAM\""
-        puts "    * as the program to use for running subprocesses in the tests."
-    }
-}
-
-set TCL_PROGRAM [eval file join [file split $TCL_PROGRAM]]
 
 #
 # Convert a Tcl result code to a string.
@@ -173,9 +152,13 @@ proc GenRec {id} {
 # command line parsing is really dumb.  Pass it in a file instead.
 
 proc ForkLoopingChild {{setPGroup 0}} {
-    global TCL_PROGRAM tcl_platform
+    global tcl_platform
 
-    set childProg {file delete CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}
+    set childProg {
+	file delete CHILD.RUN
+	catch {while {1} {after 1000;update}}
+	exit 10
+    }
 
     # Create semaphore (it also contains the program to run for windows).
     set fh [open CHILD.RUN w]
@@ -190,9 +173,7 @@ proc ForkLoopingChild {{setPGroup 0}} {
             if $setPGroup {
                 id process group set
             }
-            catch {
-                execl $TCL_PROGRAM [list -qc $childProg]
-            } msg
+            catch {execl $::tcltest::tcltest CHILD.RUN} msg
             puts stderr "execl failed (ForkLoopingChild): $msg"
             exit 1
         }
@@ -201,10 +182,9 @@ proc ForkLoopingChild {{setPGroup 0}} {
         if $setPGroup {
             error "setpgroup not supported on windows"
         }
-        set newPid [execl $TCL_PROGRAM [list -q CHILD.RUN]]
+        set newPid [execl $::tcltest::tcltest CHILD.RUN]
     }
-        
-        
+
     # Wait till the child is actually running.
     while {[file exists CHILD.RUN]} {
         sleep 1

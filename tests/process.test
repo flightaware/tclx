@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: process.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -40,40 +40,44 @@ if ![lempty [info commands button]] {
 
 # Test fork, execl, and wait commands.
 
-Test process-1.1.unix {fork, execl, wait tests} {
+test process-1.1.unix {fork, execl, wait tests} {unixOnly} {
     set newPid [fork]
     if {$newPid == 0} {
-        catch {execl $TCL_PROGRAM {-qc {sleep 1;exit 12}}} msg
+	removeFile script
+	makeFile {after 1000;update;exit 12} script
+        catch {execl $::tcltest::tcltest script} msg
         puts stderr "execl failed 1.1: $msg"
         exit 1
     }
     lrange [wait $newPid] 1 end
-} 0 {EXIT 12} {unixOnly}
+} {EXIT 12}
 
-Test process-1.1.pc {fork, execl, wait tests} {
-    set newPid [execl $TCL_PROGRAM {-qc {sleep 1;exit 12}}]
+test process-1.1.pc {fork, execl, wait tests} {pcOnly} {
+    removeFile script
+    makeFile {after 1000;update;exit 12} script
+    set newPid [execl $::tcltest::tcltest script]
     lrange [wait $newPid] 1 end
-} 0 {EXIT 12} {pcOnly}
+} {EXIT 12}
 
-Test process-1.2 {fork, execl, wait tests} {
+test process-1.2 {fork, execl, wait tests} {
     set newPid [ForkLoopingChild]
     sleep 1
 
     kill $newPid
     lrange [wait $newPid] 1 end
-} 0 {SIG SIGTERM}
+} {SIG SIGTERM}
 
 set newPid1 [ForkLoopingChild]
 set newPid2 [ForkLoopingChild]
 
-Test process-1.3 {fork, execl, wait tests} {
+test process-1.3 {fork, execl, wait tests} {
     sleep 3 ;# Give em a chance to get going.
 
     kill [list $newPid1 $newPid2]
 
     list [wait $newPid1] [wait $newPid2]
 
-} 0 [list "$newPid1 SIG SIGTERM" "$newPid2 SIG SIGTERM"]
+} [list "$newPid1 SIG SIGTERM" "$newPid2 SIG SIGTERM"]
 
 Test process-1.4 {fork, execl, wait tests} {
     fork foo
@@ -83,14 +87,17 @@ Test process-1.5 {fork, execl, wait tests} {
     wait baz
 } 1 {invalid pid or process group id "baz"}
 
-Test process-1.6 {fork, execl, wait tests} {
+test process-1.6 {fork, execl, wait tests} {
     set testPid [ForkLoopingChild]
     kill $testPid
     set result [wait $testPid]
     lrange $result 1 end
-} 0 {SIG SIGTERM}
+} {SIG SIGTERM}
 
-Test process-1.7 {fork, execl, wait tests} {
+test process-1.7 {fork, execl, wait tests} {tclxShell} {
+    # This works when $TCL_PROGRAM is the old TclX static shell because
+    # it passes the args on the command line.  Tcl doesn't all that, so
+    # we can't change this test to work in TclX 8.4+.
     set newPid [fork]
     if {$newPid == 0} {
         catch {
@@ -101,7 +108,7 @@ Test process-1.7 {fork, execl, wait tests} {
         exit 1
     }
     lrange [wait $newPid] 1 end
-} 0 {EXIT 10}
+} {EXIT 10}
 
 # Try execl in various wrong ways.  We try it in a separate process, first,
 # in case by error we exec something.
@@ -120,27 +127,31 @@ Test process-1.8 {fork, execl, wait tests} {
 } 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
 
 Test process-1.9 {fork, execl, wait tests} {
+    removeFile script
+    makeFile {exit 0} {script}
     set newPid [fork]
     if {$newPid == 0} {
-	catch {execl -argv0 FOOPROC $TCL_PROGRAM {-qc {exit 0}} badarg}
+	catch {execl -argv0 FOOPROC $::tcltest::tcltest script badarg}
 	exit 23
     }
     if {[lrange [wait $newPid] 1 end] == {EXIT 23}} {
-	execl -argv0 FOOPROC $TCL_PROGRAM {-qc {exit 0}} badarg
+	execl -argv0 FOOPROC $::tcltest::tcltest script badarg
     } else {
         concat "appears to have exec-ed something"
     }
 } 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
 
 Test process-1.10 {fork, execl, wait tests} {
+    removeFile script
+    makeFile {exit 0} {script}
     set newPid [fork]
     if {$newPid == 0} {
-	catch {execl $TCL_PROGRAM {-qc {exit 0}} badarg}
+	catch {execl $::tcltest::tcltest script badarg}
 	exit 24
     }
     sleep 1
     if {[lrange [wait $newPid] 1 end] == {EXIT 24}} {
-	execl ../runtcl {-qc {exit 0}} badarg
+	execl $::tcltest::tcltest script badarg
     }
 } 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
 

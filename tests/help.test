@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: help.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -110,6 +110,7 @@ global helpServerFH
 
 set fh [open HELP.PRG w]
 puts $fh {
+    package require Tclx
     fconfigure stdout -buffering none
     fconfigure stderr -buffering none
     commandloop -interactive on -prompt1 {subst "===HELPSERVER===\n"} \
@@ -118,7 +119,7 @@ puts $fh {
 }
 close $fh
 
-set helpServerFH [open "|$TCL_PROGRAM HELP.PRG" r+]
+set helpServerFH [open "|[list $::tcltest::tcltest HELP.PRG]" r+]
 fconfigure $helpServerFH -buffering none
 
 #

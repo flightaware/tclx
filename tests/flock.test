@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: flock.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -208,6 +208,7 @@ Test flock-4.4 {flock/unlock of a file that is not locked} {
 #
 set fh [open FLOCK.PRG w]
 puts $fh {
+    package require Tclx
     fconfigure stdout -buffering line
     set writeFH [open FLOCKW.TMP WRONLY]
     set rdwrFH [open FLOCKRW.TMP RDWR]
@@ -226,7 +227,7 @@ puts $fh {
 }
 close $fh
 
-set childFH [open "|$TCL_PROGRAM FLOCK.PRG" r+]
+set childFH [open "|[list $::tcltest::tcltest FLOCK.PRG]" r+]
 
 if {[gets $childFH line] < 0} {
     error "Unexpected EOF from flock test child"
