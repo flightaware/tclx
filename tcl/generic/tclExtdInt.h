@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 4.6 1995/01/01 19:49:33 markd Exp markd $
+ * $Id: tclExtdInt.h,v 4.7 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -466,14 +466,8 @@ Tcl_LmatchCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 /*
  * from tclXmath.c
  */
-extern int 
-Tcl_MaxCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_MinCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
-Tcl_RandomCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+Tcl_InitMath _ANSI_ARGS_((Tcl_Interp*));
 
 /*
  * from tclXmsgcat.c

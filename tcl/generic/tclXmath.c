@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 4.0 1994/07/16 05:27:24 markd Rel markd $
+ * $Id: tclXmath.c,v 4.1 1995/01/01 19:49:30 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -32,12 +32,21 @@ long random ();
 static long 
 ReallyRandom _ANSI_ARGS_((long my_range));
 
+static int 
+Tcl_MaxCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+static int 
+Tcl_MinCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+static int 
+Tcl_RandomCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
 
 /*
  *-----------------------------------------------------------------------------
  *
  * Tcl_MaxCmd --
- *      Implements the TCL max command:
+ *      Implements the Tcl max command:
  *        max num1 num2 ?..numN?
  *
  * Results:
@@ -45,7 +54,7 @@ ReallyRandom _ANSI_ARGS_((long my_range));
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 Tcl_MaxCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -86,7 +95,7 @@ Tcl_MaxCmd (clientData, interp, argc, argv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 Tcl_MinCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -111,6 +120,100 @@ Tcl_MinCmd (clientData, interp, argc, argv)
             }
         }
     strcpy (interp->result, argv [minIdx]);
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_MaxFunc --
+ *      Implements the Tcl max math function
+ *        expr max(num1, num2)
+ *
+ * Results:
+ *      Standard TCL results.
+ *
+ *-----------------------------------------------------------------------------
+ */
+static int
+Tcl_MaxFunc (clientData, interp, args, resultPtr)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    Tcl_Value  *args;
+    Tcl_Value  *resultPtr;
+{
+    if ((args [0].type == TCL_INT) && (args [1].type == TCL_INT)) {
+        resultPtr->type = TCL_INT;
+
+        if (args [0].intValue > args [1].intValue) {
+            resultPtr->intValue = args [0].intValue;
+        } else {
+            resultPtr->intValue = args [1].intValue;
+        }
+    } else {
+        double values [2];
+        int    idx;
+
+        resultPtr->type = TCL_DOUBLE;
+
+        values [0] = (args [0].type == TCL_INT) ? (double) args [0].intValue :
+                                                  args [0].doubleValue;
+        values [1] = (args [1].type == TCL_INT) ? (double) args [1].intValue :
+                                                  args [1].doubleValue;
+
+        if (values [0] > values [1]) {
+            resultPtr->doubleValue = values [0];
+        } else {
+            resultPtr->doubleValue = values [1];
+        }
+    }
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_MinFunc --
+ *      Implements the Tcl min math function
+ *        expr min(num1, num2)
+ *
+ * Results:
+ *      Standard TCL results.
+ *
+ *-----------------------------------------------------------------------------
+ */
+static int
+Tcl_MinFunc (clientData, interp, args, resultPtr)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    Tcl_Value  *args;
+    Tcl_Value  *resultPtr;
+{
+    if ((args [0].type == TCL_INT) && (args [1].type == TCL_INT)) {
+        resultPtr->type = TCL_INT;
+
+        if (args [0].intValue < args [1].intValue) {
+            resultPtr->intValue = args [0].intValue;
+        } else {
+            resultPtr->intValue = args [1].intValue;
+        }
+    } else {
+        double values [2];
+        int    idx;
+
+        resultPtr->type = TCL_DOUBLE;
+
+        values [0] = (args [0].type == TCL_INT) ? (double) args [0].intValue :
+                                                  args [0].doubleValue;
+        values [1] = (args [1].type == TCL_INT) ? (double) args [1].intValue :
+                                                  args [1].doubleValue;
+
+        if (values [0] < values [1]) {
+            resultPtr->doubleValue = values [0];
+        } else {
+            resultPtr->doubleValue = values [1];
+        }
+    }
     return TCL_OK;
 }
 
@@ -150,7 +253,7 @@ ReallyRandom (myRange)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 Tcl_RandomCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -198,4 +301,37 @@ outOfRange:
                           buf, (char *) NULL);
         return TCL_ERROR;
     }
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *  Tcl_InitMath --
+ *
+ *    Initialize the TclX math commands and functions.
+ *-----------------------------------------------------------------------------
+ */
+void
+Tcl_InitMath (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_ValueType minMaxArgTypes [2] = 
+        {TCL_EITHER, TCL_EITHER};
+
+    Tcl_CreateCommand (interp, "max", Tcl_MaxCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "min", Tcl_MinCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "random", Tcl_RandomCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+
+    Tcl_CreateMathFunc (interp, "max",
+                        2, minMaxArgTypes,
+                        Tcl_MaxFunc,
+                        (ClientData) NULL);
+
+    Tcl_CreateMathFunc (interp, "min",
+                        2, minMaxArgTypes,
+                        Tcl_MinFunc,
+                        (ClientData) NULL);
+
 }

@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 4.2 1995/01/01 19:49:22 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 4.3 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -193,12 +193,7 @@ TclXCmd_Init (interp)
     /*
      * from tclXmath.c
      */
-    Tcl_CreateCommand (interp, "max", Tcl_MaxCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "min", Tcl_MinCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "random", Tcl_RandomCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_InitMath (interp);
 
     /*
      * from tclXmsgcat.c
