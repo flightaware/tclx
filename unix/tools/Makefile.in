@@ -1,0 +1,44 @@
+#
+# Makefile  --
+#
+# Makefile for building tools used during install
+#------------------------------------------------------------------------------
+# Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: Makefile,v 2.6 1993/07/18 22:38:14 markd Exp $
+#------------------------------------------------------------------------------
+#
+
+include ../Config.mk
+include ../config/${TCL_CONFIG_FILE}
+SHELL=/bin/sh
+
+#------------------------------------------------------------------------------
+
+CFLAGS=${OPTIMIZE_FLAG} ${XCFLAGS} -I../${TCL_UCB_DIR} ${SYS_DEP_FLAGS}
+
+#------------------------------------------------------------------------------
+
+installtools: tclxversion $(TK_BUILD)
+
+tclxversion: getversion.c
+	$(CC) $(CFLAGS) getversion.c -o tclxversion
+
+WISHX: tkxversion
+
+tkxversion: getversion.c
+	$(CC) $(CFLAGS) -I../$(TK_UCB_DIR) -DTK_GET_VERSION getversion.c \
+	   -o tkxversion
+
+#------------------------------------------------------------------------------
+
+clean:
+	-rm -f tclxversion tkxversion *.o
+
