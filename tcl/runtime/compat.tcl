@@ -13,18 +13,40 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 4.0 1994/07/16 05:29:27 markd Rel markd $
+# $Id: compat.tcl,v 4.1 1995/01/01 19:49:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
-#@package: TclX-Compatibility execvp assign_fields
+#@package: TclX-Compatibility execvp assign_fields server_open
 
 proc execvp {progname args} {
     error "The execvp command is outdated, use the execl command directly"
 }
+
 proc assign_fields {list args} {
     if [lempty $args] {
         return
     }
     return [uplevel lassign [list $list] $args]
+}
+
+proc server_open args {
+    set cmd server_connect
+
+    set buffered 1
+    while {[string match -* [lindex $args 0]]} {
+        set opt [lvarpop args]
+        if [cequal $opt -buf] {
+            set buffered 1
+        } elseif  [cequal $opt -nobuf] {
+            set buffered 0
+        }
+        lappend cmd $opt
+    }
+    if $buffered {
+        lappend cmd -twoids
+    }
+    set cmd [concat $cmd $args]
+
+    uplevel $cmd
 }
