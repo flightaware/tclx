@@ -64,6 +64,12 @@ InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
                          int         argc,
                          char      **argv));
 
+static int
+SendMessage _ANSI_ARGS_((Tcl_Interp *interp,
+                         FILE       *filePtr,
+                         int         flags,
+                         int         nonewline,
+                         char       *strmsg));
 
 /*
  *-----------------------------------------------------------------------------
@@ -782,6 +788,120 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
+ * SendMessage --
+ *
+ *   Send a message on a socket.  There are two versions of this function,
+ * one that uses sendmsg and takes advantage of gather-write to send the new
+ * line. The other is for systems that don't have sendmsg (Linux).
+ *
+ * Parameters:
+ *   o interp (O) - Error messages are returned in result.
+ *   o filePtr (I) - FILE associated with socket.
+ *   o flags (I) - Flags to pass to sendmsg/send.
+ *   o nonewline (I) - TRUE if a newline should not be sent.
+ *   o strmsg (I) - String message to send.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+#ifdef HAVE_SENDMSG
+static int
+SendMessage (interp, filePtr, flags, nonewline, strmsg)
+    Tcl_Interp *interp;
+    FILE       *filePtr;
+    int         flags;
+    int         nonewline;
+    char       *strmsg;
+{
+    struct msghdr msgHeader;
+    struct iovec  dataVec [2];
+    int           bytesAttempted;
+    int           bytesSent;
+
+    /*
+     * Fill in the message header and write vector.  If a newline is
+     * to be included, its the second element in the vector.
+     */
+    msgHeader.msg_name = NULL;
+    msgHeader.msg_namelen = 0;
+    msgHeader.msg_iov = dataVec;
+    msgHeader.msg_iovlen = 1;
+#ifdef HAVE_MSG_ACCRIGHTS
+    msgHeader.msg_accrights = NULL;
+    msgHeader.msg_accrightslen = 0;
+#else
+    msgHeader.msg_control = NULL;
+    msgHeader.msg_controllen = 0;
+#endif    
+
+    bytesAttempted = strlen (strmsg);
+    dataVec [0].iov_base = strmsg;
+    dataVec [0].iov_len = bytesAttempted;
+
+    if (!nonewline) {
+        dataVec [1].iov_base = "\n";
+        dataVec [1].iov_len = 1;
+        msgHeader.msg_iovlen++;
+        bytesAttempted++;
+    }
+   
+    bytesSent = sendmsg (fileno (filePtr), &msgHeader, flags);
+    if (bytesSent < 0) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+
+    if (bytesSent != bytesAttempted) {
+        Tcl_AppendResult (interp, "sent fewer bytes than requested",
+                          (char *)NULL);
+    }
+    return TCL_OK;
+}
+#else
+static int
+SendMessage (interp, filePtr, flags, nonewline, strmsg)
+    Tcl_Interp *interp;
+    FILE       *filePtr;
+    int         flags;
+    int         nonewline;
+    char       *strmsg;
+{
+    Tcl_DString  buffer;
+    char        *message;
+    int          bytesAttempted;
+    int          bytesSent;
+
+
+    if (nonewline) {
+        message = strmsg;
+    } else {
+        Tcl_DStringInit (&buffer);
+        Tcl_DStringAppend (&buffer, strmsg, -1);
+        Tcl_DStringAppend (&buffer, "\n", -1);
+        message = Tcl_DStringValue (&buffer);
+    }
+    bytesAttempted = strlen (message);
+
+    bytesSent = send (fileno (filePtr), message, bytesAttempted, flags);
+    if (!nonewline) {
+        Tcl_DStringFree (&buffer);
+    }
+    if (bytesSent < 0) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+
+    if (bytesSent != bytesAttempted) {
+        Tcl_AppendResult (interp, "sent fewer bytes than requested",
+                          (char *)NULL);
+    }
+    return TCL_OK;
+}
+#endif /* HAVE_SENDMSG */
+
+/*
+ *-----------------------------------------------------------------------------
+ *
  * Tcl_ServerSendCmd --
  *     Implements the TCL server_send command:
  *
@@ -797,14 +917,10 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    FILE         *filePtr;
-    int           bytesAttempted;
-    int           bytesSent;
-    int           flags = 0;
-    int           nonewline = 0;
-    int           nextArg;
-    struct msghdr msgHeader;
-    struct iovec  dataVec [2];
+    FILE  *filePtr;
+    int    flags = 0;
+    int    nonewline = 0;
+    int    nextArg;
 
     nextArg = 1;
     while ((nextArg < argc) && (argv [nextArg][0] == '-')) {
@@ -833,44 +949,7 @@ Tcl_ServerSendCmd (clientData, interp, argc, argv)
                          &filePtr) != TCL_OK)
         return TCL_ERROR;
 
-    /*
-     * Fill in the message header and write vector.  If a newline is
-     * to be included, its the second element in the vector.
-     */
-    msgHeader.msg_name = NULL;
-    msgHeader.msg_namelen = 0;
-    msgHeader.msg_iov = dataVec;
-    msgHeader.msg_iovlen = 1;
-#ifdef HAVE_MSG_ACCRIGHTS
-    msgHeader.msg_accrights = NULL;
-    msgHeader.msg_accrightslen = 0;
-#else
-    msgHeader.msg_control = NULL;
-    msgHeader.msg_controllen = 0;
-#endif    
-
-    bytesAttempted = strlen (argv [nextArg]);
-    dataVec [0].iov_base = argv [nextArg];
-    dataVec [0].iov_len = bytesAttempted;
-
-    if (!nonewline) {
-        dataVec [1].iov_base = "\n";
-        dataVec [1].iov_len = 1;
-        msgHeader.msg_iovlen++;
-        bytesAttempted++;
-    }
-   
-    bytesSent = sendmsg (fileno (filePtr), &msgHeader, flags);
-    if (bytesSent < 0) {
-        interp->result = Tcl_PosixError (interp);
-        return TCL_ERROR;
-    }
-
-    if (bytesSent != bytesAttempted) {
-        Tcl_AppendResult (interp, "sent fewer bytes than requested",
-                          (char *)NULL);
-    }
-    return TCL_OK;
+    return SendMessage (interp, filePtr,  flags, nonewline, argv [nextArg]);
 }
 
 /*

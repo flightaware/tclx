@@ -174,6 +174,9 @@
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
 
+/* Define if you have the sendmsg function.  */
+#undef HAVE_SENDMSG
+
 /* Define if you have the setitimer function.  */
 #undef HAVE_SETITIMER
 
