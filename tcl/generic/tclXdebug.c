@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 8.1 1997/04/17 04:58:35 markd Exp $
+ * $Id: tclXdebug.c,v 8.2 1997/06/12 21:08:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -26,7 +26,7 @@
 
 typedef struct traceInfo_t {
     Tcl_Interp *interp;
-    Tcl_Trace   traceHolder;
+    Tcl_Trace   traceId;
     int         inTrace;
     int         noEval;
     int         noTruncate;
@@ -80,10 +80,10 @@ CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              char        **argv));
 
 static int
-TclX_CmdtraceCmd _ANSI_ARGS_((ClientData    clientData,
-                              Tcl_Interp   *interp,
-                              int           argc,
-                              char        **argv));
+TclX_CmdtraceObjCmd _ANSI_ARGS_((ClientData clientData, 
+                                 Tcl_Interp *interp,
+                                 int objc,
+                                 Tcl_Obj *CONST objv[]));
 
 static void
 DebugCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -102,10 +102,10 @@ TraceDelete (interp, infoPtr)
     Tcl_Interp   *interp;
     traceInfo_pt  infoPtr;
 {
-    if (infoPtr->traceHolder != NULL) {
-        Tcl_DeleteTrace (interp, infoPtr->traceHolder);
+    if (infoPtr->traceId != NULL) {
+        Tcl_DeleteTrace (interp, infoPtr->traceId);
         infoPtr->depth = 0;
-        infoPtr->traceHolder = NULL;
+        infoPtr->traceId = NULL;
         if (infoPtr->callback != NULL) {
             ckfree (infoPtr->callback);
             infoPtr->callback = NULL;
@@ -388,7 +388,7 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
 
 /*
  *-----------------------------------------------------------------------------
- * Tcl_CmdtraceCmd --
+ * Tcl_CmdtraceObjCmd --
  *
  * Implements the TCL trace command:
  *     cmdtrace level|on ?noeval? ?notruncate? ?procs? ?fileid? ?command cmd?
@@ -397,24 +397,26 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CmdtraceCmd (clientData, interp, argc, argv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           argc;
-    char        **argv;
+TclX_CmdtraceObjCmd (clientData, interp, objc, objv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;
-    int           idx;
-    char         *fileHandle, *callback;
+    int idx;
+    char *argStr, *callback;
+    Tcl_Obj *channelId;
 
-    if (argc < 2)
+    if (objc < 2)
         goto argumentError;
+    argStr = Tcl_GetStringFromObj (objv [1], NULL);
 
     /*
      * Handle `depth' sub-command.
      */
-    if (STREQU (argv[1], "depth")) {
-        if (argc != 2)
+    if (STREQU (argStr, "depth")) {
+        if (objc != 2)
             goto argumentError;
         sprintf(interp->result, "%d", infoPtr->depth);
         return TCL_OK;
@@ -428,8 +430,8 @@ TclX_CmdtraceCmd (clientData, interp, argc, argv)
     /*
      * Handle off sub-command.
      */
-    if (STREQU (argv[1], "off")) {
-        if (argc != 2)
+    if (STREQU (argStr, "off")) {
+        if (objc != 2)
             goto argumentError;
         return TCL_OK;
     }
@@ -438,76 +440,82 @@ TclX_CmdtraceCmd (clientData, interp, argc, argv)
     infoPtr->noTruncate = FALSE;
     infoPtr->procCalls  = FALSE;
     infoPtr->channel    = NULL;
-    fileHandle          = NULL;
+    channelId           = NULL;
     callback            = NULL;
 
-    for (idx = 2; idx < argc; idx++) {
-        if (STREQU (argv[idx], "notruncate")) {
+    if (STREQU (argStr, "on")) {
+        infoPtr->depth = MAXINT;
+    } else {
+        if (Tcl_GetIntFromObj (interp, objv [1], &(infoPtr->depth)) != TCL_OK)
+            return TCL_ERROR;
+    }
+
+    for (idx = 2; idx < objc; idx++) {
+        argStr = Tcl_GetStringFromObj (objv [idx], NULL);
+        if (STREQU (argStr, "notruncate")) {
             if (infoPtr->noTruncate)
                 goto argumentError;
             infoPtr->noTruncate = TRUE;
             continue;
         }
-        if (STREQU (argv[idx], "noeval")) {
+        if (STREQU (argStr, "noeval")) {
             if (infoPtr->noEval)
                 goto argumentError;
             infoPtr->noEval = TRUE;
             continue;
         }
-        if (STREQU (argv[idx], "procs")) {
+        if (STREQU (argStr, "procs")) {
             if (infoPtr->procCalls)
                 goto argumentError;
             infoPtr->procCalls = TRUE;
             continue;
         }
-        if (STRNEQU (argv [idx], "std", 3) || 
-                STRNEQU (argv [idx], "file", 4)) {
-            if (fileHandle != NULL)
+        if (STRNEQU (argStr, "std", 3) || 
+                STRNEQU (argStr, "file", 4)) {
+            if (channelId != NULL)
                 goto argumentError;
             if (callback != NULL)
                 goto mixCommandAndFile;
-            fileHandle = argv [idx];
+            channelId = objv [idx];
             continue;
         }
-        if (STREQU (argv [idx], "command")) {
+        if (STREQU (argStr, "command")) {
             if (callback != NULL)
                 goto argumentError;
-            if (fileHandle != NULL)
+            if (channelId != NULL)
                 goto mixCommandAndFile;
-            if (idx == argc - 1)
+            if (idx == objc - 1)
                 goto missingCommand;
-            callback = argv [++idx];
+            callback = Tcl_GetStringFromObj (objv [++idx], NULL);
             continue;
         }
         goto invalidOption;
     }
 
-    if (STREQU (argv[1], "on")) {
-        infoPtr->depth = MAXINT;
-    } else {
-        if (Tcl_GetInt (interp, argv[1], &(infoPtr->depth)) != TCL_OK)
-            return TCL_ERROR;
-    }
-
     if (callback != NULL) {
         infoPtr->callback = ckstrdup (callback);
     } else {
-        if (fileHandle == NULL)
-            fileHandle = "stdout";
-        infoPtr->channel = TclX_GetOpenChannel (interp,
-                                                fileHandle,
-                                                TCL_WRITABLE);
+        if (channelId == NULL) {
+            infoPtr->channel = TclX_GetOpenChannel (interp,
+                                                    "stdout",
+                                                    TCL_WRITABLE);
+        } else {
+            infoPtr->channel = TclX_GetOpenChannelObj (interp,
+                                                       channelId,
+                                                       TCL_WRITABLE);
+        }
         if (infoPtr->channel == NULL)
             return TCL_ERROR;
     }
-    infoPtr->traceHolder = Tcl_CreateTrace (interp,
-                                            infoPtr->depth,
-                                            (Tcl_CmdTraceProc*)CmdTraceRoutine,
-                                            (ClientData) infoPtr);
+    infoPtr->traceId =
+        Tcl_CreateTrace (interp,
+                         infoPtr->depth,
+                         (Tcl_CmdTraceProc*) CmdTraceRoutine,
+                         (ClientData) infoPtr);
     return TCL_OK;
 
   argumentError:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+    Tcl_AppendResult (interp, tclXWrongArgs, objv [0], 
                       " level | on ?noeval? ?notruncate? ?procs?",
                       "?fileid? ?command cmd? | off | depth", (char *) NULL);
     return TCL_ERROR;
@@ -563,7 +571,7 @@ TclX_DebugInit (interp)
     infoPtr = (traceInfo_pt) ckalloc (sizeof (traceInfo_t));
 
     infoPtr->interp      = interp;
-    infoPtr->traceHolder = NULL;
+    infoPtr->traceId     = NULL;
     infoPtr->inTrace     = FALSE;
     infoPtr->noEval      = FALSE;
     infoPtr->noTruncate  = FALSE;
@@ -574,8 +582,10 @@ TclX_DebugInit (interp)
 
     Tcl_CallWhenDeleted (interp, DebugCleanUp, (ClientData) infoPtr);
 
-    Tcl_CreateCommand (interp, "cmdtrace", TclX_CmdtraceCmd, 
-                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "cmdtrace",
+                          TclX_CmdtraceObjCmd, 
+                          (ClientData) infoPtr,
+                          (Tcl_CmdDeleteProc*) NULL);
 }
 
 
