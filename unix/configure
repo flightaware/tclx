@@ -541,6 +541,30 @@ fi
 fi
 LIBS="$LIBS $socket_libs"
 
+ac_save_LIBS="${LIBS}"
+LIBS="${LIBS} -lbsd"
+ac_have_lib=""
+test -n "$silent" || echo "checking for -lbsd"
+cat > conftest.${ac_ext} <<EOF
+#include "confdefs.h"
+
+int main() { return 0; }
+int t() { main();; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  ac_have_lib="1"
+
+fi
+rm -f conftest*
+LIBS="${ac_save_LIBS}"
+if test -n "${ac_have_lib}"; then
+   :; LIBS="$LIBS -lbsd"
+else
+   :; 
+fi
+
+
 #------------------------------------------------------------------------------
 #       Check for additional libraries the Tcl/Tk does not check for.
 #------------------------------------------------------------------------------
