@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 4.1 1995/01/01 19:49:09 markd Exp markd $
+# $Id: signal.test,v 5.0 1995/07/25 05:41:51 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -28,16 +28,6 @@ if ![lempty [info commands button]] {
     puts "*************************************************************"
     puts ""
     return
-}
-
-#
-# Determine if we have Posix signals.
-#
-set msg {}
-set posix 1
-catch {signal unblock SIGHUP} msg
-if {$msg == "Posix signals are not available on this system"} {
-    set posix 0
 }
 
 Test signal-1.1 {signal tests} {
@@ -205,7 +195,7 @@ proc ForkChild {exitCode} {
     return $childPid
 }
 
-if $posix {
+if [infox have_posix_signals] {
     set expect {123 {{SIGCHLD {trap 0 {global G_gotChild;set G_gotChild 1;sleep 1}}}}}
 } else {
     set expect {123 {{SIGCHLD {default 0}}}}
@@ -243,7 +233,7 @@ Test signal-1.16 {signal tests} {
     set gotChild3 $G_gotChild
     signal default SIGCHLD
     list $gotChild1 $gotChild2 $gotChild3
-} 0 [list 1 $posix 1]
+} 0 [list 1 [infox have_posix_signals] 1]
 
 
 Test signal-1.17 {signal tests} {
@@ -259,7 +249,7 @@ Test signal-1.17 {signal tests} {
     list $gotPipe1 $gotPipe2
 } 0 {1 1}
 
-if $posix {
+if [infox have_posix_signals] {
     Test signal-1.18 {signal tests} {
         signal error SIGHUP
         signal block SIGHUP
