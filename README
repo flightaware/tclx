@@ -4,15 +4,9 @@
 BETA RELEASE
 ============
 
-    This is the TclX 7.4a beta 4 release.  It corresponds to the Tcl 7.4 b3
-and Tk 4.0 b3 releases.  Please report bugs ASAP to tcl-project@neosoft.com.
-
-SGI IRIX Note:
-   The files tcl7.4b3/tclPort.h and tk4.0b3/tkPort.h contain prototypes of
-gettimeofday that conflict with the one in /usr/include/sys/time.h.  To
-to get Tcl, Tk and TclX to compile, you need to delete the gettimeofday
-prototypes in these two files.
-
+    This is the TclX 7.4a beta 4 release.  It corresponds to the official
+Tcl 7.4 and Tk 4.0 releases.  Please report bugs ASAP to
+tcl-project@neosoft.com.
 
 INTRODUCTION
 ============
@@ -43,6 +37,22 @@ redistributable, including for commercial use and resale.
    Please read the file INSTALL carefully before building and
 installing Extended Tcl.
 
+NEW FEATURES IN TCLX 7.4a
+=========================
+
+  o ccollate command for doing localized string comparisons.
+  o Added the subcommands "groups", "groupids" and "host" to the id command.
+  o Greatly enhanced the TCP/IP server command set.  Includes the ability
+    to create multiple connection severs in Tcl.
+  o Added tclx_errorHandler variable used to specify a procedure to call
+    when an uncaught error occurs.
+  o Added -fileid option to the chmod, chown and chgrp commands, allowing
+    for operations on open files.
+  o Added ftruncate command to truncate file lengths.
+  o Added support in the dup command to bind an open file number to a Tcl file
+    handle.
+  o Improved performance of auto_load facility.
+  o Many bug and portability fixes.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -79,7 +89,7 @@ Tcl, see the manual page man/TclX.man.
 
     o Online help on Tcl, TclX and Tk commands.
 
-    o A simple interface for accessing TCP/IP based servers.
+    o A simple interface for accessing and building TCP/IP based servers.
 
     o X/PG based internationalization commands.
 
