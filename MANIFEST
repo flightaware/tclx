@@ -353,9 +353,7 @@
 ./tktests/signal.test
 ./tktests/tktests.tcl
 ./tkucbsrc/Makefile
-./tkucbsrc/tkEvent.c
 ./tkucbsrc/tkEvent.cdiff
-./tkucbsrc/tkEvent.good
 ./tkucbsrc/tkEvent.sed
 ./tools/Makefile
 ./tools/bldmanhelp.tcl
