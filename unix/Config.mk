@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 8.7 1997/08/17 04:08:46 markd Exp $
+# $Id: Config.mk,v 8.8 1997/08/30 22:30:14 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ STRIP=strip
 # Location of optional tcl2c program.  Used if compiling with a Tcl that has
 # the PlusPatch applied.
 
-TCL2C = ${TCL_UNIX_DIR}/tcl2c
+TCL2C = ${TCL_BUILD}/unix/tcl2c
 
 
 #------------------------------------------------------------------------------
