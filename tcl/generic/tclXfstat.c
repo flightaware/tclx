@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 4.0 1994/07/16 05:28:32 markd Rel markd $
+ * $Id: tclXfstat.c,v 4.1 1995/01/01 19:49:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -31,8 +31,9 @@
  * Prototypes of internal functions.
  */
 static int
-GetRemoteHost _ANSI_ARGS_((Tcl_Interp *interp,
-                           FILE       *filePtr));
+GetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
+                         FILE       *filePtr,
+                         int         which));
 
 static char *
 GetFileType _ANSI_ARGS_((struct stat  *statBufPtr));
@@ -54,43 +55,68 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
                             struct stat  *statBufPtr,
                             char         *itemName));
 
+/*
+ * Defines for GetHostInfo
+ */
+#define GETHOSTINFO_LOCAL 0
+#define GETHOSTINFO_REMOTE 1
+
 #ifndef NO_SYS_SOCKET_H
 
 /*
  *-----------------------------------------------------------------------------
  *
- * GetRemoteHost --
- *     Return the remote host IP address and name (if it can be obtained)
- * as a list.
- *
+ * GetHostInfo --
+ *     Return a host address, name (if it can be obtained) and port number.
+ *     
  * Parameters:
  *   o interp (O) - List is returned in the result.
  *   o filePtr (I) - Pointer to file.  Should be a socket connection.
+ *   o which (I) -  GETHOSTINFO_LOCAL or GETHOSTINFO_REMOTE indicating if
+ *     local or remote information should be returned.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-GetRemoteHost (interp, filePtr)
+GetHostInfo (interp, filePtr, which)
     Tcl_Interp *interp;
     FILE       *filePtr;
+    int         which;
 {
     int                 socketFD, nameLen;
-    struct sockaddr_in  remote;
+    struct sockaddr_in  sockaddr;
     struct hostent     *hostEntry;
+    char               *hostName;
+    char                portText [32];
 
     socketFD = fileno (filePtr);
-    nameLen = sizeof (remote);
+    nameLen = sizeof (sockaddr);
 
-    if (getpeername (socketFD, (struct sockaddr *) &remote, &nameLen) < 0)
-        goto unixError;
-    Tcl_AppendElement (interp, inet_ntoa (remote.sin_addr));
+    if (which == GETHOSTINFO_REMOTE) {
+        if (getpeername (socketFD, (struct sockaddr *) &sockaddr,
+                         &nameLen) < 0)
+            goto unixError;
+    } else {
+        if (getsockname (socketFD, (struct sockaddr *) &sockaddr,
+                         &nameLen) < 0)
+            goto unixError;
+    }
 
-    hostEntry = gethostbyaddr ((char *) &(remote.sin_addr),
-                               sizeof (remote.sin_addr),
+    hostEntry = gethostbyaddr ((char *) &(sockaddr.sin_addr),
+                               sizeof (sockaddr.sin_addr),
                                AF_INET);
     if (hostEntry != NULL)
-        Tcl_AppendElement (interp, hostEntry->h_name);
+        hostName = hostEntry->h_name;
+    else
+        hostName = "";
+
+    Tcl_AppendElement (interp, inet_ntoa (sockaddr.sin_addr));
+
+    Tcl_AppendElement (interp, hostName);
+
+    sprintf (portText, "%u", ntohs (sockaddr.sin_port));
+    Tcl_AppendElement (interp, portText);
        
     return TCL_OK;
 
@@ -104,13 +130,13 @@ GetRemoteHost (interp, filePtr)
 /*
  *-----------------------------------------------------------------------------
  *
- * GetRemoteHost --
+ * GetHostInfo --
  *     Version of this functions that always returns an error on systems that
  * don't have sockets.
  *-----------------------------------------------------------------------------
  */
 static int
-GetRemoteHost (interp, filePtr)
+GetHostInfo (interp, filePtr)
     Tcl_Interp *interp;
     FILE       *filePtr;
 {
@@ -187,15 +213,15 @@ ReturnStatList (interp, filePtr, statBufPtr)
     sprintf (statList, 
              "{atime %ld} {ctime %ld} {dev %ld} {gid %ld} {ino %ld} {mode %ld} ",
               (long) statBufPtr->st_atime, (long) statBufPtr->st_ctime,
-	      (long) statBufPtr->st_dev,   (long) statBufPtr->st_gid,
-	      (long) statBufPtr->st_ino,   (long) statBufPtr->st_mode);
+              (long) statBufPtr->st_dev,   (long) statBufPtr->st_gid,
+              (long) statBufPtr->st_ino,   (long) statBufPtr->st_mode);
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
     sprintf (statList, 
              "{mtime %ld} {nlink %ld} {size %ld} {uid %ld} {tty %d} {type %s}",
              (long) statBufPtr->st_mtime,  (long) statBufPtr->st_nlink,
-	     (long) statBufPtr->st_size,   (long) statBufPtr->st_uid,
-	     (int) isatty (fileno (filePtr)), GetFileType (statBufPtr));
+             (long) statBufPtr->st_size,   (long) statBufPtr->st_uid,
+             (int) isatty (fileno (filePtr)), GetFileType (statBufPtr));
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
 }
@@ -336,14 +362,17 @@ ReturnStatItem (interp, filePtr, statBufPtr, itemName)
     else if (STREQU (itemName, "tty"))
         interp->result = isatty (fileno (filePtr)) ? "1" : "0";
     else if (STREQU (itemName, "remotehost")) {
-        if (GetRemoteHost (interp, filePtr) != TCL_OK)
+        if (GetHostInfo (interp, filePtr, GETHOSTINFO_REMOTE) != TCL_OK)
+            return TCL_ERROR;
+    } else if (STREQU (itemName, "localhost")) {
+        if (GetHostInfo (interp, filePtr, GETHOSTINFO_LOCAL) != TCL_OK)
             return TCL_ERROR;
     } else {
         Tcl_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
                           "\"atime\", \"ctime\", \"dev\", \"gid\", \"ino\", ",
                           "\"mode\", \"mtime\", \"nlink\", \"size\", ",
-                          "\"tty\", \"type\", \"uid\", or \"remotehost\"",
-                          (char *) NULL);
+                          "\"tty\", \"type\", \"uid\", \"remotehost\" or",
+                          "\"localhost\"", (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -379,7 +408,7 @@ Tcl_FstatCmd (clientData, interp, argc, argv)
     if (Tcl_GetOpenFile (interp, argv[1],
                          FALSE, FALSE,  /* No checking */
                          &filePtr) != TCL_OK)
-	return TCL_ERROR;
+        return TCL_ERROR;
     
     if (fstat (fileno (filePtr), &statBuf)) {
         interp->result = Tcl_PosixError (interp);
