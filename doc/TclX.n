@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.8 1997/07/04 21:17:33 markd Exp $
+.\" $Id: TclX.n,v 8.9 1997/07/10 07:21:17 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1170,7 +1170,7 @@ non-socket file handle number maybe specified for \fItargetFileId\fR.  The
 .B fcntl \fIfileId\fR \fIattribute ?value\fR? 
 .RS
 This command either sets or clears a file option or returns its current
-value.  If \fIvalue\fR are not specified, then the current value of
+value.  If \fIvalue\fR is not specified, then the current value of
 \fBattribute\fR is returned.  All values are boolean. Some attributes maybe
 only be gotten, not modified.
 The following attributes may be specified:
