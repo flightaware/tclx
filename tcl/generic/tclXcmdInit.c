@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.3 1996/02/09 18:42:41 markd Exp $
+ * $Id: tclXcmdInit.c,v 5.4 1996/02/12 18:15:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,9 +28,7 @@ static void
 InitTclXGlobals _ANSI_ARGS_(());
 
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * InitTclXGlobals --
  *
  *   Initialize global variables used by the infox command.
@@ -59,10 +57,8 @@ InitTclXGlobals ()
 }
 
 
-/*
- *-----------------------------------------------------------------------------
- *
- * TclXCmd_Init --
+/*-----------------------------------------------------------------------------
+ * Tclxcmd_Init --
  *
  *   Add the Extended Tcl commands to the specified interpreter (except for
  * the library commands that override that standard Tcl procedures).  This
@@ -70,10 +66,10 @@ InitTclXGlobals ()
  *-----------------------------------------------------------------------------
  */
 int
-TclXCmd_Init (interp)
+Tclxcmd_Init (interp)
     Tcl_Interp *interp;
 {
-    if (TclXCmd_SafeInit (interp) == TCL_ERROR)
+    if (Tclxcmd_SafeInit (interp) == TCL_ERROR)
         return TCL_ERROR;
 
     /*
@@ -189,16 +185,14 @@ TclXCmd_Init (interp)
 }
 
 
-/*
- *-----------------------------------------------------------------------------
- *
- * TclXCmd_SafeInit --
+/*-----------------------------------------------------------------------------
+ * Tclxcmd_SafeInit --
  *
  *   Add the safe Extended Tcl commands to the specified interpreter.
  *-----------------------------------------------------------------------------
  */
 int
-TclXCmd_SafeInit (interp)
+Tclxcmd_SafeInit (interp)
     Tcl_Interp *interp;
 {
     InitTclXGlobals ();
@@ -313,28 +307,4 @@ TclXCmd_SafeInit (interp)
                        (ClientData) NULL, (void (*)()) NULL);
 
     return TCL_OK;
-}
-
-
-/*
- *-----------------------------------------------------------------------------
- *
- * Tclxcmd_Init, Tclxcmd_SafeInit --
- *
- *   Versions of TclXCmd_Init and TclXCmd_SafeInit that conforms to the Tcl
- * dynamic loading naming convention.
- *-----------------------------------------------------------------------------
- */
-int
-Tclxcmd_Init (interp)
-    Tcl_Interp *interp;
-{
-    return TclXCmd_Init (interp);
-}
-
-int
-Tclxcmd_SafeInit (interp)
-    Tcl_Interp *interp;
-{
-    return TclXCmd_SafeInit (interp);
 }

@@ -13,19 +13,12 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 5.0 1995/07/25 05:41:29 markd Rel $
+# $Id: tcllib.test,v 5.1 1996/02/09 18:43:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
 eval $SAVED_UNKNOWN
-
-# Load the slow-path part of the unknown command.  Otherwise the unknown
-# command will not work when the loadpath is changed.
-
-if ![auto_load tclx_unknown2] {
-    error "can't auto_load tclx_unknown2"
-}
 
 global save_auto_path auto_path
 set save_auto_path $auto_path
@@ -55,6 +48,7 @@ if ![file isdirectory tcllib2.dir] {
 #
 proc TclLibReset {} {
     auto_reset
+    catch {unset auto_pkg_index}
 }
 
 #
@@ -139,7 +133,7 @@ set auto_path [list [pwd]/tcllib1.dir [pwd]/../unix]
 
 TestReg tcllib-3.1 {bogus package library index} {
     TclLibAAB
-} 1 {^format error in library index "/.*test1.tndx" \(bogus\)$}
+} 1 {^error while autoloading "TclLibAAB": format error in library index "/.*test1.tndx" \(bogus\)$}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
@@ -148,7 +142,7 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.2 {bogus package library index} {
     TclLibAAB
-} 1 {^range to eval outside of file bounds "/.*test1.tlib"$}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds "/.*test1.tlib"$}
 
 
 PutFile tcllib1.dir/test1.tndx \
@@ -156,7 +150,7 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.3 {bogus package library index} {
     TclLibAAB
-} 1 {^range to eval outside of file bounds "/.*test1.tlib"$}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds "/.*test1.tlib"$}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
@@ -165,23 +159,21 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.4 {bogus package library index} {
     TclLibAAB
-} 1 {^range to eval outside of file bounds "/}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds "/}
 
 TclLibReset
 set auto_path [list [pwd]/tcllib2.dir [pwd]/../unix]
 
 if {[id user] != "root"} {
-    Test tcllib-4.1 {bad rebuild package library index} {
+    TestReg tcllib-4.1 {bad rebuild package library index} {
         global errorCode errorInfo
         BuildTestLib tcllib2.dir/test1.tlib TclLibAB
         chmod -w tcllib2.dir
-        list [catch {TclLibABB} msg] [crange $msg 0 25] \
-             [lrange $errorCode 0 1] \
-             [string match "*while loading Tcl library index*" $errorInfo] \
-             [string match "*while auto loading \"TclLibABB\"*" $errorInfo]
-    } 0 {1 {building package index for} {POSIX EACCES} 1 1}
-}
+        list [catch {TclLibABB} msg] [string tolower $msg]
 
+    } 0 {^1 {error while autoloading "tcllibabb": building package index for.*tcllib2.dir/test1.tlib' failed: couldn't open ".*tcllib2.dir/test1.tndx": permission denied}}
+    echo NOTE: Tcl unknown command should not lose errorCode...
+}
 TclLibCleanUp
 set auto_path [list [pwd]/tcllib1.dir [pwd]/../unix]
 
@@ -203,7 +195,7 @@ PutFile tcllib1.dir/tclIndex "# Tcl autoload index file, version 2.0" \
 
 TestReg tcllib-5.2 {missing file found with Ousterhout library index} {
     nukearray
-} 1 {^couldn't read file}
+} 1 {^error while autoloading "nukearray": couldn't read file}
 
 PutFile tcllib1.dir/nukearray.tmp {proc nukearray {} {}}
 chmod 000 tcllib1.dir/nukearray.tmp
@@ -211,7 +203,7 @@ chmod 000 tcllib1.dir/nukearray.tmp
 if {[id user] != "root"} {
     TestReg tcllib-5.3 {missing file found with Ousterhout library index} {
         nukearray
-    } 1 {^couldn't read file}
+    } 1 {^error while autoloading "nukearray": couldn't read file}
 }
 
 TclLibCleanUp

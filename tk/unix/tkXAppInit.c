@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 5.2 1996/02/12 07:21:43 markd Exp $
+ * $Id: tkXAppInit.c,v 5.3 1996/02/12 18:17:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -78,13 +78,19 @@ Tcl_AppInit (interp)
     Tcl_Interp *interp;
 #endif
 {
-    if (TclX_Init(interp) == TCL_ERROR) {
-	return TCL_ERROR;
-    }
-    if (TkX_Init(interp) == TCL_ERROR) {
+    if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tk", TkX_Init, (Tcl_PackageInitProc *) NULL);
+    if (Tclx_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    if (Tk_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+    if (Tkx_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+    Tcl_StaticPackage(interp, "Tk", Tkx_Init, (Tcl_PackageInitProc *) NULL);
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if

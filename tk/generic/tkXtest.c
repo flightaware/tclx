@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXtest.c,v 5.2 1996/02/09 18:43:57 markd Exp $
+ * $Id: tkXtest.c,v 5.3 1996/02/12 18:17:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -62,10 +62,16 @@ int
 Tcl_AppInit (interp)
     Tcl_Interp *interp;
 {
-    if (TclX_Init (interp) == TCL_ERROR) {
+    if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    if (TkX_Init(interp) == TCL_ERROR) {
+    if (Tclx_Init (interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+    if (Tk_Init(interp) == TCL_ERROR) {
+	return TCL_ERROR;
+    }
+    if (Tkx_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
     if (Tktest_Init(interp) == TCL_ERROR) {

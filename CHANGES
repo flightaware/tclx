@@ -1052,3 +1052,14 @@
 ===============================================================================
 12 Feb 96: Released TclX 7.5a Beta 1
 ===============================================================================
+14 Feb 96:
+  o Changed TclX so that it now requires the standard Tcl and Tk runtimes
+    be available.  This simplifies the code and tracking changes to Tcl
+    at the expense of slightly slower runtime initialization.  This also
+    make TclX fully dynamic loadable, including the TclX tlib package
+    library.
+  o TclX_Init and TkX_Init have been renamed to Tclx_Init and Tkx_Init to
+    conform to the dynamic loading conventions.  These routines are no longer
+    independent, the Tcl and Tk init routines must be called first.
+  o Added initialization of preliminary set of safe commands.
+-------------------------------------------------------------------------------

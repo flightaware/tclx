@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.5 1996/02/12 07:21:07 markd Exp $
+ * $Id: tclExtdInt.h,v 5.6 1996/02/12 18:15:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -292,6 +292,12 @@ Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
 
 extern void
 Tcl_ResetSignals ();
+
+extern int
+TclX_SetRuntimeLocation _ANSI_ARGS_((Tcl_Interp *interp,
+                                     char       *varName,
+                                     char       *envVar,
+                                     char       *defaultDir));
 
 extern Tcl_Channel
 TclX_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,

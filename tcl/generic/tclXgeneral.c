@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 5.2 1996/02/09 18:42:56 markd Exp $
+ * $Id: tclXgeneral.c,v 5.3 1996/02/12 18:15:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -93,7 +93,8 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     }
 
     if (STREQU ("version", argv [1])) {
-        Tcl_SetResult (interp, tclxVersion, TCL_STATIC);
+        if (tclxVersion != NULL)
+            Tcl_SetResult (interp, tclxVersion, TCL_STATIC);
         return TCL_OK;
     }
     if (STREQU ("patchlevel", argv [1])) {

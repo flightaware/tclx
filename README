@@ -79,10 +79,14 @@ redistributable, including for commercial use and resale.
    Please read the file INSTALL carefully before building and
 installing Extended Tcl.
 
-NEW FEATURES IN TCLX 7.5a
-=========================
+CHANGES IN TCLX 7.5a
+====================
 
-  o Compatibility with Tcl 7.5 / Tk 4.1 alpha.
+  o The TclX runtime is no longer independent of the standard Tcl and
+    Tk runtimes.  Tcl & Tk must be installed (or the TCL_LIBRARY and
+    TK_LIBRARY environment variables set) before building or running
+    TclX.  Tcl_Init must now be called before TclX_Init and Tk_Init
+    before TkX_Init.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -141,7 +145,7 @@ MANUAL PAGES
 
     Man pages in nroff/troff format are provided for all of Tcl and
 the extensions in the directory tclX7.5a/man.  Start with the
-TclX.man manual.
+TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
 ===========================
@@ -179,42 +183,21 @@ creation of Tcl applications and libraries of a substantial size.
 The TclX library mechanism is a super-set of the mechanism provided
 with standard Tcl.
 
-LINKING TCL APPLICATIONS
-========================
+LINKING APPLICATIONS AND EXTENSION WITH TCLX
+============================================
 
-   To build a TclX based application containing C code, start with
-either:
+   There are three basic approaches to linking TclX into applications or
+with other extensions:
 
-        src/tclXAppInit.c for just TclX
-or
-        src/tkXAppInit.c for TclX & Tk
+   o Dynamically load the C code using either 'package require' or
+     the 'load' command.
 
-and add your application initialization.  These files contain an application
-specific initialization function as well as "main".  There are comments in the
-code to guide you.  For example:
+   o Linking TclX into an application based on the standard Tcl or Tk
+     shells (tclsh or wish) or based on your own startup.
 
-  cc tclXAppInit.o mystuff.a libtclx.a libtcl.a ${TCLXLIBS} -o myapp
+   o Build an application based on the TclX shells (tcl or wishx).
 
-  cc tkXAppInit.o mystuff.a libtkx.a libtk.a libtclx.a libtcl.a ${TKXLIBS} \
-     -o myapp
-
-The *AppInit.c files are also installed in the src directory under the
-TclX/TkX master directories.
-
-The files tclxlibs.mk and tkxlibs.mk define system libraries that the TclX
-configure script thinks you should use for linking programs. These file are
-in a format that can be included from a make file.
-
-IMPORTANT NOTE:  libtclx.a must be specified on the link command line
-before libtcl.a.  If the order is reversed, incorrect command line
-parsing code will be used.
-
-DYNAMIC LOADING OF TCLX
-========================
-
-  Instead of linking a custom application based on the TclX shell, it
-is possible to dynamic load it into an application based on another
-shell.  
+See the TclXInit.3 manual page for more details.
 
 SUPPORT FOR EXTENDED TCL
 ========================
@@ -227,19 +210,14 @@ Tcl.  Please send questions, bug reports, and bug fixes to:
 WHERE TO GET IT
 ===============
 
-Tcl & Tk is available via anonymous ftp from:
-
-   ftp.cs.berkeley.edu:/ucb/tcl/[tcl7.5.tar.Z tk4.1.tar.Z]
-or
-   ftp.neosoft.com:/pub/tcl/distrib/[tcl7.5.tar.gz tk4.1.tar.gz]
-or
-   ftp.uu.net:languages/tcl/[tcl7.5.tar.Z tk4.1.tar.Z]
-
 Extended Tcl 7.5a can be downloaded by anonymous FTP from:
 
    ftp.neosoft.com:/pub/tcl/distrib/tclX7.5a.tar.gz
 or
    ftp.aud.alcatel.com:tcl/extensions/tclX7.5a.tar.gz
+
+Always check ftp.neosoft.com first, as there is often a delay in
+updating the Alcatel archives.
 
 A contributed sources archive resides on ftp.aud.alcatel.com and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently
@@ -253,8 +231,8 @@ THANKS
 
   A big thanks to all of the Extended Tcl users from all over the world
 who have helped us debug problems and given us valuable suggestions.
-A special thanks to John Ousterhout for Tcl, Tk and all the support he
-has given us.
+A special thanks to John Ousterhout and his team at Sun for Tcl, Tk and
+all the support they have given us.
 
 
 NEOSOFT TCL CONSULTING

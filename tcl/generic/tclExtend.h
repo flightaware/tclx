@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.8 1996/02/12 07:21:10 markd Exp $
+ * $Id: tclExtend.h,v 5.9 1996/02/12 18:15:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -46,8 +46,8 @@ extern int   tclAppPatchlevel;   /* Patchlevel of the application           */
 
 /*
  * Used to override the init file name, which is either library relative or
- * absolute.  The value fields must be changed before TclX_Init or
- * TclXLib_Init is called.  To change the library location,
+ * absolute.  The value fields must be changed before Tclx_Init or
+ * Tclxlib_Init is called. 
  */
 extern char *tclX_library;     /* Library directory to use.        */
 extern char *tclX_libraryEnv;  /* Override environment variable.   */
@@ -87,22 +87,10 @@ TclX_Main _ANSI_ARGS_((int              argc,
                        Tcl_AppInitProc *appInitProc));
 
 EXTERN int
-TclX_Init _ANSI_ARGS_((Tcl_Interp *interp));
-
-EXTERN int
-TclX_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
-
-EXTERN int
 Tclx_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN int
 Tclx_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
-
-EXTERN int
-TclXCmd_Init _ANSI_ARGS_((Tcl_Interp *interp));
-
-EXTERN int
-TclXCmd_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN int
 Tclxcmd_Init _ANSI_ARGS_((Tcl_Interp *interp));
@@ -111,7 +99,7 @@ EXTERN int
 Tclxcmd_SafeInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN int
-TclXLib_Init _ANSI_ARGS_((Tcl_Interp *interp));
+Tclxlib_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 EXTERN void
 TclX_ErrorExit _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -240,13 +228,10 @@ Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
  *
  * The variables are Used to override the library and library environment
  * variable used to find the TkX startup file and runtime library.  The values
- * of these fields must be changed before TkX_Init is called.
+ * of these fields must be changed before Tkx_Init is called.
  */
 extern char *tkX_library;
 extern char *tkX_libraryEnv;
-
-EXTERN int
-TkX_Init _ANSI_ARGS_((Tcl_Interp  *interp));
 
 EXTERN int
 Tkx_Init _ANSI_ARGS_((Tcl_Interp  *interp));

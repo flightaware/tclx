@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.7 1996/02/09 18:43:59 markd Exp $
+# $Id: Makefile.in,v 5.8 1996/02/12 07:21:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -57,9 +57,6 @@ LIBTCLX = ../../tcl/unix/libtclx.a
 
 HELP_DIR = ${srcbasedir}/tk/help
 
-DEMOSSRC  = ${TK_SRC}/library/demos
-DEMOPROGS = browse hello ixset rmt rolodex square tcolor timer widget
-
 TEST_OBJS = tktest.o tkSquare.o tkXtest.o
 
 #------------------------------------------------------------------------------
@@ -67,7 +64,7 @@ TEST_OBJS = tktest.o tkSquare.o tkXtest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtkx.a wishx RUNTIME tktest runtest ${bldbasedir}/tk/tests
+all: libtkx.a wishx tclhelp help.tmp tktest runtest ${bldbasedir}/tk/tests
 
 wishx: tkXAppInit.o libtkx.a ${LIBTK} ${TCL_LIB} ${TK_LIB}
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
@@ -99,34 +96,10 @@ shlink:
 	    (rm -f wishx; exit 1)
 
 #------------------------------------------------------------------------------
-# Generate the runtime .tlib library in the current directory.  Copy other
-# runtime files into this directory so it can be used as a temporary runtime
-# directory before installation.  Also need "help" and "demos" directory here
-# so that the help and tkdemo commands will work before installation.
-# Normally just symlink, unless we don't have them.
+# We need the "help" directory here so that the help command will work before
+# installation. Normally just symlink, unless we don't have them.
 #
-RUNTIME: tk.tlib tk.tndx tk.tcl prolog.ps tclhelp help demos
-
-tk.tlib: ${TK_SRC}/library/tclIndex ${srcdir}/../runtime/tkdemo.tcl
-	rm -f tk.tlib tk.tndx
-	${CONVERTLIB} ${TK_SRC}/library/tclIndex tk.tlib
-	rm -f tk.tndx
-	cat ${srcdir}/../runtime/tkdemo.tcl >>tk.tlib
-
-tk.tndx: tk.tlib
-	${GENTNDX} tk.tlib
-
-# Update tk.tcl to autoload from our library rather than explictly source
-# the files.  We pick an entry point in each file to force it to be brought
-# in.
-tk.tcl: ${TK_SRC}/library/tk.tcl
-	rm -f tk.tcl
-	sed -f ${srcdir}/../runtime/tk.tcl.sed \
-	    ${TK_SRC}/library/tk.tcl >tk.tcl
-
-prolog.ps: ${TK_SRC}/library/prolog.ps
-	rm -f prolog.ps
-	cp ${TK_SRC}/library/prolog.ps prolog.ps
+RUNTIME: tclhelp help.tmp
 
 tclhelp: ${srcdir}/../runtime/tclhelp.tcl
 	rm -f tclhelp
@@ -134,11 +107,8 @@ tclhelp: ${srcdir}/../runtime/tclhelp.tcl
 	cat ${srcdir}/../runtime/tclhelp.tcl >>tclhelp
 	chmod +rx tclhelp
 
-#------------------------------------------------------------------------------
-# Need a "help" and "demos" directories in this directory so that the help and
-# tkdemo commands will work before installation.  Normaly just symlink, unless
-# we don't have them.# (Must enforce master dir being there, as a dependency
-# on make.tmp causes it to be always rebuilt).
+help.tmp: help
+	touch help.tmp
 
 help:
 	if [ "@HAVE_SYML@" = "YES" ]; then \
@@ -148,16 +118,6 @@ help:
 	    rm -rf help ;\
 	    (cd ${HELP_DIR}; tar -cf - help) | tar -xf - ;\
 	fi
-
-demos:
-	if [ ! -d demos ] ; then mkdir demos ; else exit 0; fi
-	${INSTCOPY} ${DEMOSSRC} demos
-	@for i in $(DEMOPROGS); \
-	    do \
-	    rm -f demos/$$i; \
-	    sed -e "s/^exec wish/exec wishx"/ ${DEMOSSRC}/$$i >demos/$$i; \
-	    chmod 755 demos/$$i; \
-	done;
 
 #------------------------------------------------------------------------------
 # Generate the test program.
@@ -216,7 +176,8 @@ ${bldbasedir}/tk/tests:
 # Run the UCB tests with wishx.
 
 test: all
-	echo "cd ${TK_SRC}/tests; source all; exit" | ./runtest -n tktest
+	echo "cd ${TK_SRC}/tests; source all; exit" | 
+	    ./runtest -n tktest -geometry +0+0
 
 #------------------------------------------------------------------------------
 # Build help for Tk.  These files are normally part of the distribution and
@@ -233,11 +194,7 @@ buildhelp:
 install: install-exec install-runtime
 
 install-runtime:
-	${INSTCOPY} tk.tcl tk.tlib tk.tndx ${INSTALL_ROOT}${TKX_INST_MASTER}
-	${INSTCOPY} ${TK_SRC}/library/prolog.ps \
-	    ${INSTALL_ROOT}${TKX_INST_MASTER}
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_MASTER}/help
-	${INSTCOPY} demos ${INSTALL_ROOT}${TKX_INST_MASTER}/demos
 
 install-exec:
 	${INSTCOPY} wishx ${INSTALL_ROOT}${TCL_BINDIR}
@@ -275,8 +232,7 @@ install-master-exec:
 #------------------------------------------------------------------------------
 clean:
 	-rm -f tkXAppInit.o ${OBJS} ${TEST_OBJS} wishx libtkx.a
-	-rm -f tktest.c tkSquare.c
-	-rm -rf tk.tlib tk.tndx tk.tcl prolog.ps tclhelp help demos
+	-rm -f tktest.c tkSquare.c tclhelp help help.tmp
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

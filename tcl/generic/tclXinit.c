@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.6 1996/02/09 18:42:58 markd Exp $
+ * $Id: tclXinit.c,v 5.7 1996/02/12 18:15:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,8 +38,7 @@ static int
 InitSetup _ANSI_ARGS_((Tcl_Interp *interp));
 
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * TclX_ErrorExit --
  *
  * Display error information and abort when an error is returned in the
@@ -90,8 +89,7 @@ TclX_ErrorExit (interp, exitCode)
     Tcl_Exit (exitCode);
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * InsureVarExists --
  *
  *   Insure that the specified global variable exists.
@@ -119,8 +117,7 @@ InsureVarExists (interp, varName, defaultValue)
     return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
  * ProcessInitFile --
  *
  *   Evaluate the TclX initialization file (normally TclInit.tcl in the
@@ -206,9 +203,7 @@ ProcessInitFile (interp)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * InitSetup --
  *
  *   So setup common to both normal and safe initialization.
@@ -231,26 +226,24 @@ InitSetup (interp)
 }
 
 
-/*
- *-----------------------------------------------------------------------------
- *
- * TclX_Init --
+/*-----------------------------------------------------------------------------
+ * Tclx_Init --
  *
  *   Initialize all Extended Tcl commands, set auto_path and source the
  * Tcl init file.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_Init (interp)
+Tclx_Init (interp)
     Tcl_Interp *interp;
 {
     if (InitSetup (interp) == TCL_ERROR)
         goto errorExit;
 
-    if (TclXCmd_Init (interp) == TCL_ERROR)
+    if (Tclxcmd_Init (interp) == TCL_ERROR)
         goto errorExit;
 
-    if (TclXLib_Init (interp) == TCL_ERROR)
+    if (Tclxlib_Init (interp) == TCL_ERROR)
         goto errorExit;
 
     /*
@@ -270,22 +263,20 @@ TclX_Init (interp)
 }
 
 
-/*
- *-----------------------------------------------------------------------------
- *
- * TclX_SafeInit --
+/*-----------------------------------------------------------------------------
+ * Tclx_SafeInit --
  *
  *   Initialize safe Extended Tcl commands.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_SafeInit (interp)
+Tclx_SafeInit (interp)
     Tcl_Interp *interp;
 {
     if (InitSetup (interp) == TCL_ERROR)
         goto errorExit;
 
-    if (TclXCmd_SafeInit (interp) == TCL_ERROR)
+    if (Tclxcmd_SafeInit (interp) == TCL_ERROR)
         goto errorExit;
 
     return TCL_OK;
@@ -296,32 +287,63 @@ TclX_SafeInit (interp)
     return TCL_ERROR;
 }
 
-/*
- *-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * TclX_SetRuntimeLocation --
  *
- * Tclx_Init, Tclx_SafeInit --
+ * Set the value of a *_library Tcl variable and add the directory to the
+ * auto_path.
  *
- *   Interface to TclX_Init and TclX_SafeInit that follows the Tcl dynamic
- * loading naming conventions.
+ * Parameters:
+ *   o interp (I) - A pointer to the interpreter.
+ *   o varName (I) - Name of the variable to set.
+ *   o envVar (I) - Override environment variable (maybe NULL).
+ *   o defaultDir (I) - Default value to set the variable to (maybe NULL).
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ * Alogrithm:
+ *   o If the Tcl variable is already set, do nothing.
+ *   o If the name of an environment variable is supplied and that env var
+ *     exists, use the environment variable to set the Tcl variable.
+ *   o If a default is supplied for the variable, set it to the default.
+ *   o If the Tcl variable was set, add it to the auto_path.
  *-----------------------------------------------------------------------------
  */
 int
-Tclx_Init (interp)
+TclX_SetRuntimeLocation (interp, varName, envVar, defaultDir)
     Tcl_Interp *interp;
+    char       *varName;
+    char       *envVar;
+    char       *defaultDir;
 {
-    return TclX_Init (interp);
-}
+    char *libDir = NULL;
 
-int
-Tclx_SafeInit (interp)
-    Tcl_Interp *interp;
-{
-    return TclX_SafeInit (interp);
+    if (Tcl_GetVar (interp, varName, TCL_GLOBAL_ONLY) != NULL)
+        return TCL_OK;
+
+    if (envVar != NULL) {
+        libDir = Tcl_GetVar2 (interp, "env", envVar, TCL_GLOBAL_ONLY);
+    }
+    if (libDir == NULL) {
+        libDir = defaultDir;
+    }
+    if (libDir == NULL)
+        return TCL_OK;
+
+    if (Tcl_SetVar (interp, varName, libDir,
+                    TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
+        return TCL_ERROR;
+
+    if (libDir [0] == '\0')
+        return TCL_OK;  /* No library, don't modify path */
+
+    if (Tcl_SetVar (interp, "auto_path", libDir,
+                    TCL_GLOBAL_ONLY  | TCL_APPEND_VALUE |
+                    TCL_LIST_ELEMENT | TCL_LEAVE_ERR_MSG) == NULL)
+        return TCL_ERROR;
+    return TCL_OK;
 }
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * TclX_EvalRCFile --
  *
  * Evaluate the file stored in tcl_RcFileName it is readable.  Exit if an

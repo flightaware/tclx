@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.4 1996/02/12 07:21:44 markd Exp $
+ * $Id: tkXshell.c,v 5.5 1996/02/12 18:17:19 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -127,6 +127,13 @@ TkX_Main(argc, argv, appInitProc)
     inChannel = Tcl_GetChannel(interp, "stdin", NULL);
     outChannel = Tcl_GetChannel(interp, "stdout", NULL);
     errChannel = Tcl_GetChannel(interp, "stderr", NULL);
+
+    /*
+     * Initialize information returned by infox.
+     */
+    tclAppName     = "Wishx";
+    tclAppLongname = "Extended Tk Shell - Wishx";
+    tclAppVersion  = TK_VERSION;
 
     /*
      * Parse command-line arguments.  A leading "-file" argument is

@@ -12,13 +12,13 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 5.2 1995/11/10 06:50:40 markd Exp $
+.\" $Id: TclXInit.3,v 5.3 1996/01/10 21:30:16 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
 .ad b
 .SH NAME
-TclX_Init, TclXCmd_Init, TclXLib_Init, TclX_Main, TkX_Init, TkX_Main - Extended Tcl initialization.
+Tclx_Init, Tclxcmd_Init, TclX_Main, Tkx_Init, TkX_Main - Extended Tcl initialization.
 '
 .SH SYNOPSIS
 .nf
@@ -33,30 +33,16 @@ extern char *tclAppVersion;
 extern int   tclAppPatchlevel;
 
 int
-Tcl_AppInit (Tcl_Interp *interp);
-
-int
-TclX_Init (Tcl_Interp *interp);
-
-int
 Tclx_Init (Tcl_Interp *interp);
-
-int
-TclXCmd_Init (Tcl_Interp *interp);
 
 int
 Tclxcmd_Init (Tcl_Interp *interp);
 
 int
-TclXLib_Init (Tcl_Interp *interp);
-
 void
 TclX_Main (int               argc,
            char            **argv,
            Tcl_AppInitProc  *appInitProc);
-
-int
-TkX_Init (Tcl_Interp *interp);
 
 int
 Tkx_Init (Tcl_Interp *interp);
@@ -118,46 +104,14 @@ If set to an absolute path, it is not assumed to be in the TclX library
 directory and is independent of a library path being specified.
 If set to NULL, not initialization file is evaluated.
 '
-.SS Tcl_AppInit
-.PP
-This function is used to initialize an TclX based application.
-It is intended to
-the the only file that is modified for most applications.
-There are two versions of this function, one for applications built on
-just TclX and the other for applications built on TclX and Tk.
-.PP
-The TclX version of this function is found in \fBtclXAppInit.c\fR and the 
-Tk version is found in \fBtkXAppInit.c\fR.  It should be modified according to
-the instructions in these files to initialize a TclX based application.
-.PP
-A custom application is then linked in a manner similar to:
-.sp
-.nf
-.ft CW
-  cc tclXAppInit.o mystuff.a libtclx.a libtcl.a ${SYSLIBS} -o myapp
-.ft R
-.fi
-.sp
-or
-.sp
-.nf
-.ft CW
-  cc tkXAppInit.o mystuff.a libtkx.a libtk.a libtclx.a libtcl.a \\
-     ${SYSLIBS} -o myapp
-.ft R
-.fi
-'
-.SS "TclX_Init, Tclx_Init"
+.SS "Tclx_Init"
 .PP
 Initializes Extended Tcl, adding the extended command set to the interpreter.
-This is called from \fBTcl_AppInit\fR.  Normally, this function is used in
-an application in place of the \fBTcl_Init\fR function.  If used in this
-way, the UCB Tcl run time environment is not required and startup will be
-faster.  This function may also be called after \fBTcl_Init\fR has been called.
-In this case, the Tcl library mechanism defined in \fBinit.tcl\fR will be
-replaced with the TclX mechanism.  The function is also available under the
-name \fBTclx_Init\fR, which conforms to the Tcl \fBload\fR command package
-naming conventions.
+This is called from \fBTcl_AppInit\fR.  This function must be called after
+the \fBTcl_Init\fR function.  In addition to the standard command set, it
+enables use of tlib packages libraries and makes the standard TclX library
+available.
+
 .PP
 Parameters
 .RS 2
@@ -169,30 +123,12 @@ Returns:
 \fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS "TclXCmd_Init, Tclxcmd_Init"
+.SS "Tclxcmd_Init"
 .PP
 Add the TclX command set to the interpreter, with the exception of the
 TclX library management commands.  This is normally called by
-\fBTclX_Init\fR and should only be used if you don't want the TclX library
-handling.  The function is also available under the
-name \fBTclxcmd_Init\fR, which conforms to the Tcl \fBload\fR command package
-naming conventions.
-.PP
-Parameters
-.RS 2
-\fBo \fIinterp\fR - A pointer to the interpreter to add the commands to.
-.RE
-.PP
-Returns:
-.RS 2
-\fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
-.RE
-'
-.SS TclXLib_Init
-.PP
-Add the TclX library management commands to the interpreter.
-This is normally called by \fBTclX_Init\fR.  It also sets the Tcl variable
-"tclx_library" to TclX library directory.
+\fBTclx_Init\fR and should only be used if you don't want the TclX library
+handling.
 .PP
 Parameters
 .RS 2
@@ -215,18 +151,10 @@ or enters an interactive command loop.
 This procedure never returns, it exits the process when it's done.  Using
 the TclX shell also gives you SIGINT handling in interactive shells.
 '
-.SS "TkX_Init, Tkx_Init"
+.SS "Tkx_Init"
 .PP
 Initializes Extended Tcl Tk environment.
-This is called from \fBTcl_AppInit\fR.  Normally, this function is used in
-an application in place of the \fBTk_Init\fR function.  If used in this
-way, the UCB Tk run time environment is not required and startup will be
-faster.  This function may also be called after \fBTk_Init\fR has been called.
-In this case, the TclX Tk runtime environment will not be used or required.
-The function is also available under the name \fBTkx_Init\fR, which conforms
-to the Tcl \fBload\fR command package naming conventions.  However, there
-is probably no good reason to dynamically load this function, as it only
-provides standard \fBTk_Init\fR functionallity for the \fBTkX_Main\fR shell.
+This is called from \fBTcl_AppInit\fR after the \fBTk_Init\fR function.
 .PP
 Parameters
 .RS 2
@@ -252,27 +180,12 @@ otherwise it is identical to standard wish.
 '
 .SH "INTEGRATING TCLX WITH OTHER EXTENSIONS AND APPLICATIONS"
 .PP
-There are two aspects to integrating TclX with other applications. Does
-the application use the Tcl/Tk standard runtime or rely only on the 
-TclX runtime and are the Tcl and Tk shells based on the standard Tcl/Tk shells
-or the TclX shells.  The tclAppInit.c is the only file that will normally
-need to be modified.
-.PP
-The normal approach to add TclX to an application is to replace the
-calls to \fBTcl_Init\fR with \fBTclX_Init\fR and  \fBTk_Init\fR with
-\fBTkX_Init\fR.  TclX has a functional superset of the Tcl and Tk
-runtimes.  The TclX, used alone, does not require the standard
-runtime environments to be installed on the system.  It supports faster
-auto loading of the runtime routines and has support for multiple
-version of TclX being installed (use master directory install option
-for most flexability).  However, some people are more comfortable
-adding Tcl in the same way as other extensions.  That is, calling
-\fBTclX_Init\fR after \fBTcl_Init\fR and \fBTkX_Init\fR after \fBTk_Init\fR.
-Currently, calling \fBTkX_Init\fR is unnecessary if the \fBTk_Init\fR has
-been called.
-.PP
-If only the TclX command set, but not the procedure library and runtime
-is desired, then \fBTclXCmd_Init\fR is called after \fBTcl_Init\fR.
+The main aspects to integrating TclX with into an application is to
+decide if the application is based on the standard Tcl/Tk shells or the
+TclX shells.  If the standard shells are desired, then all that is
+necessary is to call \fBTclx_Init\fR after \fBTcl_Init\fR and 
+ \fBTkx_Init\fR after \fBTk_Init\fR.  This functionallity may also be 
+dynamically loaded.
 .PP
 To get the TclX shell in a Tcl only application, with the \fBtcl\fR command
 functionallity, call \fBTclX_Main\fR from the \fBmain\fR function instead of

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 5.2 1996/02/12 07:21:12 markd Exp $
+ * $Id: tclXAppInit.c,v 5.3 1996/02/12 18:15:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -78,10 +78,13 @@ Tcl_AppInit (interp)
     Tcl_Interp *interp;
 #endif
 {
-    if (TclX_Init (interp) == TCL_ERROR) {
+    if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
-    Tcl_StaticPackage (interp, "Tclx", TclX_Init, TclX_SafeInit);
+    if (Tclx_Init (interp) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+    Tcl_StaticPackage (interp, "Tclx", Tclx_Init, Tclx_SafeInit);
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -94,10 +97,6 @@ Tcl_AppInit (interp)
      * where "app" is the name of the application.  If this line is deleted
      * then no user-specific startup file will be run under any conditions.
      */
-#if (TCL_MINOR_VERSION < 5)
-    tcl_RcFileName = "~/.tclrc";
-#else
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclrc", TCL_GLOBAL_ONLY);
-#endif
     return TCL_OK;
 }

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.6 1996/02/09 18:43:51 markd Exp $
+# $Id: Makefile.in,v 5.7 1996/02/12 07:21:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -77,10 +77,7 @@ TLIB_SRCS = ${RUNTIME_DIR}/arrayprocs.tcl \
 	    ${RUNTIME_DIR}/stringfile.tcl \
 	    ${RUNTIME_DIR}/tcllib.tcl \
 	    ${RUNTIME_DIR}/fmath.tcl \
-	    ${RUNTIME_DIR}/tclshell.tcl \
-	    ${RUNTIME_DIR}/buildhelp.tcl \
-	    ${RUNTIME_DIR}/parray.tcl \
-	    ${TCL_LIBRARY_DIR}/parray.tcl
+	    ${RUNTIME_DIR}/buildhelp.tcl
 
 HELP_DIR = ${srcbasedir}/tcl/help
 
@@ -256,7 +253,7 @@ tclXAppInit++.C: ${TCLX_GENERIC_DIR}/tclXAppInit.c
 # the help command will work before installation.  Normally just symlink,
 # unless we don't have them.
 #
-RUNTIME: tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help
+RUNTIME: tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help.tmp
 
 tcl.tlib: ${TLIB_SRCS}
 	-rm -f tcl.tlib tcl.tndx
@@ -276,6 +273,9 @@ buildidx.tcl: ${RUNTIME_DIR}/buildidx.tcl
 loadouster.tcl: ${RUNTIME_DIR}/loadouster.tcl
 	rm -f loadouster.tcl
 	cp ${RUNTIME_DIR}/loadouster.tcl loadouster.tcl
+
+help.tmp: help
+	touch help.tmp
 
 help:
 	if [ "@HAVE_SYML@" = "YES" ]; then \
@@ -306,8 +306,8 @@ tclTest.c: ${TCL_SRC}/generic/tclTest.c
 
 runtest: Makefile
 	@echo '#!/bin/sh'                                           >runtest
-	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
 	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest
+	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tclXtest"          >>runtest
 	@echo "export TCLX_LIBRARY TCL_PROGRAM TCL_LIBRARY"        >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
@@ -410,8 +410,8 @@ clean:
 	-rm -f tclXAppInit.o tclTest.c
 	-rm -f ${OBJS} libtclx.a tcl tcl++ checkup.done
 	-rm -f tclXAppInit++.C TCLXX_O_YES TCLXX_O_NO tclXAppInit++.o tcl++.o
-	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help
-	-rm -f ${TEST_OBJS} tclXtest runtest
+	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl
+	-rm -f help help.tmp ${TEST_OBJS} tclXtest runtest
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

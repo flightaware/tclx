@@ -251,14 +251,12 @@
 ./tcl/runtime/globrecur.tcl
 ./tcl/runtime/help.tcl
 ./tcl/runtime/loadouster.tcl
-./tcl/runtime/parray.tcl
 ./tcl/runtime/profrep.tcl
 ./tcl/runtime/pushd.tcl
 ./tcl/runtime/setfuncs.tcl
 ./tcl/runtime/showproc.tcl
 ./tcl/runtime/stringfile.tcl
 ./tcl/runtime/tcllib.tcl
-./tcl/runtime/tclshell.tcl
 ./tcl/tests/all
 ./tcl/tests/arrayproc.test
 ./tcl/tests/bsearch.test
@@ -361,7 +359,6 @@
 ./tk/help/tk/widgets/tk_popup
 ./tk/help/tk/widgets/toplevel
 ./tk/runtime/tclhelp.tcl
-./tk/runtime/tk.tcl.sed
 ./tk/runtime/tkdemo.tcl
 ./tk/tests/signal.test
 ./tk/unix/Makefile.in
