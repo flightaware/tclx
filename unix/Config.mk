@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 7.2 1996/09/04 17:15:13 markd Exp $
+# $Id: Config.mk,v 7.3 1996/10/19 18:24:09 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -45,7 +45,6 @@
 # Other macros used in file paths:
 #   o TCLX_FULL_VERSION is the full TclX version.
 #   o TKX_FULL_VERSION is the full TkX version.
-#   o ARCH is either ".arch", as specified to configure, or empty.
 #   o prefix and exec_prefix.
 #------------------------------------------------------------------------------
 
@@ -136,14 +135,14 @@ TKX_INST_RUNTIME=${TKX_PREFIX}/lib/tkX${TKX_FULL_VERSION}
 #------------------------------------------------------------------------------
 # The directories to install the executables in.
 
-TCLX_INST_BIN=${TCLX_EXEC_PREFIX}/bin${ARCH}
-TKX_INST_BIN=${TKX_EXEC_PREFIX}/bin${ARCH}
+TCLX_INST_BIN=${TCLX_EXEC_PREFIX}/bin
+TKX_INST_BIN=${TKX_EXEC_PREFIX}/bin
 
 #------------------------------------------------------------------------------
 # The directories to install the libraries in.
 
-TCLX_INST_LIB=${TCLX_EXEC_PREFIX}/lib${ARCH}
-TKX_INST_LIB=${TKX_EXEC_PREFIX}/lib${ARCH}
+TCLX_INST_LIB=${TCLX_EXEC_PREFIX}/lib
+TKX_INST_LIB=${TKX_EXEC_PREFIX}/lib
 
 #------------------------------------------------------------------------------
 # The directories the TclX include files are installed.

@@ -102,12 +102,6 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           Note: The source directory must be clean, it can't contain a built
           copy of TclX.
 
-        o --with-arch=ARCH
-          Append the suffix .ARCH to the bin and lib installation directories.
-          This is an alternative to --exec-prefix for setting up a server
-          for multiple CPU architectures.  ARCH is typically a string such
-          as "i386" or "SPARC".
-
         o --prefix=PREFIX
           Directory under which the "include" and "man" directories are
           found for installation. 
@@ -116,7 +110,7 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           Directory under which the "bin" and "lib" directories are
           found for installation.  
 
-    o If you decide to change the --with-arch, --prefix or --execprefix,
+    o If you decide to change the --prefix or --execprefix option,
       just rerun configure and make.  The dependencies will cause the
       correct files to be built.
  
@@ -316,11 +310,6 @@ BSDI:
      priority for non-root users.  This causes nice test 1.7 to fail.
 
    o Also seee the 386BSD/BSDI section below.
-
-   o There is some problem in the configure parsing of the --with-arch option.
-     The syntax "./configure --arch=XXX" will not work, use
-     "./configure --arch XXX" instead.
-
 
 386BSD/NetBSD:
    o Expect round off errors in floating point math tests.

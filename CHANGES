@@ -1219,4 +1219,9 @@
     new file subcommands. Compatbility with these commands is still supported
     for old scripts via procedures in the TclX library.
 -------------------------------------------------------------------------------
-
+19 Oct 96:
+  o Modified to build pkgIndex.tcl files and install them so that Tcl
+    auto_loading will find them.
+  o Removed --arch configure option.  With new pkgIndex.tcl changes, its not
+    much good unless Tcl and Tk supported it.
+-------------------------------------------------------------------------------

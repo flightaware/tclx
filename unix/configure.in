@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.4 1996/10/18 02:48:16 markd Exp $
+dnl $Id: configure.in,v 7.5 1996/10/19 18:24:12 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.4 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.5 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -72,19 +72,6 @@ fi
 if test ! -d ../tk/unix ; then
    mkdir ../tk/unix || exit 1
 fi
-
-#------------------------------------------------------------------------------
-# Check command line looking for the --with-arch= option.
-#------------------------------------------------------------------------------
-
-AC_ARG_WITH(arch,
-    [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
-                      and lib directory names],
-    [TCLX_ARCH=.$withval
-     AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
-    ],
-    [AC_MSG_RESULT("No architecture suffix will be used")])
-AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
 # Check command line looking for the --with-tk=YES/NO option.
@@ -163,7 +150,6 @@ echo "srcbasedir=$srcbasedir" >>confmakefile
 echo "bldbasedir=$bldbasedir" >>confmakefile
 echo "prefix=$prefix" >>confmakefile
 echo "exec_prefix=$exec_prefix" >>confmakefile
-echo "ARCH=$TCLX_ARCH" >>confmakefile
 echo "all:" >>confmakefile
 echo '	@echo TCL_CONFIG=\"${TCL_CONFIG}\"' >>confmakefile
 echo '	@echo TK_CONFIG=\"${TK_CONFIG}\"' >>confmakefile

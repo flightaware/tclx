@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 7.0 1996/06/16 05:34:09 markd Exp $
+# $Id: Common.mk.in,v 7.1 1996/10/04 04:25:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,7 +41,6 @@ bldbasedir   = @bldbasedir@
 VPATH        = ${srcdir}
 prefix       = @prefix@
 exec_prefix  = @exec_prefix@
-ARCH         = @TCLX_ARCH@
 
 #------------------------------------------------------------------------------
 # TclX configuration information determined by configure.
