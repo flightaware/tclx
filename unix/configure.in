@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.8 1996/11/08 23:18:21 markd Exp $
+dnl $Id: configure.in,v 7.9 1996/11/16 08:05:25 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.8 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.9 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -303,8 +303,10 @@ case "$TCL_SHLIB_SUFFIX" in
          ;;
    *..o) VERSION=""
          TCLX_SHLIB_BASE_NAME=libtclx..o
+         VERSION=${TCLX_SHLIB_VERSION}
          eval "TCLX_SHLIB_NAME=libtclx${TCL_SHARED_LIB_SUFFIX}"
          TKX_SHLIB_BASE_NAME=libtkx..o
+         VERSION=${TKX_SHLIB_VERSION}
          eval "TKX_SHLIB_NAME=libtkx${TCL_SHARED_LIB_SUFFIX}"
          ;;
       *) TCLX_SHLIB_BASE_NAME=""
