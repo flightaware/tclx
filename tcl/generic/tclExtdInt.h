@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.19 1993/08/05 06:41:55 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.20 1993/08/18 06:12:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -61,9 +61,12 @@
 #ifdef NO_VALUES_H
 #    include <math.h>
 #    include <limits.h>
-#    define MAXDOUBLE HUGE_VAL
 #else
 #    include <values.h>
+#endif
+
+#ifndef MAXDOUBLE
+#    define MAXDOUBLE HUGE_VAL
 #endif
 
 #include <grp.h>
