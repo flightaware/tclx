@@ -138,6 +138,9 @@
 /* Define if catclose is type void instead of int */
 #undef BAD_CATCLOSE
 
+/* Define struct msghdr contains the msg_accrights field */
+#undef HAVE_MSG_ACCRIGHTS
+
 /* Define if you have the bcopy function.  */
 #undef HAVE_BCOPY
 
