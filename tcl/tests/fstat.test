@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fstat.test,v 1.5 1992/10/05 05:09:15 markd Exp markd $
+# $Id: fstat.test,v 2.0 1992/10/16 04:49:50 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -68,7 +68,7 @@ Test fstat-2.3 {keyed list returns} {
 
 Test fstat-3.1 {individual item returns} {
     set old [fstat $gorpFH mtime]
-    exec sleep 2
+    sleep 2
     puts $gorpFH "More text"
     flush $gorpFH
     set new [fstat $gorpFH mtime]
