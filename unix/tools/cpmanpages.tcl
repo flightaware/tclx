@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: installTcl.tcl,v 2.8 1993/06/06 15:05:35 markd Exp $
+# $Id: cpmanpages.tcl,v 1.1 1993/06/28 14:57:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -242,7 +242,7 @@ switch -- $manType {
     }
     TK {
         puts stdout "Copying Tk manual pages to tkmaster/man"
-        set sourceFiles [glob ../$config(TCL_TK_DIR)/doc/*]
+        set sourceFiles [glob ../$config(TK_UCB_DIR)/doc/*]
         set destDir ../tkmaster/man
         set sectionXRef(.n)   $config(TK_MAN_CMD_SECTION)
         set sectionXRef(.man) $config(TK_MAN_CMD_SECTION)
@@ -262,7 +262,7 @@ foreach sourceFile $sourceFiles {
 
     set ext [file extension $sourceFile]
     if ![info exists sectionXRef($ext)] {
-        puts stderr "WARNING: Don't know how to install $sourceFile"
+        puts stderr "WARNING: Don't know how to handle section for $sourceFile,"
         continue
     }
     InstallManPage $sourceFile $destDir $sectionXRef($ext)
