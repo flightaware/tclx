@@ -1,3 +1,9 @@
+2004-11-22  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* doc/TclX.n: minor typo fixes
+
+	* generic/tclExtdInt.h: [Bug 1066799] (dgp)
+
 2004-07-14  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclXselect.c: undef panic on __APPLE__ (steffen)

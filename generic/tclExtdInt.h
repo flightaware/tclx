@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 1.3 2002/09/26 00:19:18 hobbs Exp $
+ * $Id: tclExtdInt.h,v 1.4 2004/06/04 16:17:37 andreas_kupries Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,6 +29,16 @@
 #   include "tclXwinPort.h"
 #else
 #   include "tclXunixPort.h"
+#endif
+
+/*
+ * Internal interp flags compatibility - removed in Tcl 8.5 sources.
+ */
+#ifndef ERR_IN_PROGRESS
+#define ERR_IN_PROGRESS	2
+#endif
+#ifndef ERROR_CODE_SET
+#define ERROR_CODE_SET 8
 #endif
 
 /*
