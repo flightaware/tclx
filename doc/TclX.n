@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.20 1995/05/28 18:54:38 markd Exp markd $
+.\" $Id: TclX.n,v 4.21 1995/06/08 19:33:20 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -511,7 +511,7 @@ is interpreted on a 24-hour clock.
 - A specific month and day with optional year.
 The acceptable formats are
 .IR mm/dd [ /yy ],
-.IR yyyy/mm/dd ,
+.\" (Does not work): .IR yyyy/mm/dd ,
 .IR "monthname dd" "[, " yy ],
 .IR "dd monthname" " [" yy "],
 and
