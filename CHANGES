@@ -1292,4 +1292,7 @@
   o Deprecated the copyfile command in favor of the fcopy command. 
     Compatability with copyfile is still supported for old scripts via a
     procedure in the TclX library.
--------------------------------------------------------------------------------
+  o All commands now use the Tcl_Obj API.
+===============================================================================
+08 Jul 97: Released TclX 8.0.0 Beta 2
+===============================================================================
