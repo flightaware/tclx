@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.3 1997/06/25 08:23:39 markd Exp $
+ * $Id: tclXutil.c,v 8.4 1997/06/25 16:58:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1194,7 +1194,6 @@ TclX_WrongArgs (interp, commandNameObj, string)
     return TCL_ERROR;
 }
 
-
 
 /*-----------------------------------------------------------------------------
  * TclX_StringAppendObjResult --
@@ -1229,4 +1228,44 @@ TclX_StringAppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
     va_end(argList);
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_IsNullObj --
+ *
+ *   Check if an object is {}, either in list or zero-lemngth string form, with
+ * out forcing a conversion.
+ *
+ * Parameters:
+ *   o objPtr (I) - Object to check.
+ * Returns:
+ *   True if NULL, FALSE if not.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_IsNullObj (objPtr)
+    Tcl_Obj *objPtr;
+{
+    static Tcl_ObjType *listType = NULL, *stringType = NULL;
+    int length;
+    
+    /*
+     * Only get types once, as they must be static.
+     */
+    if (listType == NULL) {
+        listType = Tcl_GetObjType ("list");
+        stringType = Tcl_GetObjType ("string");
+    }
 
+    if ((objPtr->typePtr == NULL) && (objPtr->bytes == NULL)) {
+        return TRUE;
+    } else {
+        if (objPtr->typePtr == listType) {
+            Tcl_ListObjLength (NULL, objPtr, &length);
+            return (length == 0);
+        } else if (objPtr->typePtr == stringType) {
+            Tcl_GetStringFromObj (objPtr, &length);
+            return (length == 0);
+        }
+    }
+    return FALSE;
+}

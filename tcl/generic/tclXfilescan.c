@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.1 1997/04/17 04:58:38 markd Exp $
+ * $Id: tclXfilescan.c,v 8.2 1997/06/12 21:08:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -870,13 +870,13 @@ FileScanCleanUp (clientData, interp)
 }
 
 /*-----------------------------------------------------------------------------
- *  TclX_InitFilescan --
+ *  TclX_FilescanInit --
  *
  *    Initialize the TCL file scanning facility..
  *-----------------------------------------------------------------------------
  */
 void
-TclX_InitFilescan (interp)
+TclX_FilescanInit (interp)
     Tcl_Interp *interp;
 {
     void_pt  scanTablePtr;

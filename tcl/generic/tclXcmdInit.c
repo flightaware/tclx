@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 8.3 1997/06/29 19:13:24 markd Exp $
+ * $Id: tclXcmdInit.c,v 8.4 1997/06/29 19:30:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -238,11 +238,7 @@ Tclxcmd_SafeInit (interp)
     /*
      * from tclXbsearch.c
      */
-    Tcl_CreateCommand (interp, 
-		       "bsearch",
-		       TclX_BsearchCmd, 
-                      (ClientData) NULL,
-		      (Tcl_CmdDeleteProc*) NULL);
+    TclX_BsearchInit (interp);
 
     /*
      * from tclXfstat.c
@@ -271,7 +267,7 @@ Tclxcmd_SafeInit (interp)
     /*
      * from tclXfilescan.c
      */
-    TclX_InitFilescan (interp);
+    TclX_FilescanInit (interp);
 
     /*
      * from tclXgeneral.c
@@ -316,7 +312,7 @@ Tclxcmd_SafeInit (interp)
     /*
      * from tclXmath.c
      */
-    TclX_InitMath (interp);
+    TclX_MathInit (interp);
 
     /*
      * from tclXprofile.c

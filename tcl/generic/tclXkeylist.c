@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.2 1997/06/12 21:08:21 markd Exp $
+ * $Id: tclXkeylist.c,v 8.3 1997/06/25 08:23:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1004,7 +1004,7 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
                                         (char *) NULL);
             return TCL_ERROR;
         } else {
-            Tcl_SetIntObj (Tcl_GetObjResult (interp), FALSE);
+            Tcl_SetBooleanObj (Tcl_GetObjResult (interp), FALSE);
             return TCL_OK;
         }
     }
@@ -1020,13 +1020,12 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
     /*
      * Variable (or empty variable name) specified.
      */
-    Tcl_GetStringFromObj (objv [3], &strLen);
-    if (strLen != 0) {
+    if (!TclX_IsNullObj (objv [3])) {
         if (Tcl_ObjSetVar2 (interp, objv [3], NULL, valuePtr,
                             TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
     }
-    Tcl_SetIntObj (Tcl_GetObjResult (interp), TRUE);
+    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
     return TCL_OK;
 }
 

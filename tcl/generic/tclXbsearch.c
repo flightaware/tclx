@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 8.2 1997/06/12 21:08:12 markd Exp $
+ * $Id: tclXbsearch.c,v 8.3 1997/06/25 16:58:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -25,7 +25,7 @@
  */
 typedef struct binSearchCB_t {
     Tcl_Interp   *interp;         /* Pointer to the interpreter.             */
-    char         *fileHandle;     /* Handle of file.                         */
+    char         *channelId;      /* Handle of file.                         */
     char         *key;            /* The key to search for.                  */
 
     Tcl_Channel   channel;        /* I/O channel.                            */
@@ -51,6 +51,12 @@ ReadAndCompare _ANSI_ARGS_((off_t          fileOffset,
 
 static int
 BinSearch _ANSI_ARGS_((binSearchCB_t *searchCBPtr));
+
+static int 
+TclX_BsearchObjCmd _ANSI_ARGS_((ClientData clientData, 
+                                Tcl_Interp *interp,
+                                int objc,
+                                Tcl_Obj *CONST objv[]));
 
 /*-----------------------------------------------------------------------------
  *
@@ -87,7 +93,6 @@ StandardKeyCompare (key, line)
 }
 
 /*-----------------------------------------------------------------------------
- *
  * TclProcKeyCompare --
  *    Comparison routine for BinSearch that runs a Tcl procedure to, 
  *    compare the key to a line from the file.
@@ -134,7 +139,6 @@ TclProcKeyCompare (searchCBPtr)
 }
 
 /*-----------------------------------------------------------------------------
- *
  * ReadAndCompare --
  *    Search for the next line in the file starting at the specified
  *    offset.  Read the line into the dynamic buffer and compare it to
@@ -174,7 +178,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
                 Tcl_InputBlocked (searchCBPtr->channel)) {
                 Tcl_AppendResult (searchCBPtr->interp,
                                   "bsearch got unexpected EOF on \"",
-                                  searchCBPtr->fileHandle, "\"",
+                                  searchCBPtr->channelId, "\"",
                                   (char *) NULL);
                 return TCL_ERROR;
             }
@@ -222,13 +226,12 @@ ReadAndCompare (fileOffset, searchCBPtr)
     return TCL_OK;
 
   posixError:
-   Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
+   Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->channelId, ": ",
                      Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- *
  * BinSearch --
  *      Binary search a sorted ASCII file.
  *
@@ -283,50 +286,45 @@ BinSearch (searchCBPtr)
     }
 
   posixError:
-   Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
+   Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->channelId, ": ",
                      Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- *
- * Tcl_BsearchCmd --
+ * TclX_BsearchObjCmd --
  *     Implements the TCL bsearch command:
  *        bsearch filehandle key ?retvar?
- *
- * Results:
- *      Standard TCL results.
- *
  *-----------------------------------------------------------------------------
  */
-int
-TclX_BsearchCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+static int
+TclX_BsearchObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj     *CONST objv[];
 {
     int status;
     binSearchCB_t searchCB;
 
-    if ((argc < 3) || (argc > 5)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " handle key ?retvar? ?compare_proc?",
-                          (char *) NULL);
+    if ((objc < 3) || (objc > 5)) {
+        TclX_WrongArgs (interp, objv [0], 
+                        "handle key ?retvar? ?compare_proc?");
         return TCL_ERROR;
     }
 
+    searchCB.channelId = Tcl_GetStringFromObj (objv [1], NULL);
     searchCB.channel = TclX_GetOpenChannel (interp,
-                                            argv [1],
+                                            searchCB.channelId,
                                             TCL_READABLE);
     if (searchCB.channel == NULL)
         return TCL_ERROR;
 
     searchCB.interp = interp;
-    searchCB.fileHandle = argv [1];
-    searchCB.key = argv [2];
+    searchCB.key = Tcl_GetStringFromObj (objv [2], NULL);
     searchCB.lastRecOffset = -1;
-    searchCB.tclProc = (argc == 5) ? argv [4] : NULL;
+    searchCB.tclProc = (objc == 5) ? Tcl_GetStringFromObj (objv [4], NULL) :
+        NULL;
 
     Tcl_DStringInit (&searchCB.lineBuf);
 
@@ -337,25 +335,49 @@ TclX_BsearchCmd (clientData, interp, argc, argv)
     }
 
     if (status == TCL_BREAK) {
-        Tcl_DStringFree (&searchCB.lineBuf);
-        if ((argc >= 4) && (argv [3][0] != '\0'))
-            interp->result = "0";
-        return TCL_OK;
+        if ((objc >= 4) && !TclX_IsNullObj (objv [3]))
+            Tcl_SetBooleanObj (Tcl_GetObjResult (interp), FALSE);
+        goto okExit;
     }
 
-    if ((argc == 3) || (argv [3][0] == '\0')) {
-        Tcl_DStringResult (interp, &searchCB.lineBuf);
+    if ((objc == 3) || TclX_IsNullObj (objv [3])) {
+        Tcl_SetStringObj (Tcl_GetObjResult (interp),
+                          Tcl_DStringValue (&searchCB.lineBuf),
+                          -1);
     } else {
-        char *varPtr;
+        Tcl_Obj *valPtr;
 
-        varPtr = Tcl_SetVar (interp, argv[3], searchCB.lineBuf.string,
-                             TCL_LEAVE_ERR_MSG);
-        Tcl_DStringFree (&searchCB.lineBuf);
-        if (varPtr == NULL)
-            return TCL_ERROR;
-        interp->result = "1";
+        valPtr = Tcl_NewStringObj (Tcl_DStringValue (&searchCB.lineBuf),
+                                   -1);
+        if (Tcl_ObjSetVar2 (interp, objv [3], NULL, valPtr,
+                            TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
+            Tcl_DecrRefCount (valPtr);
+            goto errorExit;
+        }
+        Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
     }
+
+  okExit:
+    Tcl_DStringFree (&searchCB.lineBuf);
+    return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&searchCB.lineBuf);
     return TCL_OK;
 }
-
-
+
+/*-----------------------------------------------------------------------------
+ * TclX_BsearchInit --
+ *     Initialize the bsearch command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_BsearchInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp, 
+                          "bsearch",
+                          TclX_BsearchObjCmd, 
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
+}

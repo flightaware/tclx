@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 8.2 1997/06/12 21:08:23 markd Exp $
+ * $Id: tclXmath.c,v 8.3 1997/06/25 16:58:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -340,13 +340,13 @@ TclX_RandomObjCmd (dummy, interp, objc, objv)
 }
 
 /*-----------------------------------------------------------------------------
- *  TclX_InitMath --
+ *  TclX_MathInit --
  *
  *    Initialize the TclX math commands and functions.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_InitMath (interp)
+TclX_MathInit (interp)
     Tcl_Interp *interp;
 {
     Tcl_ValueType minMaxArgTypes [2];

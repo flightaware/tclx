@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.4 1997/06/29 19:13:24 markd Exp $
+ * $Id: tclExtdInt.h,v 8.5 1997/06/29 19:30:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -304,6 +304,9 @@ TclX_WrongArgs _ANSI_ARGS_((Tcl_Interp *interp,
 extern void
 TclX_StringAppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
 
+extern int
+TclX_IsNullObj _ANSI_ARGS_((Tcl_Obj *objPtr));
+
 /*
  * Definitions required to initialize all extended commands.  These are either
  * the command executors or initialization routines that do the command
@@ -318,8 +321,8 @@ TclX_StringAppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
 /*
  * from tclXbsearch.c
  */
-extern int 
-TclX_BsearchCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+extern void
+TclX_BsearchInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXchmod.c
@@ -408,7 +411,7 @@ TclX_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
  * from tclXfilescan.c
  */
 extern void
-TclX_InitFilescan _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_FilescanInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXgeneral.c
@@ -455,7 +458,7 @@ TclX_ListInit _ANSI_ARGS_((Tcl_Interp *interp));
  * from tclXmath.c
  */
 extern void
-TclX_InitMath _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_MathInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 /*
  * from tclXmsgcat.c
