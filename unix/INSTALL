@@ -319,8 +319,34 @@ These files are recompiled as they have compiled in paths to the library
 directories, which are different under TclX.  We are talking with John
 Ousterhout about a solution.
 
-INTEGRATING WITH OTHER EXTENSIONS
-=================================
+INTEGRATING WITH OTHER EXTENSIONS AND APPLICATIONS
+==================================================
+  TclX is normally fairly easy to integrate with other applications and
+extensions.  This section contains notes on the general approach, plus
+notes on extensions that are a little tricky.
+
+To integrate applications following the Tcl_AppInit conventions with TclX,
+including the TclX library handling and shell:
+
+    o Replace the call to "Tcl_Init" with a call to "TclX_Init" in the
+      Tcl_AppInit function.
+
+    o In Tk based application, replace the call to "TK_Init" with a call to
+      "TkX_Init" in the Tcl_AppInit function.
+
+    o Link with "-ltkx -ltk -ltclx -ltcl" in that order.  If you get strange
+      behavior, such as no shell prompt, check this order.
+
+To add just the TclX commands, but not the TclX library handling or shell
+(including shell signal handling):
+
+    o Add a call to "TclXCmd_Init" after the call to Tcl_Init in the
+      Tcl_AppInit function.
+   
+    o Link with "-ltk -ltcl -ltclx" in that order.
+
+If you need more details on how to initialize TclX, see the TclXInit(3) manual
+page.
 
 TkPixmap:
     o Build Tk with TkPixmap as directed.
