@@ -255,10 +255,9 @@
 ./tcl/tests/chartype.test
 ./tcl/tests/chmod.test
 ./tcl/tests/chroot.test
-./tcl/tests/clock.test
+./tcl/tests/compat/clock.test
 ./tcl/tests/cmdloop.test
 ./tcl/tests/cmdtrace.test
-./tcl/tests/compat.test
 ./tcl/tests/convlib.test
 ./tcl/tests/copyfile.test
 ./tcl/tests/dup.test
@@ -288,7 +287,7 @@
 ./tcl/tests/pushd.test
 ./tcl/tests/readdir.test
 ./tcl/tests/select.test
-./tcl/tests/server.test
+./tcl/tests/compat/server.test
 ./tcl/tests/setfuncs.test
 ./tcl/tests/shell.test
 ./tcl/tests/showproc.test
