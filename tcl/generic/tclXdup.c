@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 4.4 1995/01/01 19:49:25 markd Exp markd $
+ * $Id: tclXdup.c,v 4.5 1995/04/30 03:22:33 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -34,6 +34,14 @@ DoSpecifiedDup _ANSI_ARGS_((Tcl_Interp *interp,
                             OpenFile   *srcFilePtr,
                             char       *newFileId));
 
+static int
+DupFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
+                           char       *srcFileId,
+                           char       *targetFileId));
+
+static int
+BindFileNum _ANSI_ARGS_((Tcl_Interp *interp,
+                         char       *fileNumStr));
 
 /*
  *-----------------------------------------------------------------------------
@@ -218,40 +226,29 @@ DoSpecifiedDup (interp, srcFilePtr, targetFileId)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_DupCmd --
- *     Implements the dup TCL command:
- *         dup fileId ?targetFileId?
+ * DupFileHandle --
+ *   Duplicate a Tcl file handle.
  *
- * Results:
- *      Returns TCL_OK and interp->result containing a filehandle
- *      if the requested file or pipe was successfully duplicated.
- *
- *      Return TCL_ERROR and interp->result containing an
- *      explanation of what went wrong if an error occured.
- *
- * Side effects:
- *      Locates and creates an entry in the handles table
- *
+ * Parameters:
+ *   o interp (I) - If an error occures, the error message is in result.
+ *   o srcFileId (I) - The id  of the file to dup.
+ *   o targetFileId (I) - The id for the new file.  NULL if any id maybe
+ *     used.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-int
-Tcl_DupCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
+static int
+DupFileHandle (interp, srcFileId, targetFileId)
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    char       *srcFileId;
+    char       *targetFileId;
 {
     OpenFile *srcFilePtr;
     FILE     *newFilePtr;
     off_t     seekOffset = -1;
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
-                          " fileId ?targetFileId?", (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    srcFilePtr = Tcl_GetOpenFileStruct (interp, argv[1]);
+    srcFilePtr = Tcl_GetOpenFileStruct (interp, srcFileId);
     if (srcFilePtr == NULL)
 	return TCL_ERROR;
 
@@ -293,10 +290,10 @@ Tcl_DupCmd (clientData, interp, argc, argv)
      * Process the dup depending on if dup-ing to a new file or a target
      * file handle.
      */
-    if (argc == 2)
-        newFilePtr = DoNormalDup (interp, srcFilePtr);
+    if (targetFileId != NULL)
+        newFilePtr = DoSpecifiedDup (interp, srcFilePtr, targetFileId);
     else
-        newFilePtr = DoSpecifiedDup (interp, srcFilePtr, argv [2]);
+        newFilePtr = DoNormalDup (interp, srcFilePtr);
 
     if (newFilePtr == NULL)
         return TCL_ERROR;
@@ -313,4 +310,121 @@ unixError:
     Tcl_ResetResult (interp);
     interp->result = Tcl_PosixError (interp);
     return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * BindFileNumber --
+ *   Bind a file number of an open file to a Tcl file handle.
+ *
+ * Parameters:
+ *   o interp (I) - If an error occures, the error message is in result.
+ *   o fileNumStr (I) - The string number of the open file.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+BindFileNumber (interp, fileNumStr)
+    Tcl_Interp *interp;
+    char       *fileNumStr;
+{
+    unsigned  fileNum;
+    int       fileStat, perms;
+    char     *mode;
+    FILE     *filePtr;
+
+    if (!Tcl_StrToUnsigned (fileNumStr, 0, &fileNum)) {
+        Tcl_AppendResult (interp, "invalid integer file number \"", fileNumStr,
+                          "\", expected unsigned integer or Tcl file id",
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if ((fileNum < tclNumFiles) && (tclOpenFiles [fileNum] != NULL)) {
+        Tcl_AppendResult (interp, "file number \"", fileNumStr,
+                          "\" is already bound to a Tcl file  id",
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     * Make sure file is open and determine the access mode.
+     */
+    fileStat = fcntl (fileNum, F_GETFL, 0);
+    if (fileStat == -1)
+        goto unixError;
+
+    switch (fileStat & O_ACCMODE) {
+      case O_RDONLY:
+        mode = "r";
+        perms = TCL_FILE_READABLE;
+        break;
+      case O_WRONLY:
+        mode = "w";
+        perms = TCL_FILE_WRITABLE;
+        break;
+      case O_RDWR:
+        mode = "r+";
+        perms = TCL_FILE_READABLE | TCL_FILE_WRITABLE;
+        break;
+    }
+
+    filePtr = fdopen (fileNum, mode);
+    if (filePtr == NULL)
+        goto unixError;
+
+    Tcl_EnterFile (interp, filePtr, perms);
+    return TCL_OK;
+
+unixError:
+    Tcl_ResetResult (interp);
+    interp->result = Tcl_PosixError (interp);
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_DupCmd --
+ *     Implements the dup TCL command:
+ *         dup fileId ?targetFileId?
+ *
+ * Results:
+ *      Returns TCL_OK and interp->result containing a filehandle
+ *      if the requested file or pipe was successfully duplicated.
+ *
+ *      Return TCL_ERROR and interp->result containing an
+ *      explanation of what went wrong if an error occured.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_DupCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    if ((argc < 2) || (argc > 3)) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv[0], 
+                          " fileId ?targetFileId?", (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     * If a number is supplied, bind it to a file handle rather than doing
+     * a dup.
+     */
+    if (ISDIGIT (argv [1][0])) {
+        if (argc != 2) {
+            Tcl_AppendResult (interp, "the second argument, targetFileId, is ",
+                              "not allow when binding a file number to a Tcl ",
+                              "file id", (char *) NULL);
+            return TCL_ERROR;
+        }
+        return BindFileNumber (interp, argv [1]);
+    } else {
+        return DupFileHandle (interp, argv [1], argv [2]);
+    }
 }

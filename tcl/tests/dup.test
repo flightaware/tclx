@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 4.0 1994/07/16 05:24:41 markd Rel markd $
+# $Id: dup.test,v 4.1 1995/01/01 19:47:38 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -72,8 +72,10 @@ if {[set childPid [fork]] == 0} {
     dup $outFH stdout
     close $outFH
         
-    execl $TCL_PROGRAM [list -qc {commandloop {} {}}]
-    puts stderr "execl failed"
+    catch {
+        execl $TCL_PROGRAM [list -qc {commandloop {} {}}]
+    } msg
+    puts stderr "execl failed: $msg"
     exit 1
 }
 
@@ -88,6 +90,76 @@ foreach line $data {
     } 0 $line
 }
 close $outFH
+
+# Test binding of open files to ids.
+
+pipe fromChild toParent
+pipe fromParent toChild
+
+flush stdout
+flush stderr
+
+if {[set childPid [fork]] == 0} {
+    catch {
+        close $fromChild
+        close $toChild
+        set toParent [crange $toParent 4 end]
+        set fromParent [crange $fromParent 4 end]
+        set childProgram {}
+        append childProgram "set toParent \[dup $toParent\];"
+        append childProgram "set fromParent \[dup $fromParent\];"
+        append childProgram {catch {puts $fromParent arf} msg;}
+        append childProgram {puts $toParent "msg1: $msg";}
+        append childProgram {flush $toParent;}
+        append childProgram {catch {gets $toParent} msg;}
+        append childProgram {puts $toParent "msg2: $msg";}
+        append childProgram {flush $toParent;}
+        append childProgram {while {[gets $fromParent msg] >= 0} {
+            puts $toParent "got: $msg"; flush $toParent}}
+        execl $TCL_PROGRAM [list -qc $childProgram]
+    } msg
+    puts stderr "child failed: $msg"
+    exit 1
+}
+close $toParent
+close $fromParent
+
+Test dup-2.1 {dup tests} {
+    set msg [gets $fromChild]
+    if [regexp {^msg1: "file.*" wasn't opened for writing} $msg] {
+        list OK
+    } else {
+        list $msg
+    }
+} 0 {OK}
+
+Test dup-2.2 {dup tests} {
+    set msg [gets $fromChild]
+    if [regexp {^msg2: "file.*" wasn't opened for reading} $msg] {
+        list OK
+    } else {
+        list $msg
+    }
+} 0 {OK}
+
+Test dup-2.2 {dup tests} {
+    puts $toChild "test 2.2"
+    flush $toChild
+    gets $fromChild
+} 0 {got: test 2.2}
+
+Test dup-2.3 {dup tests} {
+    puts $toChild "test 2.3"
+    flush $toChild
+    gets $fromChild
+} 0 {got: test 2.3}
+
+Test dup-2.4 {dup tests} {
+    close $toChild
+    close $fromChild
+    wait $childPid
+} 0 [list $childPid EXIT 0]
+
 
 unlink -nocomplain {DUP.TMP DUP2.TMP INCMDS.TMP OUTPUT.TMP}
 

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.21 1995/06/08 19:33:20 markd Exp markd $
+.\" $Id: TclX.n,v 4.22 1995/06/27 04:32:27 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1222,6 +1222,11 @@ id.  Normally this is \fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.
 The dup command will handle flushing output and closing this file.
 The new file will be buffered, if its needs to be unbuffered, use the
 \fBfcntl\fR command to set it unbuffered.
+.sp
+If \fIfileId\fR is a number rather than a Tcl file id, then the \fBdup\fR
+command will bind that file to a Tcl file id.  This is usedful for accessing
+files that are passed from the parent process.
+The argument ?\fItargetFileId\fR? is not valid with this operation.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
