@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.10 1999/06/16 23:18:11 surles Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.1 1999/06/23 00:39:12 surles Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -64,6 +64,7 @@ GENERIC_DIR		= $(SRC_DIR)/../generic
 COMPAT_DIR		= $(SRC_DIR)/../compat
 WIN_DIR			= $(SRC_DIR)
 RUNTIME_DIR		= $(SRC_DIR)/../runtime
+RUNTIME_DIR_NATIVE	= "$(shell cygpath $(PATHTYPE) '$(SRC_DIR)/../runtime')"
 TOOLS_DIR		= $(ROOT_DIR)/../unix/tools
 BIN_DIR			= $(PWD)
 
@@ -94,6 +95,8 @@ TCL_BIN_NATIVE		= $(shell cygpath $(PATHTYPE) '$(TCL_BIN_DIR)')
 TK_GENERIC_NATIVE	= $(shell cygpath $(PATHTYPE) '$(TK_GENERIC_DIR)')
 TCL_WIN_NATIVE		= $(shell cygpath $(PATHTYPE) '$(TCL_WIN_DIR)')
 TK_WIN_NATIVE		= $(shell cygpath $(PATHTYPE) '$(TK_WIN_DIR)')
+TCL_SRC_NATIVE		= $(shell cygpath $(PATHTYPE) '$(TCL_SRC_DIR)')
+TK_SRC_NATIVE		= $(shell cygpath $(PATHTYPE) '$(TK_SRC_DIR)')
 
 SHARED_LIBRARIES 	= $(TCLX_DLL_FILE)
 STATIC_LIBRARIES	= $(TCLX_LIB_FILE)
@@ -145,7 +148,7 @@ SHLIB_CFLAGS	= @SHLIB_CFLAGS@
 SHLIB_SUFFIX	= @SHLIB_SUFFIX@
 VER		= @TCLX_MAJOR_VERSION@@TCLX_MINOR_VERSION@@TCLX_PATCH_LEVEL@
 DOTVER	        = @TCLX_MAJOR_VERSION@.@TCLX_MINOR_VERSION@.@TCLX_PATCH_LEVEL@
-LIBS		= @LIBS@
+LIBS		= @LIBS@ Wsock32.lib
 
 CC_OBJNAME	= @CC_OBJNAME@
 CC_EXENAME	= @CC_EXENAME@
@@ -167,7 +170,7 @@ CAT32		= cat32
 CATTCL		= cattcl
 
 RUN_SETUP	= PATH="$(TCL_BIN_DIR)"; export PATH; \
-		  TCL_LIBRARY="$(TCL_BIN_NATIVE)"; export TCL_LIBRARY; \
+		  TCL_LIBRARY="$(TCL_SRC_NATIVE)/../library"; export TCL_LIBRARY; \
 		  TCLX_LIBRARY="$(BIN_DIR_NATIVE)"; export TCLX_LIBRARY; \
 		  TCL_PROGRAM="$(BIN_DIR_NATIVE)/$(TCLXSH)"; export TCL_PROGRAM;
 RUN_TCLXSH	= $(RUN_SETUP) $(BIN_DIR)/$(TCLXSH)
@@ -238,6 +241,25 @@ TLIB_SRCS = \
 	$(RUNTIME_DIR)/tcllib.tcl \
 	$(RUNTIME_DIR)/fmath.tcl \
 	$(RUNTIME_DIR)/buildhelp.tcl
+
+TLIB_SRCS_NATIVE= \
+	$(RUNTIME_DIR_NATIVE)/arrayprocs.tcl \
+	$(RUNTIME_DIR_NATIVE)/compat.tcl \
+	$(RUNTIME_DIR_NATIVE)/convlib.tcl \
+	$(RUNTIME_DIR_NATIVE)/edprocs.tcl \
+	$(RUNTIME_DIR_NATIVE)/events.tcl \
+	$(RUNTIME_DIR_NATIVE)/forfile.tcl \
+	$(RUNTIME_DIR_NATIVE)/globrecur.tcl \
+	$(RUNTIME_DIR_NATIVE)/help.tcl \
+	$(RUNTIME_DIR_NATIVE)/profrep.tcl \
+	$(RUNTIME_DIR_NATIVE)/pushd.tcl \
+	$(RUNTIME_DIR_NATIVE)/setfuncs.tcl \
+	$(RUNTIME_DIR_NATIVE)/showproc.tcl \
+	$(RUNTIME_DIR_NATIVE)/stringfile.tcl \
+	$(RUNTIME_DIR_NATIVE)/tcllib.tcl \
+	$(RUNTIME_DIR_NATIVE)/fmath.tcl \
+	$(RUNTIME_DIR_NATIVE)/buildhelp.tcl
+
 
 all: binaries libraries doc
 
@@ -315,11 +337,13 @@ getopt.$(OBJEXT): getopt.c
 
 tcl.tlib: ${TLIB_SRCS} autoload.tcl $(CATTCL)
 	@$(RM) $@ 
-	./$(CATTCL) ${TLIB_SRCS} > $@
+	./$(CATTCL) ${TLIB_SRCS_NATIVE} > $@
 
 tcl.tndx: tclx.tcl tcl.tlib buildidx.tcl
 	@$(RM) $@ 
-	$(RUN_TCLXSH) -q $(TOOLS_DIR)/genindex.tcl tcl.tlib
+	$(RUN_TCLXSH) \
+	    -q "$(shell cygpath $(PATHTYPE) '$(TOOLS_DIR)/genindex.tcl')" \
+            tcl.tlib
 
 tclx.tcl: ${RUNTIME_DIR}/tclx.tcl
 	@$(RM) tclx.tcl
@@ -335,7 +359,9 @@ autoload.tcl: ${RUNTIME_DIR}/autoload.tcl
 
 instcopy: $(TOOLS_DIR)/buildutil.tcl $(TOOLS_DIR)/instcopy.tcl $(CATTCL)
 	@$(RM) instcopy
-	./$(CATTCL) $(TOOLS_DIR)/buildutil.tcl $(TOOLS_DIR)/instcopy.tcl > $@
+	./$(CATTCL) \
+	    "$(shell cygpath $(PATHTYPE) '$(TOOLS_DIR)/buildutil.tcl')" \
+	    "$(shell cygpath $(PATHTYPE) '$(TOOLS_DIR)/instcopy.tcl')" > $@
 
 # Add the object extension to the implicit rules.  By default .obj is not
 # automatically added.
@@ -350,7 +376,7 @@ instcopy: $(TOOLS_DIR)/buildutil.tcl $(TOOLS_DIR)/instcopy.tcl $(CATTCL)
 	$(CC) -c $(STUB_CC_SWITCHES) -DBUILD_TCLX ${DEPARG} $(CC_OBJNAME)
 
 .rc.res:
-	$(RC) -fo $@ -r -i "$(GENERIC_DIR_NATIVE)" -i "$(WIN_DIR_NATIVE)" $<
+	$(RC) -fo $@ -r -i "$(GENERIC_DIR_NATIVE)" -i "$(WIN_DIR_NATIVE)" $(DEPARG)
 
 install: all install-binaries install-libraries install-doc
 
