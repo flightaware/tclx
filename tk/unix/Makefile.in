@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.21 1997/11/19 02:31:28 markd Exp $
+# $Id: Makefile.in,v 8.22 1997/12/14 20:21:08 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -89,7 +89,7 @@ all: wishx RUNTIME tktest
 
 static: wishx.static tktest.static
 
-standalone: wishx.standalone tktest.standalone
+standalone: wishx.standalone tktest.standalone hello
 
 wishx: tkXAppInit.o @TKX_SHLIB_BUILD_REF@ @TKX_STLIB_BUILD_REF@ ${TCL} Makefile
 	${CC} ${LD_SWITCHES} tkXAppInit.o ${ALL_LIBS} \
