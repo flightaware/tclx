@@ -296,7 +296,7 @@
 ./tcl/tests/testlib.tcl
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
-./tcl/unix/pkgIndex.proto.in
+./tcl/unix/pkgIndex.tcl.in
 ./tcl/unix/tclXAppInit.c
 ./tcl/unix/tclXunixCmds.c
 ./tcl/unix/tclXunixDup.c
@@ -373,6 +373,7 @@
 ./tk/runtime/tkx.tcl
 ./tk/tests/signal.test
 ./tk/unix/Makefile.in
+./tk/unix/pkgIndex.tcl.in
 ./tk/unix/tkXAppInit.c
 ./tk/unix/tkxConfig.sh.in
 ./tk/win/makefile.vc
