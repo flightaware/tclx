@@ -1,0 +1,63 @@
+#
+# Makefile --
+#
+# Makefile for building Tcl sources used by wishx.
+#------------------------------------------------------------------------------
+# Copyright 1992 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id$
+#------------------------------------------------------------------------------
+#
+
+include ../Config.mk
+include ../config/$(TCL_CONFIG_FILE)
+SHELL=/bin/sh
+
+#------------------------------------------------------------------------------
+
+WISHX_TCL = ../tktcllib/wishx.tcl
+TK_TCL    = ../tktcllib/tk.tcl
+TK_TLIB   = ../tktcllib/tk.tlib
+TK_PROLOG = ../tktcllib/prolog.ps
+TK_DEMOS  = ../tktcllib/demos
+
+#------------------------------------------------------------------------------
+
+all: made.tmp
+
+made.tmp: $(WISHX_TCL) $(TK_TLIB) $(TK_TCL) $(TK_DEMOS)/widget
+	touch made.tmp
+
+$(WISHX_TCL): ../$(TCL_TK_DIR)/library/wish.tcl wishx.sed
+	rm -f $(WISHX_TCL)
+	sed -f wishx.sed <../$(TCL_TK_DIR)/library/wish.tcl >$(WISHX_TCL)
+
+$(TK_TCL): ../$(TCL_TK_DIR)/library/tk.tcl
+	rm -f $(TK_TCL)
+	cp ../$(TCL_TK_DIR)/library/tk.tcl $(TK_TCL)
+
+$(TK_TLIB): ../$(TCL_TK_DIR)/library/tclIndex
+	../runtcl "-c convert_lib ../$(TCL_TK_DIR)/library/tclIndex $(TK_TLIB)"
+
+$(TK_PROLOG): ../$(TCL_TK_DIR)/library/prolog.ps
+	cp ../$(TCL_TK_DIR)/library/prolog.ps $(TK_PROLOG)
+
+$(TK_DEMOS)/widget: ../$(TCL_TK_DIR)/library/demos/widget
+	rm -rf $(TK_DEMOS)
+	mkdir $(TK_DEMOS)
+	(cd ../$(TCL_TK_DIR)/library/demos;tar -cf - .) | \
+	    (cd $(TK_DEMOS); tar -xf -)
+
+#------------------------------------------------------------------------------
+
+clean:
+	rm -f made.tmp
+	rm -f $(WISHX_TCL) $(TK_TCL) $(TK_TLIB) ../tktcllib/tk.tndx
+	rm -rf $(TK_DEMOS)
