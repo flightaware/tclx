@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.7 1993/07/12 05:26:12 markd Exp markd $
+ * $Id: tclExtend.h,v 2.8 1993/07/18 15:19:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -111,9 +111,9 @@ Tcl_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,
 int
 Tcl_ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *dirEnvVar,
-                                 char       *dir1,
-                                 char       *dir2,
-                                 char       *dir3,
+                                 char       *dir,
+                                 char       *version1,
+                                 char       *version2,
                                  char       *initFile));
 
 EXTERN char *

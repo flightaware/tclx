@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.11 1993/07/12 06:28:33 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.12 1993/07/19 06:25:21 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -195,9 +195,9 @@ Tcl_ResetSignals ();
 
 void
 Tcl_SetLibraryDirEnvVar _ANSI_ARGS_((char  *envVar,
-                                     char  *dir1,
-                                     char  *dir2,
-                                     char  *dir3));
+                                     char  *dir,
+                                     char  *version1,
+                                     char  *version2));
 
 extern FILE *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.11 1993/07/18 15:19:48 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.12 1993/07/19 06:25:21 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,10 +42,10 @@ ParseCmdArgs _ANSI_ARGS_((Tcl_Interp  *interp,
                           tclParms_t  *tclParmsPtr));
 
 static void
-MergeDirPath _ANSI_ARGS_((char        *dir1,
-                          char        *dir2,
-                          char        *dir3,
-                          Tcl_DString *dirPathPtr));
+MergeMasterDirPath _ANSI_ARGS_((char        *dir,
+                                char        *version1,
+                                char        *version2,
+                                Tcl_DString *dirPathPtr));
 
 /*
  *-----------------------------------------------------------------------------
@@ -180,34 +180,33 @@ usageError:
 
 /*
  *-----------------------------------------------------------------------------
- * MergeDirPath --
+ * MergeMasterDirPath --
  *
- *   Merge directory components and into a path name.  Used to generate
- * a path containing a two-part version number.
+ *   Merge mastter directory components and into a path name.  
  *
  * Parameters:
- *   o dir1, dir2, dir3 (I) - 3 part directory name.  These strings are
- *     concatinated together to form the directory path.  Any of these maybe
- *     NULL.
+ *   o dir (I) - The directory name.
+ *   o version1, version2 - Two part version number forming a directory under
+ *     dir.  Either maybe NULL.
  *   o dirPathPtr (O) - Dynamic string containing the directory path.  Will
  *     be initialized.
  *-----------------------------------------------------------------------------
  */
 static void
-MergeDirPath (dir1, dir2, dir3, dirPathPtr)
-    char        *dir1;
-    char        *dir2;
-    char        *dir3;
+MergeMasterDirPath (dir, version1, version2, dirPathPtr)
+    char        *dir;
+    char        *version1;
+    char        *version2;
     Tcl_DString *dirPathPtr;
 {
     Tcl_DStringInit (dirPathPtr);
 
-    if (dir1 != NULL)
-        Tcl_DStringAppend (dirPathPtr, dir1, -1);
-    if (dir2 != NULL)
-        Tcl_DStringAppend (dirPathPtr, dir2, -1);
-    if (dir3 != NULL)
-        Tcl_DStringAppend (dirPathPtr, dir3, -1);
+    Tcl_DStringAppend (dirPathPtr, dir, -1);
+    Tcl_DStringAppend (dirPathPtr, "/", -1);
+    if (version1 != NULL)
+        Tcl_DStringAppend (dirPathPtr, version1, -1);
+    if (version2 != NULL)
+        Tcl_DStringAppend (dirPathPtr, version2, -1);
 }
 
 /*
@@ -220,24 +219,24 @@ MergeDirPath (dir1, dir2, dir3, dirPathPtr)
  *
  * Parameters:
  *   o envVar (I) - Environement variable to set if it does not exist.
- *   o dir1, dir2, dir3 (I) - 3 part directory name.  These strings are
- *     concatinated together to form the directory path.  Any of these maybe
- *     NULL.
+ *   o dir (I) - The directory name.
+ *   o version1, version2 - Two part version number forming a directory under
+ *     dir.  Either maybe NULL.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_SetLibraryDirEnvVar (envVar, dir1, dir2, dir3)
+Tcl_SetLibraryDirEnvVar (envVar, dir, version1, version2)
     char  *envVar;
-    char  *dir1;
-    char  *dir2;
-    char  *dir3;
+    char  *dir;
+    char  *version1;
+    char  *version2;
 {
     Tcl_DString   masterDir;
 
     if (getenv (envVar) != NULL)
         return;
 
-    MergeDirPath (dir1, dir2, dir3, &masterDir);
+    MergeMasterDirPath (dir, version1, version2, &masterDir);
     setenv (envVar, masterDir.string);
 
     Tcl_DStringFree (&masterDir);
@@ -256,9 +255,9 @@ Tcl_SetLibraryDirEnvVar (envVar, dir1, dir2, dir3)
  *   o interp  (I) - A pointer to the interpreter.
  *   o dirEnvVar (I) - Environment variable used to override the directory
  *     path.
- *   o dir1, dir2, dir3 (I) - 3 part directory name.  These strings are
- *     concatinated together to form the directory path.  Any of these maybe
- *     NULL.
+ *   o dir (I) - The directory name.
+ *   o version1, version2 - Two part version number forming a directory under
+ *     dir.  Either maybe NULL.
  *   o initFile (I) - The name of the init file, which is found either in the
  *     directory pointed to by envVar or by the directory formed from dir1,
  *     dir2 & dir3.
@@ -267,12 +266,12 @@ Tcl_SetLibraryDirEnvVar (envVar, dir1, dir2, dir3)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ProcessInitFile (interp, dirEnvVar, dir1, dir2, dir3, initFile)
+Tcl_ProcessInitFile (interp, dirEnvVar, dir, version1, version2, initFile)
     Tcl_Interp *interp;
     char       *dirEnvVar;
-    char       *dir1;
-    char       *dir2;
-    char       *dir3;
+    char       *dir;
+    char       *version1;
+    char       *version2;
     char       *initFile;
 {
     char         *dirEnvValue;
@@ -287,7 +286,7 @@ Tcl_ProcessInitFile (interp, dirEnvVar, dir1, dir2, dir3, initFile)
         Tcl_DStringInit (&filePath);
         Tcl_DStringAppend (&filePath, dirEnvValue, -1);
     } else {
-        MergeDirPath (dir1, dir2, dir3, &filePath);
+        MergeMasterDirPath (dir, version1, version2, &filePath);
     }
 
     /*

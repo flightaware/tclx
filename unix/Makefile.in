@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.7 1993/07/18 21:14:28 markd Exp markd $
+# $Id: Makefile,v 2.8 1993/07/19 06:25:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -190,9 +190,10 @@ TCLXINSTALL: INSTALLTOOLS
 	@echo "   Install TclX master directory"
 	@echo "
 	set -x ;\
-	target=`tools/tclxversion ${TCL_MASTERDIR}` ;\
+	target=${TCL_MASTERDIR}/`tools/tclxversion` ;\
+	mkdir ${TCL_MASTERDIR} 2>/dev/null ;\
 	rm -rf $$target ;\
-	mkdir $$target 2>/dev/null ;\
+	mkdir $$target  ;\
 	(cd tclmaster ; tar -cf - .) | (cd $$target; tar -xf -) ;\
 	rm -f ${TCL_BINDIR}/tcl ;\
 	ln -s $$target/bin/tcl ${TCL_BINDIR}/tcl
@@ -202,9 +203,10 @@ TKXINSTALL: INSTALLTOOLS
 	@echo "   Install TkX master directory"
 	@echo "
 	set -x ;\
-	target=`tools/tkxversion ${TK_MASTERDIR}` ;\
+	target=${TK_MASTERDIR}/`tools/tkxversion` ;\
+	mkdir ${TK_MASTERDIR} 2>/dev/null ;\
 	rm -rf $$target ;\
-	mkdir $$target 2>/dev/null ;\
+	mkdir $$target  ;\
 	(cd tkmaster ; tar -cf - .) | (cd $$target; tar -xf -) ;\
 	rm -f ${TCL_BINDIR}/wishx ;\
 	ln -s $$target/bin/wishx ${TCL_BINDIR}/wishx ;\

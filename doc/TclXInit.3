@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Startup.3,v 2.4 1993/06/21 05:48:34 markd Exp markd $
+.\" $Id: Startup.3,v 2.5 1993/07/12 05:26:12 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Tcl_Startup" TCL "" "Tcl"
@@ -42,9 +42,9 @@ Tcl_Startup (Tcl_Interp  *interp,
 int
 Tcl_ProcessInitFile (Tcl_Interp *interp,
                      char       *dirEnvVar,
-                     char       *dir1,   
-                     char       *dir2,
-                     char       *dir3,
+                     char       *dir,
+                     char       *version1,
+                     char       *version2,
                      char       *initFile);
 .ft R
 .fi
@@ -143,8 +143,9 @@ Parameters:
 .br
 \fBo dirEnvVar (I) - Environment variable used to override the directory path.
 .br
-\fBo dir1, dir2, dir3 (I) - 3 part directory name.  These strings are
-concatinated together to form the directory path.  Any of these maybe NULL.
+\fBo dir\fR (I) - The directory name.
+\fBo version1, version2\fR - Two part version number forming a directory under
+dir.  Either maybe NULL.
 .br
 \fBo initFile (I) - The name of the init file, which is found either in the
 directory pointed to by envVar or by the directory formed from dir1,

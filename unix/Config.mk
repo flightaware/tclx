@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.19 1993/07/18 23:27:03 markd Exp markd $
+# $Id: Config.mk,v 2.20 1993/07/18 23:48:04 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -121,15 +121,17 @@ TCL_GROUP=bin
 
 #
 # The master Tcl directory that the Extended Tcl runtime files are installed
-# into.  The Tcl initialization file (TclInit.tcl) and tcl.tlib file are found
-# in this directory. The directory name will have the TclX version number
-# appended to it.
+# into.  All files are installed in this directory, then symbolic links are
+# built from the outside. A directory whose name is the TclX version number
+# will be build in this directory.
 #
 TCL_MASTERDIR=/usr/local/tclX
 
 #
 # The master Tk directory that the Tk runtime files are installed into.
-# The directory name will have the TkX version number appended to it.
+# All files are installed in this directory, then symbolic links are
+# built from the outside. A directory whose name is the TkX version number
+# will be build in this directory.
 #
 TK_MASTERDIR=/usr/local/tkX
 

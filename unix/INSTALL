@@ -183,21 +183,21 @@ machines. The hierarchies are:
      o man - Contains the Tk manual pages.
 
    The contents of the tclmaster and tkmaster directories must be installed in
-the directory specified at compile time.
+the directory specified at compile.
 
    The installed tclmaster directory path is formed from the value of
 TCL_MASTERDIR define in Config.mk and the Tcl version number and TclX version
-suffix.  The default path would be /usr/local/tclX7.0a.
+suffix.  The default path would be /usr/local/tclX/7.0a.
 
    The installed tkmaster directory path is formed from the value of
 TK_MASTERDIR define in Config.mk and the Tk version number and TclX version
-suffix.  The default path would be /usr/local/tkX3.3a.
+suffix.  The default path would be /usr/local/tkX/3.3a.
 
   Symbolic links are built from the standard locations that external files
 are installed an the master directory, for example:
 
-    ln -s /usr/local/bin/tcl /usr/local/tclX7.0a/bin/tcl
-    ln -s /usr/local/bin/wishx /usr/local/tkX3.3a/bin/wishx
+    ln -s /usr/local/bin/tcl /usr/local/tclX/7.0a/bin/tcl
+    ln -s /usr/local/bin/wishx /usr/local/tkX/3.3a/bin/wishx
 
 Install the Extended Tcl master directories by typing the command:
 
