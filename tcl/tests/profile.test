@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: profile.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -37,32 +37,32 @@ proc ProcA1 {} {ProcB1}
 proc ProcB1 {} {ProcC1;ProcC1}
 proc ProcC1 {} {}
 
-test profile-1.1 {profile count tests} {
+Test profile-1.1 {profile count tests} {
    profile on
    ProcA1
    profile off profData
    SumCntData profData
-} [list {<global> 1} \
-        {{ProcA1 <global>} 1} \
-        {{ProcB1 ProcA1 <global>} 1} \
-        {{ProcC1 ProcB1 ProcA1 <global>} 2}]
+} 0 [list {<global> 1} \
+          {{ProcA1 <global>} 1} \
+          {{ProcB1 ProcA1 <global>} 1} \
+          {{ProcC1 ProcB1 ProcA1 <global>} 2}]
 
 proc ProcA2 {} {ProcB2}
 proc ProcB2 {} {ProcC2}
 proc ProcC2 {} {uplevel ProcD2; ProcD2}
 proc ProcD2 {} {}
 
-test profile-1.2 {profile count tests} {
+Test profile-1.2 {profile count tests} {
    profile on
    ProcA2
    profile off profData
    SumCntData profData
-} [list {<global> 1} \
-        {{ProcA2 <global>} 1} \
-        {{ProcB2 ProcA2 <global>} 1} \
-        {{ProcC2 ProcB2 ProcA2 <global>} 1} \
-        {{ProcD2 ProcB2 ProcA2 <global>} 1} \
-        {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1}]
+} 0 [list {<global> 1} \
+          {{ProcA2 <global>} 1} \
+          {{ProcB2 ProcA2 <global>} 1} \
+          {{ProcC2 ProcB2 ProcA2 <global>} 1} \
+          {{ProcD2 ProcB2 ProcA2 <global>} 1} \
+          {{ProcD2 ProcC2 ProcB2 ProcA2 <global>} 1}]
 
 proc ProcA3 {} {ProcB3}
 proc ProcB3 {} {catch {ProcC3};ProcE3}
@@ -70,17 +70,17 @@ proc ProcC3 {} {ProcD3}
 proc ProcD3 {} {error baz}
 proc ProcE3 {} {}
 
-test profile-1.3 {profile count tests} {
+Test profile-1.3 {profile count tests} {
    profile on
    ProcA3
    profile off profData
    SumCntData profData
-} [list {<global> 1} \
-        {{ProcA3 <global>} 1} \
-        {{ProcB3 ProcA3 <global>} 1} \
-        {{ProcC3 ProcB3 ProcA3 <global>} 1} \
-        {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
-        {{ProcE3 ProcB3 ProcA3 <global>} 1}]
+} 0 [list {<global> 1} \
+          {{ProcA3 <global>} 1} \
+          {{ProcB3 ProcA3 <global>} 1} \
+          {{ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcD3 ProcC3 ProcB3 ProcA3 <global>} 1} \
+          {{ProcE3 ProcB3 ProcA3 <global>} 1}]
 
 #
 # Function to build a list from the profile output data with each entry
@@ -97,10 +97,10 @@ proc SumCpuData {profDataVar} {
                               $stack [lindex $profData($stack) 0]]
     }
     set retData {}
-    foreach entry [lsort $sumData] {
+    foreach entry $sumData {
         lappend retData [lrange $entry 1 end]
     }
-    return $retData
+    return [lsort $retData]
 }
 
 proc EatTime {amount} {
@@ -115,72 +115,69 @@ proc ProcB4 {} {EatTime 1}
 proc ProcC4 {} {EatTime 100}
 proc ProcD4 {} {EatTime 1000}
 
-test profile-2.1 {profile CPU time tests} {
+Test profile-2.1 {profile CPU time tests} {
    profile on
    ProcA4
    profile off profData
    SumCpuData profData
-} [list {{EatTime ProcB4 ProcA4 <global>} 1} \
-        {{ProcB4 ProcA4 <global>} 1} \
-        {{EatTime ProcC4 ProcA4 <global>} 1} \
-        {{ProcC4 ProcA4 <global>} 1} \
-        {{EatTime ProcD4 ProcA4 <global>} 1} \
-        {{ProcD4 ProcA4 <global>} 1} \
-        {<global> 1} \
-        {{ProcA4 <global>} 1}]
+} 0 [list {<global> 1} \
+          {{EatTime ProcB4 ProcA4 <global>} 1} \
+          {{EatTime ProcC4 ProcA4 <global>} 1} \
+          {{EatTime ProcD4 ProcA4 <global>} 1} \
+          {{ProcA4 <global>} 1} {{ProcB4 ProcA4 <global>} 1} \
+          {{ProcC4 ProcA4 <global>} 1} {{ProcD4 ProcA4 <global>} 1}]
 
 proc ProcA1 {} {ProcB1;set a 1;incr a}
 proc ProcB1 {} {ProcC1;ProcC1}
 proc ProcC1 {} {set a 1;incr a}
 
-test profile-3.1 {profile -command tests} {
+Test profile-3.1 {profile -command tests} {
    profile -commands on
    ProcA1
    profile off profData
    SumCntData profData
-} [list {<global> 1} \
-        {{ProcA1 <global>} 1} \
-        {{ProcB1 ProcA1 <global>} 1} \
-        {{ProcC1 ProcB1 ProcA1 <global>} 2} \
-        {{incr ProcA1 <global>} 1} \
-        {{incr ProcC1 ProcB1 ProcA1 <global>} 2} \
-        {{profile <global>} 1} {{set ProcA1 <global>} 1} \
-        {{set ProcC1 ProcB1 ProcA1 <global>} 2}]
+} 0 [list {<global> 1} \
+          {{ProcA1 <global>} 1} \
+          {{ProcB1 ProcA1 <global>} 1} \
+          {{ProcC1 ProcB1 ProcA1 <global>} 2} \
+          {{incr ProcA1 <global>} 1} \
+          {{incr ProcC1 ProcB1 ProcA1 <global>} 2} \
+          {{profile <global>} 1} {{set ProcA1 <global>} 1} \
+          {{set ProcC1 ProcB1 ProcA1 <global>} 2}]
 
-test profile-4.1 {profile error tests} {
-   list [catch {profile off} msg] $msg
-} {1 {wrong # args: profile [-commands] on|off arrayVar}}
+Test profile-4.1 {profile error tests} {
+    profile off
+} 1 {wrong # args: profile [-commands] on|off arrayVar}
 
-test profile-4.2 {profile error tests} {
-   list [catch {profile baz} msg] $msg
-} {1 {expected one of "on" or "off", got "baz"}}
+Test profile-4.2 {profile error tests} {
+    profile baz
+} 1 {expected one of "on" or "off", got "baz"}
 
-test profile-4.3 {profile error tests} {
-   list [catch {profile -comman on} msg] $msg
-} {1 {expected option of "-commands", got "-comman"}}
+Test profile-4.3 {profile error tests} {
+    profile -comman on
+} 1 {expected option of "-commands", got "-comman"}
 
-test profile-4.4 {profile error tests} {
-   list [catch {profile -commands off} msg] $msg
-} {1 {wrong # args: profile [-commands] on|off arrayVar}}
+Test profile-4.4 {profile error tests} {
+    profile -commands off
+} 1 {wrong # args: profile [-commands] on|off arrayVar}
 
-test profile-4.5 {profile error tests} {
-   list [catch {profile -commands} msg] $msg
-} {1 {wrong # args: profile [-commands] on|off arrayVar}}
+Test profile-4.5 {profile error tests} {
+    profile -commands
+} 1 {wrong # args: profile [-commands] on|off arrayVar}
 
-test profile-4.6 {profile error tests} {
-   list [catch {profile -commands on foo} msg] $msg
-} {1 {wrong # args: profile [-commands] on|off arrayVar}}
+Test profile-4.6 {profile error tests} {
+    profile -commands on foo
+} 1 {wrong # args: profile [-commands] on|off arrayVar}
 
-test profile-4.7 {profile error tests} {
-   list [catch {profile off foo} msg] $msg
-} {1 {profiling is not currently enabled}}
+Test profile-4.7 {profile error tests} {
+    profile off foo
+} 1 {profiling is not currently enabled}
 
-test profile-4.8 {profile error tests} {
-   profile on
-   set result [list [catch {profile on} msg] $msg]
-   profile off foo
-   set result
-} {1 {profiling is already enabled}}
+Test profile-4.8 {profile error tests} {
+    profile on
+    profile on
+} 1 {profiling is already enabled}
+profile off foo
 
 #
 # Set up some dummy profile data for the report tests.  The data is not
@@ -216,10 +213,10 @@ proc GetProfRep {fileName} {
 
 rename SAVED_UNKNOWN unknown
 
-test profile-5.1 {profrep tests} {
+Test profile-5.1 {profrep tests} {
     profrep profData "calls" 1 prof.tmp "Profile Test 5.1"
     GetProfRep prof.tmp
-} {-----------------------------------------------------
+} 0 {-----------------------------------------------------
 Profile Test 5.1
 -----------------------------------------------------
 Procedure Call Stack      Calls  Real Time   CPU Time
@@ -231,10 +228,10 @@ ProcC4                        3       1000        100
 ProcD4                        1        100       1070
 }
 
-test profile-5.2 {profrep tests} {
+Test profile-5.2 {profrep tests} {
     profrep profData "real" 1 prof.tmp "Profile Test 5.2"
     GetProfRep prof.tmp
-} {-----------------------------------------------------
+} 0 {-----------------------------------------------------
 Profile Test 5.2
 -----------------------------------------------------
 Procedure Call Stack      Calls  Real Time   CPU Time
@@ -246,10 +243,10 @@ ProcD4                        1        100       1070
 ProcB4                        7         80         11
 }
 
-test profile-5.3 {profrep tests} {
+Test profile-5.3 {profrep tests} {
     profrep profData "cpu" 1 prof.tmp "Profile Test 5.3"
     GetProfRep prof.tmp
-} {-----------------------------------------------------
+} 0 {-----------------------------------------------------
 Profile Test 5.3
 -----------------------------------------------------
 Procedure Call Stack      Calls  Real Time   CPU Time
@@ -261,10 +258,10 @@ ProcB4                        7         80         11
 EatTime                       4        800         10
 }
 
-test profile-5.4 {profrep tests} {
+Test profile-5.4 {profrep tests} {
     profrep profData "cpu" 2 prof.tmp "Profile Test 5.4"
     GetProfRep prof.tmp
-} {-----------------------------------------------------
+} 0 {-----------------------------------------------------
 Profile Test 5.4
 -----------------------------------------------------
 Procedure Call Stack      Calls  Real Time   CPU Time
@@ -278,10 +275,10 @@ ProcB4 ProcA4                 7         80         11
 EatTime ProcB4                4        800         10
 }
 
-test profile-5.5 {profrep tests} {
+Test profile-5.5 {profrep tests} {
     profrep profData "cpu" 10 prof.tmp "Profile Test 5.5"
     GetProfRep prof.tmp
-} {------------------------------------------------------
+} 0 {------------------------------------------------------
 Profile Test 5.5
 ------------------------------------------------------
 Procedure Call Stack       Calls  Real Time   CPU Time
