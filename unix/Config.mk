@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.4 1992/12/18 05:16:14 markd Exp markd $
+# $Id: Config.mk,v 2.5 1992/12/19 05:24:25 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -47,10 +47,13 @@ TCL_UCB_DIR=../tcl6.5
 # you do not want a "wishx" compiled, don't define TCL_TK_SHELL. The libraries
 # required to link Tk are defined in the system specific sections below.
 # If TCL_TK_SHELL is define, Tk manual pages will be installed by the install
-# script.
-#
+# script.  The Tk demo files can also optionally be installed if
+# TK_INSTALL_DEMO is set 1.  If you don't want the demo installed, set it
+# to 0.
+
 #TCL_TK_SHELL=wishx
 TCL_TK_DIR=../tk3.0
+TK_INSTALL_DEMO=1
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Not that if debugging or
