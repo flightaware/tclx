@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 1.1 1992/09/20 23:21:21 markd Exp markd $
+ * $Id: tclXregexp.c,v 2.0 1992/10/16 04:51:08 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -375,7 +375,7 @@ Tcl_RegExpCompile (interp, regExpPtr, expression, flags)
     /*
      * If no meta-characters, use Boyer-Moore string matching only.
      */
-    if (!anyMeta) {
+    if ((!anyMeta) && (flags & REXP_BOTH_ALGORITHMS)) {
         regExpPtr->boyerMoorePtr = BoyerMooreCompile (expBuf, strlen (expBuf));
         goto okExitPoint;
     }
