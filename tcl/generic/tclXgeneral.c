@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.8 1997/07/10 07:21:19 markd Exp $
+ * $Id: tclXgeneral.c,v 8.9 1997/08/08 10:04:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,7 +48,7 @@ TclX_LoopObjCmd _ANSI_ARGS_((ClientData clientData,
                              Tcl_Obj    *CONST objv[]));
 
 static int
-GlobalImport (Tcl_Interp *interp);
+GlobalImport _ANSI_ARGS_((Tcl_Interp *interp));
 
 static int
 TclX_Try_EvalObjCmd _ANSI_ARGS_((ClientData clientData, 

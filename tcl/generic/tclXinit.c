@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.6 1997/07/01 02:58:04 markd Exp $
+ * $Id: tclXinit.c,v 8.7 1997/08/17 04:08:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,7 +44,7 @@ static char tclx_findinit [] =
     set envVar [string toupper ${w}X_LIBRARY]\n\
     if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
     if [info exists env(EXT_FOLDER)] {\n\
-	lappend dirs [file join $env(EXT_FOLDER) \"Tool Command Language\" ${w}X$version]
+	lappend dirs [file join $env(EXT_FOLDER) \"Tool Command Language\" ${w}X$version]\n\
     }\n\
     lappend dirs $defaultLib\n\
     set libDir {}\n\

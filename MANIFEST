@@ -303,6 +303,7 @@
 ./tcl/tests/tcllib.test
 ./tcl/tests/testlib.tcl
 ./tcl/tests/tryeval.test
+./tcl/tests/ucbtests.tcl
 ./tcl/tests/unixcmds.test
 ./tcl/unix/Makefile.in
 ./tcl/unix/pkgIndex.tcl.in
