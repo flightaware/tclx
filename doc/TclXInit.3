@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 4.5 1995/07/05 01:17:36 markd Exp markd $
+.\" $Id: TclXInit.3,v 5.0 1995/07/25 05:40:34 markd Rel $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -209,7 +209,7 @@ This is called from \fBTcl_AppInit\fR.  Normally, this function is used in
 an application in place of the \fBTk_Init\fR function.  If used in this
 way, the UCB Tk run time environment is not required and startup will be
 faster.  This function may also be called after \fBTk_Init\fR has been called.
-In this case, the TclX Tk runtime environment will not be user or required.
+In this case, the TclX Tk runtime environment will not be used or required.
 .PP
 Parameters
 .RS 2
@@ -221,7 +221,7 @@ Returns:
 \fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
-.SS TclX_Main
+.SS TkX_Main
 .PP
 This function parses the command line according to the wish shell
 specification.
