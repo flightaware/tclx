@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 1.2 1992/10/03 22:50:20 markd Exp markd $
+# $Id: buildhelp.tcl,v 1.3 1992/10/05 22:01:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:

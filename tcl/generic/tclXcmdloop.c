@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 1.2 1992/10/05 01:15:41 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 1.3 1992/10/05 02:03:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

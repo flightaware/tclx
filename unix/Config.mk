@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.9 1992/10/13 03:24:19 markd Exp markd $
+# $Id: Config.mk,v 1.10 1992/10/13 06:39:49 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

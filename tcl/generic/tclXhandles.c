@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXhandles.c,v 1.1 1992/09/20 23:18:59 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

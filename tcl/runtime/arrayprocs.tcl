@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: arrayprocs.tcl,v 1.1 1992/09/20 23:30:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

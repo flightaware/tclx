@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 1.1 1992/09/20 23:30:27 markd Exp markd $
+# $Id: help.tcl,v 1.2 1992/10/05 22:01:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
