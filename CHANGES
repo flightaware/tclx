@@ -857,11 +857,23 @@
     an unknown command or other error.
 -------------------------------------------------------------------------------
  27 Dec 94:
-  o Use clock_t instead of assuming long for real times.
+  o Use clock_t, off_t instead of assuming long.
   o A main is no longer part of the library, its should be part of the
-    tclAppInit.c file.  This follows conventions for Tcl & Tk.
+    tclAppInit.c file.  This follows new conventions for Tcl & Tk.
     (*POTENTIAL INCOMPATIBILITY*)
   o Port to Tcl 7.4/Tk 4.0 beta 1.
+  o Worked abound HPUX compiler pointer arithmetic bug in handle table code.
+  o Manual page installation now uses the same default locations as Tcl/Tk.
 ===============================================================================
  28 Dec 94: Released TclX7.4a-beta1.
 ===============================================================================
+ 31 Dec 94:
+  o Modified tests to include the special test commands use in the Tcl and Tk
+    tests.
+-------------------------------------------------------------------------------
+  o Increased flexibility in including TclX in applications without using
+    the Tcl runtime.
+  o Added the tclx_library Tcl variable.
+  o Added the C variables tclX_library, tclX_libraryEnv and tclX_initFile to
+    give custom applications more control over the TclX runtime.
+-------------------------------------------------------------------------------
