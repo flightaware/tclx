@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXdebug.c,v 2.5 1993/07/18 05:59:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -122,7 +122,7 @@ PrintArg (filePtr, argStr, noTruncate)
     quote_it = (printLen == 0);
 
     for (idx = 0; idx < printLen; idx++)
-        if (isspace (argStr [idx])) {
+        if (ISSPACE (argStr [idx])) {
             quote_it = TRUE;
             break;
         }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.5 1993/07/25 00:56:25 markd Exp markd $
+ * $Id: tclXstring.c,v 2.6 1993/08/01 05:42:33 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -505,7 +505,7 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
     }
     if (STREQU (class, "space")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isspace (*scanPtr))
+            if (!ISSPACE (*scanPtr))
                 break;
         }
         goto returnResult;

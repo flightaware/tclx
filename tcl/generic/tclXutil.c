@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.6 1993/07/12 06:28:33 markd Exp markd $
+ * $Id: tclXutil.c,v 2.7 1993/07/20 08:20:26 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -61,7 +61,7 @@ Tcl_StrToLong (string, base, longPtr)
     long  num;
 
     num = strtol(string, &end, base);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && ISSPACE(*end)) {
         end++;
     }
     if ((end == string) || (*end != 0))
@@ -99,7 +99,7 @@ Tcl_StrToInt (string, base, intPtr)
     int   num;
 
     num = strtol(string, &end, base);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && ISSPACE(*end)) {
         end++;
     }
     if ((end == string) || (*end != 0))
@@ -137,7 +137,7 @@ Tcl_StrToUnsigned (string, base, unsignedPtr)
     unsigned long  num;
 
     num = strtoul (string, &end, base);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && ISSPACE(*end)) {
         end++;
     }
     if ((end == string) || (*end != 0))
@@ -169,7 +169,7 @@ Tcl_StrToDouble (string, doublePtr)
     double  num;
 
     num = strtod (string, &end);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && ISSPACE(*end)) {
         end++;
     }
     if ((end == string) || (*end != 0))
@@ -340,7 +340,7 @@ Tcl_GetLong(interp, string, longPtr)
     long  i;
 
     i = strtol(string, &end, 0);
-    while ((*end != '\0') && isspace(*end)) {
+    while ((*end != '\0') && ISSPACE(*end)) {
         end++;
     }
     if ((end == string) || (*end != 0)) {
@@ -384,13 +384,13 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
      * Since some strtoul functions don't detect negative numbers, check
      * in advance.
      */
-    while (isspace(*string))
+    while (ISSPACE(*string))
         string++;
     if (string [0] == '-')
         goto badUnsigned;
 
     i = strtoul(string, &end, 0);
-    while ((*end != '\0') && isspace(*end))
+    while ((*end != '\0') && ISSPACE(*end))
         end++;
 
     if ((end == string) || (*end != '\0'))

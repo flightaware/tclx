@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.17 1993/08/02 05:12:34 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.18 1993/08/03 06:13:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -155,6 +155,12 @@ extern char *tclXWrongArgs;
         (((str1) [0] == (str2) [0]) && (strcmp (str1, str2) == 0))
 #define STRNEQU(str1, str2, cnt) \
         (((str1) [0] == (str2) [0]) && (strncmp (str1, str2, cnt) == 0))
+
+/*
+ * Macro to check for a space that makes sure its ASCII first.  Needed for
+ * non-ASCII character sets on some machines.
+ */
+#define ISSPACE(c) (isascii (c) && isspace (c))
 
 /*
  * Macro that behaves like strdup, only uses ckalloc.

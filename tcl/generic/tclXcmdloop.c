@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.6 1993/07/27 05:17:30 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.7 1993/08/02 05:12:34 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -51,7 +51,7 @@ IsSetVarCmd (command)
     char  *nextPtr;
     int    wordCnt;
 
-    if ((!STRNEQU (command, "set", 3)) || (!isspace (command [3])))
+    if ((!STRNEQU (command, "set", 3)) || (!ISSPACE (command [3])))
         return FALSE;  /* Quick check */
 
     /*
@@ -62,7 +62,7 @@ IsSetVarCmd (command)
     while (*nextPtr != '\0') {
         nextPtr = TclWordEnd (nextPtr, FALSE);
         nextPtr++;  /* Character after the word */
-        while ((*nextPtr != '\0') && (isspace (*nextPtr)))
+        while ((*nextPtr != '\0') && (ISSPACE (*nextPtr)))
             nextPtr++;
         wordCnt++;
     }

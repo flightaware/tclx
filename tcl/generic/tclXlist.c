@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXlist.c,v 2.4 1993/05/05 05:15:31 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -270,7 +270,7 @@ Tcl_LemptyCmd (clientData, interp, argc, argv)
     }
 
     scanPtr = argv [1];
-    while ((*scanPtr != '\0') && (isspace (*scanPtr)))
+    while ((*scanPtr != '\0') && (ISSPACE (*scanPtr)))
         scanPtr++;
     sprintf (interp->result, "%d", (*scanPtr == '\0'));
     return TCL_OK;
