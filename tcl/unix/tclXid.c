@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 5.3 1996/02/22 07:35:58 markd Exp $
+ * $Id: tclXid.c,v 5.4 1996/03/01 17:59:07 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -103,9 +103,7 @@ IdGroupId _ANSI_ARGS_((Tcl_Interp *interp,
                        int         argc,
                        char      **argv));
 
-/*
- *-----------------------------------------------------------------------------
- *
+/*-----------------------------------------------------------------------------
  * Tcl_IdCmd --
  *     Implements the TCL id command:
  *
@@ -123,7 +121,7 @@ IdGroupId _ANSI_ARGS_((Tcl_Interp *interp,
  *
  *        id groupids
  *
- *        id host <name>
+ *        id host
  *
  *        id process
  *        id process parent
@@ -330,6 +328,14 @@ IdProcess (interp, argc, argv)
                               " process group ?set?", (char *) NULL);
             return TCL_ERROR;
         }
+
+        if (Tcl_IsSafe (interp)) {
+            Tcl_AppendResult (interp,
+                              "can't set process group from a safe interpeter",
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
+                        
 #ifndef NO_SETPGID
         pid = getpid ();
         setpgid (pid, pid);
