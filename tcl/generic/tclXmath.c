@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 5.2 1996/02/12 18:16:04 markd Exp $
+ * $Id: tclXmath.c,v 5.3 1996/02/18 22:04:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,7 +22,7 @@
  * Define return of random function unless stdlib does it.  If we are using
  * out own version, make sure to define it.
  */
-#if defined(NO_RANDOM) || !defined(STDLIB_DEFS_RANDOM)
+#if defined(NO_RANDOM) || defined(NO_RANDOM_PROTO)
 long random ();
 #endif
 

@@ -524,7 +524,7 @@ else
 fi
 
 
-# From configure.in Revision: 5.24 dnl
+# From configure.in Revision: 5.25 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -2522,26 +2522,43 @@ fi
 
 
 #------------------------------------------------------------------------------
-# Determine if random is declared in stdlib.h.  If it is, we don't want to
-# redeclare it.  Some systems, such as the DEC Alpha, have random declared
-# are returning int rather than long, since long is 64 bit.
+# Determine if random is declared in stdlib.h or math.h.  If it is, we don't
+# want to redeclare it.  Some systems, such as the DEC Alpha, have random
+# declared as returning int rather than long, since long is 64 bit.
 #------------------------------------------------------------------------------
 
+found_random=NO
 cat > conftest.$ac_ext <<EOF
-#line 2532 "configure"
+#line 2533 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   egrep ""random"" >/dev/null 2>&1; then
   rm -rf conftest*
-  cat >> confdefs.h <<\EOF
-#define STDLIB_DEFS_RANDOM 1
-EOF
-
+  found_random=YES
 fi
 rm -f conftest*
 
+cat > conftest.$ac_ext <<EOF
+#line 2545 "configure"
+#include "confdefs.h"
+#include <math.h>
+EOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep ""random"" >/dev/null 2>&1; then
+  rm -rf conftest*
+  found_random=YES
+fi
+rm -f conftest*
+
+
+if test "$found_random" = "NO"; then
+    cat >> confdefs.h <<\EOF
+#define NO_RANDOM_PROTO 1
+EOF
+
+fi
 
 #------------------------------------------------------------------------------
 #       If Config.mk is not in the build directory, copy it local.

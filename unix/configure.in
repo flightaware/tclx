@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.24 1996/03/11 08:14:21 markd Exp $
+dnl $Id: configure.in,v 5.25 1996/03/21 06:06:40 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.24 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.25 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -500,15 +500,21 @@ AC_CHECK_FUNC(rename, ,[LIBOBJS="$LIBOBJS rename.o"])
 AC_SUBST(LIBOBJS)
 
 #------------------------------------------------------------------------------
-# Determine if random is declared in stdlib.h.  If it is, we don't want to
-# redeclare it.  Some systems, such as the DEC Alpha, have random declared
-# are returning int rather than long, since long is 64 bit.
+# Determine if random is declared in stdlib.h or math.h.  If it is, we don't
+# want to redeclare it.  Some systems, such as the DEC Alpha, have random
+# declared as returning int rather than long, since long is 64 bit.
 #------------------------------------------------------------------------------
 
-AC_HEADER_EGREP("random", stdlib.h, AC_DEFINE(STDLIB_DEFS_RANDOM))
+found_random=NO
+AC_HEADER_EGREP("random", stdlib.h, [found_random=YES])
+AC_HEADER_EGREP("random", math.h, [found_random=YES])
+
+if test "$found_random" = "NO"; then
+    AC_DEFINE(NO_RANDOM_PROTO)
+fi
 
 #------------------------------------------------------------------------------
-#       If Config.mk is not in the build directory, copy it local.
+# If Config.mk is not in the build directory, copy it local.
 #------------------------------------------------------------------------------
 
 if test ! -r Config.mk
