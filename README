@@ -1,10 +1,10 @@
-                          Extended Tcl (TclX) 8.1.1
+                          Extended Tcl (TclX) 8.2.0
                           =========================
 
 INTRODUCTION
 ============
 
-    Extended Tcl (TclX), is a set of extensions to Tcl 8.1, the Tool Command
+    Extended Tcl (TclX), is a set of extensions to Tcl 8.2, the Tool Command
 Language invented by Dr. John Ousterhout.  Tcl is a powerful, yet simple
 embeddable programming language.  Extended Tcl is oriented towards system
 programming tasks and large application development.  TclX provides additional
@@ -20,9 +20,9 @@ with the Extended Tcl command set and signal handling.
 
    Extended Tcl runs on most Unix-like systems and Windows 95/NT.
 
-   While this TclX distribution is tested with Tcl 8.1.1 and Tk 8.1.1, it will
-probably work with newer versions of 8.1.*-series Tcl & Tk with little or no 
-changes.  Please check the Extended Tcl homepage at www.neosoft.com/tclx
+   While this TclX distribution is tested with Tcl 8.2 and Tk 8.2, it will
+probably work with newer versions of 8.2.*-series Tcl & Tk with little or no 
+changes.  Please check the Extended Tcl homepage at http://www.neosoft.com/tclx
 for the latest release and information.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
@@ -39,7 +39,7 @@ BUILDING TCLX
    For instructions on how to build TclX on Unix and Unix-like systems,
 see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
 
-CHANGES IN TCLX 8.1.1
+CHANGES IN TCLX 8.2
 =====================
   o Library naming and version numbering changed to match Tcl's.
 
@@ -104,7 +104,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX8.1.1/doc.  Start with the
+the extensions in the directory tclX8.2.1/doc.  Start with the
 TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
@@ -153,11 +153,11 @@ in the body of the mail.  Send messages to this list at tclx-win@grizzly.com.
 WHERE TO GET IT
 ===============
 
-Extended Tcl 8.1.0 can be downloaded by anonymous FTP from:
+Extended Tcl can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/TclX/tclX8.1.1.tar.gz
+   ftp://ftp.neosoft.com:/pub/tcl/TclX/tclX*.tar.gz
 
-A contributed sources archive resides on ftp.neosoft.com.com.
+A contributed sources archive resides on ftp.neosoft.com.
 A Frequently Asked Questions (FAQ) document exists in this archive.
 
 Remember to mail Extended Tcl problems and questions to
