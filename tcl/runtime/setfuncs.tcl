@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: setfuncs.tcl,v 1.1 1992/09/20 23:30:27 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -38,10 +38,10 @@ proc union {lista listb} {
 # sort a list, returning the sorted version minus any duplicates
 #
 proc lrmdups {list} {
-    # guarantee last doesn't match the first element
-    set last "NOMATCH[lindex $list 0]"
-    set result ""
-    foreach element [lsort $list] {
+    set list [lsort $list]
+    set result [lvarpop list]
+    lappend last $result
+    foreach element $list {
 	if {$last != $element} {
 	    lappend result $element
 	    set last $element
@@ -123,4 +123,5 @@ proc intersect {list1 list2} {
     }
     return $intersectList
 }
+
 
