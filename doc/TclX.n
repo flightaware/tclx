@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 1.7 1992/10/05 02:53:18 markd Exp markd $
+.\" $Id: TclX.man,v 1.8 1992/10/05 18:07:53 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1835,8 +1835,6 @@ The Tcl default file is searched for using the following algorithm:
 - An environment variable, \fBTCLDEFAULT\fR, is checked for.  If present,
 it is used as the name of the
 default file.
-.sp
-- A file, \fBTCLDEFAULT\fR, is looked for in the current directory.
 .sp
 - A global default file, which
 is usually either \fB/etc/default/tcl\fI$ver\fR or

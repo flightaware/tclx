@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXstartup.c,v 1.1 1992/09/20 23:22:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -180,7 +180,6 @@ usageError:
  *
  *   Find the Tcl default file.  If is looked for in the following order:
  *       o A environment variable named `TCLDEFAULT'.
- *       o A file named `TCLDEFAULT'.
  *       o The specified defaultFile (which normally has an version number
  *         appended.
  *   A tcl variable `TCLDEFAULT', will contain the path of the default file
@@ -202,12 +201,9 @@ FindDefaultFile (interp, defaultFile)
     char        *defaultFileToUse;
     struct stat  statBuf;
 
-    if ((defaultFileToUse = getenv ("TCLDEFAULT")) == NULL) {
-        defaultFileToUse = "TCLDEFAULT";
-        if (stat (defaultFileToUse, &statBuf) < 0) {
-            defaultFileToUse = defaultFile;
-        }
-    }
+    if ((defaultFileToUse = getenv ("TCLDEFAULT")) == NULL)
+        defaultFileToUse = defaultFile;
+
     if (stat (defaultFileToUse, &statBuf) < 0)
         defaultFileToUse = "";
     if (Tcl_SetVar (interp, "TCLDEFAULT", defaultFileToUse,
@@ -248,8 +244,7 @@ ProcessDefaultFile (interp, defaultFile)
         Tcl_AppendResult (interp,
                           "Can't access Tcl default file,\n",
                           "  Located in one of the following ways:\n",
-                          "    Environment variable: `TCLDEFAULT',\n",
-                          "    File in current directory: `TCLDEFAULT', or\n",
+                          "    Environment variable: `TCLDEFAULT' or,\n",
                           "    File `", defaultFile, "'.\n", 
                           (char *) NULL);
         return TCL_ERROR;
