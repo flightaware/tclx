@@ -5,18 +5,11 @@ TclX 7.5.0 Beta 3 Release
 ========================
 
 This is the third TclX beta release that is compatible with the Tcl 7.5 /
-Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 3 releases.
+Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 3 releases
+and will probably work the the final Tcl 7.5 release.
 
 Shared library support has been added.  It needs a lot of testing
 on different platforms.  Please try it (configure --enable-shared).
-
-No support is currently available for MS Windows or the MacIntosh.  We
-are interested in supporting these platforms, but don't have the time
-or expertise to do it in the near future.  If anyone is interested in
-working with us on these port, we would like to do it in the same manner
-as Tcl and Tk.  Please contact us if you would like to help.   We will
-handle merge changes into the source tree and making changes available.
-Please contact us at tcl-project@neosoft.com if you think you can help.
 
 INTRODUCTION
 ============
@@ -54,9 +47,7 @@ CHANGES IN TCLX 7.5.0
 =====================
 
   o The TclX runtime is no longer independent of the standard Tcl and
-    Tk runtimes.  Tcl & Tk must be installed (or the TCL_LIBRARY and
-    TK_LIBRARY environment variables set) before building or running
-    TclX.  Tcl_Init must now be called before TclX_Init and Tk_Init
+    Tk runtimes.  Tcl_Init must now be called before TclX_Init and Tk_Init
     before TkX_Init.
 
   o Dropped support for the C++ interfaces in tcl++.h.   This file was
@@ -66,7 +57,8 @@ CHANGES IN TCLX 7.5.0
     us if this causes you problems.
 
   o Added support for building shared libraries on systems where shared
-    library support is implemented by Tcl.
+    library support is implemented by Tcl.  The TclX library (libtclx.so)
+    is now dynamically loadable using the load command.
 
   o Added support for doing event driven programming in the TclX shell.
 
@@ -75,6 +67,7 @@ CHANGES IN TCLX 7.5.0
     server_cntl functionallity has been incorporated in the fcntl
     command.  All old scripts using the server_* commands will continue
     to work.
+  
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.22 1996/03/11 05:54:02 markd Exp $
+# $Id: Makefile.in,v 5.23 1996/03/11 09:10:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -164,12 +164,15 @@ tkXtest.o: ${TKX_GENERIC_DIR}/tkXtest.c
 #------------------------------------------------------------------------------
 
 runtest: Makefile
-	@echo '#!/bin/sh'                                          >runtest
+	@echo '#!/bin/sh'                                           >runtest
+	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest
 	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest
+	@echo "TK_LIBRARY=${TK_SRC}/library"                       >>runtest
 	@echo "TKX_LIBRARY=${TKX_TMP_RUNTIME}"                     >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtest
 	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tktest"                >>runtest
-	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"        >>runtest
+	@echo "export TCL_LIBRARY TCLX_LIBRARY"                    >>runtest
+	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"          >>runtest
 	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_SHLIB_DIR}:${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}:${LD_LIBRARY_PATH}" >>runtest
 	@echo "export LD_LIBRARY_PATH"                             >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest

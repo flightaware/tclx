@@ -4,8 +4,8 @@ QUICK START
 This section is a quick set of step by step instructions for building TclX
 in the manner that addresses the needs of most users.   If you:
 
-    o have built and installed both Tcl and Tk and the built trees are
-      in directories adjacent to the TclX source directory.  i.e.
+    o have built and installed  both Tcl and Tk and the built trees are in
+     directories adjacent to the TclX source directory.  i.e.
 
                             mybuilddir/
                  tcl7.5/      tk4.1/      tclX7.5.0/
@@ -24,6 +24,9 @@ then the following steps will build, test and installed TclX:
     make test          # Run both standard and extended Tcl tests
     make tktest        # Run Tk tests with wishx
     make install
+
+If you build with --enable-shared, Tcl and Tk must be built with
+--enable-shared.
     
 If you have a failure, check the "Porting Notes" section at the end of
 this file.  If you still have problems, try to debug it as much as

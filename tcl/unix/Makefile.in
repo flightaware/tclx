@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.20 1996/03/11 05:53:53 markd Exp $
+# $Id: Makefile.in,v 5.21 1996/03/11 09:10:15 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -307,7 +307,7 @@ runtest: Makefile
 	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest
 	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tclXtest"          >>runtest
-	@echo "export TCLX_LIBRARY TCL_PROGRAM TCL_LIBRARY"        >>runtest
+	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtest
 	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}:${LD_LIBRARY_PATH}" >>runtest
 	@echo "export LD_LIBRARY_PATH"                             >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest

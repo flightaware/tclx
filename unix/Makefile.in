@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.9 1996/02/29 07:02:51 markd Exp $
+# $Id: Makefile.in,v 5.10 1996/03/11 05:54:09 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -53,9 +53,10 @@ TOOLS:
 runtcl: Makefile
 	@echo '#!/bin/sh'                                           >runtcl
 	@echo '# script for testing Tcl before installation'       >>runtcl
+	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtcl
 	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                   >>runtcl
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtcl
-	@echo "export TCLX_LIBRARY TCL_PROGRAM"                    >>runtcl
+	@echo "export TCL_LIBRARY TCLX_LIBRARY TCL_PROGRAM"        >>runtcl
 	@echo "LD_LIBRARY_PATH=${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}:${LD_LIBRARY_PATH}" >>runtcl
 	@echo "export LD_LIBRARY_PATH"                             >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
@@ -69,11 +70,14 @@ runtcl: Makefile
 runwishx: Makefile
 	@echo '#!/bin/sh'                                          >runwishx
 	@echo '# script for testing wishx before installation'    >>runwishx
+	@echo "TCL_LIBRARY=${TCL_SRC}/library"                    >>runwishx
 	@echo "TCLX_LIBRARY=${TCLX_TMP_RUNTIME}"                  >>runwishx
+	@echo "TK_LIBRARY=${TK_SRC}/library"                      >>runwishx
 	@echo "TKX_LIBRARY=${TKX_TMP_RUNTIME}"                    >>runwishx
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"              >>runwishx
 	@echo "WISHX=${TKX_UNIX_BLD_DIR}/wishx"                   >>runwishx
-	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"       >>runwishx
+	@echo "export TCL_LIBRARY TCLX_LIBRARY"                   >>runwishx
+	@echo "export TK_LIBRARY TKX_LIBRARY TCL_PROGRAM"         >>runwishx
 	@echo "LD_LIBRARY_PATH=${bldbasedir}/tk/unix:${TK_SHLIB_DIR}:${bldbasedir}/tcl/unix:${TCL_SHLIB_DIR}:${LD_LIBRARY_PATH}" >>runwishx
 	@echo "export LD_LIBRARY_PATH"                            >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
