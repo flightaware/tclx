@@ -74,6 +74,7 @@ AC_DEFUN(TEA_PATH_TCLCONFIG, [
 	    # check in a few common install locations
 	    if test x"${ac_cv_c_tclconfig}" = x ; then
 		for i in `ls -d ${exec_prefix}/lib 2>/dev/null` \
+			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
@@ -169,6 +170,7 @@ AC_DEFUN(TEA_PATH_TKCONFIG, [
 	    # check in a few common install locations
 	    if test x"${ac_cv_c_tkconfig}" = x ; then
 		for i in `ls -d ${exec_prefix}/lib 2>/dev/null` \
+			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
@@ -468,10 +470,15 @@ AC_DEFUN(TEA_ENABLE_THREADS, [
 		    fi
 		fi
 	    fi
-	    
+
 	    # Does the pthread-implementation provide
 	    # 'pthread_attr_setstacksize' ?
+
+	    ac_saved_libs=$LIBS
+	    LIBS="$LIBS $THREADS_LIBS"
 	    AC_CHECK_FUNCS(pthread_attr_setstacksize)
+	    LIBS=$ac_saved_libs
+	    AC_CHECK_FUNCS(readdir_r)
 	fi
     else
 	TCL_THREADS=0
@@ -811,38 +818,41 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 		fi
 	    fi
 
-	    if test "${SHARED_BUILD}" = "0" ; then
-		runtime=-MT
-	    else
-		runtime=-MD
+	    if test "$GCC" != "yes" ; then
+	        if test "${SHARED_BUILD}" = "0" ; then
+		    runtime=-MT
+	        else
+		    runtime=-MD
+	        fi
+
+                if test "$do64bit" = "yes" ; then
+		    # All this magic is necessary for the Win64 SDK RC1 - hobbs
+		    export CC="${MSSDK}/Bin/Win64/cl.exe \
+	                -I${MSSDK}/Include/prerelease \
+                        -I${MSSDK}/Include/Win64/crt \
+	                -I${MSSDK}/Include"
+		    export RC="${MSSDK}/bin/rc.exe"
+		    export lflags="-MACHINE:IA64 -LIBPATH:${MSSDK}/Lib/IA64 \
+	                -LIBPATH:${MSSDK}/Lib/Prerelease/IA64"
+		    export STLIB_LD="${MSSDK}/bin/win64/lib.exe -nologo ${lflags}"
+		    export LINKBIN="${MSSDK}/bin/win64/link.exe ${lflags}"
+		    CFLAGS_DEBUG="-nologo -Zi -Od -W3 ${runtime}d"
+		    CFLAGS_OPTIMIZE="-nologo -O2 -Gs -W2 ${runtime}"
+	        else
+		    RC="rc"
+		    STLIB_LD="lib -nologo"
+    		    LINKBIN="link -link50compat"
+		    CFLAGS_DEBUG="-nologo -Z7 -Od -W3 -WX ${runtime}d"
+		    CFLAGS_OPTIMIZE="-nologo -O2 -Gs -GD -W2 ${runtime}"
+		fi
 	    fi
 
-	    if test "$do64bit" = "yes" ; then
-		# All this magic is necessary for the Win64 SDK RC1 - hobbs
-		export CC="${MSSDK}/Bin/Win64/cl.exe \
-	    -I${MSSDK}/Include/prerelease -I${MSSDK}/Include/Win64/crt \
-	    -I${MSSDK}/Include"
-		export RC="${MSSDK}/bin/rc.exe"
-		export lflags="-MACHINE:IA64 -LIBPATH:${MSSDK}/Lib/IA64 \
-	    -LIBPATH:${MSSDK}/Lib/Prerelease/IA64"
-		export STLIB_LD="${MSSDK}/bin/win64/lib.exe -nologo ${lflags}"
-		export LINKBIN="${MSSDK}/bin/win64/link.exe ${lflags}"
-		CFLAGS_DEBUG="-nologo -Zi -Od -W3 ${runtime}d"
-		CFLAGS_OPTIMIZE="-nologo -O2 -Gs -W2 ${runtime}"
-	    else
-		RC="rc"
-		STLIB_LD="lib -nologo"
-    		LINKBIN="link -link50compat"
-		CFLAGS_DEBUG="-nologo -Z7 -Od -W3 -WX ${runtime}d"
-		CFLAGS_OPTIMIZE="-nologo -O2 -Gs -GD -W2 ${runtime}"
-	    fi
-
-	    if test "$MINGW32" = "yes"; then
+	    if test "$GCC" = "yes"; then
 		# mingw gcc mode
+		RC="windres"
 		CFLAGS_DEBUG="-g"
 		CFLAGS_OPTIMIZE="-O2"
-		SHLIB_LD="gcc -shared"
-		STLIB_LD='${AR} cr'
+		SHLIB_LD="$CC -shared"
 		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.a'
 		LDFLAGS_CONSOLE="-wl,--subsystem,console ${lflags}"
 		LDFLAGS_WINDOW="-wl,--subsystem,windows ${lflags}"
@@ -990,12 +1000,12 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 	    # Check to enable 64-bit flags for compiler/linker
 	    if test "$do64bit" = "yes" ; then
 		if test "$GCC" = "yes" ; then
-		    hpux_arch=`gcc -dumpmachine`
+		    hpux_arch=`${CC} -dumpmachine`
 		    case $hpux_arch in
 			hppa64*)
 			    # 64-bit gcc in use.  Fix flags for GNU ld.
 			    do64bit_ok=yes
-			    SHLIB_LD="gcc -shared"
+			    SHLIB_LD="${CC} -shared"
 			    SHLIB_LD_LIBS=""
 			    LD_SEARCH_FLAGS=''
 			    ;;
@@ -1005,8 +1015,13 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 		    esac
 		else
 		    do64bit_ok=yes
-		    EXTRA_CFLAGS="+DA2.0W"
-		    LDFLAGS="+DA2.0W $LDFLAGS"
+		    if test "`uname -m`" = "ia64" ; then
+			EXTRA_CFLAGS="+DD64"
+			LDFLAGS="+DD64 $LDFLAGS"
+		    else
+			EXTRA_CFLAGS="+DA2.0W"
+			LDFLAGS="+DA2.0W $LDFLAGS"
+		    fi
 		fi
 	    fi
 	    ;;
@@ -1634,9 +1649,6 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 		ULTRIX-4.*)
 		    ;;
 		windows)
-		    if test "$MINGW32" != "yes"; then 
-		        SHLIB_CFLAGS="-fPIC"
-		    fi
 		    ;;
 		*)
 		    SHLIB_CFLAGS="-fPIC"
@@ -2422,6 +2434,9 @@ The PACKAGE variable must be defined by your TEA configure.in])
 	    ;;
     esac
 
+    # Check if exec_prefix is set. If not use fall back to prefix
+    if test x$exec_prefix = xNONE ; then exec_prefix=$prefix ; fi
+
     AC_SUBST(EXEEXT)
     AC_SUBST(CYGPATH)
 ])
@@ -2516,6 +2531,18 @@ AC_DEFUN(TEA_SETUP_COMPILER, [
 
     AC_OBJEXT
     AC_EXEEXT
+
+    #--------------------------------------------------------------------
+    # Common compiler flag setup
+    #--------------------------------------------------------------------
+
+    TEA_TCL_EARLY_FLAGS
+    TEA_TCL_64BIT_FLAGS
+    #TEA_C_BIGENDIAN
+    if test "${TEA_PLATFORM}" = "unix" ; then
+	TEA_MISSING_POSIX_HEADERS
+	TEA_BUGGY_STRTOD
+    fi
 ])
 
 #------------------------------------------------------------------------
@@ -3090,6 +3117,7 @@ AC_DEFUN(TEA_PATH_CONFIG, [
 	    # check in a few common install locations
 	    if test x"${ac_cv_c_$1config}" = x ; then
 		for i in `ls -d ${exec_prefix}/lib 2>/dev/null` \
+			`ls -d ${prefix}/lib 2>/dev/null` \
 			`ls -d /usr/local/lib 2>/dev/null` \
 			`ls -d /usr/contrib/lib 2>/dev/null` \
 			`ls -d /usr/lib 2>/dev/null` \
