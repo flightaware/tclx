@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 1.2 1992/09/21 05:08:03 markd Exp markd $
+ * $Id: tclExtdInt.h,v 1.3 1992/09/21 07:11:03 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -190,6 +190,10 @@ Tcl_RegExpExecute _ANSI_ARGS_((Tcl_Interp  *interp,
                                char        *matchStrLower));
 void
 Tcl_ResetSignals ();
+
+int
+Tcl_ReturnDouble _ANSI_ARGS_((Tcl_Interp *interp,
+                              double      number));
 
 int
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,

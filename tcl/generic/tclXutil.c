@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXutil.c,v 1.1 1992/09/20 23:22:38 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,6 +22,8 @@
 #  define _tolower tolower
 #  define _toupper toupper
 #endif
+
+extern double pow ();
 
 
 /*
@@ -641,10 +643,98 @@ Tcl_System (interp, command)
     /*
      * Parent process.
      */
+#ifndef TCL_HAVE_WAITPID
+    if (Tcl_WaitPids(1, &processID, &processStatus) == -1) {
+        interp->result = Tcl_UnixError (interp);
+        return -1;
+    }
+#else
     if (waitpid (processID, &processStatus, 0) == -1) {
         interp->result = Tcl_UnixError (interp);
         return -1;
     }
+#endif
     return (WEXITSTATUS(processStatus));
 
 }
+
+/*
+ *--------------------------------------------------------------
+ *
+ * Tcl_ReturnDouble --
+ *
+ *	Format a double to the maximum precision supported on
+ *	this machine.  If the number formats to an even integer,
+ *	a ".0" is append to assure that the value continues to
+ *	represent a floating point number.
+ *
+ * Results:
+ *	A standard Tcl result.	If the result is TCL_OK, then the
+ *	interpreter's result is set to the string value of the
+ *	double.	 If the result is TCL_OK, then interp->result
+ *	contains an error message (If the number had the value of
+ *	"not a number" or "infinite").
+ *
+ * Side effects:
+ *	None.
+ *
+ *--------------------------------------------------------------
+ */
+
+int
+Tcl_ReturnDouble(interp, number)
+    Tcl_Interp *interp;			/* ->result gets converted number */
+    double number;			/* Number to convert */
+{
+    static int precision = 0;
+    register char *scanPtr;
+
+    /*
+     * On the first call, determine the number of decimal digits that represent
+     * the precision of a double.
+     */
+    if (precision == 0) {
+	sprintf (interp->result, "%.0f", pow (2.0, (double) DSIGNIF));
+	precision = strlen (interp->result);
+    }
+
+    sprintf (interp->result, "%.*g", precision, number);
+
+    /*
+     * Scan the number for "." or "e" to assure that the number has not been
+     * converted to an integer.	 Also check for NaN on infinite
+     */
+
+    scanPtr = interp->result;
+    if (scanPtr [0] == '-')
+	scanPtr++;
+    for (; isdigit (*scanPtr); scanPtr++)
+	continue;
+
+    switch (*scanPtr) {
+      case '.':
+      case 'e':
+	return TCL_OK;
+      case 'n':
+      case 'N':
+	interp->result = "Floating point error, result is not a number";
+	return TCL_ERROR;
+      case 'i':
+      case 'I':
+	interp->result = "Floating point error, result is infinite";
+	return TCL_ERROR;
+      case '\0':
+	scanPtr [0] = '.';
+	scanPtr [1] = '0';
+	scanPtr [2] = '\0';
+	return TCL_OK;
+    }
+
+    /*
+     * If we made it here, this sprintf returned something we did not expect.
+     */
+    Tcl_AppendResult (interp, ": unexpected floating point conversion result",
+		      (char *) NULL);
+    return TCL_ERROR;
+}
+     
