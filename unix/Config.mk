@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.8 1992/10/13 03:06:56 markd Exp markd $
+# $Id: Config.mk,v 1.9 1992/10/13 03:24:19 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -131,7 +131,7 @@ MEM_DEBUG_FLAGS=
 # o TCL_GROUP - The group that all Tcl files will belong to after installation.
 #
 TCL_OWNER=bin
-TCL_OWNER=bin
+TCL_GROUP=bin
 
 # o TCL_DEFAULT - Base name of Tcl default file.  This name will have a
 #   version number appended.
