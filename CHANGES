@@ -1188,6 +1188,10 @@
 27 Jul 96: Released TclX 7.5.3 - alpha 1 (Win32 alpha release)
 ===============================================================================
  8 Aug 96:
-  o The runtime no installs under /usr/local/lib/{tclX,tkX} by default.
+  o The runtime now installs under /usr/local/lib/{tclX,tkX} by default.
     (Hi Don).
+-------------------------------------------------------------------------------
+16 Aug 96:
+  o Added support for ITcl namespaces to the profile command.  Change supplied
+    by Christopher Hylands <cxh@EECS.Berkeley.EDU>.
 -------------------------------------------------------------------------------

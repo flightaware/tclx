@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 7.1 1996/07/18 19:36:24 markd Exp $
+ * $Id: tclXprofile.c,v 7.2 1996/07/22 17:10:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -392,6 +392,10 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int procLevel = (iPtr->varFramePtr == NULL) ? 0 : iPtr->varFramePtr->level;
     clock_t realTime, cpuTime;
+#ifdef ITCL_NAMESPACES
+    char *commandNamesp;
+    Tcl_DString commandWithNs;
+#endif
 
     /*
      * Calculate the time spent since the last trace.
@@ -438,9 +442,32 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
      * If this command is a procedure or if all commands are being traced,
      * handle the entry.
      */
+#ifdef ITCL_NAMESPACES      
+    if (infoPtr->allCommands || (TclFindProc (iPtr, argv [0]) != NULL)) {
+        /*
+         * Append the namespace of the command.
+         */
+        Tcl_DStringInit (&commandWithNs);
+        commandNamesp = Itcl_GetNamespPath (Itcl_GetActiveNamesp (interp));
+	if (commandNamesp != NULL) {
+            Tcl_DStringAppend (&commandWithNs, commandNamesp, -1);
 
-    if (infoPtr->allCommands || (TclFindProc (iPtr, argv [0]) != NULL))
+            /*
+             * If the argument does not have a leading ::, then append one.
+             */
+            if (!STRNEQU (argv[0], "::", 2)) 
+                Tcl_DStringAppend (&commandWithNs, "::", -1); 
+	}
+	Tcl_DStringAppend (&commandWithNs, argv[0], -1); 
+	ProcEntry (infoPtr, Tcl_DStringValue (&commandWithNs),
+		   procLevel + 1, evalLevel + 1);
+	Tcl_DStringFree (&commandWithNs);
+    }
+#else
+    if (infoPtr->allCommands || (TclFindProc (iPtr, argv [0]) != NULL)) {
         ProcEntry (infoPtr, argv [0], procLevel + 1, evalLevel + 1);
+    }
+#endif
 
     /*
      * Save the exit time of the profiling trace handler.
