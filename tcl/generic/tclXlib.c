@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.10 1993/09/16 05:37:54 markd Exp markd $
+ * $Id: tclXlib.c,v 2.11 1993/10/31 23:55:23 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -1099,8 +1099,8 @@ LoadCommand (interp, command)
     if (Tcl_GetCommandInfo (interp, command, &cmdInfo))
         return TCL_OK;  /* Found and loaded */
 
-    Tcl_AppendResult (interp, "command \"", command, "\" was not loaded by ",
-                      "\"", loadCmd, "\" even though it returned no error",
+    Tcl_AppendResult (interp, "command \"", command, "\" was defined in a Tcl",
+                      " library index, but not in a Tcl library",
                       (char *) NULL);
     return TCL_ERROR;
 }
