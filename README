@@ -7,6 +7,8 @@ BETA RELEASE
     This is the TclX 7.4a beta 1 release.  It corresponds to the Tcl 7.4 b1
 and Tk 4.0 b1 releases.  Please report bugs ASAP to tcl-project@neosoft.com.
 
+The Tk tests currently only run with the special tktest program, don't try a
+"make tktest".
 
 INTRODUCTION
 ============
