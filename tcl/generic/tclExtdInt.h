@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.25 1999/03/31 06:37:42 markd Exp $
+ * $Id: tclExtdInt.h,v 8.26 1999/06/23 00:24:57 surles Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -196,6 +196,19 @@ typedef int
 /*
  * Prototypes for utility procedures.
  */
+
+extern int
+TclX_CreateObjCommand _ANSI_ARGS_((Tcl_Interp* interp, char* cmdName,
+				   Tcl_ObjCmdProc *proc, ClientData clientData,
+				   Tcl_CmdDeleteProc *deleteProc, int flags));
+
+/* Special flags for "TclX_CreateObjCommand".
+ */
+
+#define TCLX_CMD_NOPREFIX	1	/* don't define with "exp_" prefix */
+#define TCLX_CMD_REDEFINE	2	/* stomp on old commands with same name */
+
+
 extern int
 TclX_StrToOffset _ANSI_ARGS_((CONST char *string,
                               int         base,

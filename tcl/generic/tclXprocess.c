@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXprocess.c,v 8.10 1999/03/31 06:37:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -300,15 +300,18 @@ TclX_ProcessInit (interp)
                           (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    /* Avoid conflict with "expect".
+     */
+
+    TclX_CreateObjCommand (interp,
                           "fork",
 			  TclX_ForkObjCmd,
                           (ClientData) NULL,
-			  (Tcl_CmdDeleteProc*) NULL);
+			  (Tcl_CmdDeleteProc*) NULL, 0);
 
-    Tcl_CreateObjCommand (interp,
+    TclX_CreateObjCommand (interp,
                           "wait",
                           TclX_WaitObjCmd,
                           (ClientData) NULL,
-                          (Tcl_CmdDeleteProc*) NULL);
+                          (Tcl_CmdDeleteProc*) NULL, 0);
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXutil.c,v 8.28 1999/03/31 06:37:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1203,4 +1203,50 @@ TclX_ShellExit (interp, exitCode)
         Tcl_Exit (0);
     }
 #endif    
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_CreateObjCommand --
+ *
+ * Handles the creation of TclX commands. Used for commands who come
+ * in conflict with other extensions.
+ *
+ * Parameters:
+ *   o Like Tcl_CreateObjCommand
+ *   o flags - Additional flags to control the behaviour of the procedure.
+ *----------------------------------------------------------------------------- */
+
+int
+TclX_CreateObjCommand (interp, cmdName, proc, clientData, deleteProc, flags)
+     Tcl_Interp*        interp;
+     char*              cmdName;
+     Tcl_ObjCmdProc*    proc;
+     ClientData         clientData;
+     Tcl_CmdDeleteProc* deleteProc;
+     int                flags;
+{
+  Namespace *globalNsPtr = (Namespace *) Tcl_GetGlobalNamespace(interp);
+  Namespace *currNsPtr   = (Namespace *) Tcl_GetCurrentNamespace(interp);
+  char cmdnamebuf[80];
+
+  if ((flags & TCLX_CMD_REDEFINE) ||
+      !(Tcl_FindHashEntry(&globalNsPtr->cmdTable,cmdName) ||
+	Tcl_FindHashEntry(&currNsPtr->cmdTable,cmdName))) {
+
+      Tcl_CreateObjCommand(interp,cmdName,
+			   proc,clientData,deleteProc);
+  }
+
+  if (!(cmdName[0] == 't' &&
+	cmdName[1] == 'c' &&
+	cmdName[2] == 'l' &&
+	cmdName[3] == 'x')
+      && !(flags & TCLX_CMD_NOPREFIX)) {
+
+      sprintf(cmdnamebuf,"tclx_%s",cmdName);
+      Tcl_CreateObjCommand(interp,cmdnamebuf,proc,clientData,
+			   deleteProc);
+  }
+
+  return TCL_OK;
 }

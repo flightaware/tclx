@@ -1,3 +1,20 @@
+2001-05-19  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* All of the changes below are there to fix bug [418295].
+
+	* tcl/generic/tclXoscmds.c (TclX_OsCmdsInit): "system" and
+	  "sleep" now use the new command creation procedure.
+
+	* tcl/generic/tclXprocess.c (TclX_ProcessInit): "fork" and
+	  "wait" now use the new command creation procedure.
+
+	* tcl/generic/tclXutil.c (TclX_CreateObjCommand): Added
+	  the implementation of this new procedure.
+
+	* tcl/generic/tclExtdInt.h: Added TclX_CreateObjCommand to
+	  encapsulate the logic for the creation of commands FOO and
+	  tclx_FOO.
+
 2001-05-15  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* tcl/generic/tclXlist.c (TclX_LassignObjCmd): Added

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXoscmds.c,v 8.9 1999/03/31 06:37:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -387,11 +387,11 @@ TclX_OsCmdsInit (interp)
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    TclX_CreateObjCommand (interp,
 			  "sleep",
 			  TclX_SleepObjCmd,
                           (ClientData) NULL,
-			  (Tcl_CmdDeleteProc*) NULL);
+			  (Tcl_CmdDeleteProc*) NULL, 0);
 
     Tcl_CreateObjCommand (interp,
                           "sync",
@@ -399,11 +399,11 @@ TclX_OsCmdsInit (interp)
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
-    Tcl_CreateObjCommand (interp,
+    TclX_CreateObjCommand (interp,
                           "system",
 			  TclX_SystemObjCmd,
                           (ClientData) NULL,
-			  (Tcl_CmdDeleteProc*) NULL);
+			  (Tcl_CmdDeleteProc*) NULL, 0);
 
     Tcl_CreateObjCommand (interp,
 			  "umask",
