@@ -13,22 +13,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.test,v 2.3 1993/09/25 16:06:44 markd Exp markd $
+# $Id: globrecur.test,v 3.0 1993/11/19 06:57:47 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] == ""} then {source testlib.tcl}
 eval $SAVED_UNKNOWN
 
-proc tcltouch file {
-    close [open $file w]
-}
-
 exec rm -rf GLOBTESTDIR
-mkdir GLOBTESTDIR
-mkdir GLOBTESTDIR/dir1
-mkdir GLOBTESTDIR/dir2
-mkdir GLOBTESTDIR/dir2/dir3
 
 tcltouch GLOBTESTDIR/file1
 tcltouch GLOBTESTDIR/dir1/file1

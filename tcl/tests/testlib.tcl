@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 3.0 1993/11/19 06:57:00 markd Rel markd $
+# $Id: testlib.tcl,v 3.1 1994/01/23 16:58:20 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -151,4 +151,13 @@ proc ForkLoopingChild {{setPGroup 0}} {
     exit 1
 }
 
+#
+# Create a file.  If the directory doesn't exist, create it.
+#
+proc tcltouch file {
+    if ![file exists [file dirname $file]] {
+        mkdir -path [file dirname $file]
+    }
+    close [open $file w]
+}
 
