@@ -349,4 +349,6 @@
   o Use our own strftime for SGI since their's is broken.
   o Added changes to fix problems with systems using IEEE floating point math
     error reporting.
--------------------------------------------------------------------------------
+===============================================================================
+ 9 Oct 92: Extended Tcl 6.4c patch1 released
+===============================================================================
