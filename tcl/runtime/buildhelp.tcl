@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildhelp.tcl,v 2.12 1993/11/10 06:47:40 markd Exp markd $
+# $Id: buildhelp.tcl,v 2.13 1993/11/11 03:57:52 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -485,17 +485,14 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
     }
 
     if {[file extension $briefFile] != ".brf"} {
-        puts stderr "Brief file \"$briefFile\" must have an extension \".brf\""
-        exit 1
+        error "Brief file \"$briefFile\" must have an extension \".brf\""
     }
     if [file exists $helpDir/$briefFile] {
-        puts stderr "Brief file \"$helpDir/$briefFile\" already exists"
-        exit 1
+        error "Brief file \"$helpDir/$briefFile\" already exists"
     }
     set briefHelpFH [open "|sort > $helpDir/$briefFile" w]
 
-    foreach manFile $sourceFiles {
-        set manFile [glob $manFile]
+    foreach manFile [glob $sourceFiles] {
         set ext [file extension $manFile]
         if {$ext == ".tcl" || $ext == ".tlib"} {
             set status [catch {ProcessTclScript $manFile} msg]
@@ -503,13 +500,8 @@ proc buildhelp {helpDirPath briefFile sourceFiles} {
             set status [catch {ProcessNroffFile $manFile} msg]
         }
         if {$status != 0} {
-            echo "Error extracting help from: $manFile"
-            echo $msg
-            global errorInfo tcl_interactive
-            if {!$tcl_interactive} {
-                echo $errorInfo
-                exit 1
-            }
+            global errorInfo errorCode
+            error "Error extracting help from: $manFile" $errorInfo $errorCode
         }
     }
 
