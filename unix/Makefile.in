@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.7 1994/03/09 16:05:31 markd Exp markd $
+# $Id: Makefile.in,v 3.8 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -48,6 +48,7 @@ LIBTK_A    = tkmaster/lib${ARCH}/libtk.a
 TK_H       = tkmaster/include/tk.h
 INSTCOPY   = ./runtcl tools/instcopy
 CPMANPAGES = ./runtcl ${bldbasedir}/tools/cpmanpages
+SYMLINKEXT = ${bldbasedir}/tools/symlinkext
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
@@ -271,9 +272,9 @@ install-master-exec: all MASTER-NOTE TCLXMINSTALL-EXEC ${TK_BUILD}MMAYBE-EXEC
 MASTER-NOTE:
 	@echo ""
 	@echo "*************************************************************"
-	@echo "*** TclX currently builds symbolic links to the bin files ***"
-	@echo "*** in the master directories.  If you need links to the  ***"
-	@echo "*** include or man files you must build them by hand.     ***"
+	@echo "*** TclX currently does not build symbolic links to the   ***"
+	@echo "*** manual pages in the master directories.  If you need  ***"
+	@echo "*** these man page links you must build them by hand.     ***"
 	@echo "*************************************************************"
 	@echo ""
 
@@ -290,9 +291,9 @@ TCLXMINSTALL:
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
 	    ${srcbasedir}/man ${TCL_INST_MASTER}/man
-	test -d ${TCL_BINDIR} || mkdir ${TCL_BINDIR}
-	rm -f ${TCL_BINDIR}/tcl
-	ln -s ${TCL_INST_MASTER}/bin${ARCH}/tcl ${TCL_BINDIR}/tcl
+	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
+	${SYMLINKEXT} ${TCL_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
+	${SYMLINKEXT} ${TCL_INST_MASTER}/include/* ${TCL_INCLUDEDIR}
 
 TCLXMINSTALL-EXEC:
 	@echo ""
@@ -301,10 +302,8 @@ TCLXMINSTALL-EXEC:
 	${INSTCOPY} tclmaster/bin${ARCH} ${TCL_INST_MASTER}
 	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
-	test -d ${TCL_BINDIR} || ${TCL_BINDIR}
-	rm -f ${TCL_BINDIR}/tcl
-	ln -s ${TCL_INST_MASTER}/bin${ARCH}/tcl ${TCL_BINDIR}/tcl
-
+	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
+	${SYMLINKEXT} ${TCL_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
 
 TKXMINSTALL:
 	@echo ""
@@ -317,11 +316,9 @@ TKXMINSTALL:
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
 	    ${TK_MAN_UNIXCMD_SECTION} \
 	    ${TK_UCB_SRC}/doc ${TK_INST_MASTER}/man
-	test -d ${TCL_BINDIR} || mkdir ${TCL_BINDIR}
-	rm -f ${TCL_BINDIR}/wishx
-	ln -s ${TK_INST_MASTER}/bin${ARCH}/wishx ${TCL_BINDIR}/wishx
-	rm -f ${TCL_BINDIR}/tclhelp
-	ln -s ${TK_INST_MASTER}/bin${ARCH}/tclhelp ${TCL_BINDIR}/tclhelp
+	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
+	${SYMLINKEXT} ${TK_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
+	${SYMLINKEXT} ${TK_INST_MASTER}/include/* ${TCL_INCLUDEDIR}
 
 TKXMINSTALL-EXEC:
 	@echo ""
@@ -330,11 +327,8 @@ TKXMINSTALL-EXEC:
 	${INSTCOPY} tkmaster/bin${ARCH} ${TK_INST_MASTER}
 	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
-	test -d ${TCL_BINDIR} || mkdir ${TCL_BINDIR}
-	rm -f ${TCL_BINDIR}/wishx
-	ln -s ${TK_INST_MASTER}/bin${ARCH}/wishx ${TCL_BINDIR}/wishx
-	rm -f ${TCL_BINDIR}/tclhelp
-	ln -s ${TK_INST_MASTER}/bin${ARCH}/tclhelp ${TCL_BINDIR}/tclhelp
+	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
+	${SYMLINKEXT} ${TK_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
 
 # Fake targets to decide if we install wishx or not.
 

@@ -797,6 +797,8 @@
 -------------------------------------------------------------------------------
  1 Jul 94:
    o Changes to support DEC Alpha.
+   o When using master install model, lib and include files are not symbolicly
+     link to the external directories.
 ===============================================================================
- 1 Jul 94: Released TclX7.3b-beta1.
+ 2 Jul 94: Released TclX7.3b-beta1.
 ===============================================================================

@@ -357,5 +357,6 @@
 ./tools/cpmanpages.tcl
 ./tools/getversion.c
 ./tools/instcopy.tcl
+./tools/symlinkext.sh
 ./tools/tclmanpages
 ./tools/tkmanpages

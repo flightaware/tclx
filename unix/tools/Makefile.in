@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.5 1994/04/01 02:18:19 markd Exp markd $
+# $Id: Makefile.in,v 3.6 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -41,7 +41,8 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
 
 #------------------------------------------------------------------------------
 
-all: tclxversion $(TK_BUILD) instcopy bldmanhelp cpmanpages cphelpdir
+all: tclxversion $(TK_BUILD) instcopy bldmanhelp cpmanpages cphelpdir \
+     symlinkext
 
 tclxversion: getversion.c
 	$(CC) $(CC_FLAGS) ${srcdir}/getversion.c -o tclxversion ${LIBS}
@@ -71,11 +72,16 @@ cphelpdir: cphelpdir.sh
 	cat ${srcdir}/cphelpdir.sh        >>cphelpdir
 	chmod a+x cphelpdir
 
+symlinkext: symlinkext.sh
+	rm -f symlinkext
+	cat ${srcdir}/symlinkext.sh  >symlinkext
+	chmod a+x symlinkext
+
 #------------------------------------------------------------------------------
 
 clean:
 	-rm -f tclxversion tkxversion *.o
-	-rm -f instcopy bldmanhelp cpmanpages cphelpdir TclXman.lst
+	-rm -f instcopy bldmanhelp cpmanpages cphelpdir symlinkext
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
