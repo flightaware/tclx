@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 4.4 1995/07/01 19:03:44 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 4.5 1995/07/02 05:12:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -74,20 +74,10 @@ Tcl_GetTimeZone (currentTime)
     return timeZone;
 #endif
 
-#if defined(HAVE_GETTIMEOFDAY) && !defined (TCL_GOT_TIMEZONE)
-#   define TCL_GOT_TIMEZONE
-    struct timeval  tv;
-    struct timezone tz;
-    int             timeZone;
-
-    gettimeofday (&tv, &tz);
-    timeZone = tz.tz_minuteswest;
-    if (tz.tz_dsttime)
-        timeZone += 60;
-
-    return timeZone;
-#endif
-
+/*
+ * Must prefer timezone variable over gettimeofday, as gettimeofday is
+ * broken on Solaris.
+ */
 #if defined(HAVE_TIMEZONE_VAR) && !defined (TCL_GOT_TIMEZONE)
 #   define TCL_GOT_TIMEZONE
     static int setTZ = FALSE;
@@ -98,6 +88,20 @@ Tcl_GetTimeZone (currentTime)
         setTZ = TRUE;
     }
     timeZone = timezone / 60;
+
+    return timeZone;
+#endif
+
+#if defined(HAVE_GETTIMEOFDAY) && !defined (TCL_GOT_TIMEZONE)
+#   define TCL_GOT_TIMEZONE
+    struct timeval  tv;
+    struct timezone tz;
+    int             timeZone;
+
+    gettimeofday (&tv, &tz);
+    timeZone = tz.tz_minuteswest;
+    if (tz.tz_dsttime)
+        timeZone += 60;
 
     return timeZone;
 #endif
