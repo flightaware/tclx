@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.6 1996/10/20 01:53:38 markd Exp $
+# $Id: Makefile.in,v 7.7 1996/10/27 00:34:15 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,10 +41,10 @@ LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LDLIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
-	 ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS}\
-	 ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-	 ${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
+LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
+       ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS}\
+       ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
+       ${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${TCLX_LD_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -73,23 +73,33 @@ TEST_OBJS = tkTest.o tkSquare.o tkXunixTest.o
 all: libtkx.a SHLIB_@BUILD_SHARED@ wishx RUNTIME tktest runtest \
      ${bldbasedir}/tk/tests
 
+static: wishx.static
+
 wishx: tkXAppInit.o libtkx.a ${LIBTK} ${LIBTCLX}
-	${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${LIBS} -o wishx || \
 	    (rm -f wishx; exit 1)
+
+wishx.static: tkXAppInit.o libtkx.a ${LIBTK} ${LIBTCLX}
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${SALIBS} -o $@ || \
+	    (rm -f $@; exit 1)
 
 ${TKX_STLIB_NAME}: ${OBJS}
 	${AR} cr libtkx.a ${OBJS}
 	${RANLIB} libtkx.a
 
-SHLIB_YES: ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION}
+SHLIB_YES: ${TKX_SHLIB_NAME}
 	touch SHLIB_YES
 
-${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION}: ${SOBJS}
-	rm -f ${TKX_SHLIB_NAME} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION}
-	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${SOBJS} ${SHLIBLIBS}
-	mv ${TKX_SHLIB_BASE_NAME} ${TKX_SHLIB_BASE_NAME}.${TKX_SHLIB_VERSION}
-	rm -f ${TKX_SHLIB_BASE_NAME}
-	${LN_S} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION} ${TKX_SHLIB_BASE_NAME}
+${TKX_SHLIB_NAME}:	${TKX_SHLIB_BASE_NAME}.${TKX_SHLIB_VERSION}
+	rm -f $@
+	${LN_S} ${TKX_SHLIB_BASE_NAME}.${TKX_SHLIB_VERSION} $@
+
+${TKX_SHLIB_BASE_NAME}.${TKX_SHLIB_VERSION}: ${SOBJS}
+	rm -f ${TKX_SHLIB_NAME} $@
+	${TCL_SHLIB_LD} -o ${TKX_SHLIB_NAME} ${TCLX_LD_SEARCH_FLAGS} \
+		${TCL_LD_SEARCH_FLAGS} ${TK_LD_SEARCH_FLAGS} ${SOBJS} \
+		${TCL_SHLIB_LD_LIBS}
+	mv ${TKX_SHLIB_NAME} $@
 
 SHLIB_NO:
 	touch SHLIB_NO
@@ -154,7 +164,7 @@ help:
 #
 
 tktest: ${TEST_OBJS} libtkx.a ${LIBTCLX}
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LIBS} -o tktest || \
 	    (rm -f tktest; exit 1)
 
 tkTest.o: ${TK_SRC}/generic/tkTest.c
@@ -229,14 +239,14 @@ install-exec:
 	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TKX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/libtkx.a
 	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${INSTCOPY} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION} ${INSTALL_ROOT}${TKX_INST_LIB} ;\
-	    rm -f ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME};\
-	    ${LN_S} ${TKX_SHLIB_NAME}.${TKX_SHLIB_VERSION} \
-		${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_BASE_NAME} ;\
+	    ${INSTCOPY} ${TKX_SHLIB_BASE_NAME}.${TKX_SHLIB_VERSION} \
+	    ${INSTALL_ROOT}${TKX_INST_LIB} ;\
+	    rm -f ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_NAME};\
+	    ${LN_S} ${TKX_SHLIB_BASE_NAME}.${TKX_SHLIB_VERSION} \
+		${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_SHLIB_NAME} ;\
 	fi
 	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
 	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
-	${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TKX_INST_LIB}/tkX${TKX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 clean:

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.14 1996/10/20 01:53:23 markd Exp $
+# $Id: Makefile.in,v 7.15 1996/10/25 04:55:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -34,9 +34,9 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
-LDLIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
-	 ${TCL_DL_LIBS} ${XLDLIBS} ${TCL_LD_SEARCH_FLAGS} \
-	 ${TCLX_LD_SEARCH_FLAGS}
+LIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
+       ${TCL_DL_LIBS} ${XLDLIBS} ${TCL_LD_SEARCH_FLAGS} \
+       ${TCLX_LD_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -110,9 +110,16 @@ TEST_OBJS = tclTest.o tclUnixTest.o tclXtest.o tclXunixTest.o
 #
 all: libtclx.a SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest runtest
 
+static:	tcl.static
+
 tcl: tclXAppInit.o libtclx.a SHLIB_@BUILD_SHARED@
-	${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
+	${CC} ${LD_SWITCHES} tclXAppInit.o ${LIBS} -o tcl || \
 	    (rm -f tcl; exit 1)
+
+tcl.static: tclXAppInit.o libtclx.a
+	${CC} ${LD_SWITCHES} tclXAppInit.o ${SALIBS} -o $@ || \
+	    (rm -f $@; exit 1)
+
 
 ${TCLX_STLIB_NAME}: ${OBJS}
 	${AR} cr libtclx.a ${OBJS}
@@ -123,7 +130,7 @@ SHLIB_YES: ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION}
 
 ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION}: ${SOBJS}
 	rm -f ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION}
-	${TCL_SHLIB_LD} -o ${TCLX_SHLIB_NAME} ${SOBJS} ${SHLIBLIBS}
+	${TCL_SHLIB_LD} -o ${TCLX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
 	mv ${TCLX_SHLIB_BASE_NAME} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION}
 	rm -f ${TCLX_SHLIB_BASE_NAME}
 	${LN_S} ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION} ${TCLX_SHLIB_BASE_NAME}
@@ -505,7 +512,7 @@ help:
 # Generate the test program.
 #
 tclXtest: ${TEST_OBJS} libtclx.a
-	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tclXtest || \
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LIBS} -o tclXtest || \
 	    (rm -f tclXtest; exit 1)
 
 tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
@@ -603,20 +610,20 @@ install-exec:
 	${INSTCOPY} libtclx.a ${INSTALL_ROOT}${TCLX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/libtclx.a
 	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${INSTCOPY} ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
-	    rm -f ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_BASE_NAME};\
-	    ${LN_S} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION} \
-		   ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_BASE_NAME} ;\
+	    ${INSTCOPY} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION} \
+		${INSTALL_ROOT}${TCLX_INST_LIB}/tclX${TCLX_FULL_VERSION} ;\
+	    rm -f ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_NAME};\
+	    ${LN_S} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION} \
+		   ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_NAME} ;\
 	fi
 	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
-	${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TCLX_INST_LIB}/tclX${TCLX_FULL_VERSION}
 
 #------------------------------------------------------------------------------
 
 clean:
 	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} libtclx.a tcl checkup.done
 	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
-	-rm -f SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_BASE_NAME}
+	-rm -f SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION}
 	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
 
 #------------------------------------------------------------------------------

@@ -1227,3 +1227,9 @@
 ===============================================================================
 20 Oct 96: Released TclX 7.6.0 Beta 2
 ===============================================================================
+15 Nov 96:
+  o Integrated fixes for shared libraries on AIX and MIPS from Jan Nijtmans'
+    <nijtmans@nici.kun.nl> TclX plus patch.
+  o More work on Windows port, including make from a single makefile and
+    install rules.
+-------------------------------------------------------------------------------

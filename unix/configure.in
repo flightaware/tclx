@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.7 1996/10/19 19:53:10 markd Exp $
+dnl $Id: configure.in,v 7.8 1996/11/08 23:18:21 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.7 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.8 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -191,12 +191,17 @@ ORIG_TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
 LIB_RUNTIME_DIR=$TCL_EXEC_PREFIX
 TCL_LD_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS`
 
+if test "x`uname -p 2>/dev/null`" = "xmips" -o "x$TCL_SHARED_LIB_SUFFIX" = 'x${VERSION}.a' ; then
+    TCL_SHLIB_CFLAGS=""
+fi
+
 AC_SUBST(TCL_VERSION)
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
 AC_SUBST(TCL_EXEC_PREFIX)
 AC_SUBST(TCL_SHLIB_CFLAGS)
 AC_SUBST(TCL_SHLIB_LD)
+AC_SUBST(TCL_SHLIB_LD_LIBS)
 AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(TCL_LD_FLAGS)
 AC_SUBST(TCL_LD_SEARCH_FLAGS)
@@ -283,10 +288,13 @@ TCLX_STLIB_NAME=libtclx.a
 TKX_STLIB_NAME=libtkx.a
 
 case "$TCL_SHLIB_SUFFIX" in
-   *.so) TCLX_SHLIB_BASE_NAME=libtclx.so
-         TCLX_SHLIB_NAME=libtclx.so
-         TKX_SHLIB_BASE_NAME=libtkx.so
-         TKX_SHLIB_NAME=libtkx.so
+   *.so) if test "x${TCL_SHARED_LIB_SUFFIX}" = 'x${VERSION}.a' ; then
+	     TCL_SHLIB_SUFFIX='.a'
+	 fi
+         TCLX_SHLIB_BASE_NAME="libtclx.so"
+         TCLX_SHLIB_NAME="libtclx${TCL_SHLIB_SUFFIX}"
+         TKX_SHLIB_BASE_NAME="libtkx.so"
+         TKX_SHLIB_NAME="libtkx${TCL_SHLIB_SUFFIX}"
          ;;
    *.sl) TCLX_SHLIB_BASE_NAME=libtclx.sl
          TCLX_SHLIB_NAME=libtclx.sl
