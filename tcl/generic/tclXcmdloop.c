@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 5.3 1996/02/12 18:15:34 markd Exp $
+ * $Id: tclXcmdloop.c,v 5.4 1996/03/11 06:15:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -98,7 +98,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
     if ((checkCmd != NULL) && (intResult == TCL_OK) && IsSetVarCmd (checkCmd))
         return;
 
-    stdoutChan = Tcl_GetStdChannel (TCL_STDIN);
+    stdoutChan = Tcl_GetStdChannel (TCL_STDOUT);
 
     if (intResult == TCL_OK) {
         if (stdoutChan == NULL)
