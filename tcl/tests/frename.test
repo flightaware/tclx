@@ -1,0 +1,46 @@
+#
+# frename.test
+#
+# Tests for the frename command.
+#---------------------------------------------------------------------------
+# Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: filecmds.test,v 7.2 1996/09/03 23:39:07 markd Exp $
+#------------------------------------------------------------------------------
+#
+
+if {[info procs test] != "test"} then {source testlib.tcl}
+
+unlink -nocomplain {FRENAME1.TMP FRENAME2.TMP}
+
+Test frename-1.1 {frename tests} {
+    frename
+} 1 {wrong # args: frename oldPath newPath}
+
+Test frename-1.2 {frename tests} {
+    frename a b c
+} 1 {wrong # args: frename oldPath newPath}
+
+Test frename-1.3 {frename tests} {
+    close [open FRENAME1.TMP w]
+    set result [file exists FRENAME1.TMP]
+    lappend result [file exists FRENAME2.TMP]
+    frename FRENAME1.TMP FRENAME2.TMP
+    lappend result [file exists FRENAME1.TMP]
+    lappend result [file exists FRENAME2.TMP]
+    set result
+} 0 {1 0 0 1}
+
+Test frename-1.4 {frename tests} {
+    unlink -nocomplain FRENAME3.TMP
+    list [catch {frename FRENAME3.TMP FRENAME4.TMP} msg] [string tolower $msg]
+} 0 {1 {rename "frename3.tmp" to "frename4.tmp" failed: no such file or directory}}
+
+unlink -nocomplain {FRENAME1.TMP FRENAME2.TMP}
