@@ -123,8 +123,6 @@
 ./tclhelp/tcl/files/rmdir
 ./tclhelp/tcl/files/seek
 ./tclhelp/tcl/files/select
-./tclhelp/tcl/files/server_info
-./tclhelp/tcl/files/server_open
 ./tclhelp/tcl/files/sync
 ./tclhelp/tcl/files/tell
 ./tclhelp/tcl/files/unlink
@@ -188,6 +186,11 @@
 ./tclhelp/tcl/processes/pid
 ./tclhelp/tcl/processes/system
 ./tclhelp/tcl/processes/wait
+./tclhelp/tcl/server/server_accept
+./tclhelp/tcl/server/server_connect
+./tclhelp/tcl/server/server_create
+./tclhelp/tcl/server/server_info
+./tclhelp/tcl/server/server_send
 ./tclhelp/tcl/signals/signal
 ./tclhelp/tcl/status/cd
 ./tclhelp/tcl/status/dirs
