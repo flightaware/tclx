@@ -18,7 +18,7 @@
 # being the merger of all "help" directories found along the $auto_path
 # variable.
 #------------------------------------------------------------------------------
-# $Id: help.tcl,v 6.0 1996/05/10 16:16:38 markd Exp $
+# $Id: help.tcl,v 7.0 1996/06/16 05:31:26 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -175,7 +175,7 @@ proc help:Display line {
     global TCLXENV
     if {$TCLXENV(help:lineCnt) >= 23} {
         set TCLXENV(help:lineCnt) 0
-        puts stdout ":" nonewline
+        puts -nonewline stdout ":"
         flush stdout
         gets stdin response
         if {![lempty $response]} {

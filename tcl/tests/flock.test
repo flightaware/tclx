@@ -12,41 +12,27 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 7.0 1996/06/16 05:32:13 markd Exp $
+# $Id: flock.test,v 7.1 1996/07/26 05:56:19 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
 
-if [cequal $tcl_platform(platform) windows] {
-    echo "    * The flock and funlock commands have not been ported to Win32" 
-    return
-}
-
 if ![infox have_flock] {
-    puts "File locking is not available on this system, tests skipped"
+    if [cequal $tcl_platform(platform) windows] {
+        puts "File locking is not available on this Unix system, tests skipped"
+    } else {
+        puts "File locking is not available on this version of Windows"
+    }
     return
 }
 
-unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
-
-
-#
-# Fork without exec will not work under Tk, skip this test
-#
-if ![lempty [info commands button]] {
-    puts "*************************************************************"
-    puts "Flock tests are constructed in a way that does not work"
-    puts "under Tk.  Test skipped."
-    puts "*************************************************************"
-    puts ""
-    return
-}
+unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP FLOCK.PRG}
 
 #
 # Create and open a read file and a write file.
 #
-unlink -nocomplain {FLOCKR.TMP FLOCKW.TMP}
+unlink -nocomplain {FLOCKR.TMP FLOCKW.TMP FLOCKRW.TMP}
 
 foreach X {R W RW} {
     set fh [open FLOCK${X}.TMP w]
@@ -58,10 +44,10 @@ set readFH  [open FLOCKR.TMP r]
 set writeFH [open FLOCKW.TMP w]
 set rdwrFH  [open FLOCKRW.TMP r+]
 
+
 #
 # Check flock argument checking
 #
-
 set flockWrongArgs {wrong # args: flock ?-read|-write? ?-nowait? fileId ?start? ?length? ?origin?}
 
 Test flock-1.1 {flock argument checking} {
@@ -210,23 +196,37 @@ Test flock-4.4 {flock/unlock of a file that is not locked} {
 } 0 {}
 
 #
-# Start a process to lock a file.  A pipe will be used to report when its
-# locked.
-
-pipe fromChild toParent
-flush stdout
-flush stderr
-set lockerPid [fork]
-if {$lockerPid == 0} {
-   flock $writeFH
-   flock $rdwrFH 0 10
-   puts $toParent "*I am ready*"
-   flush $toParent
-   while 1 {sleep 20}
-   exit 0
+# Start a process to lock a file.  Write something to stdout to indicate
+# that the process is running.  Wait for something on stdin to exit.
+#
+set fh [open FLOCK.PRG w]
+puts $fh {
+    set writeFH [open FLOCKW.TMP WRONLY]
+    set rdwrFH [open FLOCKRW.TMP RDWR]
+    flock $writeFH
+    flock $rdwrFH 0 10
+    puts "*I am ready*"
+    flush stdout
+    if {[gets stdin line] < 0} {
+        puts stderr "unexpected EOF in flock child"
+        exit 1
+    }
+    if ![cequal $line "*STOP, Please*"] {
+        puts stderr "unexpected input in flock child: \"$line\""
+        exit 1
+    }
+    exit 0
 }
-if {([gets $fromChild line] < 0) || ([set line] != "*I am ready*")} {
-   error "Unexpected response from flock test child: $line"}
+close $fh
+
+set childFH [open "|$TCL_PROGRAM FLOCK.PRG" r+]
+
+if {[gets $childFH line] < 0} {
+    error "Unexpected EOF from flock test child"
+}
+if ![cequal $line "*I am ready*"] {
+    error "Unexpected response from flock test child: $line"
+}
 
 Test flock-5.1 {flock of file locked by child process} {
    flock -nowait $writeFH
@@ -252,12 +252,11 @@ Test flock-5.4 {flock of file locked by child process} {
    set stat
 } 0 1
 
-kill $lockerPid
-wait $lockerPid
+puts $childFH "*STOP, Please*"
+flush $childFH
+close $childFH
 
 catch {close $readFH}
 catch {close $writeFH}
 catch {close $rdwrFH}
-catch {close $fromChild}
-catch {close $toParent}
-unlink -nocomplain {FLOCKR.TMP FLOCKRW.TMP FLOCKW.TMP}
+unlink -nocomplain {FLOCKR.TMP FLOCKW.TMP FLOCKRW.TMP FLOCK.PRG}
