@@ -1340,4 +1340,7 @@
   o Added support for generating standalone executables, with Tcl runtime in
     the executable as strings.  Requires Jan Nijtmans'
     <nijtmans@worldaccess.nl> Tcl/Tk Plus patch.
--------------------------------------------------------------------------------
+===============================================================================
+01 Sep 97: Released TclX 8.0.0 Beta 3
+===============================================================================
+
