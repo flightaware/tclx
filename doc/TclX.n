@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.5 1997/07/01 02:26:10 markd Exp $
+.\" $Id: TclX.n,v 8.6 1997/07/04 08:40:57 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -883,16 +883,21 @@ Sleep the Extended Tcl process for \fIseconds\fR seconds.
 '\"@help: tcl/processes/system
 '\"@brief: Execute command via `system' call.
 .TP
-.B system \fIcommand\fR
+.B system \fIcmdstr1\fR ?\fIcmdstr2\fR...? 
 .br
-Executes \fIcommand\fR via the \fIsystem\fR(3) call.  Differs from \fBexec\fR
+Concatenates  \fIcmdstr1\fR,  \fIcmdstr2\fR etc with space separators
+(see the \fBconcat\fR command) into a single command and then evaluates
+the command using the standard system shell.  On Unix systems, this is
+\fB/bin/sh\fR and om Windows its \fBcommand.com\fR.  The exit code of
+the command is returned.
+.sp
+This command differs from the \fBexec\fR command
 in that \fBsystem\fR doesn't return the executed command's standard output
 as the
 result string, and
 \fBsystem\fR goes through the Unix shell to provide wildcard
 expansion, redirection, etc,
-as is normal from an \fBsh\fR command line.  The exit code of
-the command is returned.
+as is normal from an \fBsh\fR command line.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

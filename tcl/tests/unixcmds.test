@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 8.0.4.1 1997/04/14 02:02:40 markd Exp $
+# $Id: unixcmds.test,v 8.1 1997/04/17 04:59:40 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -119,32 +119,34 @@ Test unixcmds-4.3 {umask tests} {
 } 1 {wrong # args: umask ?octalmask?}
 
 if [cequal $tcl_platform(platform) windows] { ;# WIN32???
-    echo "    * The system command has not been ported to Win32" 
-} else {
+    echo "    * Note: The system command has not been ported to Win32" 
+}
 
 # Test the system command
 
 Test unixcmds-5.1 {system tests} {
     system "ls / >/dev/null"
-} 0 0
+} 0 0 {unixOnly}
+
+Test unixcmds-5.1.1 {system tests} {
+    system ls / >/dev/null
+} 0 0 {unixOnly}
 
 Test unixcmds-5.2 {system tests} {
     system
-} 1 {wrong # args: system command}
+} 1 {wrong # args: system cmdstr1 ?cmdstr2...?}
 
 Test unixcmds-5.3 {system tests} {
-    system x y z
-} 1 {wrong # args: system command}
+    system exit 3
+} 0 3 {unixOnly}
 
 Test unixcmds-5.4 {system tests} {
     system "exit 3"
-} 0 3
+} 0 3 {unixOnly}
 
 Test unixcmds-5.5 {system tests} {
     system "exit 101"
-} 0 101
-
-}
+} 0 101 {unixOnly}
 
 # Test the sleep command, as well as we can.
 

@@ -1287,4 +1287,6 @@
   o Modified signals to be better behaved with multiple interpreters.
     Thanks to Viktor Dukhovni <viktor@esm.com> for the patch.
   o Fix trap signal handler overwriting interp result.
+  o Modified the system command to take multiple arguments and concat them
+    into a single command string.
 -------------------------------------------------------------------------------

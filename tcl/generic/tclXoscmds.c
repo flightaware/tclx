@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 8.5 1997/06/30 07:57:51 markd Exp $
+ * $Id: tclXoscmds.c,v 8.6 1997/07/04 08:41:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -283,12 +283,8 @@ TclX_SyncObjCmd (clientData, interp, objc, objv)
 
 /*-----------------------------------------------------------------------------
  * TclX_SystemObjCmd --
- *     Implements the TCL system command:
- *     system command
- *
- * Results:
- *  Standard TCL results, may return the UNIX system error message.
- *
+ *   Implements the TCL system command:
+ *      system cmdstr1 ?cmdstr2...?
  *-----------------------------------------------------------------------------
  */
 static int
@@ -298,17 +294,22 @@ TclX_SystemObjCmd (clientData, interp, objc, objv)
     int         objc;
     Tcl_Obj   *CONST objv[];
 {
-    char *systemString;
+    Tcl_Obj *cmdObjPtr;
+    char *cmdStr;
     int exitCode;
 
-    if (objc != 2)
-	return TclX_WrongArgs (interp, objv [0], "command");
+    if (objc < 2)
+	return TclX_WrongArgs (interp, objv [0], "cmdstr1 ?cmdstr2...?");
 
-    systemString = Tcl_GetStringFromObj (objv [1], NULL);
-    if (TclXOSsystem (interp, systemString, &exitCode) != TCL_OK)
+    cmdObjPtr = Tcl_ConcatObj (objc - 1, &(objv[1]));
+    cmdStr = Tcl_GetStringFromObj (cmdObjPtr, NULL);
+
+    if (TclXOSsystem (interp, cmdStr, &exitCode) != TCL_OK) {
+        Tcl_DecrRefCount (cmdObjPtr);
         return TCL_ERROR;
-
+    }
     Tcl_SetIntObj (Tcl_GetObjResult (interp), exitCode);
+    Tcl_DecrRefCount (cmdObjPtr);
     return TCL_OK;
 }
 
