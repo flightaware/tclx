@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 4.3 1994/11/29 06:53:48 markd Exp markd $
+# $Id: filescan.test,v 4.4 1995/01/01 19:49:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -390,13 +390,13 @@ Test 7.2 {filescan tests} {
 # files of odd and even.
 #
 
-set testFH [open test.TMP w]
+set testFH [open TEST.TMP w]
 loop cnt 0 101 {
     puts $testFH "Line $cnt"
     puts $testFH "Match me"
 }
 close $testFH
-set testFH [open test.TMP r]
+set testFH [open TEST.TMP r]
 
 set testChkFH [open TESTCHK.TMP w]
 set testChk2FH [open TESTCHK2.TMP w]
