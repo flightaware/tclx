@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.2 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXlib.c,v 2.3 1993/05/09 16:18:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -829,7 +829,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath, overwrite)
           case 0:  /* EOF */
             goto reachedEOF;
           case -1: /* Error */
-            Tcl_AppendResult (Tcl_UnixError (interp), (char *) NULL);
+            Tcl_AppendResult (interp, Tcl_UnixError (interp), (char *) NULL);
             goto errorExit;
         }
         if ((Tcl_SplitList (interp, lineBuffer.ptr, &lineArgc,
