@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 2.6 1993/08/01 05:42:33 markd Exp markd $
+ * $Id: tclXstring.c,v 2.7 1993/08/05 06:41:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -442,84 +442,84 @@ Tcl_CtypeCmd (clientData, interp, argc, argv)
      */
     if ((class [2] == 'n') && STREQU (class, "alnum")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isalnum (*scanPtr))
+            if (!isalnum (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if ((class [2] == 'p') && STREQU (class, "alpha")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (! isalpha (*scanPtr))
+            if (!isalpha (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if ((class [1] == 's') && STREQU (class, "ascii")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isascii (*scanPtr))
+            if (!isascii (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if (STREQU (class, "cntrl")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!iscntrl (*scanPtr))
+            if (!iscntrl (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if (STREQU (class, "digit")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isdigit (*scanPtr))
+            if (!isdigit (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if (STREQU (class, "graph")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isgraph (*scanPtr))
+            if (!isgraph (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if (STREQU (class, "lower")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!islower (*scanPtr))
+            if (!islower (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if ((class [1] == 'r') && STREQU (class, "print")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isprint (*scanPtr))
+            if (!isprint (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if ((class [1] == 'u') && STREQU (class, "punct")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!ispunct (*scanPtr))
+            if (!ispunct (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if (STREQU (class, "space")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!ISSPACE (*scanPtr))
+            if (!isspace (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if (STREQU (class, "upper")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isupper (*scanPtr))
+            if (!isupper (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
     }
     if (STREQU (class, "xdigit")) {
         for (; *scanPtr != 0; scanPtr++) {
-            if (!isxdigit (*scanPtr))
+            if (!isxdigit (UCHAR (*scanPtr)))
                 break;
         }
         goto returnResult;
