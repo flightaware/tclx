@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Memory.man,v 1.2 1992/10/03 04:32:48 markd Exp markd $
+.\" $Id: Memory.man,v 2.0 1992/10/16 04:49:11 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Memory" TCL "" "Tcl"
@@ -145,7 +145,7 @@ Parameters:
 \fB__FILE__\fR.
 .br
 \fBo \fIline\fR - The line that this routine is being called from, normally
-\fB__LINE__\R. 
+\fB__LINE__\fR.
 .RE
 '
 .SH ENABLING MEMORY DEBUGGING

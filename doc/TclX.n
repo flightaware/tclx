@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 1.10 1992/10/08 23:07:33 markd Exp markd $
+.\" $Id: TclX.man,v 2.0 1992/10/16 04:49:16 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -735,7 +735,7 @@ with the program's stdin and stdout coming from and going to
 our pair of pipes.
 .sp
 .nf
-.ftCW
+.ft CW
     proc ChildProcess {cmd inPipe outPipe} {
         if {[set childPid [fork]] == 0} {
             close stdin
@@ -751,7 +751,7 @@ our pair of pipes.
         }
         return $childPid
     }
-.ftR
+.ft R
 .fi
 '@endhelp
 '@help: files/fcntl
@@ -1495,7 +1495,7 @@ extracted.  This command is a short cut for:
 .sp
 .nf
 .ft CW
-    \fBstring range\fR \fIstring\R [\fBexpr\fI firstExpr\fR] [\fBexpr\fR \fIlength\fB-1\fR]
+    \fBstring range\fR \fIstring\fR [\fBexpr\fI firstExpr\fR] [\fBexpr\fR \fIlength\fB-1\fR]
 .ft R
 .fi
 '@endhelp
@@ -1740,7 +1740,7 @@ thus any other Tcl shell command-line flags must precede this option.
 .B \-c
 Take the next argument as a Tcl command to execute.  It may contain series of 
 commands to execute, separated by `;'.  Any following arguments are passed in
-\fBargv\fR, thus, as with \fB-f\R, any other Tcl shell flags must precede
+\fBargv\fR, thus, as with \fB-f\fR, any other Tcl shell flags must precede
 this option.
 .TP
 .B \-\-
