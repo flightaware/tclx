@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.15 1996/03/18 08:49:39 markd Exp $
+ * $Id: tclExtdInt.h,v 5.16 1996/03/19 07:52:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -518,10 +518,10 @@ extern int
 Tcl_LinkCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
- * from tclXserver.c
+ * from tclXxxxSock.c
  */
 extern void
-Tcl_ServerInit _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_SocketInit _ANSI_ARGS_((Tcl_Interp *interp));
 
 extern int
 TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,

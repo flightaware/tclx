@@ -1,7 +1,8 @@
 /*
- * tclXserver.c --
+ * tclXunixSock.c --
  *
- * High level commands for connecting to TCP/IP based servers.
+ * Socket utility functions for Unix.  This also has the deprecated server
+ * creation commands, which are not supported on platforms other than Unix.
  *---------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
@@ -11,17 +12,12 @@
  * Mark Diekhans make no representations about the suitability of this
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
+ *-----------------------------------------------------------------------------
+ * $Id: tclXunixOS.c,v 5.3 1996/03/19 07:53:01 markd Exp $
+ *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*
- * Some version of Linux have <linix/uio.h> (included by <sys/socket.h>) that
- * defines struct iovec.  Its also defined in <sys/uio.h>.  Kind of broken.
- */
-#ifndef __LINUX_UIO_H
-#    include <sys/uio.h>
-#endif
 
 #ifndef INADDR_NONE
 #    define INADDR_NONE  ((long) -1)
@@ -31,20 +27,11 @@
 #    define bcopy(from, to, length)    memmove((to), (from), (length))
 #endif
 
-#ifdef NO_BZERO
-#    define bzero(to, length)          memset((to), '\0', (length))
-#endif
-
 #ifndef NO_DATA
 #   define NO_DATA NO_ADDRESS
 #endif
 
 extern int h_errno;
-
-/*
- * The maximum length of any attribute name.
- */
-#define MAX_ATTR_NAME_LEN  20
 
 /*
  * Prototypes of internal functions.
@@ -408,6 +395,10 @@ Tcl_ServerInfoCmd (clientData, interp, argc, argv)
 #define SERVER_BUF      1
 #define SERVER_NOBUF    2
 
+#ifdef NO_BZERO
+#    define bzero(to, length)          memset((to), '\0', (length))
+#endif
+
 static int
 BindFileHandles _ANSI_ARGS_((Tcl_Interp *interp,
                              unsigned    options,
@@ -675,13 +666,13 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_ServerInit --
+ * TclX_SocketInit --
  *     
  *   Initialize the server commands in the specified interpreter.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_ServerInit (interp)
+TclX_SocketInit (interp)
     Tcl_Interp *interp;
 {
     Tcl_CreateCommand (interp, "host_info", Tcl_ServerInfoCmd,

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.23 1996/03/15 07:36:06 markd Exp $
+# $Id: Makefile.in,v 5.24 1996/03/17 08:48:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -53,8 +53,8 @@ GENERIC_OBJS = \
     tclXhandles.o    tclXid.o         tclXinit.o       tclXkeylist.o  \
     tclXlib.o        tclXlist.o       tclXmath.o       tclXmsgcat.o   \
     tclXlibInit.o    tclXprocess.o    tclXprofile.o    tclXregexp.o   \
-    tclXselect.o     tclXserver.o     tclXsignal.o     tclXshell.o    \
-    tclXstring.o     tclXunixcmds.o   tclXutil.o       tclXunixOS.o   \
+    tclXselect.o     tclXunixSock.o   tclXsignal.o     tclXshell.o    \
+    tclXstring.o     tclXunixCmds.o   tclXutil.o       tclXunixOS.o   \
     tclXoscmds.o
 
 COMPAT_OBJS = @LIBOBJS@
@@ -194,9 +194,6 @@ tclXregexp.o: ${TCLX_GENERIC_DIR}/tclXregexp.c
 tclXselect.o: ${TCLX_GENERIC_DIR}/tclXselect.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXselect.c
 
-tclXserver.o: ${TCLX_GENERIC_DIR}/tclXserver.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXserver.c
-
 tclXshell.o: ${TCLX_GENERIC_DIR}/tclXshell.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXshell.c
 
@@ -218,11 +215,14 @@ tclXchmod.o: ${TCLX_UNIX_SRC_DIR}/tclXchmod.c
 tclXid.o: ${TCLX_UNIX_SRC_DIR}/tclXid.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXid.c
 
+tclXunixCmds.o: ${TCLX_UNIX_SRC_DIR}/tclXunixCmds.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXunixCmds.c
+
 tclXunixOS.o: ${TCLX_UNIX_SRC_DIR}/tclXunixOS.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXunixOS.c
 
-tclXunixcmds.o: ${TCLX_UNIX_SRC_DIR}/tclXunixcmds.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXunixcmds.c
+tclXunixSock.o: ${TCLX_UNIX_SRC_DIR}/tclXunixSock.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXunixSock.c
 
 random.o: ${COMPAT_DIR}/random.c
 	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/random.c
