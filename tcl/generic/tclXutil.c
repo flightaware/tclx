@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.19 1997/08/10 22:18:30 markd Exp $
+ * $Id: tclXutil.c,v 8.20 1997/08/16 16:25:58 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1152,7 +1152,11 @@ Tcl_Obj *
 TclX_SaveResultErrorInfo (interp)
     Tcl_Interp  *interp;
 {
-    Tcl_Obj *saveObjv [3];
+    Tcl_Obj *saveObjv [4];
+    Tcl_Obj *listObj;
+
+    long flags = ((Interp *)interp)->flags &
+	(ERR_ALREADY_LOGGED | ERR_IN_PROGRESS | ERROR_CODE_SET);
 
     saveObjv [0] = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
     
@@ -1168,7 +1172,11 @@ TclX_SaveResultErrorInfo (interp)
         saveObjv [2] = Tcl_NewObj ();
     }
 
-    return Tcl_NewListObj (3, saveObjv);
+    saveObjv [3] = Tcl_NewLongObj(flags);
+
+    Tcl_IncrRefCount(listObj = Tcl_NewListObj (4, saveObjv));
+
+    return listObj;
 }
 
 
@@ -1190,27 +1198,27 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
 {
     Tcl_Obj **saveObjv;
     int saveObjc;
-    char *errorInfo;
-    int errorInfoLen;
+    long flags;
 
     if ((Tcl_ListObjGetElements (NULL, saveObjPtr, &saveObjc,
                                  &saveObjv) != TCL_OK) ||
-        (saveObjc != 3)) {
+        (saveObjc != 4) ||
+        (Tcl_GetLongFromObj (NULL, saveObjv[3], &flags) != TCL_OK)) {
+	/*
+	 * This should never happen
+	 */
         panic ("invalid TclX result save object");
     }
 
-    /*
-     * Need to clear flags and result so that errorInfo/errorCode are set
-     * correctly.
-     */
-    Tcl_ResetResult (interp);
+    TclX_ObjSetVar2S (interp, ERRORCODE, NULL, saveObjv[2],
+		      TCL_GLOBAL_ONLY);
 
-    Tcl_SetObjErrorCode (interp, saveObjv [2]);
+    TclX_ObjSetVar2S (interp, ERRORINFO, NULL, saveObjv[1],
+		      TCL_GLOBAL_ONLY);
 
-    errorInfo = Tcl_GetStringFromObj (saveObjv [1], &errorInfoLen);
-    Tcl_AddObjErrorInfo (interp, errorInfo, errorInfoLen);
+    Tcl_SetObjResult (interp, saveObjv[0]);
 
-    Tcl_SetObjResult (interp, saveObjv [0]);
+    ((Interp *)interp)->flags |= flags;
 
     Tcl_DecrRefCount (saveObjPtr);
 }

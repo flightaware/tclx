@@ -1,6 +1,8 @@
                          TclX bug, idea and task list
 *** Serious Bugs ***
 
+o cmdtrace usage message includes garbage after args: .
+
 o Should mainloop call exit when no more events?
 
 o replicate doesn't take an expression
