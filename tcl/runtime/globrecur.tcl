@@ -1,7 +1,7 @@
 #
 # globrecur.tcl --
 #
-#  Build up a directory list recursively.
+#  Build or process a directory list recursively.
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -12,21 +12,63 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: globrecur.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
+# $Id: globrecur.tcl,v 2.2 1993/06/24 04:45:16 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-globrecur recursive_glob
 
-proc recursive_glob {globlist} {
-    set result ""
-    foreach pattern $globlist {
-        foreach file [glob -nocomplain $pattern] {
-            lappend result $file
-            if {[file type $file] == "directory"} {
-                set result [concat $result [recursive_glob $file/*]]
+proc recursive_glob {dirlist globlist} {
+    set result {}
+    set recurse {}
+    foreach dir $dirlist {
+        if ![file isdirectory $dir] {
+            error "\"$dir\" is not a directory"
+        }
+        foreach pattern $globlist {
+            set result [concat $result [glob -nocomplain -- $dir/$pattern]]
+        }
+        foreach file [glob -nocomplain -- $dir/* $dir/.*] {
+            if [file isdirectory $file] {
+                set fileTail [file tail $file]
+                if {!(($fileTail == ".") || ($fileTail == ".."))} {
+                    lappend recurse $file
+                }
             }
         }
     }
+    if ![lempty $recurse] {
+        set result [concat $result [recursive_glob $recurse $globlist]]
+    }
     return $result
+}
+
+#@package: TclX-forrecur for_recursive_glob
+
+proc for_recursive_glob {var dirlist globlist code {depth 1}} {
+    upvar $depth $var myVar
+    set recurse {}
+    foreach dir $dirlist {
+        if ![file isdirectory $dir] {
+            error "\"$dir\" is not a directory"
+        }
+        foreach pattern $globlist {
+            foreach file [glob -nocomplain -- $dir/$pattern] {
+                set myVar $file
+                uplevel $depth $code
+            }
+        }
+        foreach file [glob -nocomplain -- $dir/* $dir/.*] {
+            if [file isdirectory $file] {
+                set fileTail [file tail $file]
+                if {!(($fileTail == ".") || ($fileTail == ".."))} {
+                    lappend recurse $file
+                }
+            }
+        }
+    }
+    if ![lempty $recurse] {
+        for_recursive_glob $var $recurse $globlist $code [expr {$depth + 1}]
+    }
+    return {}
 }

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.34 1993/09/20 01:13:11 markd Exp markd $
+.\" $Id: TclX.man,v 2.35 1993/09/22 01:02:53 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -185,16 +185,18 @@ array.  The \fBbreak\fR and \fBcontinue\fR statements work as with
 '@endhelp
 '
 '@help: tcl/files/for_recursive_glob
-'@brief: Perform a foreach-style loop for all globbed files and directories.
+'@brief: A foreach-style loop for all matched (globbed) files.
 .TP
-.B for_recursive_glob \fIvar globlist code\fR
+.B for_recursive_glob \fB?-sym? \fIvar dirlist globlist code\fR
 .br
-This procedure performs a foreach-style loop for each file and directory
-that recursively matched one or more patterns specified in the call to
-\fBfor_recursive_glob\fR, setting \fIvar\fR to the matching file or
-directory, and calling \fIcode\fR.  The \fBbreak\fR and \fBcontinue\fR
-statements work as expected.  This procedure does not follow symbolic
-links.
+This procedure performs a foreach-style loop over recursively matched files.
+All directories in \fIdirlist\fR are recursively searched (breadth-first),
+comparing each file found against the file glob patterns in \fBgloblist\fR.
+For each matched file, the variable \fIvar\fR is set to the file path and
+\fIcode\fR is evaluated.
+If \fB-sym\fR is specified, symbolic links are followed.
+Note, patterns in \fIgloblist\fR should not contain "/" characters, as
+the patterns are matched against the last component of files name.
 '@:
 '@:This procedure is provided by Extended Tcl.
 '@endhelp
@@ -262,14 +264,17 @@ then the current directory is pushed, but remains unchanged.
 '@endhelp
 '
 '@help: tcl/files/recursive_glob
-'@brief: Do filename globbing, recursively descending all matched directories.
+'@brief: Recursive filename matching (globbing).
 .TP
-.B recursive_glob \fIgloblist\fR
+.B recursive_glob \fB?-sym? ?--? \fIdirlist globlist\fR
 .br
-This procedure does the same thing as glob, except that it recursively
-descends all the matched subdirectories, returning a list of all the
-files that matched all pattern in the list \fIgloblist\fR.  This
-procedure does not follow symbolic links.
+This procedure returns a list of recursively matches files.
+All directories in \fIdirlist\fR are recursively searched (breadth-first),
+comparing each file found against the file glob patterns in \fBgloblist\fR.
+If \fB-sym\fR is specified, symbolic links are followed.  The \fB--\fR string
+is used to optionally indicate the end of options.
+Note, patterns in \fIgloblist\fR should not contain "/" characters, as
+the patterns are matched against the last component of files name.
 '@:
 '@:This procedure is provided by Extended Tcl.
 '@endhelp

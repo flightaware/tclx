@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.10 1993/09/21 03:40:27 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.11 1993/09/25 05:09:17 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -23,9 +23,6 @@
  */
 static int
 IsSetVarCmd _ANSI_ARGS_((char  *command));
-
-static void
-OutFlush _ANSI_ARGS_((FILE *filePtr));
 
 static int
 SetPromptVar _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -72,30 +69,6 @@ IsSetVarCmd (command)
 /*
  *-----------------------------------------------------------------------------
  *
- * OutFlush --
- *
- *   Flush a stdio file and check for errors.  Keeps us from going on if
- * we are really not outputting anything.
- *-----------------------------------------------------------------------------
- */
-static void
-OutFlush (filePtr)
-    FILE *filePtr;
-{
-    int stat;
-
-    stat = fflush (filePtr);
-    if (ferror (filePtr)) {
-        if (errno != EINTR)
-            panic ("command loop: error writing to output file: %s\n",
-                   strerror (errno));
-        clearerr (filePtr);
-    }
-}
-
-/*
- *-----------------------------------------------------------------------------
- *
  * TclX_PrintResult --
  *
  *   Print the result of a Tcl.  It can optionally not echo "set" commands
@@ -129,14 +102,14 @@ TclX_PrintResult (interp, intResult, checkCmd)
             fputs ("\n", stdout);
         }
     } else {
-        OutFlush (stdout);
+        fflush (stdout);
         if (intResult == TCL_ERROR)  
             fputs ("Error: ", stderr);
         else
             fprintf (stderr, "Bad return code (%d): ", intResult);
         fputs (interp->result, stderr);
         fputs ("\n", stderr);
-        OutFlush (stderr);
+        fflush (stderr);
     }
 }
 
@@ -188,7 +161,7 @@ TclX_OutputPrompt (interp, topLevel)
         else
             fputs (">", stdout);
     }
-    OutFlush (stdout);
+    fflush (stdout);
     Tcl_ResetResult (interp);
 }
 
