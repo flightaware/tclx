@@ -178,6 +178,11 @@ InetAtoN (interp, strAddress, inAddress)
  *   o socketFD (I) - File number of the socket that was opened.
  * Returns:
  *   TCL_OK or TCL_ERROR.
+ * Note:
+ *   While it might seem that for nobuf access, a single FILE struct could
+ * be used, this just isn't the case on all systems.  A varity of problems
+ * can occur when doing a fdopen on a socket with r+ or other read/write
+ * access.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -186,53 +191,11 @@ BindFileHandles (interp, options, socketFD)
     unsigned    options;
     int         socketFD;
 {
-    int      socketFD2 = -1;
-    FILE     *filePtr, *file2Ptr;
-    OpenFile *tclFilePtr;
+    int       socketFD2 = -1;
+    FILE     *readFilePtr, *writeFilePtr;
 
     /*
-     * Handle setting up two file handles, buffered or unbuffered.
-     */
-    if (options & SERVER_TWOIDS) {
-        socketFD2 = dup (socketFD);
-        if (socketFD2 < 0) {
-            interp->result = Tcl_PosixError (interp);
-            goto errorExit;
-        }
-        filePtr = Tcl_SetupFileEntry (interp, socketFD, TCL_FILE_READABLE);
-        if (filePtr == NULL)
-            goto errorExit;
-
-        file2Ptr = Tcl_SetupFileEntry (interp, socketFD2, TCL_FILE_WRITABLE);
-        if (filePtr == NULL)
-            goto errorExit;
-
-        if (options & SERVER_NOBUF) {
-            setbuf (filePtr, NULL);
-            setbuf (file2Ptr, NULL);
-        }
-        sprintf (interp->result, "file%d file%d", socketFD, socketFD2);
-        return TCL_OK;
-    }
-
-    /*
-     * Setup unbuffered, single handle access.
-     */
-    if (options & SERVER_NOBUF) {
-        filePtr = Tcl_SetupFileEntry (interp, socketFD,
-                                      TCL_FILE_READABLE | TCL_FILE_WRITABLE);
-        if (filePtr == NULL)
-            goto errorExit;
-
-        setbuf (filePtr, NULL);
-        sprintf (interp->result, "file%d", socketFD);
-        return TCL_OK;
-    }
-
-    /*
-     * Set up single handle, buffered access.  This requires creating
-     * two FILE objects, but binding them to a single handle.  This is
-     * something Tcl_GetOpenFile supports internally.
+     * Dup the socket to get a second descriptor for write access.
      */
     socketFD2 = dup (socketFD);
     if (socketFD2 < 0) {
@@ -240,23 +203,44 @@ BindFileHandles (interp, options, socketFD)
         goto errorExit;
     }
 
-    filePtr = Tcl_SetupFileEntry (interp, socketFD, TCL_FILE_READABLE);
-    if (filePtr == NULL)
-        goto errorExit;
+    if (options & SERVER_TWOIDS) {
+        /*
+         * Setup two, independent file ids.
+         */
+        readFilePtr = Tcl_SetupFileEntry (interp, socketFD,
+                                          TCL_FILE_READABLE);
+        if (readFilePtr == NULL)
+            goto errorExit;
 
-    tclFilePtr = tclOpenFiles [fileno (filePtr)];
+        writeFilePtr = Tcl_SetupFileEntry (interp, socketFD2,
+                                           TCL_FILE_WRITABLE);
+        if (writeFilePtr == NULL)
+            goto errorExit;
 
-    file2Ptr = fdopen (socketFD2, "w");
-    if (file2Ptr == NULL) {
-        interp->result = Tcl_PosixError (interp);
-        return NULL;
+        if (options & SERVER_NOBUF) {
+            setbuf (readFilePtr, NULL);
+            setbuf (writeFilePtr, NULL);
+        }
+        sprintf (interp->result, "file%d file%d", socketFD, socketFD2);
+        return TCL_OK;
+    } else {
+        /*
+         * Set up single handle access.  This requires creating two FILE
+         * objects, but binding them to a single handle.  This is something
+         * Tcl_GetOpenFile supports internally.
+         */
+        readFilePtr = Tcl_SetupFileEntry2 (interp, socketFD, socketFD2,
+                                           &writeFilePtr);
+        if (readFilePtr == NULL)
+            goto errorExit;
+        
+        if (options & SERVER_NOBUF) {
+            setbuf (readFilePtr, NULL);
+            setbuf (writeFilePtr, NULL);
+        }
+        sprintf (interp->result, "file%d", socketFD);
+        return TCL_OK;
     }
-
-    tclFilePtr->permissions |= TCL_FILE_WRITABLE;
-    tclFilePtr->f2 = file2Ptr;
-
-    sprintf (interp->result, "file%d", socketFD);
-    return TCL_OK;
 
   errorExit:
     Tcl_CloseForError (interp, socketFD);
