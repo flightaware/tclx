@@ -323,3 +323,7 @@
 11 Oct 92:
   o Modified install script to purge the target help tree before installing.
 -------------------------------------------------------------------------------
+12 Oct 92:
+  o Added a options argument to Tcl_Startup.  It is not currrently used.
+   (*POTENTIAL INCOMPATIBILITY*)
+-------------------------------------------------------------------------------
