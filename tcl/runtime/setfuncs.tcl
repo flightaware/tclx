@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: setfuncs.tcl,v 5.2 1996/02/18 22:05:28 markd Exp $
+# $Id: setfuncs.tcl,v 5.3 1996/02/22 06:54:48 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -67,8 +67,8 @@ proc intersect3 {list1 list2} {
             set a3($v) {}
         }
     }
-    list [sort [array names a1]] [sort [array names a2]] \
-         [sort [array names a3]]
+    list [lsort [array names a1]] [lsort [array names a2]] \
+         [lsort [array names a3]]
 }
 
 #
