@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.25 1996/03/17 06:52:18 markd Exp $
+# $Id: Makefile.in,v 5.26 1996/03/21 06:35:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,7 +27,8 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} ${TK_DEFS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_USE_SHLIB_CFLAGS} \
+              ${TK_DEFS} \
 	      -I${TKX_GENERIC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \

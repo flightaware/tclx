@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.11 1996/03/11 08:14:12 markd Exp $
+# $Id: Common.mk.in,v 5.12 1996/03/21 06:06:34 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -63,19 +63,24 @@ TCL_USE_LIB = ${@TCL_USE_LIB@}
 TK_USE_LIB  = ${@TK_USE_LIB@}
 
 #------------------------------------------------------------------------------
-# Configuration information from tclConfig.sh and tkConfig.sh.
+# Configuration information from tclConfig.sh and tkConfig.sh. The
+# TCL_USE_SHLIBS_CFLAGS is defined to be either the value of TCL_SHLIB_CFLAGS
+# of a non-existant macro to be empty.  We don't want to compile with the
+# shared library flags if we are not linking shared libraries, as this breaks
+# some systems (Linux).
 #
-TCL_DEFS         = @TCL_DEFS@
-TCL_LIBS         = @TCL_LIBS@
-TCL_SHLIB_CFLAGS = @TCL_SHLIB_CFLAGS@
-TCL_LD_FLAGS     = @TCL_LD_FLAGS@
-TCL_DL_LIBS      = @TCL_DL_LIBS@
-TCL_SHLIB_LD     = @TCL_SHLIB_LD@
+TCL_DEFS             = @TCL_DEFS@
+TCL_LIBS             = @TCL_LIBS@
+TCL_SHLIB_CFLAGS     = @TCL_SHLIB_CFLAGS@
+TCL_USE_SHLIB_CFLAGS = ${@TCL_USE_SHLIB_CFLAGS@}
+TCL_LD_FLAGS         = @TCL_LD_FLAGS@
+TCL_DL_LIBS          = @TCL_DL_LIBS@
+TCL_SHLIB_LD         = @TCL_SHLIB_LD@
 
-TK_DEFS          = @TK_DEFS@
-TK_LIBS          = @TK_LIBS@
-TK_XINCLUDES     = @TK_XINCLUDES@
-TK_XLIBSW        = @TK_XLIBSW@
+TK_DEFS              = @TK_DEFS@
+TK_LIBS              = @TK_LIBS@
+TK_XINCLUDES         = @TK_XINCLUDES@
+TK_XLIBSW            = @TK_XLIBSW@
 
 #------------------------------------------------------------------------------
 # Location of directories.

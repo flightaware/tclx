@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.25 1996/03/21 06:06:40 markd Exp $
+dnl $Id: configure.in,v 5.26 1996/03/22 04:31:50 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.25 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.26 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -113,12 +113,14 @@ case "$BUILD_SHARED" in
         AC_MSG_RESULT(Will build shared libraries)
         BUILD_SHARED=YES
         TCL_USE_LIB=TCL_SHLIB
+        TCL_USE_SHLIB_CFLAGS=TCL_SHLIB_CFLAGS
         TK_USE_LIB=TK_SHLIB
         ;;
     NO|no)
         AC_MSG_RESULT(Will not build shared libraries)
         BUILD_SHARED=NO
         TCL_USE_LIB=TCL_LIB
+        TCL_USE_SHLIB_CFLAGS=TCL_NO_SHLIB_CFLAGS  # Not actually defined
         TK_USE_LIB=TK_LIB
         ;;
      *)
@@ -127,6 +129,7 @@ case "$BUILD_SHARED" in
 esac
 AC_SUBST(BUILD_SHARED)
 AC_SUBST(TCL_USE_LIB)
+AC_SUBST(TCL_USE_SHLIB_CFLAGS)
 AC_SUBST(TK_USE_LIB)
 
 #------------------------------------------------------------------------------
@@ -236,10 +239,6 @@ AC_SUBST(SHLIB_LD)
 if test "$TKX_BUILD" = "YES"; then
    . $TK_CONFIG
 fi
-echo
-echo "Note: Temporary workaround in configure file: Fix TK_LIBS macro."
-echo
-TK_LIBS=`echo $TK_LIBS | sed 's/ -ltcl7.5//'`
 
 AC_SUBST(TK_DEFS)
 AC_SUBST(TK_LIBS)

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.26 1996/03/20 06:58:00 markd Exp $
+# $Id: Makefile.in,v 5.27 1996/03/21 06:35:52 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -26,7 +26,7 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_SHLIB_CFLAGS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_USE_SHLIB_CFLAGS} \
 	      ${TCL_DEFS} ${TCLX_DEFS} \
 	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
 	      -I${TCLX_UNIX_BLD_DIR} \
@@ -339,6 +339,17 @@ ${bldbasedir}/tcl/tests:
 test: ucbtests extdtests
 
 ucbtests: all
+	@echo ""
+	@echo "***************************************************************"
+	@echo "* Note: Expect failures from the following standard Tcl tests.*"
+	@echo "* They do not represent problems with TclX,  but are caused   *"
+	@echo "* by Tcl tests being sensitive to the program running the     *"
+	@echo "* tests.                                                      *"
+	@echo "*     load-7.1                                                *"
+	@echo "*     load-7.3                                                *"
+	@echo "*     load-7.4                                                *"
+	@echo "***************************************************************"
+	@echo ""
 	./runtest -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
 
 extdtests: all
