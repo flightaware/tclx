@@ -353,6 +353,7 @@
 ./tk/help/tk/widgets/toplevel
 ./tk/runtime/tclhelp.tcl
 ./tk/runtime/tkdemo.tcl
+./tk/runtime/tkx.tcl
 ./tk/tests/signal.test
 ./tk/unix/Makefile.in
 ./tk/unix/tkxConfig.sh.in
