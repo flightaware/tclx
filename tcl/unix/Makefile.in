@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.1 1996/12/17 08:16:19 markd Exp $
+# $Id: Makefile.in,v 8.0.2.1 1996/12/21 04:54:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -34,13 +34,13 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
-LIBS = @SHARED_LIBS@ ${TCLX_LD_SEARCH_FLAGS}
+LIBS = ${TCLX_LD_SEARCH_FLAGS} @SHARED_LIBS@
 
 ALL_LIBS = ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
-	   ${TCL_DL_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
+	   ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
 
 STATIC_LIBS = ${TCLX_STLIB_NAME} ${TCL_LIB} ${TCLX_LIBS} ${TCL_LIBS} \
-	      ${TCL_DL_LIBS} ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
+	      ${XLDLIBS} ${TCLX_CC_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.1 1996/12/17 08:16:26 markd Exp $
+# $Id: Makefile.in,v 8.0.2.1 1996/12/21 04:54:07 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -41,16 +41,15 @@ LD_SWITCHES = ${LDFLAGS} ${TCL_LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LIBS = ${TK_LIB} ${TK_XLIBSW} @SHARED_LIBS@ ${TKX_LD_SEARCH_FLAGS}
+LIBS = ${TKX_LD_SEARCH_FLAGS} ${TK_LIB} ${TK_XLIBSW} @SHARED_LIBS@
 
 ALL_LIBS = ${TKX_BUILD_LIB_SPEC} ${TK_LIB} ${TK_XLIBSW} \
 	   ${TCLX_BUILD_LIB_SPEC} ${TCL_LIB} ${TK_LIBS} ${TCLX_LIBS} \
-	   ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} ${TKX_CC_SEARCH_FLAGS}
+	   ${XLDLIBS} ${TKX_CC_SEARCH_FLAGS}
 
 STATIC_LIBS = ${TKX_STLIB_NAME} ${TK_LIB} ${TK_XLIBSW} \
               ${TCLX_UNIX_SRC_DIR}/${TCLX_STLIB_NAME} ${TCL_LIB} \
-              ${TK_LIBS} ${TCLX_LIBS} ${TCL_LIBS} ${TCL_DL_LIBS} ${XLDLIBS} \
-              ${TKX_CC_SEARCH_FLAGS}
+              ${TK_LIBS} ${TCLX_LIBS} ${XLDLIBS} ${TKX_CC_SEARCH_FLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
