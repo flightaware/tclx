@@ -1163,4 +1163,8 @@
   o Fixed lindex and lrange indexing out of bounds memory when negative indexes
     are used.
 -------------------------------------------------------------------------------
+ 8 May 96:
+  o Even more changes to deal with the runtime library search path correctly
+    on Solaris and others.
+-------------------------------------------------------------------------------
 

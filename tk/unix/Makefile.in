@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.32 1996/04/30 07:18:24 markd Exp $
+# $Id: Makefile.in,v 5.33 1996/05/03 05:56:52 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,7 +27,7 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCL_USE_SHLIB_CFLAGS} \
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} ${TCLX_USE_SHLIB_CFLAGS} \
               ${TK_DEFS} \
 	      -I${TKX_GENERIC_DIR} \
 	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
@@ -204,7 +204,7 @@ install: install-exec install-runtime
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
 
 install-runtime:
-	${INSTCOPY} tkx.tcl ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
+	${INSTCOPY} tkx.tcl ${INSTALL_ROOT}${TKX_INST_RUNTIME}
 
 install-exec:
 	${INSTCOPY} wishx ${INSTALL_ROOT}${TCLX_INST_BIN}

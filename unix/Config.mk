@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.18 1996/04/30 07:13:06 markd Exp $
+# $Id: Config.mk,v 5.19 1996/05/03 05:56:57 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -46,6 +46,7 @@
 #   o TCLX_FULL_VERSION is the full TclX version.
 #   o TKX_FULL_VERSION is the full TkX version.
 #   o ARCH is either ".arch", as specified to configure, or empty.
+#   o prefix and exec_prefix.
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------

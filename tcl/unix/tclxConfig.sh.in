@@ -36,3 +36,9 @@ TCLX_BUILD_LIB_SPEC='@TCLX_BUILD_LIB_SPEC@'
 # installed directory.
 #
 TCLX_LIB_SPEC='@TCLX_LIB_SPEC@'
+
+#
+# Search flags that specify how to find the TclX shared libraries at run time
+# on some systems.
+#
+TCLX_LD_SEARCH_FLAGS='@TCLX_LD_SEARCH_FLAGS@'

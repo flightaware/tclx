@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.33 1996/05/02 15:32:39 markd Exp $
+dnl $Id: configure.in,v 5.34 1996/05/03 05:57:06 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.33 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.34 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -111,42 +111,15 @@ AC_ARG_WITH(arch,
 AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
-# Handle the --enable-shared option.
+# We need the real value of prefix and exec-prefix now, not when the generated
+# script is ready to output them.
 #------------------------------------------------------------------------------
 
-AC_ARG_ENABLE(shared,
-    [  --enable-shared         build and link with shared libraries],
-    [BUILD_SHARED=$enableval],
-    [BUILD_SHARED=NO])
-case "$BUILD_SHARED" in
-    YES|yes)
-        AC_MSG_RESULT(Will build shared libraries)
-        BUILD_SHARED=YES
-        TCL_USE_SHLIB_CFLAGS=TCL_SHLIB_CFLAGS
-        TCLX_BUILD_LIB_SPEC="-L$bldbasedir/tcl/unix -ltclx"
-        TCLX_LIB_SPEC="-L$TCLX_LIB -ltclx"
-        TKX_BUILD_LIB_SPEC="-L$bldbasedir/tk/unix -ltkx"
-        TKX_LIB_SPEC="-L$TCLX_LIB -ltkx"
-        ;;
-    NO|no)
-        AC_MSG_RESULT(Will not build shared libraries)
-        BUILD_SHARED=NO
-        TCL_USE_SHLIB_CFLAGS=TCL_NO_SHLIB_CFLAGS  # Not actually defined
-        TCLX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/libtclx.a"
-        TCLX_LIB_SPEC="$TCLX_LIB/libtclx.a"
-        TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/libtkx.a"
-        TKX_LIB_SPEC="$TCLX_LIB/libtkx.a"
-        ;;
-     *)
-        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
-        ;;
-esac
-AC_SUBST(BUILD_SHARED)
-AC_SUBST(TCL_USE_SHLIB_CFLAGS)
-AC_SUBST(TCLX_BUILD_LIB_SPEC)
-AC_SUBST(TCLX_LIB_SPEC)
-AC_SUBST(TKX_BUILD_LIB_SPEC)
-AC_SUBST(TKX_LIB_SPEC)
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+test "x$exec_prefix" = xNONE && exec_prefix=$prefix
+
+AC_SUBST(prefix)
+AC_SUBST(exec_prefix)
 
 #------------------------------------------------------------------------------
 # Extract the version information out of tclExtend.h so it can be assigned
@@ -188,9 +161,12 @@ AC_MSG_CHECKING(macro values from Config.mk)
 cat Config.mk >confmakefile
 echo "srcbasedir=$srcbasedir" >>confmakefile
 echo "bldbasedir=$bldbasedir" >>confmakefile
+echo "prefix=$prefix" >>confmakefile
+echo "exec_prefix=$exec_prefix" >>confmakefile
 echo "all:" >>confmakefile
 echo '	@echo TCL_CONFIG=\"${TCL_CONFIG}\"' >>confmakefile
 echo '	@echo TK_CONFIG=\"${TK_CONFIG}\"' >>confmakefile
+echo '	@echo TCLX_INST_LIB=\"${TCLX_INST_LIB}\"' >>confmakefile
 echo ".NO_PARALLEL: all" >>confmakefile
 
 eval `${MAKE-make} -f confmakefile`
@@ -206,13 +182,26 @@ if test "$TKX_BUILD" = "YES"; then
 fi
 AC_MSG_RESULT(ok)
 
+AC_SUBST(TCLX_INST_LIB)
+
 # Get defines from tclConfig.sh
 . $TCL_CONFIG
 
 LIBS=$TCL_LIBS   # Need for tests.
 
+#
+# Make TCL_LD_SEARCH_FLAGS a full value.  It is normally contains a value
+# with the path LIB_INSTALL_DIR.  Expand this to be the value of the 
+# TCL_EXEC_PREFIX.  Also, save the original search flags, we will need them
+# later.
+#
+ORIG_TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
+LIB_INSTALL_DIR=$TCL_EXEC_PREFIX
+TCL_LD_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS`
+
 AC_SUBST(TCL_DEFS)
 AC_SUBST(TCL_LIBS)
+AC_SUBST(TCL_EXEC_PREFIX)
 AC_SUBST(TCL_SHLIB_CFLAGS)
 AC_SUBST(TCL_SHLIB_LD)
 AC_SUBST(TCL_DL_LIBS)
@@ -226,15 +215,56 @@ if test "$TKX_BUILD" = "YES"; then
    . $TK_CONFIG
 fi
 
+# Tk doesn't provide its own search flags, but should.
+TK_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
+
 AC_SUBST(TK_DEFS)
 AC_SUBST(TK_LIBS)
+AC_SUBST(TK_EXEC_PREFIX)
 AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TK_XLIBSW)
 AC_SUBST(TK_LD_SEARCH_FLAGS)
 AC_SUBST(TK_BUILD_LIB_SPEC)
 AC_SUBST(TK_LIB_SPEC)
 
+#------------------------------------------------------------------------------
+# Handle the --enable-shared option.  Must do this after extracting information
+# from Config.mk, as we need TCLX_INST_LIB.
+#------------------------------------------------------------------------------
 
+AC_ARG_ENABLE(shared,
+    [  --enable-shared         build and link with shared libraries],
+    [BUILD_SHARED=$enableval],
+    [BUILD_SHARED=NO])
+case "$BUILD_SHARED" in
+    YES|yes)
+        AC_MSG_RESULT(Will build shared libraries)
+        BUILD_SHARED=YES
+        TCLX_USE_SHLIB_CFLAGS=TCL_SHLIB_CFLAGS
+        TCLX_BUILD_LIB_SPEC="-L$bldbasedir/tcl/unix -ltclx"
+        TCLX_LIB_SPEC="-L$TCLX_INST_LIB -ltclx"
+        TKX_BUILD_LIB_SPEC="-L$bldbasedir/tk/unix -ltkx"
+        TKX_LIB_SPEC="-L$TCLX_INST_LIB -ltkx"
+        ;;
+    NO|no)
+        AC_MSG_RESULT(Will not build shared libraries)
+        BUILD_SHARED=NO
+        TCLX_USE_SHLIB_CFLAGS=TCL_NO_SHLIB_CFLAGS  # Not actually defined
+        TCLX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/libtclx.a"
+        TCLX_LIB_SPEC="$TCLX_INST_LIB/libtclx.a"
+        TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/libtkx.a"
+        TKX_LIB_SPEC="$TCLX_INST_LIB/libtkx.a"
+        ;;
+     *)
+        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
+        ;;
+esac
+AC_SUBST(BUILD_SHARED)
+AC_SUBST(TCLX_USE_SHLIB_CFLAGS)
+AC_SUBST(TCLX_BUILD_LIB_SPEC)
+AC_SUBST(TCLX_LIB_SPEC)
+AC_SUBST(TKX_BUILD_LIB_SPEC)
+AC_SUBST(TKX_LIB_SPEC)
 
 #------------------------------------------------------------------------------
 # Check for various programs used during the build.  If the CC environment
@@ -286,14 +316,12 @@ AC_SUBST(TKX_SHLIB_BASE_NAME)
 AC_SUBST(TKX_SHLIB_NAME)
 
 #------------------------------------------------------------------------------
-# Determine the search path argument for the installed TclX libraries.  This
-# is hacked from the variable set in tclConfig.sh.
+# Determine the search path argument for the installed TclX libraries. 
 #-----------------------------------------------------------------------------
 
-TCLX_LD_SEARCH_FLAGS=`echo $TCL_LD_SEARCH_FLAGS|sed 's%/.*$%%'`
-
-if test "X$TCLX_LD_SEARCH_FLAGS" != "X"; then
-    TCLX_LD_SEARCH_FLAGS=$TCLX_LD_SEARCH_FLAGS$TCLX_INST_LIB
+if test "X$ORIG_TCL_LD_SEARCH_FLAGS" != "X"; then
+    LIB_INSTALL_DIR=$TCLX_INST_LIB
+    TCLX_LD_SEARCH_FLAGS=`eval echo $ORIG_TCL_LD_SEARCH_FLAGS` 
 fi
 AC_SUBST(TCLX_LD_SEARCH_FLAGS)
 
