@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 4.5 1995/01/19 06:55:22 markd Exp markd $
+ * $Id: tkXAppInit.c,v 4.6 1995/04/02 16:39:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -51,7 +51,7 @@ main (argc, argv)
     char **argv;
 #endif
 {
-    TkX_Main(argc, argv);
+    TkX_Main(argc, argv, Tcl_AppInit);
     return 0;			/* Needed only to prevent compiler warning. */
 }
 

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 4.4 1995/01/19 06:55:22 markd Exp markd $
+ * $Id: tclXAppInit.c,v 4.5 1995/04/02 16:39:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -50,7 +50,7 @@ main (argc, argv)
     char **argv;
 #endif
 {
-    TclX_Main(argc, argv);
+    TclX_Main(argc, argv, Tcl_AppInit);
     return 0;			/* Needed only to prevent compiler warning. */
 }
 

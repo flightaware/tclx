@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 4.9 1995/04/03 20:19:39 markd Exp markd $
+ * $Id: tclExtend.h,v 4.10 1995/04/21 21:11:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -83,8 +83,9 @@ extern int tclDeleteInterpAtEnd;
  * Exported TclX initialization functions.
  */
 EXTERN void
-TclX_Main _ANSI_ARGS_((int    argc,
-                       char **argv));
+TclX_Main _ANSI_ARGS_((int              argc,
+                       char           **argv,
+                       Tcl_AppInitProc *appInitProc));
 
 EXTERN int
 TclX_Init _ANSI_ARGS_((Tcl_Interp *interp));
@@ -232,8 +233,9 @@ extern char *tkX_library;
 extern char *tkX_libraryEnv;
 
 EXTERN void
-TkX_Main _ANSI_ARGS_((int    argc,
-                      char **argv));
+TkX_Main _ANSI_ARGS_((int               argc,
+                      char            **argv,
+                      Tcl_AppInitProc  *appInitProc));
 
 EXTERN int
 TkX_Init _ANSI_ARGS_((Tcl_Interp  *interp));

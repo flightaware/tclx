@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 4.4 1995/01/16 07:39:53 markd Exp markd $
+ * $Id: tclXshell.c,v 4.5 1995/04/17 01:24:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -220,14 +220,17 @@ ParseCmdLine (interp, argc, argv)
  *
  * Parameters:
  *   o argc, argv - Arguments passed to main for the command line.
+ *   o appInitProc - Application-specific initialization procedure to call
+ *     after most initialization but before starting to execute commands.
  * Notes:
  *   Does not return.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_Main (argc, argv)
-    int    argc;
-    char **argv;
+TclX_Main (argc, argv, appInitProc)
+    int               argc;
+    char            **argv;
+    Tcl_AppInitProc  *appInitProc;
 {
     Tcl_Interp *interp;
     char       *evalStr;
@@ -247,7 +250,7 @@ TclX_Main (argc, argv)
      * Initialized all packages and application specific commands.  This
      * includes Extended Tcl initialization.
      */
-    if (Tcl_AppInit (interp) == TCL_ERROR)
+    if ((*appInitProc)(interp) != TCL_OK)
         goto errorExit;
 
     /*

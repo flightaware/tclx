@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.5 1995/01/19 06:54:52 markd Exp markd $
+ * $Id: tkXshell.c,v 4.6 1995/04/17 01:24:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -119,9 +119,13 @@ static void		SignalProc _ANSI_ARGS_((int signalNum));
  */
 
 void
-TkX_Main (argc, argv)
+TkX_Main (argc, argv, appInitProc)
     int argc;				/* Number of arguments. */
     char **argv;			/* Array of argument strings. */
+    Tcl_AppInitProc *appInitProc;	/* Application-specific initialization
+					 * procedure to call after most
+					 * initialization but before starting
+					 * to execute commands. */
 {
     char *args, *p, *msg, *argv0, *class;
     char buf[20];
@@ -245,7 +249,7 @@ TkX_Main (argc, argv)
      * Invoke application-specific initialization.
      */
 
-    if (Tcl_AppInit(interp) != TCL_OK) {
+    if ((*appInitProc)(interp) != TCL_OK) {
 	TclX_ErrorExit (interp, 255);
     }
 
@@ -422,7 +426,7 @@ StdinProc(clientData, mask)
      */
 
     Tk_CreateFileHandler(0, 0, StdinProc, (ClientData) 0);
-    code = Tcl_RecordAndEval(interp, cmd, 0);
+    code = Tcl_RecordAndEval(interp, cmd, TCL_EVAL_GLOBAL);
     Tk_CreateFileHandler(0, TK_READABLE, StdinProc, (ClientData) 0);
     if ((code != TCL_OK) || tty)
         TclX_PrintResult (interp, code, cmd);

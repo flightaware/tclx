@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 4.2 1995/01/01 19:46:29 markd Exp markd $
+.\" $Id: TclXInit.3,v 4.3 1995/01/16 07:39:53 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -48,8 +48,9 @@ int
 TclXLib_Init (Tcl_Interp *interp);
 
 void
-TclX_Main (int    argc,
-           char **argv);
+TclX_Main (int               argc,
+           char            **argv,
+           Tcl_AppInitProc  *appInitProc);
 .ft R
 .fi
 .SH DESCRIPTION
@@ -185,8 +186,8 @@ Returns:
 .SS TclX_Main
 .PP
 This function parses the command line according to the TclX shell
-specification.  It creates an interpreter and calls the function
-\fBTcl_AppInit\fR to initialize any application specific commands.
+specification.  It creates an interpreter and calls the specified function
+\fBappInitProc\fR to initialize any application specific commands.
 It then either evaluates the command of script specified on the
 command line or enters an interactive command loop.  This procedure never
 returns, it exits the process when it's done.
