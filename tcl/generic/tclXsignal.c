@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.14 1993/09/09 06:07:15 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.15 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -607,8 +607,12 @@ RestoreErrorState (interp, errStatePtr)
     errState_t *errStatePtr;
 {
     Tcl_SetResult (interp, errStatePtr->result, TCL_VOLATILE);
-    Tcl_SetVar (interp, "errorInfo", errStatePtr->errorInfo, TCL_GLOBAL_ONLY);
-    Tcl_SetVar (interp, "errorCode", errStatePtr->errorCode, TCL_GLOBAL_ONLY);
+    if (errStatePtr->errorInfo != NULL)
+        Tcl_SetVar (interp, "errorInfo", errStatePtr->errorInfo,
+                    TCL_GLOBAL_ONLY);
+    if (errStatePtr->errorCode != NULL)
+        Tcl_SetVar (interp, "errorCode", errStatePtr->errorCode,
+                    TCL_GLOBAL_ONLY);
 
     ckfree (errStatePtr);
 }
