@@ -37,7 +37,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 5.0 1995/07/25 05:59:36 markd Rel $
+# $Id: cpmanpages.tcl,v 5.1 1996/02/12 18:17:32 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -304,10 +304,9 @@ if [catch {open $testName w} fh] {
     set longNames 1
 }
 
-set sourceFiles [glob -nocomplain -- $sourceDir/*.man $sourceDir/*.n \
-                      $sourceDir/*.1 $sourceDir/*.3]
+set sourceFiles [glob -- $sourceDir/*.n $sourceDir/*.1 $sourceDir/*.3]
 
-set ignoreFiles {tclsh.1}
+set ignoreFiles {}
 
 # Actually install the files.
 
