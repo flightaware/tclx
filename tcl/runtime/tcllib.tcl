@@ -33,7 +33,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tcllib.tcl,v 4.3 1995/07/05 00:31:51 markd Exp markd $
+# $Id: tcllib.tcl,v 5.0 1995/07/25 06:00:09 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -157,12 +157,12 @@ proc auto_reset {} {
 
 #------------------------------------------------------------------------------
 # auto_mkindex:
-# Regenerate a tclIndex file from Tcl source files.  Takes two arguments:
+# Regenerate a tclIndex file from Tcl source files.  Takes as argument
 # the name of the directory in which the tclIndex file is to be placed,
-# and a glob pattern to use in that directory to locate all of the relevant
-# files.
+# floowed by any number of glob patterns to use in that directory to
+# locate all of the relevant files.
 
-proc auto_mkindex {dir files} {
+proc auto_mkindex {dir args} {
     global errorCode errorInfo
     set oldDir [pwd]
     cd $dir
@@ -174,7 +174,7 @@ proc auto_mkindex {dir files} {
     append index "# sets an element in the auto_index array, where the\n"
     append index "# element name is the name of a command and the value is\n"
     append index "# a script that loads the command.\n\n"
-    foreach file [glob $files] {
+    foreach file [eval glob $args] {
 	set f ""
 	set error [catch {
 	    set f [open $file]
@@ -189,7 +189,7 @@ proc auto_mkindex {dir files} {
 	if $error {
 	    set code $errorCode
 	    set info $errorInfo
-	    catch [close $f]
+	    catch {close $f}
 	    cd $oldDir
 	    error $msg $info $code
 	}
@@ -199,4 +199,3 @@ proc auto_mkindex {dir files} {
     close $f
     cd $oldDir
 }
-
