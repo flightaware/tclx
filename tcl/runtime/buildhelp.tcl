@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: buildhelp.tcl,v 1.1 1992/09/20 23:28:10 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 # For nroff man pages, the areas of text to extract are delimited with:
@@ -261,7 +261,7 @@ proc ProcessTclScript {pathName} {
 }
 
 #-----------------------------------------------------------------------------
-# Proc to copy the help merge tree, excluding the brief file.
+# Proc to copy the help merge tree, excluding the brief file and RCS files
 # 
 
 proc CopyMergeTree {helpDirPath mergeTree} {
@@ -276,7 +276,9 @@ proc CopyMergeTree {helpDirPath mergeTree} {
     for_recursive_glob mergeFile {.} {
         if {"$mergeFile" == "./brief"} {
             continue}
-            set helpFile "$helpDirPath/$mergeFile"
+        if {[file tail $mergeFile] == "RCS"} {
+            continue}
+        set helpFile "$helpDirPath/$mergeFile"
         if {[file isdirectory $mergeFile]} {
             if ![file exists $helpFile] {
                 mkdir $helpFile
