@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 8.6 1997/08/23 18:56:25 markd Exp $
+# $Id: Common.mk.in,v 8.7 1997/08/30 22:30:13 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -68,12 +68,6 @@ TCLX_LIB_NAME   = @TCLX_LIB_NAME@
 TKX_SHLIB_NAME       = @TKX_SHLIB_NAME@
 TKX_STLIB_NAME       = @TKX_STLIB_NAME@
 TKX_LIB_NAME         = @TKX_LIB_NAME@
-
-TCLX_SHLIB_BUILD     = @TCLX_SHLIB_BUILD@
-TCLX_STLIB_BUILD     = @TCLX_STLIB_BUILD@
-
-TKX_SHLIB_BUILD      = @TKX_SHLIB_BUILD@
-TKX_STLIB_BUILD      = @TKX_STLIB_BUILD@
 
 #------------------------------------------------------------------------------
 # Compiler flag to use when generating shared object files.  Unixware cc will
