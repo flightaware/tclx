@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+ * $Id: tclXdup.c,v 4.0 1994/07/16 05:26:47 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -236,7 +236,9 @@ Tcl_DupCmd (clientData, interp, argc, argv)
 	return TCL_ERROR;
 
     if (oldFilePtr->numPids > 0) {
-        Tcl_AppendResult (interp, "can not `dup' a pipeline", (char *) NULL);
+        Tcl_AppendResult (interp, "can not \"dup\" a Tcl pipeline created ",
+                          "with \"open\" the command, use \"pipe\", \"fork\" ",
+                          "and \"execl\" instead.", (char *) NULL);
         return TCL_ERROR;
     }
 
