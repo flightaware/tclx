@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tkXshell.c,v 8.7 1999/03/31 06:37:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -34,8 +34,6 @@
  * SCCS: @(#) tkMain.c 1.145 96/03/08 17:13:44
  */
 
-#include <ctype.h>
-#include <stdio.h>
 #include <tclExtdInt.h>
 #include <tk.h>
 
@@ -56,7 +54,7 @@ extern char * strrchr _ANSI_ARGS_((CONST char *string, int c));
 /*
  *----------------------------------------------------------------------
  *
- * TkX_Main --
+ * TkX_MainEx --
  *
  *	Main program for Wish and most other Tk-based applications.
  *
@@ -73,34 +71,58 @@ extern char * strrchr _ANSI_ARGS_((CONST char *string, int c));
  */
 
 void
-TkX_Main(argc, argv, appInitProc)
+TkX_MainEx(argc, argv, appInitProc, interp)
     int argc;				/* Number of arguments. */
     char **argv;			/* Array of argument strings. */
     Tcl_AppInitProc *appInitProc;	/* Application-specific initialization
 					 * procedure to call after most
 					 * initialization but before starting
 					 * to execute commands. */
+    Tcl_Interp *interp;
 {
     char *args, *msg, *fileName;
     char buf[20];
+    char buffer [MAX_PATH];
     int code;
     size_t length;
     Tcl_Channel inChannel, outChannel, errChannel;
-    Tcl_Interp *interp;
     int tty;
 
+    /* 
+     * Initialize the stubs before making any calls to Tcl or Tk APIs.
+     */
+
+    if (Tcl_InitStubs(interp, "8.0", 0) == NULL) {
+	abort();
+    }
+    if (TclX_InitTclStubs(interp, "8.0", 0) == NULL) {
+	abort();
+    }
+    
     TclX_SetAppInfo (TRUE,
                      "wishx",
                      "Extended Wish",
                      TKX_FULL_VERSION,
                      TCLX_PATCHLEVEL);
 
-    Tcl_FindExecutable(argv[0]);
-    interp = Tcl_CreateInterp();
 #ifdef TCL_MEM_DEBUG
     Tcl_InitMemory(interp);
 #endif
 
+#ifdef __WIN32
+#ifndef BORLAND
+    /*
+     * Parse the command line. Since Windows programs don't get passed the
+     * command name as the first argument, we need to fetch it explicitly.
+     */
+
+    TclX_SplitWinCmdLine (&argc, &argv);
+    GetModuleFileName (NULL, buffer, sizeof (buffer));
+    argv[0] = buffer;
+#endif
+#endif
+
+    Tcl_FindExecutable(argv[0]);
     /*
      * Parse command-line arguments.  A leading "-file" argument is
      * ignored (a historical relic from the distant past).  If the
@@ -162,8 +184,12 @@ TkX_Main(argc, argv, appInitProc)
      */
 
     if ((*appInitProc)(interp) != TCL_OK) {
+	printf("BAD\n");
         TclX_ErrorExit (interp, 255,
                         "\n    while\ninitializing application (Tcl_AppInit?)");
+    }
+    if (Tk_InitStubs(interp, "8.0", 0) == NULL) {
+	abort();
     }
 
     /*

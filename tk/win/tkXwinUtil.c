@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tkXwinUtil.c,v 8.3 1999/03/31 06:37:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -20,9 +20,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #undef WIN32_LEAN_AND_MEAN
-
-extern int
-TkConsoleInit (Tcl_Interp *interp);
 
 
 /*-----------------------------------------------------------------------------
@@ -42,7 +39,7 @@ TkX_ConsoleInit (Tcl_Interp *interp)
     char *flag = Tcl_GetVar(interp, "tcl_interactive", TCL_GLOBAL_ONLY);
 
     if ((flag != NULL) && !STREQU (flag, "0")) {
-	if (TkConsoleInit (interp) == TCL_ERROR) {
+	if (Tk_CreateConsoleWindow (interp) == TCL_ERROR) {
             return TCL_ERROR;
 	}
     }
