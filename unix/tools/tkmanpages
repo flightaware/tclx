@@ -13,11 +13,10 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tkmanpages,v 5.3 1996/03/10 23:22:01 markd Exp $
+# $Id: tkmanpages,v 5.4 1996/03/11 09:09:15 markd Exp $
 #------------------------------------------------------------------------------
 #
 return {
-    {after.n        tk/control/after}
     {bell.n         tk/control/bell}
     {bind.n         tk/control/bind}
     {bindtags.n     tk/control/bindtags}
