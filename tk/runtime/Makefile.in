@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.12 1993/09/16 05:37:54 markd Exp markd $
+# $Id: Makefile.in,v 1.13 1993/09/23 05:40:51 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -20,12 +20,13 @@ SHELL=/bin/sh
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk
 
-srcdir     = @srcdir@
-srcbasedir = @srcbasedir@
-bldbasedir = @bldbasedir@
-VPATH      = @srcdir@
-
-MAN_DIR_SEPARATOR=@MAN_DIR_SEPARATOR@
+srcdir            = @srcdir@
+srcbasedir        = @srcbasedir@
+bldbasedir        = @bldbasedir@
+VPATH             = @srcdir@
+prefix            = @prefix@
+execprefix        = @execprefix@
+MAN_DIR_SEPARATOR = @MAN_DIR_SEPARATOR@
 
 #------------------------------------------------------------------------------
 # Include user-editable defines.
@@ -42,8 +43,8 @@ TCLHELP     = ${bldbasedir}/tkmaster/bin/tclhelp
 DEMOS       = ${bldbasedir}/tkmaster/demos
 MAN         = ${bldbasedir}/tkmaster/man
 HELP        = ${bldbasedir}/tkmaster/help
-CPMANPAGES  = ${srcbasedir}/tools/cpmanpages.tcl
-BLDMANHELP  = ${srcbasedir}/tools/bldmanhelp.tcl
+CPMANPAGES  = ${srcbasedir}/tools/cpmanpages
+BLDMANHELP  = ${srcbasedir}/tools/bldmanhelp
 TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
 
 #------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ ${MAN}:
 HELPCP: ${HELP}/Tk.brf
 
 ${HELP}/Tk.brf:
-	sh ${srcbasedir}/tools/cphelpdir.sh ${srcbasedir}/tkmaster/help \
+	${srcbasedir}/tools/cphelpdir` ${srcbasedir}/tkmaster/help \
            ${bldbasedir}/tkmaster/help
 
 #------------------------------------------------------------------------------

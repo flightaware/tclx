@@ -1,4 +1,3 @@
-:
 #
 # cphelpdir.sh --
 #
@@ -19,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.14 1993/08/26 04:55:13 markd Exp markd $
+# $Id: cphelpdir.sh,v 1.1 1993/09/23 05:45:10 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -33,7 +32,6 @@ then
     echo "*** Tcl help files not found. Run `make buildhelp' to generate"
     echo "***"
 else
-    mkdir $BUILD 2> /dev/null
-    (cd $SRC; tar -cf - .) | (cd $BUILD; tar -xf -)
+    $TOOLS/instcopy $SRC $BUILD
 fi
 

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: signal.test,v 2.3 1993/07/18 16:33:14 markd Exp $
+# $Id: signal.test,v 1.1 1993/07/18 21:11:28 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -30,10 +30,10 @@ proc SignalAlarmHandler {signal} {
     toplevel .signalHand
     label .signalHand.label -borderwidth 6 -relief sunken \
          -text "Received $signal"
-    button .signalHand.exit  -text "Exit" \
+    button .signalHand.dismiss  -text "Dismiss" \
         -command {destroy .signalHand}
 
-    pack configure .signalHand.label .signalHand.exit -fill x
+    pack configure .signalHand.label .signalHand.dismiss -fill x
     grab .signalHand
 }
 

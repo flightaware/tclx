@@ -46,6 +46,11 @@ The following directories are included under the tclX7.0a* directory:
 
     o tools - Tools used for building and installing TclX.
 
+THE EXTENDED TCL INSTALLATION MODELS
+====================================
+
+
+
 HOW TO BUILD EXTENDED TCL
 =========================
 
@@ -191,8 +196,8 @@ machines.  The hierarchies are:
 
      o man - Contains the Tk manual pages.
 
-   The contents of the tclmaster and tkmaster directories must be installed in
-the directory specified at compile.
+   The files built in the tclmaster and tkmaster directories must be installed
+in the directory specified at configuration time.
 
    The installed tclmaster directory path is formed from the value of
 TCL_MASTERDIR define in Config.mk and the Tcl version number and TclX version

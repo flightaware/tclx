@@ -7,11 +7,8 @@
 #
 # It is run in the following manner:
 #
-#     tcl $path/cpmanpages.tcl TCL|TCLX|TK sourceDir ?man-separator-char?
+#     cpmanpages TCL|TCLX|TK sourceDir ?man-separator-char?
 #
-#  Note:
-#    $(srcbase) must be the absolute path to the script. This is needed to
-#    find the buildutil.tcl when source and build directories are different.
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -22,7 +19,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 1.5 1993/08/13 15:01:21 markd Exp markd $
+# $Id: cpmanpages.tcl,v 1.6 1993/09/23 05:40:51 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -83,7 +80,7 @@ proc CopyManPage {sourceFile targetFile} {
 # found or parsed.
 #------------------------------------------------------------------------------
 
-proc GetManNames {manFile} {
+proc GetManNames manFile {
 
    set manFH [open $manFile]
 
@@ -131,6 +128,8 @@ proc GetManNames {manFile} {
 #   o extension - Extension to use for the installed file.
 # Globals:
 #   o config - configuration information.
+# Returns:
+#   A list of the man files created, relative to targetDir.
 #------------------------------------------------------------------------------
 
 proc InstallShortMan {sourceFile targetDir extension} {
@@ -140,6 +139,7 @@ proc InstallShortMan {sourceFile targetDir extension} {
 
     CopyManPage $sourceFile "$targetDir/$manFileName"
 
+    return $manFileName
 }
 
 #------------------------------------------------------------------------------
@@ -152,6 +152,9 @@ proc InstallShortMan {sourceFile targetDir extension} {
 #   o extension - Extension to use for the installed file.
 # Globals:
 #   o config - configuration information.
+# Returns:
+#   A list of the man files created, relative to targetDir.  They are all links
+# to the same entry.
 #------------------------------------------------------------------------------
 
 proc InstallLongMan {sourceFile targetDir extension} {
@@ -168,6 +171,7 @@ proc InstallLongMan {sourceFile targetDir extension} {
     # Copy file to the first name in the list.
 
     set firstFilePath $targetDir/[lvarpop manNames].$extension
+    set created [list [file tail $firstFilePath]]
 
     CopyManPage $sourceFile $firstFilePath
 
@@ -175,16 +179,17 @@ proc InstallLongMan {sourceFile targetDir extension} {
 
     foreach manName $manNames {
         set targetFile  $targetDir/$manName.$extension
-
         unlink -nocomplain $targetFile
         if {[catch {
                 link $firstFilePath $targetFile
             } msg] != 0} {
             puts stderr "error from: link $firstFilePath $targetFile"
             puts stderr "    $msg"
+        } else {
+            lappend created [file tail $targetFile]
         }
     }
-
+    return $created
 }
 
 #------------------------------------------------------------------------------
@@ -197,19 +202,27 @@ proc InstallLongMan {sourceFile targetDir extension} {
 #   o section - Section to install the manual page in.
 # Globals
 #   o config - configuration information.
+# Returns:
+#   A list of the man files created, relative to targetDir.  They are all links
+# to the same entry.
 #------------------------------------------------------------------------------
 
 proc InstallManPage {sourceFile manDir section} {
     global config manSeparator
 
-    set targetDir    "$manDir/man$manSeparator"
-    append targetDir $section
+    set targetDir "$manDir/man${manSeparator}${section}"
 
     if {$config(TCL_MAN_STYLE) == "SHORT"} {
-        InstallShortMan $sourceFile $targetDir $section
+        set files [InstallShortMan $sourceFile $targetDir $section]
     } else {
-        InstallLongMan $sourceFile $targetDir $section
+        set files [InstallLongMan $sourceFile $targetDir $section]
     }
+   
+    set created {}
+    foreach file $files {
+        lappend created man${manSeparator}${section}/$file
+    }
+    return $created
 }
 
 #------------------------------------------------------------------------------
@@ -222,8 +235,6 @@ if {[llength $argv] < 2 || [llength $argv] > 3} {
 set manType [lindex $argv 0]
 set sourceDir [lindex $argv 1]
 set manSeparator [lindex $argv 2]
-
-source [file dirname [info script]]/buildutil.tcl
 
 # Parse the configure files and then default missing values.
 
@@ -247,12 +258,12 @@ switch -- $manType {
         puts stdout "Copying Extended Tcl manual pages to tclmaster/man"
         set destDir   ../tclmaster/man
         set sectionXRef(.n)   $config(TCL_MAN_CMD_SECTION)
-        set sectionXRef(.man) $config(TCL_MAN_CMD_SECTION)
         set sectionXRef(.3)   $config(TCL_MAN_FUNC_SECTION)
     }
     TK {
         puts stdout "Copying Tk manual pages to tkmaster/man"
         set destDir ../tkmaster/man
+        set sectionXRef(.1)   $config(TK_MAN_UNIXCMD_SECTION)
         set sectionXRef(.n)   $config(TK_MAN_CMD_SECTION)
         set sectionXRef(.3)   $config(TK_MAN_FUNC_SECTION)
     }
@@ -265,6 +276,8 @@ set ignoreFiles {tclsh.1}
 
 # Actually install the files.
 
+set created {}
+
 foreach sourceFile $sourceFiles {
     if {[lsearch $ignoreFiles [file tail $sourceFile]] >= 0} continue
 
@@ -273,5 +286,18 @@ foreach sourceFile $sourceFiles {
         puts stderr "WARNING: Don't know how to handle section for $sourceFile,"
         continue
     }
-    InstallManPage $sourceFile $destDir $sectionXRef($ext)
+    set file [InstallManPage $sourceFile $destDir $sectionXRef($ext)]
+    lappend created $file
+}
+
+#
+# For the TclX manual pages, create a file describing the files to install.
+#
+
+if {"$manType" == "TCLX"} {
+    set fh [open ../tools/TclXman.lst w]
+    foreach fileSet $created {
+        puts $fh $fileSet
+    }
+    close $fh
 }

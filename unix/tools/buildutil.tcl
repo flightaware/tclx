@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 1.1 1993/06/28 14:57:16 markd Exp markd $
+# $Id: buildutil.tcl,v 1.2 1993/07/30 15:05:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -57,15 +57,17 @@ proc ParseConfigFile {configFile configVar} {
 #
 # Copy the specified file and change the ownership.  If target is a directory,
 # then the file is copied to it, otherwise target is a new file name.
+# If the source file was owner-executable, the all-executable is set on the
+# created file.
 #------------------------------------------------------------------------------
 
 proc CopyFile {sourceFile target} {
-
     if {[file isdirectory $target]} {
         set targetFile "$target/[file tail $sourceFile]"
     } else {
         set targetFile $target
     }
+echo CopyFile $sourceFile $targetFile
 
     unlink -nocomplain $targetFile
     set sourceFH [open $sourceFile r]
@@ -73,6 +75,15 @@ proc CopyFile {sourceFile target} {
     copyfile $sourceFH $targetFH
     close $sourceFH
     close $targetFH
+
+    # Fixup the mode.
+
+    file stat $sourceFile sourceStat
+    if {$sourceStat(mode) & 0100} {
+        chmod a+rx $targetFile
+    } else {
+        chmod a+r  $targetFile
+    }
 }
 
 #------------------------------------------------------------------------------

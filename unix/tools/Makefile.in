@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.7 1993/09/23 05:40:51 markd Exp markd $
+# $Id: Makefile.in,v 1.8 1993/09/24 14:37:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -24,6 +24,8 @@ srcdir     = @srcdir@
 srcbasedir = @srcbasedir@
 bldbasedir = @bldbasedir@
 VPATH      = @srcdir@
+prefix     = @prefix@
+execprefix = @execprefix@
 XINCLUDES  = @XINCLUDES@
 
 @MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
@@ -38,7 +40,7 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
  
 #------------------------------------------------------------------------------
 
-all: tclxversion $(TK_BUILD)
+all: tclxversion $(TK_BUILD) instcopy bldmanhelp cpmanpages cphelpdir
 
 tclxversion: getversion.c
 	$(CC) $(CC_FLAGS) ${srcdir}/getversion.c -o tclxversion
@@ -49,10 +51,26 @@ tkxversion: getversion.c
 	$(CC) $(CC_FLAGS) -I$(TK_UCB_SRC) -DTK_GET_VERSION \
 	   ${srcdir}/getversion.c -o tkxversion
 
+instcopy: instcopy.tcl buildutil.tcl
+	cat ${srcdir}/buildutil.tcl ${srcdir}/instcopy.tcl >instcopy
+
+bldmanhelp: bldmanhelp.tcl
+	cp ${srcdir}/bldmanhelp.tcl bldmanhelp
+
+cpmanpages: cpmanpages.tcl buildutil.tcl
+	cat ${srcdir}/buildutil.tcl ${srcdir}/cpmanpages.tcl >cpmanpages
+
+cphelpdir: cphelpdir.sh
+	echo ":"                           >cphelpdir
+	echo "TOOLS=${bldbasedir}/tools"   >cphelpdir
+	cat ${srcdir}/cphelpdir.sh        >>cphelpdir
+	chmod a+x cphelpdir
+
 #------------------------------------------------------------------------------
 
 clean:
 	-rm -f tclxversion tkxversion *.o
+	-rm -f instcopy bldmanhelp cpmanpages cphelpdir TclXman.lst
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
