@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 4.6 1995/07/05 01:17:36 markd Exp markd $
+ * $Id: tkXinit.c,v 5.0 1995/07/25 06:00:45 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -95,9 +95,6 @@ TkX_Init (interp)
     libDir = NULL;
     if (tkX_libraryEnv != NULL) {
         libDir = Tcl_GetVar2 (interp, "env", tkX_libraryEnv, TCL_GLOBAL_ONLY);
-    }
-    if (libDir == NULL) {
-        libDir = Tcl_GetVar (interp, "tk_library", TCL_GLOBAL_ONLY);
     }
     if (libDir == NULL) {
         if (tkX_library != NULL)
