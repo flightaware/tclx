@@ -34,7 +34,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tclshell.tcl,v 4.2 1995/01/01 19:50:01 markd Exp markd $
+# $Id: tclshell.tcl,v 5.0 1995/07/25 06:00:12 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -110,7 +110,6 @@ proc auto_execok name {
     set auto_execs($name) 0
     if {[string first / $name] >= 0} {
 	if {[file executable $name] && ![file isdirectory $name]} {
-	    puts "special, ok!"
 	    set auto_execs($name) 1
 	}
 	return $auto_execs($name)
