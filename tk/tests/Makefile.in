@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.4 1995/03/31 21:33:02 markd Exp markd $
+# $Id: Makefile.in,v 1.5 1995/04/21 21:07:47 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -95,7 +95,7 @@ runtest:
 	@echo ':'                                                   >runtest
 	@echo "TCL_LIBRARY=${bldbasedir}/tclsrc"                   >>runtest
 	@echo "TK_LIBRARY=${bldbasedir}/tktclsrc"                  >>runtest
-	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runwishx
+	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runtest
 	@echo "TESTWISH=${bldbasedir}/tktests/tkXtest"             >>runtest
 	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"          >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
