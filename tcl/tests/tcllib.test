@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 2.5 1993/10/29 04:16:15 markd Exp markd $
+# $Id: tcllib.test,v 3.0 1993/11/19 06:57:41 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -63,8 +63,8 @@ proc TclLibReset {} {
 proc TclLibCleanUp {} {
     catch {chmod +rwx tcllib1.dir}
     catch {chmod +rwx tcllib2.dir}
-    unlink -nocomplain [glob -nocomplain tcllib1.dir/* tcllib1.dir/.*]
-    unlink -nocomplain [glob -nocomplain tcllib2.dir/* tcllib2.dir/.*]
+    unlink -nocomplain [glob -nocomplain tcllib1.dir/*]
+    unlink -nocomplain [glob -nocomplain tcllib2.dir/*]
     catch {rmdir tcllib1.dir}
     catch {rmdir tcllib2.dir}
     TclLibReset
