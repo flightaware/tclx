@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 2.9 1993/10/23 23:33:57 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 2.10 1993/10/24 18:56:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,9 +45,14 @@ TclXCmd_Init (interp)
     strcat (tclxVersion, TCL_EXTD_VERSION_SUFFIX);
 
     tclxPatchlevel = TCLX_PATCHLEVEL;
-    tclAppName     = "TclX";
-    tclAppLongname = "Extended Tcl";
-    tclAppVersion  = tclxVersion;
+    if (tclAppName == NULL)
+        tclAppName = "TclX";
+    if (tclAppLongname == NULL)
+        tclAppLongname = "Extended Tcl";
+    if (tclAppVersion == NULL) {
+        tclAppVersion = tclxVersion;
+        tclAppPatchlevel = tclxPatchlevel;
+    }
 
     /*
      * from tclCkalloc.c (now part of the UCB Tcl).

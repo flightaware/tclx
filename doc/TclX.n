@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.43 1993/10/31 16:55:57 markd Exp markd $
+.\" $Id: TclX.n,v 2.44 1993/11/04 16:07:50 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -157,6 +157,11 @@ specific value for this variable.
 .B appversion
 Return the version number for the current application.  The C variable
 \fBtclAppVersion\fR must be set by the application to return an 
+application-specific value for this variable.
+.TP
+.B apppatchlevel
+Return the patchlevel for the current application.  The C variable
+\fBtclAppPatchlevel\fR must be set by the application to return an 
 application-specific value for this variable.
 .RE
 '\"@:

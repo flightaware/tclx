@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 2.7 1993/07/20 08:35:45 markd Exp markd $
+.\" $Id: TclXInit.3,v 2.8 1993/09/20 02:37:42 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
@@ -28,6 +28,7 @@ TclX_AppInit, TclX_Init, TclXCmd_Init, TclXLib_Init - Extended Tcl initializatio
 extern char *tclAppName;
 extern char *tclAppLongname;
 extern char *tclAppVersion;
+extern int   tclAppPatchlevel;
 
 int
 TclX_AppInit (Tcl_Interp *interp);
@@ -59,6 +60,11 @@ the default by the application.
 '
 .SS tclAppVersion
 The application version string to be returned by the \fBinfox\fR command.
+procedures are called.  This value maybe altered from
+the default by the application.
+'
+.SS tclAppPatchlevel
+The application patchlevel to be returned by the \fBinfox\fR command.
 procedures are called.  This value maybe altered from
 the default by the application.
 '

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.19 1993/10/23 23:33:57 markd Exp markd $
+ * $Id: tclExtend.h,v 2.20 1993/11/05 05:33:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,6 +42,7 @@ extern int   tclxPatchlevel;     /* Extended Tcl patch level.               */
 extern char *tclAppName;         /* Application name                        */
 extern char *tclAppLongname;     /* Long, natural language application name */
 extern char *tclAppVersion;      /* Version number of the application       */
+extern int   tclAppPatchlevel;   /* Patchlevel of the application           */
 
 /*
  * Flag user to indicate that a signal that was setup to return an error

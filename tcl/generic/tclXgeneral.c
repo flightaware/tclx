@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 2.6 1993/08/04 15:20:50 markd Exp markd $
+ * $Id: tclXgeneral.c,v 2.7 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,6 +28,7 @@ int   tclxPatchlevel    = 0;     /* Extended Tcl patch level.               */
 char *tclAppName        = NULL;  /* Application name                        */
 char *tclAppLongname    = NULL;  /* Long, natural language application name */
 char *tclAppVersion     = NULL;  /* Version number of the application       */
+int   tclAppPatchlevel  = 0;     /* Patch level of the application          */
 
 
 /*
@@ -76,6 +77,8 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
+    char numBuf [32];
+
     if (argc != 2) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
                           " option", (char *) NULL);
@@ -87,7 +90,6 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
         return TCL_OK;
     }
     if (STREQU ("patchlevel", argv [1])) {
-        char numBuf [32];
         sprintf (numBuf, "%d", tclxPatchlevel);
         Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
         return TCL_OK;
@@ -115,10 +117,15 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
             Tcl_SetResult (interp, tclAppVersion, TCL_STATIC);
         return TCL_OK;
     }
+    if (STREQU ("aoopatchlevel", argv [1])) {
+        sprintf (numBuf, "%d", tclAppPatchlevel);
+        Tcl_SetResult (interp, numBuf, TCL_VOLATILE);
+        return TCL_OK;
+    }
 
     Tcl_AppendResult (interp, "illegal option \"", argv [1], 
                       "\" expect one of: version, patchlevel, posix_signals, ",
-                      "appname, applongname, or appversion",
+                      "appname, applongname, appversion, or apppatchlevel",
                       (char *) NULL);
     return TCL_ERROR;
 }
