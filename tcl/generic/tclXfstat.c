@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.5 1997/07/04 20:23:50 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -250,7 +250,7 @@ ReturnStatArray (interp, ttyDev, statBufPtr, arrayObj)
 
   errorExit:
     Tcl_DecrRefCount (idxObj);
-    goto errorExit;
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
