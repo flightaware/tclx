@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.3 1993/03/15 06:39:07 markd Exp markd $
+# $Id: Makefile,v 2.4 1993/06/06 15:05:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -27,7 +27,7 @@ SHELL=/bin/sh
 
 # List of files that are touched by secondary makefiles when something changes.
 
-MADE.FILES=ucbsrc/made.tmp osSupport/made.tmp src/made.tmp
+MADE.FILES=osSupport/made.tmp src/made.tmp
 TKMADE.FILES=tkucbsrc/made.tmp
 
 CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) \
@@ -44,12 +44,14 @@ all: tcl runtcl $(TCL_TK_SHELL)
 
 tcl: TCLX_MAKES
 
-TCLX_MAKES: libtcl.a
-	cd ucbsrc;    $(MAKE) -$(MAKEFLAGS) all
+TCLX_MAKES: libtcl.a tclmaster runtcl
+#???	cd ucbsrc;    $(MAKE) -$(MAKEFLAGS) all
 	cd osSupport; $(MAKE) -$(MAKEFLAGS) all
-	cd tclsrc;    $(MAKE) -$(MAKEFLAGS) all
 	cd src;       $(MAKE) -$(MAKEFLAGS) all
+	cd tclsrc;    $(MAKE) -$(MAKEFLAGS) all
 
+tclmaster:
+	mkdir tclmaster
 
 # Copy the UCB libtcl.a file from where it was built.  Force the other
 # Makefiles to add their .o files to the library by nuking their made.tmp file.
@@ -86,8 +88,10 @@ libtk.a: $(TCL_TK_DIR)/libtk.a
 runtcl:
 	@echo ':'                                              >runtcl
 	@echo '# script for testing Tcl before installation'  >>runtcl
-	@echo "TCLINIT=`pwd`/tcllib/TclInit.tcl"              >>runtcl
+	@echo "TCLINIT=`pwd`/tclmaster/TclInit.tcl"           >>runtcl
 	@echo "export TCLINIT"                                >>runtcl
+	@echo "TCL_LIBRARY=`pwd`/tclmaster"                   >>runtcl
+	@echo "export TCL_LIBRARY"                            >>runtcl
 	@echo "if [ \$$# = 0 ]"                               >>runtcl
 	@echo "then"                                          >>runtcl
 	@echo "    exec `pwd`/tcl"                            >>runtcl
@@ -99,11 +103,11 @@ runtcl:
 runwishx:
 	@echo ':'                                               >runwishx
 	@echo '# script for testing wishx before installation' >>runwishx
-	@echo "TCLINIT=`pwd`/tcllib/TclInit.tcl"               >>runwishx
+	@echo "TCLINIT=`pwd`/tclmaster/TclInit.tcl"            >>runwishx
 	@echo "export TCLINIT"                                 >>runwishx
-	@echo "TKINIT=`pwd`/tktcllib/wishx.tcl"                >>runwishx
+	@echo "TKINIT=`pwd`/tkmaster/wishx.tcl"                >>runwishx
 	@echo "export TKINIT"                                  >>runwishx
-	@echo "TK_LIBRARY=`pwd`/tktcllib"                      >>runwishx
+	@echo "TK_LIBRARY=`pwd`/tkmaster"                      >>runwishx
 	@echo "export TK_LIBRARY"                              >>runwishx
 	@echo "if [ \$$# = 0 ]"                                >>runwishx
 	@echo "then"                                           >>runwishx
@@ -125,11 +129,6 @@ tcl++:
 test: ucbtests extdtests
 
 ucbtests: all
-	@echo ""
-	@echo "**************************************************"
-	@echo "* Ignore failures in tests:  expr-2.2 & expr-2.6 *"
-	@echo "**************************************************"
-	@echo ""
 	./runtcl -c "cd $(TCL_UCB_DIR)/tests;source all"
 
 extdtests: all
@@ -139,14 +138,13 @@ extdtests: all
 # Build help for Tk.
 
 buildtkhelp:
-	./runtcl tclsrc/bldtkhelp.tcl  $(TCL_TK_DIR)
+	cd tktclsrc;  $(MAKE) -$(MAKEFLAGS) buildtkhelp
 
 #------------------------------------------------------------------------------
 # Install Tcl.
 
 install: all
 	./runtcl tclsrc/installTcl.tcl
-
 
 #------------------------------------------------------------------------------
 # Clean up the mess we made.
@@ -160,3 +158,4 @@ clean:
 	cd tksrc;     $(MAKE) -$(MAKEFLAGS) clean
 	cd tktclsrc;  $(MAKE) -$(MAKEFLAGS) clean
 	-rm -f libtcl.a libtk.a runtcl runwishx tkhelp.tmp
+	-rm -rf tclmaster

@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.15 1993/05/28 04:13:13 markd Exp markd $
+# $Id: Config.mk,v 2.16 1993/06/05 19:26:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -36,9 +36,9 @@ TCL_CONFIG_FILE=scoodt2.0
 
 #------------------------------------------------------------------------------
 # Location of the UCB Tcl distribution relative to this directory.  TclX works
-# with Tcl 6.5, Tcl 6.6, or Tcl 6.7
+# with Tcl 7.0
 #
-TCL_UCB_DIR=../tcl6.7
+TCL_UCB_DIR=../tcl7.0
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -51,7 +51,7 @@ TCL_UCB_DIR=../tcl6.7
 # TK_INSTALL_DEMO is set 1.  If you don't want the demo installed, set it
 # to 0.
 
-TCL_TK_SHELL=wishx
+#TCL_TK_SHELL=wishx
 TCL_TK_DIR=../tk3.2
 TK_INSTALL_DEMO=1
 
@@ -59,15 +59,15 @@ TK_INSTALL_DEMO=1
 # Compiler debug/optimization/profiling flag to use.  Not that if debugging or
 # profiling is enabled, the DO_STRIPPING option below must be disabled.
 #
-OPTIMIZE_FLAG=-O
+OPTIMIZE_FLAG=-g
 
 #------------------------------------------------------------------------------
 # Stripping of the final tclshell binary.  Specify `true' if the binary is to
 # be stripped (optimized case) or specify `false' if the binary is not to be
 # stripped (debugging case).
 #
-#DO_STRIPPING=false
-DO_STRIPPING=true
+DO_STRIPPING=false
+#DO_STRIPPING=true
 
 #------------------------------------------------------------------------------
 # Definition of the compiler you want to use, as well as extra flags for the
@@ -83,21 +83,10 @@ YACC=yacc
 #------------------------------------------------------------------------------
 # If C++ is to be used these should be used.  Specifying CPLUSOBJS includes the
 # C++ support code in the Tcl library. CCPLUS is the command to run your C++
-# compiler. CPLUSINCL is the location of your standard C++  include files.
+# compiler.
 #
 #CPLUSOBJS=tcl++.o
 CCPLUS=CC
-CPLUSINCL=/usr/include/CC
-
-#------------------------------------------------------------------------------
-# Enable or disable Tcl history in the Tcl flag.  If this macro is set to
-# '-DTCL_NOHISTORY', the `history' command will not be available in the Tcl
-# shell.  Many people do not find the history command useful and its rather
-# large, so this way it can be excluded from the standard shell.  It will
-# still be in the library and will be available in other applications if they
-# use `Tcl_RecordAndEval'.
-#
-HISTORY_FLAG=
 
 #------------------------------------------------------------------------------
 # Memory debugging defines.  These are only of interest if you are adding C
@@ -280,10 +269,6 @@ TK_MAN_FUNC_SECTION=TK
 #        void.
 #
 #      o TCL_NO_ITIMER - Set if setitimer is not available.
-#
-#      o TCL_IEEE_FP_MATH - Set if IEEE 745-1985 error reporting via the value
-#        a function returns is to be used instead of the standard matherr
-#        mechanism.
 #
 #      o TCL_NO_FILE_LOCKING - Set if the fcntl system call does not support
 #        file locking.

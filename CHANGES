@@ -455,3 +455,67 @@
     directly and it sets the Tcl path.  The directory Tcl is installed in
     now contains the TclX version number.
 -------------------------------------------------------------------------------
+22 Mar 93:
+  o In SGI config file, Added -lsun to get NIS getpwnam.
+-------------------------------------------------------------------------------
+5 Apr 93:
+  o Handle conversions of dates correctly when in daylight savings time.
+  o Added support for linux from Jamie Honan <jhonan@kralizec.zeta.org.au>.
+-------------------------------------------------------------------------------
+15 Apr 93:
+  o Updated RS600 config file thanks to R Lindsay Todd <toddr@rpi.edu>.
+  o Fixed problems with convertclock converting GMT times while in DST.
+-------------------------------------------------------------------------------
+ 2 May 93:
+  o Fixed keylget to handle internal quoting correctly.  Thanks to 
+    Spencer W. Thomas <spencer@med.umich.edu> for the fix.
+-------------------------------------------------------------------------------
+ 3 May 93:
+  o Allow for backslash continuation of #@package: lines.
+  o Deleted Tcl_System, per UCB wait changes.  Added osSupport/system.c for
+    anyone who's "system" function uses wait (i.e. is broken).
+   (*POTENTIAL INCOMPATIBILITY*)
+  o Removed outdate execvp proc (use execl). (*POTENTIAL INCOMPATIBILITY*)
+-------------------------------------------------------------------------------
+ 9 May 93:
+  o Changed loadlibindex so it overrides existing package definitions.
+-------------------------------------------------------------------------------
+12 May 93:
+  o Run ranlib on lib files after installing.
+  o Improved readability of profrep output.
+  o Build index will ignore errors changing ownership.
+  o Allow profiling to work on systems where times does not return real time.
+-------------------------------------------------------------------------------
+26 May 93:
+  o Added solaris make file supplied by Judy Grass.
+  o Fixed filescan so that if will keep matchInfo(offset) valid even if the
+    callbacks read from the file.
+-------------------------------------------------------------------------------
+28 May 93:
+  o Added fix for flock on Solaris supplied by Judy Grass.
+  o Call tzset on systems that use the timezone variable.
+  o buildpackageindex now deletes the index if the build fails.
+-------------------------------------------------------------------------------
+ 3 Jun 93:
+  o Changed startup sequence to be more generalized and allow Tk runtime to be
+    stored in a separate directory from the Tcl runtime.  This allows for
+    multiple version of Tk to be installed.  (*POTENTIAL INCOMPATIBILITY for
+    C code*)
+-------------------------------------------------------------------------------
+ 8 Jun 93:
+  o Fixed unknown trap handler so it works on systems were
+    "file executable {}" returns 1.
+-------------------------------------------------------------------------------
+17 Jun 93:
+  o Extended wait command to support all waitpid options.
+  o Can not dup to any specified file id, instead of just the standard ones.
+  o The history command can nolonger be compiled out.
+-------------------------------------------------------------------------------
+20 Jun 93:
+  o Changed package library code to be a functional super-set of the standard
+    Tcl 7.0 libraries.  auto_path is now used instead of TCLPATH.  Several
+    commands have been elimiated.  (*POTENTIAL INCOMPATIBILITY*)
+  o Deleted the floating-point math functions that are now part of the "expr'
+    command.  Supplied procs in tcl.tlib to replace the old commands.
+  o Many changes for compabibility with Tcl 7.0.
+-------------------------------------------------------------------------------
