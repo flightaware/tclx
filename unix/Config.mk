@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.3 1995/10/20 05:50:22 markd Exp $
+# $Id: Config.mk,v 5.3 1995/11/05 03:51:13 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -32,35 +32,35 @@
 # The rules make it easy to specify locations of files either relative to
 # the source or build directories or or as absolute directories.  If these
 # rules are not followed, it will not build.  All values are defaulted to
-# reasonable locations.  If UCB tcl and Tk are in directories that are
-# siblings of the TclX source directory, things will probably work just find.
+# reasonable locations.  If Tcl and Tk are in directories that are siblings
+# of the TclX source directory, things will probably work just fine.
 #
 # File paths MUST be one of:
 #
 #   o Absolute paths (starting with /), e.g.  /usr/local/lib/libtcl.a
 #   o Paths relative to the source directory make macro ${srcbasedir}, e.g.
-#     $(srcbasedir)/../tk4.0
+#     -I$(srcbasedir)/../tk4.0
 #   o Paths relative to the build directory make macro ${bldbasedir}, e.g.
 #     ${bldbasedir}/../tk4.0/libtk.a
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# The UCB Tcl source distribution directory and the path to the UCB Tcl
-# library (libtcl.a),  Note, access is required to tclInt.h which is not
-# installed by Tcl.
+# The Tcl source distribution directory and the path to the Tcl library
+# (libtcl.a),  Note, access is required to tclInt.h which is not installed
+# by Tcl.
 
-TCL_UCB_SRC=${srcbasedir}/../tcl7.5a2
-TCL_UCB_LIB=${bldbasedir}/../tcl7.5a2/unix/libtcl.a
+TCL_SRC=${srcbasedir}/../tcl7.5a2
+TCL_LIB=${bldbasedir}/../tcl7.5a2/unix/libtcl.a
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
 # that includes the TclX command set, define TK_BUILD=WISHX.  Also define the
-# the directory containing the UCB Tk source distribution and the path to the
-# UCB Tk library (libtk.a).
+# the directory containing the Tk source distribution and the path to the Tk
+# library (libtk.a).
 
 TK_BUILD = WISHX
-TK_UCB_SRC=${srcbasedir}/../tk4.1a2
-TK_UCB_LIB=${bldbasedir}/../tk4.1a2/unix/libtk.a
+TK_SRC=${srcbasedir}/../tk4.1a2
+TK_LIB=${bldbasedir}/../tk4.1a2/unix/libtk.a
 
 #------------------------------------------------------------------------------
 # C compiler and debug/optimization/profiling flag to use.  Set by configure,

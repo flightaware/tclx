@@ -1,7 +1,8 @@
 #
-# tools/Makefile.in  --
+# unix/tools/Makefile.in  --
 #
-# Makefile for building tools used during install
+# Makefile for building tools used during build and install process.  Nothing
+# here is actually installed on the system.
 #------------------------------------------------------------------------------
 # Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
 #
@@ -12,46 +13,34 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.1 1995/09/26 06:40:33 markd Exp $
+# $Id: Makefile.in,v 5.2 1995/11/22 04:16:01 markd Exp $
 #------------------------------------------------------------------------------
 #
-SHELL = /bin/sh
+
+#------------------------------------------------------------------------------
+# Common and user-editable defines.
+#
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
+
+#------------------------------------------------------------------------------
+# Local macros.
+#
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${TCLX_GENERIC_DIR} \
+	      -I${TCL_GENERIC_DIR} -I${TK_GENERIC_DIR}
 
 #------------------------------------------------------------------------------
 
-CC          = @CC@
-CFLAGS      = @CFLAGS@
-srcdir      = @srcdir@
-srcbasedir  = @srcbasedir@
-bldbasedir  = @bldbasedir@
-VPATH       = @srcdir@
-prefix      = @prefix@
-exec_prefix = @exec_prefix@
-XINCLUDES   = @XINCLUDES@
-LIBS        = @LIBS@ -lm
-
-@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
-
-#------------------------------------------------------------------------------
-
-CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
-           -I${TK_UCB_SRC}/generic -I${TCL_UCB_SRC}/generic ${XINCLUDES}
-
-.c.o:
-	${CC} ${CC_FLAGS} -c $<
-
-#------------------------------------------------------------------------------
-
-all: tclxversion $(TK_BUILD) instcopy bldmanhelp cpmanpages cphelpdir \
+all: tclxversion ${TK_BUILD} instcopy bldmanhelp cpmanpages cphelpdir \
      symlinkext
 
-tclxversion: getversion.c
-	$(CC) $(CC_FLAGS) ${srcdir}/getversion.c -o tclxversion ${LIBS}
+tclxversion: getversion.c Makefile
+	${CC} ${CC_SWITCHES} ${srcdir}/getversion.c -o tclxversion ${LIBS}
 
 WISHX: tkxversion
 
-tkxversion: getversion.c
-	$(CC) $(CC_FLAGS) -I$(TK_UCB_SRC) -DTK_GET_VERSION \
+tkxversion: getversion.c Makefile
+	${CC} ${CC_SWITCHES} -DTK_GET_VERSION \
 	   ${srcdir}/getversion.c -o tkxversion ${LIBS}
 
 instcopy: instcopy.tcl buildutil.tcl

@@ -1,7 +1,7 @@
 #
 # Makefile --
 #
-# Top-level makefile for Extended Tcl.
+# Top-level Unix makefile for Extended Tcl.
 # 
 #------------------------------------------------------------------------------
 # Copyright 1992-1995 Karl Lehenbauer and Mark Diekhans.
@@ -13,84 +13,47 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.0 1995/07/25 06:00:54 markd Rel markd $
+# $Id: Makefile.in,v 5.1 1995/09/08 21:02:43 markd Exp $
 #------------------------------------------------------------------------------
 #
-SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
-# Autoconfig defines that can be overridden in Config.mk
-
-CC                = @CC@
-CFLAGS            = @CFLAGS@
-CXX               = @CXX@
-CXXFLAGS          = @CXXFLAGS@
-RANLIB            = @RANLIB@
-STRIP             = @STRIP@
-srcdir            = @srcdir@
-srcbasedir        = @srcbasedir@
-bldbasedir        = @bldbasedir@
-VPATH             = @srcdir@
-prefix            = @prefix@
-exec_prefix       = @exec_prefix@
-ARCH              = @TCL_ARCH@
-
-#------------------------------------------------------------------------------
-# Include user-editable defines.
-
-@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
+# Common and user-editable defines.
+#
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
 # Flags that were passed on the command line that are to be passed on to
-# second level makes.  C++ flags are only passed to the src dir build.
+# second level makes.  C++ flags are only passed to the tcl build.
 
 PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}" "LDFLAGS=${LDFLAGS}"
 PASSXX_FLAGS = ${PASS_FLAGS} "CXX=${CXX}" "CXXFLAGS=${CXXFLAGS}"
 
 #------------------------------------------------------------------------------
-# The made.tmp files are used to indicate a makefile has successfully added
-# it's .o files to a library.  We need to purge the right ones one a new
-# library is copied.
 
-TCLMADE.TMP = osSupport/made.tmp src/made.tmp
-TKMADE.TMP  = tksrc/made.tmp
+all: COMP_TCLX COMP_${TK_BUILD}
 
-#------------------------------------------------------------------------------
+COMP_TCLX: COMP_TOOLS runtcl
+	cd ../tcl/unix; ${MAKE} ${PASSXX_FLAGS} all
 
-all: TCLX runtcl COMP_${TK_BUILD}
-
-#------------------------------------------------------------------------------
-# Compile the Extended Tcl library and link the Tcl shell.
-#
-
-TCLX: runtcl
-	cd tools;     ${MAKE} ${PASS_FLAGS} all
-	cd osSupport; ${MAKE} ${PASS_FLAGS} all
-	cd src;       ${MAKE} ${PASSXX_FLAGS} all
-	cd tclsrc;    ${MAKE} ${PASS_FLAGS} all
-	cd tests;     ${MAKE} ${PASS_FLAGS} all
-	cd src;       ${MAKE} ${PASSXX_FLAGS} checkup
-
-#------------------------------------------------------------------------------
-# Generate a wish shell {wishx} with Extended Tcl commands.
-#
-
-COMP_WISHX: runwishx
-	cd tksrc;    ${MAKE} ${PASS_FLAGS} all
-	cd tktclsrc; ${MAKE} ${PASS_FLAGS} all
-	cd tktests;  ${MAKE} ${PASS_FLAGS} all
+COMP_WISHX: COMP_TOOLS runwishx
+	cd ../tk/unix; ${MAKE} ${PASS_FLAGS} all
 
 COMP_:
+
+COMP_TOOLS:
+	cd tools; ${MAKE} ${PASS_FLAGS} all
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
 # at the local master directories so tcl & wishx can be run before installing.
 
-runtcl:
+runtcl: Makefile
 	@echo '#!/bin/sh'                                           >runtcl
 	@echo '# script for testing Tcl before installation'       >>runtcl
-	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"               >>runtcl
-	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                  >>runtcl
+	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtcl
+	@echo "TCL_PROGRAM=${TCLX_UNIX_DIR}/tcl"                   >>runtcl
 	@echo "export TCLX_LIBRARY TCL_PROGRAM"                    >>runtcl
 	@echo "if [ \$$# = 0 ]"                                    >>runtcl
 	@echo "then"                                               >>runtcl
@@ -100,13 +63,13 @@ runtcl:
 	@echo "fi"                                                 >>runtcl
 	chmod a+rx runtcl
 
-runwishx:
+runwishx: Makefile
 	@echo '#!/bin/sh'                                          >runwishx
 	@echo '# script for testing wishx before installation'    >>runwishx
-	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"              >>runwishx
-	@echo "TKX_LIBRARY=${bldbasedir}/tkmaster"                >>runwishx
-	@echo "TCL_PROGRAM=${bldbasedir}/src/tcl"                 >>runwishx
-	@echo "WISHX=${bldbasedir}/tksrc/wishx"                   >>runwishx
+	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                   >>runwishx
+	@echo "TKX_LIBRARY=${TKX_TMP_MASTER}"                     >>runwishx
+	@echo "TCL_PROGRAM=${TCLX_UNIX_DIR}/tcl"                  >>runwishx
+	@echo "WISHX=${TKX_UNIX_DIR}/wishx"                       >>runwishx
 	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"       >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx
@@ -115,12 +78,6 @@ runwishx:
 	@echo "    exec \$$WISHX \"\$$@\""                        >>runwishx
 	@echo "fi"                                                >>runwishx
 	chmod a+rx runwishx
-
-#------------------------------------------------------------------------------
-# Test to see if the C++ include file compiles and links.
-
-tcl++:
-	cd src;${MAKE} tcl++
 
 #------------------------------------------------------------------------------
 # Relink using shared libraries.  The libraries must be built and installed
@@ -140,16 +97,16 @@ SHLINK_:
 # Run the tests.
 
 test: all
-	cd tests;     ${MAKE} ${PASS_FLAGS} test
+	cd ../tcl/unix; ${MAKE} test
 
 ucbtests: all
-	cd tests;     ${MAKE} ${PASS_FLAGS} ucbtests
+	cd ../tcl/unix; ${MAKE} ucbtests
 
 extdtests: all
-	cd tests;     ${MAKE} ${PASS_FLAGS} extdtests
+	cd ../tcl/unix; ${MAKE} extdtests
 
 tktest: all
-	cd tktests;   ${MAKE} ${PASS_FLAGS} test
+	cd ../tk/unix;  ${MAKE} test
 
 #------------------------------------------------------------------------------
 # Rebuild help files.  The are shipped with TclX, but can be rebuilt if Tcl or
@@ -158,10 +115,10 @@ tktest: all
 buildhelp: buildtclhelp buildtkhelp
 
 buildtclhelp:
-	cd tclsrc;   ${MAKE} buildtclhelp
+	cd ../tcl/unix; ${MAKE} buildtclhelp
 
 buildtkhelp:
-	cd tktclsrc; ${MAKE} buildtkhelp
+	cd ../tkunix;   ${MAKE} buildtkhelp
 
 #------------------------------------------------------------------------------
 
@@ -250,17 +207,10 @@ WISHXMMAYBE-EXEC: TKXMINSTALL-EXEC
 # Clean up all files that were built by make.
 
 clean:
-	cd tools;     ${MAKE} ${PASS_FLAGS} clean
-	cd osSupport; ${MAKE} ${PASS_FLAGS} clean
-	cd src;       ${MAKE} ${PASS_FLAGS} clean
-	cd tclsrc;    ${MAKE} ${PASS_FLAGS} clean
-	cd tksrc;     ${MAKE} ${PASS_FLAGS} clean
-	cd tktclsrc;  ${MAKE} ${PASS_FLAGS} clean
-	cd tests;     ${MAKE} ${PASS_FLAGS} clean
-	cd tktests;   ${MAKE} ${PASS_FLAGS} clean
-	cd man;       ${MAKE} ${PASS_FLAGS} clean
+	cd ../tk/unix;  ${MAKE} clean
+	cd ../tcl/unix; ${MAKE} clean
 	-rm -f runtcl runwishx
-	-rm -rf tclmaster tkmaster
+
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

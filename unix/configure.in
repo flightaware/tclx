@@ -13,12 +13,12 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.4 1995/11/05 03:56:23 markd Exp $
+dnl $Id: configure.in,v 5.5 1995/11/15 06:40:29 markd Exp $
 dnl----------------------------------------------------------------------------
-AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.4 $),)dnl
+AC_INIT(../tcl/generic/tclExtend.h)
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.5 $),)dnl
 
-AC_CONFIG_HEADER(src/tclXconf.h)
+AC_CONFIG_HEADER(../tcl/unix/tclXconf.h)
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.
@@ -32,13 +32,13 @@ unset MFLAGS MAKEFLAGS
 AC_ARG_WITH(arch,
          [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
                           and lib directory names],
-         [TCL_ARCH=.$withval])
-if test "X$TCL_ARCH" = "X" ; then
+         [TCLX_ARCH=.$withval])
+if test "X$TCLX_ARCH" = "X" ; then
     AC_MSG_RESULT("No architecture suffix will be used")
 else
-    AC_MSG_RESULT("An architecture suffix of \"$TCL_ARCH\" will be appended to bin and lib directories")
+    AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
 fi
-AC_SUBST(TCL_ARCH)
+AC_SUBST(TCLX_ARCH)
 
 #------------------------------------------------------------------------------
 # Check for various programs used during the build.
@@ -84,15 +84,6 @@ else
     HAVE_SYML="YES"
 fi
 AC_SUBST(HAVE_SYML)
-
-#------------------------------------------------------------------------------
-# Purge the specific set of files that must be rebuild if the prefix is
-# changed or the build directory is moved.
-#------------------------------------------------------------------------------
-
-rm -f runtcl runwishx tests/runtest tktests/runtest 2>/dev/null
-rm -f src/tclCmdIL.o src/tclXinit.o src/tclXlibInit.o  2>/dev/null
-rm -f tksrc/tkXinit.o */made*.tmp 2>/dev/null
 
 #------------------------------------------------------------------------------
 #       Some make programs require includes to be 
@@ -325,12 +316,13 @@ fi
 AC_SUBST(MAN_DIR_SEPARATOR)
 
 #------------------------------------------------------------------------------
-# Define srcbasedir and bldbasedir as absolute paths.
+# Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
+# tree.
 #------------------------------------------------------------------------------
 
-srcbasedir=`cd $srcdir;pwd`
+srcbasedir=`cd $srcdir/..; pwd`
 AC_SUBST(srcbasedir)
-bldbasedir=`pwd`
+bldbasedir=`cd ..; pwd`
 AC_SUBST(bldbasedir)
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -696,27 +688,11 @@ then
 fi
 
 #------------------------------------------------------------------------------
-#       Copy the tests to the build directory if they are not there.
-#       We could do something fancier, but this is easy for now.
-#------------------------------------------------------------------------------
-
-if test ! -d tests
-then
-    echo "Copying $srcdir/tests contents to build directory"
-    mkdir tests
-    # Prevent line to long on some systems.
-    CURDIR=`pwd`
-    cd $srcdir/tests
-    cp *.test *.tcl all $CURDIR/tests || exit 1
-    cd $CURDIR
-fi
-
-#------------------------------------------------------------------------------
 # Generate the make files.
 #------------------------------------------------------------------------------
 
 AC_SUBST(prefix)
 AC_SUBST(execprefix)
 
-AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile tksrc/Makefile tktclsrc/Makefile tools/Makefile tests/Makefile tktests/Makefile man/Makefile src/tclxlibs.mk tksrc/tkxlibs.mk)
+AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxlibs.mk ../tk/unix/tkxlibs.mk)
 

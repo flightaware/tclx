@@ -1,7 +1,14 @@
-/* src/tclXconf.h.in.  Generated automatically from configure.in by autoheader.  */
+/* ../tcl/unix/tclXconf.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef gid_t
+
+/* Define if your struct tm has tm_zone.  */
+#undef HAVE_TM_ZONE
+
+/* Define if you don't have tm_zone but do have the external array
+   tzname.  */
+#undef HAVE_TZNAME
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef mode_t
@@ -38,10 +45,6 @@
 
 /* Define if don't you have values.h */
 #undef NO_VALUES_H
-
-/* Define if you don't have tm_zone but do have the external array
-   tzname.  */
-#undef HAVE_TZNAME
 
 /* Define if your struct tm has tm_zone.  */
 #undef HAVE_TM_ZONE

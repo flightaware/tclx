@@ -1,5 +1,5 @@
 #
-# tksrc/Makefile.in --
+# tk/unix/Makefile.in --
 #
 # Makefile to build a wish with Extended Tcl (wishx).
 # 
@@ -13,90 +13,209 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.3 1995/09/30 19:36:08 markd Exp $
+# $Id: Makefile.in,v 5.4 1995/09/30 22:35:41 markd Exp $
 #------------------------------------------------------------------------------
 #
-SHELL = /bin/sh
 
 #------------------------------------------------------------------------------
-# Autoconfig defines that can be overridden in Config.mk
-
-CC          = @CC@
-CFLAGS      = @CFLAGS@
-RANLIB      = @RANLIB@
-srcdir      = @srcdir@
-srcbasedir  = @srcbasedir@
-bldbasedir  = @bldbasedir@
-VPATH       = @srcdir@
-prefix      = @prefix@
-exec_prefix = @exec_prefix@
-ARCH        = @TCL_ARCH@
-XINCLUDES   = @XINCLUDES@
-LIBS        = @LIBS@ @MATH_LIBS@
-XLIBSW      = @XLIBSW@
+# Common and user-editable defines.
+#
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
-# Include user-editable defines.
-
-@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
-
-#------------------------------------------------------------------------------
-
-LIBTCLX      = ../src/libtclx.a
-INST_MASTER  = ${TK_MASTERDIR}/`../tools/tkxversion`
-INSTCOPY     = ../runtcl ../tools/instcopy
-SYMLINKEXT   = ../tools/symlinkext
+# Local macros.
 
 # The ordering of the libraries is important.  Some X libs on SysV include
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LDLIBS = libtkx.a ${TK_UCB_LIB} ${XLIBSW} ${LIBTCLX} \
-	 ${TCL_UCB_LIB} ${LIBS} ${XLDLIBS}
+LDLIBS = libtkx.a ${TK_LIB} ${XLIBSW} ${LIBTCLX} ${TCL_LIB} ${LIBS} ${XLDLIBS}
 
 SHLDLIBS = ${TKX_SHLIBS} ${XLIBSW} ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
-CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
-           -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
-           -I${TK_UCB_SRC}/generic -I${TK_UCB_SRC}/unix \
-           -I${TCL_UCB_SRC}/generic -I${TCL_UCB_SRC}/unix \
-           ${XINCLUDES}
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+	      -I${TKX_GENERIC_DIR} \
+	      -I${TK_GENERIC_DIR} -I${TK_UNIX_DIR} \
+	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_DIR} \
+	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR} \
+	      ${XINCLUDES}
 
-LD_FLAGS = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
-
-.c.o:
-	${CC} ${CC_FLAGS} -c $<
+LD_SWITCHES = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 #------------------------------------------------------------------------------
+# Source and target macros.
+#
+GENERIC_OBJS = tkXinit.o tkXshell.o
 
-OBJS=tkXinit.o tkXshell.o
+OBJS = ${GENERIC_OBJS}
+
+LIBTCLX = ../../tcl/unix/libtclx.a
+
+HELP_DIR = ${srcbasedir}/tk/help
+
+DEMOSSRC  = ${TK_SRC}/library/demos
+DEMOPROGS = browse hello ixset rmt rolodex square tcolor timer widget
+
+TEST_OBJS = tktest.o tkSquare.o tkXtest.o
 
 #------------------------------------------------------------------------------
-# Compile the TkX library and link wishx.  If the link fails, purge
-# the executable, as some systems leave invalid executables around.
+# Dependencies for generating the libraries and linking the executable.
+# If a link fails, purge the executable, as some systems leave invalid
+# executables around.
+#
+all: libtkx.a wishx RUNTIME tktest runtest
 
-all: made.tmp wishx
-
-wishx: tkXAppInit.o libtkx.a ${LIBTK} ${TCL_UCB_LIB} ${TK_UCB_LIB} made.tmp
-	${CC} ${LD_FLAGS} tkXAppInit.o ${LDLIBS} -o wishx || \
+wishx: tkXAppInit.o libtkx.a ${LIBTK} ${TCL_LIB} ${TK_LIB}
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${LDLIBS} -o wishx || \
 	    (rm -f wishx; exit 1)
 
-made.tmp libtkx.a: ${OBJS}
-	${AR} cr libtkx.a ${OBJS} ${UCBOBJS}
+libtkx.a: ${OBJS}
+	${AR} cr libtkx.a ${OBJS}
 	${RANLIB} libtkx.a
-	touch made.tmp
 
-tkXinit.o: ${srcdir}/tkXinit.c
-	${CC} -c -I${TK_UCB_SRC} ${CC_FLAGS} ${DEFS} \
-	    -DTKX_LIBRARY=\"${INST_MASTER}\" ${srcdir}/tkXinit.c
+#------------------------------------------------------------------------------
+# Dependencies for generating objects.
+#
+tkXinit.o: ${TKX_GENERIC_DIR}/tkXinit.c Makefile
+	${CC} -c ${CC_SWITCHES} -DTKX_LIBRARY=\"${TKX_INST_MASTER}\" \
+	  ${TKX_GENERIC_DIR}/tkXinit.c
+
+tkXshell.o: ${TKX_GENERIC_DIR}/tkXshell.c
+	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXshell.c
+
+tkXAppInit.o: ${TKX_GENERIC_DIR}/tkXAppInit.c
+	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXAppInit.c
 
 #------------------------------------------------------------------------------
 # Relink using shared libraries.  The libraries must be built and installed
 # by hand.
 
 shlink:
-	${CC} ${LD_FLAGS} tkXAppInit.o ${SHLDLIBS} -o wishx || \
+	${CC} ${LD_SWITCHES} tkXAppInit.o ${SHLDLIBS} -o wishx || \
 	    (rm -f wishx; exit 1)
+
+#------------------------------------------------------------------------------
+# Generate the runtime .tlib library in the current directory.  Copy other
+# runtime files into this directory so it can be used as a temporary runtime
+# directory before installation.  Also need "help" and "demos" directory here
+# so that the help and tkdemo commands will work before installation.
+# Normally just symlink, unless we don't have them.
+#
+RUNTIME: tk.tlib tk.tndx tk.tcl prolog.ps tclhelp help demos
+
+tk.tlib: ${TK_SRC}/library/tclIndex ${srcdir}/../runtime/tkdemo.tcl
+	rm -f tk.tlib tk.tndx
+	${CONVERTLIB} ${TK_SRC}/library/tclIndex tk.tlib
+	cat ${srcdir}/../runtime/tkdemo.tcl >>tk.tlib
+
+tk.tndx: tk.tlib
+	${GENTNDX} tk.tlib
+
+# Update tk.tcl to autoload from our library rather than explictly source
+# the files.  We pick an entry point in each file to force it to be brought
+# in.
+tk.tcl: ${TK_SRC}/library/tk.tcl
+	rm -f tk.tcl
+	sed -f ${srcdir}/../runtime/tk.tcl.sed \
+	    ${TK_SRC}/library/tk.tcl >tk.tcl
+
+prolog.ps: ${TK_SRC}/library/prolog.ps
+	rm -f prolog.ps
+	cp ${TK_SRC}/library/prolog.ps prolog.ps
+
+tclhelp: ${srcdir}/../runtime/tclhelp.tcl
+	rm -f tclhelp
+	echo "#!${TCL_BINDIR}/wishx"          >tclhelp
+	cat ${srcdir}/../runtime/tclhelp.tcl >>tclhelp
+	chmod +rx tclhelp
+
+#------------------------------------------------------------------------------
+# Need a "help" and "demos" directories in this directory so that the help and
+# tkdemo commands will work before installation.  Normaly just symlink, unless
+# we don't have them.# (Must enforce master dir being there, as a dependency
+# on make.tmp causes it to be always rebuilt).
+
+help:
+	if [ "@HAVE_SYML@" = "YES" ]; then \
+	    rm -rf help ;\
+	    ln -s ${HELP_DIR} help ;\
+	else \
+	    rm -rf help ;\
+	    (cd ${HELP_DIR}; tar -cf - help) | tar -xf - ;\
+	fi
+
+demos:
+	if [ ! -d demos ] ; then mkdir demos ; else exit 0; fi
+	${INSTCOPY} ${DEMOSSRC} demos
+	@for i in $(DEMOPROGS); \
+	    do \
+	    rm -f demos/$$i; \
+	    sed -e "s/^exec wish/exec wishx"/ ${DEMOSSRC}/$$i >demos/$$i; \
+	    chmod 755 demos/$$i; \
+	done;
+
+#------------------------------------------------------------------------------
+# Generate the test program.
+#
+
+tktest: ${TEST_OBJS} libtkx.a ${LIBTCLX}
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tktest || \
+	    (rm -f tktest; exit 1)
+
+tktest.o: tktest.c
+	${CC} -c ${CC_SWITCHES} tktest.c
+
+tkSquare.o: tkSquare.c
+	${CC} -c ${CC_SWITCHES} tkSquare.c
+
+tkXtest.o: ${TKX_GENERIC_DIR}/tkXtest.c
+	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXtest.c
+
+tktest.c: ${TK_SRC}/generic/tkTest.c
+	rm -f tktest.c	
+	echo '#include "../../tcl/unix/tclXconf.h"' >tktest.c
+	cat ${TK_SRC}/generic/tkTest.c >>tktest.c
+
+tkSquare.c: ${TK_SRC}/generic/tkSquare.c
+	rm -f tkSquare.c	
+	echo '#include "../../tcl/unix/tclXconf.h"'   >tkSquare.c
+	cat ${TK_SRC}/generic/tkSquare.c >>tkSquare.c
+
+#------------------------------------------------------------------------------
+# Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
+# at the local master directories so tktest can be run.
+
+runtest: Makefile
+	@echo '#!/bin/sh'                                           >runtest
+	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
+	@echo "TKX_LIBRARY=${TKX_TMP_MASTER}"                      >>runtest
+	@echo "TCL_PROGRAM=${TCLX_UNIX_DIR}/tcl"                   >>runtest
+	@echo "TESTWISH=${bldbasedir}/tk/unix/tkXtest"             >>runtest
+	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"        >>runtest
+	@echo "if [ \$$# = 0 ]"                                    >>runtest
+	@echo "then"                                               >>runtest
+	@echo "    exec \$$TESTWISH"                               >>runtest
+	@echo "else"                                               >>runtest
+	@echo "    exec \$$TESTWISH \"\$$@\""                      >>runtest
+	@echo "fi"                                                 >>runtest
+	chmod a+rx runtest
+
+#------------------------------------------------------------------------------
+# Run the UCB tests with wishx.
+
+test: all
+	echo "cd ${TK_SRC}/tests; source all; exit" | ./runtest -n tktest
+
+#------------------------------------------------------------------------------
+# Build help for Tk.  These files are normally part of the distribution and
+# not rebuilt by users.
+#
+buildtkhelp:
+	rm -rf ${HELP_DIR} help
+	mkdir ${HELP_DIR}
+	${BLDMANHELP} ${TK_SRC}/doc ${srcbasedir}/unix/tools/tkmanpages \
+	    ${HELP_DIR} Tk.brf
 
 #------------------------------------------------------------------------------
 
@@ -110,7 +229,7 @@ install-exec:
 	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
 
 install-master: install-master-exec
-	${INSTCOPY} ${TK_UCB_SRC}/generic/tk.h \
+	${INSTCOPY} ${TK_SRC}/generic/tk.h \
 	    ${INSTALL_ROOT}${INST_MASTER}/include
 	${SYMLINKEXT} ${INST_MASTER}/include/* ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 
@@ -125,7 +244,8 @@ install-master-exec:
 
 #------------------------------------------------------------------------------
 clean:
-	-rm -f made.tmp tkXAppInit.o ${OBJS} wishx libtkx.a
+	-rm -f tkXAppInit.o ${OBJS} wishx libtkx.a
+	-rm -rf tk.tlib tk.tndx tk.tcl prolog.ps tclhelp help demos
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

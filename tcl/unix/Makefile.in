@@ -1,5 +1,5 @@
 #
-# src/Makefile.in  --
+# tcl/unix/Makefile.in  --
 #
 # Makefile for Extended Tcl C sources. 
 # 
@@ -13,64 +13,39 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.2 1995/09/26 06:39:58 markd Exp $
+# $Id: Makefile.in,v 5.3 1995/09/30 19:35:55 markd Exp $
 #------------------------------------------------------------------------------
 #
-SHELL = /bin/sh
 
 #------------------------------------------------------------------------------
-# Autoconfig defines that can be overridden in Config.mk
-
-CC          = @CC@
-CFLAGS      = @CFLAGS@
-CXX         = @CXX@
-CXXFLAGS    = @CXXFLAGS@
-TCLXX       = @TCLXX@
-YACC        = @YACC@
-RANLIB      = @RANLIB@
-srcdir      = @srcdir@
-srcbasedir  = @srcbasedir@
-bldbasedir  = @bldbasedir@
-VPATH       = @srcdir@
-prefix      = @prefix@
-exec_prefix = @exec_prefix@
-ARCH        = @TCL_ARCH@
-LIBS        = @LIBS@ @MATH_LIBS@
+# Common and user-editable defines.
+#
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Common.mk@MAKEQUOTE@
+@MAKEINCLUDE@ @MAKEQUOTE@@bldbasedir@/unix/Config.mk@MAKEQUOTE@
 
 #------------------------------------------------------------------------------
-# Include user-editable defines.
-
-@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
-
-#------------------------------------------------------------------------------
-
-INST_MASTER   = ${TCL_MASTERDIR}/`../tools/tclxversion`
-INSTCOPY      = ../runtcl ../tools/instcopy
-SYMLINKEXT    = ../tools/symlinkext
-
-LDLIBS = libtclx.a ${TCL_UCB_LIB} ${LIBS} ${XLDLIBS}
+# Local macros.
+#
+LDLIBS = libtclx.a ${TCL_LIB} ${LIBS} ${XLDLIBS}
 
 SHLDLIBS = ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
+CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
+	      -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_DIR} \
+	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
 
-CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
-           -I${bldbasedir}/src -I${TCL_UCB_SRC}/generic -I${TCL_UCB_SRC}/unix
+LD_SWITCHES = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
+CXX_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CXXFLAGS} \
+	       -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_DIR} \
+	       -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
 
-LD_FLAGS = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
-
-CXX_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CXXFLAGS} -I${srcbasedir}/src \
-           -I${bldbasedir}/src -I${TCL_UCB_SRC}/generic -I${TCL_UCB_SRC}/unix
-
-
-LDXX_FLAGS = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CXXFLAGS}
-
-.c.o:
-	${CC} ${CC_FLAGS} -c $<
+LDXX_SWITCHES = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CXXFLAGS}
 
 #------------------------------------------------------------------------------
-
-OBJS= \
+# Source and target macros.
+#
+GENERIC_OBJS = \
     tclXbsearch.o    tclXchmod.o      tclXclock.o      tclXcmdInit.o \
     tclXcmdloop.o    tclXcnvclock.o   tclXdebug.o      tclXdup.o     \
     tclXfcntl.o      tclXfilecmds.o   tclXfilescan.o   tclXflock.o   \
@@ -81,46 +56,188 @@ OBJS= \
     tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
     tclXunixcmds.o   tclXutil.o
 
+COMPAT_OBJS = @LIBOBJS@
+
+OBJS= ${GENERIC_OBJS} ${COMPAT_OBJS}
+
+RUNTIME_DIR = ${srcbasedir}/tcl/runtime
+
+TLIB_SRCS = ${RUNTIME_DIR}/arrayprocs.tcl \
+	    ${RUNTIME_DIR}/compat.tcl \
+	    ${RUNTIME_DIR}/convlib.tcl \
+	    ${RUNTIME_DIR}/edprocs.tcl \
+	    ${RUNTIME_DIR}/forfile.tcl \
+	    ${RUNTIME_DIR}/globrecur.tcl \
+	    ${RUNTIME_DIR}/help.tcl \
+	    ${RUNTIME_DIR}/profrep.tcl \
+	    ${RUNTIME_DIR}/pushd.tcl \
+	    ${RUNTIME_DIR}/setfuncs.tcl \
+	    ${RUNTIME_DIR}/showproc.tcl \
+	    ${RUNTIME_DIR}/stringfile.tcl \
+	    ${RUNTIME_DIR}/tcllib.tcl \
+	    ${RUNTIME_DIR}/fmath.tcl \
+	    ${RUNTIME_DIR}/tclshell.tcl \
+	    ${RUNTIME_DIR}/buildhelp.tcl \
+	    ${RUNTIME_DIR}/parray.tcl \
+	    ${TCL_LIBRARY_DIR}/parray.tcl
+
+HELP_DIR = ${srcbasedir}/tcl/help
+
+TEST_OBJS = tclTest.o tclXtest.o
+
 #------------------------------------------------------------------------------
-# Compile the TclX library and link the shell.  If the link fails, purge
-# the executable, as some systems leave invalid executables around.
+# Dependencies for generating the libraries and linking the executable.
+# If a link fails, purge the executable, as some systems leave invalid
+# executables around.
+#
+all: libtclx.a tcl TCLXX_${TCLXX} checkup RUNTIME tclXtest runtest
 
-all: made.tmp tcl TCLXX_${TCLXX}
-
-tcl: tclXAppInit.o libtclx.a ${TCL_UCB_LIB} made.tmp 
-	${CC} ${LD_FLAGS} tclXAppInit.o ${LDLIBS} -o tcl || \
+tcl: tclXAppInit.o libtclx.a ${TCL_LIB}
+	${CC} ${LD_SWITCHES} tclXAppInit.o ${LDLIBS} -o tcl || \
 	    (rm -f tcl; exit 1)
 
-made.tmp libtclx.a: ${OBJS} TCLXX_O_${TCLXX}
+libtclx.a: ${OBJS} TCLXX_O_${TCLXX}
 	${AR} cr libtclx.a ${OBJS}
 	if [ "${TCLXX}" = "YES" ] ; then \
 	    ${AR} cr libtclx.a tcl++.o ;\
 	else exit 0 ; fi
 	${RANLIB} libtclx.a
-	touch made.tmp
 
-tclXlibInit.o: ${srcdir}/tclXlibInit.c
-	${CC} -c ${CC_FLAGS} -DTCLX_LIBRARY=\"${INST_MASTER}\" \
-	    ${srcdir}/tclXlibInit.c
+#------------------------------------------------------------------------------
+# Dependencies for generating objects.
+#
+tclXlibInit.o: ${TCLX_GENERIC_DIR}/tclXlibInit.c Makefile
+	${CC} -c ${CC_SWITCHES} -DTCLX_LIBRARY=\"${TCLX_INST_MASTER}\" \
+	    ${TCLX_GENERIC_DIR}/tclXlibInit.c
 
-tclXcmdInit.o: ${srcdir}/tclXcmdInit.c ${srcdir}/tclXpatchl.h
+tclXcmdInit.o: ${TCLX_GENERIC_DIR}/tclXcmdInit.c \
+	       ${TCLX_GENERIC_DIR}/tclXpatchl.h
+	${CC} -c ${CC_SWITCHES}  ${TCLX_GENERIC_DIR}/tclXcmdInit.c
 
-tclXgetdate.c: ${srcdir}/tclXgetdate.y
-	${YACC} $(srcdir)/tclXgetdate.y
+tclXgetdate.c: ${TCLX_GENERIC_DIR}/tclXgetdate.y
+	${YACC} $(TCLX_GENERIC_DIR)/tclXgetdate.y
 	sed 's/yy/TclXyy/g' <y.tab.c >tclXgetdate.c
 	rm y.tab.c
 
-tcl++.o: ${srcdir}/tcl++.C ${srcdir}/tcl++.h
-	${CXX} -c ${CXX_FLAGS} ${srcdir}/tcl++.C
+tclXAppInit.o: ${TCLX_GENERIC_DIR}/tclXAppInit.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXAppInit.c
+
+tclXbsearch.o: ${TCLX_GENERIC_DIR}/tclXbsearch.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXbsearch.c
+
+tclXchmod.o: ${TCLX_GENERIC_DIR}/tclXchmod.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXchmod.c
+
+tclXclock.o: ${TCLX_GENERIC_DIR}/tclXclock.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXclock.c
+
+tclXcmdloop.o: ${TCLX_GENERIC_DIR}/tclXcmdloop.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXcmdloop.c
+
+tclXcnvclock.o: ${TCLX_GENERIC_DIR}/tclXcnvclock.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXcnvclock.c
+
+tclXdebug.o: ${TCLX_GENERIC_DIR}/tclXdebug.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXdebug.c
+
+tclXdup.o: ${TCLX_GENERIC_DIR}/tclXdup.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXdup.c
+
+tclXfcntl.o: ${TCLX_GENERIC_DIR}/tclXfcntl.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXfcntl.c
+
+tclXfilecmds.o: ${TCLX_GENERIC_DIR}/tclXfilecmds.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXfilecmds.c
+
+tclXfilescan.o: ${TCLX_GENERIC_DIR}/tclXfilescan.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXfilescan.c
+
+tclXflock.o: ${TCLX_GENERIC_DIR}/tclXflock.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXflock.c
+
+tclXfstat.o: ${TCLX_GENERIC_DIR}/tclXfstat.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXfstat.c
+
+tclXgeneral.o: ${TCLX_GENERIC_DIR}/tclXgeneral.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXgeneral.c
+
+tclXgetdate.o: tclXgetdate.c
+	${CC} -c ${CC_SWITCHES} tclXgetdate.c
+
+tclXhandles.o: ${TCLX_GENERIC_DIR}/tclXhandles.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXhandles.c
+
+tclXid.o: ${TCLX_GENERIC_DIR}/tclXid.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXid.c
+
+tclXinit.o: ${TCLX_GENERIC_DIR}/tclXinit.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXinit.c
+
+tclXkeylist.o: ${TCLX_GENERIC_DIR}/tclXkeylist.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXkeylist.c
+
+tclXlib.o: ${TCLX_GENERIC_DIR}/tclXlib.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXlib.c
+
+tclXlist.o: ${TCLX_GENERIC_DIR}/tclXlist.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXlist.c
+
+tclXmath.o: ${TCLX_GENERIC_DIR}/tclXmath.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXmath.c
+
+tclXmsgcat.o: ${TCLX_GENERIC_DIR}/tclXmsgcat.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXmsgcat.c
+
+tclXprocess.o: ${TCLX_GENERIC_DIR}/tclXprocess.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXprocess.c
+
+tclXprofile.o: ${TCLX_GENERIC_DIR}/tclXprofile.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXprofile.c
+
+tclXregexp.o: ${TCLX_GENERIC_DIR}/tclXregexp.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXregexp.c
+
+tclXselect.o: ${TCLX_GENERIC_DIR}/tclXselect.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXselect.c
+
+tclXserver.o: ${TCLX_GENERIC_DIR}/tclXserver.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXserver.c
+
+tclXshell.o: ${TCLX_GENERIC_DIR}/tclXshell.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXshell.c
+
+tclXsignal.o: ${TCLX_GENERIC_DIR}/tclXsignal.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXsignal.c
+
+tclXstring.o: ${TCLX_GENERIC_DIR}/tclXstring.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXstring.c
+
+tclXunixcmds.o: ${TCLX_GENERIC_DIR}/tclXunixcmds.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXunixcmds.c
+
+tclXutil.o: ${TCLX_GENERIC_DIR}/tclXutil.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXutil.c
+
+tcl++.o: ${TCLX_GENERIC_DIR}/tcl++.C ${TCLX_GENERIC_DIR}/tcl++.h
+	${CXX} -c ${CXX_SWITCHES} ${TCLX_GENERIC_DIR}/tcl++.C
+
+random.o: ${COMPAT_DIR}/random.c
+	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/random.c
+
+rename.o: ${COMPAT_DIR}/rename.c
+	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/rename.c
+
+strftime.o: ${COMPAT_DIR}/strftime.c
+	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/strftime.c
 
 #------------------------------------------------------------------------------
 # Do some special checks to make sure TclX is built ok.
 
-checkup: made2.tmp
+checkup: checkup.done
 
-made2.tmp: tcl
-	../runtcl ${srcbasedir}/tools/checkup.tcl
-	touch made2.tmp
+checkup.done: tcl
+	./tcl -q ${srcbasedir}/unix/tools/checkup.tcl
+	touch checkup.done
 
 #------------------------------------------------------------------------------
 # Make sure we can link a C++ program (the result is not install).  Target
@@ -134,28 +251,120 @@ TCLXX_O_NO:
 TCLXX_YES:  tcl++
 TCLXX_NO:
 
-tcl++: tclXAppInit++.o tcl++.o made.tmp
-	${CXX} ${LDXX_FLAGS} tclXAppInit++.o ${LDLIBS} -o tcl++
+tcl++: tclXAppInit++.o tcl++.o libtclx.a
+	${CXX} ${LDXX_SWITCHES} tclXAppInit++.o ${LDLIBS} -o tcl++
 
-tclXAppInit++.o: ${srcdir}/tcl++.h tclXAppInit++.C
-	${CXX} -c ${CXX_FLAGS} tclXAppInit++.C
+tclXAppInit++.o: ${TCLX_GENERIC_DIR}/tcl++.h tclXAppInit++.C
+	${CXX} -c ${CXX_SWITCHES} tclXAppInit++.C
 
-tclXAppInit++.C: ${srcdir}/tclXAppInit.c
+tclXAppInit++.C: ${TCLX_GENERIC_DIR}/tclXAppInit.c
 	rm -f tclXAppInit++.C
-	cp ${srcdir}/tclXAppInit.c tclXAppInit++.C
+	cp ${TCLX_GENERIC_DIR}/tclXAppInit.c tclXAppInit++.C
+
+#------------------------------------------------------------------------------
+# Generate the runtime .tlib library in the current directory.  Copy other
+# runtime files into this directory so it can be used as a temporary runtime
+# directory before installation.  Also need a "help" directory here so that
+# the help command will work before installation.  Normally just symlink,
+# unless we don't have them.
+#
+RUNTIME: tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help
+
+tcl.tlib: ${TLIB_SRCS}
+	-rm -f tcl.tlib tcl.tndx
+	cat ${TLIB_SRCS} | grep -v '^#[^@].*' | grep -v '#$$' > $@
+
+tcl.tndx: tcl.tlib TclInit.tcl buildidx.tcl
+	${GENTNDX} tcl.tlib
+
+TclInit.tcl: ${RUNTIME_DIR}/TclInit.tcl
+	rm -f TclInit.tcl
+	cp ${RUNTIME_DIR}/TclInit.tcl TclInit.tcl
+
+buildidx.tcl: ${RUNTIME_DIR}/buildidx.tcl
+	rm -f buildidx.tcl
+	cp ${RUNTIME_DIR}/buildidx.tcl buildidx.tcl
+
+loadouster.tcl: ${RUNTIME_DIR}/loadouster.tcl
+	rm -f loadouster.tcl
+	cp ${RUNTIME_DIR}/loadouster.tcl loadouster.tcl
+
+help:
+	if [ "@HAVE_SYML@" = "YES" ]; then \
+	    rm -rf help ;\
+	    ln -s ${HELP_DIR} help ;\
+	else \
+	    rm -rf help ;\
+	    (cd ${HELP_DIR}; tar -cf - help) | tar -xf - ;\
+	fi
+
+#------------------------------------------------------------------------------
+# Generate the test program.
+#
+tclXtest: ${TEST_OBJS} libtclx.a
+	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LDLIBS} -o tclXtest || \
+	    (rm -f tclXtest; exit 1)
+
+tclXtest.o: ${TCLX_GENERIC_DIR}/tclXtest.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXtest.c
+
+tclTest.o: tclTest.c
+	${CC} -c ${CC_SWITCHES} tclTest.c
+
+tclTest.c: ${TCL_SRC}/generic/tclTest.c
+	rm -f tclTest.c	
+	echo '#include "tclXconf.h"'      >tclTest.c
+	cat ${TCL_SRC}/generic/tclTest.c >>tclTest.c
+
+runtest:
+	@echo '#!/bin/sh'                                           >runtest
+	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
+	@echo "TCL_LIBRARY=${TCL_SRC}/library"                     >>runtest
+	@echo "TCL_PROGRAM=${bldbasedir}/tcl/unix/tclXtest"        >>runtest
+	@echo "export TCLX_LIBRARY TCL_PROGRAM TCL_LIBRARY"        >>runtest
+	@echo "if [ \$$# = 0 ]"                                    >>runtest
+	@echo "then"                                               >>runtest
+	@echo "    exec \$$TCL_PROGRAM"                            >>runtest
+	@echo "else"                                               >>runtest
+	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                   >>runtest
+	@echo "fi"                                                 >>runtest
+	chmod a+rx runtest
+
+#------------------------------------------------------------------------------
+# Run the UCB and Extended Tcl tests.
+
+test: ucbtests extdtests
+
+ucbtests: all
+	./runtest -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
+
+extdtests: all
+	./runtest -c "cd ${srcbasedir}/tcl/tests; source all"
+
+#------------------------------------------------------------------------------
+# Build help for Tcl & TclX.  These files are normally part of the
+# distribution and not rebuilt by users.
+#
+buildtclhelp: tcl tcl.tndx
+	rm -rf ${HELP_DIR} help
+	mkdir ${HELP_DIR}
+	${BLDMANHELP} ${TCL_SRC}/doc ${srcbasedir}/unix/tools/tclmanpages \
+	    ${HELP_DIR} Tcl.brf
+	${RUNTCL} -c "buildhelp ${HELP_DIR} TclX.brf ${srcbasedir}/doc/TclX.n"
+
 
 #------------------------------------------------------------------------------
 # Relink using shared libraries.  The libraries must be built and installed
 # by hand.
 
 shlink:
-	${CC} ${LD_FLAGS} tclXAppInit.o ${SHLDLIBS} -o tcl || \
+	${CC} ${LD_SWITCHES} tclXAppInit.o ${SHLDLIBS} -o tcl || \
 	    (rm -f tcl; exit 1)
 
 #------------------------------------------------------------------------------
 
 install: install-exec
-	${INSTCOPY} ${srcdir}/tclExtend.h ${srcdir}/tcl++.h \
+	${INSTCOPY} ${TCLX_GENERIC_DIR}/tclExtend.h ${TCLX_GENERIC_DIR}/tcl++.h \
 	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 
 install-exec:
@@ -166,14 +375,14 @@ install-exec:
 	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
 
 install-master: install-master-exec
-	${INSTCOPY} ${TCL_UCB_SRC}/generic/tcl.h ${srcdir}/tclExtend.h \
-	    ${srcdir}/tcl++.h ${INSTALL_ROOT}${INST_MASTER}/include
+	${INSTCOPY} ${TCL_SRC}/generic/tcl.h ${TCLX_GENERIC_DIR}/tclExtend.h \
+	    ${TCLX_GENERIC_DIR}/tcl++.h ${INSTALL_ROOT}${INST_MASTER}/include
 	${SYMLINKEXT} ${INST_MASTER}/include/* ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 
 install-master-exec:
 	${INSTCOPY} tcl ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}
 	${STRIP} ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}/tcl
-	${INSTCOPY} ${TCL_UCB_LIB} libtclx.a \
+	${INSTCOPY} ${TCL_LIB} libtclx.a \
 	    ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
 	${RANLIB} ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}/*.a
 	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
@@ -183,9 +392,11 @@ install-master-exec:
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f made*.tmp tclXgetdate.c tclXAppInit.o
-	-rm -f ${OBJS} libtclx.a tcl tcl++
+	-rm -f tclXgetdate.c tclXAppInit.o
+	-rm -f ${OBJS} libtclx.a tcl tcl++ checkup.done
 	-rm -f tclXAppInit++.C TCLXX_O_YES TCLXX_O_NO tclXAppInit++.o tcl++.o
+	-rm -f tcl.tlib tcl.tndx TclInit.tcl buildidx.tcl loadouster.tcl help
+	-rm -f ${TEST_OBJS} tclXtest runtest
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
