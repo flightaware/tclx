@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.16 1993/06/05 19:26:09 markd Exp markd $
+# $Id: Config.mk,v 2.17 1993/06/21 06:15:01 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -38,22 +38,17 @@ TCL_CONFIG_FILE=scoodt2.0
 # Location of the UCB Tcl distribution relative to this directory.  TclX works
 # with Tcl 7.0
 #
-TCL_UCB_DIR=../tcl7.0
+TCL_UCB_DIR=../tcl7.0b1
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
-# that includes the TclX command set, define TCL_TK_SHELL=wishx and the
-# location of your Tk directory in TCL_TK_DIR relative to this directory. If
-# you do not want a "wishx" compiled, don't define TCL_TK_SHELL. The libraries
+# that includes the TclX command set, define TK_BUILD=WISHX and the
+# location of your Tk directory in TK_UCB_DIR relative to this directory. If
+# you do not want a "wishx" compiled, don't define TK_BUILD. The libraries
 # required to link Tk are defined in the system specific sections below.
-# If TCL_TK_SHELL is define, Tk manual pages will be installed by the install
-# script.  The Tk demo files can also optionally be installed if
-# TK_INSTALL_DEMO is set 1.  If you don't want the demo installed, set it
-# to 0.
 
-#TCL_TK_SHELL=wishx
-TCL_TK_DIR=../tk3.2
-TK_INSTALL_DEMO=1
+TK_BUILD=WISHX
+TK_UCB_DIR=../tk3.3b1
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Not that if debugging or
@@ -212,19 +207,12 @@ TK_MAN_FUNC_SECTION=TK
 #   of the cat* and man* manual directories.  This is usually empty or 
 #   a period. i.e "/usr/man/man1" or "/usr/man/man.1".
 #
-# o TCL_MAN_STYLE - The style of manual management the system has.It is
+# o TCL_MAN_STYLE - The style of manual management the system has. It is
 #   a string with one of the following values:
-#      o SHORT - Short file name installation (an index can be generated).
+#      o SHORT - Short file name installation.
 #      o LONG - Long file name installation, a link will be made for each
 #        name the manual page is to be available under.
 #   This flag is optional, if omitted LONG is assumed.
-#
-# o TCL_MAN_INDEX - If 1, then a manual page index will be build in the manual
-#   base directory named index.TCL. Not useful if TCL_MAN_STYLE is LONG. Each
-#   line in the file has the form:
-#       mansubject manfile section
-#   This flag is optional, if omitted 0 is assumed.
-#
 
 #==============================================================================
 # System specific configuration.  A system configuration file in the config
@@ -273,11 +261,6 @@ TK_MAN_FUNC_SECTION=TK
 #      o TCL_NO_FILE_LOCKING - Set if the fcntl system call does not support
 #        file locking.
 #
-#      o TCL_DUP_CLK_TCK - On some systems that have both time.h and
-#        sys/time.h, tclUnix.h defines CLK_TCK then tclExtdInt.h includes
-#        time.h and you get a redefiniton warning.  Set this flag to prevent
-#        the warning (its not safe to just unset it).
-#
 #      o TCL_NOVALUES_H - Some systems do not support the <values.h>
 #        include file.  Define this to account for this fact.
 #
@@ -286,12 +269,14 @@ TK_MAN_FUNC_SECTION=TK
 #
 #      o TCL_NO_SOCKETS - Define if sockets are not available.
 #
-#      o TCL_NO_REAL_TIMES - If the times system call does not return the
+#      o TCL_NO_REAL_TIMES - If the "times" system call does not return the
 #        elasped real time.
+#
+#      o TCL_NO_SETPGID - Define if the system does not have setpgrp.
 #
 #    o LIBS - The flags to specify when linking the tclshell.
 #
-#    o TCL_TK_LIBS - The libraries to link the TK wish program.  This should
+#    o TK_LIBS - The libraries to link the TK wish program.  This should
 #      also include libraries specified for LIBS, as both values may not be
 #      used together due to library ordering constraints.
 #
@@ -313,5 +298,6 @@ TK_MAN_FUNC_SECTION=TK
 #      do not function correctly.  The following are available:
 #         o strftime.o
 #         o system.o
+#         o random.o
 #..............................................................................
 

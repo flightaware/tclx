@@ -421,8 +421,9 @@
     generic.h macro.
 -------------------------------------------------------------------------------
 13 Feb 93:
-  o Change the cmd parameter of from const char * to char *, since Tcl_Eval
-    requires the string to be writable. (*POTENTIAL INCOMPATIBILITY*)
+  o Change the tcl++.h cmd parameter of from const char * to char *, since
+    Tcl_Eval requires the string to be writable.
+    (*POTENTIAL INCOMPATIBILITY for C++ code*)
   o Removed cmdtrace flush option, output lines are now always flushed.
    (*POTENTIAL INCOMPATIBILITY*)
 -------------------------------------------------------------------------------
@@ -443,8 +444,8 @@
     to ?xxx? for consistency with Tcl.
 -------------------------------------------------------------------------------
 10 Mar 93:
-  o Added the program and make target to optional build Tk help files from
-    the command manual pages.
+  o Added the program and make target to build Tk help files from the command
+    manual pages.
 -------------------------------------------------------------------------------
 14 Mar 93:
   o Deleted merge tree option of buildhelp.tcl.  This was for internal use and
@@ -474,7 +475,7 @@
   o Allow for backslash continuation of #@package: lines.
   o Deleted Tcl_System, per UCB wait changes.  Added osSupport/system.c for
     anyone who's "system" function uses wait (i.e. is broken).
-   (*POTENTIAL INCOMPATIBILITY*)
+   (*POTENTIAL INCOMPATIBILITY for C code.*)
   o Removed outdate execvp proc (use execl). (*POTENTIAL INCOMPATIBILITY*)
 -------------------------------------------------------------------------------
  9 May 93:
@@ -496,12 +497,6 @@
   o Call tzset on systems that use the timezone variable.
   o buildpackageindex now deletes the index if the build fails.
 -------------------------------------------------------------------------------
- 3 Jun 93:
-  o Changed startup sequence to be more generalized and allow Tk runtime to be
-    stored in a separate directory from the Tcl runtime.  This allows for
-    multiple version of Tk to be installed.  (*POTENTIAL INCOMPATIBILITY for
-    C code*)
--------------------------------------------------------------------------------
  8 Jun 93:
   o Fixed unknown trap handler so it works on systems were
     "file executable {}" returns 1.
@@ -518,4 +513,30 @@
   o Deleted the floating-point math functions that are now part of the "expr'
     command.  Supplied procs in tcl.tlib to replace the old commands.
   o Many changes for compabibility with Tcl 7.0.
+  o Changed the help facility so that multiple help directories are searched
+    to find help files.  This forms a virtual help tree root.
+-------------------------------------------------------------------------------
+27 Jun 93:
+  o Incorporated fix to the profile command that caused it to count upleveled
+    CPU time twice.  Patch supplied by Bob Mazanec <mazanec@hci.cirr.com>.
+  o Changed for_recursive_glob and recursive_glob to not follow symbolic links.
+  o Merged the "showprocs" functionallity into "showproc", they were almost the
+    same.  (*POTENTIAL INCOMPATIBILITY*)
+  o Changed shell initialization so it doesn't change the prompt hooks if they
+    have already be set during startup.
+-------------------------------------------------------------------------------
+11 Jul 93:
+  o Changed random command to use random instead or rand.  Supplied the BSD
+    random function in osSupport.
+  o Changed "programName" variable to "argv0" for compatibility with Tcl 7.0.
+    (*POTENTIAL INCOMPATIBILITY*)
+  o Simplified shell startup code, including support for separate master
+    directories for TclX and Tk.  Tcl_CommandLoop function is now internal.
+    (*POTENTIAL INCOMPATIBILITY for C code*)
+  o Changed cindex, crange and csubstr to take expressions starting with a
+    magic token "end" or "len" that will be substituted before the expression
+    is evaluated.
+  o Add kludge to get machines with only the timezone variable to handle
+    formating time as GMT correctly.
+  o Added our own version of wish main, with programmable prompts, etc.
 -------------------------------------------------------------------------------

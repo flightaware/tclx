@@ -1,5 +1,5 @@
 
-              *** README.EXTD - README file for Extended Tcl ***
+                     *** README file for Extended Tcl ***
 
 
 EXTENDED TCL
@@ -14,7 +14,7 @@ with Tcl 7.0.  You take the Extended Tcl package, add it to Tcl 7.0, and from
 that you get Extended Tcl.  (Berkeley Tcl is not included in this
 distribution, obtain it from sprite.berkeley.edu).
 
-   Support is also included for building a Tk 3.2 wish shell (wishx) with the
+   Support is also included for building a Tk 3.3 wish shell (wishx) with the
 Extended Tcl command set.
 
     Extended Tcl was designed and implemented by Karl Lehenbauer
@@ -24,7 +24,8 @@ early stages from Peter da Silva (peter@NeoSoft.com).
    As with Berkeley Tcl, all of Extended Tcl is freely redistributable,
 including for commercial use and resale.
 
-   Please read this file carefully before building and installing Extended Tcl.
+   Please read the file INSTALL carefully before building and installing
+Extended Tcl.
 
 
 FEATURES ADDED BY EXTENDED TCL
@@ -59,15 +60,19 @@ page man/TclX.man.
 
     o Time and date manipulation and conversion commands.
 
+    o A simple command for accessing TCP/IP based servers.
+
 ON-LINE HELP
 ============
 
     There is a help system included with Extended Tcl.  It contains some
-documentation on every command in Berkeley Tcl, and Extended Tcl.  You can
+documentation on every command in Berkeley Tcl, Extended Tcl and Tk.  You can
 invoke it interactively from within Extended Tcl by typing "help".
 
     Once you bring Tcl up and have gotten it to pass all the tests, try typing
 "help help" to learn how to use help.
+
+    There is also a Tk based help program "tclhelp".
 
 MANUAL PAGES
 ============
@@ -90,149 +95,6 @@ C++ programmers can include the file "tcl++.h" to define C++ classes
 that can be used to access a Tcl interpreter.  This is based on Tcl
 C++ classes originally developed by Parag Patel.
 
-EXTENDED TCL SRC DIRECTORY HIERARCHY
-====================================
-
-Building the Extended Tcl requires access to built Tcl and Tk source
-directories.  Their location relative to the tclX7.0a must be configured
-by editing tclX7.0a/Config.mk.
-
-The following directories are included under the tclX7.0a directory:
-
-    o config - Configuration files for various Unix versions.
-
-    o man - Unformated manual pages for TclX.
-
-    o src - The main source for TclX.
-
-    o osSupport - Library routines required by TclX that may not be available
-      on all Unix versions. 
-
-    o ucbsrc - A makefile and sed scripts used to modify source files that
-      are supplied with UCB Tcl.  The files are modified with sed so you don't
-      have to have patch to build Tcl, however context diffs are provided if
-      problems occur porting to a new version of Tcl.
-
-    o tclsrc - Tcl source that is built into the Tcl package library.
-
-    o tcllib - Tcl source and runtime environment that is required to run TclX.
-
-    o tcllib/help - Help files for Tcl and TclX.
-
-    o tests - Tests for TclX.
-
-    o tkucbsrc - A makefile and sed scripts used to modify source files that
-      are supplied with Tk to add in TclX functionality.  Context diffs are
-      also provided.
-
-    o tksrc - A makefile that builds a version of the Tk wish shell containing
-      Extended Tcl.
-
-    o experimental - An directory of expermintal and contributed Tcl source.
-      The code is not normally built as part of TclX.
-
-HOW TO BUILD EXTENDED TCL
-=========================
-
-   o Configure and compile Tcl 7.0 following the instructions the comes with
-     Tcl.  You do not need to install it.
-
-   o If you are going to be using Tk and want to build an Extended Tcl wish
-     shell (wishx), configure and compile Tk 3.2.  You do not need to install
-     it.
-
-   o Edit Config.mk following the instructions in that file.  At a minimum you
-     must set TCL_CONFIG_FILE and TCL_UCB_DIR.  If you are building wishx,
-     you must also set TCL_TK_DIR and remove the `#' from the line defining
-     TCL_TK_SHELL.  
-
-   o TCL_CONFIG_FILE contains the name of a file in the config directory that
-     defines your machine-specific configuration.  If there is not one there
-     for you system you will have to construct on.  Use a similar system as a
-     template and read Config.mk for a description of the attributes and
-     flags that can be defined.  If you create a new configuration file,
-     send it to us.
-
-    o Note that the site specific installation options should be set in
-      Config.mk before compiling.  It is especially important to set the value
-      for TCL_MASTERDIR & TK_MASTERDIR in Config.mk before compiling TclX.
-      See the section on installing Extended Tcl for more details.
-
-    o Now do a "make".  If all goes well, this will build an extended
-      "libtcl.a" and the "tcl" executable in the tclX7.0a directory.  If Tk
-      is requested, an extended "libtk.a" and "wishx" executable will also be
-      built.
-
-    o Until the Extended Tcl runtime files are installed, "tcl" and "wishx"
-      can't be run directly.  To run them before installation, use "runtcl" or
-      "runwishx".
-
-    o If you are using Tk and desired to have the information from the Tk
-      command manual pages available in the Tcl help system, build them with
-      the command:  make buildtkhelp
-
-   We have a limited number of systems available to test Extended Tcl on,
-we need your help in supporting TclX on a wide range of platforms.  The nature
-of the functionality TclX supports mean a great deal of system dependent code.
-Thanks to all of those who have submitted configuration files and changes to
-TclX.
-
-RUN TESTS TO INSURE THAT TCL IS WORKING PROPERLY
-================================================
-
-    Tcl and TclX come with over 1400 tests that you can run to insure that it
-is working properly.  These tests have greatly helped us while working on Tcl
-by detecting bugs that get introduced accidentally as side-effects of changes.
-Consequently, we have found Tcl to be very reliable, and have had very few
-cases where a new release has regressed by introducing new bugs in old
-functions, or reintroducing old bugs in old functions.
-
-   There are two sets of tests: the tests from Berkeley Tcl, and tests for
-Extended Tcl, which test both the new commands added by Extended Tcl and the
-procedures defined in the Extended Tcl procedure library.
-
-    o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.0a directory.
-
-    o The Extended Tcl tests may be run by themselves with "make extdtests".
-
-    o If a test fails, please dig into the test and the C source for the
-      function being tested, fix the bug and mail us the change.  If you're
-      not inclined to do this, please report the problem, including the output
-      of the test, to tcl-project@neosoft.com.  Sometimes tests fail due to
-      problems in the system environment or bugs in that test rather than
-      problems with TclX.  Even if a few of the tests fail, you probably still
-      have a working TclX.
-
-    o If you're having trouble with the Berkeley tests, and you suspect that
-      the extensions might be involved, you can build a special minimal
-      version of Berkeley Tcl by cd'ing to the tcl7.0 directory and doing
-      a "make test".
-
-    o If your run the Tk tests with wishx, your will get failures from the
-      option tests, since they expect a program named "wish", not "wishx".
-      All other tests should work in the same manner as with standard wish.
-      Run wishx with the argument "-name wish" to get these tests to work.
-
-INSTALLING EXTENDED TCL
-=======================
-???  The Extended Tcl install script
-     install the Tcl manual pages and a super-set libtcl.a.  The standard
-     Tcl library procs will be added to a TclX .tlib library instead of being
-     installed as separate files.
-
-    To install Extended Tcl, edit the tclX7.0a/Config.mk installation
-configuration section to match your preferences. Read the information in 
-Config.mk carefully before configuring it.  TCL_MASTERDIR must have been
-set before compiling TclX.
-
-    The master directory name will have the Tcl version number appended to
-it, which allows multiple versions of Tcl to be installed.???
-
-    Cd to the tclX7.0a directory and do a "make install" (normally as root).
-This will install include files and manual pages for Berkeley Tcl and TclX, as
-well as the TclX binary and library.
-
 PACKAGE LIBRARIES
 =================
 
@@ -243,23 +105,16 @@ packages.  The package code provides a low-overhead means of automatically
 demand-loading a package on the first attempt to execute one of the procedures
 defined within it.  As such, package libraries provide a mechanism to
 accommodate the creation of Tcl applications and libraries of a substantial
-size.
-
-   Note that the package library mechanism takes the place of the "tclIndex"
-mechanism that comes with UCB Tcl.  These type of libraries can be loaded by
-Extended Tcl, but the commands and variables described in the Tcl manual are
-not available.
+size.  The TclX library mechanism is a super-set of the mechanism provided
+with standard Tcl.
 
 LINKING TCL APPLICATIONS
 ========================
 
-   The libraries (libtcl.a, libtk.a) built by Extended Tcl are super sets
-of the libraries produced by standard Tcl and Tk.  If you call the 
-Tcl_CreateInterp routine, you get the standard Tcl command set, if you
-call Tcl_CreatedExtendedInterp, you get the extended command set.  Calling
-Tcl_Startup or Tcl_ShellEnvInit, you get the Extended Tcl startup mechanism
-and package libraries, otherwise you get the standard Tcl libraries.
-
+   To build a TclX based application containing C code, start with either
+src/main.c (for just Tcl) or tksrc/tkMain.c (for Tk) and add your apllication
+initialization.  There are comments in the code to guide you.  These need
+to be linked with libtcl.a, libtclx.a, libtk.a and libtkx.a
 
 SUPPORT FOR EXTENDED TCL
 ========================
@@ -271,25 +126,32 @@ send questions, bug reports, and bug fixes to:
 
 COMPATIBILITY WITH TclX 6.5c
 ============================
-????
+
    We have attempted to main backwards-compatibility with older versions
 of TclX.  A few changes were made to enhance usability or fix problems that
 have introduced a few incompatibilities, these are listed below.  Remember
 that multiple versions of Tcl may be installed on a system using the Tcl
-default file, so you don't have to convert everything at once.
+default file, so you don't have to convert everything at once.  See the
+CHANGES file for full details.  These are the major incompatible changes:
 
-  o Only set SIGINT to cause an error if the Tcl shell or wish is reading
-    commands from stdin.
+   o TclX auto loading has been made compatible with standard Tcl.  The
+     path is now found in the "auto_path" variable instead of "TCLPATH".
+     The "demand_load" function has been renamed "auto_load" and "load" has
+     been renamed "auto_load_file".  The "autoload" procedure no longer exists.
+   o The variable programName was changed to argv0 for compatibility with
+     Tcl.
+   o Removed oytdated execvp proc, use execl directly.
+   o Removed "flush" option on "cmdtrace".  Output lines are now flushed after
+     each command is traced.
 
-  o Renamed the Extended Tcl wish shell to "wishx", so both extended and
-    standard versions can be installed on the system.
+
 
 CAVEATS
 =======
 
     Do not create any set-user-id versions of Tcl yet.  There are holes in
-the startup sequence involving shell variables and default files that need
-to be plugged first.
+the startup sequence that need to be plugged first and guidelines need to
+be developed.
 
 TCL USENET NEWSGROUP
 ====================
@@ -314,7 +176,8 @@ or
 or
    ftp.uu.net:languages/tcl/tclX7.0a.tar.Z
 
-A contributed sources archive resides on barkley.berkeley.edu.
+A contributed sources archive resides on harbor.ecn.purdue.edu and is mirrored
+on ftp.ibp.fr for our friends in Europe.
 
 Remember to mail Extended Tcl problems and questions to tcl-project@NeoSoft.com
 not Dr. John Ousterhout.
