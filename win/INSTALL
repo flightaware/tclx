@@ -1,6 +1,6 @@
                         Building TclX on Windows 95/NT
 
-Welcome to the alpha 1 release of TclX 7.5.3
+Welcome to the alpha 1 release of TclX 7.6.0
 
   This is an early alpha release, the code is nor production quality.  A
 lot of work is left to do.  It is being made available for those who
@@ -16,27 +16,17 @@ message to majordomo@grizzly.com with the body of the message containing:
 To send mail to the list, user tclx-win@grizzly.com.
 
 The alpha release is available in:
-        ftp://ftp.neosoft.com/pub/tcl/tclx-distrib/tclX7.5.3-a1.tar.gz
+        ftp://ftp.neosoft.com/pub/tcl/tclx-distrib/tclX7.6.0-a1.tar.gz
 
 To build the release:
    o You need Visual C++ 4.0 (per standard Tcl instructions).  Contributions
      of a Borland C++ makefile would be welcome (and a donation of a licensed
      copy of the current Borland C++ even more welcome).
      
-   o The patch win/tclWinSock.c.diff must be applied to the Tcl 7.5
-     distribution and Tcl 7.5 recompiled and the DLL reinstalled.
-    
-   o Tcl 7.5 should be in a directory adjacent to the tclX7.5.3a1 directory
+   o Tcl 7.6 should be in a directory adjacent to the tclX7.6.0a1 directory
      or the paths in makefile.vc need to be changed.
 
-   o Edit win/tclXwinPort.h to set TCLX_LIBRARY to full path to
-     tclX7.5.3a1/tcl/win.  If anyone can tell me how to pass a string
-     #define on the command line using nmake, this can be moved to
-     makefile.vc.  This is a short term hack. The runtime environment
-     is generate in this directory and should remain here for all
-     testing.
-        
-   o To compile, cd to tclX7.5.3a1/tcl/win and enter the command:
+   o To compile, cd to tclX7.6.0a1/tcl/win and enter the command:
 
         nmake -f makefile.vc
 
@@ -51,7 +41,7 @@ To build the release:
         o In the Open dialog:
             o Set the "Files of Type" field to be "All Files (*.*)"
             o Set the "Open As" field to be "Makefile"
-            o Now select "tclX7.5.3a1/tcl/win/makefile.vc" using the
+            o Now select "tclX7.6.0a1/tcl/win/makefile.vc" using the
               standard open dialog.
         o A warning dialog will come up asking if you want to wrap a
           workspace around the makefile.  Answer "Yes'.
