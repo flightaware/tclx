@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.9 1994/05/28 03:38:22 markd Exp markd $
+.\" $Id: TclX.n,v 3.10 1994/06/28 07:06:25 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1582,6 +1582,7 @@ If the \fBofficial_name\fR option is specified, the official name for
 .sp
 If the \fBaliases\fR option is specified, a list of aliases for \fIhostname\fR
 is returned.
+'\"@endhelp
 '
 .SH "FILE SCANNING COMMANDS"
 .PP
