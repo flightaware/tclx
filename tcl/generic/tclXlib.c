@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 3.4 1994/05/16 05:13:02 markd Exp markd $
+ * $Id: tclXlib.c,v 3.5 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -43,6 +43,14 @@ static char *AUTO_INDEX     = "auto_index";
 static char *AUTO_PATH      = "auto_path";
 static char *AUTO_OLDPATH   = "auto_oldpath";
 static char *AUTO_PKG_INDEX = "auto_pkg_index";
+
+/*
+ * Command to pass to Tcl_GlobalEval to load the file loadouster.tcl.
+ * This is a global rather than a local so it will work with K&R compilers.
+ * Its writable so it works with gcc.
+ */
+static char loadOusterCmd [] = "source [info library]/loadouster.tcl";
+
 
 /*
  * Per-interpreter structure used for managing the library.
@@ -759,9 +767,7 @@ LoadOusterIndex (interp, indexFilePath)
     if (!Tcl_GetCommandInfo (interp,
                              "auto_load_ouster_index",
                              &loadCmdInfo)) {
-        char cmd [] = "source [info library]/loadouster.tcl";
-
-        if (Tcl_GlobalEval (interp, cmd) == TCL_ERROR)
+        if (Tcl_GlobalEval (interp, loadOusterCmd) == TCL_ERROR)
             goto errorExit;
     }
 
