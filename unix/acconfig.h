@@ -175,3 +175,8 @@
 /* Define if we must use our own version of random */
 #undef NO_RANDOM
 
+/* Define if we have catgets and friends */
+#undef HAVE_CATGETS
+
+/* Define if catclose is type void instead of int */
+#undef BAD_CATCLOSE

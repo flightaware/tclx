@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 4.1 1995/01/01 19:25:18 markd Exp markd $
+ * $Id: tclXmsgcat.c,v 4.2 1995/01/01 19:49:31 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -268,9 +268,15 @@ Tcl_CatcloseCmd (clientData, interp, argc, argv)
     if (catDescPtr == NULL)
         return TCL_ERROR;
 
+    /*
+     * NetBSD has catclose of return type void, which is non-standard.
+     */
+#ifdef BAD_CATCLOSE
+    catclose (*catDescPtr);
+#else
     if ((catclose (*catDescPtr) < 0) && fail)
         return CatOpFailed (interp, "close of message catalog failed");
-
+#endif
     Tcl_HandleFree (msgCatTblPtr, catDescPtr);
     return TCL_OK;
 }

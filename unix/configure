@@ -401,7 +401,7 @@ else
 fi
 
 
-# From configure.in Revision: 4.4 dnl
+# From configure.in Revision: 4.5 dnl
 
 
 
@@ -3040,6 +3040,83 @@ done
 
 
 #------------------------------------------------------------------------------
+# Check for catgets.  Not the some systems (NetBSD 1.0) have catclose declared
+# as type void rather than type int.
+#------------------------------------------------------------------------------
+
+echo $ac_n "checking for catgets""... $ac_c" 1>&4
+if eval "test \"`echo '${'ac_cv_func_catgets'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&4
+else
+  cat > conftest.$ac_ext <<EOF
+#line 3053 "configure"
+#include "confdefs.h"
+#include <ctype.h> /* Arbitrary system header to define __stub macros. */
+/* Override any gcc2 internal prototype to avoid an error.  */
+char catgets(); 
+
+int main() { return 0; }
+int t() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_catgets) || defined (__stub___catgets)
+choke me
+#else
+catgets();
+#endif
+
+; return 0; }
+EOF
+if eval $ac_link; then
+  rm -rf conftest*
+  eval "ac_cv_func_catgets=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_func_catgets=no"
+fi
+rm -f conftest*
+
+fi
+if eval "test \"`echo '$ac_cv_func_'catgets`\" = yes"; then
+  echo "$ac_t""yes" 1>&4
+  cat >> confdefs.h <<\EOF
+#define HAVE_CATGETS 1
+EOF
+
+         echo "$ac_t""yes" 1>&4
+         cat > conftest.$ac_ext <<EOF
+#line 3091 "configure"
+#include "confdefs.h"
+#include <nl_types.h>
+int main() { return 0; }
+int t() {
+
+                if (catclose ((nl_catd) 0) == 0) exit 0;
+; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  echo "$ac_t""`catclose ok'" 1>&4
+else
+  rm -rf conftest*
+  
+                echo "$ac_t""`bad catclose return type'" 1>&4
+                cat >> confdefs.h <<\EOF
+#define BAD_CATCLOSE 1
+EOF
+
+fi
+rm -f conftest*
+
+else
+  echo "$ac_t""no" 1>&4
+fi
+
+
+
+#------------------------------------------------------------------------------
 #       Check for missing functions that we need.  They will be
 #       compiled in the osSupport directory. Must check for SCO
 #       -lintl, which is were strftime is hidden.  Also done after library
@@ -3054,7 +3131,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="$LIBS -lintl "
 cat > conftest.$ac_ext <<EOF
-#line 3058 "configure"
+#line 3135 "configure"
 #include "confdefs.h"
 
 int main() { return 0; }
@@ -3085,7 +3162,7 @@ if eval "test \"`echo '${'ac_cv_func_strftime'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 3089 "configure"
+#line 3166 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 /* Override any gcc2 internal prototype to avoid an error.  */
@@ -3130,7 +3207,7 @@ if eval "test \"`echo '${'ac_cv_func_strftime'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 3134 "configure"
+#line 3211 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 /* Override any gcc2 internal prototype to avoid an error.  */
@@ -3173,7 +3250,7 @@ if eval "test \"`echo '${'ac_cv_func_random'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 3177 "configure"
+#line 3254 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 /* Override any gcc2 internal prototype to avoid an error.  */
@@ -3220,7 +3297,7 @@ if eval "test \"`echo '${'ac_cv_func_rename'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&4
 else
   cat > conftest.$ac_ext <<EOF
-#line 3224 "configure"
+#line 3301 "configure"
 #include "confdefs.h"
 #include <ctype.h> /* Arbitrary system header to define __stub macros. */
 /* Override any gcc2 internal prototype to avoid an error.  */
@@ -3273,7 +3350,7 @@ esac
 #------------------------------------------------------------------------------
 
 cat > conftest.$ac_ext <<EOF
-#line 3277 "configure"
+#line 3354 "configure"
 #include "confdefs.h"
 #include <stdlib.h>
 EOF

@@ -477,9 +477,9 @@ BSDI:
      passing a empty string as an argument to a program (it deletes the
      string).  Try GNU make.
    o Also seee the 386BSD/BSDI section below.
-   o NetBSD 1.0 declares catclose as returning void rather than int. The
-     file src/tclXmsgcat.c must be edited to not check the status from 
-     catclose.
+   o NetBSD 1.0 declares catclose as returning void rather than int. This is
+     checked for in configure but still causes the message-cat-2.4 test
+     to fail.
 
 386BSD/BSDI
    o There is some problem in the configure parsing of the --with-arch option.
