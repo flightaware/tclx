@@ -507,11 +507,8 @@ CONVEX:
      the error "Errno is zero".
 
 LINUX:
-   o Some versions Linux are shipped with a catclose declaration
-     in /usr/include/nl_types.h that returns type void rather than int.
-     This does not follow the XPG/3 standard.  You must edit src/tclXmsgcat.c
-     to ignore the return of catclose.  Also, please send mail to the Linux
-     maintainers to get them to fix this.
+   o Linux 1.1.59 has a bad strftime function, which causes clock tests to
+     fail.
 
 CRAY:
    o catgets does not return the default string, causing failure of 
