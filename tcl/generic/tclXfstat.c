@@ -12,10 +12,33 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 7.2 1996/07/22 17:10:02 markd Exp $
+ * $Id: tclXfstat.c,v 7.3 1996/08/02 10:59:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
+
+#ifndef S_IFMT
+#   define S_IFMT  0170000
+#endif
+
+/*
+ * Table to convert file mode to symbolic file type.  Note, the S_ macros
+ * are not used because the BSD macros don't distinguish between a fifo and
+ * a socket.
+ */
+static struct {
+    int intType;
+    char *strType;
+} modeToSymTable [] = {
+    {S_IFIFO,  "fifo"},
+    {S_IFCHR,  "characterSpecial"},
+    {S_IFDIR,  "directory"},
+    {S_IFBLK,  "blockSpecial"},
+    {S_IFREG,  "file"},
+    {S_IFLNK,  "link"},
+    {S_IFSOCK, "socket"},
+    {0,        NULL}
+};
 
 /*
  * Prototypes of internal functions.
@@ -58,30 +81,13 @@ static char *
 StrFileType (statBufPtr)
     struct stat  *statBufPtr;
 {
-    char *typeStr;
+    int idx;
 
-    /*
-     * Get a string representing the type of the file.
-     */
-    if (S_ISREG (statBufPtr->st_mode)) {
-        typeStr = "file";
-    } else if (S_ISDIR (statBufPtr->st_mode)) {
-        typeStr = "directory";
-    } else if (S_ISCHR (statBufPtr->st_mode)) {
-        typeStr = "characterSpecial";
-    } else if (S_ISBLK (statBufPtr->st_mode)) {
-        typeStr = "blockSpecial";
-    } else if (S_ISFIFO (statBufPtr->st_mode)) {
-        typeStr = "fifo";
-    } else if (S_ISLNK (statBufPtr->st_mode)) {
-        typeStr = "link";
-    } else if (S_ISSOCK (statBufPtr->st_mode)) {
-        typeStr = "socket";
-    } else {
-        typeStr = "unknown";
+    for (idx = 0; modeToSymTable [idx].strType != NULL; idx++) {
+        if ((statBufPtr->st_mode & S_IFMT) == modeToSymTable [idx].intType)
+            return modeToSymTable [idx].strType;
     }
-
-    return typeStr;
+    return "unknown";
 }
 
 /*-----------------------------------------------------------------------------
