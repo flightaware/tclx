@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 5.1 1996/03/15 07:35:55 markd Exp $
+ * $Id: tclXoscmds.c,v 5.2 1996/03/19 07:52:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -271,7 +271,8 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
            goto errorExit;
 
         /*
-         * Make leading directories, if requested.
+         * If -path is specified, make; directories that don't exist.  Also,
+         * its not an error it the target directory exists.
          */
         if (argc == 3) {
             scanPtr = dirName;
@@ -288,13 +289,12 @@ Tcl_MkdirCmd (clientData, interp, argc, argv)
                 if (result != TCL_OK)
                    goto errorExit;
             }
+            if (stat (dirName, &statBuf) < 0)
+                result = TclX_OSmkdir (interp, dirName);
+        } else {
+            if (TclX_OSmkdir (interp, dirName) != TCL_OK)
+                goto errorExit;
         }
-        /*
-         * Make final directory in the path.
-         */
-        if (TclX_OSmkdir (interp, dirName) != TCL_OK)
-           goto errorExit;
-
         Tcl_DStringFree (&pathBuf);
     }
 

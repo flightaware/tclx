@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 5.2 1996/02/16 08:09:58 markd Exp $
+# $Id: unixcmds.test,v 5.3 1996/03/15 07:36:03 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -190,6 +190,15 @@ Test unixcmds-7.1 {mkdir and rmdir tests} {
 
 Test unixcmds-7.2 {mkdir and rmdir tests} {
     catch {rmdir {MKDIR1.TMP/a/b/c MKDIR1.TMP/a/b MKDIR1.TMP/a MKDIR1.TMP}}
+    mkdir -path MKDIR1.TMP/a/b/c
+    set result [file isdirectory MKDIR1.TMP/a/b/c] 
+    catch {rmdir {MKDIR1.TMP/a/b/c MKDIR1.TMP/a/b MKDIR1.TMP/a MKDIR1.TMP}}
+    set result
+} 0 1
+
+Test unixcmds-7.2.1 {mkdir and rmdir tests} {
+    catch {rmdir {MKDIR1.TMP/a/b/c MKDIR1.TMP/a/b MKDIR1.TMP/a MKDIR1.TMP}}
+    mkdir -path MKDIR1.TMP/a/b/c
     mkdir -path MKDIR1.TMP/a/b/c
     set result [file isdirectory MKDIR1.TMP/a/b/c] 
     catch {rmdir {MKDIR1.TMP/a/b/c MKDIR1.TMP/a/b MKDIR1.TMP/a MKDIR1.TMP}}
