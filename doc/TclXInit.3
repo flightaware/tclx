@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Startup.man,v 2.2 1992/11/17 06:09:31 markd Exp markd $
+.\" $Id: Startup.man,v 2.3 1993/03/15 06:39:07 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Tcl_Startup" TCL "" "Tcl"
@@ -50,7 +50,6 @@ void
 Tcl_CommandLoop (Tcl_Interp *interp,
                  FILE       *inFile,
                  FILE       *outFile,
-                 int         (*evalProc) (),
                  unsigned    options);
 
 void
@@ -181,9 +180,6 @@ Parameters:
 \fBo \fIinFile\fR - The file to read commands from.
 .br
 \fBo \fIoutFile\fR - The file to write the prompts to. 
-.br
-\fBo \fIevalProc\fR - The function to call to evaluate a command.
-Should be either Tcl_Eval or Tcl_RecordAndEval if history is desired.
 .br
 \fBo \fIoptions\fR - Currently unused.
 .RE

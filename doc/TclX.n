@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.13 1993/06/06 15:05:35 markd Exp markd $
+.\" $Id: TclX.man,v 2.14 1993/06/08 05:00:43 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -635,7 +635,7 @@ signal.
 \fBerror\fR - Generate a catchable Tcl error.  It will be as if the command
 that was running returned an error.  The error code will be in the form:
 .br
-    \fBUNIX SIG\fR \fIsigname\fR
+    \fBPOSIX SIG\fR \fIsigname\fR
 .br
 For the death of child signal, \fIsigname\fR will always be SIGCHLD, rather
 than SIGCLD, to allow writing portable code.
@@ -798,17 +798,17 @@ position.
 '@help: tcl/files/dup
 '@brief: Duplicate an open file
 .TP
-.B dup \fIfileId\fR ?\fIstdfileId\fR?
+.B dup \fIfileId\fR ?\fItargetFileId\fR?
 .br
-Duplicate an open file.  A file handle is created that addresses the
+Duplicate an open file.  A new file id is opened that addresses the
 same file as \fIfileId\fR.
 .sp
-A special case is allowed for duping files to stdin, stdout or stderr.
-If \fIstdfileId\fR is specified, then it must contain either
-\fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.  In this form, the
-file corresponding to \fIstdfileId\fR is
-closed, and the dup is performed from \fIfileId\fR with the
-result going to \fIstdfileId\fR.
+If \fItargetFileId\fR is specified, the the file is dup to this specified file
+id.  Normally this is \fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.
+The dup command will handle flushing output and closing this file.  It is
+recommended that the file not be closed in advanced if it is one of
+\fBstdin\fR, \fBstdout\fR, or \fBstderr\fR.  Otherwise internal C code that
+uses one of these files via direct access to stdio FILE struct may fail.
 .sp
 The procedure shown below will create a child process and
 set its standard input and output files to a pair
@@ -821,11 +821,8 @@ our pair of pipes.
 .ft CW
     proc ChildProcess {cmd inPipe outPipe} {
         if {[set childPid [fork]] == 0} {
-            close stdin
             dup $inPipe stdin
             close $inPipe
-
-            close stdout
             dup $outPipe stdout
             close $outPipe
 

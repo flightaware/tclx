@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Handles.man,v 1.1 1992/09/20 23:05:02 markd Exp markd $
+.\" $Id: Handles.man,v 2.0 1992/10/16 04:49:04 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH Handles TCL "" "Tcl"
@@ -121,8 +121,7 @@ The resulting use count.
 .SS Tcl_HandleTblRelease
 .PP
 Decrement the use count on a Tcl dynamic handle table.  If the count
-goes to zero or negative, then release the table.  It is designed to be 
-called when a command is released.
+goes to zero or negative, then release the table.
 .PP
 Parameters:
 .RS 2
