@@ -504,6 +504,21 @@ Test 9.3 {filescan tests} {
     scancontext delete $ch
 } 0 {}
 
+Test 9.1 {filescan tests} {
+    set testFH [open TEST.TMP w]
+    puts $testFH "foo\nbar"
+    close $testFH
+
+    set linesMatched {}
+    set testCH [scancontext create]
+    scanmatch $testCH {foo|bar} {
+        lappend linesMatched $matchInfo(line)
+    }
+    set testFH [open TEST.TMP]
+    scanfile $testCH $testFH
+    close $testFH
+    set linesMatched
+} 0 {foo bar}
 
 TestRemove TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP
 

@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.9 1997/09/18 15:57:29 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -333,6 +333,7 @@ PreParseRegExp (expression, infoPtr)
           case '?':
           case '+':
           case '*':
+          case '|':
             gotMeta = TRUE;
             break;
           case '[':
@@ -484,6 +485,18 @@ TclX_RegExpCompileObj (interp, regExpPtr, expressionObj, flags)
         preParseInfo.meta = TRUE;
         preParseInfo.largestNonMetaLen = -1;
     }
+
+#if 1
+    /* FIXME: there are still some problems with the pre-parser and
+     * finding the largest non-meta expression.  The only real way to
+     * to this is look at the compiled expression.  For now, if there are
+     * meta, just disable the boyer-moore is there is any meta.
+     */
+    if (preParseInfo.meta) {
+        preParseInfo.largestNonMeta = NULL;
+        preParseInfo.largestNonMetaLen = -1;
+    }
+#endif
     regExpPtr->numSubExprs = preParseInfo.numSubExprs;
 
     /*
