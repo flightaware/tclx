@@ -22,6 +22,11 @@
 #   o sourceDir - directory containing manual pages to install.
 #   o targetDir - manual directory to install pages in.  This is the directory
 #     containing the section directories, e.g. /usr/local/man.
+#
+# If any of these strings are quoted with "@" (e.g. @.@), then the two "@"
+# are removed.  This is to work around problems with systems were quoted empty
+# strings don't make it past make and shell expansion, resulting in a missing
+# argument.
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -32,9 +37,20 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 1.8 1993/10/23 23:33:18 markd Exp markd $
+# $Id: cpmanpages.tcl,v 3.0 1993/11/19 07:00:10 markd Rel markd $
 #------------------------------------------------------------------------------
 #
+
+#------------------------------------------------------------------------------
+# Unquote -- 
+#
+# Remove "@" if they quote a string.
+#------------------------------------------------------------------------------
+
+proc Unquote str {
+    regsub -- {^@(.*)@$} $str {\1} str
+    return $str
+}
 
 #------------------------------------------------------------------------------
 # CopyManFile -- 
@@ -251,12 +267,12 @@ if {[lindex $argv 0] == "-rmcat"} {
     lvarpop argv
 }
 
-set manSeparator    [lindex $argv 0]
-set sectionXRef(.n) [lindex $argv 1]
-set sectionXRef(.3) [lindex $argv 2]
-set sectionXRef(.1) [lindex $argv 3]
-set sourceDir       [lindex $argv 4]
-set targetDir       [lindex $argv 5]
+set manSeparator    [Unquote [lindex $argv 0]]
+set sectionXRef(.n) [Unquote [lindex $argv 1]]
+set sectionXRef(.3) [Unquote [lindex $argv 2]]
+set sectionXRef(.1) [Unquote [lindex $argv 3]]
+set sourceDir       [Unquote [lindex $argv 4]]
+set targetDir       [Unquote [lindex $argv 5]]
 
 # Remove undefined sections from the array.
 

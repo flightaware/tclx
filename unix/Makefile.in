@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.0 1993/11/19 07:01:44 markd Rel markd $
+# $Id: Makefile.in,v 3.1 1993/11/25 03:21:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -231,8 +231,8 @@ TCLXINSTALL:
 	   tclmaster/help tclmaster/src ${TCL_INST_MASTER}
 	${INSTCOPY} tclmaster/include/tclExtend.h tclmaster/include/tcl++.h \
 	   ${TCL_INCLUDEDIR}
-	${CPMANPAGES} -rmcat '${MAN_DIR_SEPARATOR}' \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} '' \
+	${CPMANPAGES} -rmcat @${MAN_DIR_SEPARATOR}@ \
+	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
 	    ${srcbasedir}/man ${TCL_MAN_BASEDIR}
 
 TCLXINSTALL-EXEC:
@@ -283,11 +283,11 @@ TCLXMINSTALL:
 	rm -rf ${TCL_INST_MASTER}
 	${INSTCOPY} -dirname tclmaster ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
-	${CPMANPAGES} '${MAN_DIR_SEPARATOR}' \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} '' \
+	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
+	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
 	    ${TCL_UCB_SRC}/doc ${TCL_INST_MASTER}/man
-	${CPMANPAGES} '${MAN_DIR_SEPARATOR}' \
-	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} '' \
+	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
+	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
 	    ${srcbasedir}/man ${TCL_INST_MASTER}/man
 	if test ! -d ${TCL_BINDIR} ; then mkdir ${TCL_BINDIR}; fi
 	rm -f ${TCL_BINDIR}/tcl
@@ -312,7 +312,7 @@ TKXMINSTALL:
 	rm -rf ${TK_INST_MASTER}
 	${INSTCOPY} -dirname tkmaster ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
-	${CPMANPAGES} '${MAN_DIR_SEPARATOR}' \
+	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
 	    ${TK_MAN_UNIXCMD_SECTION} \
 	    ${TK_UCB_SRC}/doc ${TK_INST_MASTER}/man
