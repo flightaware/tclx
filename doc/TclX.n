@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.11 1993/05/09 16:18:08 markd Exp markd $
+.\" $Id: TclX.man,v 2.12 1993/06/01 05:52:14 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1868,10 +1868,12 @@ line parser:
 .TP
 .B \-q
 Quick initialization flag.  If this flag is set the only initialization step
-performed is to locate the Tcl initialization file and save its path in the Tcl
-variable TCLINIT.  The file is not evaluated.
+performed is to locate the initialization files and save their paths in
+the Tcl variable TCLINITS.  TCLPATH is also set to be the directories
+containing the initialization files.
+The files are not evaluated.
 This provides for a fast startup, but does not make any of the Extended
-Tcl procedures and facilities available.
+Tcl library procedures available.
 .TP
 .B \-n
 No procedure call stack dump.  The procedure call stack will not be displayed
@@ -1986,12 +1988,12 @@ initialization file, normally \fBTclInit.tcl\fR.  If an environment variable
 If the \fBTCLINIT\fR environment variable is not set, the file
 \fBTclInit.tcl\fR is used from the default Tcl master directory.
 .PP
-\fBTcl\fR then executes the Tcl initialization file.  This file sets
-The \fBTCLPATH\fR variable, which contains a list of directories that contain
-Other site-specific variables may also be set in this file.  The \fBTCLPATH\fR
-maybe overridden with an environment variable \fBTCLPATH\fR containing a
-space-separated directory list.  Other procedures and variables used by
-the Extended Tcl shell are also set by this file.
+\fBTcl\fR then evaulates the Tcl initialization file.  The \fBTCLPATH\fR
+variable is initialized to the Tcl master directory and may be augmented by
+the intialization file.
+The \fBTCLPATH\fR maybe overridden with an environment variable \fBTCLPATH\fR
+containing a space-separated directory list.  Other procedures and variables
+used by the Extended Tcl shell are also set by this file.
 .PP
 If the Tcl is invoked interactively, it will source a file
 named \fI.tclrc\fR in the
@@ -2001,6 +2003,13 @@ loading development utilities, not to support applications,
 which should not have
 to rely
 on the user's environment in such a manner.
+.PP
+Some applications, such as \fBwishx\fR, have additional initialization files.
+They may have environment variables that override the default location
+of thise initialization files.
+The Tcl global variable \fBTCLINITS\fR will be set to contain the
+list of intialization files and the Tcl global variable \fBTCLPATH\fR
+will contain the directories contain those initialization files.
 '@endhelp
 '
 .SH "TCL SHELL VARIABLES"
@@ -2029,9 +2038,8 @@ attempt to exec an non-existent command as a shell command.
 The name that the Tcl shell is executing as.  All directory
 components are removed from the program name.
 .TP
-.B TCLINIT
-The path to the file that initializes, and does startup processing of,
-Tcl.  This can be overridden by an environmental variable \fBTCLINIT\fR.
+.B TCLINITS
+A list of the initialization files used to startup Tcl.
 .TP
 .B TCLPATH
 Path to search to locate Tcl scripts.  Used by the \fBload\fR and 

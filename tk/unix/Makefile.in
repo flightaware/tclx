@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.1 1992/12/19 05:36:07 markd Exp markd $
+# $Id: Makefile,v 2.2 1992/12/19 08:03:35 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -23,21 +23,30 @@ SHELL=/bin/sh
 
 #------------------------------------------------------------------------------
 
-CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS)
+CFLAGS= $(OPTIMIZE_FLAG) $(XCFLAGS) -I../src -I../$(TCL_TK_DIR) \
+        -I../$(TCL_UCB_DIR) $(MEM_DEBUG_FLAGS) $(SYS_DEP_FLAGS)
+
+#------------------------------------------------------------------------------
+
+OBJS= main.o
 
 #------------------------------------------------------------------------------
 
 all: ../wishx
 
-../wishx: ../libtk.a ../libtcl.a
+../wishx: main.o ../libtk.a ../libtcl.a
 	$(RANLIB_CMD) ../libtk.a
-	$(CC) $(CFLAGS) ../tkucbsrc/main.o ../libtk.a ../libtcl.a \
+	$(CC) $(CFLAGS) main.o ../libtk.a ../libtcl.a \
             $(XLDFLAGS) $(TCL_TK_LIBS) -o ../wishx
 	if $(DO_STRIPPING) ; then \
 	    strip ../wishx; \
 	    $(MCS_CMD) ../wishx; fi
 
+main.o: main.c
+	$(CC) -c $(CFLAGS) -DTCL_MASTERDIR=\"$(TCL_MASTERDIR)\" \
+        -DTK_MASTERDIR=\"$(TK_MASTERDIR)\" main.c
+
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f ../wishx
+	-rm -f ../wishx $(OBJS)

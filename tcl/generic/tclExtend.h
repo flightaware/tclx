@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.3 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclExtend.h,v 2.4 1993/05/04 06:29:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,6 +37,7 @@ typedef void *void_pt;
 #define TCLSH_QUICK_STARTUP       1   /* Don't process Tcl init file.        */
 #define TCLSH_ABORT_STARTUP_ERR   2   /* Abort on an error.                  */
 #define TCLSH_NO_STACK_DUMP       8   /* Don't dump the proc stack on error. */
+#define TCLSH_INTERACTIVE        16   /* Set interactiveSession to 1.        */
 
 /*
  * These globals are used by the infox command.  Should be set by main.
@@ -62,6 +63,24 @@ extern int (*tclShellCmdEvalProc) ();
  * this is set.
  */
 extern int tclReceivedSignal;
+
+/*
+ * Structure used to pass initialization file information to Tcl_Startup
+ * or Tcl_ShellEnvInit.  Any of these items maybe NULL to have them ignored.
+ * A NULL initFile name just sets the path.
+ */
+typedef struct tclInitFile_t {
+    CONST char *envVar;    /* Environment variable used to find file.   */
+    CONST char *dir1;      /* 3 part directory name to concat.  Usually */
+    CONST char *dir2;      /* contains version numbers.                 */
+    CONST char *dir3;
+    CONST char *initFile;  /* Actual initialization file in dir.        */
+} tclInitFile_t;
+
+/*
+ * Pointer to the standard init file entry for TclX.
+ */
+extern tclInitFile_t tclDefaultInitFile;
 
 /*
  * Exported Extended Tcl functions.
@@ -184,18 +203,17 @@ Tcl_MathError _ANSI_ARGS_((char *functionName,
                            int   errorType));
 
 EXTERN void 
-Tcl_Startup _ANSI_ARGS_((Tcl_Interp   *interp,
-                         int           argc,
-                         CONST char  **argv,
-                         CONST char   *initFile,
-                         unsigned      options));
+Tcl_Startup _ANSI_ARGS_((Tcl_Interp     *interp,
+                         unsigned        options,
+                         int             argc,
+                         CONST char    **argv,
+                         tclInitFile_t **initFiles));
 
 EXTERN int
-Tcl_ShellEnvInit _ANSI_ARGS_((Tcl_Interp  *interp,
-                              unsigned     options,
-                              CONST char  *programName,
-                              int          argc,
-                              CONST char **argv,
-                              int          interactive,
-                              CONST char  *initFile));
+Tcl_ShellEnvInit _ANSI_ARGS_((Tcl_Interp     *interp,
+                              unsigned        options,
+                              CONST char     *programName,
+                              int             argc,
+                              CONST char    **argv,
+                              tclInitFile_t **initFiles));
 #endif
