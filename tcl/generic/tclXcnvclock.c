@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcnvclock.c,v 4.3 1995/04/03 20:19:39 markd Exp markd $
+ * $Id: tclXcnvclock.c,v 4.4 1995/07/01 19:03:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -104,8 +104,7 @@ Tcl_GetTimeZone (currentTime)
 
 #ifndef TCL_GOT_TIMEZONE
    /*
-    * Cause compile error.  The defines are done in tclExtdInt.h based on
-    * what autoconf found.
+    * Cause compile error, we don't know how to get timezone.
     */
   error: autoconf did not figure out how to determine the timezone. 
 #endif
