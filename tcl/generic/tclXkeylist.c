@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.1 1997/04/17 04:58:42 markd Exp $
+ * $Id: tclXkeylist.c,v 8.2 1997/06/12 21:08:21 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -70,7 +70,7 @@ typedef struct {
     }
 
 /*
- * Macros to validate an keyed list object or internale representation
+ * Macros to validate an keyed list object or internal representation
  */
 #ifdef TCLX_DEBUG
 #   define KEYL_OBJ_ASSERT(keylAPtr) {\
@@ -89,6 +89,12 @@ typedef struct {
  */
 static void
 ValidateKeyedList _ANSI_ARGS_((keylIntObj_t *keylIntPtr));
+
+static int
+ValidateKey _ANSI_ARGS_((Tcl_Interp *interp,
+                         char *key,
+                         int keyLen,
+                         int isPath));
 
 static keylIntObj_t *
 AllocKeyedListIntRep _ANSI_ARGS_((void));
@@ -197,6 +203,60 @@ ValidateKeyedList (keylIntPtr)
     }
 }
 #endif
+
+/*-----------------------------------------------------------------------------
+ * ValidateKey --
+ *   Check that a key or keypath string is a valid value.
+ *
+ * Parameters:
+ *   o interp - Used to return error messages.
+ *   o key - Key string to check.
+ *   o keyLen - Length of the string, used to check for binary data.
+ *   o isPath - TRUE if this is a key path, FALSE if its a simple key and
+ *     thus "." is illegal.
+ * Returns:
+ *    TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+ValidateKey (interp, key, keyLen, isPath)
+    Tcl_Interp *interp;
+    char *key;
+    int keyLen;
+    int isPath;
+{
+    char *keyp;
+
+    if (strlen (key) != keyLen) {
+        Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
+                                "keyed list key may not be a ",
+                                "binary string", (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (key [0] == '\0') {
+        Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
+                                "keyed list key may not be an ",
+                                "empty string", (char *) NULL);
+        return TCL_ERROR;
+    }
+    for (keyp = key; *keyp != '\0'; keyp++) {
+        if ((!isPath) && (*keyp == '.')) {
+            Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
+                                    "keyed list key may not contain a \".\"; ",
+                                    "it is used as a separator in key paths",
+                                    (char *) NULL);
+            return TCL_ERROR;
+        }
+        if (isspace (*keyp)) {
+            Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
+                                    "keyed list key may not contain ",
+                                    "white-space characters", (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+    return TCL_OK;
+}
+
 
 /*-----------------------------------------------------------------------------
  * AllocKeyedListIntRep --
@@ -383,6 +443,7 @@ ObjToKeyedListEntry (interp, objPtr, entryPtr)
     int objc;
     Tcl_Obj **objv;
     char *key;
+    int keyLen;
 
     if (Tcl_ListObjGetElements (interp, objPtr, &objc, &objv) != TCL_OK) {
         Tcl_ResetResult (interp);
@@ -403,11 +464,8 @@ ObjToKeyedListEntry (interp, objPtr, entryPtr)
         return TCL_ERROR;
     }
 
-    key = Tcl_GetStringFromObj (objv [0], NULL);
-    if (key [0] == '\0') {
-        Tcl_AppendStringsToObj (Tcl_GetObjResult (interp),
-                                "keyed list key may not be an ",
-                                "empty string", (char *) NULL);
+    key = Tcl_GetStringFromObj (objv [0], &keyLen);
+    if (ValidateKey (interp, key, keyLen, FALSE) == TCL_ERROR) {
         return TCL_ERROR;
     }
 
@@ -535,35 +593,43 @@ UpdateStringOfKeyedList (keylPtr)
 {
 #define UPDATE_STATIC_SIZE 32
     int idx, strLen;
-    char **listArgv, *entryArgv [2];
-    char *staticListArgv [UPDATE_STATIC_SIZE];
+    Tcl_Obj **listObjv, *entryObjv [2], *tmpListObj;
+    Tcl_Obj *staticListObjv [UPDATE_STATIC_SIZE];
+    char *listStr;
     keylIntObj_t *keylIntPtr =
         (keylIntObj_t *) keylPtr->internalRep.otherValuePtr;
 
+    /*
+     * Conversion to strings is done via list objects to support binary data.
+     */
     if (keylIntPtr->numEntries > UPDATE_STATIC_SIZE) {
-        listArgv =
-            (char **) ckalloc (keylIntPtr->numEntries * sizeof (char *));
+        listObjv =
+            (Tcl_Obj **) ckalloc (keylIntPtr->numEntries * sizeof (Tcl_Obj *));
     } else {
-        listArgv = staticListArgv;
+        listObjv = staticListObjv;
     }
 
+    /*
+     * Convert each keyed list entry to a two element list object.  No
+     * need to incr/decr ref counts, the list objects will take care of that.
+     * FIX: Keeping key as string object will speed this up.
+     */
     for (idx = 0; idx < keylIntPtr->numEntries; idx++) {
-        entryArgv [0] = keylIntPtr->entries [idx].key;
-        entryArgv [1] =
-            Tcl_GetStringFromObj (keylIntPtr->entries [idx].valuePtr,
-                                  &strLen);
-        listArgv [idx] = Tcl_Merge (2, entryArgv);
+        entryObjv [0] = 
+            Tcl_NewStringObj (keylIntPtr->entries [idx].key,
+                              strlen (keylIntPtr->entries [idx].key));
+        entryObjv [1] = keylIntPtr->entries [idx].valuePtr;
+        listObjv [idx] = Tcl_NewListObj (2, entryObjv);
     }
 
-    keylPtr->bytes = Tcl_Merge (keylIntPtr->numEntries, listArgv);
-    keylPtr->length = strlen (keylPtr->bytes);
+    tmpListObj = Tcl_NewListObj (keylIntPtr->numEntries, listObjv);
+    listStr = Tcl_GetStringFromObj (tmpListObj, &strLen);
+    keylPtr->bytes = ckbinstrdup (listStr, strLen);
+    keylPtr->length = strLen;
 
-
-    for (idx = 0; idx < keylIntPtr->numEntries; idx++) {
-        ckfree (listArgv [idx]);
-    }
-    if (listArgv != staticListArgv)
-        ckfree ((VOID*) listArgv);
+    Tcl_DecrRefCount (tmpListObj);
+    if (listObjv != staticListObjv)
+        ckfree ((VOID*) listObjv);
 }
 
 /*-----------------------------------------------------------------------------
@@ -612,11 +678,6 @@ TclX_KeyedListGet (interp, keylPtr, key, valuePtrPtr)
     keylIntObj_t *keylIntPtr;
     char *nextSubKey;
     int findIdx;
-
-    if (key [0] == '\0') {
-        TclX_StringAppendObjResult (interp, "empty key", (char *) NULL);
-        return TCL_ERROR;
-    }
 
     if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
         return TCL_ERROR;
@@ -673,11 +734,6 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
     char *nextSubKey;
     int findIdx, keyLen, status;
     Tcl_Obj *newKeylPtr;
-
-    if (key [0] == '\0') {
-        TclX_StringAppendObjResult (interp, "empty key", (char *) NULL);
-        return TCL_ERROR;
-    }
 
     if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
         return TCL_ERROR;
@@ -775,11 +831,6 @@ TclX_KeyedListDelete (interp, keylPtr, key)
     keylIntObj_t *keylIntPtr, *subKeylIntPtr;
     char *nextSubKey;
     int findIdx, status;
-
-    if (key [0] == '\0') {
-        TclX_StringAppendObjResult (interp, "empty key", (char *) NULL);
-        return TCL_ERROR;
-    }
 
     if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
         return TCL_ERROR;
@@ -911,7 +962,8 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
     Tcl_Obj     *CONST objv[];
 {
     Tcl_Obj *keylPtr, *valuePtr;
-    int strLen, status;
+    char *key;
+    int keyLen, strLen, status;
 
     if ((objc < 2) || (objc > 4)) {
         return TclX_WrongArgs (interp, objv [0],
@@ -933,9 +985,12 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
     /*
      * Handle retrieving a value for a specified key.
      */
-    status = TclX_KeyedListGet (interp, keylPtr,
-                                Tcl_GetStringFromObj (objv [2], &strLen),
-                                &valuePtr);
+    key = Tcl_GetStringFromObj (objv [2], &keyLen);
+    if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
+        return TCL_ERROR;
+    }
+
+    status = TclX_KeyedListGet (interp, keylPtr, key, &valuePtr);
     if (status == TCL_ERROR)
         return TCL_ERROR;
 
@@ -944,9 +999,7 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
      */
     if (status == TCL_BREAK) {
         if (objc == 3) {
-            TclX_StringAppendObjResult (interp, "key \"", 
-                                        Tcl_GetStringFromObj (objv [2],
-                                                              &strLen),
+            TclX_StringAppendObjResult (interp, "key \"",  key,
                                         "\" not found in keyed list",
                                         (char *) NULL);
             return TCL_ERROR;
@@ -991,7 +1044,8 @@ TclX_KeylsetObjCmd (clientData, interp, objc, objv)
     Tcl_Obj     *CONST objv[];
 {
     Tcl_Obj *keylVarPtr, *keylPtr;
-    int idx, strLen;
+    char *key;
+    int idx, keyLen;
 
     if ((objc < 4) || ((objc % 2) != 0)) {
         return TclX_WrongArgs (interp, objv [0],
@@ -1022,9 +1076,12 @@ TclX_KeylsetObjCmd (clientData, interp, objc, objv)
     keylPtr = keylVarPtr;
 
     for (idx = 2; idx < objc; idx += 2) {
-        if (TclX_KeyedListSet (interp, keylPtr,
-                               Tcl_GetStringFromObj (objv [idx], &strLen),
-                               objv [idx+1]) != TCL_OK)
+        key = Tcl_GetStringFromObj (objv [idx], &keyLen);
+        if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
+            return TCL_ERROR;
+        }
+
+        if (TclX_KeyedListSet (interp, keylPtr, key, objv [idx+1]) != TCL_OK)
             return TCL_ERROR;
     }
 
@@ -1046,7 +1103,7 @@ TclX_KeyldelObjCmd (clientData, interp, objc, objv)
 {
     Tcl_Obj *keylVarPtr, *keylPtr;
     char *key;
-    int idx, strLen, status;
+    int idx, keyLen, status;
 
     if (objc < 3) {
         return TclX_WrongArgs (interp, objv [0], "listvar key ?key ...?");
@@ -1075,7 +1132,10 @@ TclX_KeyldelObjCmd (clientData, interp, objc, objv)
     keylPtr = keylVarPtr;
 
     for (idx = 2; idx < objc; idx++) {
-        key = Tcl_GetStringFromObj (objv [idx], &strLen);
+        key = Tcl_GetStringFromObj (objv [idx], &keyLen);
+        if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
+            return TCL_ERROR;
+        }
 
         status = TclX_KeyedListDelete (interp, keylPtr, key);
         switch (status) {
@@ -1106,7 +1166,7 @@ TclX_KeylkeysObjCmd (clientData, interp, objc, objv)
 {
     Tcl_Obj *keylPtr, *listObjPtr;
     char *key;
-    int strLen, status;
+    int keyLen, status;
 
     if ((objc < 2) || (objc > 3)) {
         return TclX_WrongArgs (interp, objv [0], "listvar ?key?");
@@ -1124,7 +1184,10 @@ TclX_KeylkeysObjCmd (clientData, interp, objc, objv)
     if (objc < 3) {
         key = NULL;
     } else {
-        key = Tcl_GetStringFromObj (objv [2], &strLen);
+        key = Tcl_GetStringFromObj (objv [2], &keyLen);
+        if (ValidateKey (interp, key, keyLen, TRUE) == TCL_ERROR) {
+            return TCL_ERROR;
+        }
     }
 
     status = TclX_KeyedListGetKeys (interp, keylPtr, key, &listObjPtr);

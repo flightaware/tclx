@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.1 1997/04/17 04:58:55 markd Exp $
+ * $Id: tclXutil.c,v 8.2 1997/06/12 21:08:34 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -566,7 +566,6 @@ TclX_GetOffset(interp, string, offsetPtr)
  *   o exprResultPtr (O) - The result of the expression is returned here.
  * Returns:
  *   TCL_OK or TCL_ERROR.
- * FIX: Arguments should not be a `long', as the max length of a string is int.
  *-----------------------------------------------------------------------------
  */
 int

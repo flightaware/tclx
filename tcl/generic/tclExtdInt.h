@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.1 1997/04/17 04:58:31 markd Exp $
+ * $Id: tclExtdInt.h,v 8.2 1997/06/12 21:08:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -194,10 +194,14 @@ extern Tcl_Obj *tclXWrongArgsObj;
 #define ISLOWER(c) (islower ((unsigned char) c))
 
 /*
- * Macro that behaves like strdup, only uses ckalloc.
+ * Macro that behaves like strdup, only uses ckalloc.  Also macro that does the
+ * same with a string that might contain zero bytes,
  */
 #define ckstrdup(sourceStr) \
   (strcpy (ckalloc (strlen (sourceStr) + 1), sourceStr))
+
+#define ckbinstrdup(sourceStr, length) \
+  ((char *) memcpy (ckalloc (length + 1), sourceStr, length + 1))
 
 /*
  * Callback type for walking directories.

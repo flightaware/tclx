@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 8.0.4.1 1997/04/14 02:02:26 markd Exp $
+# $Id: keylist.test,v 8.1 1997/04/17 04:59:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,6 +27,8 @@ set list2 {{keyA valueA} {keyB {{keyB1 valueB1} {keyB2 valueB2}}}
            {keyD valueD}}
 set list3 {{C {{CC {{CCC ccc}}}}} {A {{AA aa} {AB ab}}}
            {B {{BA ba} {BB bb} {BC {{BBB bbb}}}}}}
+set list4 [list [list keyA "value\0A"] [list keyB value\0\1\0B] \
+        [list keyD \0value\0D]]
 
 Test keylist-1.1 {keylget tests} {
     keylget list1 keyA
@@ -120,15 +122,48 @@ Test keylist-1.21 {keylget tests} {
     keylget keyedlist keyB
 } 1 {keyed list key may not be an empty string}
 
+Test keylist-1.21 {keylget tests} {
+    set keyedlist {{{} valueA} {keyB valueB} {keyD valueD}}
+    keylget keyedlist keyB
+} 1 {keyed list key may not be an empty string}
+
 Test keylist-1.22 {keylget tests} {
+    set keyedlist {{{keyA } valueA} {keyB valueB} {keyD valueD}}
+    keylget keyedlist keyB
+} 1 {keyed list key may not contain white-space characters}
+
+Test keylist-1.23 {keylget tests} {
+    set keyedlist [list [list "Key\0A" valueA] {keyB valueB} {keyD valueD}]
+    keylget keyedlist keyB
+} 1 {keyed list key may not be a binary string}
+
+Test keylist-1.24 {keylget tests} {
+    set keyedlist {{{key.A} valueA} {keyB valueB} {keyD valueD}}
+    keylget keyedlist keyB
+} 1 {keyed list key may not contain a "."; it is used as a separator in key paths}
+
+Test keylist-1.25 {keylget tests} {
     keylget
 } 1 {wrong # args: keylget listvar ?key? ?retvar | {}?}
 
-Test keylist-1.23 {keylget tests} {
+Test keylist-1.26 {keylget tests} {
     unset keyedlist
     keylset keyedlist keyA aaa"bbb
     keylget keyedlist keyA
 } 0 {aaa"bbb}
+
+Test keylist-1.27 {keylget tests} {
+    keylget list4 keyA
+} 0 "value\0A"
+
+Test keylist-1.28 {keylget tests} {
+    keylget list4 keyB
+} 0 "value\0\1\0B"
+
+Test keylist-1.29 {keylget tests} {
+    keylget list4 keyD
+} 0 "\0value\0D"
+
 
 
 Test keylist-2.1 {keylkeys tests} {
@@ -167,6 +202,14 @@ Test keylist-2.8 {keylkeys tests} {
     keylkeys
 } 1 {wrong # args: keylkeys listvar ?key?}
 
+Test keylist-2.9 {keylkeys tests} {
+    keylkeys list4
+} 0 {keyA keyB keyD}
+
+Test keylist-2.10 {keylkeys tests} {
+    keylget list4 key\0B
+} 1 {keyed list key may not be a binary string}
+
 
 Test keylist-3.1 {keylset tests} {
     catch {unset keyedlist}
@@ -187,6 +230,13 @@ Test keylist-3.3 {keylset tests} {
     keylset keyedlist keyB valueB keyB valueB2
     set keyedlist
 } 0 {{keyA valueA} {keyB valueB2}}
+
+Test keylist-3.3.1 {keylset tests} {
+    catch {unset keyedlist}
+    keylset keyedlist keyA value\0A
+    keylset keyedlist keyB \0valueB keyB \0value\0\1\0B2
+    set keyedlist
+} 0 [list [list keyA value\0A] [list keyB \0value\0\1\0B2]]
 
 Test keylist-3.4 {keylset tests} {
     catch {unset keyedlist}
@@ -218,6 +268,21 @@ Test keylist-3.8 {keylset tests} {
     keylset keyedlist keyA valueA
 } 1 {keyed list entry must be a two element list, found "keyA valueA valueBad"}
 
+Test keylist-3.8.1 {keylset tests} {
+    catch {unset keyedlist}
+    keylset keyedlist {} valueA
+} 1 {keyed list key may not be an empty string}
+
+Test keylist-3.8.2 {keylset tests} {
+    catch {unset keyedlist}
+    keylset keyedlist "Key A" valueA
+} 1 {keyed list key may not contain white-space characters}
+
+Test keylist-3.8.3 {keylset tests} {
+    catch {unset keyedlist}
+    keylset keyedlist "key\0A" valueA
+} 1 {keyed list key may not be a binary string}
+
 Test keylist-3.9 {keylset tests} {
     set keyedlist {}    
     keylset keyedlist C.CC.CCC ccc
@@ -248,7 +313,6 @@ Test keylist-3.14 {keylset tests} {
     keylset keyedlist B.BC.BBB bbb
     set keyedlist
 } 0 {{C {{CC {{CCC ccc}}}}} {A {{AA aa} {AB ab}}} {B {{BA ba} {BB bb} {BC {{BBB bbb}}}}}}
-
 
 Test keylist-4.1 {keyldel tests} {
     set keyedlist {{keyA valueA} {keyB valueB} {keyD valueD}}
@@ -333,6 +397,9 @@ Test keylist-4.15 {keyldel tests} {
     set keyedlist
 } 0 {{C {{CC {{CCC ccc}}}}}}
 
+Test keylist-4.16 {keyldel tests} {
+    keyldel list4 key\0B
+} 1 {keyed list key may not be a binary string}
 
 # Handling of empty lists.
 
