@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: clock.test,v 2.0 1992/10/16 04:49:30 markd Rel markd $
+# $Id: clock.test,v 2.1 1992/11/07 20:36:55 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -67,3 +67,15 @@ test clock-3.7 {convertclock tests} {
     fmtclock $clock {%b %d,%Y %H.%M GMT} GMT
 } {Oct 23,1992 15.00 GMT}
 
+
+test clock-3.7 {convertclock tests} {
+    # Test if local timezone works when not explicitly specified.
+
+    set clock [getclock]
+    set ourzone [fmtclock $clock %Z]
+    set intime [fmtclock $clock {%a %h %d %T %Y}]
+
+    set cnv1 [convertclock $intime]
+    set cnv2 [convertclock "$intime $ourzone"]
+    expr {$cnv1 == $cnv2}
+} 1
