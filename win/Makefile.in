@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.5 1999/07/09 23:13:14 redman Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.6 1999/08/20 17:59:38 stanton Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -177,6 +177,7 @@ LDFLAGS_CONSOLE	= @LDFLAGS_CONSOLE@
 LDFLAGS_WINDOW	= @LDFLAGS_WINDOW@
 EXEEXT		= @EXEEXT@
 OBJEXT		= @OBJEXT@
+STLIB_LD	= @STLIB_LD@
 SHLIB_LD	= @SHLIB_LD@
 SHLIB_LD_LIBS	= @SHLIB_LD_LIBS@ $(TCL_STUB_LIB_FILE) Wsock32.lib
 SHLIB_CFLAGS	= @SHLIB_CFLAGS@
@@ -372,19 +373,19 @@ $(CATTCL).${OBJEXT}: cattcl.c
 
 ${TCLX_DLL_FILE}: ${TCLX_OBJS} tcl.res
 	@$(RM) ${TCLX_DLL_FILE}
-	@MAKE_DLL@ ${TCLX_OBJS} tcl.res
+	@MAKE_SHARED_LIB@ ${TCLX_OBJS} tcl.res
 
 ${TCLX_LIB_FILE}: ${TCLX_OBJS}
 	@$(RM) ${TCLX_LIB_FILE}
-	@MAKE_LIB@ ${TCLX_OBJS}
+	@MAKE_STATIC_LIB@ ${TCLX_OBJS}
 
 ${TKX_DLL_FILE}: ${TKX_OBJS} tkx.res
 	@$(RM) ${TKX_DLL_FILE}
-	@MAKE_DLL@ ${TKX_OBJS} ${TCLX_LIB_FILE} ${TK_STUB_LIB_FILE} tkx.res 
+	@MAKE_SHARED_LIB@ ${TKX_OBJS} ${TCLX_LIB_FILE} ${TK_STUB_LIB_FILE} tkx.res 
 
 ${TKX_LIB_FILE}: ${TKX_OBJS}
 	@$(RM) ${TKX_LIB_FILE}
-	@MAKE_LIB@ ${TKX_OBJS} 
+	@MAKE_STATIC_LIB@ ${TKX_OBJS} 
 
 # Special case object targets
 

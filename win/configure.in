@@ -2,7 +2,7 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.5 1999/07/09 22:50:00 hershey Exp $
+# RCS: @(#) $Id: configure.in,v 1.6 1999/07/09 23:13:14 redman Exp $
 
 AC_INIT(../tcl/generic/tclExtend.h)
 
@@ -82,6 +82,20 @@ SC_LOAD_TCLCONFIG
 
 SC_PATH_TKCONFIG($TCLX_PATCH_LEVEL)
 SC_LOAD_TKCONFIG
+
+#--------------------------------------------------------------------
+# Generate command for making .dll and .lib files.
+#--------------------------------------------------------------------
+
+SC_MAKE_LIB
+
+SHLIB_LD=${TCL_SHLIB_LD}
+STLIB_LD=${TCL_STLIB_LD}
+SHLIB_CFLAGS=${TCL_SHLIB_CFLAGS}
+
+AC_SUBST(TCL_SHLIB_LD)
+AC_SUBST(TCL_STLIB_LD)
+AC_SUBST(TCL_SHLIB_CFLAGS)
 
 #--------------------------------------------------------------------
 # Perform final evaluations of variables with possible substitutions.

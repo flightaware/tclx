@@ -645,8 +645,8 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    LD_SEARCH_FLAGS=""
 	    ;;
 	*win32*|*WIN32*|CYGWIN_NT*|cygwin_nt*)
-	    CFLAGS_DEBUG="-nologo -Z7 -Od -WX ${runtime}d"
-	    CFLAGS_OPTIMIZE="-nologo -Oti -Gs -GD ${runtime}"
+	    CFLAGS_DEBUG="-nologo -Z7 -Od -WX"
+	    CFLAGS_OPTIMIZE="-nologo -Oti -Gs -GD"
 	    LDFLAGS_CONSOLE="-subsystem:console"
 	    LDFLAGS_WINDOW="-subsystem:windows"
 	    LDFLAGS_DEBUG="-debug:full -debugtype:cv"
@@ -657,6 +657,25 @@ AC_DEFUN(SC_CONFIG_CFLAGS, [
 	    SHLIB_LD="link -dll -nologo"
 	    SHLIB_LD_LIBS="user32.lib advapi32.lib"
 	    RC="rc"
+	    if test "${SHARED_BUILD}" = "0" ; then
+		# static
+		AC_MSG_RESULT([using static flags])
+		runtime=-MT
+		MAKE_DLL="echo "
+		LIBSUFFIX="s\${DBGX}.lib"
+		LIBRARIES="\${STATIC_LIBRARIES}"
+		EXESUFFIX="s\${DBGX}.exe"
+		DLLSUFFIX=""
+	    else
+		# dynamic
+		AC_MSG_RESULT([using shared flags])
+		runtime=-MD
+		MAKE_DLL="\${SHLIB_LD} \${SHLIB_LD_LIBS} \$(LDFLAGS) -out:\[$]@"
+		LIBSUFFIX="\${DBGX}.lib"
+		DLLSUFFIX="\${DBGX}.dll"
+		EXESUFFIX="\${DBGX}.exe"
+		LIBRARIES="\${SHARED_LIBRARIES}"
+	    fi
 	    ;;
 	dgux*)
 	    SHLIB_CFLAGS="-K PIC"
