@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # symlinkext.sh --
 #
@@ -16,7 +17,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: symlinkext.sh,v 4.0 1994/07/16 05:29:23 markd Rel markd $
+# $Id: symlinkext.sh,v 4.1 1995/01/01 19:49:50 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
