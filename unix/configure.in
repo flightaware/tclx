@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.30 2000/04/04 00:41:53 wart Exp $
+dnl $Id: configure.in,v 8.31 2000/07/13 01:26:54 welch Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.30 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.31 $),)dnl
 
 #------------------------------------------------------------------------------
 # Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
@@ -744,6 +744,7 @@ fi
 
 #------------------------------------------------------------------------------
 # Determine if we have enough tools to generate the help files.
+# Allow --with-helpdir to specify help file outputs
 #------------------------------------------------------------------------------
 
 AC_PATH_PROGS(NROFF, nroff, :, ${PATH})
@@ -755,6 +756,14 @@ else
     BUILDHELP=buildhelp
 fi
 AC_SUBST(BUILDHELP)
+
+AC_ARG_WITH(help, [  --with-help              directory containing generated help files], with_help=${withval})
+if test x"${with_help}" != x ; then
+    HELP_DIR=${with_help}
+else
+    HELP_DIR=${srcdir}/tcl/help
+fi
+AC_SUBST(HELP_DIR)
 
 #------------------------------------------------------------------------------
 # Generate the make files.
