@@ -3,7 +3,10 @@
 	* unix/tclXunixOS.c: Converted both implementations of TclXOSsleep
 	* win/tclXwinOS.c:   from direct access to native time functions
 	                     to the use of Tcl's more abstract interface
-	                     (Tcl_Sleep).
+	                     (Tcl_Sleep). For the reason behind _this_
+	                     change see TIP #233. Our change here now
+	                     causes TclX to be automatically in sync
+	                     with any virtualization set up in the core.
 
 2005-01-18  Jeff Hobbs  <jeffh@ActiveState.com>
 
