@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 7.0 1996/06/16 05:30:12 markd Exp $
+ * $Id: tclXdup.c,v 7.1 1996/07/22 17:10:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -283,6 +283,7 @@ DupFileHandle (interp, srcFileId, targetFileId)
  *   o fileNumStr (I) - The string number of the open file.
  * Returns:
  *   TCL_OK or TCL_ERROR.
+ * FIX: This maybe completely non-portable, move to UnixOS.
  *-----------------------------------------------------------------------------
  */
 static int
@@ -306,8 +307,8 @@ BindOpenFile (interp, fileNumStr)
     /*
      * Make sure file is open and determine the access mode and file type.
      */
-    if (TclXOSGetOpenFileMode (fileNum, &mode, &nonBlocking) != TCL_OK)
-        goto unixError;
+    if (TclXOSGetOpenFileMode (interp, fileNum, &mode, &nonBlocking) != TCL_OK)
+        return TCL_ERROR; 
 
     if (fstat (fileNum, &fileStat) < 0)
         goto unixError;

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 7.1 1996/07/25 04:42:08 markd Exp $
+ * $Id: tclXwinCmds.c,v 7.2 1996/07/26 05:56:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,11 +31,10 @@
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_ChrootCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+Tcl_ChrootCmd (ClientData  clientData,
+               Tcl_Interp *interp,
+               int         argc,
+               char      **argv)
 {
     return TclXNotAvailableError (interp, argv [0]);
 }
@@ -51,66 +50,12 @@ Tcl_ChrootCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_TimesCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+Tcl_TimesCmd (ClientData  clientData,
+              Tcl_Interp *interp,
+              int         argc,
+              char      **argv)
 {
     return TclXNotAvailableError (interp, argv [0]);
-}
-
-/*-----------------------------------------------------------------------------
- * Temp stub procedures.
- * FIX: Some of the functionality here needs to be ported
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_ChmodCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
-{
-    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
-                      "ported to Windows 95/NT", (char *) NULL);
-    return TCL_ERROR;
-}
-
-int
-Tcl_ChownCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
-{
-    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
-                      "ported to Windows 95/NT", (char *) NULL);
-    return TCL_ERROR;
-}
-
-int
-Tcl_ChgrpCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
-{
-    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
-                      "ported to Windows 95/NT", (char *) NULL);
-    return TCL_ERROR;
-}
-
-int
-Tcl_FcntlCmd (clientData, interp, argc, argv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          argc;
-    char       **argv;
-{
-    Tcl_AppendResult (interp, "the ", argv [0], " command has not yet been ",
-                      "ported to Windows 95/NT", (char *) NULL);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -121,7 +66,6 @@ Tcl_FcntlCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_ServerInit (interp)
-    Tcl_Interp *interp;
+TclX_ServerInit (Tcl_Interp *interp)
 {
 }

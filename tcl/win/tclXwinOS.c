@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.3 1996/07/26 05:56:31 markd Exp $
+ * $Id: tclXwinOS.c,v 7.4 1996/08/02 10:59:54 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -305,26 +305,21 @@ TclXOSsync ()
 
 /*-----------------------------------------------------------------------------
  * TclXOSfsync --
- *   Portability interface to fsync functionallity.  Does a sync if fsync is
- * nor available.
+ *   Portability interface to fsync functionallity.  Does a _flushall, since
+ * fsync is no available.
  *
  * Parameters:
  *   o interp (I) - Errors returned in result.
- *   o channelName (I) - Name fo channel to sync.
+ *   o channel (I) - The channel to sync.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 int
 TclXOSfsync (Tcl_Interp *interp,
-             char       *channelName)
+             Tcl_Channel channel)
 {
-    Tcl_Channel channel;
     int fileNum;
-
-    channel = TclX_GetOpenChannel (interp, channelName, TCL_WRITABLE);
-    if (channel == NULL)
-        return TCL_ERROR;
 
     fileNum = TclX_GetOpenFnum (interp, channelName, TCL_WRITABLE);
     if (fileNum < 0)
@@ -337,9 +332,8 @@ TclXOSfsync (Tcl_Interp *interp,
     return TCL_OK;
 
   posixError:
-    interp->result = Tcl_PosixError (interp);
+    Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
     return TCL_ERROR;
-
 }
 
 /*-----------------------------------------------------------------------------
@@ -850,26 +844,24 @@ TclXOSGetFileSize (Tcl_Channel  channel,
 
 /*-----------------------------------------------------------------------------
  * TclXOSftruncate --
- *   Portability interface to ftruncate functionality.  Coded to be part of
- * the ftruncate command to allow for good error messages.
+ *   Portability interface to ftruncate functionality. 
  *
  * Parameters:
  *   o interp (I) - Error messages are returned in the interpreter.
- *   o fileHandle (I) - Path to file.
+ *   o channel (I) - Channel to truncate.
  *   o newSize (I) - Size to truncate the file to.
+ *   o funcName (I) - Command or other name to use in not available error.
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 int
 TclXOSftruncate (Tcl_Interp  *interp,
-                 char        *fileHandle,
-                 off_t        newSize)
+                 Tcl_channel  channel,
+                 off_t        newSize,
+                 char        *funcName)
 {
-    Tcl_AppendResult (interp,
-                      "the -fileid option is not available on MS Windows",
-                      (char *) NULL);
-    return TCL_ERROR;
+    return TclXNotAvailableError (interp, funcName);
 }
 
 /*-----------------------------------------------------------------------------
@@ -1000,4 +992,136 @@ TclXOSgetsockname (Tcl_Channel channel,
     if (getsockname (fnum, (struct sockaddr *) sockaddr, &sockaddrSize) < 0)
         return TCL_ERROR;
     return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSchmod --
+ *   Portability interface to chmod functionallity.
+ *
+ * Parameters:
+ *   o interp (I) - Errors returned in result.
+ *   o fileName (I) - Name of to set the mode on.
+ *   o mode (I) - New, unix style file access mode.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSchmod (interp, fileName, mode)
+    Tcl_Interp *interp;
+    char       *fileName;
+    int         mode;
+{
+#if 0
+  FIX:
+    if (chmod (fileName, (unsigned short) mode) < 0) {
+        Tcl_AppendResult (interp, "chmod failed on \"", fileName, "\": ",
+                          Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+#else
+    Tcl_AppendResult (interp, funcName, " is not available on this system",
+                      (char *) NULL);
+    return TCL_ERROR;
+#endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSfchmod --
+ *   Portability interface to fchmod functionallity.
+ *
+ * Parameters:
+ *   o interp (I) - Errors returned in result.
+ *   o channel (I) - Channel to set the mode on.
+ *   o mode (I) - New, unix style file access mode.
+ *   o funcName (I) - Command or other string to use in not available error.
+ * Results:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSfchmod (interp, channel, mode, funcName)
+    Tcl_Interp *interp;
+    Tcl_Channel channel;
+    int         mode;
+    char       *funcName;
+{
+#if 0
+  FIX:
+    if (fchmod (ChannelToFnum (channel, 0), (unsigned short) mode) < 0) {
+        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        return TCL_ERROR;
+    }
+#else
+    Tcl_AppendResult (interp, funcName, " is not available on this system",
+                      (char *) NULL);
+    return TCL_ERROR;
+#endif
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSChangeOwnGrp --
+ *   Change the owner and/or group of a file by file name.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o options - Option flags are:
+ *     o TCLX_CHOWN - Change file's owner.
+ *     o TCLX_CHGRP - Change file's group.
+ *   o ownerStr - String containing owner name or id.  NULL if TCLX_CHOWN
+ *     not specified.
+ *   o groupStr - String containing owner name or id.  NULL if TCLX_CHOWN
+ *     not specified.  If NULL and TCLX_CHOWN is specified, the user's group
+ *     is used.
+ *   o files (I) - NULL terminated list of file names.
+ *   o funcName (I) - Command or other name to use in not available error.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSChangeOwnGrp (interp, options, ownerStr, groupStr, files, funcName)
+    Tcl_Interp  *interp;
+    unsigned     options;
+    char        *ownerStr;
+    char        *groupStr;
+    char       **files;
+    char       *funcName;
+{
+    return TclXNotAvailableError (interp, funcName);
+}
+
+/*-----------------------------------------------------------------------------
+ * TclXOSFChangeOwnGrp --
+ *   Change the owner and/or group of a file by open channel.
+ *
+ * Parameters:
+ *   o interp - Pointer to the current interpreter, error messages will be
+ *     returned in the result.
+ *   o options - Option flags are:
+ *     o TCLX_CHOWN - Change file's owner.
+ *     o TCLX_CHGRP - Change file's group.
+ *   o ownerStr - String containing owner name or id.  NULL if TCLX_CHOWN
+ *     not specified.
+ *   o groupStr - String containing owner name or id.  NULL if TCLX_CHOWN
+ *     not specified.  If NULL and TCLX_CHOWN is specified, the user's group
+ *     is used.
+ *   o channelIds (I) - NULL terminated list of channel ids.
+ *   o funcName (I) - Command or other name to use in not available error.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
+    Tcl_Interp *interp;
+    unsigned    options;
+    char       *ownerStr;
+    char       *groupStr;
+    char      **channelIds;
+    char       *funcName;
+{
+    return TclXNotAvailableError (interp, funcName);
 }

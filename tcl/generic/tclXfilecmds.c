@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 7.1 1996/07/18 19:36:17 markd Exp $
+ * $Id: tclXfilecmds.c,v 7.2 1996/07/22 17:10:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -45,8 +45,6 @@
 #include "tclExtdInt.h"
 
 static char *FILE_ID_OPT = "-fileid";
-static char *FILE_ID_NOT_AVAIL =
-    "the -fileid option is not available on this system";
 
 /*
  * Prototypes of internal functions.
@@ -768,8 +766,9 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
     int          argc;
     char       **argv;
 {
-    int    argIdx, fileIds;
-    off_t  newSize;
+    int argIdx, fileIds;
+    off_t newSize;
+    Tcl_Channel channel;
 
     fileIds = FALSE;
     for (argIdx = 1; (argIdx < argc) && (argv [argIdx] [0] == '-'); argIdx++) {
@@ -796,7 +795,11 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
 
 
     if (fileIds) {
-        return TclXOSftruncate (interp, argv [argIdx], newSize);
+        channel = TclX_GetOpenChannel (interp, argv [argIdx], 0);
+        if (channel == NULL)
+            return TCL_ERROR;
+        return TclXOSftruncate (interp, channel, newSize,
+                                "-fileid option");
     } else {
         return TruncateByPath (interp, argv [argIdx], newSize);
     }

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 7.2 1996/07/22 17:10:08 markd Exp $
+ * $Id: tclXoscmds.c,v 7.3 1996/07/26 05:55:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -344,6 +344,8 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
+    Tcl_Channel channel;
+
     if ((argc < 1) || (argc > 2)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?filehandle?",
                           (char *) NULL);
@@ -355,7 +357,17 @@ Tcl_SyncCmd (clientData, interp, argc, argv)
 	return TCL_OK;
     }
 
-    return TclXOSfsync (interp, argv [1]);
+    channel = TclX_GetOpenChannel (interp, argv [1], TCL_WRITABLE);
+    if (channel == NULL)
+        return TCL_ERROR;
+
+    if (Tcl_Flush (channel) < 0) {
+        Tcl_AppendResult (interp, Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    return TclXOSfsync (interp, channel);
 }
 
 /*-----------------------------------------------------------------------------

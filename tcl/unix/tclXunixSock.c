@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 7.0 1996/06/16 05:33:30 markd Exp $
+ * $Id: tclXunixSock.c,v 7.1 1996/07/22 17:10:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -230,11 +230,12 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
+    Tcl_Channel channel;
+    Tcl_File acceptFile;
     unsigned options;
     int acceptSocketFD, addrLen;
     int socketFD = -1, nextArg;
     struct sockaddr_in connectSocket;
-    Tcl_File acceptFile;
 
     /*
      * Parse arguments.
@@ -267,7 +268,14 @@ Tcl_ServerAcceptCmd (clientData, interp, argc, argv)
      */
     bzero ((VOID *) &connectSocket, sizeof (connectSocket));
 
-    acceptSocketFD = TclX_GetOpenFnum (interp, argv [nextArg], 0);
+    channel = TclX_GetOpenChannel (interp, argv [nextArg], 0);
+    if (channel == NULL)
+        return TCL_ERROR;
+
+    acceptFile = Tcl_GetChannelFile (channel, TCL_READABLE);
+    if (acceptFile == NULL)
+        acceptFile = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+    acceptSocketFD =  (int) Tcl_GetFileInfo (acceptFile, NULL);
     if (acceptSocketFD < 0)
         return TCL_ERROR;
 

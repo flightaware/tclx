@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.3 1996/07/26 05:55:52 markd Exp $
+ * $Id: tclExtdInt.h,v 7.4 1996/08/02 10:59:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -133,6 +133,12 @@ typedef struct {
 #define TCLX_TRANSLATE_CR          3
 #define TCLX_TRANSLATE_CRLF        4
 #define TCLX_TRANSLATE_PLATFORM    5
+
+/*
+ * Flags used by chown/chgrp.
+ */
+#define TCLX_CHOWN  0x1
+#define TCLX_CHGRP  0x2
 
 /*
  * Used to return argument messages by most commands.
@@ -616,7 +622,7 @@ TclXOSsync _ANSI_ARGS_((void));
 
 extern int
 TclXOSfsync _ANSI_ARGS_((Tcl_Interp *interp,
-                          char       *channelName));
+                         Tcl_Channel channel));
 
 extern int
 TclXOSsystem _ANSI_ARGS_((Tcl_Interp *interp,
@@ -648,9 +654,10 @@ TclXOSkill _ANSI_ARGS_((Tcl_Interp *interp,
                         char       *funcName));
 
 extern int
-TclXOSGetOpenFileMode _ANSI_ARGS_((int  fileNum,
-                                   int *mode,
-                                   int *nonBlocking));
+TclXOSGetOpenFileMode _ANSI_ARGS_((Tcl_Interp *interp,
+                                   int         fileNum,
+                                   int        *mode,
+                                   int        *nonBlocking));
 
 extern int
 TclXOSFstat _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -673,8 +680,9 @@ TclXOSGetFileSize _ANSI_ARGS_((Tcl_Channel  channel,
 
 extern int
 TclXOSftruncate _ANSI_ARGS_((Tcl_Interp  *interp,
-                             char        *fileHandle,
-                             off_t        newSize));
+                             Tcl_Channel  channel,
+                             off_t        newSize,
+                             char        *funcName));
 
 extern int
 TclXOSfork _ANSI_ARGS_((Tcl_Interp *interp,
@@ -699,4 +707,31 @@ int
 TclXOSgetsockname _ANSI_ARGS_((Tcl_Channel channel,
                                void       *sockaddr,
                                int         sockaddrSize));
+
+int
+TclXOSchmod _ANSI_ARGS_((Tcl_Interp *interp,
+                         char       *fileName,
+                         int         mode));
+
+int
+TclXOSfchmod _ANSI_ARGS_((Tcl_Interp *interp,
+                          Tcl_Channel channel,
+                          int         mode,
+                          char       *funcName));
+
+int
+TclXOSChangeOwnGrp _ANSI_ARGS_((Tcl_Interp  *interp,
+                                unsigned     options,
+                                char        *ownerStr,
+                                char        *groupStr,
+                                char       **files,
+                                char       *funcName));
+
+int
+TclXOSFChangeOwnGrp _ANSI_ARGS_((Tcl_Interp *interp,
+                                 unsigned    options,
+                                 char       *ownerStr,
+                                 char       *groupStr,
+                                 char      **channelIds,
+                                 char       *funcName));
 #endif
