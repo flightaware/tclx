@@ -1,3 +1,9 @@
+2001-09-11  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* tcl/generic/tclXlib.c (MakeAbsFile): Replaced a call to the
+	  internal 'TclpGetCwd' with an access to the public API
+	  'Tcl_GetCwd'. [457266]. Reported by Vincent Darley.
+
 2001-08-01  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* doc/TclX.n: 
