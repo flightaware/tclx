@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 8.1 1997/04/17 04:59:37 markd Exp $
+# $Id: string.test,v 8.2 1997/06/25 08:23:49 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -56,6 +56,15 @@ Test string-1.9 {cindex tests} {
     cindex ABCDEFG 1 10
 } 1 {wrong # args: cindex string indexExpr}
 
+Test string-1.10 {cindex tests} {
+    cindex A\0BCDEFG 2
+} 0 {B}
+
+Test string-1.11 {cindex tests} {
+    cindex A\0BCDEFG 1
+} 0 "\0"
+
+
 # Test the 'clength' command.
 
 Test string-2.1 {clength tests} {
@@ -69,6 +78,10 @@ Test string-2.2 {clength tests} {
 Test string-2.3 {clength tests} {
     clength
 } 1 {wrong # args: clength string}
+
+Test string-2.4 {clength tests} {
+    clength "AB\0D X\0Z"
+} 0 {8}
 
 # Test the crange command.
 
@@ -106,10 +119,20 @@ Test string-3.8 {crange tests} {
 } 1 {syntax error in expression "4x-3"}
 
 Test string-3.9 {crange tests} {
+    puts "*****>>>>> FAILS DUE TO BUG IN TCL 8.0b1 <<<<<*****"
     set text .tex
     set l 4
     crange $text $l+1 end
 } 0 {}
+
+Test string-3.10 {crange tests} {
+    crange AB\0DEFG 1 3
+} 0 "B\0D"
+
+Test string-3.11 {crange tests} {
+    crange ABC\0E\0G 2 end
+} 0 "C\0E\0G"
+
 
 # Test the 'replicate' command
 
@@ -124,6 +147,10 @@ Test string-4.2 {replicate tests} {
 Test string-4.3 {replicate tests} {
     replicate X
 } 1 {wrong # args: replicate string countExpr}
+
+Test string-4.4 {replicate tests} {
+    replicate Ab\0d 4
+} 0 "Ab\0dAb\0dAb\0dAb\0d"
 
 # Test the csubstr command.
 
@@ -159,6 +186,14 @@ Test string-5.7 {csubstr tests} {
 Test string-5.8 {csubstr tests} {
     csubstr ABCD 0 len
 } 0 {ABCD}
+
+Test string-5.9 {csubstr tests} {
+    csubstr AB\0D len-2 end
+} 0 "\0D"
+
+Test string-5.8 {csubstr tests} {
+    csubstr AB\0D 0 len
+} 0 "AB\0D"
 
 # Test the translit command.
 
@@ -218,8 +253,16 @@ Test string-9.3 {cequal tests} {
     cequal ab c
 } 0 0
 
-Test string-9.3 {cequal tests} {
+Test string-9.4 {cequal tests} {
     cequal abcded abcded
+} 0 1
+
+Test string-9.5 {cequal tests} {
+    cequal a\0 a
+} 0 0
+
+Test string-9.6 {cequal tests} {
+    cequal ab\0cd\0ed ab\0cd\0ed
 } 0 1
 
 # ccollate command
@@ -272,6 +315,15 @@ Test string-11.2 {cconcat tests} {
 Test string-11.3 {cconcat tests} {
     cconcat Aaa " " Bbb
 } 0 {Aaa Bbb}
+
+Test string-11.4 {cconcat tests} {
+    cconcat A\0a B\0b
+} 0 "A\0aB\0b"
+
+
+Test string-11.4 {cconcat tests} {
+    cconcat Aaa " " \0 Bbb
+} 0 "Aaa \0Bbb"
 
 
 

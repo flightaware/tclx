@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.1 1997/04/17 04:58:53 markd Exp $
+ * $Id: tclXstring.c,v 8.2 1997/06/12 21:08:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -275,6 +275,7 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
     char *string2Ptr;
     int string2Len;
 
+/*FIX: Not binary clean  */
     if ((objc < 3) || (objc > 4))
         return TclX_WrongArgs (interp, objv[0], "?options? string1 string2");
 
@@ -368,6 +369,7 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
     int           tokenStrLen;
     Tcl_Obj      *newVarValueObj;
 
+/*FIX: Not binary clean */
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "strvar separators");
     
@@ -431,7 +433,7 @@ TclX_CequalObjCmd (dummy, interp, objc, objv)
     Tcl_SetBooleanObj (Tcl_GetObjResult (interp),
                        ((string1Len == string2Len) &&
                         (*string1Ptr == *string2Ptr) &&
-                        STREQU (string1Ptr, string2Ptr)));
+                        (memcpy (string1Ptr, string2Ptr, string1Len))));
     return TCL_OK;
 }
 
@@ -495,6 +497,7 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
     int            idx;
     int            stringIndex;
 
+/*FIX: Not binary clean */
     if (objc != 4)
         return TclX_WrongArgs (interp, objv[0], "from to string");
 
