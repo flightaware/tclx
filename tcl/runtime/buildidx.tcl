@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 2.2 1993/05/16 06:36:04 markd Exp markd $
+# $Id: buildidx.tcl,v 2.3 1993/05/28 08:46:10 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -93,14 +93,15 @@ proc TCLSH:CreateLibIndex {libName} {
     set pkgInfo {}
     if {[catch {
         scanfile $contectHdl $libFH
-       } msg] != 0} {
+        if [lempty $pkgInfo] {
+            error "No #@package definitions found in $libName"
+        }   
+    } msg] != 0} {
        global errorInfo errorCode
        close $libFH
        close $idxFH
+       unlink -nocomplain $idxName
        error $msg $errorInfo $errorCode
-    }
-    if [lempty $pkgInfo] {
-        error "No #@package definitions found in $libName"
     }
     if ![lempty $pkgInfo] {
         TCLSH:PutIdxEntry $idxFH $pkgInfo [tell $libFH] 
