@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildidx.tcl,v 2.6 1993/10/29 04:16:15 markd Exp markd $
+# $Id: buildidx.tcl,v 3.0 1993/11/19 07:00:37 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -125,15 +125,16 @@ proc TCLSH:CreateLibIndex {libName} {
 #------------------------------------------------------------------------------
 # Create a package library index from a library file.
 #
-proc buildpackageindex {libfile} {
-
-    set status [catch {
-        TCLSH:CreateLibIndex $libfile
-    } errmsg]
-    if {$status != 0} {
-        global errorInfo errorCode
-        error "building package index for `$libfile' failed: $errmsg" \
-              $errorInfo $errorCode
+proc buildpackageindex {libfilelist} {
+    foreach libfile $libfilelist {
+        set status [catch {
+            TCLSH:CreateLibIndex $libfile
+        } errmsg]
+        if {$status != 0} {
+            global errorInfo errorCode
+            error "building package index for `$libfile' failed: $errmsg" \
+                $errorInfo $errorCode
+        }
     }
 }
 

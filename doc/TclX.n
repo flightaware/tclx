@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.0 1993/11/19 06:56:37 markd Rel markd $
+.\" $Id: TclX.n,v 3.1 1993/11/25 03:21:14 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2662,11 +2662,14 @@ executed to load the command will also be returned.
 '
 .TP
 '\"@help: tcl/libraries/buildpackageindex
-'\"@brief: Build an index to a package library.
-.B buildpackageindex \fIlibfile\fR
+'\"@brief: Build index files for package libraries.
+.B buildpackageindex \fIlibfilelist\fR
 .br
-Build an index for a package library.  The the \fIlibfile\fR name must end with
-the suffix \fB.tlib\fR.
+Build index files for package libraries.
+The argument \fIlibfilelist\fR is a list of package libraries.
+Each name must end with the suffix \fB.tlib\fR.
+A corresponding \fB.tndx\fR file will be built.
+The user must have write access to the directory containing each library.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
