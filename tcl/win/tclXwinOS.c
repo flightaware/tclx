@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 8.10 1999/04/05 16:16:36 markd Exp $
+ * $Id: tclXwinOS.c,v 8.11.6.1 2000/04/04 00:27:15 lfb Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -603,7 +603,16 @@ TclXOSkill (Tcl_Interp *interp,
             int         signal,
             char       *funcName)
 {
-    return TclXNotAvailableError (interp, funcName);
+    HANDLE processHandle;
+
+    processHandle = OpenProcess(PROCESS_TERMINATE, FALSE, (int) pid);
+    if (processHandle == NULL) {
+	Tcl_AppendResult(interp, "invalid pid", (char *) NULL);
+	return TCL_ERROR;
+    }
+
+    TerminateProcess(processHandle, 7);
+    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
