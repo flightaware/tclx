@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 6.1 1996/05/23 22:38:49 markd Exp $
+ * $Id: tclExtdInt.h,v 7.0 1996/06/16 05:29:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -158,6 +158,16 @@ extern char *tclXWrongArgs;
   (strcpy (ckalloc (strlen (sourceStr) + 1), sourceStr))
 
 /*
+ * Callback type for walking directories.
+ */
+typedef int
+(TclX_WalkDirProc) _ANSI_ARGS_((Tcl_Interp  *interp,
+                                char        *path,
+                                char        *fileName,
+                                int          caseSensitive,
+                                ClientData   clientData));
+
+/*
  * Prototypes for utility procedures.
  */
 extern void
@@ -196,12 +206,12 @@ TclX_GetChannelOption _ANSI_ARGS_((Tcl_Channel channel,
 extern Tcl_Channel
 TclX_GetOpenChannel _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *handle,
-                                 int         accessMode));
+                                 int         direction));
 
 extern int
 TclX_GetOpenFnum _ANSI_ARGS_ ((Tcl_Interp *interp,
                                char       *handle,
-                               int         accessMode));
+                               int         direction));
 
 extern int
 Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,
@@ -592,6 +602,11 @@ TclX_OSmkdir _ANSI_ARGS_((Tcl_Interp *interp,
                           char       *path));
 
 extern int
+TclX_OSlink _ANSI_ARGS_((Tcl_Interp *interp,
+                         char       *srcPath,
+                         char       *destPath,
+                         char       *funcName));
+extern int
 TclX_OSsymlink _ANSI_ARGS_((Tcl_Interp *interp,
                             char       *srcPath,
                             char       *destPath,
@@ -612,18 +627,16 @@ TclX_OSGetOpenFileMode _ANSI_ARGS_((int  fileNum,
                                     int *mode,
                                     int *nonBlocking));
 
-int
-TclX_OSopendir _ANSI_ARGS_((Tcl_Interp     *interp,
-                            char           *path,
-                            TCLX_DIRHANDLE *handlePtr,
-                            int            *caseSensitive));
-int
-TclX_OSreaddir _ANSI_ARGS_((Tcl_Interp     *interp,
-                            TCLX_DIRHANDLE  handle,
-                            int             hidden,
-                            char          **fileNamePtr));
-int
-TclX_OSclosedir _ANSI_ARGS_((Tcl_Interp     *interp,
-                             TCLX_DIRHANDLE  handle));
+extern int
+TclX_OSWalkDir _ANSI_ARGS_((Tcl_Interp       *interp,
+                            char             *path,
+                            int               hidden,
+                            TclX_WalkDirProc *callback,
+                            ClientData        clientData));
+
+extern int
+TclX_OSGetFileSize _ANSI_ARGS_((Tcl_Channel  channel,
+                                int          direction,
+                                off_t       *fileSize));
 
 #endif

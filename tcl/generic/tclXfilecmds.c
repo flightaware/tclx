@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 6.0 1996/05/10 16:15:29 markd Exp $
+ * $Id: tclXfilecmds.c,v 7.0 1996/06/16 05:30:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -72,6 +72,14 @@ static int
 TruncateByHandle  _ANSI_ARGS_((Tcl_Interp  *interp,
                                char        *fileHandle,
                                off_t        newSize));
+
+static int
+ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
+                             char        *path,
+                             char        *fileName,
+                             int          caseSensitive,
+                             ClientData   clientData));
+
 
 /*-----------------------------------------------------------------------------
  * Tcl_PipeCmd --
@@ -90,7 +98,6 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     int fileNums [2];
-    Tcl_File file;
     Tcl_Channel chans [2];
 
     chans [0] = chans [1] = NULL;
@@ -769,7 +776,8 @@ TruncateByHandle (interp, fileHandle, newSize)
     char        *fileHandle;
     off_t        newSize;
 {
-#if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE)
+#ifndef WIN32
+#if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE) 
     int fileNum, stat;
 
     fileNum = TclX_GetOpenFnum (interp, fileHandle, TCL_WRITABLE);
@@ -791,6 +799,9 @@ TruncateByHandle (interp, fileHandle, newSize)
     Tcl_AppendResult (interp, FILE_ID_NOT_AVAIL, (char *) NULL);
     return TCL_ERROR;
 #endif
+#endif
+    Tcl_AppendResult (interp, "not yet on windows", (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -846,6 +857,35 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
 }
 
 /*-----------------------------------------------------------------------------
+ * ReadDirCallback --
+ *
+ *   Callback procedure for walking directories.
+ * Parameters:
+ *   o interp (I) - Interp is passed though.
+ *   o path (I) - Normalized path to directory.
+ *   o fileName (I) - Tcl normalized file name in directory.
+ *   o caseSensitive (I) - Are the file names case sensitive?  Always
+ *     TRUE on Unix.
+ *   o clientData (I) - Tcl_DString to append names to.
+ * Returns:
+ *   TCL_OK.
+ *-----------------------------------------------------------------------------
+ */
+static int
+ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
+    Tcl_Interp  *interp;
+    char        *path;
+    char        *fileName;
+    int          caseSensitive;
+    ClientData   clientData;
+{
+    Tcl_DString *fileList = (Tcl_DString *) clientData;
+
+    Tcl_DStringAppendElement (fileList, fileName);
+    return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
  * Tcl_ReaddirCmd --
  *     Implements the rename TCL command:
  *         readdir ?-hidden? dirPath
@@ -863,10 +903,8 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
 {
     Tcl_DString pathBuf;
     char *dirPath;
-    TCLX_DIRHANDLE handle;
-    int hidden, status, caseSensitive;
+    int hidden, status;
     Tcl_DString fileList;
-    char *fileName;
     
     if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -893,25 +931,17 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
     if (dirPath == NULL)
         goto errorExit;
 
-    if (TclX_OSopendir (interp, dirPath, &handle, &caseSensitive) != TCL_OK)
+    status = TclX_OSWalkDir (interp,
+                             dirPath,
+                             hidden,
+                             ReadDirCallback,
+                             (ClientData) &fileList);
+    if (status == TCL_ERROR)
         goto errorExit;
-    
-    while (TRUE) {
-        status = TclX_OSreaddir (interp, handle, hidden, &fileName);
-        if (status == TCL_ERROR)
-            goto errorExit2;
-        if (status == TCL_BREAK)
-            break;
-        Tcl_DStringAppendElement (&fileList, fileName);
-    }
-    if (TclX_OSclosedir (interp, handle) != TCL_OK)
-        goto errorExit2;
+
     Tcl_DStringFree (&pathBuf);
     Tcl_DStringResult (interp, &fileList);
     return TCL_OK;
-
-  errorExit2:
-    TclX_OSclosedir (NULL, handle);
 
   errorExit:
     Tcl_DStringFree (&pathBuf);

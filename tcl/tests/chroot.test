@@ -16,6 +16,11 @@
 #------------------------------------------------------------------------------
 #
 
+if [cequal $tcl_platform(platform) windows] { ;# WIN32???
+    echo chroot win32 work not completed
+    return
+}
+
 if {[info procs test] != "test"} then {source testlib.tcl}
 
 #
@@ -32,11 +37,22 @@ if ![lempty [info commands button]] {
 
 Test chroot-1.1 {chroot tests} {
     chroot
-} 1 {wrong # args: chroot path}
+} 1 {wrong # args: chroot path} {unixOnly}
 
 Test chroot-1.2 {chroot tests} {
     chroot a b
-} 1 {wrong # args: chroot path}
+} 1 {wrong # args: chroot path} {unixOnly}
+
+Test chroot-1.3 {chroot tests}
+    chroot a b
+} 1 {} {pcOnly}
+
+#
+# Actually doing something real with chroot only makes sense on unix.
+#
+if ![cequal $tcl_platform(platform) "unix"] {
+    return
+}
 
 if {[id user] != "root"} {
     puts "*************************************************************"
@@ -70,7 +86,7 @@ if {$pid > 0} {
 #
 # child tests chroot then exits
 #
-Test chroot-1.3 {chroot tests} {
+Test chroot-2.1 {chroot tests} {
     chroot CHROOTDIR
     glob -nocomplain /*
 } 0 {}

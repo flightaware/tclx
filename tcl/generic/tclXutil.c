@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 6.1 1996/05/23 22:38:51 markd Exp $
+ * $Id: tclXutil.c,v 7.0 1996/06/16 05:31:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -611,17 +611,17 @@ Tcl_RelativeExpr (interp, cstringExpr, stringLen, exprResultPtr)
  * Parameters:
  *   o interp (I) - Current interpreter.
  *   o handle (I) - The file handle to convert.
- *   o accessMode (I) - Set of TCL_READABLE or TCL_WRITABLE or zero to
- *     not do error checking.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
  * Returns:
  *   A the channel or NULL if an error occured.
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclX_GetOpenChannel (interp, handle, accessMode)
+TclX_GetOpenChannel (interp, handle, direction)
     Tcl_Interp *interp;
     char       *handle;
-    int         accessMode;
+    int         direction;
 {
     Tcl_Channel chan;
     int mode;
@@ -630,12 +630,12 @@ TclX_GetOpenChannel (interp, handle, accessMode)
     if (chan == (Tcl_Channel) NULL) {
 	return NULL;
     }
-    if ((accessMode & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
+    if ((direction & TCL_READABLE) && ((mode & TCL_READABLE) == 0)) {
         Tcl_AppendResult(interp, "channel \"", handle,
                 "\" wasn't opened for reading", (char *) NULL);
         return NULL;
     }
-    if ((accessMode & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
+    if ((direction & TCL_WRITABLE) && ((mode & TCL_WRITABLE) == 0)) {
         Tcl_AppendResult(interp, "channel \"", handle,
                 "\" wasn't opened for writing", (char *) NULL);
         return NULL;
@@ -652,26 +652,26 @@ TclX_GetOpenChannel (interp, handle, accessMode)
  * Parameters:
  *   o interp (I) - Current interpreter.
  *   o handle (I) - The file handle to convert.
- *   o accessMode (I) - Set of TCL_READABLE or TCL_WRITABLE or zero to
- *     not do error checking.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
  * Returns:
  *   The file number of < 0 if an error occured.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_GetOpenFnum (interp, handle, accessMode)
+TclX_GetOpenFnum (interp, handle, direction)
     Tcl_Interp *interp;
     char       *handle;
-    int         accessMode;
+    int         direction;
 {
     Tcl_Channel channel;
     Tcl_File file;
 
-    channel = TclX_GetOpenChannel (interp, handle, accessMode);
+    channel = TclX_GetOpenChannel (interp, handle, direction);
     if (channel == NULL)
         return -1;
 
-    switch (accessMode) {
+    switch (direction) {
       case 0:
       case TCL_READABLE | TCL_WRITABLE:
         file = Tcl_GetChannelFile (channel, TCL_READABLE);
@@ -703,6 +703,7 @@ TclX_GetOpenFnum (interp, handle, accessMode)
  * Returns:
  *   The file number or -1 if a file number is not associated with this access
  * direction.
+ *???No longer used???
  *-----------------------------------------------------------------------------
  */
 int

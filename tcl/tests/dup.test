@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 6.0 1996/05/10 16:17:20 markd Exp $
+# $Id: dup.test,v 7.0 1996/06/16 05:32:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -106,25 +106,25 @@ if {[set childPid [fork]] == 0} {
         close $toChild
         set toParent [crange $toParent 4 end]
         set fromParent [crange $fromParent 4 end]
-        set childProgram {}
-        append childProgram "set toParent \[dup $toParent\]" \n
-        append childProgram "set fromParent \[dup $fromParent\]" \n
-        append childProgram {if ![fcntl $fromParent RDWR] } "{\n"
-        append childProgram {    puts $toParent "DOING ACCESS CHECK"} \n
-        append childProgram {    flush $toParent} \n
-        append childProgram {    catch {puts $fromParent arf} msg} \n
-        append childProgram {    puts $toParent "msg1: $msg"} \n
-        append childProgram {    flush $toParent} \n
-        append childProgram {    catch {gets $toParent} msg} \n
-        append childProgram {    puts $toParent "msg2: $msg"} \n
-        append childProgram {    flush $toParent} \n
-        append childProgram "} else {\n"
-        append childProgram {    puts $toParent "SKIPPING ACCESS CHECK"} \n
-        append childProgram {    flush $toParent} \n
-        append childProgram "}\n"
-        append childProgram {while {[gets $fromParent msg] >= 0} {
+        set prog {}
+        append prog "set toParent \[dup $toParent\]" \n
+        append prog "set fromParent \[dup $fromParent\]" \n
+        append prog {if ![fcntl $fromParent RDWR] } "{\n"
+        append prog {    puts $toParent "DOING ACCESS CHECK"} \n
+        append prog {    flush $toParent} \n
+        append prog {    catch {puts $fromParent arf} msg} \n
+        append prog {    puts $toParent "msg1: $msg"} \n
+        append prog {    flush $toParent} \n
+        append prog {    catch {gets $toParent} msg} \n
+        append prog {    puts $toParent "msg2: $msg"} \n
+        append prog {    flush $toParent} \n
+        append prog "} else {\n"
+        append prog {    puts $toParent "SKIPPING ACCESS CHECK"} \n
+        append prog {    flush $toParent} \n
+        append prog "}\n"
+        append prog {while {[gets $fromParent msg] >= 0} {
             puts $toParent "got: $msg"; flush $toParent}}
-        execl $TCL_PROGRAM [list -qc $childProgram]
+        execl $TCL_PROGRAM [list -qc $prog]
     } msgDOING
     puts stderr "child failed: $msg"
     exit 1

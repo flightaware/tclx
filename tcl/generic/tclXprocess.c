@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 6.0 1996/05/10 16:15:56 markd Exp $
+ * $Id: tclXprocess.c,v 7.0 1996/06/16 05:30:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -144,6 +144,7 @@ Tcl_ForkCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
+#ifndef WIN32
     int pid;
 
     if (argc != 1) {
@@ -159,6 +160,9 @@ Tcl_ForkCmd (clientData, interp, argc, argv)
 
     sprintf(interp->result, "%d", pid);
     return TCL_OK;
+#else
+    Tcl_AppendResult (interp, "does not work yet", (char *) NULL);
+#endif
 }
 
 /*

@@ -39,6 +39,10 @@ static char sccsid[] = "@(#)getopt.c	8.2 (Berkeley) 4/2/94";
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef WIN32
+extern char *__progname;
+#endif
+
 int	opterr = 1,		/* if error message should be printed */
 	optind = 1,		/* index into parent argv vector */
 	optopt,			/* character checked for validity */
@@ -59,7 +63,6 @@ getopt(nargc, nargv, ostr)
 	char * const *nargv;
 	const char *ostr;
 {
-	extern char *__progname;
 	static char *place = EMSG;		/* option letter processing */
 	char *oli;				/* option letter list index */
 
@@ -86,8 +89,13 @@ getopt(nargc, nargv, ostr)
 		if (!*place)
 			++optind;
 		if (opterr && *ostr != ':')
+#ifndef WIN32
 			(void)fprintf(stderr,
 			    "%s: illegal option -- %c\n", __progname, optopt);
+#else
+			(void)fprintf(stderr,
+			    "illegal option -- %c\n", optopt);
+#endif
 		return (BADCH);
 	}
 	if (*++oli != ':') {			/* don't need argument */
@@ -103,9 +111,16 @@ getopt(nargc, nargv, ostr)
 			if (*ostr == ':')
 				return (BADARG);
 			if (opterr)
+#ifndef WIN32
 				(void)fprintf(stderr,
 				    "%s: option requires an argument -- %c\n",
 				    __progname, optopt);
+#else
+				(void)fprintf(stderr,
+				    "option requires an argument -- %c\n",
+				    optopt);
+#endif
+
 			return (BADCH);
 		}
 	 	else				/* white space */

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 6.0 1996/05/10 16:15:36 markd Exp $
+ * $Id: tclXgeneral.c,v 7.0 1996/06/16 05:30:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -211,6 +211,14 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
 #       endif        
         return TCL_OK;
     }
+    if (STREQU ("have_symlink", argv [1])) {
+#       ifdef S_IFLNK
+        interp->result = "1";
+#       else
+        interp->result = "0";
+#       endif        
+        return TCL_OK;
+    }
     if (STREQU ("have_waitpid", argv [1])) {
 #       ifndef NO_WAITPID
         interp->result = "1";
@@ -244,7 +252,7 @@ Tcl_InfoxCmd (clientData, interp, argc, argv)
                       "\" expect one of: version, patchlevel, ",
                       "have_fchown, have_fchmod, have_flock, ",
                       "have_fsync, have_ftruncate, have_msgcats, ",
-                      "have_truncate, have_posix_signals, ",
+                      "have_symlink, have_truncate, have_posix_signals, ",
                       "have_waitpid, ",
                       "appname, applongname, appversion, or apppatchlevel",
                       (char *) NULL);

@@ -302,8 +302,11 @@
 ./tcl/unix/tclXunixSock.c
 ./tcl/unix/tclxConfig.sh.in
 ./tcl/win/makefile.vc
+./tcl/win/tclWinSock.c
+./tcl/win/tclWinSock.c.diff
 ./tcl/win/tclXwinOS.c
 ./tcl/win/tclXwinPort.h
+./tcl/win/winDumpExts.c
 ./tk/generic/tkXAppInit.c
 ./tk/generic/tkXinit.c
 ./tk/generic/tkXshell.c
@@ -382,3 +385,4 @@
 ./unix/tools/libconvert.tcl
 ./unix/tools/tclmanpages
 ./unix/tools/tkmanpages
+./win/tclWinSock.c.diff

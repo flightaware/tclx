@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: tcllib.test,v 6.0 1996/05/10 16:18:18 markd Exp $
+# $Id: tcllib.test,v 7.0 1996/06/16 05:33:02 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -142,7 +142,7 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.2 {bogus package library index} {
     TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds "/.*test1.tlib"$}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "/.*test1.tlib", index file probably corrupt$}
 
 
 PutFile tcllib1.dir/test1.tndx \
@@ -150,7 +150,7 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.3 {bogus package library index} {
     TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds "/.*test1.tlib"$}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "/.*test1.tlib", index file probably corrupt$}
 
 catch {rename buildpackageindex {}} ;# Make sure we can autoload this
 
@@ -159,7 +159,7 @@ PutFile tcllib1.dir/test1.tndx \
 
 TestReg tcllib-3.4 {bogus package library index} {
     TclLibAAB
-} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds "/}
+} 1 {^error while autoloading "TclLibAAB": range to eval outside of file bounds in "/}
 
 TclLibReset
 set auto_path [list [pwd]/tcllib2.dir $tclx_library]

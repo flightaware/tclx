@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 6.0 1996/05/10 16:15:22 markd Exp $
+ * $Id: tclXcmdloop.c,v 7.0 1996/06/16 05:30:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -58,6 +58,12 @@ AsyncSignalErrorHandler _ANSI_ARGS_((Tcl_Interp *interp,
 static void
 AsyncCommandHandler _ANSI_ARGS_((ClientData clientData,
                                  int        mask));
+
+static int
+SyncSignalErrorHandler _ANSI_ARGS_((Tcl_Interp *interp,
+                                    ClientData  clientData,
+                                    int         background,
+                                    int         signalNum));
 
 static void
 AsyncCommandHandlerDelete _ANSI_ARGS_((ClientData clientData));

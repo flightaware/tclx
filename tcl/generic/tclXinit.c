@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 6.0 1996/05/10 16:15:40 markd Exp $
+ * $Id: tclXinit.c,v 7.0 1996/06/16 05:30:29 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -65,7 +65,7 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
     char       *libEnvVar;
 {
     Tcl_DString  initFilePath;
-    char *initFile, *value;
+    char *initFile;
     struct stat statInfo;
 
     Tcl_DStringInit (&initFilePath);
@@ -92,7 +92,7 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
                                   "file with the environment variable: \"",
                                   libEnvVar, "\"", (char *) NULL);
             }
-            return NULL;
+            return TCL_ERROR;;
         }
         Tcl_DStringAppend (&initFilePath, libDir, -1);
         Tcl_DStringAppend (&initFilePath, "/", -1);
@@ -123,7 +123,6 @@ ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
                    initFilePath.string) == TCL_ERROR)
         goto errorExit;
 
-  exitPoint:        
     Tcl_DStringFree (&initFilePath);
     Tcl_ResetResult (interp);
     return TCL_OK;
@@ -284,7 +283,6 @@ TclX_ErrorExit (interp, exitCode)
     int          exitCode;
 {
     char *errorStack;
-    char  numBuf [32];
     Tcl_Channel stdoutChan, stderrChan;
     Tcl_DString savedResult;
 

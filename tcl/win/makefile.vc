@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: makefile.vc,v 6.0 1996/05/10 16:18:56 markd Exp $
+# $Id: makefile.vc,v 7.0 1996/06/16 05:33:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -31,15 +31,15 @@
 
 ROOT    = ..
 TMPDIR  = .
-TOOLS32 = c:\msvc20
-TOOLS16 = c:\msvc
-TCLDIR  = ..\..\..\tcl7.5b3
-TKDIR   = ..\..\..\tk4.1b3
+TOOLS32 = c:\msdev
+TOOLS16 = c:\msdev
+TCLDIR  = ..\..\..\tcl7.5
+TKDIR   = ..\..\..\tk4.1
 
 TCLX_LIBRARY = \"\\usr\\lib\\tclX\\7.5\"
 
 # Comment the following line to compile with symbols
-NODEBUG=1
+#NODEBUG=1
 
 # uncomment the following two lines to compile with TCL_MEM_DEBUG
 #DEBUGDEFINES   =-DTCL_MEM_DEBUG
@@ -49,7 +49,7 @@ PATH=$(TOOLS32)\bin;$(PATH)
 
 WINDIR          = $(ROOT)\win
 GENERICDIR      = $(ROOT)\generic
-XLIBDIR         = $(ROOT)\xlib
+
 
 cc32 = $(TOOLS32)\bin\cl -I$(TOOLS32)\include
 rc32 = $(TOOLS32)\bin\rc
@@ -58,11 +58,21 @@ cc16 = $(TOOLS16)\bin\cl -I$(TOOLS16)\include
 link16 = $(TOOLS16)\bin\link
 rc16 = $(TOOLS16)\bin\rc
 
+# On Win95, developer studio defines INCLUDE and LIB, but not nmake.
+# On NT you don't need these (same VC++ release!).
+
+!IF "$(INCLUDE)" == ""
+INCLUDE=$(TOOLS32)\INCLUDE;$(TOOLS32)\MFC\include
+!endif
+!IF "$(LIB)" == ""
+LIB=$(TOOLS32)\LIB;\$(TOOLS32)\MFC\lib
+!ENDIF
+
 TCLX_INCLUDES = -I$(TOOLS32)\include -I$(ROOT)\win -I$(ROOT)\generic \
         -I$(TCLDIR)\generic -I$(TCLDIR)\win
 
 TCLX_DEFINES = \
-    -nologo $(DEBUGDEFINES)
+    -nologo $(DEBUGDEFINES) -DTCLX_LIBRARY=$(TCLX_LIBRARY)
 
 TCLOBJS = \
         $(TMPDIR)\tclXAppInit.obj
@@ -70,21 +80,24 @@ TCLOBJS = \
 TCLXTESTOBJS = \
         $(TMPDIR)\tclXTest.obj
 
+#        $(TMPDIR)\tclXchmod.obj ???
+#        $(TMPDIR)\tclXfcntl.obj ???
+#        $(TMPDIR)\tclXid.obj ???
+#        $(TMPDIR)\tclXserver.obj 
+#        $(TMPDIR)\tclXunixcmds.obj
+
 TCLXOBJS = \
         $(TMPDIR)\tclXbsearch.obj \
-        $(TMPDIR)\tclXchmod.obj \
         $(TMPDIR)\tclXcmdInit.obj \
         $(TMPDIR)\tclXcmdloop.obj \
         $(TMPDIR)\tclXdebug.obj \
         $(TMPDIR)\tclXdup.obj \
-        $(TMPDIR)\tclXfcntl.obj \
         $(TMPDIR)\tclXfilecmds.obj \
         $(TMPDIR)\tclXfilescan.obj \
         $(TMPDIR)\tclXflock.obj \
         $(TMPDIR)\tclXfstat.obj \
         $(TMPDIR)\tclXgeneral.obj \
         $(TMPDIR)\tclXhandles.obj \
-        $(TMPDIR)\tclXid.obj \
         $(TMPDIR)\tclXinit.obj \
         $(TMPDIR)\tclXkeylist.obj \
         $(TMPDIR)\tclXlib.obj \
@@ -92,18 +105,18 @@ TCLXOBJS = \
         $(TMPDIR)\tclXlist.obj \
         $(TMPDIR)\tclXmath.obj \
         $(TMPDIR)\tclXmsgcat.obj \
+        $(TMPDIR)\tclXosCmds.obj \
         $(TMPDIR)\tclXprocess.obj \
         $(TMPDIR)\tclXprofile.obj \
         $(TMPDIR)\tclXregexp.obj \
         $(TMPDIR)\tclXselect.obj \
-        $(TMPDIR)\tclXserver.obj \
         $(TMPDIR)\tclXshell.obj \
         $(TMPDIR)\tclXsignal.obj \
         $(TMPDIR)\tclXstring.obj \
-        $(TMPDIR)\tclXunixcmds.obj \
         $(TMPDIR)\tclXutil.obj \
-    $(TMPDIR)\getopt1.obj \
-    $(TMPDIR)\getopt.obj
+        $(TMPDIR)\tclXwinOS.obj \
+        $(TMPDIR)\random.obj \
+        $(TMPDIR)\getopt.obj
 
 TCLX16OBJS = $(TMPDIR)\tclWin16.obj
 
@@ -115,7 +128,7 @@ TCL16DLL = $(TCLDIR)\win\tcl1675.dll
 TCLXLIB = tclx75.lib
 TCLXDLL = tclx75.dll
 TCLX16DLL = tclx1675.dll
-TCL = tcl75.exe
+TCL = tcl.exe
 TCLXTEST = tclxtest.exe
 DUMPEXTS = dumpexts.exe
 
@@ -136,16 +149,21 @@ tclXvc.def: dumpexts.exe $(TCLXOBJS)
         dumpexts.exe -o $@ $(TCLXDLL) @<<
         $(TCLXOBJS)
 <<
+
+#????
+arf:
         echo    tclDeleteInterpAtEnd >> tclXvc.def
         echo    tclErrorSignalProc >> tclXvc.def
         echo    tclGotErrorSignal >> tclXvc.def
         echo    tclSignalBackgroundError >> tclXvc.def
 
 dumpexts.exe: $(DUMPEXTSOBJS)
+        set LIB=$(LIB)
         $(link) $(conlflags) -out:dumpexts.exe $(DUMPEXTSOBJS) \
                 $(guilibs) $(libc)
 
 $(TCLXDLL): $(TCLXOBJS) tclXvc.def $(TMPDIR)\tcl.res
+        set LIB=$(LIB)
         $(link) $(linkdebug) $(dlllflags) -def:tclXvc.def \
                 $(TMPDIR)\tcl.res $(guilibsdll) -out:$(TCLXDLL) @<<
                 $(TCLXOBJS) $(TCLLIB) Wsock32.lib
@@ -165,11 +183,13 @@ HEAPSIZE 1024
 
 
 $(TCL): $(TCLOBJS) $(TCLXLIB) $(TMPDIR)\tcl.res
+        set LIB=$(LIB)
         $(link) $(linkdebug) $(conlflags) \
                 $(TCLOBJS) $(TMPDIR)\tcl.res $(TCLXLIB) $(TCLLIB) $(conlibsdll) \
                 -out:$(TCL)
 
 $(TCLXTEST): $(TCLXTESTOBJS) $(TCLXLIB)
+        set LIB=$(LIB)
         $(link) $(linkdebug) $(conlflags) \
                 $(TCLXTESTOBJS) $(TCLXLIB) $(conlibsdll) \
                 -out:$(TCLXTEST)
@@ -206,6 +226,10 @@ $(TMPDIR)\tclWin16.obj: $(ROOT)\win\tclWin16.c
           $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
 
 {$(ROOT)\win}.c{$(TMPDIR)}.obj:
+    $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
+          $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
+
+{$(ROOT)\compat}.c{$(TMPDIR)}.obj:
     $(cc32) $(cdebug) $(cflags) $(cvarsdll) $(TCLX_INCLUDES) \
           $(TCLX_DEFINES) -Fo$(TMPDIR)\ $<
 

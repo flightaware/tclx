@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 6.0 1996/05/10 16:15:44 markd Exp $
+ * $Id: tclXlib.c,v 7.0 1996/06/16 05:30:33 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -36,6 +36,11 @@
  */
 #include "tclExtdInt.h"
 
+#ifdef WIN32
+/*needed for _getcwd */
+#include <direct.h>
+#endif
+
 /*
  * Names of Tcl variables that are used.
  */
@@ -52,11 +57,19 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
 static char loadOusterCmd [] = "source $tclx_library/loadouster.tcl";
 
 /*
+ * Indicates the type of library index.
+ */
+typedef enum {
+    TCLLIB_TNDX,       /* *.tndx                   */
+    TCLLIB_TND,        /* *.tnd (.tndx in 8.3 land */
+    TCLLIB_OUSTER      /* tclIndex                 */
+} indexNameClass_t;
+
+/*
  * Indicates if we have ITcl namespaces and the command to check for.
  */
 static int haveNameSpaces = FALSE;
 static char nameSpaceCheckCommand [] = "@scope";
-
 
 /*
  * Per-interpreter structure used for managing the library.
@@ -73,7 +86,7 @@ static int
 EvalFilePart _ANSI_ARGS_((Tcl_Interp  *interp,
                           char        *fileName,
                           off_t        offset,
-                          unsigned     length));
+                          off_t        length));
 
 static char *
 MakeAbsFile _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -113,12 +126,20 @@ BuildPackageIndex  _ANSI_ARGS_((Tcl_Interp *interp,
                                 char       *tlibFilePath));
 
 static int
-LoadPackageIndex _ANSI_ARGS_((Tcl_Interp *interp,
-                              char       *tlibFilePath));
+LoadPackageIndex _ANSI_ARGS_((Tcl_Interp       *interp,
+                              char             *tlibFilePath,
+                              indexNameClass_t  indexNameClass));
 
 static int
 LoadOusterIndex _ANSI_ARGS_((Tcl_Interp *interp,
                              char       *indexFilePath));
+
+static int
+LoadDirIndexCallback _ANSI_ARGS_((Tcl_Interp  *interp,
+                                  char        *path,
+                                  char        *fileName,
+                                  int          caseSensitive,
+                                  ClientData   clientData));
 
 static int
 LoadDirIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -128,6 +149,12 @@ static int
 LoadPackageIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
                                 libInfo_t   *infoPtr,
                                 char        *path));
+
+static int
+Tcl_Auto_load_pkgCmd _ANSI_ARGS_((ClientData   dummy,
+                                  Tcl_Interp  *interp,
+                                  int          argc,
+                                  char       **argv));
 
 static int
 AddInProgress _ANSI_ARGS_((Tcl_Interp  *interp,
@@ -161,6 +188,18 @@ static int
 LoadCommand _ANSI_ARGS_((Tcl_Interp  *interp,
                          char        *command));
 
+static int
+Tcl_LoadlibindexCmd _ANSI_ARGS_((ClientData   dummy,
+                                 Tcl_Interp  *interp,
+                                 int          argc,
+                                 char       **argv));
+
+static int
+Tcl_Auto_loadCmd _ANSI_ARGS_((ClientData   clientData,
+                              Tcl_Interp  *interp,
+                              int          argc,
+                              char       **argv));
+
 static void
 TclLibCleanUp _ANSI_ARGS_((ClientData  clientData,
                            Tcl_Interp *interp));
@@ -182,48 +221,48 @@ EvalFilePart (interp, fileName, offset, length)
     Tcl_Interp  *interp;
     char        *fileName;
     off_t        offset;
-    unsigned     length;
+    off_t        length;
 {
-    Interp       *iPtr = (Interp *) interp;
-    int           fileNum, result;
-    struct stat   statBuf;
-    char         *oldScriptFile, *cmdBuffer, *buf;
-    Tcl_DString   pathBuf;
+    Interp *iPtr = (Interp *) interp;
+    int result;
+    off_t fileSize;
+    Tcl_DString pathBuf;
+    char *oldScriptFile, *cmdBuffer, *buf;
+    Tcl_Channel channel = NULL;
 
     Tcl_ResetResult (interp);
     Tcl_DStringInit (&pathBuf);
-    
+
     fileName = Tcl_TranslateFileName (interp, fileName, &pathBuf);
     if (fileName == NULL)
-        return TCL_ERROR;
+        goto errorExit;
 
-    fileNum = open (fileName, O_RDONLY, 0);
-    if (fileNum < 0) {
-        Tcl_AppendResult (interp, "open failed on: ", fileName, ": ",
-                          Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
-    }
+    channel = Tcl_OpenFileChannel (interp, fileName, "r", 0);
+    if (channel == NULL)
+        goto errorExit;
+    
+    if (TclX_OSGetFileSize (channel, TCL_READABLE, &fileSize) == TCL_ERROR)
+        goto posixError;
 
-    if (fstat (fileNum, &statBuf) == -1)
-        goto accessError;
-
-    if ((statBuf.st_size < offset + length) || (offset < 0)) {
-        Tcl_AppendResult (interp, "range to eval outside of file bounds \"",
-                          fileName, "\"", (char *) NULL);
+    if ((fileSize < offset + length) || (offset < 0)) {
+        Tcl_AppendResult (interp, "range to eval outside of file bounds in \"",
+                          fileName, "\", index file probably corrupt",
+                          (char *) NULL);
         goto errorExit;
     }
-    if (lseek (fileNum, offset, 0) < 0)
-        goto accessError;
+
+    if (Tcl_Seek (channel, offset, SEEK_SET) < 0)
+        goto posixError;
 
     cmdBuffer = ckalloc (length + 1);
-    if (read (fileNum, cmdBuffer, length) != length)
-        goto accessError;
+    if (Tcl_Read (channel, cmdBuffer, length) != length)
+        goto posixError;
 
     cmdBuffer [length] = '\0';
 
-    if (close (fileNum) != 0)
-        goto accessError;
-    fileNum = -1;
+    if (Tcl_Close (NULL, channel) != 0)
+        goto posixError;
+    channel = NULL;
 
     oldScriptFile = iPtr->scriptFile;
     iPtr->scriptFile = fileName;
@@ -252,13 +291,13 @@ EvalFilePart (interp, fileName, offset, length)
     /*
      * Errors accessing the file once its opened are handled here.
      */
-  accessError:
+  posixError:
     Tcl_AppendResult (interp, "error accessing: ", fileName, ": ",
                       Tcl_PosixError (interp), (char *) NULL);
 
   errorExit:
-    if (fileNum > 0)
-        close (fileNum);
+    if (channel != NULL)
+        Tcl_Close (NULL, channel);
     Tcl_DStringFree (&pathBuf);
     return TCL_ERROR;
 }
@@ -310,7 +349,11 @@ MakeAbsFile (interp, fileName, absNamePtr)
      * Otherwise its relative to the current directory, get the directory
      * and go from here.
      */
+#ifdef WIN32
+    if (_getcwd (curDir, MAXPATHLEN) == NULL) {
+#else
     if (getcwd (curDir, MAXPATHLEN) == NULL) {
+#endif
         Tcl_AppendResult (interp, "error getting working directory name: ",
                           Tcl_PosixError (interp), (char *) NULL);
     }
@@ -657,14 +700,17 @@ BuildPackageIndex (interp, tlibFilePath)
  * Parameters
  *   o interp (I) - A pointer to the interpreter, error returned in result.
  *   o tlibFilePath (I) - Absolute path name to the library file.
+ *   o indexNameClass (I) - TCLLIB_TNDX if the index file should the suffix
+ *     ".tndx" or TCLLIB_TND if it should have ".tnd".
  * Returns:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
 static int
-LoadPackageIndex (interp, tlibFilePath)
-    Tcl_Interp *interp;
-    char       *tlibFilePath;
+LoadPackageIndex (interp, tlibFilePath, indexNameClass)
+    Tcl_Interp       *interp;
+    char             *tlibFilePath;
+    indexNameClass_t  indexNameClass;
 {
     Tcl_DString  tndxFilePath;
     struct stat  tlibStat;
@@ -672,10 +718,14 @@ LoadPackageIndex (interp, tlibFilePath)
 
     Tcl_DStringInit (&tndxFilePath);
 
+    /*
+     * Modify library file path to be the index file path.
+     */
     Tcl_DStringAppend (&tndxFilePath, tlibFilePath, -1);
     tndxFilePath.string [tndxFilePath.length - 3] = 'n';
     tndxFilePath.string [tndxFilePath.length - 2] = 'd';
-    tndxFilePath.string [tndxFilePath.length - 1] = 'x';
+    if (indexNameClass == TCLLIB_TNDX)
+        tndxFilePath.string [tndxFilePath.length - 1] = 'x';
 
     /*
      * Get library's modification time.  If the file can't be accessed, set
@@ -767,6 +817,88 @@ LoadOusterIndex (interp, indexFilePath)
 }
 
 /*-----------------------------------------------------------------------------
+ * LoadDirIndexCallback --
+ *
+ *   Function called for every directory entry for LoadDirIndexes.
+ *
+ * Parameters
+ *   o interp (I) - Interp is passed though.
+ *   o path (I) - Normalized path to directory.
+ *   o fileName (I) - Tcl normalized file name in directory.
+ *   o caseSensitive (I) - Are the file names case sensitive?  Always
+ *     TRUE on Unix.
+ *   o clientData (I) - Pointer to a boolean that is set to TRUE if an error
+ *     occures while porocessing the index file.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+LoadDirIndexCallback (interp, path, fileName, caseSensitive, clientData)
+    Tcl_Interp  *interp;
+    char        *path;
+    char        *fileName;
+    int          caseSensitive;
+    ClientData   clientData;
+{
+    int *indexErrorPtr = (int *) clientData;
+    int nameLen;
+    indexNameClass_t indexNameClass;
+    Tcl_DString filePath;
+
+    /*
+     * Figure out if its an index file.
+     */
+    
+    nameLen = strlen (fileName);
+    if ((nameLen > 5) && STREQU (fileName + nameLen - 5, ".tlib")) {
+        indexNameClass = TCLLIB_TNDX;
+    } else if ((nameLen > 4) && STREQU (fileName + nameLen - 4, ".tli")) {
+        indexNameClass = TCLLIB_TND;
+    } else if ((caseSensitive && STREQU (fileName, "tclIndex")) ||
+               ((!caseSensitive) && STREQU (fileName, "tclindex"))) {
+        indexNameClass = TCLLIB_OUSTER;
+    } else {
+        return TCL_OK;  /* Not an index, skip */
+    }
+
+    /*
+     * Assemble full path to library file.
+     */
+    Tcl_DStringInit (&filePath);
+    Tcl_DStringAppend (&filePath, path, -1);
+    Tcl_DStringAppend (&filePath, "/", -1);
+    Tcl_DStringAppend (&filePath, fileName, -1);
+
+    /*
+     * Skip index it can't be accessed.
+     */
+    if (access (filePath.string, R_OK) < 0)
+        goto exitPoint;
+
+    /*
+     * Process the index according to its type.
+     */
+    if (indexNameClass == TCLLIB_OUSTER) {
+        if (LoadOusterIndex (interp, filePath.string) != TCL_OK)
+            goto errorExit;
+    } else {
+        if (LoadPackageIndex (interp, filePath.string,
+                              indexNameClass) != TCL_OK)
+            goto errorExit;
+    }
+
+  exitPoint:
+    Tcl_DStringFree (&filePath);
+    return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&filePath);
+    *indexErrorPtr = TRUE;
+    return TCL_ERROR;
+}
+
+/*-----------------------------------------------------------------------------
  * LoadDirIndexes --
  *
  *     Load the indexes for all package library (.tlib) or a Ousterhout
@@ -784,75 +916,24 @@ LoadDirIndexes (interp, dirName)
     Tcl_Interp  *interp;
     char        *dirName;
 {
-    TCLX_DIRHANDLE handle;
-    int caseSensitive, status, tlibStyle, dirNameLen, nameLen;
-    char *fileName;
-    Tcl_DString filePath;
+    int indexError = FALSE;
 
-    if (TclX_OSopendir (NULL, dirName, &handle, &caseSensitive) != TCL_OK)
-        return TCL_OK;   /* Skip directory on error */
-
-    Tcl_DStringInit (&filePath);
-    Tcl_DStringAppend (&filePath, dirName, -1);
-    Tcl_DStringAppend (&filePath, "/",     -1);
-
-    dirNameLen = strlen (dirName) + 1;  /* Include `/' */
-
-    while (TRUE) {
-        status = TclX_OSreaddir (interp, handle, FALSE, &fileName);
-        if (status == TCL_ERROR)
-            goto errorExit;
-        if (status == TCL_BREAK)
-            break;
-
-        /*
-         * Figure out if its an index file.
-         */
-        nameLen = strlen (fileName);
-        if (nameLen < 5)
-            continue;  /* name too short for any name */
-        if (STREQU (fileName + nameLen - 5, ".tlib")) {
-            tlibStyle = TRUE;
-        } else if ((caseSensitive && STREQU (fileName, "tclIndex")) ||
-                   ((!caseSensitive) && STREQU (fileName, "tclindex"))) {
-            tlibStyle = FALSE;
-        } else {
-            continue;  /* Not an index */
+    /*
+     * This is a little tricky.  We want to skip directories we can't read,
+     * read, but if we get an error processing an index, we want
+     * to report it.  A boolean is passed in to indicate if the error
+     * returned involved parsing the file.
+     */
+    if (TclX_OSWalkDir (interp, dirName, FALSE, /* hidden */
+                        LoadDirIndexCallback,
+                        (ClientData) &indexError) == TCL_ERROR) {
+        if (!indexError) {
+            Tcl_ResetResult (interp);
+            return TCL_OK;
         }
-
-        /*
-         * Append the file name on to the directory.
-         */
-        Tcl_DStringTrunc (&filePath, dirNameLen);
-        Tcl_DStringAppend (&filePath, fileName, -1);
-        
-        /*
-         * Skip index it can't be accessed.
-         */
-        if (access (filePath.string, R_OK) < 0)
-            continue;
-        
-        /*
-         * Process the index according to its type.
-         */
-        if (tlibStyle) {
-            if (LoadPackageIndex (interp, filePath.string) != TCL_OK)
-                goto errorExit;
-        } else {
-            if (LoadOusterIndex (interp, filePath.string) != TCL_OK)
-                goto errorExit;
-        }
+        return TCL_ERROR;
     }
-
-    Tcl_DStringFree (&filePath);
-    if (TclX_OSclosedir (interp, handle) != TCL_OK)
-        goto errorExit;
     return TCL_OK;
-
-  errorExit:
-    Tcl_DStringFree (&filePath);
-    TclX_OSclosedir (NULL, handle);
-    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1318,24 +1399,27 @@ Tcl_LoadlibindexCmd (dummy, interp, argc, argv)
      */
     pathLen = strlen (pathName);
 
-    if ((pathLen > 5) && (pathName [pathLen - 5] == '.')) {
-        if (!STREQU (pathName + pathLen - 5, ".tlib"))
-            goto invalidName;
-        if (LoadPackageIndex (interp, pathName) != TCL_OK)
+    if ((pathLen > 5) && STREQU (pathName + pathLen - 5, ".tlib")) {
+        if (LoadPackageIndex (interp, pathName, TCLLIB_TNDX) != TCL_OK)
             goto errorExit;
-    } else {
-        if (!STREQU (pathName + pathLen - 9, "/tclIndex"))
-            goto invalidName;
+    } else if ((pathLen > 4) && STREQU (pathName + pathLen - 4, ".tli")) {
+        if (LoadPackageIndex (interp, pathName, TCLLIB_TND) != TCL_OK)
+            goto errorExit;
+    } else if (STREQU (pathName + pathLen - 9, "/tclIndex") ||
+               STREQU (pathName + pathLen - 9, "/tclindex")) {
+        /* Should we check for DOS before allowing lower case???*/
         if (LoadOusterIndex (interp, pathName) != TCL_OK)
             goto errorExit;
+    } else {
+        Tcl_AppendResult (interp, "invalid library name, must have an ",
+                          " extension of \".tlib\", \".tli\" or the name ",
+                          "\"tclIndex\", got \"", argv [1], "\"",
+                          (char *) NULL);
+        goto errorExit;
     }
+
     Tcl_DStringFree (&pathNameBuf);
     return TCL_OK;
-
-  invalidName:
-    Tcl_AppendResult (interp, "invalid library name, must have an extension ",
-                      "of \".tlib\" or the name \"tclIndex\", got \"",
-                      argv [1], "\"", (char *) NULL);
 
   errorExit:
     Tcl_DStringFree (&pathNameBuf);
@@ -1476,11 +1560,11 @@ TclX_LibraryInit (interp)
     Tcl_CallWhenDeleted (interp, TclLibCleanUp, (ClientData) infoPtr);
 
     Tcl_CreateCommand (interp, "auto_load_pkg", Tcl_Auto_load_pkgCmd,
-                      (ClientData) infoPtr, (void (*)()) NULL);
+                      (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "auto_load", Tcl_Auto_loadCmd,
-                      (ClientData) infoPtr, (void (*)()) NULL);
+                      (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "loadlibindex", Tcl_LoadlibindexCmd,
-                      (ClientData) infoPtr, (void (*)()) NULL);
+                      (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * Check for ITcl namespaces.

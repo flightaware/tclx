@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 6.0 1996/05/10 16:15:16 markd Exp $
+ * $Id: tclXbsearch.c,v 7.0 1996/06/16 05:30:05 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -159,10 +159,8 @@ ReadAndCompare (fileOffset, searchCBPtr)
     off_t          fileOffset;
     binSearchCB_t *searchCBPtr;
 {
-    int  recChar, status;
-
     if (Tcl_Seek (searchCBPtr->channel, fileOffset, SEEK_SET) < 0)
-        goto unixError;
+        goto posixError;
 
     /*
      * Go to beginning of next line by reading the remainder of the current
@@ -178,7 +176,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
                                   (char *) NULL);
                 return TCL_ERROR;
             }
-            goto unixError;
+            goto posixError;
         }
     }
     fileOffset = Tcl_Tell (searchCBPtr->channel);  /* Offset of next line */
@@ -204,7 +202,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
             searchCBPtr->cmpResult = -1;
             return TCL_OK;
         }
-        goto unixError;
+        goto posixError;
     }
 
     /*
@@ -221,7 +219,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
 
     return TCL_OK;
 
-  unixError:
+  posixError:
    Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
                      Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;
@@ -249,14 +247,11 @@ BinSearch (searchCBPtr)
     binSearchCB_t *searchCBPtr;
 {
     off_t middle, high, low;
-    struct stat statBuf;
-
-    if (fstat (TclX_ChannelFnum (searchCBPtr->channel, TCL_READABLE),
-               &statBuf) < 0)
-        goto unixError;
 
     low = 0;
-    high = statBuf.st_size;
+    if (TclX_OSGetFileSize (searchCBPtr->channel, TCL_READABLE,
+                            &high) != TCL_OK)
+        goto posixError;
 
     /*
      * "Binary search routines are never written right the first time around."
@@ -285,7 +280,7 @@ BinSearch (searchCBPtr)
         }
     }
 
-  unixError:
+  posixError:
    Tcl_AppendResult (searchCBPtr->interp, searchCBPtr->fileHandle, ": ",
                      Tcl_PosixError (searchCBPtr->interp), (char *) NULL);
    return TCL_ERROR;

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 6.0 1996/05/10 16:16:06 markd Exp $
+ * $Id: tclXsignal.c,v 7.0 1996/06/16 05:30:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -251,6 +251,11 @@ GetSignalState _ANSI_ARGS_((int              signalNum,
 static int
 SetSignalState _ANSI_ARGS_((int             signalNum,
                             signalProcPtr_t sigFunc));
+static int
+Tcl_SignalCmd _ANSI_ARGS_((ClientData  clientData,
+                           Tcl_Interp *interp,
+                           int         argc,
+                           char      **argv));
 
 static int
 BlockSignals _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -330,6 +335,11 @@ SetSignalStates _ANSI_ARGS_((Tcl_Interp *interp,
 static void
 SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
                               Tcl_Interp *interp));
+static int
+Tcl_KillCmd _ANSI_ARGS_((ClientData  clientData,
+                         Tcl_Interp *interp,
+                         int         argc,
+                         char      **argv));
 
 
 /*-----------------------------------------------------------------------------
@@ -1717,7 +1727,7 @@ Tcl_InitSignalHandling (interp)
     Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);
 
     Tcl_CreateCommand (interp, "signal", Tcl_SignalCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "kill", Tcl_KillCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 }

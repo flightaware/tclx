@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 6.0 1996/05/10 16:17:27 markd Exp $
+# $Id: filescan.test,v 7.0 1996/06/16 05:32:11 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -191,8 +191,16 @@ close $test2FH
 ValScan 1.4
 
 Test filescan-1.5 {filescan tests} {
-    system "diff TESTCHK.TMP TEST2.TMP"
-} 0 0
+    set fh [open TESTCHK.TMP]
+    set TESTCHK [read $fh]
+    close $fh
+    set fh [open TEST2.TMP]
+    set TEST2 [read $fh]
+    close $fh
+    cequal $TESTCHK $TEST2
+} 0 1
+catch {unset TESTCHK}
+catch {unset TEST2}
 
 scancontext delete $testCH
 

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 6.0 1996/05/10 16:15:54 markd Exp $
+ * $Id: tclXoscmds.c,v 7.0 1996/06/16 05:30:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -156,6 +156,68 @@ Tcl_UmaskCmd (clientData, interp, argc, argv)
     }
 
     return TCL_OK;
+}
+
+/*-----------------------------------------------------------------------------
+ * Tcl_LinkCmd --
+ *     Implements the TCL link command:
+ *         link ?-sym? srcpath destpath
+ *
+ * Results:
+ *  Standard TCL results, may return the UNIX system error message.
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_LinkCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    char *srcPath, *destPath;
+    Tcl_DString  srcPathBuf, destPathBuf;
+
+    Tcl_DStringInit (&srcPathBuf);
+    Tcl_DStringInit (&destPathBuf);
+
+    if ((argc < 3) || (argc > 4)) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " ?-sym? srcpath destpath", (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (argc == 4) {
+        if (!STREQU (argv [1], "-sym")) {
+            Tcl_AppendResult (interp, "invalid option, expected: \"-sym\", ",
+                              "got: ", argv [1], (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+
+    srcPath = Tcl_TranslateFileName (interp, argv [argc - 2], &srcPathBuf);
+    if (srcPath == NULL)
+        goto errorExit;
+
+    destPath = Tcl_TranslateFileName (interp, argv [argc - 1], &destPathBuf);
+    if (destPath == NULL)
+        goto errorExit;
+
+    if (argc == 4) {
+        if (TclX_OSsymlink (interp, srcPath, destPath, argv [0]) != TCL_OK)
+            goto errorExit;
+    } else {
+        if (TclX_OSlink (interp, srcPath, destPath, argv [0]) != TCL_OK) {
+            goto errorExit;
+        }
+    }
+
+    Tcl_DStringFree (&srcPathBuf);
+    Tcl_DStringFree (&destPathBuf);
+    return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&srcPathBuf);
+    Tcl_DStringFree (&destPathBuf);
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 6.0 1996/05/10 16:15:15 markd Exp $
+ * $Id: tclXAppInit.c,v 7.0 1996/06/16 05:30:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,8 +27,10 @@
  * Even if matherr is not used on this system, there is a dummy version
  * in libtcl.
  */
+#ifndef WIN32
 EXTERN int matherr ();
 int (*tclDummyMathPtr)() = matherr;
+#endif
 
 
 /*

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 6.0 1996/05/10 16:18:22 markd Exp $
+# $Id: unixcmds.test,v 7.0 1996/06/16 05:33:05 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -56,11 +56,11 @@ Test unixcmds-1.1 {link and unlink tests} {
                      [expr $dev1==$dev2]]
     unlink {LINK1.TMP LINK2.TMP}
     set result
-} 0 {1 1 1}
+} 0 {1 1 1} {unixOnly}
 
 Test unixcmds-1.2 {link and unlink tests} {
     list [catch {link LINK1.TMP LINK2.TMP} msg] [string tolower $msg]
-} 0 {1 {linking "link1.tmp" to "link2.tmp" failed: no such file or directory}}
+} 0 {1 {linking "link1.tmp" to "link2.tmp" failed: no such file or directory}} {unixOnly}
 
 Test unixcmds-1.3 {link and unlink tests} {
     link
@@ -68,14 +68,7 @@ Test unixcmds-1.3 {link and unlink tests} {
 
 # Test -sym only if we have symbolic links.
 
-catch {link -sym doesNotExist doesNotExist2} msg
-unlink -nocomplain doesNotExist2
-set haveSymLinks 1
-if {$msg == "symbolic links are not supported on this system"} {
-    set haveSymLinks 0
-}
-
-if $haveSymLinks {
+if [infox have_symlink] {
     Test unixcmds-1.4 {link and unlink tests} {
         unlink -nocomplain LINK2.TMP
         TestCreate LINK1.TMP
@@ -84,8 +77,12 @@ if $haveSymLinks {
         set result [file readlink LINK2.TMP]
         unlink {LINK1.TMP LINK2.TMP}
         set result
-    } 0 {LINK1.TMP}
+    } 0 {LINK1.TMP} {unixOnly}
 }
+
+Test unixcmds-1.1 {link and unlink tests} {
+    link LINK1.TMP LINK2.TMP
+} 1 {} {pcOnly}
 
 # Test unlink command.
 
@@ -115,6 +112,10 @@ Test unixcmds-2.4 {link and unlink tests} {
 
 # Test the times command (the best we can).
 
+if [cequal $tcl_platform(platform) windows] { ;# WIN32???
+    echo times win32 work not completed
+} else {
+
 Test unixcmds-3.1 {times tests} {
     llength [times]
 } 0 4
@@ -122,6 +123,7 @@ Test unixcmds-3.1 {times tests} {
 Test unixcmds-3.2 {times tests} {
     times foo
 } 1 {wrong # args: times}
+}
 
 # Test umask command.
 
@@ -131,7 +133,7 @@ Test unixcmds-4.1 {umask tests} {
     set newMask [umask]
     umask $oldMask
     set newMask
-} 0 666
+} 0 666 {unixOnly}
 
 Test unixcmds-4.2 {umask tests} {
     umask 999
@@ -140,6 +142,10 @@ Test unixcmds-4.2 {umask tests} {
 Test unixcmds-4.3 {umask tests} {
     umask 7 7
 } 1 {wrong # args: umask ?octalmask?}
+
+if [cequal $tcl_platform(platform) windows] { ;# WIN32???
+    echo system win32 work not completed
+} else {
 
 # Test the system command
 
@@ -162,6 +168,8 @@ Test unixcmds-5.4 {system tests} {
 Test unixcmds-5.5 {system tests} {
     system "exit 101"
 } 0 101
+
+}
 
 # Test the sleep command, as well as we can.
 

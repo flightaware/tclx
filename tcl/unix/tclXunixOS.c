@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 6.0 1996/05/10 16:18:44 markd Exp $
+ * $Id: tclXunixOS.c,v 7.0 1996/06/16 05:33:27 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -39,25 +39,46 @@ extern
 double ceil ();
 #endif
 
-#if 0
+/*
+ * Prototypes of internal functions.
+ */
+static int
+ChannelToFnum _ANSI_ARGS_((Tcl_Channel channel,
+                           int         direction));
+
 
 /*-----------------------------------------------------------------------------
- * TclX_OS --
- *   Portability interface to functionallity.
+ * ChannelToFnum --
+ *
+ *    Convert a channel to a file number.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o funcName (I) - Command or other name to use in not available error.
- * Results:
- *   TCL_OK or TCL_ERROR.
+ *   o channel (I) - Channel to get file number for.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
+ * Returns:
+ *   The file number or -1 if a file number is not associated with this access
+ * direction.
  *-----------------------------------------------------------------------------
  */
-int
-TclX_OS (interp, funcName)
-    Tcl_Interp *interp;
-    char       *funcName;
-#endif
+static int
+ChannelToFnum (channel, direction)
+    Tcl_Channel channel;
+    int         direction;
+{
+    Tcl_File file;
 
+    if (direction == 0) {
+        file = Tcl_GetChannelFile (channel, TCL_READABLE);
+        if (file == NULL)
+            file = Tcl_GetChannelFile (channel, TCL_WRITABLE);
+    } else {
+        file = Tcl_GetChannelFile (channel, direction);
+        if (file == NULL)
+            return -1;
+    }
+    return (int) Tcl_GetFileInfo (file, NULL);
+}
 
 /*-----------------------------------------------------------------------------
  * TclX_OSTicksToMS --
@@ -231,7 +252,7 @@ TclX_OSpipe (interp, fildes)
 int
 TclX_OSsetitimer (interp, seconds, funcName)
     Tcl_Interp *interp;
-    double      *seconds;
+    double     *seconds;
     char       *funcName;
 {
 /*
@@ -264,7 +285,7 @@ TclX_OSsetitimer (interp, seconds, funcName)
 #else
     unsigned useconds;
 
-    useconds = ceil (seconds);
+    useconds = ceil (*seconds);
     *seconds = alarm (useconds);
 
     return TCL_OK;
@@ -662,29 +683,41 @@ TclX_OSGetOpenFileMode (fileNum, mode, nonBlocking)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_OSopendir --
- *   Portability interface to opendir functionallity.
+ * TclX_OSWalkDir --
+ *   Portability interface to reading the contents of a directory.  The
+ * specified directory is walked and a callback is called on each entry.
+ * The "." and ".." entries are skipped.
  *
  * Parameters:
- *   o interp (I) - Errors returned in result.  Maybe NULL if error text is
- *     not to be returned.
+ *   o interp (I) - Interp to return errors in.
  *   o path (I) - Path to the directory.
- *   o handlePtr (O) - The handle to pass in other functions to access this
- *     directory is returned here.
- *   o caseSensitive (O) - Are the file names case sensitive?  Always TRUE
- *     on Unix.
+ *   o hidden (I) - Include hidden files.  Ignored on Unix.
+ *   o callback (I) - Callback function to call on each directory entry.
+ *     It should return TCL_OK to continue processing, TCL_ERROR if an
+ *     error occured and TCL_BREAK to stop processing.  The parameters are:
+ *        o interp (I) - Interp is passed though.
+ *        o path (I) - Normalized path to directory.
+ *        o fileName (I) - Tcl normalized file name in directory.
+ *        o caseSensitive (I) - Are the file names case sensitive?  Always
+ *          TRUE on Unix.
+ *        o clientData (I) - Client data that was passed.
+ *   o clientData (I) - Client data to pass to callback.
  * Results:
- *   TCL_OK or TCL_ERROR.
+ *   TCL_OK if completed directory walk.  TCL_BREAK if callback returned
+ * TCL_BREAK and TCL_ERROR if an error occured.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSopendir (interp, path, handlePtr, caseSensitive)
-    Tcl_Interp     *interp;
-    char           *path;
-    TCLX_DIRHANDLE *handlePtr;
-    int            *caseSensitive;
+TclX_OSWalkDir (interp, path, hidden, callback, clientData)
+    Tcl_Interp       *interp;
+    char             *path;
+    int               hidden;
+    TclX_WalkDirProc *callback;
+    ClientData        clientData;
 {
     DIR *handle;
+    struct dirent *entryPtr;
+    int result = TCL_OK;
     
     handle = opendir (path);
     if (handle == NULL)  {
@@ -694,33 +727,6 @@ TclX_OSopendir (interp, path, handlePtr, caseSensitive)
                               (char *) NULL);
         return TCL_ERROR;
     }
-    *handlePtr = handle;
-    *caseSensitive = TRUE;
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_OSreaddir --
- *   Portability interface to readdir functionallity.  The "." and ".." entries
- * are not returned.
- *
- * Parameters:
- *   o interp (I) - Errors returned in result.
- *   o handle (I) - The handle returned by TclX_OSopendir.
- *   o hidden (I) - Include hidden files.  Ignored on Unix.
- *   o fileNamePtr (O) - A pointer to the filename is returned here.
- * Results:
- *   TCL_OK, TCL_ERROR or TCL_BREAK if there are no more directory entries.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_OSreaddir (interp, handle, hidden, fileNamePtr)
-    Tcl_Interp     *interp;
-    TCLX_DIRHANDLE  handle;
-    int             hidden;
-    char          **fileNamePtr;
-{
-    struct dirent *entryPtr;
    
     while (TRUE) {
         entryPtr = readdir (handle);
@@ -733,33 +739,48 @@ TclX_OSreaddir (interp, handle, hidden, fileNamePtr)
                 (entryPtr->d_name [2] == '\0'))
                 continue;
         }
-        *fileNamePtr = entryPtr->d_name;
-        return TCL_OK;
+        result = (*callback) (interp, path, entryPtr->d_name,
+                              TRUE, clientData);
+        if (!((result == TCL_OK) || (result == TCL_CONTINUE)))
+            break;
     }
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_OSclosedir --
- *   Portability interface to closedir functionallity.
- *
- * Parameters:
- *   o interp (I) - Errors returned in result.  Maybe NULL if error text is
- *     not to be returned.
- *   o handle (I) - The handle returned by TclX_OSopendir.
- * Results:
- *   TCL_OK or TCL_ERROR.
- *-----------------------------------------------------------------------------
- */
-int
-TclX_OSclosedir (interp, handle)
-    Tcl_Interp     *interp;
-    TCLX_DIRHANDLE  handle;
-{
+    if (result == TCL_ERROR) {
+        closedir (handle);
+        return TCL_ERROR;
+    }
     if (closedir (handle) < 0) {
         if (interp != NULL)
             Tcl_AppendResult (interp, "close of directory failed: ",
                               Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
+    return result;
+}
+
+/*-----------------------------------------------------------------------------
+ * TclX_OSGetFileSize --
+ *   Portability interface to get the size of an open file.
+ *
+ * Parameters:
+ *   o channel (I) - Channel.
+ *   o fileSize (O) - File size is returned here.
+ *   o direction (I) - TCL_READABLE or TCL_WRITABLE, or zero.  If zero, then
+ *     return the first of the read and write numbers.
+ * Results:
+ *   TCL_OK or TCL_ERROR.  A POSIX error will be set.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_OSGetFileSize (channel, direction, fileSize)
+    Tcl_Channel  channel;
+    int          direction;
+    off_t       *fileSize;
+{
+    struct stat statBuf;
+
+    if (fstat (ChannelToFnum (channel, direction), &statBuf)) {
+        return TCL_ERROR;
+    }
+    *fileSize = statBuf.st_size;
     return TCL_OK;
 }

@@ -16,18 +16,42 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 6.0 1996/05/10 16:18:20 markd Exp $
+# $Id: testlib.tcl,v 7.0 1996/06/16 05:33:03 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 # Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
 # that variable.  Don't do this more than once.
 
-global SAVED_UNKNOWN TCL_PROGRAM env TEST_ERROR_INFO
+global SAVED_UNKNOWN TCL_PROGRAM env TEST_ERROR_INFO tcl_platform
 
 if [info exists env(TEST_ERROR_INFO)] {
     set TEST_ERROR_INFO 1
 }
+# Check configuration information that will determine which tests
+# to run.  To do this, create an array testConfig.  Each element
+# has a 0 or 1 value, and the following elements are defined:
+#	unixOnly -	1 means this is a UNIX platform, so it's OK
+#			to run tests that only work under UNIX.
+#	pcOnly -	1 means this is a PC platform, so it's OK to
+#			run tests that only work on PCs.
+#	unixOrPc -	1 means this is a UNIX or PC platform.
+#	tempNotPc -	The inverse of pcOnly.  This flag is used to
+#			temporarily disable a test.
+
+catch {unset testConfig}
+if {$tcl_platform(platform) == "unix"} {
+    set testConfig(unixOnly) 1
+    set testConfig(tempNotPc) 1
+} else {
+    set testConfig(unixOnly) 0
+} 
+if {$tcl_platform(platform) == "windows"} {
+    set testConfig(pcOnly) 1
+} else {
+    set testConfig(pcOnly) 0
+}
+set testConfig(unixOrPc) [expr $testConfig(unixOnly) || $testConfig(pcOnly)]
 
 #
 # Save path to Tcl program to exec, use it when running children in the
@@ -96,7 +120,16 @@ proc OutTestError {test_name test_description contents_of_test
 # Routine to execute tests and compare to expected results.
 #
 proc Test {test_name test_description contents_of_test passing_int_result
-           passing_result} {
+           passing_result {constraints {}}} {
+
+    # Check constraints to see if we should run this test.
+    foreach constraint $constraints {
+        if {![info exists testXConfig($constraint)] ||
+            !$testConfig($constraint)} {
+                return
+        }
+    }
+
     set int_result [catch {uplevel $contents_of_test} result]
 
     if {($int_result != $passing_int_result) ||

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 6.0 1996/05/10 16:15:53 markd Exp $
+ * $Id: tclXmsgcat.c,v 7.0 1996/06/16 05:30:40 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,9 +38,28 @@ static int
 CatOpFailed _ANSI_ARGS_((Tcl_Interp *interp,
                          CONST char *errorMsg));
 
+static int
+Tcl_CatopenCmd _ANSI_ARGS_((ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         argc,
+                            char      **argv));
+
+static int
+Tcl_CatgetsCmd _ANSI_ARGS_((ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         argc,
+                            char      **argv));
+
+static int
+Tcl_CatcloseCmd _ANSI_ARGS_((ClientData  clientData,
+                             Tcl_Interp *interp,
+                             int         argc,
+                             char      **argv));
+
 static void
 MsgCatCleanUp _ANSI_ARGS_((ClientData  clientData,
                            Tcl_Interp *interp));
+
 
 /*
  * Message catalog table is global, so it is shared between all interpreters
@@ -328,10 +347,10 @@ Tcl_InitMsgCat (interp)
      */
 
     Tcl_CreateCommand (interp, "catopen", Tcl_CatopenCmd, 
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "catgets", Tcl_CatgetsCmd, 
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "catclose", Tcl_CatcloseCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 }
 

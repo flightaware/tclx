@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 6.0 1996/05/10 16:15:31 markd Exp $
+ * $Id: tclXfilescan.c,v 7.0 1996/06/16 05:30:20 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -66,6 +66,18 @@ ScanContextCopyFile _ANSI_ARGS_((Tcl_Interp  *interp,
                                  char        *contextHandle,
                                  char        *fileHandle));
 
+static int
+Tcl_ScancontextCmd _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
+                                int         argc,
+                                char      **argv));
+
+static int
+Tcl_ScanmatchCmd _ANSI_ARGS_((ClientData  clientData,
+                              Tcl_Interp *interp,
+                              int         argc,
+                              char      **argv));
+
 static void
 CopyFileCloseHandler _ANSI_ARGS_((ClientData clientData));
 
@@ -83,6 +95,7 @@ SetMatchInfoVar _ANSI_ARGS_((Tcl_Interp       *interp,
                              scanContext_t    *contextPtr,
                              Tcl_Channel       channel,
                              char             *fileLine,
+                             off_t             fileOffset,
                              long              scanLineNum,
                              matchDef_t       *matchPtr,
                              Tcl_SubMatchInfo  subMatchInfo));
@@ -94,6 +107,12 @@ ScanFile _ANSI_ARGS_((Tcl_Interp    *interp,
 
 static void
 ScanFileCloseHandler _ANSI_ARGS_((ClientData clientData));
+
+static int
+Tcl_ScanfileCmd _ANSI_ARGS_((ClientData  clientData,
+                             Tcl_Interp *interp,
+                             int         argc,
+                             char      **argv));
 
 static void
 FileScanCleanUp _ANSI_ARGS_((ClientData  clientData,
@@ -230,11 +249,11 @@ SetCopyFile (interp, contextPtr, fileHandle)
     if (contextPtr->copyFileChannel != NULL) {
         Tcl_DeleteCloseHandler (contextPtr->copyFileChannel,
                                 CopyFileCloseHandler,
-                                contextPtr);
+                                (ClientData) contextPtr);
     }
     Tcl_CreateCloseHandler (copyFileChannel,
                             CopyFileCloseHandler,
-                            contextPtr);
+                            (ClientData) contextPtr);
     contextPtr->copyFileChannel = copyFileChannel;
     return TCL_OK;
 }
@@ -253,7 +272,7 @@ ClearCopyFile (contextPtr)
     if (contextPtr->copyFileChannel != NULL) {
         Tcl_DeleteCloseHandler (contextPtr->copyFileChannel,
                                 CopyFileCloseHandler,
-                                contextPtr);
+                                (ClientData) contextPtr);
         contextPtr->copyFileChannel = NULL;
     }
 }
@@ -274,7 +293,6 @@ ScanContextCopyFile (interp, scanTablePtr, contextHandle, fileHandle)
     char        *fileHandle;
 {
     scanContext_t *contextPtr, **tableEntryPtr;
-    Tcl_Channel    copyFileChannel;
 
     tableEntryPtr = (scanContext_t **) Tcl_HandleXlate (interp,
                                                         scanTablePtr,
@@ -478,6 +496,7 @@ argError:
  *   o contextPtr (I) - The current scan context.
  *   o channel (I) - The file being scanned.
  *   o fileLine (I) - The current line.
+ *   o fileOffset (I) - Offset into the file.
  *   o scanLineNum (I) - Current scanned line in the file.
  *   o matchPtr (I) - The current match, or NULL fo the default.
  *   o subMatchInfo (I) - Information about the subexpressions that matched,
@@ -486,18 +505,18 @@ argError:
  */
 static int
 SetMatchInfoVar (interp, storedLinePtr, contextPtr, channel, fileLine,
-                 scanLineNum, matchPtr, subMatchInfo)
+                 fileOffset, scanLineNum, matchPtr, subMatchInfo)
     Tcl_Interp       *interp;
     int              *storedLinePtr;
     scanContext_t    *contextPtr;
     Tcl_Channel       channel;
     char             *fileLine;
+    off_t             fileOffset;
     long              scanLineNum;
     matchDef_t       *matchPtr;
     Tcl_SubMatchInfo  subMatchInfo;
 {
     static char *MATCHINFO = "matchInfo";
-    off_t matchOffset;
     int idx, start, end;
     char key [32], buf [32], *varPtr, holdChar;
 
@@ -509,13 +528,11 @@ SetMatchInfoVar (interp, storedLinePtr, contextPtr, channel, fileLine,
 
         Tcl_UnsetVar (interp, MATCHINFO, 0);
         
-        matchOffset = Tcl_Tell (channel) - (strlen (fileLine) + 1);
-
         if (Tcl_SetVar2 (interp, MATCHINFO, "line", fileLine, 
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
 
-        sprintf (buf, "%ld", matchOffset);
+        sprintf (buf, "%ld", fileOffset);
         if (Tcl_SetVar2 (interp, MATCHINFO, "offset", buf,
                          TCL_LEAVE_ERR_MSG) == NULL)
             return TCL_ERROR;
@@ -591,7 +608,8 @@ ScanFile (interp, contextPtr, channel)
 {
     Tcl_DString buffer, lowerBuffer;
     matchDef_t *matchPtr;
-    int result, matchedAtLeastOne, status, storedThisLine;
+    off_t fileOffset;
+    int result, matchedAtLeastOne, storedThisLine;
     long scanLineNum = 0;
     Tcl_SubMatchInfo subMatchInfo;
 
@@ -610,6 +628,7 @@ ScanFile (interp, contextPtr, channel)
         if (!contextPtr->fileOpen)
             goto scanExit;  /* Closed by a callback */
 
+        fileOffset = Tcl_Tell (channel);
         if (Tcl_Gets (channel, &buffer) < 0) {
             if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))
                 goto scanExit;
@@ -640,14 +659,15 @@ ScanFile (interp, contextPtr, channel)
 
             matchedAtLeastOne = TRUE;
 
-            result = SetMatchInfoVar(interp,
-                                     &storedThisLine,
-                                     contextPtr,
-                                     channel,
-                                     buffer.string,
-                                     scanLineNum,
-                                     matchPtr,
-                                     subMatchInfo);
+            result = SetMatchInfoVar (interp,
+                                      &storedThisLine,
+                                      contextPtr,
+                                      channel,
+                                      buffer.string,
+                                      fileOffset,
+                                      scanLineNum,
+                                      matchPtr,
+                                      subMatchInfo);
             if (result != TCL_OK)
                 goto scanExit;
 
@@ -682,6 +702,7 @@ ScanFile (interp, contextPtr, channel)
                                      contextPtr,
                                      channel,
                                      buffer.string,
+                                     fileOffset,
                                      scanLineNum,
                                      NULL,
                                      NULL);
@@ -792,13 +813,13 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
     contextPtr->fileOpen = TRUE;
     Tcl_CreateCloseHandler (channel,
                             ScanFileCloseHandler,
-                            contextPtr);
+                            (ClientData) contextPtr);
     status = ScanFile (interp,
                        contextPtr,
                        channel);
     Tcl_DeleteCloseHandler (channel,
                             ScanFileCloseHandler,
-                            contextPtr);
+                            (ClientData) contextPtr);
 
     /*
      * If we set the copyfile, disassociate it from the context.
@@ -864,10 +885,10 @@ Tcl_InitFilescan (interp)
      * Initialize the commands.
      */
     Tcl_CreateCommand (interp, "scanfile", Tcl_ScanfileCmd, 
-                       (ClientData) scanTablePtr, (void (*)()) NULL);
+                       (ClientData) scanTablePtr, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "scanmatch", Tcl_ScanmatchCmd, 
-                       (ClientData) scanTablePtr, (void (*)()) NULL);
+                       (ClientData) scanTablePtr, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "scancontext", Tcl_ScancontextCmd,
-                       (ClientData) scanTablePtr, (void (*)()) NULL);
+                       (ClientData) scanTablePtr, (Tcl_CmdDeleteProc*) NULL);
 }
 

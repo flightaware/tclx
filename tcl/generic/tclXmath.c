@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 6.0 1996/05/10 16:15:51 markd Exp $
+ * $Id: tclXmath.c,v 7.0 1996/06/16 05:30:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,7 +20,7 @@
 
 /*
  * Define return of random function unless stdlib does it.  If we are using
- * out own version, make sure to define it.
+ * out own version, make sure to define it. ???Should be in port.h.
  */
 #if defined(NO_RANDOM) || defined(NO_RANDOM_PROTO)
 long random ();
@@ -37,6 +37,35 @@ ConvertIntOrDouble _ANSI_ARGS_((Tcl_Interp *interp,
 static long 
 ReallyRandom _ANSI_ARGS_((long my_range));
 
+static int
+Tcl_MaxCmd _ANSI_ARGS_((ClientData  clientData,
+                        Tcl_Interp *interp,
+                        int         argc,
+                        char      **argv));
+
+static int
+Tcl_MinCmd _ANSI_ARGS_((ClientData  clientData,
+                        Tcl_Interp *interp,
+                        int         argc,
+                        char      **argv));
+
+static int
+Tcl_MaxFunc _ANSI_ARGS_((ClientData  clientData,
+                         Tcl_Interp *interp,
+                         Tcl_Value  *args,
+                         Tcl_Value  *resultPtr));
+
+static int
+Tcl_MinFunc _ANSI_ARGS_((ClientData  clientData,
+                         Tcl_Interp *interp,
+                         Tcl_Value  *args,
+                         Tcl_Value  *resultPtr));
+
+static int
+Tcl_RandomCmd _ANSI_ARGS_((ClientData  clientData,
+                           Tcl_Interp *interp,
+                           int         argc,
+                           char      **argv));
 
 
 /*-----------------------------------------------------------------------------
@@ -286,7 +315,7 @@ Tcl_RandomCmd (clientData, interp, argc, argv)
         } else
             seed = (unsigned) (getpid() + time((time_t *)NULL));
 
-        srandom (seed);
+        (void) srandom (seed);
 
     } else {
         if (argc != 2)
@@ -332,11 +361,11 @@ Tcl_InitMath (interp)
     minMaxArgTypes [1] = TCL_EITHER;
 
     Tcl_CreateCommand (interp, "max", Tcl_MaxCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "min", Tcl_MinCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand (interp, "random", Tcl_RandomCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
     Tcl_CreateMathFunc (interp, "max",
                         2, minMaxArgTypes,

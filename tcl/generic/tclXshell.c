@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 6.0 1996/05/10 16:16:03 markd Exp $
+ * $Id: tclXshell.c,v 7.0 1996/06/16 05:30:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -106,7 +106,7 @@ ParseCmdLine (interp, argc, argv)
      * allow for script arguments starting with `-'.
      */
     while ((option = getopt (argc, argv, getoptSpec)) != -1) {
-        switch (option) {
+        switch ((char) option) {
           case 'q':
             if (quick)
                 goto usageError;

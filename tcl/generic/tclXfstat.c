@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 6.0 1996/05/10 16:15:35 markd Exp $
+ * $Id: tclXfstat.c,v 7.0 1996/06/16 05:30:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -21,7 +21,7 @@
  * Prototypes of internal functions.
  */
 static char *
-GetFileType _ANSI_ARGS_((struct stat  *statBufPtr));
+StrFileType _ANSI_ARGS_((struct stat  *statBufPtr));
 
 static void
 ReturnStatList _ANSI_ARGS_((Tcl_Interp   *interp,
@@ -42,7 +42,7 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
 
 
 /*-----------------------------------------------------------------------------
- * GetFileType --
+ * StrFileType --
  *
  *   Looks at stat mode and returns a text string indicating what type of
  * file it is.
@@ -54,7 +54,7 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
  *-----------------------------------------------------------------------------
  */
 static char *
-GetFileType (statBufPtr)
+StrFileType (statBufPtr)
     struct stat  *statBufPtr;
 {
     char *typeStr;
@@ -113,7 +113,7 @@ ReturnStatList (interp, fileNum, statBufPtr)
              "{mtime %ld} {nlink %ld} {size %ld} {uid %ld} {tty %d} {type %s}",
              (long) statBufPtr->st_mtime,  (long) statBufPtr->st_nlink,
              (long) statBufPtr->st_size,   (long) statBufPtr->st_uid,
-             (int) isatty (fileNum), GetFileType (statBufPtr));
+             (int) isatty (fileNum), StrFileType (statBufPtr));
     Tcl_AppendResult (interp, statList, (char *) NULL);
 
 }
@@ -196,7 +196,7 @@ ReturnStatArray (interp, fileNum, statBufPtr, arrayName)
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    if (Tcl_SetVar2 (interp, arrayName, "type", GetFileType (statBufPtr),
+    if (Tcl_SetVar2 (interp, arrayName, "type", StrFileType (statBufPtr),
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
@@ -246,15 +246,27 @@ ReturnStatItem (interp, fileNum, statBufPtr, itemName)
     else if (STREQU (itemName, "ctime"))
         sprintf (interp->result, "%ld", (long) statBufPtr->st_ctime);
     else if (STREQU (itemName, "type"))
-        interp->result = GetFileType (statBufPtr);
+        interp->result = StrFileType (statBufPtr);
     else if (STREQU (itemName, "tty"))
         interp->result = isatty (fileNum) ? "1" : "0";
     else if (STREQU (itemName, "remotehost")) {
+#ifndef WIN32
         if (TclXGetHostInfo (interp, fileNum, TRUE) != TCL_OK)
             return TCL_ERROR;
+#else
+	Tcl_AppendResult (interp, "Need to figure out TclXGetHostInfo",
+			  (char *) NULL);
+	return TCL_ERROR;
+#endif
     } else if (STREQU (itemName, "localhost")) {
+#ifndef WIN32
         if (TclXGetHostInfo (interp, fileNum, FALSE) != TCL_OK)
             return TCL_ERROR;
+#else
+	Tcl_AppendResult (interp, "Need to figure out TclXGetHostInfo",
+			  (char *) NULL);
+	return TCL_ERROR;
+#endif
     } else {
         Tcl_AppendResult (interp, "Got \"", itemName, "\", expected one of ",
                           "\"atime\", \"ctime\", \"dev\", \"gid\", \"ino\", ",

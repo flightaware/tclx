@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 6.0 1996/05/10 16:16:01 markd Exp $
+ * $Id: tclXselect.c,v 7.0 1996/06/16 05:30:50 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,7 +29,7 @@
  * This breaks with GNU libc headers...really should check with autoconf.
  */
 
-#ifndef __GNU_LIBRARY__
+#if !defined(__GNU_LIBRARY__) && !defined(WIN32)
 extern
 double floor ();
 #endif

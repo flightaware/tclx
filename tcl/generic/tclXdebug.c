@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdebug.c,v 6.0 1996/05/10 16:15:23 markd Exp $
+ * $Id: tclXdebug.c,v 7.0 1996/06/16 05:30:11 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,6 +76,12 @@ CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
                              char         *command,
                              Tcl_CmdProc  *cmdProc,
                              ClientData    cmdClientData,
+                             int           argc,
+                             char        **argv));
+
+static int
+Tcl_CmdtraceCmd _ANSI_ARGS_((ClientData    clientData,
+                             Tcl_Interp   *interp,
                              int           argc,
                              char        **argv));
 
@@ -569,7 +575,7 @@ Tcl_InitDebug (interp)
     Tcl_CallWhenDeleted (interp, DebugCleanUp, (ClientData) infoPtr);
 
     Tcl_CreateCommand (interp, "cmdtrace", Tcl_CmdtraceCmd, 
-                       (ClientData) infoPtr, (void (*)()) NULL);
+                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 }
 
 
