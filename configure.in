@@ -3,68 +3,16 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.9 2004/11/23 19:16:16 hobbs Exp $
+# RCS: @(#) $Id: configure.in,v 1.10 2004/12/02 20:49:36 hobbs Exp $
 
-AC_PREREQ(2.13)
+AC_INIT([Tclx], [8.4])
+FULL_VERSION="8.4.0"
 
-#--------------------------------------------------------------------
-# Sample configure.in for Tcl Extensions.  The only places you should
-# need to modify this file are marked by the string __CHANGE__
-#--------------------------------------------------------------------
-
-#--------------------------------------------------------------------
-# __CHANGE__
-# This very first macro is used to verify that the configure script can 
-# find the sources.  The argument to AC_INIT should be a unique filename
-# for this package, and can be a relative path, such as:
-#
-# AC_INIT(generic/tcl.h)
-#--------------------------------------------------------------------
-
-AC_INIT(generic/tclExtend.h)
+TEA_INIT([3.2])
 
 AC_CONFIG_AUX_DIR(tclconfig)
-CONFIGDIR=${srcdir}/tclconfig
-AC_SUBST(CONFIGDIR)
 
-#--------------------------------------------------------------------
-# __CHANGE__
-# Set your package name and version numbers here.  The NODOT_VERSION is
-# required for constructing the library name on systems that don't like
-# dots in library names (Windows).  The VERSION variable is used on the
-# other systems.
-#--------------------------------------------------------------------
-
-PACKAGE=tclx
-
-MAJOR_VERSION=8
-MINOR_VERSION=4
-PATCHLEVEL=.0
-
-VERSION=${MAJOR_VERSION}.${MINOR_VERSION}
-FULL_VERSION=${MAJOR_VERSION}.${MINOR_VERSION}${PATCHLEVEL}
-NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}
-
-AC_SUBST(PACKAGE)
-AC_SUBST(VERSION)
-AC_SUBST(FULL_VERSION)
-# This package name must be replaced statically for AC_SUBST to work
-AC_SUBST(tclx_LIB_FILE)
-
-#--------------------------------------------------------------------
-# We put this here so that you can compile with -DVERSION="1.2" to
-# encode the package version directly into the source files.
-#--------------------------------------------------------------------
-
-eval AC_DEFINE_UNQUOTED(VERSION, "${VERSION}")
-eval AC_DEFINE_UNQUOTED(FULL_VERSION, "${FULL_VERSION}")
-
-#--------------------------------------------------------------------
-# Call TEA_INIT as the first TEA_ macro to set up initial vars.
-# This will define a ${TEA_PLATFORM} variable == "unix" or "windows".
-#--------------------------------------------------------------------
-
-TEA_INIT
+AC_DEFINE_UNQUOTED(FULL_VERSION, "${FULL_VERSION}")
 
 #--------------------------------------------------------------------
 # Load the tclConfig.sh file
@@ -89,6 +37,111 @@ TEA_PREFIX
 
 TEA_SETUP_COMPILER
 
+TEA_ADD_SOURCES([
+	tclXbsearch.c tclXchmod.c   tclXcmdloop.c  tclXdebug.c
+	tclXdup.c     tclXfcntl.c   tclXfilecmds.c tclXfilescan.c
+	tclXflock.c   tclXfstat.c   tclXgeneral.c  tclXhandles.c
+	tclXinit.c    tclXkeylist.c tclXlib.c      tclXlist.c
+	tclXmath.c    tclXmsgcat.c  tclXprocess.c  tclXprofile.c
+	tclXselect.c  tclXsignal.c  tclXstring.c   tclXsocket.c
+	tclXutil.c    tclXoscmds.c  tclXlgets.c
+])
+TEA_ADD_HEADERS([generic/tclExtend.h])
+TEA_ADD_INCLUDES([-I\"`${CYGPATH} ${srcdir}/generic`\"])
+TEA_ADD_LIBS([])
+TEA_ADD_CFLAGS([])
+TEA_ADD_STUB_SOURCES([])
+TEA_ADD_TCL_SOURCES([
+	library/tclx.tcl	library/autoload.tcl
+	library/arrayprocs.tcl	library/compat.tcl
+	library/convlib.tcl	library/edprocs.tcl
+	library/events.tcl	library/forfile.tcl
+	library/globrecur.tcl	library/help.tcl
+	library/profrep.tcl	library/pushd.tcl
+	library/setfuncs.tcl	library/showproc.tcl
+	library/stringfile.tcl	library/tcllib.tcl
+	library/fmath.tcl	library/buildhelp.tcl
+])
+
+#--------------------------------------------------------------------
+# Choose which headers you need.  Extension authors should try very
+# hard to only rely on the Tcl public header files.  Internal headers
+# contain private data structures and are subject to change without
+# notice.
+# This MUST be called after TEA_LOAD_TCLCONFIG / TEA_LOAD_TKCONFIG
+#--------------------------------------------------------------------
+
+#TEA_PUBLIC_TCL_HEADERS
+TEA_PRIVATE_TCL_HEADERS
+
+#--------------------------------------------------------------------
+# __CHANGE__
+# A few miscellaneous platform-specific items:
+#
+# Define a special symbol for Windows (BUILD_tclx in this case) so
+# that we create the export library with the dll.  See sha1.h on how
+# to use this.
+#
+# Windows creates a few extra files that need to be cleaned up.
+# You can add more files to clean if your extension creates any extra
+# files.
+#
+# Define any extra compiler flags in the PACKAGE_CFLAGS variable.
+# These will be appended to the current set of compiler flags for
+# your system.
+#--------------------------------------------------------------------
+
+if test "${TEA_PLATFORM}" = "windows" ; then
+    AC_DEFINE(BUILD_tclx)
+    CLEANFILES="pkgIndex.tcl *.lib *.dll *.exp *.ilk *.pdb vc*.pch"
+    TEA_ADD_SOURCES([tclXwinCmds.c tclXwinDup.c tclXwinId.c tclXwinOS.c])
+    TEA_ADD_LIBS([wsock32.lib])
+    TEA_ADD_INCLUDES([-I\"`${CYGPATH} ${srcdir}/win`\"])
+else
+    CLEANFILES="pkgIndex.tcl"
+    TEA_ADD_SOURCES([tclXunixCmds.c tclXunixDup.c tclXunixId.c tclXunixOS.c
+			tclXunixSock.c])
+    TEA_ADD_LIBS([${MATH_LIBS}])
+    TEA_ADD_INCLUDES([-I\"${srcdir}/unix\"])
+fi
+AC_SUBST(CLEANFILES)
+
+#--------------------------------------------------------------------
+# Check whether --enable-threads or --disable-threads was given.
+#--------------------------------------------------------------------
+
+TEA_ENABLE_THREADS
+
+#--------------------------------------------------------------------
+# The statement below defines a collection of symbols related to
+# building as a shared library instead of a static library.
+#--------------------------------------------------------------------
+
+TEA_ENABLE_SHARED
+
+#--------------------------------------------------------------------
+# This macro figures out what flags to use with the compiler/linker
+# when building shared/static debug/optimized objects.  This information
+# can be taken from the tclConfig.sh file, but this figures it all out.
+#--------------------------------------------------------------------
+
+TEA_CONFIG_CFLAGS
+
+#--------------------------------------------------------------------
+# Set the default compiler switches based on the --enable-symbols option.
+#--------------------------------------------------------------------
+
+TEA_ENABLE_SYMBOLS
+
+#--------------------------------------------------------------------
+# Everyone should be linking against the Tcl stub library.  If you
+# can't for some reason, remove this definition.  If you aren't using
+# stubs, you also need to modify the SHLIB_LD_LIBS setting below to
+# link against the non-stubbed Tcl library.  Add Tk too if necessary.
+#--------------------------------------------------------------------
+
+AC_DEFINE(USE_TCL_STUBS)
+
 #--------------------------------------------------------------------
 # START Special case checks
 #--------------------------------------------------------------------
@@ -100,19 +153,12 @@ if test "${TEA_PLATFORM}" = "unix" ; then
     # If we don't have them, we have to copy the files.
     #-------------------------------------------------------------------------
     AC_PROG_LN_S
-    if test "$LN_S" = "ln"; then
-    	HAVE_SYML="NO"
-    else
-    	HAVE_SYML="YES"
-    fi
-    AC_SUBST(HAVE_SYML)
-    
+
     #-------------------------------------------------------------------------
     # Check for system header files.
     #-------------------------------------------------------------------------
     
-    AC_HEADER_CHECK(limits.h, , [AC_DEFINE(NO_LIMITS_H)])
-    AC_HEADER_CHECK(sys/select.h, , [AC_DEFINE(NO_SYS_SELECT_H)])
+    AC_CHECK_HEADER(sys/select.h, [AC_DEFINE(HAVE_SYS_SELECT_H)], )
     
     #-------------------------------------------------------------------------
     # What type do signals return?
@@ -184,7 +230,7 @@ main() {
     	    [AC_DEFINE(NO_FTRUNCATE)
     	     AC_CHECK_LIB(x, chsize,
     		    [AC_DEFINE(HAVE_CHSIZE)
-    		     [TCLX_LIBS="$TCLX_LIBS -lx"]])])
+    		     TEA_ADD_LIBS([-lx])])])
     
     #-------------------------------------------------------------------------
     # Check for various Unix or library functions that can be used by TclX.
@@ -219,7 +265,7 @@ main() {
     #-------------------------------------------------------------------------
     
     # This is needed for DEC Alphas
-    AC_CHECK_LIB(dnet_stub, main, [TCLX_LIBS="$TCLX_LIBS -ldnet_stub"])
+    AC_CHECK_LIB(dnet_stub, main, [TEA_ADD_LIBS([-ldnet_stub])])
     
     #-------------------------------------------------------------------------
     # Check for catgets.  Not the some systems (NetBSD 1.0) have catclose
@@ -235,15 +281,14 @@ main() {
     	    AC_DEFINE(BAD_CATCLOSE)])],
     	[AC_DEFINE(NO_CATGETS)])
 fi # end Unix only checks
-    
+
 #------------------------------------------------------------------------------
 # Check for missing functions that we need.  Must be done after library checks.
 #------------------------------------------------------------------------------
 
-AC_CHECK_FUNC(random, ,[LIBOBJS="$LIBOBJS random.${OBJEXT}"]
+AC_CHECK_FUNC(random, ,[AC_LIBOBJ([random])]
               AC_DEFINE(NO_RANDOM))
-AC_CHECK_FUNC(rename, ,[LIBOBJS="$LIBOBJS rename.${OBJEXT}"])
-AC_SUBST(LIBOBJS)
+AC_CHECK_FUNC(rename, ,[AC_LIBOBJ([rename])])
 
 #------------------------------------------------------------------------------
 # Determine if random is declared in stdlib.h or math.h.  If it is, we don't
@@ -257,19 +302,6 @@ AC_HEADER_EGREP("random", math.h, [found_random=YES])
 
 if test "$found_random" = "NO"; then
     AC_DEFINE(NO_RANDOM_PROTO)
-fi
-
-#------------------------------------------------------------------------------
-# Determine if floor is declared in stdlib.h or math.h.  If it is, we don't
-# want to redeclare it.
-#------------------------------------------------------------------------------
-
-found_floor=NO
-AC_HEADER_EGREP("floor", stdlib.h, [found_floor=YES])
-AC_HEADER_EGREP("floor", math.h, [found_floor=YES])
-
-if test "$found_floor" = "NO"; then
-    AC_DEFINE(NO_FLOOR_PROTO)
 fi
 
 #-------------------------------------------------------------------------
@@ -302,87 +334,8 @@ AC_SUBST(BUILDHELP)
 AC_SUBST(HELP_DIR)
 
 #--------------------------------------------------------------------
-# END Special case checks
+# End of special case checks
 #--------------------------------------------------------------------
-
-#--------------------------------------------------------------------
-# __CHANGE__
-# Choose which headers you need.  Extension authors should try very
-# hard to only rely on the Tcl public header files.  Internal headers
-# contain private data structures and are subject to change without
-# notice.
-# This MUST be called after TEA_LOAD_TCLCONFIG / TEA_LOAD_TKCONFIG
-#--------------------------------------------------------------------
-
-#TEA_PUBLIC_TCL_HEADERS
-TEA_PRIVATE_TCL_HEADERS
-
-#--------------------------------------------------------------------
-# __CHANGE__
-# A few miscellaneous platform-specific items:
-#
-# Define a special symbol for Windows (BUILD_tclx in this case) so
-# that we create the export library with the dll.  See sha1.h on how
-# to use this.
-#
-# Windows creates a few extra files that need to be cleaned up.
-# You can add more files to clean if your extension creates any extra
-# files.
-#
-# Define any extra compiler flags in the PACKAGE_CFLAGS variable.
-# These will be appended to the current set of compiler flags for
-# your system.
-#--------------------------------------------------------------------
-
-if test "${TEA_PLATFORM}" = "windows" ; then
-    AC_DEFINE(BUILD_tclx)
-    CLEANFILES="*.lib *.dll *.exp *.ilk *.pdb vc*.pch"
-    EXTRA_SOURCES='$(WIN_SOURCES)'
-    TCLX_INCLUDES="-I\"`${CYGPATH} ${srcdir}/generic`\" -I\"`${CYGPATH} ${srcdir}/win`\""
-else
-    CLEANFILES=
-    EXTRA_SOURCES='$(UNIX_SOURCES)'
-    TCLX_INCLUDES="-I${srcdir}/generic -I${srcdir}/unix"
-fi
-AC_SUBST(CLEANFILES)
-AC_SUBST(EXTRA_SOURCES)
-AC_SUBST(TCLX_INCLUDES)
-
-#--------------------------------------------------------------------
-# Check whether --enable-threads or --disable-threads was given.
-#--------------------------------------------------------------------
-
-TEA_ENABLE_THREADS
-
-#--------------------------------------------------------------------
-# The statement below defines a collection of symbols related to
-# building as a shared library instead of a static library.
-#--------------------------------------------------------------------
-
-TEA_ENABLE_SHARED
-
-#--------------------------------------------------------------------
-# This macro figures out what flags to use with the compiler/linker
-# when building shared/static debug/optimized objects.  This information
-# can be taken from the tclConfig.sh file, but this figures it all out.
-#--------------------------------------------------------------------
-
-TEA_CONFIG_CFLAGS
-
-#--------------------------------------------------------------------
-# Set the default compiler switches based on the --enable-symbols option.
-#--------------------------------------------------------------------
-
-TEA_ENABLE_SYMBOLS
-
-#--------------------------------------------------------------------
-# Everyone should be linking against the Tcl stub library.  If you
-# can't for some reason, remove this definition.  If you aren't using
-# stubs, you also need to modify the SHLIB_LD_LIBS setting below to
-# link against the non-stubbed Tcl library.  Add Tk too if necessary.
-#--------------------------------------------------------------------
-
-AC_DEFINE(USE_TCL_STUBS)
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It
@@ -391,18 +344,6 @@ AC_DEFINE(USE_TCL_STUBS)
 #--------------------------------------------------------------------
 
 TEA_MAKE_LIB
-
-#--------------------------------------------------------------------
-# __CHANGE__
-# Add platform libs to LIBS or SHLIB_LD_LIBS as necessary.
-#--------------------------------------------------------------------
-
-if test "${TEA_PLATFORM}" = "unix" ; then
-    TEA_TCL_LINK_LIBS
-    LIBS="${LIBS} ${MATH_LIBS}"
-else
-    LIBS="${LIBS} wsock32.lib"
-fi
 
 #--------------------------------------------------------------------
 # Find tclsh so that we can run pkg_mkIndex to generate the pkgIndex.tcl
@@ -419,4 +360,4 @@ TEA_PROG_TCLSH
 # Finally, substitute all of the various values into the Makefile.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile pkgIndex.tcl])
+AC_OUTPUT([Makefile])

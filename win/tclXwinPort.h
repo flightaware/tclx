@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 1.1 2001/10/24 23:31:50 hobbs Exp $
+ * $Id: tclXwinPort.h,v 1.2 2002/04/04 06:13:21 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -51,9 +51,6 @@
 #endif
 #ifndef NO_SIGACTION
 #   define NO_SIGACTION
-#endif
-#ifndef NO_SYS_SELECT_H
-#   define NO_SYS_SELECT_H
 #endif
 #ifndef NO_TRUNCATE
 #   define NO_TRUNCATE    /* FIX: Are we sure there is no way to truncate???*/

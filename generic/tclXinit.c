@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 1.2 2002/04/02 03:01:01 hobbs Exp $
+ * $Id: tclXinit.c,v 1.3 2002/04/03 02:50:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,7 +29,7 @@ static char initScript[] = "if {[info proc ::tclx::Init]==\"\"} {\n\
 "    source -rsrc tclx.tcl\n"
 #else
 "    global tclx_library\n\
-    tcl_findLibrary tclx " VERSION " " FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
+    tcl_findLibrary tclx " PACKAGE_VERSION " " FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
 #endif
 "  }\n\
 }\n\
@@ -84,7 +84,7 @@ Tclx_SafeInit (interp)
 	(Tcl_PkgRequire(interp, "Tcl", "8.0", 0) == NULL)
 #endif
 	|| (Tclxcmd_Init(interp) != TCL_OK)
-	|| (Tcl_PkgProvide(interp, "Tclx", VERSION) != TCL_OK)
+	|| (Tcl_PkgProvide(interp, "Tclx", PACKAGE_VERSION) != TCL_OK)
 	) {
 	Tcl_AddErrorInfo (interp, "\n    (in TclX_SafeInit)");
 	return TCL_ERROR;
@@ -108,7 +108,8 @@ Tclxcmd_Init (interp)
     /*
      * These are ok in safe interps.
      */
-    TclX_SetAppInfo(TRUE, "TclX", "Extended Tcl", VERSION, TCLX_PATCHLEVEL);
+    TclX_SetAppInfo(TRUE, "TclX", "Extended Tcl",
+	    PACKAGE_VERSION, TCLX_PATCHLEVEL);
 
     TclX_BsearchInit (interp);
     TclX_FstatInit (interp);

@@ -1,3 +1,21 @@
+2005-03-23  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* Makefile.in, tclconfig/tcl.m4: Update to TEA 3.2, refactoring
+	* configure, configure.in:       some #defines.  Still needs to
+	have header usage on AIX checked, where 'kill' in tclXsignal is
+	crashing the test suite.
+	* pkgIndex.tcl.in, tclconfig/ChangeLog (removed):
+	* generic/tclXinit.c: use TEA3 define names (PACKAGE_*)
+	* generic/tclXselect.c: remove NO_SYS_SELECT_H, rely on
+	HAVE_SYS_SELECT_H from tcl's tclUnixPort.h
+	* win/tclXwinPort.h: remove NO_SYS_SELECT_H define
+	* unix/tclXunixPort.h: remove NO_FLOOR_PROTO_ check
+
+	* generic/tclXkeylist.c (DeleteKeyedListEntry): fix hash
+	consistency checks when missing cached entry.
+
+	* generic/tclXlib.c: remove trailing , in enum typdef
+
 2005-03-18  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* Makefile.in (AR): use @AR@

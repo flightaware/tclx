@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 8.4 1999/03/31 06:37:53 markd Exp $
+ * $Id: tclXunixPort.h,v 8.1 2001/10/24 23:31:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -102,10 +102,6 @@ extern int h_errno;
  */
 #if defined(NO_RANDOM) || defined(NO_RANDOM_PROTO)
 extern long random ();
-#endif
-
-#ifdef NO_FLOOR_PROTO_
-extern double floor ();
 #endif
 
 /*
