@@ -1,8 +1,10 @@
                          TclX bug, idea and task list
 *** Serious Bugs ***
+o objcmd writing man page not installed.
 
 *** Minor bugs and enhancements ***
 
+o add man compress install
 o Need to either document how namspaces are used in #@package or normalize
   them as with auto_qualify.  
 
@@ -42,3 +44,4 @@ o Making packages out of some of the new TclX functionallity, such as
 o Install instructions for WinDozes.
 
 o Help change to search for file path tail needs documented and tests.
+

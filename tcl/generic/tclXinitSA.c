@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.8 1997/08/17 08:44:44 markd Exp $
+ * $Id: tclXinitSA.c,v 8.1 1997/08/30 22:29:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -96,7 +96,7 @@ static char *tclxIndexScript[] = {
     "set auto_index(helpcd) {source -rsrc help}",
     "set auto_index(helppwd) {source -rsrc help}",
     "set auto_index(apropos) {source -rsrc help}",
-    "set auto_index(auto_load_ouster_index) {source -rsrc loadouster}",
+    "set auto_index(auto_load) {source -rsrc autoload}",
     "set auto_index(profrep:sortcmp) {source -rsrc profrep}",
     "set auto_index(profrep:sort) {source -rsrc profrep}",
     "set auto_index(profrep:print) {source -rsrc profrep}",
@@ -130,7 +130,7 @@ static char *tclxIndexScript[] = {
 #include "./forfile.c"
 #include "./globrecur.c"
 #include "./help.c"
-#include "./loadouster.c"
+#include "./autoload.c"
 #include "./profrep.c"
 #include "./pushd.c"
 #include "./setfuncs.c"
@@ -152,7 +152,7 @@ static Tcl_StaticFile table[] = {
     {"forfile", forfile_c},
     {"globrecur", globrecur_c},
     {"help", help_c},
-    {"loadouster", loadouster_c},
+    {"autoload", autoload_c},
     {"profrep", profrep_c},
     {"pushd", pushd_c},
     {"setfuncs", setfuncs_c},

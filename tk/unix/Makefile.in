@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.19 1997/10/09 20:57:47 markd Exp $
+# $Id: Makefile.in,v 8.20 1997/11/10 08:35:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -276,7 +276,7 @@ tkXinitSA.o: ${TKX_GENERIC_DIR}/tkXinitSA.c ${STANDALONE_SRCS}
 tkXinitDSA.o: ${TKX_GENERIC_DIR}/tkXinitDSA.c Makefile
 	${CC} -c ${CC_SWITCHES} ${TKX_GENERIC_DIR}/tkXinitDSA.c
 
-tkXAppInitSA.c: tkXAppInitSA.c Makefile
+tkXAppInitSA.c: ${TKX_UNIX_SRC_DIR}/tkXAppInit.c Makefile
 	rm -f tkXinitSA.c
 	sed -e s/Tclx_Init/Tclx_InitStandAlone/ \
 	    -e s/Tcl_Init/Tcl_InitStandAlone/ \
