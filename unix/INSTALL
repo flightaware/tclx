@@ -59,34 +59,25 @@ HOW TO BUILD EXTENDED TCL
     o Configure and compile Tcl 7.0 following the instructions the comes with
       Tcl.  You do not need to install it.
 
-    o If you are using a make were the make include format is:
-          `.include "file"'
-      instead of
-          `include file'
-      enter the command:
-          sh tools/editmkincl.sh
-      To convert all of the Makefile.  You need only do this once.
-
     o If you are going to be using Tk and want to build an Extended Tcl wish
       shell (wishx), configure and compile Tk 3.3.  You do not need to install
       it.
 
-    o Edit Config.mk following the instructions in that file. You must set
-      TCL_CONFIG_FILE to the name of the file in the config directory.
-      If you are not going to build wishx, comment out the line defining
-      TK_BUILD.
-
-    o TCL_CONFIG_FILE contains the name of a file in the config directory that
-      defines your machine-specific configuration.  If there is not one there
-      for you system you will have to construct on.  Use a similar system as a
-      template and read Config.mk for a description of the attributes and
-      flags that can be defined.  If you create a new configuration file,
-      send it to us.
+    o Edit Config.mk following the instructions in that file.  This file
+      is used to specify values that can't be figured out by the configure
+      script.  This includes the location of the Tcl and Tk distributions.
+      Its also used to specify the sections that the Tcl manual pages are
+      to be installed in.
 
     o Note that the site specific installation options should be set in
       Config.mk before compiling.  It is especially important to set the value
       for TCL_MASTERDIR and TK_MASTERDIR in Config.mk before compiling TclX.
       See the section on "Installing Extended Tcl" for more details.
+
+    o Enter ./configure to run the configure script.
+
+    o Config.mk can be used to override several values that configure might
+      have gotten wrong or that you desire to be change (like gcc vs cc).
 
     o Now do a "make".  If all goes well, this will build an extended
       "libtclx.a" and the "tcl" executable in the tclmaster directory.  If Tk

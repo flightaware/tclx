@@ -344,7 +344,6 @@
 ./tools/bldmanhelp.tcl
 ./tools/buildutil.tcl
 ./tools/cpmanpages.tcl
-./tools/editmkincl.sh
 ./tools/getversion.c
 ./tools/installTcl.tcl
 ./tools/tclmanpages

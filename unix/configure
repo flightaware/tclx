@@ -125,7 +125,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.30 
+# From configure.in Revision: 1.1 
 
 
 
@@ -1316,7 +1316,8 @@ do
     fi
 done
 
-mandirs="/usr/man/man1 /usr/man/cat1 /usr/share/man1 /usr/share/man1"
+mandirs="/usr/man/man1   /usr/man/cat1   /usr/share/man1   /usr/share/man1
+         /usr/man/man1.Z /usr/man/cat1.Z /usr/share/man1.Z /usr/share/man1.Z"
 gotnodotdir="NO"
 for d in $mandirs
 do

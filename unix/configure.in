@@ -11,11 +11,11 @@ dnl	Although the generated configure script is under the GNU Public,
 dnl	License Extended Tcl remains freely redistributable for any purpose,
 dnl	including commercial use.
 dnl--------------------------------------------------------------------
-dnl $Id$
+dnl $Id: configure.in,v 1.1 1993/07/30 15:09:18 markd Exp markd $
 dnl--------------------------------------------------------------------
 
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 1.30 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.1 $),)dnl
 
 
 AC_CONFIG_HEADER(src/tclXconfig.h)
@@ -228,7 +228,8 @@ do
     fi
 done
 
-mandirs="/usr/man/man1 /usr/man/cat1 /usr/share/man1 /usr/share/man1"
+mandirs="/usr/man/man1   /usr/man/cat1   /usr/share/man1   /usr/share/man1
+         /usr/man/man1.Z /usr/man/cat1.Z /usr/share/man1.Z /usr/share/man1.Z"
 gotnodotdir="NO"
 for d in $mandirs
 do
