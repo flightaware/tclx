@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.8 1996/09/04 16:16:47 markd Exp $
+# $Id: Makefile.in,v 7.9 1996/09/09 22:52:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -331,7 +331,7 @@ runtest: Makefile
 #------------------------------------------------------------------------------
 # Run the UCB and Extended Tcl tests.
 
-test: ucbtests extdtests
+test: ucbtests testx
 
 ucbtests: all
 	@echo ""
@@ -347,7 +347,7 @@ ucbtests: all
 	@echo ""
 	./runtest -c "cd ${TCL_SRC}/tests; source ${srcbasedir}/tcl/tests/all"
 
-extdtests: all
+testx: all
 	./runtest -c "cd ${srcbasedir}/tcl/tests; source all"
 
 #------------------------------------------------------------------------------

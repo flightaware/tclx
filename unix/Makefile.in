@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.0 1996/06/16 05:34:15 markd Exp $
+# $Id: Makefile.in,v 7.1 1996/08/17 02:10:21 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -99,8 +99,8 @@ test: all
 ucbtests: all
 	cd ../tcl/unix; ${MAKE} ucbtests
 
-extdtests: all
-	cd ../tcl/unix; ${MAKE} extdtests
+testx: all
+	cd ../tcl/unix; ${MAKE} testx
 
 tktest: all
 	cd ../tk/unix;  ${MAKE} test

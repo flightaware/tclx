@@ -168,7 +168,7 @@ library.
 
     o To run the Tk tests with wishx, type "make tktest".
 
-    o The Extended Tcl tests may be run by themselves with "make extdtests".
+    o The Extended Tcl tests may be run by themselves with "make testx".
 
     o If a test fails, please dig into the test and the C source for the
       function being tested, fix the bug and mail us the change.  If you're
