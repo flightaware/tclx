@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 3.3 1994/06/28 15:44:52 markd Exp markd $
+ * $Id: tclXgeneral.c,v 4.0 1994/07/16 05:27:00 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -193,7 +193,7 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
     int   result = TCL_OK;
     long  i, first, limit, incr = 1;
     char *command;
-    char  itxt [12];
+    char  itxt [32];
 
     if ((argc < 5) || (argc > 6)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
@@ -222,24 +222,22 @@ Tcl_LoopCmd (dummy, interp, argc, argv)
             return TCL_ERROR;
 
         result = Tcl_Eval (interp, command);
-        if (result != TCL_OK) {
-            if (result == TCL_CONTINUE) {
+        if (result == TCL_CONTINUE) {
+            result = TCL_OK;
+        } else if (result != TCL_OK) {
+            if (result == TCL_BREAK) {
                 result = TCL_OK;
-            } else if (result == TCL_BREAK) {
-                result = TCL_OK;
-                break;
             } else if (result == TCL_ERROR) {
                 char buf [64];
-
+                
                 sprintf (buf, "\n    (\"loop\" body line %d)", 
                          interp->errorLine);
                 Tcl_AddErrorInfo (interp, buf);
-                break;
-            } else {
-                break;
             }
+            break;
         }
     }
+
     /*
      * Set variable to its final value.
      */
