@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.24 1993/09/07 14:44:09 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.25 1993/09/16 05:37:54 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -25,6 +25,14 @@
 #include "tclUnix.h"
 
 #include <sys/param.h>
+
+/*
+ * Use the real functions, not the Tcl interface that hides signals.
+ */
+#undef open
+#undef read
+#undef waitpid
+#undef write
 
 /*
  * If tclUnix.h has already included time.h, don't include it again, some
