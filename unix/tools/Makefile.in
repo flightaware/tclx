@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.0 1993/11/19 06:59:51 markd Rel markd $
+# $Id: Makefile.in,v 3.1 1993/11/19 07:41:10 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -64,7 +64,7 @@ cpmanpages: cpmanpages.tcl buildutil.tcl
 	cat ${srcdir}/buildutil.tcl ${srcdir}/cpmanpages.tcl >cpmanpages
 
 cphelpdir: cphelpdir.sh
-	rm, -f cphelpdir
+	rm -f cphelpdir
 	echo ":"                           >cphelpdir
 	echo "TOOLS=${bldbasedir}/tools"   >cphelpdir
 	cat ${srcdir}/cphelpdir.sh        >>cphelpdir
