@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.6 1997/07/04 20:24:01 markd Exp $
+ * $Id: tclXselect.c,v 8.7 1997/07/08 06:35:28 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -293,7 +293,6 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
     if (objc < 2) {
         return TclX_WrongArgs (interp, objv [0], 
                       " readFileIds ?writeFileIds? ?exceptFileIds? ?timeout?");
-        return TCL_ERROR;
     }
 
     /*
