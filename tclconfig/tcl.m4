@@ -398,7 +398,8 @@ AC_DEFUN(TEA_ENABLE_SHARED, [
 #------------------------------------------------------------------------
 # TEA_ENABLE_THREADS --
 #
-#	Specify if thread support should be enabled
+#	Specify if thread support should be enabled.  If "yes" is
+#	specified as an arg (optional), threads are enabled by default.
 #
 # Arguments:
 #	none
@@ -418,72 +419,87 @@ AC_DEFUN(TEA_ENABLE_SHARED, [
 #------------------------------------------------------------------------
 
 AC_DEFUN(TEA_ENABLE_THREADS, [
-    AC_MSG_CHECKING([for building with threads])
     AC_ARG_ENABLE(threads, [  --enable-threads        build with threads],
-	[tcl_ok=$enableval], [tcl_ok=no])
+	[tcl_ok=$enableval], [tcl_ok=$1])
 
     if test "$tcl_ok" = "yes"; then
 	TCL_THREADS=1
 
-	case "`uname -s`" in
-	    *win32* | *WIN32* | *CYGWIN_NT* | *CYGWIN_98* | *CYGWIN_95*)
-		AC_MSG_RESULT([yes])
-		;;
-	    *)
-		AC_DEFINE(_REENTRANT)
-		AC_DEFINE(_THREAD_SAFE)
-		AC_CHECK_LIB(pthread,pthread_mutex_init,tcl_ok=yes,tcl_ok=no)
-		if test "$tcl_ok" = "no"; then
-		    # Check a little harder for __pthread_mutex_init in the
-		    # same library, as some systems hide it there until
-		    # pthread.h is defined.  We could alternatively do an
-		    # AC_TRY_COMPILE with pthread.h, but that will work with
-		    # libpthread really doesn't exist, like AIX 4.2.
-		    # [Bug: 4359]
-		    AC_CHECK_LIB(pthread, __pthread_mutex_init,
-			tcl_ok=yes, tcl_ok=no)
-		fi
-
+	if test "${TEA_PLATFORM}" != "windows" ; then
+	    # We are always OK on Windows, so check what this platform wants.
+	    AC_DEFINE(_REENTRANT)
+	    AC_DEFINE(_THREAD_SAFE)
+	    AC_CHECK_LIB(pthread,pthread_mutex_init,tcl_ok=yes,tcl_ok=no)
+	    if test "$tcl_ok" = "no"; then
+		# Check a little harder for __pthread_mutex_init in the
+		# same library, as some systems hide it there until
+		# pthread.h is defined.	 We could alternatively do an
+		# AC_TRY_COMPILE with pthread.h, but that will work with
+		# libpthread really doesn't exist, like AIX 4.2.
+		# [Bug: 4359]
+		AC_CHECK_LIB(pthread, __pthread_mutex_init,
+		    tcl_ok=yes, tcl_ok=no)
+	    fi
+	    
+	    if test "$tcl_ok" = "yes"; then
+		# The space is needed
+		THREADS_LIBS=" -lpthread"
+	    else
+		AC_CHECK_LIB(pthreads, pthread_mutex_init,
+		    tcl_ok=yes, tcl_ok=no)
 		if test "$tcl_ok" = "yes"; then
 		    # The space is needed
-		    THREADS_LIBS=" -lpthread"
+		    THREADS_LIBS=" -lpthreads"
 		else
-		    AC_CHECK_LIB(pthreads, pthread_mutex_init,
+		    AC_CHECK_LIB(c, pthread_mutex_init,
 			tcl_ok=yes, tcl_ok=no)
-		    if test "$tcl_ok" = "yes"; then
-			# The space is needed
-			THREADS_LIBS=" -lpthreads"
-		    else
-			AC_CHECK_LIB(c, pthread_mutex_init,
+		    if test "$tcl_ok" = "no"; then
+			AC_CHECK_LIB(c_r, pthread_mutex_init,
 			    tcl_ok=yes, tcl_ok=no)
-		    	if test "$tcl_ok" = "no"; then
-			    AC_CHECK_LIB(c_r, pthread_mutex_init,
-				tcl_ok=yes, tcl_ok=no)
-			    if test "$tcl_ok" = "yes"; then
-				# The space is needed
-				THREADS_LIBS=" -pthread"
-			    else
-				TCL_THREADS=0
-				AC_MSG_WARN("Don t know how to find pthread lib on your system - thread support disabled")
-			    fi
-		    	fi
+			if test "$tcl_ok" = "yes"; then
+			    # The space is needed
+			    THREADS_LIBS=" -pthread"
+			else
+			    TCL_THREADS=0
+			    AC_MSG_WARN("Don t know how to find pthread lib on your system - thread support disabled")
+			fi
 		    fi
 		fi
-
-		# Does the pthread-implementation provide
-		# 'pthread_attr_setstacksize' ?
-		AC_CHECK_FUNCS(pthread_attr_setstacksize)
-		;;
-	esac
+	    fi
+	    
+	    # Does the pthread-implementation provide
+	    # 'pthread_attr_setstacksize' ?
+	    AC_CHECK_FUNCS(pthread_attr_setstacksize)
+	fi
     else
 	TCL_THREADS=0
     fi
+    # Do checking message here to not mess up interleaved configure output
+    AC_MSG_CHECKING([for building with threads])
     if test "${TCL_THREADS}" = "1"; then
 	AC_DEFINE(TCL_THREADS)
 	AC_MSG_RESULT([yes])
     else
 	AC_MSG_RESULT([no (default)])
     fi
+    # TCL_THREADS sanity checking.  See if our request for building with
+    # threads is the same as the way Tcl was built.  If not, warn the user.
+    case ${TCL_DEFS} in
+	*THREADS=1*)
+	    if test "${TCL_THREADS}" = "0"; then
+		AC_MSG_WARN([
+    Building ${PACKAGE} without threads enabled, but building against a Tcl
+    that IS thread-enabled.])
+	    fi
+	    ;;
+	*)
+	    if test "${TCL_THREADS}" = "1"; then
+		AC_MSG_WARN([
+    --enable-threads requested, but attempting building against a Tcl
+    that is NOT thread-enabled.])
+	    fi
+	    ;;
+    esac
     AC_SUBST(TCL_THREADS)
 ])
 
@@ -817,7 +833,10 @@ dnl AC_CHECK_TOOL(AR, ar, :)
 		SHLIB_LD="${LINKBIN} -dll -nologo"
 		UNSHARED_LIB_SUFFIX='${TCL_TRIM_DOTS}\$\{DBGX\}.lib'
 		EXTRA_CFLAGS="-YX"
-		LDFLAGS_DEBUG="-debug:full -debugtype:cv -warn:2"
+		# For information on what debugtype is most useful, see:
+		# http://msdn.microsoft.com/library/en-us/dnvc60/html/gendepdebug.asp
+		# This essentially turns it all on.
+		LDFLAGS_DEBUG="-debug:full -debugtype:both -warn:2"
 		LDFLAGS_OPTIMIZE="-release"
 		LDFLAGS_CONSOLE="-link -subsystem:console ${lflags}"
 		LDFLAGS_WINDOW="-link -subsystem:windows ${lflags}"
@@ -2370,7 +2389,7 @@ AC_DEFUN(TEA_PREFIX, [
     fi
     if test "${exec_prefix}" = "NONE" -a x"${prefix_default}" = x"yes" ; then
 	if test x"${TCL_EXEC_PREFIX}" != x; then
-	    AC_MSG_WARN([--prefix defaulting to TCL_EXEC_PREFIX ${TCL_EXEC_PREFIX}])
+	    AC_MSG_WARN([--exec-prefix defaulting to TCL_EXEC_PREFIX ${TCL_EXEC_PREFIX}])
 	    exec_prefix=${TCL_EXEC_PREFIX}
 	else
 	    exec_prefix=$prefix

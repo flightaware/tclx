@@ -1,3 +1,27 @@
+2002-04-11  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tcl.m4: Enabled COFF as well as CV style debug info with
+	--enable-symbols to allow Dr. Watson users to see function info.
+	More info on debugging levels can be obtained at:
+	http://msdn.microsoft.com/library/en-us/dnvc60/html/gendepdebug.asp
+
+2002-04-03  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tcl.m4: change all SC_* macros to TEA_*.  The SC_ was for
+	Scriptics, which is no more.  TEA represents a better, independent
+	prefix that won't need changing.
+	Added preliminary mingw gcc support. [Patch #538772]
+	Added TEA_PREFIX macro that handles defaulting the prefix and
+	exec_prefix vars to those used by Tcl if none were specified.
+	Added TEA_SETUP_COMPILER macro that encompasses the AC_PROG_CC
+	check and several other basic AC_PROG checks needed for making
+	executables.  This greatly simplifies user's configure.in files.
+	Collapsed AIX-5 defines into AIX-* with extra checks for doing the
+	ELF stuff on AIX-5-ia64.
+	Updated TEA_ENABLE_THREADS to take an optional arg to allow
+	switching it on by default (for Thread) and add sanity checking to
+	warn the user if configuring threads incompatibly.
+
 2002-03-29  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* tcl.m4: made sure that SHLIB_LDFLAGS was set to LDFLAGS_DEFAULT.
