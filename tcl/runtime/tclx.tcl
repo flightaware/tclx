@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 2.1 1993/03/15 06:39:07 markd Exp markd $
+# $Id: TclInit.tcl,v 2.2 1993/06/06 15:05:35 markd Exp markd $
 #-----------------------------------------------------------------------------
 
 set TCLENV(inUnknown) 0
@@ -42,7 +42,7 @@ proc unknown {cmdName args} {
         } else {
             set binpath $cmdName
         }
-        if {[file executable $binpath]} {
+        if {($binpath != "") && [file executable $binpath]} {
             set TCLENV(inUnknown) 0
             uplevel 1 [list system [concat $cmdName $args]]
             return
