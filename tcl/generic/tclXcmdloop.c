@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 8.4 1997/06/12 21:08:14 markd Exp $
+ * $Id: tclXcmdloop.c,v 8.5 1997/06/29 19:13:25 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -68,6 +68,11 @@ SyncSignalErrorHandler _ANSI_ARGS_((Tcl_Interp *interp,
 static void
 AsyncCommandHandlerDelete _ANSI_ARGS_((ClientData clientData));
 
+static int 
+TclX_CommandloopObjCmd _ANSI_ARGS_((ClientData clientData, 
+                                    Tcl_Interp *interp,
+                                    int objc,
+                                    Tcl_Obj *CONST objv[]));
 
 /*-----------------------------------------------------------------------------
  * IsSetVarCmd --
@@ -680,7 +685,7 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
  *   Standard TCL results.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_CommandloopObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -768,5 +773,21 @@ TclX_CommandloopObjCmd (clientData, interp, objc, objv)
                     "?-async? ?-interactive on|off|tty? ?-prompt1 cmd? ?-prompt2 cmd? ?-endcommand cmd?");
     return TCL_ERROR;
 }
-
+
+/*-----------------------------------------------------------------------------
+ * TclX_CmdloopInit --
+ *     Initialize the coommandloop command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_CmdloopInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp,
+                          "commandloop",
+                          TclX_CommandloopObjCmd, 
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
+    
+}
 

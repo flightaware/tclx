@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.5 1997/06/29 19:30:46 markd Exp $
+ * $Id: tclExtdInt.h,v 8.6 1997/06/30 01:29:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -241,6 +241,11 @@ extern int
 TclX_GetChannelOption _ANSI_ARGS_((Tcl_Channel channel,
                                    int         option));
 
+extern int
+TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
+                             Tcl_Channel channel,
+                             int         remoteHost));
+
 extern Tcl_Channel
 TclX_GetOpenChannel _ANSI_ARGS_((Tcl_Interp *interp,
                                  char       *handle,
@@ -308,264 +313,84 @@ extern int
 TclX_IsNullObj _ANSI_ARGS_((Tcl_Obj *objPtr));
 
 /*
- * Definitions required to initialize all extended commands.  These are either
- * the command executors or initialization routines that do the command
- * initialization.  The initialization routines are used when there is more
- * to initializing the command that just binding the command name to the
- * executor.  Usually, this means initializing some command local data via
- * the ClientData mechanism.  The command executors should be declared to be of
- * type `Tcl_CmdProc', but this blows up some compilers, so they are declared
- * with an ANSI prototype.
+ * Definitions required to initialize all extended commands.
  */
 
-/*
- * from tclXbsearch.c
- */
 extern void
 TclX_BsearchInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXchmod.c
- */
-extern int 
-TclX_ChmodObjCmd _ANSI_ARGS_((ClientData clientData, 
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_ChmodInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_ChownObjCmd _ANSI_ARGS_((ClientData clientData, 
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_CmdloopInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_ChgrpObjCmd _ANSI_ARGS_((ClientData clientData, 
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-/*
- * from tclXcmdloop.c
- */
-extern int 
-TclX_CommandloopObjCmd  _ANSI_ARGS_((ClientData clientData, 
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-/*
- * from tclXdebug.c
- */
 extern void
 TclX_DebugInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXdup.c
- */
 extern void
 TclX_DupInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXfcntl.c
- */
-extern int 
-TclX_FcntlObjCmd _ANSI_ARGS_((ClientData clientData, 
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_FcntlInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXfilecmds.c
- */
-extern int 
-TclX_PipeObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_FilecmdsInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_CopyfileObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_FstatInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_LgetsObjCmd _ANSI_ARGS_((ClientData clientData, 
-                             Tcl_Interp   *interp, 
-                             int           objc,
-                             Tcl_Obj      *CONST objv[]));
+extern void
+TclX_FlockInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int
-TclX_FtruncateObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                 Tcl_Interp   *interp, 
-				 int           objc,
-				 Tcl_Obj      *CONST objv[]));
-
-extern int
-TclX_ReaddirObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-/*
- * from tclXfstat.c
- */
-extern int 
-TclX_FstatCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-/*
- * from tclXflock.c
- */
-extern int
-TclX_FlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int
-TclX_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-/*
- * from tclXfilescan.c
- */
 extern void
 TclX_FilescanInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXgeneral.c
- */
+extern void
+TclX_GeneralInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_EchoObjCmd _ANSI_ARGS_((ClientData clientData, 
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_IdInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_InfoxObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-extern int 
-TclX_LoopObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-/*
- * from tclXid.c
- */
-extern int 
-TclX_IdObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-/*
- * from tclXkeylist.c
- */
 extern void
 TclX_KeyedListInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXlib.c
- */
-extern int 
-TclX_LibraryInit _ANSI_ARGS_((Tcl_Interp *interp));
-
-/*
- * from tclXlist.c
- */
 extern void
 TclX_ListInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXmath.c
- */
 extern void
 TclX_MathInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXmsgcat.c
- */
 extern void
-TclX_InitMsgCat _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_MsgCatInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXprocess.c
- */
 extern void
-TclX_InitProcess _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_ProcessInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXprofile.c
- */
 void
 TclX_ProfileInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXselect.c
- */
-extern int 
-TclX_SelectCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-/*
- * from tclXsignal.c
- */
 extern void
-TclX_InitSignalHandling _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_SelectInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXstring.c
- */
+extern void
+TclX_SignalInit _ANSI_ARGS_((Tcl_Interp *interp));
+
 extern void
 TclX_StringInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXlib.c
- */
 extern void
-TclX_InitLibrary _ANSI_ARGS_((Tcl_Interp *interp));
+TclX_LibraryInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-/*
- * from tclXoscmds.c
- */
-extern int 
-TclX_AlarmObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_SocketInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_LinkObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_OsCmdsInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_NiceObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+extern void
+TclX_PlatformCmdsInit _ANSI_ARGS_((Tcl_Interp *interp));
 
-extern int 
-TclX_SleepObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-extern int 
-TclX_SyncObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-extern int 
-TclX_SystemObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-extern int 
-TclX_UmaskObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
-
-/*
- * from tclXunixCmds.c or tclXwinCmds.c
- */
-extern int 
-TclX_ChrootObjCmd _ANSI_ARGS_((ClientData clientData,
-                              Tcl_Interp *interp, 
-			      int         objc,
-			      Tcl_Obj     *CONST objv[]));
-
-extern int 
-TclX_TimesObjCmd _ANSI_ARGS_((ClientData   clientData,
-                             Tcl_Interp  *interp,
-			     int          objc,
-			     Tcl_Obj      *CONST objv[]));
-
-
-/*
- * from tclXsocket.c
- */
-extern int
-TclXGetHostInfo _ANSI_ARGS_((Tcl_Interp *interp,
-                             Tcl_Channel channel,
-                             int         remoteHost));
-
-extern int
-TclX_HostInfoObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj   *CONST objv[]));
-
-/*
- * from tclXunixSock.c and stubbed in tclXwinCmds.c.
- */
 extern void
 TclX_ServerInit _ANSI_ARGS_((Tcl_Interp *interp));
 

@@ -13,11 +13,26 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinCmds.c,v 1.4 1997/05/31 03:51:58 karl Exp $
+ * $Id: tclXwinCmds.c,v 8.2 1997/06/12 21:08:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+static int 
+TclX_ChrootObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp, 
+			      int         objc,
+			      Tcl_Obj     *CONST objv[]));
+
+static int 
+TclX_TimesObjCmd _ANSI_ARGS_((ClientData   clientData,
+                             Tcl_Interp  *interp,
+			     int          objc,
+			     Tcl_Obj      *CONST objv[]));
+
+static int 
+TclX_SelectCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 
 /*-----------------------------------------------------------------------------
@@ -25,7 +40,7 @@
  *   Stub to return an error if the chroot command is used on Windows.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 Tcl_ChrootObjCmd (ClientData  clientData,
                   Tcl_Interp *interp,
                   int         objc,
@@ -39,7 +54,7 @@ Tcl_ChrootObjCmd (ClientData  clientData,
  *   Stub to return an error if the times command is used on Windows.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 Tcl_TimesObjCmd (ClientData  clientData,
                  Tcl_Interp *interp,
                  int         objc,
@@ -49,11 +64,35 @@ Tcl_TimesObjCmd (ClientData  clientData,
 }
 
 /*-----------------------------------------------------------------------------
+ * TclX_PlatformCmdsInit --
+ *     Initialize the platform-specific commands.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_PlatformCmdsInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp,
+			  "chroot",
+			  TclX_ChrootObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc *) NULL);
+
+    Tcl_CreateObjCommand (interp, 
+			  "times",
+			  TclX_TimesObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+    
+}
+
+
+/*-----------------------------------------------------------------------------
  * Tcl_SelectCmd --
  *   Stub to return an error if the select command is used on Windows.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 Tcl_SelectCmd (ClientData  clientData,
                Tcl_Interp *interp,
                int         argc,
@@ -61,6 +100,24 @@ Tcl_SelectCmd (ClientData  clientData,
 {
     return TclXNotAvailableError (interp, argv [0]);
 }
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_SelectInit --
+ *     Initialize the select command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_SelectInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateCommand (interp, 
+		       "select",
+		       TclX_SelectCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
+}
+
 
 /*-----------------------------------------------------------------------------
  * TclX_ServerInit --

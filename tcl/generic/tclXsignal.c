@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.1 1997/04/17 04:58:51 markd Exp $
+ * $Id: tclXsignal.c,v 8.2 1997/06/12 21:08:31 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1674,12 +1674,12 @@ TclX_SetAppSignalErrorHandler (errorFunc, clientData)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_InitSignalHandling --
+ * TclX_SignalInit --
  *      Initializes singal handling for a interpreter.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_InitSignalHandling (interp)
+TclX_SignalInit (interp)
     Tcl_Interp *interp;
 {
     int              idx;

@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 8.1 1997/04/17 04:58:52 markd Exp $
+ * $Id: tclXsocket.c,v 8.2 1997/06/12 21:08:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -29,6 +29,12 @@ static struct hostent *
 InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
                          int         objc,
                          Tcl_Obj   *CONST objv[]));
+
+static int
+TclX_HostInfoObjCmd _ANSI_ARGS_((ClientData  clientData,
+                                Tcl_Interp *interp,
+                                int         objc,
+                                Tcl_Obj   *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -274,4 +280,21 @@ TclX_HostInfoObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_SocketInit --
+ *     Initialize the host_info command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_SocketInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp, 
+			  "host_info",
+			  TclX_HostInfoObjCmd,
+                          (ClientData) NULL, 
+			  (Tcl_CmdDeleteProc*) NULL);
+
+}
 

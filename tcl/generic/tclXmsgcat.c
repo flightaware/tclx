@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmsgcat.c,v 8.1 1997/04/17 04:58:46 markd Exp $
+ * $Id: tclXmsgcat.c,v 8.2 1997/06/12 21:08:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -358,13 +358,13 @@ MsgCatCleanUp (clientData, interp)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_InitMsgCat --
+ * TclX_MsgCatInit --
  *
  *   Initialize the Tcl XPG/3 message catalog support faility.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_InitMsgCat (interp)
+TclX_MsgCatInit (interp)
     Tcl_Interp *interp;
 {
     /*

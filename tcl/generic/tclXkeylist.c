@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.3 1997/06/25 08:23:38 markd Exp $
+ * $Id: tclXkeylist.c,v 8.4 1997/06/30 01:29:03 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -963,7 +963,7 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
 {
     Tcl_Obj *keylPtr, *valuePtr;
     char *key;
-    int keyLen, strLen, status;
+    int keyLen, status;
 
     if ((objc < 2) || (objc > 4)) {
         return TclX_WrongArgs (interp, objv [0],

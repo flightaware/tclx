@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 8.1 1997/04/17 04:58:37 markd Exp $
+ * $Id: tclXfcntl.c,v 8.2 1997/06/12 21:08:16 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -80,6 +80,13 @@ SetFcntlAttrObj _ANSI_ARGS_((Tcl_Interp  *interp,
                              Tcl_Channel  channel,
                              int          attrib,
                              Tcl_Obj     *valueObj));
+
+static int 
+TclX_FcntlObjCmd _ANSI_ARGS_((ClientData clientData, 
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
+
 
 /*-----------------------------------------------------------------------------
  * XlateFcntlAttr --
@@ -275,7 +282,7 @@ SetFcntlAttrObj (interp, channel, attrib, valueObj)
  *         fcntl handle attribute ?value?
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_FcntlObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -314,4 +321,20 @@ TclX_FcntlObjCmd (clientData, interp, objc, objv)
     return TCL_OK;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_FcntlInit --
+ *     Initialize the fcntl command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_FcntlInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp, 
+			  "fcntl",
+			  TclX_FcntlObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+}
 

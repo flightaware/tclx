@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXchmod.c,v 8.2 1997/06/12 21:08:12 markd Exp $
+ * $Id: tclXchmod.c,v 8.3 1997/06/25 16:58:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -35,6 +35,23 @@ static int
 ConvSymMode _ANSI_ARGS_((Tcl_Interp  *interp,
                          char        *symMode,
                          int          modeVal));
+static int 
+TclX_ChmodObjCmd _ANSI_ARGS_((ClientData clientData, 
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_ChownObjCmd _ANSI_ARGS_((ClientData clientData, 
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_ChgrpObjCmd _ANSI_ARGS_((ClientData clientData, 
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -299,7 +316,7 @@ ChmodFileIdObj (interp, modeInfo, fileIdObj)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_ChmodObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
@@ -368,7 +385,7 @@ TclX_ChmodObjCmd (clientData, interp, objc, objv)
  *  Standard TCL results, may return the UNIX system error message.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_ChownObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
@@ -456,7 +473,7 @@ TclX_ChownObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_ChgrpObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
@@ -503,4 +520,31 @@ TclX_ChgrpObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_ChmodInit --
+ *     Initialize the chmod, chgrp and chown commands.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_ChmodInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp, 
+			  "chgrp",
+			  TclX_ChgrpObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 
+    Tcl_CreateObjCommand (interp,
+			  "chmod",
+			  TclX_ChmodObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "chown",
+			  TclX_ChownObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+}

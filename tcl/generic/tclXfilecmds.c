@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 8.5 1997/06/12 21:08:16 markd Exp $
+ * $Id: tclXfilecmds.c,v 8.6 1997/06/25 16:58:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -74,6 +74,30 @@ ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
                              char        *fileName,
                              int          caseSensitive,
                              ClientData   clientData));
+
+static int 
+TclX_PipeObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_CopyfileObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_LgetsObjCmd _ANSI_ARGS_((ClientData clientData, 
+                             Tcl_Interp   *interp, 
+                             int           objc,
+                             Tcl_Obj      *CONST objv[]));
+
+static int
+TclX_FtruncateObjCmd _ANSI_ARGS_((ClientData clientData, 
+                                 Tcl_Interp   *interp, 
+				 int           objc,
+				 Tcl_Obj      *CONST objv[]));
+
+static int
+TclX_ReaddirObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -605,7 +629,8 @@ TclX_LgetsObjCmd (notUsed, interp, objc, objv)
     Tcl_Obj *dataObj, *savedResultObj;
     char *savedErrorCode;
 
-    /* FIX: make binary safe, if possible */
+    /* FIX: make binary safe, if possible.
+       Fix: Need GetsListElement that returns an object.  */
 
     Tcl_DStringInit (&buffer);
 
@@ -927,4 +952,44 @@ TclX_ReaddirObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_FilecmdsInit --
+ *     Initialize the file commands.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_FilecmdsInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp,
+			  "pipe",
+			  TclX_PipeObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "copyfile",
+			  TclX_CopyfileObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "lgets",
+                          TclX_LgetsObjCmd,
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "ftruncate",
+			  TclX_FtruncateObjCmd,
+			  (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "readdir",
+			  TclX_ReaddirObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+}
 

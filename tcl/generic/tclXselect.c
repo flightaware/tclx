@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 8.1 1997/04/17 04:58:50 markd Exp $
+ * $Id: tclXselect.c,v 8.2 1997/06/12 21:08:30 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -68,6 +68,9 @@ static char *
 ReturnSelectedFileList _ANSI_ARGS_((fd_set        *fileDescSetPtr,
                                     int            fileDescCnt,
                                     channelData_t *channelListPtr));
+
+static int 
+TclX_SelectCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 
 /*-----------------------------------------------------------------------------
@@ -416,4 +419,20 @@ TclX_SelectCmd (clientData, interp, argc, argv)
 }
 #endif
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_SelectInit --
+ *     Initialize the select command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_SelectInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateCommand (interp, 
+		       "select",
+		       TclX_SelectCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
+}
 

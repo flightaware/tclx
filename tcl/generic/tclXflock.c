@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXflock.c,v 8.1 1997/04/17 04:58:39 markd Exp $
+ * $Id: tclXflock.c,v 8.2 1997/06/12 21:08:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* FIX: Need to add an interface to F_GETLK */
@@ -28,6 +28,12 @@ ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp     *interp,
                                  char          **argv,
                                  int             argIdx,
                                  TclX_FlockInfo *lockInfoPtr));
+
+static int
+TclX_FlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+static int
+TclX_FunlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 
 /*-----------------------------------------------------------------------------
@@ -230,4 +236,26 @@ TclX_FunlockCmd (notUsed, interp, argc, argv)
     return TCL_ERROR;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_FlockInit --
+ *     Initialize the flock and funlock command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_FlockInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateCommand (interp,
+		       "flock",
+		       TclX_FlockCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateCommand (interp, 
+		       "funlock",
+		       TclX_FunlockCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
+}
 

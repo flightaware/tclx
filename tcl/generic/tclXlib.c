@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 8.4 1997/04/17 04:58:43 markd Exp $
+ * $Id: tclXlib.c,v 8.5 1997/06/12 21:08:22 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -50,20 +50,6 @@ static char *AUTO_PKG_INDEX = "auto_pkg_index";
  * Its writable so it works with gcc.
  */
 static char loadOusterCmd [] = "source [file join $tclx_library loadouster.tcl]";
-
-
-#define FIX_AUTO_LOAD_HACK 0
-#if  FIX_AUTO_LOAD_HACK
-/*
- * FIX: Ugly hack to work around problems with tcl_safeInitInterp that
- * wants to define auto_load as a proc in slave interps.  Our auto_load is
- * now named tclx_autoload, this code takes the existing auto_load proc to
- * check if tclx_autoload is available.  If it is, we use it, otherwise fall
- * through to the standard code.
- */
-static char hackAutoLoadCmd [] = 
-  "eval [list proc auto_load cmd [concat {if {[info command tclx_auto_load] != {}} {return [tclx_auto_load $cmd]};} [info body auto_load]]]";
-#endif
 
 /*
  * Indicates the type of library index.
@@ -1585,7 +1571,7 @@ TclLibCleanUp (clientData, interp)
  *   Initialize the Extended Tcl library facility commands.
  *-----------------------------------------------------------------------------
  */
-int
+void
 TclX_LibraryInit (interp)
     Tcl_Interp *interp;
 {
@@ -1611,10 +1597,6 @@ TclX_LibraryInit (interp)
     Tcl_CreateCommand (interp, "loadlibindex", TclX_LoadlibindexCmd,
                       (ClientData) infoPtr, (Tcl_CmdDeleteProc*) NULL);
 
-#if  FIX_AUTO_LOAD_HACK
-    if (Tcl_GlobalEval (interp, hackAutoLoadCmd) == TCL_ERROR)
-        return TCL_ERROR;
-#endif
     Tcl_ResetResult (interp);
                                                                   
 
@@ -1624,8 +1606,4 @@ TclX_LibraryInit (interp)
     haveNameSpaces = Tcl_GetCommandInfo (interp, 
                                          nameSpaceCheckCommand,
                                          &cmdInfo);
-    return TCL_OK;
 }
-
-
-

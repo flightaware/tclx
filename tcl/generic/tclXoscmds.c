@@ -13,11 +13,53 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXoscmds.c,v 8.2 1997/06/12 21:08:25 markd Exp $
+ * $Id: tclXoscmds.c,v 8.3 1997/06/25 16:58:54 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+static int 
+TclX_AlarmObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_LinkObjCmd _ANSI_ARGS_((ClientData clientData,
+                             Tcl_Interp *interp,
+                             int objc,
+                             Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_NiceObjCmd _ANSI_ARGS_((ClientData clientData,
+                             Tcl_Interp *interp,
+                             int objc,
+                             Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_SleepObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_SyncObjCmd _ANSI_ARGS_((ClientData clientData,
+                             Tcl_Interp *interp,
+                             int objc,
+                             Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_SystemObjCmd _ANSI_ARGS_((ClientData clientData,
+                               Tcl_Interp *interp,
+                               int objc,
+                               Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_UmaskObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp,
+                              int objc,
+                              Tcl_Obj *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -30,7 +72,7 @@
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_AlarmObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -61,7 +103,7 @@ TclX_AlarmObjCmd (clientData, interp, objc, objv)
  *  Standard TCL results, may return the UNIX system error message.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_LinkObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -132,7 +174,7 @@ TclX_LinkObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_NiceObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -182,7 +224,7 @@ TclX_NiceObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_SleepObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -211,7 +253,7 @@ TclX_SleepObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_SyncObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -252,7 +294,7 @@ TclX_SyncObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_SystemObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -285,7 +327,7 @@ TclX_SystemObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_UmaskObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -323,4 +365,57 @@ TclX_UmaskObjCmd (clientData, interp, objc, objv)
     return TCL_OK;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_OsCmdsInit --
+ *     Initialize the OS related commands.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_OsCmdsInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp,
+			  "alarm",
+			  TclX_AlarmObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "link",
+			  TclX_LinkObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "nice",
+			  TclX_NiceObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "sleep",
+			  TclX_SleepObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "sync",
+			  TclX_SyncObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+                          "system",
+			  TclX_SystemObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "umask",
+			  TclX_UmaskObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+}
 

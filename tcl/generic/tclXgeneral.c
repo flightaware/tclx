@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.2 1997/06/12 21:08:19 markd Exp $
+ * $Id: tclXgeneral.c,v 8.3 1997/06/25 16:58:53 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,6 +28,18 @@ static char *tclAppName        = NULL;
 static char *tclAppLongName    = NULL;
 static char *tclAppVersion     = NULL;
 static int   tclAppPatchlevel  = -1;
+
+static int 
+TclX_EchoObjCmd _ANSI_ARGS_((ClientData clientData, 
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_InfoxObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+
+static int 
+TclX_LoopObjCmd _ANSI_ARGS_((ClientData clientData,
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -85,7 +97,7 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
  *      Always returns TCL_OK.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_EchoObjCmd (dummy, interp, objc, objv)
      ClientData  dummy;
      Tcl_Interp *interp;
@@ -125,7 +137,7 @@ TclX_EchoObjCmd (dummy, interp, objc, objv)
  *        infox option
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_InfoxObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -278,7 +290,7 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
  *      Standard TCL results.
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_LoopObjCmd (dummy, interp, objc, objv)
      ClientData  dummy;
      Tcl_Interp *interp;
@@ -369,4 +381,32 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
     return result;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_GeneralInit --
+ *     Initialize the command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_GeneralInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp, 
+			  "echo",
+			  TclX_EchoObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp, 
+			 "infox",
+			 TclX_InfoxObjCmd,
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp, 
+			 "loop",
+			 TclX_LoopObjCmd,
+                         (ClientData) NULL,
+			 (Tcl_CmdDeleteProc*) NULL);
+}
 

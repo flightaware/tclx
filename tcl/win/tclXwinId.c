@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinId.c,v 8.0.4.1 1997/04/14 02:02:57 markd Exp $
+ * $Id: tclXwinId.c,v 8.1 1997/04/17 04:59:59 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,6 +31,11 @@ IdHost _ANSI_ARGS_((Tcl_Interp *interp,
                     int         argc,
                     char      **argv));
 
+static int 
+TclX_IdObjCmd _ANSI_ARGS_((ClientData clientData,
+                           Tcl_Interp *interp,
+                           int objc,
+                           Tcl_Obj *CONST objv[]));
 
 /*-----------------------------------------------------------------------------
  * Tcl_IdCmd --
@@ -88,7 +93,7 @@ IdHost (interp, argc, argv)
     return TCL_OK;
 }
 
-int
+static int
 Tcl_IdCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -121,4 +126,20 @@ Tcl_IdCmd (clientData, interp, argc, argv)
     return TCL_ERROR;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_IdInit --
+ *     Initialize the id command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_IdInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp,
+			  "id",
+			  TclX_IdObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+}
 

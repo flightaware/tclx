@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 8.1 1997/04/17 04:58:40 markd Exp $
+ * $Id: tclXfstat.c,v 8.2 1997/06/12 21:08:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -69,6 +69,9 @@ ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
                             int           ttyDev,
                             struct stat  *statBufPtr,
                             char         *itemName));
+
+static int 
+TclX_FstatCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 
 /*-----------------------------------------------------------------------------
@@ -298,7 +301,7 @@ ReturnStatItem (interp, channel, ttyDev, statBufPtr, itemName)
  *         fstat fileId ?item?|?stat arrayvar?
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_FstatCmd (clientData, interp, argc, argv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -341,4 +344,19 @@ TclX_FstatCmd (clientData, interp, argc, argv)
     return TCL_OK;
 }
 
-
+
+/*-----------------------------------------------------------------------------
+ * TclX_FstatInit --
+ *     Initialize the fstat command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_FstatInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateCommand (interp,
+		       "fstat",
+		       TclX_FstatCmd,
+                       (ClientData) NULL,
+		       (Tcl_CmdDeleteProc*) NULL);
+}

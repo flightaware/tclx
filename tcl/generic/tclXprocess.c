@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 8.3 1997/06/29 19:30:48 markd Exp $
+ * $Id: tclXprocess.c,v 8.4 1997/06/29 23:14:56 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -285,12 +285,12 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
 
 
 /*-----------------------------------------------------------------------------
- * TclX_InitProcess --
+ * TclX_ProcessInit --
  *   Initialize process commands.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_InitProcess (interp)
+TclX_ProcessInit (interp)
     Tcl_Interp *interp;
 {
     Tcl_CreateObjCommand (interp,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixId.c,v 8.1 1997/04/17 04:59:48 markd Exp $
+ * $Id: tclXunixId.c,v 8.2 1997/06/12 21:08:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -102,6 +102,12 @@ static int
 IdGroupId _ANSI_ARGS_((Tcl_Interp    *interp,
                        int            objc,
                        Tcl_Obj      *CONST objv[]));
+
+static int 
+TclX_IdObjCmd _ANSI_ARGS_((ClientData clientData,
+                           Tcl_Interp *interp,
+                           int objc,
+                           Tcl_Obj *CONST objv[]));
 
 /*-----------------------------------------------------------------------------
  * TclX_IdObjCmd --
@@ -645,7 +651,7 @@ IdGroupId (interp, objc, objv)
     return TCL_OK;
 }
 
-int
+static int
 TclX_IdObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -727,4 +733,19 @@ TclX_IdObjCmd (clientData, interp, objc, objv)
     return TCL_ERROR;
 }
 
-
+
+/*-----------------------------------------------------------------------------
+ * TclX_IdInit --
+ *     Initialize the id command.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_IdInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp,
+			  "id",
+			  TclX_IdObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+}

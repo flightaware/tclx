@@ -13,11 +13,23 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixCmds.c,v 8.1 1997/04/17 04:59:47 markd Exp $
+ * $Id: tclXunixCmds.c,v 8.2 1997/06/12 21:08:43 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+static int 
+TclX_ChrootObjCmd _ANSI_ARGS_((ClientData clientData,
+                              Tcl_Interp *interp, 
+			      int         objc,
+			      Tcl_Obj     *CONST objv[]));
+
+static int 
+TclX_TimesObjCmd _ANSI_ARGS_((ClientData   clientData,
+                             Tcl_Interp  *interp,
+			     int          objc,
+			     Tcl_Obj      *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -30,7 +42,7 @@
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_ChrootObjCmd (clientData, interp, objc, objv)
        ClientData  clientData;
        Tcl_Interp *interp;
@@ -65,7 +77,7 @@ TclX_ChrootObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-int
+static int
 TclX_TimesObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
@@ -90,4 +102,27 @@ TclX_TimesObjCmd (clientData, interp, objc, objv)
     return TCL_OK;
 }
 
+
+/*-----------------------------------------------------------------------------
+ * TclX_PlatformCmdsInit --
+ *     Initialize the platform-specific commands.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_PlatformCmdsInit (interp)
+    Tcl_Interp *interp;
+{
+    Tcl_CreateObjCommand (interp,
+			  "chroot",
+			  TclX_ChrootObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc *) NULL);
+
+    Tcl_CreateObjCommand (interp, 
+			  "times",
+			  TclX_TimesObjCmd,
+                          (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
+    
+}
 
