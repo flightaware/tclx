@@ -144,8 +144,9 @@ HOW TO BUILD EXTENDED TCL
       shell (wishx), configure and compile Tk 4.0.  You do not need to install
       it.
 
-    o Enter ./configure to run the configure script.  The following options are
-      recognized by the TclX configure script:
+    o Enter ./configure to run the configure script.  If you are going to
+      be compiling with gcc, set the environment variable CC to "gcc".
+      The following options are recognized by the TclX configure script:
  
         o --srcdir=DIR
           If you are using a make that supports VPATH (e.g. GNU make) you can
@@ -193,7 +194,8 @@ HOW TO BUILD EXTENDED TCL
     o Config.mk can be used to override several values that configure might
       have gotten wrong or that you desire to be change (like gcc vs cc).
 
-    o Now do a "make".  If all goes well, this will build an extended
+    o Now do a "make", if you want to use gcc (or another compiler), use
+      "make CC=gcc".  If all goes well, this will build an extended
       "libtclx.a" and the "tcl" executable in the tclmaster directory.  If Tk
       is requested, an extended "libtkx.a" and "wishx" executable will be
       built in the tkmaster directory.
@@ -418,12 +420,16 @@ DEC Alpha:
 SUN:
    o See note on flock tests hanging under the "general" section.
 
-    
 SOLARIS:
    o message-cat-1.3 test fails due to broken catopen.  This is should not
      affect actual use of this command.
    o tcllib-4.1 test fails.
-
+   o glob & library test failures observed on SunOS 5.3. Doing a "glob *"
+     in either the tclX shell or tclsh produces a mangled listing of the
+     directory.  Recompiling with gcc instead of the cc fixed the problem.
+     Cause unknown, but a trivial program to opendir/readdir a directory
+     fails.  Remember to set CC=gcc environment variable, make clean, and
+     reconfigure before going a "make CC=gcc"
 
 SCO:
    o SCO Unix systems have a "ranlib" command that is used for Xenix cross-
