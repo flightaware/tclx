@@ -12,18 +12,26 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 5.1 1996/02/12 18:15:52 markd Exp $
+ * $Id: tclXid.c,v 5.2 1996/02/20 09:10:12 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
+/*
+ * Actually configured number of groups (from sysconf if we have it).
+ */
+#ifndef NO_SYSCONF
+static int confNGroups = -1;
+#else
 #ifndef NGROUPS
 #   ifdef NGROUPS_MAX
 #       define NGROUPS NGROUPS_MAX
 #   else
 #       define NGROUPS 32
 #   endif
+#endif
+static int confNGroups = NGROUPS;
 #endif
 
 /*
@@ -348,10 +356,9 @@ IdGroupids (interp, argc, argv, symbolic)
     int         symbolic;
 {
 #ifndef NO_GETGROUPS
-    gid_t         groups [NGROUPS];
-    int           nGroups;
-    char          numText [12];
-    int           groupIndex;
+    gid_t *groups;
+    int nGroups, groupIndex;
+    char numText [12];
     struct group *grp;
 
     if (argc != 2) {
@@ -360,9 +367,17 @@ IdGroupids (interp, argc, argv, symbolic)
         return TCL_ERROR;
     }
 
+#ifndef NO_SYSCONF
+    if (confNGroups < 0)
+        confNGroups = sysconf (_SC_NGROUPS_MAX);
+#endif
+    groups = (gid_t *) ckalloc (confNGroups * sizeof (gid_t));
+
+
     nGroups = getgroups (NGROUPS, groups);
     if (nGroups < 0) {
         interp->result = Tcl_PosixError (interp);
+        ckfree (groups);
         return TCL_ERROR;
     }
 
@@ -383,6 +398,7 @@ IdGroupids (interp, argc, argv, symbolic)
     }
     if (symbolic)
         endgrent ();
+    ckfree (groups);
     return TCL_OK;
 #else
     Tcl_AppendResult (interp, "group id lists unavailable on this system ",
