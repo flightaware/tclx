@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 7.10 1996/08/19 16:20:16 markd Exp $
+ * $Id: tclExtdInt.h,v 7.11 1996/08/20 03:49:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -255,13 +255,10 @@ Tcl_RelativeExpr _ANSI_ARGS_((Tcl_Interp  *interp,
                               long        *exprResultPtr));
 
 extern int
-TclX_RuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
-                              char       *tclLibVarName,
-                              char       *tclEnvVarName,
-                              char       *defaultEnvVar,
-                              char       *defaultDir,
-                              char       *tclInitVarName,
-                              char       *defaultInitFile));
+TclXRuntimeInit _ANSI_ARGS_((Tcl_Interp *interp,
+                             char       *which,
+                             char       *defaultLib,
+                             char       *version));
 
 extern int
 TclX_SetChannelOption _ANSI_ARGS_((Tcl_Interp  *interp,

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.3 1996/08/08 01:52:18 markd Exp $
+.\" $Id: TclX.n,v 7.4 1996/08/09 04:12:23 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2489,38 +2489,10 @@ Path to the TclX runtime library.  If your running the TclX shell or
 an application based on it (like wishx).  The TclX initialization file normally
 adds this to the \fBauto_path\fR.
 .TP
-.B tclx_library_env
-Name of the environment variable the is used to override the default value for
-\fBtclx_library\fR.  This value is normally not set and the default
-environment variable, \fBTCLX_LIBRARY\fR, is used.  If the variable is set to
-an empty string, no environment override will be allowed.  This value must be
-set before \fBTclx_Init\fR is called.
-.TP
-.B tclx_init
-Path to the initialization file that \fBTclx_Init\fR will evaluate.  This value
-is normally not set, resulting in the standard init file being evaluated.
-If the path starts with a "\fB/\fR", its is taken as an absolute path.  If
-it does not start with a "\fB/\fR", its is taken as a path relative to 
-\fBtclx_library\fR.
-.TP
 .B tkx_library
 Path to the TkX runtime library.  This is set only if your application has
 called \fBTkx_InitfR.  The TkX initialization file normally adds this to the
 auto_path.
-.TP
-.B tkx_library_env
-Name of the environment variable the is used to override the default value for
-\fBtkx_library\fR.  This value is normally not set and the default environment
-variable, \fBTKX_LIBRARY\fR, is used.  If the variable is set to an empty
-string, no environment override will be allowed.  This value must be set
-before \fBTkx_Init\fR is called.
-.TP
-.B tkx_init
-Path to the initialization file that \fBTkx_Init\fR will evaluate.  This value
-is normally not set, resulting in the standard init file being evaluated.
-If the path starts with a "\fB/\fR", its is taken as an absolute path.  If
-it does not start with a "\fB/\fR", its is taken as a path relative to 
-\fBtkx_library\fR.
 .TP
 .B tcl_prompt1
 Contains code to run to output the prompt used when interactively prompting

@@ -1195,3 +1195,10 @@
   o Added support for ITcl namespaces to the profile command.  Change supplied
     by Christopher Hylands <cxh@EECS.Berkeley.EDU>.
 -------------------------------------------------------------------------------
+20 Aug 96:
+  o Search for the TclX init files and library directories in the same manner
+    as Tcl/Tk.  This removes the tclx/tkx_library_env, tclx/tkx_init libraries
+    Tcl variables.  This removes some of the flexability, but makes it
+    consistent with Tcl/Tk and simplifies Win32 port.
+   (* potential incompatibility *)
+-------------------------------------------------------------------------------

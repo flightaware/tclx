@@ -12,22 +12,61 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 7.3 1996/07/26 05:55:54 markd Exp $
+ * $Id: tclXinit.c,v 7.4 1996/08/01 15:50:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
+ * Tcl procedure to search for an init for either TclX or TkX startup file.  
+ * The algorithm is, with $w being either tcl or tk:
+ *    o The directory specified in the environment variable ${w}X_LIBRARY,
+ *      if it exists, with $w upshifted.
+ *    o The specified default library directory,
+ *    o [info nameofexectutable]/../../$lib/${w}/$version, best guess if
+ *      default directory does not work.
+ *    o [info nameofexectutable]/../../tclX$version/$w/$platform, for
+ *      running before installation.  Platform is either "unix" or "win".
+ * Parameters:
+ *   o w - Which are we configuring. Either "tcl" or "tk".
+ *   o defaultLib - Default path to the library directory
+ *   o version - The version, which is the directory just below extdir.
+ *   o noInit - If a true value, skip actually eval the init file,
+ *     just set the variable.
+ * Globals:
+ *   o ${w}x_library - Set to the directory containing the init file.
+ */
+static char tclx_fileinit [] =
+"proc tclx_findinit {w defaultLib version noInit} {\n\
+    upvar #0 env env ${w}x_library libDir tcl_platform tcl_platform\n\
+    set dirs {}\n\
+    set envVar [string toupper ${w}X_LIBRARY]\n\
+    if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
+    lappend dirs $defaultLib\n\
+    set prefix [file dirname [file dirname [info nameofexecutable]]]\n\
+    lappend dirs [file join $prefix lib ${w}X $version]\n\
+    if [cequal $tcl_platform(platform) windows] {\n\
+        set plat win} else {set plat unix}\n\
+    lappend dirs [file join [file dirname [file dirname $prefix]] ${w}X${version} $w $plat]\n\
+    foreach libDir $dirs {\n\
+        set init [file join $libDir ${w}x.tcl]\n\
+        if [file exists $init] {\n\
+            if !$noInit {uplevel #0 source $init}; return\n\
+        }\n\
+    }\n\
+    set msg \"Can't find ${w}x.tcl in the following directories: \n\"\n\
+    foreach d $dirs {append msg \"  $d\n\"}\n\
+    append msg \"This probably means that TclX wasn't installed properly.\n\"\n\
+    error $msg\n\
+}";
+
+static char tclx_fileinitProc [] = "tclx_findinit";
+
+
+/*
  * Prototypes of internal functions.
  */
-static int
-ProcessInitFile _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *tclInitVarName,
-                             char       *defaultInitFile,
-                             char       *libDir,
-                             char       *libEnvVar));
-
 static int
 InsureVarExists _ANSI_ARGS_((Tcl_Interp *interp,
                              char       *varName,
@@ -38,209 +77,59 @@ InitSetup _ANSI_ARGS_((Tcl_Interp *interp));
 
 
 /*-----------------------------------------------------------------------------
- * ProcessInitFile --
+ * TclXRuntimeInit --
  *
- *   Evaluate an initialization file.
- *
- * Parameters:
- *   o interp  (I) - A pointer to the interpreter.
- *   o tclInitVarName (I) - Name of Tcl variable that can specify the init
- *     file.
- *   o defaultInitFile (I) - Default path to the initializion file.  If the
- *     first character is not '/', its is relative to libDir.
- *   o libDir (I) - Library directory or NULL (in which case, the init file
- *     must be absolute.
- *   o libEnvVar (I) - Environment variable used to override the location of
- *     the libDir.  NULL if not overridable. This is needed for error messages.
- * Returns:
- *   TCL_OK if all is ok, TCL_ERROR if an error occured.
- *-----------------------------------------------------------------------------
- */
-static int
-ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir, libEnvVar)
-    Tcl_Interp *interp;
-    char       *tclInitVarName;
-    char       *defaultInitFile;
-    char       *libDir;
-    char       *libEnvVar;
-{
-    Tcl_DString initFileBuf, initFilePathBuf;
-    char *initFile, *initFilePath;
-    struct stat statInfo;
-
-    Tcl_DStringInit (&initFileBuf);
-    Tcl_DStringInit (&initFilePathBuf);
-
-    /*
-     * Get the name of the init file, either use the Tcl variable or the
-     * default.
-     */
-    initFile = Tcl_GetVar (interp, tclInitVarName, TCL_GLOBAL_ONLY);
-    if (initFile == NULL)
-        initFile = defaultInitFile;
-
-    initFile = Tcl_TranslateFileName (interp, initFile, &initFileBuf);
-    if (initFile == NULL)
-        goto errorExit;
-
-    /*
-     * Build path to file.
-     */
-    switch (Tcl_GetPathType (initFile)) {
-      case TCL_PATH_ABSOLUTE:
-        break;
-
-      case TCL_PATH_VOLUME_RELATIVE:
-        /* FIX:???? WIN32 */
-        Tcl_AppendResult (interp, "TCL_PATH_VOLUME_RELATIVE not yet ",
-                          "supported by TclX library code \"", initFile, "\"",
-                          (char *) NULL);
-        goto errorExit;
-        
-      case TCL_PATH_RELATIVE:
-        if (libDir == NULL) {
-            Tcl_AppendResult (interp, "No runtime directory defined, ",
-                              "can't find initialization file \"",
-                              initFile, "\".", (char *) NULL);
-            if (libEnvVar != NULL) {
-                Tcl_AppendResult (interp,
-                                  "\nOverride directory containing this ",
-                                  "file with the environment variable: \"",
-                                  libEnvVar, "\"", (char *) NULL);
-            }
-            goto errorExit;
-        }
-    }
-    
-    initFilePath = TclX_JoinPath (libDir, initFile, &initFilePathBuf);
-
-    /*
-     * Check for file existing before evaling it so we can return a helpful
-     * error.
-     */
-    if (stat (initFilePath, &statInfo) < 0) {
-        Tcl_AppendResult (interp, "Can't access initialization file \"",
-                          initFilePath, "\" (", Tcl_PosixError (interp),
-                          ")", (char *) NULL);
- 
-        if ((libEnvVar != NULL) && 
-            (Tcl_GetPathType (initFile) != TCL_PATH_ABSOLUTE)) {
-            Tcl_AppendResult (interp,
-                              "\n  Override directory containing this ",
-                              "file with the environment variable: \"",
-                              libEnvVar, "\"", (char *) NULL);
-        }
-        goto errorExit;
-    }
-
-    if (TclX_Eval (interp,
-                   TCLX_EVAL_GLOBAL | TCLX_EVAL_FILE | TCLX_EVAL_ERR_HANDLER,
-                   initFilePath) == TCL_ERROR)
-        goto errorExit;
-
-    Tcl_DStringFree (&initFileBuf);
-    Tcl_DStringFree (&initFilePathBuf);
-    Tcl_ResetResult (interp);
-    return TCL_OK;
-
-  errorExit:
-    Tcl_DStringFree (&initFileBuf);
-    Tcl_DStringFree (&initFilePathBuf);
-    Tcl_AddErrorInfo (interp,
-                     "\n    (while processing initialization file)");
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * TclX_RuntimeInit --
- *
- * Set the value of a *_library Tcl variable and evaluate an initialzation
- * file.
+ * Find the location of the init file, set the *_library Tcl variable to
+ * the directory containing it and evaluate the init file.  This uses the
+ * inline proc tclx_fileinit defined above, cause its easier in Tcl.  See
+ * that proc's documentation for a description of the search algorithm,
  *
  * Parameters:
- *   o interp (I) - A pointer to the interpreter.
- *   o tclLibVarName (I) - Name of the variable to set.
- *   o tclEnvVarName (I) - Tcl variable that may contain the name of the
- *     override variable or an empty string to disable override. (maybe NULL).
- *   o defaultEnvVar (I) - Default override environment variable (maybe NULL).
- *   o defaultDir (I) - Default value to set the variable to (maybe NULL).
- *   o tclInitVarName (I) - Name of Tcl variable that can specify the init
- *     file.
- *   o defaultInitFile (I) - Default path to the initializion file.  If the
- *     first character is not '/', its is relative to libDir.
+ *   o interp - A pointer to the interpreter.
+ *   o which - Either "tcl" or "tk", used to generate the names of 
+ *     the environment variable, the init file and the Tcl global variable
+ *     that points to the library.
+ *   o defaultLib - Default path to the library directory.
+ *   o version - Version string use in file paths.
  * Returns:
  *   TCL_OK or TCL_ERROR.
- * Alogrithm:
- *   o If the Tcl variable tclLibVarName is already set, do nothing.
- *   o If tclEnvVarName is supplied and that Tcl variable exists, use it's
- *     value as the name of the environment variable to check.  If the value is
- *     the empty string, don't check the environment.
- *   o If the tclEnvVarName Tcl variable is not set, then the default
- *     environment variable is used.
- *   o If the environment is to be checked and the environment is defined,
- *     use its value for the value to set tclLibVarName to.
- *   o If a default is supplied for the variable, set tclLibVarName value to
- *     it.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_RuntimeInit (interp, tclLibVarName, tclEnvVarName, defaultEnvVar,
-                  defaultDir, tclInitVarName, defaultInitFile)
+TclXRuntimeInit (interp, which, defaultLib, version)
     Tcl_Interp *interp;
-    char       *tclLibVarName;
-    char       *tclEnvVarName;
-    char       *defaultEnvVar;
-    char       *defaultDir;
-    char       *tclInitVarName;
-    char       *defaultInitFile;
+    char       *which;
+    char       *defaultLib;
+    char       *version;
+    
 {
-    char *libEnvVar = NULL, *libDir = NULL;
-
+#define PROC_ARGC 5
+    Tcl_CmdInfo cmdInfo;
+    char *procArgv [PROC_ARGC + 1];
+    
     /*
-     * Set the library variable if not already set.
+     * Find the init procedure.  If its not defined, define it now.
      */
-    if (Tcl_GetVar (interp, tclLibVarName, TCL_GLOBAL_ONLY) == NULL) {
-        /*
-         * Get the name of the environment variable that overrides.
-         */
-        if (tclEnvVarName != NULL) {
-            libEnvVar = Tcl_GetVar (interp, tclLibVarName, TCL_GLOBAL_ONLY);
-            if (libEnvVar == NULL) {
-                libEnvVar = defaultEnvVar;
-            } else {
-                if (libEnvVar [0] == '\0')
-                    libEnvVar = NULL;
-            }
-        } else {
-            libEnvVar = defaultEnvVar;
-        }
-
-        /*
-         * Get the value of the environment variable if its defined.
-         */
-        if (libEnvVar != NULL) {
-            libDir = Tcl_GetVar2 (interp, "env", libEnvVar, TCL_GLOBAL_ONLY);
-        }
-        if (libDir == NULL) {
-            libDir = defaultDir;
-        }
-
-        /*
-         * Set the value if we actually have a path.
-         */
-        if (libDir != NULL) {
-            if (Tcl_SetVar (interp, tclLibVarName, libDir,
-                            TCL_GLOBAL_ONLY | TCL_LEAVE_ERR_MSG) == NULL)
-                return TCL_ERROR;
+    if (!Tcl_GetCommandInfo (interp, tclx_fileinitProc, &cmdInfo)) {
+        if (Tcl_GlobalEval (interp, tclx_fileinit) != TCL_OK)
+            return TCL_ERROR;
+        if (!Tcl_GetCommandInfo (interp, tclx_fileinitProc, &cmdInfo)) {
+            panic ("can't find %s\n", tclx_fileinitProc);
         }
     }
+    
+    procArgv [0] = tclx_fileinitProc;
+    procArgv [1] = which;
+    procArgv [2] = defaultLib;
+    procArgv [3] = version;
+    procArgv [4] =(Tcl_GetVar2 (interp, "TCLXENV", "quick",
+                                TCL_GLOBAL_ONLY) != NULL) ? "1" : "0";
+    procArgv [5] = NULL;
 
-    if (Tcl_GetVar2 (interp, "TCLXENV", "quick", TCL_GLOBAL_ONLY) == NULL) {
-         if (ProcessInitFile (interp, tclInitVarName, defaultInitFile, libDir,
-                              libEnvVar) == TCL_ERROR)
-             return TCL_ERROR;
-    }
-    return TCL_OK;
+    return cmdInfo.proc (cmdInfo.clientData,
+                         interp,
+                         PROC_ARGC,
+                         procArgv);
 }
 
 /*-----------------------------------------------------------------------------
@@ -250,7 +139,7 @@ TclX_RuntimeInit (interp, tclLibVarName, tclEnvVarName, defaultEnvVar,
  * error occurs.
  *
  * Parameters:
- *   o interp (I) - A pointer to the interpreter.
+ *   o interp - A pointer to the interpreter.
  *-----------------------------------------------------------------------------
  */
 void
@@ -337,9 +226,9 @@ TclX_ErrorExit (interp, exitCode)
  *   Insure that the specified global variable exists.
  *
  * Parameters:
- *   o interp  (I) - A pointer to the interpreter.
- *   o varName (I) - Name of the variable.
- *   o defaultValue (I) - Value to set the variable to if it doesn't already
+ *   o interp  - A pointer to the interpreter.
+ *   o varName - Name of the variable.
+ *   o defaultValue - Value to set the variable to if it doesn't already
  *     exist.
  * Returns:
  *   TCL_OK if all is ok, TCL_ERROR if an error occured.
@@ -410,13 +299,10 @@ Tclx_Init (interp)
     if (Tclxlib_Init (interp) == TCL_ERROR)
         goto errorExit;
 
-    if (TclX_RuntimeInit (interp,
-                          "tclx_library",
-                          "tclx_library_env",
-                          "TCLX_LIBRARY",
-                          TCLX_LIBRARY,
-                          "tclx_init",
-                          "tclx.tcl") == TCL_ERROR)
+    if (TclXRuntimeInit (interp,
+                         "tcl",
+                         TCLX_LIBRARY,
+                         TCLX_FULL_VERSION) == TCL_ERROR)
         goto errorExit;
 
     return TCL_OK;
