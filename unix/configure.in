@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.20.2.4 1998/12/04 02:51:56 suresh Exp $
+dnl $Id$
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.20.2.4 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision$),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -266,9 +266,6 @@ AC_SUBST(TCL_LIB_SPEC)
 if test "$TKX_BUILD" = "YES"; then
    . $TK_CONFIG
 fi
-
-# Tk doesn't provide its own search flags, but should.
-TK_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
 
 AC_SUBST(TK_VERSION)
 AC_SUBST(TK_DEFS)
@@ -614,7 +611,7 @@ if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
 	LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
     fi
 fi
-eval "TKX_CC_SEARCH_FLAGS=\"$TCL_LD_SEARCH_FLAGS\""
+eval "TKX_CC_SEARCH_FLAGS=\"$TK_CC_SEARCH_FLAGS\""
 case $TCL_SHLIB_LD in
     *ld*)
 	TKX_LD_SEARCH_FLAGS=`echo ${TKX_CC_SEARCH_FLAGS} |sed -e "s|-Wl,||g" -e "s|,| |g"`
