@@ -1,0 +1,22 @@
+                        Building TclX on Windows 95/NT
+
+To build the alpha 1 release:
+   o The patch win/tclWinSock.c.diff must be applied to the Tcl 7.5
+     distribution and Tcl 7.5 recompiled and installed.
+    
+
+In the alpha 1 release, the following restrictions apply:
+
+    o Support is only provided for Visual C++ 4.0.
+
+    o The id command is limited, only the host and process options are
+      implemented
+
+    o The chmod, chown, chgrp, fcntl commands are not yet implemented.
+
+    o There are probably several problems with using open sockets with commands
+      that operate on open files.
+    
+    o The select command probably does nothing useful.
+
+    o No support for installing TclX, the runtime.
