@@ -12,7 +12,7 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsocket.c,v 8.9 1999/03/31 06:37:46 markd Exp $
+ * $Id: tclXsocket.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -165,20 +165,19 @@ InfoGetHost (interp, objc, objv)
 
     char *command =    Tcl_GetStringFromObj (objv [0], NULL);
     char *subCommand = Tcl_GetStringFromObj (objv [1], NULL);
-    char *host       = Tcl_GetStringFromObj (objv [2], NULL);
+    char *host;
 
     if (objc != 3) {
         TclX_AppendObjResult (interp, tclXWrongArgs, command, " ", 
                               subCommand, " host", (char *) NULL);
         return NULL;
     }
+    host = Tcl_GetStringFromObj(objv [2], NULL);
 
     if (TclXOSInetAtoN (NULL, host, &address) == TCL_OK) {
-        hostEntry = gethostbyaddr ((char *) &address,
-                                   sizeof (address),
-                                   AF_INET);
+        hostEntry = gethostbyaddr((char *) &address, sizeof(address), AF_INET);
     } else {
-        hostEntry = gethostbyname (host);
+        hostEntry = gethostbyname(host);
     }
     if (hostEntry == NULL) {
         ReturnGetHostError (interp, host);

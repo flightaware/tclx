@@ -1,5 +1,8 @@
 2004-05-24  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* generic/tclXsocket.c (InfoGetHost): read host after arg count
+	check. [Bug 930035] (teterin)
+
 	* doc/TclX.n: doc and comment fixes
 	* unix/tclXunixOS.c:
 	* win/tclXwinOS.c:
