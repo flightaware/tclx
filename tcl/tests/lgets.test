@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lgets.test,v 5.2 1996/02/09 18:43:42 markd Exp $
+# $Id: lgets.test,v 5.3 1996/02/16 08:09:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -36,12 +36,10 @@ Test lgets-1.4 {lgets command} {
 } 1 "channel \"$f\" wasn't opened for reading"
 catch {close $f}
 
+set test2data \
+        [replicate abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 100]
 set f [open test2.tmp w]
-puts $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" nonewline
-puts $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" nonewline
-puts $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" nonewline
-puts $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" nonewline
-puts $f "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+puts $f $test2data
 close $f
 
 Test lgets-1.5 {lgets command with long line} {
@@ -49,16 +47,26 @@ Test lgets-1.5 {lgets command with long line} {
     set x [lgets $f]
     close $f
     set x
-} 0 {abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
+} 0 $test2data
 
 Test lgets-1.6 {lgets command with long line} {
     set f [open test2.tmp]
     set x [lgets $f y]
     close $f
     list $x $y
-} 0 {260 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
+} 0 [list [clength $test2data] $test2data]
 
-Test lgets-1.7 {lgets command and end of file} {
+Test lgets-1.7 {lgets command with EOF in list element} {
+    set f [open test2.tmp w]
+    puts $f "Test1  \{Test2 " nonewline
+    close $f
+    set f [open test2.tmp]
+    lgets $f
+} 1 {eof encountered while reading list from channel}
+
+catch {close $f}
+
+Test lgets-1.8 {lgets command with EOF in list} {
     set f [open test2.tmp w]
     puts $f "Test1\nTest2" nonewline
     close $f
@@ -67,12 +75,10 @@ Test lgets-1.7 {lgets command and end of file} {
     set y {}
     lappend x [lgets $f y] $y
     set y {}
-    lappend x [lgets $f y] $y
-    set y {}
-    lappend x [lgets $f y] $y
+    lappend x [catch {lgets $f y} r] $r $y
     close $f
     set x
-} 0 {5 Test1 5 Test2 -1 {}}
+} 0 {5 Test1 1 {eof encountered while reading list from channel} Test2}
 
 Test lgets-2.1 {lgets command} {
     catch {unset data}
@@ -150,6 +156,7 @@ Test lgets-2.11 {lgets command} {
 catch {close $fh}
 unset data
 
+# Make sure odd lists work.
 set data "ERR_REQUEST_PROCESSOR_FAILURE \\ {sc\\ ...\""
 
 Test lgets-3.1 {lgets command} {
@@ -160,8 +167,29 @@ Test lgets-3.1 {lgets command} {
 } 0 $data
 
 catch {close $fh}
-unset data
 
+# Easy test to make sure basic non-blocked channel works, even though we
+# don't actually test the no-data case.
+
+pipe rpipe wpipe
+fconfigure $rpipe -blocking 0
+
+Test lgets-4.1 {lgets on non-blocked channel} {
+    puts $wpipe $data
+    flush $wpipe
+    lgets $rpipe
+} 0 $data
+
+Test lgets-4.2 {lgets on non-blocked channel} {
+    puts $wpipe $data
+    flush $wpipe
+    catch {unset x}
+    list [lgets $rpipe x] $x
+} 0 [list 41 $data]
+
+catch {close $rpipe}
+catch {close $wpipe}
+unset data
 
 unlink -nocomplain {test1.tmp test2.tmp}
 
