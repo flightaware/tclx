@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.11 1993/08/02 04:41:49 markd Exp markd $
+# $Id: Makefile.in,v 2.12 1993/08/13 15:01:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -97,10 +97,17 @@ buildtclhelp: ${TCLINIT.TCL} ${TCL.TLIB}
 	../runtcl -c "buildhelp ${HELP} TclX.brf $(srcdir)/man/TclX.man"
 
 #------------------------------------------------------------------------------
+# Clean up everything but the manual pages that we copied to the master
+# directories.
 
-clean:
+partclean:
 	-rm -f ${TCL.TLIB} ${TCL.TNDX} ${TCLINIT.TCL}
 	-rm -f ${BUILDHELP.TCL} ${BUILDIDX.TCL} ${LOADOUSTER.TCL}
+
+#------------------------------------------------------------------------------
+# Clean up all files that were built by make.
+
+clean: partclean
 	-rm -rf ${MAN}
 
 #------------------------------------------------------------------------------

@@ -2,35 +2,33 @@ EXTENDED TCL SOURCE DIRECTORY HIERARCHY
 =======================================
 
 Building the Extended Tcl requires access to built Tcl and Tk source
-directories.  Their location relative to the tclX7.0a directory must be
-configured by editing tclX7.0a/Config.mk.  The default is to place tclX7.0a
+directories.  Their location relative to the tclX7.0a* directory must be
+configured by editing tclX7.0a*/Config.mk.  The default is to place tclX7.0a*
 in a directory parallel to the Tcl and Tk distributions:
 
                    tcl7.0      tk3.3      tclX7.0a
 
 
-The following directories are included under the tclX7.0a directory:
+The following directories are included under the tclX7.0a* directory:
 
-    o config - Configuration files for various Unix versions.
-
-    o man - Unformated manual pages for TclX.
+    o man - Unformatted manual pages for TclX.
 
     o src - The main source for TclX.
 
     o osSupport - Library routines required by TclX that may not be available
-      on all Unix versions. 
+      on all Unix versions.
 
     o ucbsrc - A makefile and sed scripts used to modify source files that
       are supplied with UCB Tcl to add signal handling.  The files are modified
-      with sed so you don't have to have patch to build Tcl, however context
+      with sed so you don't have to patch to build Tcl, however context
       diffs are provided if problems occur porting to a new version of Tcl.
 
     o tclsrc - Tcl source that is built into the standard Tcl package library.
-      The makefile also handles generation of help files and copying man file
+      The makefile also handles generation of help files and copying man files
       into the master directory
 
     o tclmaster - Tcl master directory.  All files required to run TclX
-      are build or copied into this directory.  The entire contents of
+      are built or copied into this directory.  The entire contents of
       this directory are installed.
 
     o tests - Tests for TclX.
@@ -42,13 +40,17 @@ The following directories are included under the tclX7.0a directory:
       are supplied with Tk to add signal handling.  Context diffs are also
       provided.
 
+    o tktclsrc - Tcl source that is built into the standard Tk package library.
+      The makefile also handles generation of help files and copying man files
+      into the master directory
+
     o tkmaster - Tk master directory.  All files required to run Tk
       are built or copied into this directory.  The entire contents of
       this directory are installed.
 
     o tktests - Files used to test wishx.
 
-    o experimental - An directory of expermintal and contributed Tcl source.
+    o experimental - A directory of experimental and contributed Tcl source.
       The code is not normally built as part of TclX.
 
     o tools - Tools used for building and installing TclX.
@@ -56,17 +58,17 @@ The following directories are included under the tclX7.0a directory:
 HOW TO BUILD EXTENDED TCL
 =========================
 
-    o Configure and compile Tcl 7.0 following the instructions the comes with
+    o Configure and compile Tcl 7.0 following the instructions that come with
       Tcl.  You do not need to install it.
 
     o If you are going to be using Tk and want to build an Extended Tcl wish
       shell (wishx), configure and compile Tk 3.3.  You do not need to install
       it.
 
-    o Edit Config.mk following the instructions in that file.  This file
+    o Edit Config.mk following the instructions in the file.  This file
       is used to specify values that can't be figured out by the configure
       script.  This includes the location of the Tcl and Tk distributions.
-      Its also used to specify the sections that the Tcl manual pages are
+      It's also used to specify the sections that the Tcl manual pages are
       to be installed in.
 
     o Note that the site specific installation options should be set in
@@ -84,13 +86,18 @@ HOW TO BUILD EXTENDED TCL
       is requested, an extended "libtkx.a" and "wishx" executable will be
       built in the tkmaster directory.
 
+    o Note that a fair amount of time is spent moving manual pages to the
+      master directories.  If you need to rebuild while debugging problems,
+      "make partclean" will removed everything but the manual pages and
+      Tk demo files.  This should make subsequent makes go much faster.
+
     o Until the Extended Tcl runtime files are installed, "tcl" and "wishx"
       can't be run directly.  To run them before installation, use "runtcl" or
       "runwishx".
 
     o Extended Tcl comes with help pages that are built from the Tcl 7.0 and
       Tk 3.3 manual pages as well as the TclX manual page.  If you are building
-      TclX with an later version of Tcl or Tk, you might want to rebuild these
+      TclX with a later version of Tcl or Tk, you might want to rebuild these
       manual pages.  If new manual pages have been added, you can add them
       by editing the files "tools/tclmanpages" and "tools/tkmanpages".
       You must have nroff and the man macro package installed on your system
@@ -108,15 +115,26 @@ TclX.
 TESTING EXTENDED TCL
 ====================
 
-   There are three sets of tests: the tests from Berkeley Tcl, the tests for
+   There are three sets of tests: the tests for Berkeley Tcl, the tests for
 Tk and the tests for Extended Tcl, which test both the new commands added by
 Extended Tcl and the procedures defined in the Extended Tcl procedure
 library.
 
     o Run both the Berkeley and TclX tests by typing "make test" in the
-      tclX7.0a directory.
+      tclX7.0a directory.  The tests require a tcl shell with added commands
+      (tcltest in the tcl7.0 distribution).  Because the Extended TCL shell
+      (tcl) does not have these commands, the following tests will not run:
 
-    o To run the Tk tests with wishx, type "make tktest".
+	cmdinfo.test
+	dcall.test
+	link.test
+
+    o To run the Tk tests with wishx, type "make tktest".  The tests require
+      a tcl shell with added commands (tcltest in the tcl7.0 distribution).
+      Because the Extended TCL shell (tcl) does not have these commands, the
+      following tests will not run:
+
+	raise.test
 
     o The Extended Tcl tests may be run by themselves with "make extdtests".
 
@@ -132,24 +150,24 @@ library.
     o If you're having trouble with the Berkeley tests, and you suspect that
       the extensions might be involved, you can build a special minimal
       version of Berkeley Tcl by cd'ing to the tcl7.0 directory and doing
-      a "make test".
+      a "make test".  Similarly, you can do "make test" in the tk3.3 directory.
 
 INSTALLING EXTENDED TCL
 =======================
- 
+
    TclX builds two master directories to hold all of the pieces of TclX that
-need to be installed.  The master directory include all of the run-time
+need to be installed.  The master directory includes all of the run-time
 library files, plus the executables and all other installed files.  This allows
 for easy NFS sharing on heterogeneous networks and moving built TclX to new
-machines. The hierarchies are:
+machines.  The hierarchies are:
 
-   o tclmaster - Contains Tcl code libraries and support files need to run
+   o tclmaster - Contains Tcl code libraries and support files needed to run
      TclX.
 
      o bin - Contains the TclX shell.
 
      o help - Contains the help pages for Tcl & TclX.  This directory is
-       shipped pre-built, but can be rebuilt if necessary. 
+       shipped pre-built, but can be rebuilt if necessary.
 
      o include - Contains the Tcl and TclX exported include files.
 
@@ -157,15 +175,15 @@ machines. The hierarchies are:
 
      o man - Contains the Tcl and TclX manual pages.
 
-   o tkmaster - Contains Tk code libraries and files need to run wishx and
+   o tkmaster - Contains Tk code libraries and files needed to run wishx and
      Tk applications built with Extended Tcl.
 
-     o bin - Contains the wishx and tclhelp.
+     o bin - Contains the wishx shell and tclhelp.
 
      o demos - Contains the Tk demos.
 
      o help - Contains the help pages for Tk.  This directory is shipped
-       pre-built, but can be rebuilt if necessary. 
+       pre-built, but can be rebuilt if necessary.
 
      o include - Contains the Tk exported include files.
 
@@ -185,7 +203,7 @@ TK_MASTERDIR define in Config.mk and the Tk version number and TclX version
 suffix.  The default path would be /usr/local/tkX/3.3a.
 
   Symbolic links are built from the standard locations that external files
-are installed an the master directory, for example:
+are installed as in the master directory, for example:
 
     ln -s /usr/local/bin/tcl /usr/local/tclX/7.0a/bin/tcl
     ln -s /usr/local/bin/wishx /usr/local/tkX/3.3a/bin/wishx
@@ -200,3 +218,15 @@ PORTING NOTES
 
 DEC Ultrix:
    o Several tests fail when Tcl is run on an NFS mounted file system.
+
+Sun:
+   o Some versions of the Sun C compiler will leave a non-executable binary
+     around if the link fails with unresolved externals.  You will have to
+     removed them by hand.
+
+SCO:
+   o SCO Unix systems have a "ranlib" command that is used for Xenix cross-
+     development.  Pre-ODT 3.0 development systems, the command returns
+     an error if used on COFF files.  Many developers rename the command
+     to "xranlib" if they are not doing cross development.  Later versions
+     of the command return a warning if used on COFF binaries.

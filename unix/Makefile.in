@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 2.12 1993/07/30 15:05:15 markd Exp markd $
+# $Id: Makefile.in,v 2.13 1993/08/13 15:01:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -233,20 +233,28 @@ MAYBE:
 WISHXMAYBE: TKXINSTALL
 
 #------------------------------------------------------------------------------
-# Clean up the mess we made.
+# Clean up everything but the manual pages that we copied to the master
+# directories.  This is useful while debugging, as the copy process is slow.
 
-clean:
+partclean:
 	cd tools;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd ucbsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd osSupport; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd src;       ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} partclean
 	cd tkucbsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
-	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} partclean
 	-rm -f runtcl runwishx
 	-rm -rf tclmaster/bin tclmaster/lib tclmaster/include
 	-rm -rf tkmaster/bin tkmaster/lib tkmaster/include
+
+#------------------------------------------------------------------------------
+# Clean up all files that were built by make.
+
+clean: partclean
+	cd tclsrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
+	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} clean
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.
