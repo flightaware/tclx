@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.0 1995/07/25 06:00:47 markd Rel markd $
+ * $Id: tkXshell.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -117,9 +117,10 @@ TkX_Main (argc, argv, appInitProc)
     char buf[20];
     int code;
     size_t length;
-    FILE *stderrPtr = TclX_Stdfile (interp, stderr);
+    FILE *stderrPtr;
 
     interp = Tcl_CreateInterp();
+    stderrPtr = TclX_Stdfile (interp, stderr);
 #ifdef TCL_MEM_DEBUG
     Tcl_InitMemory(interp);
 #endif
