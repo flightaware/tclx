@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 7.7 1996/10/27 00:34:09 markd Exp $
+ * $Id: tclExtend.h,v 7.8 1996/11/16 15:27:42 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,27 +27,22 @@
  * that TclX was released against.  Its possible that TclX maybe running with
  * a different version of Tcl or Tk.  The basic versions are used for package
  * provide, the full versions as used for file names and include beta release
- * information and patch information.  The shared library versions are the
- * version suffixes for libraries (if supported).  It is made by using the Tcl
- * or Tk version as the major version and the TclX suffix, converted to a
- * number, as a minor.
+ * information and patch information.OB
  *
  * Examples:
- *   Release        _VERSION  _FULL_VERSION  _SHLIB_VERSION
- *   7.5.0           7.5.0     7.5.0         75.0
- *   7.5.1 beta 1    7.5.1     7.5.1b1       75.1
- *   7.5.1 patch 1   7.5.1.1   7.5.1p1       75.1
+ *   Release        _VERSION  _FULL_VERSION
+ *   7.5.0           7.5.0     7.5.0
+ *   7.5.1 beta 1    7.5.1     7.5.1b1
+ *   7.5.1 patch 1   7.5.1.1   7.5.1p1
  */
 
 #define TCLX_PATCHLEVEL      0
 
 #define TCLX_VERSION        "7.6.0"
 #define TCLX_FULL_VERSION   "7.6.0"
-#define TCLX_SHLIB_VERSION  "76.0"
 
 #define TKX_VERSION         "4.2.0"
 #define TKX_FULL_VERSION    "4.2.0"
-#define TKX_SHLIB_VERSION   "42.0"
 
 /*
  * Generic void pointer.

@@ -1,5 +1,5 @@
 # Tcl package index file, version 1.0
 # 
-# Package index TkX  @TKX_VERSION@.
+# Package index for TkX @TKX_FULL_VERSION@.
 #
-package ifneeded Tkx @TKX_VERSION@ {package require Tclx @TCLX_VERSION@; package require Tk @TK_VERSION@; load @TKX_INST_LIB@/@TKX_SHLIB_NAME@}
+package ifneeded Tkx @TKX_VERSION@ "package require Tclx @TCLX_VERSION@; package require Tk @TK_VERSION@; load $dir/../@TKX_SHLIB_NAME@"

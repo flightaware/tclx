@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 7.3 1996/10/20 01:51:17 markd Exp $
+# $Id: Common.mk.in,v 7.4 1996/11/16 08:05:22 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -23,11 +23,9 @@ SHELL = /bin/sh
 #
 TCLX_VERSION       = @TCLX_VERSION@
 TCLX_FULL_VERSION  = @TCLX_FULL_VERSION@
-TCLX_SHLIB_VERSION = @TCLX_SHLIB_VERSION@
 
 TKX_VERSION        = @TKX_VERSION@
 TKX_FULL_VERSION   = @TKX_FULL_VERSION@
-TKX_SHLIB_VERSION  = @TKX_SHLIB_VERSION@
 
 #------------------------------------------------------------------------------
 # Autoconfig defines that can be overridden in Config.mk.
@@ -51,22 +49,19 @@ TCLX_DEFS    = @DEFS@
 TCLX_LIBS    = @TCLX_LIBS@
 
 #------------------------------------------------------------------------------
-# Shared library names if BUILD_SHARED is YES.  Base name is the name of
-# the library less the version, for dynamic loading.
+# Shared library names if BUILD_SHARED is YES.
 #
-TCLX_SHLIB_BASE_NAME = @TCLX_SHLIB_BASE_NAME@
 TCLX_SHLIB_NAME      = @TCLX_SHLIB_NAME@
 TCLX_STLIB_NAME      = @TCLX_STLIB_NAME@
 
-TKX_SHLIB_BASE_NAME  = @TKX_SHLIB_BASE_NAME@
 TKX_SHLIB_NAME       = @TKX_SHLIB_NAME@
 TKX_STLIB_NAME       = @TKX_STLIB_NAME@
 
 #------------------------------------------------------------------------------
-# Compiler argument required if the objects are going to be placed into a
-# shared library.  Empty if shared libraries are not being built.
-#
-TCLX_USE_SHLIB_CFLAGS = ${@TCLX_USE_SHLIB_CFLAGS@}
+# Compiler flag to use when generating shared object files.  Unixware cc will
+# only output the name of the .c file, so we hack it.
+
+CC_SHOBJ_FLAG = @CC_SHOBJ_FLAG@
 
 #------------------------------------------------------------------------------
 # Linker arguments to pick up TclX libraries.

@@ -9,14 +9,14 @@ dnl  includes there internal header files.  The sections from Tcl and Tk
 dnl  are grouped together and marked for easy sycning with Outerhout's
 dnl  releases.
 dnl
-dnl  Although the generated configure script is under the GNU Public,
-dnl  License Extended Tcl remains freely redistributable for any purpose,
+dnl  Although the generated configure script is under the GNU Public
+dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 7.9 1996/11/16 08:05:25 markd Exp $
+dnl $Id: configure.in,v 7.10 1996/11/17 01:12:23 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 7.9 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 7.10 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -101,6 +101,30 @@ esac
 AC_SUBST(TKX_BUILD)
 
 #------------------------------------------------------------------------------
+# Check for the --enable-shared option.
+#------------------------------------------------------------------------------
+
+AC_ARG_ENABLE(shared,
+    [  --enable-shared         build and link with shared libraries],
+    [BUILD_SHARED=$enableval],
+    [BUILD_SHARED=NO])
+case "$BUILD_SHARED" in
+    YES|yes)
+        AC_MSG_RESULT(Will build shared libraries)
+        BUILD_SHARED=YES
+        ;;
+    NO|no)
+        AC_MSG_RESULT(Will not build shared libraries)
+        BUILD_SHARED=NO
+        ;;
+     *)
+        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
+        exit 1
+        ;;
+esac
+AC_SUBST(BUILD_SHARED)
+
+#------------------------------------------------------------------------------
 # We need the real value of prefix and exec-prefix now, not when the generated
 # script is ready to output them.
 #------------------------------------------------------------------------------
@@ -124,18 +148,15 @@ AC_MSG_RESULT($TCLX_FULL_VERSION)
 
 AC_SUBST(TCLX_VERSION)
 AC_SUBST(TCLX_FULL_VERSION)
-AC_SUBST(TCLX_SHLIB_VERSION)
 
 AC_SUBST(TKX_VERSION)
 AC_SUBST(TKX_FULL_VERSION)
-AC_SUBST(TKX_SHLIB_VERSION)
 
 #------------------------------------------------------------------------------
 # If Config.mk is not in the build directory, copy it local.
 #------------------------------------------------------------------------------
 
-if test ! -r Config.mk
-then
+if test ! -r Config.mk ; then
     echo "Copying $srcdir/Config.mk to build directory"
     cp $srcdir/Config.mk  Config.mk || exit 1
 fi
@@ -191,6 +212,7 @@ ORIG_TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
 LIB_RUNTIME_DIR=$TCL_EXEC_PREFIX
 TCL_LD_SEARCH_FLAGS=`eval echo $TCL_LD_SEARCH_FLAGS`
 
+# Hack for MIPS (from plus patch).
 if test "x`uname -p 2>/dev/null`" = "xmips" -o "x$TCL_SHARED_LIB_SUFFIX" = 'x${VERSION}.a' ; then
     TCL_SHLIB_CFLAGS=""
 fi
@@ -227,45 +249,6 @@ AC_SUBST(TK_BUILD_LIB_SPEC)
 AC_SUBST(TK_LIB_SPEC)
 
 #------------------------------------------------------------------------------
-# Handle the --enable-shared option.  Must do this after extracting information
-# from Config.mk, as we need TCLX_INST_LIB.
-#------------------------------------------------------------------------------
-
-AC_ARG_ENABLE(shared,
-    [  --enable-shared         build and link with shared libraries],
-    [BUILD_SHARED=$enableval],
-    [BUILD_SHARED=NO])
-case "$BUILD_SHARED" in
-    YES|yes)
-        AC_MSG_RESULT(Will build shared libraries)
-        BUILD_SHARED=YES
-        TCLX_USE_SHLIB_CFLAGS=TCL_SHLIB_CFLAGS
-        TCLX_BUILD_LIB_SPEC="-L$bldbasedir/tcl/unix -ltclx"
-        TCLX_LIB_SPEC="-L$TCLX_INST_LIB -ltclx"
-        TKX_BUILD_LIB_SPEC="-L$bldbasedir/tk/unix -ltkx"
-        TKX_LIB_SPEC="-L$TCLX_INST_LIB -ltkx"
-        ;;
-    NO|no)
-        AC_MSG_RESULT(Will not build shared libraries)
-        BUILD_SHARED=NO
-        TCLX_USE_SHLIB_CFLAGS=TCL_NO_SHLIB_CFLAGS  # Not actually defined
-        TCLX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/libtclx.a"
-        TCLX_LIB_SPEC="$TCLX_INST_LIB/libtclx.a"
-        TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/libtkx.a"
-        TKX_LIB_SPEC="$TCLX_INST_LIB/libtkx.a"
-        ;;
-     *)
-        AC_MSG_ERROR(Invalid argument to --enable-shared=, expected YES or NO)
-        ;;
-esac
-AC_SUBST(BUILD_SHARED)
-AC_SUBST(TCLX_USE_SHLIB_CFLAGS)
-AC_SUBST(TCLX_BUILD_LIB_SPEC)
-AC_SUBST(TCLX_LIB_SPEC)
-AC_SUBST(TKX_BUILD_LIB_SPEC)
-AC_SUBST(TKX_LIB_SPEC)
-
-#------------------------------------------------------------------------------
 # Check for various programs used during the build.  If the CC environment
 # variable is not set, the compiler used to build Tcl is used.
 #------------------------------------------------------------------------------
@@ -273,69 +256,87 @@ AC_SUBST(TKX_LIB_SPEC)
 AC_MSG_CHECKING(which C compiler to use)
 if test "X$CC" = "X"; then
     CC=$TCL_CC
-    AC_MSG_RESULT(using C compiler specified in tclConfig.sh)
+    AC_MSG_RESULT(using C compiler specified in tclConfig.sh: $CC)
 else
-    AC_MSG_RESULT(using C compiler specified in by CC env var)
+    AC_MSG_RESULT(using C compiler specified in by CC env var: $CC)
 fi
 AC_SUBST(CC)
 AC_PROG_RANLIB
 
 #------------------------------------------------------------------------------
-# Determine the names of the shared libraries to build.
+# Determine the names of the TclX libraries and the link specifications and
+# other shared library stuff.
 #------------------------------------------------------------------------------
 
-TCLX_STLIB_NAME=libtclx.a
-TKX_STLIB_NAME=libtkx.a
+#
+# Generate the library names using the Tcl macros.
+#
+VERSION=$TCLX_VERSION
+eval "TCLX_STLIB_NAME=libtclx${TCL_UNSHARED_LIB_SUFFIX}"
+eval "TCLX_SHLIB_NAME=libtclx${TCL_SHARED_LIB_SUFFIX}"
 
-case "$TCL_SHLIB_SUFFIX" in
-   *.so) if test "x${TCL_SHARED_LIB_SUFFIX}" = 'x${VERSION}.a' ; then
-	     TCL_SHLIB_SUFFIX='.a'
-	 fi
-         TCLX_SHLIB_BASE_NAME="libtclx.so"
-         TCLX_SHLIB_NAME="libtclx${TCL_SHLIB_SUFFIX}"
-         TKX_SHLIB_BASE_NAME="libtkx.so"
-         TKX_SHLIB_NAME="libtkx${TCL_SHLIB_SUFFIX}"
-         ;;
-   *.sl) TCLX_SHLIB_BASE_NAME=libtclx.sl
-         TCLX_SHLIB_NAME=libtclx.sl
-         TKX_SHLIB_BASE_NAME=libtkx.sl
-         TKX_SHLIB_NAME=libtkx.sl
-         ;;
-   *..o) VERSION=""
-         TCLX_SHLIB_BASE_NAME=libtclx..o
-         VERSION=${TCLX_SHLIB_VERSION}
-         eval "TCLX_SHLIB_NAME=libtclx${TCL_SHARED_LIB_SUFFIX}"
-         TKX_SHLIB_BASE_NAME=libtkx..o
-         VERSION=${TKX_SHLIB_VERSION}
-         eval "TKX_SHLIB_NAME=libtkx${TCL_SHARED_LIB_SUFFIX}"
-         ;;
-      *) TCLX_SHLIB_BASE_NAME=""
-         TCLX_SHLIB_NAME=""
-         TKX_SHLIB_BASE_NAME=""
-         TKX_SHLIB_NAME=""
-         if test "X$BUILD_SHARED" = "XYES" ; then
-             AC_MSG_ERROR(do not know how to build shared libraries for this Unix system)
-         fi
-         ;;
-esac
+VERSION=$TKX_VERSION
+eval "TKX_STLIB_NAME=libtkx${TCL_UNSHARED_LIB_SUFFIX}"
+eval "TKX_SHLIB_NAME=libtkx${TCL_SHARED_LIB_SUFFIX}"
 
+#
+# If the names ended up the same, do build twice.
+#
 if test "x$TCLX_STLIB_NAME" = "x$TCLX_SHLIB_NAME"; then
     TCLX_STLIB_NAME=dont_build_this
     TKX_STLIB_NAME=dont_build_this
 fi
 
+#
+# Determine suffix to use for the object files for the shared library.
+#
 if test "x${TCL_SHLIB_CFLAGS}" != "x"; then
     SHOBJ_SUFFIX="..o"
 else
     SHOBJ_SUFFIX=".o"
 fi
-AC_SUBST(SHOBJ_SUFFIX)
-AC_SUBST(TCLX_STLIB_NAME)
-AC_SUBST(TKX_STLIB_NAME)
 
 #
-# Test for UnixWare -o bug
+# Determine the arguments for specifying the prefered TclX libraries on the
+# link lines.
 #
+case "$BUILD_SHARED" in
+    YES)
+        TCLX_LIB_FLAG="-ltclx${TCLX_VERSION}"
+        TKX_LIB_FLAG="-ltkx${TKX_VERSION}"
+        if test "X${TCL_LIB_VERSIONS_OK}" = "Xnodots" ; then
+            TCLX_LIB_FLAG=`echo ${TCLX_LIB_FLAG} | tr -d .`
+            TKX_LIB_FLAG=`echo ${TKX_LIB_FLAG} | tr -d .`
+        fi
+        TCLX_BUILD_LIB_SPEC="-L$bldbasedir/tcl/unix ${TCLX_LIB_FLAG}"
+        TCLX_LIB_SPEC="-L$TCLX_INST_LIB ${TCLX_LIB_FLAG}"
+        TKX_BUILD_LIB_SPEC="-L$bldbasedir/tk/unix ${TKX_LIB_FLAG}"
+        TKX_LIB_SPEC="-L$TCLX_INST_LIB ${TKX_LIB_FLAG}"
+        ;;
+    NO|no)
+        AC_MSG_RESULT(Will not build shared libraries)
+        BUILD_SHARED=NO
+        TCLX_BUILD_LIB_SPEC="$bldbasedir/tcl/unix/${TCLX_STLIB_NAME}"
+        TCLX_LIB_SPEC="$TCLX_INST_LIB/${TCLX_STLIB_NAME}"
+        TKX_BUILD_LIB_SPEC="$bldbasedir/tk/unix/${TKX_STLIB_NAME}"
+        TKX_LIB_SPEC="$TCLX_INST_LIB/${TKX_STLIB_NAME}"
+        ;;
+esac
+
+AC_SUBST(SHOBJ_SUFFIX)
+AC_SUBST(TCLX_STLIB_NAME)
+AC_SUBST(TCLX_SHLIB_NAME)
+AC_SUBST(TKX_STLIB_NAME)
+AC_SUBST(TKX_SHLIB_NAME)
+AC_SUBST(TCLX_BUILD_LIB_SPEC)
+AC_SUBST(TCLX_LIB_SPEC)
+AC_SUBST(TKX_BUILD_LIB_SPEC)
+AC_SUBST(TKX_LIB_SPEC)
+
+#------------------------------------------------------------------------------
+# Test for UnixWare -o bug.  Macros are used in targets to build the shared
+# objects.
+#------------------------------------------------------------------------------
 AC_MSG_CHECKING([for UnixWare -o bug])
 rm -rf conftest*
 cat > conftest.$ac_ext <<EOF
@@ -343,26 +344,21 @@ int main() { return 0; }
 EOF
 ${CC-cc} -c -o conftest..o conftest.$ac_ext
 if test -f conftest..o; then
-    SAVE="@:"
-    RESTORE="@:"
-    O_FLAG='-o $@'
+    OBJ_SAVE="@:"
+    OBJ_RESTORE="@:"
+    CC_SHOBJ_FLAG='-o $@'
     AC_MSG_RESULT([OK])
 else
-    SAVE='@if test -f $*o ; then rm -f $*sav; mv $*o $*sav; fi;'
-    RESTORE='@mv $*o $@; if test -f $*save ; then mv $*save $*o; fi;'
-    O_FLAG=""
+    OBJ_SAVE='@if test -f $*o ; then rm -f $*sav; mv $*o $*sav; fi;'
+    OBJ_RESTORE='@mv $*o $@; if test -f $*save ; then mv $*save $*o; fi;'
+    CC_SHOBJ_FLAG=""
     AC_MSG_RESULT([buggy])
 fi
 rm -rf conftest*
 
-AC_SUBST(SAVE)
-AC_SUBST(RESTORE)
-AC_SUBST(O_FLAG)
-
-AC_SUBST(TCLX_SHLIB_BASE_NAME)
-AC_SUBST(TCLX_SHLIB_NAME)
-AC_SUBST(TKX_SHLIB_BASE_NAME)
-AC_SUBST(TKX_SHLIB_NAME)
+AC_SUBST(OBJ_SAVE)
+AC_SUBST(OBJ_RESTORE)
+AC_SUBST(CC_SHOBJ_FLAG)
 
 #------------------------------------------------------------------------------
 # Determine the search path argument for the installed TclX libraries. 

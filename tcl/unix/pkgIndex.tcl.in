@@ -1,5 +1,5 @@
 # Tcl package index file, version 1.0
 # 
-# Package index TclX  @TCLX_VERSION@.
+# Package index for TclX @TCLX_FULL_VERSION@.
 #
-package ifneeded Tclx @TCLX_VERSION@ {load @TCLX_INST_LIB@/@TCLX_SHLIB_NAME@}
+package ifneeded Tclx @TCLX_VERSION@ "load $dir/../@TCLX_SHLIB_NAME@"

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.15 1996/10/25 04:55:29 markd Exp $
+# $Id: Makefile.in,v 7.16 1996/11/16 08:05:20 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -108,32 +108,30 @@ TEST_OBJS = tclTest.o tclUnixTest.o tclXtest.o tclXunixTest.o
 # If a link fails, purge the executable, as some systems leave invalid
 # executables around.
 #
-all: libtclx.a SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest runtest
+all: ${TCLX_STLIB_NAME} SHLIB_@BUILD_SHARED@ tcl checkup RUNTIME tclXtest \
+     runtest
 
 static:	tcl.static
 
-tcl: tclXAppInit.o libtclx.a SHLIB_@BUILD_SHARED@
+tcl: tclXAppInit.o ${TCLX_STLIB_NAME} SHLIB_@BUILD_SHARED@
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${LIBS} -o tcl || \
 	    (rm -f tcl; exit 1)
 
-tcl.static: tclXAppInit.o libtclx.a
+tcl.static: tclXAppInit.o ${TCLX_STLIB_NAME}
 	${CC} ${LD_SWITCHES} tclXAppInit.o ${SALIBS} -o $@ || \
 	    (rm -f $@; exit 1)
 
 
 ${TCLX_STLIB_NAME}: ${OBJS}
-	${AR} cr libtclx.a ${OBJS}
-	${RANLIB} libtclx.a
+	${AR} cr ${TCLX_STLIB_NAME} ${OBJS}
+	${RANLIB} ${TCLX_STLIB_NAME}
 
-SHLIB_YES: ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION}
+SHLIB_YES: ${TCLX_SHLIB_NAME}
 	touch SHLIB_YES
 
-${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION}: ${SOBJS}
-	rm -f ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION}
+${TCLX_SHLIB_NAME}: ${SOBJS}
+	rm -f ${TCLX_SHLIB_NAME}
 	${TCL_SHLIB_LD} -o ${TCLX_SHLIB_NAME} ${SOBJS} ${TCL_SHLIB_LD_LIBS}
-	mv ${TCLX_SHLIB_BASE_NAME} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION}
-	rm -f ${TCLX_SHLIB_BASE_NAME}
-	${LN_S} ${TCLX_SHLIB_NAME}.${TCLX_SHLIB_VERSION} ${TCLX_SHLIB_BASE_NAME}
 
 SHLIB_NO:
 	touch SHLIB_NO
@@ -260,203 +258,242 @@ rename.o: ${COMPAT_DIR}/rename.c
 	${CC} -c ${CC_SWITCHES} ${COMPAT_DIR}/rename.c
 
 #------------------------------------------------------------------------------
-# Dependencies for generating objects. (position independant versions)
+# Dependencies for generating objects (position independant versions).
 #
 tclXlibInit..o: ${TCLX_GENERIC_DIR}/tclXlibInit.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXlibInit.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXlibInit.c
+	@OBJ_RESTORE@
 
 tclXcmdInit..o: ${TCLX_GENERIC_DIR}/tclXcmdInit.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS}  ${TCLX_GENERIC_DIR}/tclXcmdInit.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	     ${TCLX_GENERIC_DIR}/tclXcmdInit.c
+	@OBJ_RESTORE@
 
 tclXAppInit..o: ${TCLX_GENERIC_DIR}/tclXAppInit.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXAppInit.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXAppInit.c
+	@OBJ_RESTORE@
 
 tclXbsearch..o: ${TCLX_GENERIC_DIR}/tclXbsearch.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXbsearch.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXbsearch.c
+	@OBJ_RESTORE@
 
 tclXcmdloop..o: ${TCLX_GENERIC_DIR}/tclXcmdloop.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXcmdloop.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXcmdloop.c
+	@OBJ_RESTORE@
 
 tclXdebug..o: ${TCLX_GENERIC_DIR}/tclXdebug.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXdebug.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXdebug.c
+	@OBJ_RESTORE@
 
 tclXdup..o: ${TCLX_GENERIC_DIR}/tclXdup.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXdup.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXdup.c
+	@OBJ_RESTORE@
 
 tclXfcntl..o: ${TCLX_GENERIC_DIR}/tclXfcntl.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXfcntl.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXfcntl.c
+	@OBJ_RESTORE@
 
 tclXfilecmds..o: ${TCLX_GENERIC_DIR}/tclXfilecmds.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXfilecmds.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXfilecmds.c
+	@OBJ_RESTORE@
 
 tclXfilescan..o: ${TCLX_GENERIC_DIR}/tclXfilescan.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXfilescan.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXfilescan.c
+	@OBJ_RESTORE@
 
 tclXflock..o: ${TCLX_GENERIC_DIR}/tclXflock.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXflock.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXflock.c
+	@OBJ_RESTORE@
 
 tclXfstat..o: ${TCLX_GENERIC_DIR}/tclXfstat.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXfstat.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXfstat.c
+	@OBJ_RESTORE@
 
 tclXgeneral..o: ${TCLX_GENERIC_DIR}/tclXgeneral.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXgeneral.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXgeneral.c
+	@OBJ_RESTORE@
 
 tclXhandles..o: ${TCLX_GENERIC_DIR}/tclXhandles.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXhandles.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXhandles.c
+	@OBJ_RESTORE@
 
 tclXinit..o: ${TCLX_GENERIC_DIR}/tclXinit.c Makefile
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    -DTCLX_LIBRARY=\"${TCLX_INST_RUNTIME}\" \
 	    ${TCLX_GENERIC_DIR}/tclXinit.c
-	@RESTORE@
+	@OBJ_RESTORE@
 
 tclXkeylist..o: ${TCLX_GENERIC_DIR}/tclXkeylist.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXkeylist.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXkeylist.c
+	@OBJ_RESTORE@
 
 tclXlib..o: ${TCLX_GENERIC_DIR}/tclXlib.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXlib.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXlib.c
+	@OBJ_RESTORE@
 
 tclXlist..o: ${TCLX_GENERIC_DIR}/tclXlist.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXlist.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXlist.c
+	@OBJ_RESTORE@
 
 tclXmath..o: ${TCLX_GENERIC_DIR}/tclXmath.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXmath.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXmath.c
+	@OBJ_RESTORE@
 
 tclXmsgcat..o: ${TCLX_GENERIC_DIR}/tclXmsgcat.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXmsgcat.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXmsgcat.c
+	@OBJ_RESTORE@
 
 tclXprocess..o: ${TCLX_GENERIC_DIR}/tclXprocess.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXprocess.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXprocess.c
+	@OBJ_RESTORE@
 
 tclXprofile..o: ${TCLX_GENERIC_DIR}/tclXprofile.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXprofile.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXprofile.c
+	@OBJ_RESTORE@
 
 tclXregexp..o: ${TCLX_GENERIC_DIR}/tclXregexp.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXregexp.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXregexp.c
+	@OBJ_RESTORE@
 
 tclXselect..o: ${TCLX_GENERIC_DIR}/tclXselect.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXselect.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXselect.c
+	@OBJ_RESTORE@
 
 tclXshell..o: ${TCLX_GENERIC_DIR}/tclXshell.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXshell.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXshell.c
+	@OBJ_RESTORE@
 
 tclXsignal..o: ${TCLX_GENERIC_DIR}/tclXsignal.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXsignal.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXsignal.c
+	@OBJ_RESTORE@
 
 tclXsocket..o: ${TCLX_GENERIC_DIR}/tclXsocket.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXsocket.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXsocket.c
+	@OBJ_RESTORE@
 
 tclXstring..o: ${TCLX_GENERIC_DIR}/tclXstring.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXstring.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXstring.c
+	@OBJ_RESTORE@
 
 tclXoscmds..o: ${TCLX_GENERIC_DIR}/tclXoscmds.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXoscmds.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXoscmds.c
+	@OBJ_RESTORE@
 
 tclXutil..o: ${TCLX_GENERIC_DIR}/tclXutil.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXutil.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXutil.c
+	@OBJ_RESTORE@
 
 tclXchmod..o: ${TCLX_GENERIC_DIR}/tclXchmod.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_GENERIC_DIR}/tclXchmod.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_GENERIC_DIR}/tclXchmod.c
+	@OBJ_RESTORE@
 
 tclXid..o: ${TCLX_UNIX_SRC_DIR}/tclXid.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_UNIX_SRC_DIR}/tclXid.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_UNIX_SRC_DIR}/tclXid.c
+	@OBJ_RESTORE@
 
 tclXunixCmds..o: ${TCLX_UNIX_SRC_DIR}/tclXunixCmds.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_UNIX_SRC_DIR}/tclXunixCmds.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_UNIX_SRC_DIR}/tclXunixCmds.c
+	@OBJ_RESTORE@
 
 tclXunixDup..o: ${TCLX_UNIX_SRC_DIR}/tclXunixDup.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_UNIX_SRC_DIR}/tclXunixDup.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_UNIX_SRC_DIR}/tclXunixDup.c
+	@OBJ_RESTORE@
 
 tclXunixOS..o: ${TCLX_UNIX_SRC_DIR}/tclXunixOS.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_UNIX_SRC_DIR}/tclXunixOS.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_UNIX_SRC_DIR}/tclXunixOS.c
+	@OBJ_RESTORE@
 
 tclXunixId..o: ${TCLX_UNIX_SRC_DIR}/tclXunixId.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_UNIX_SRC_DIR}/tclXunixId.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_UNIX_SRC_DIR}/tclXunixId.c
+	@OBJ_RESTORE@
 
 tclXunixSock..o: ${TCLX_UNIX_SRC_DIR}/tclXunixSock.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${TCLX_UNIX_SRC_DIR}/tclXunixSock.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${TCLX_UNIX_SRC_DIR}/tclXunixSock.c
+	@OBJ_RESTORE@
 
 random..o: ${COMPAT_DIR}/random.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${COMPAT_DIR}/random.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${COMPAT_DIR}/random.c
+	@OBJ_RESTORE@
 
 rename..o: ${COMPAT_DIR}/rename.c
-	@SAVE@
-	${CC} -c @O_FLAG@ ${CC_SWITCHES} ${TCLX_USE_SHLIB_CFLAGS} ${COMPAT_DIR}/rename.c
-	@RESTORE@
+	@OBJ_SAVE@
+	${CC} -c ${CC_SHOBJ_FLAG} ${CC_SWITCHES} ${TCL_SHLIB_CFLAGS} \
+	    ${COMPAT_DIR}/rename.c
+	@OBJ_RESTORE@
 
 #------------------------------------------------------------------------------
 # Do some special checks to make sure TclX is built ok.
@@ -511,7 +548,7 @@ help:
 #------------------------------------------------------------------------------
 # Generate the test program.
 #
-tclXtest: ${TEST_OBJS} libtclx.a
+tclXtest: ${TEST_OBJS} ${TCLX_STLIB_NAME}
 	${CC} ${LD_SWITCHES} ${TEST_OBJS} ${LIBS} -o tclXtest || \
 	    (rm -f tclXtest; exit 1)
 
@@ -607,23 +644,20 @@ install-runtime:
 install-exec:
 	${INSTCOPY} tcl ${INSTALL_ROOT}${TCLX_INST_BIN}
 	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
-	${INSTCOPY} libtclx.a ${INSTALL_ROOT}${TCLX_INST_LIB}
-	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/libtclx.a
+	${INSTCOPY} ${TCLX_STLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB}
+	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_STLIB_NAME}
 	if test "@BUILD_SHARED@" = "YES"; then \
-	    ${INSTCOPY} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION} \
-		${INSTALL_ROOT}${TCLX_INST_LIB}/tclX${TCLX_FULL_VERSION} ;\
-	    rm -f ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_NAME};\
-	    ${LN_S} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION} \
-		   ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_SHLIB_NAME} ;\
+	    ${INSTCOPY} ${TCLX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
 	fi
 	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
+	${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} libtclx.a tcl checkup.done
+	-rm -f tclXAppInit.o ${OBJS} ${SOBJS} ${TCLX_STLIB_NAME} tcl
 	-rm -f tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl
-	-rm -f SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME} ${TCLX_SHLIB_BASE_NAME}.${TCLX_SHLIB_VERSION}
+	-rm -f checkup.done SHLIB_YES SHLIB_NO ${TCLX_SHLIB_NAME}
 	-rm -rf help help.tmp ${TEST_OBJS} tclXtest runtest dltest dltest.tmp
 
 #------------------------------------------------------------------------------

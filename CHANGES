@@ -1228,8 +1228,14 @@
 20 Oct 96: Released TclX 7.6.0 Beta 2
 ===============================================================================
 15 Nov 96:
-  o Integrated fixes for shared libraries on AIX and MIPS from Jan Nijtmans'
+  o Major clean up of shared library build, including fixes from Jan Nijtmans'
     <nijtmans@nici.kun.nl> TclX plus patch.
   o More work on Windows port, including make from a single makefile and
     install rules.
 -------------------------------------------------------------------------------
+17 Nov 96:
+  o pkgIndex.tcl files now works relative to $dir, so they can be moved.
+  o libtclx and libtkx now use the same alogrithm for naming that includes the
+    version number as Tcl and Tk.
+-------------------------------------------------------------------------------
+ 
