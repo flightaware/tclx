@@ -215,7 +215,7 @@ Tcl_ServerOpenCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    Tcl_AppendResult (interp, argv [2], " not available on this system",
+    Tcl_AppendResult (interp, argv [0], " not available on this system",
                       (char *) NULL);
     return TCL_ERROR;
 }
