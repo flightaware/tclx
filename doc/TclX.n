@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.35 1993/09/22 01:02:53 markd Exp markd $
+.\" $Id: TclX.man,v 2.36 1993/09/25 16:06:44 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -35,7 +35,6 @@ Tcl procedures, any of which can be automatically loaded on the first
 attempt to execute it.
 .PP
 The command descriptions are separated into several sections:
-???Redo this ???
 .RS 5
 .TP
 o General Commands
@@ -60,17 +59,9 @@ o String and Character Manipulation Commands
 .TP
 o XPG/3 Message Catalog Commands
 .TP
-o Tcl Shell and Development Environment ???Funny name??
+o Extended Tcl Shell
 .TP
 o Help Facility
-.TP
-o Tcl Shell Initialization Sequence ???Combine these sections.
-.TP
-o Tcl Initialization File
-.TP
-o Tcl Shell Variables
-.TP
-o Tcl Shell Procedures ??
 .TP
 o Tcl Loadable Libraries and Packages
 .RE
@@ -187,16 +178,14 @@ array.  The \fBbreak\fR and \fBcontinue\fR statements work as with
 '@help: tcl/files/for_recursive_glob
 '@brief: A foreach-style loop for all matched (globbed) files.
 .TP
-.B for_recursive_glob \fB?-sym? \fIvar dirlist globlist code\fR
+.B for_recursive_glob \fIvar dirlist globlist code\fR
 .br
 This procedure performs a foreach-style loop over recursively matched files.
 All directories in \fIdirlist\fR are recursively searched (breadth-first),
 comparing each file found against the file glob patterns in \fBgloblist\fR.
 For each matched file, the variable \fIvar\fR is set to the file path and
 \fIcode\fR is evaluated.
-If \fB-sym\fR is specified, symbolic links are followed.
-Note, patterns in \fIgloblist\fR should not contain "/" characters, as
-the patterns are matched against the last component of files name.
+Symbolic links are not followed.
 '@:
 '@:This procedure is provided by Extended Tcl.
 '@endhelp
@@ -266,15 +255,12 @@ then the current directory is pushed, but remains unchanged.
 '@help: tcl/files/recursive_glob
 '@brief: Recursive filename matching (globbing).
 .TP
-.B recursive_glob \fB?-sym? ?--? \fIdirlist globlist\fR
+.B recursive_glob \fIdirlist globlist\fR
 .br
 This procedure returns a list of recursively matches files.
 All directories in \fIdirlist\fR are recursively searched (breadth-first),
 comparing each file found against the file glob patterns in \fBgloblist\fR.
-If \fB-sym\fR is specified, symbolic links are followed.  The \fB--\fR string
-is used to optionally indicate the end of options.
-Note, patterns in \fIgloblist\fR should not contain "/" characters, as
-the patterns are matched against the last component of files name.
+Symbolic links are not followed.
 '@:
 '@:This procedure is provided by Extended Tcl.
 '@endhelp
@@ -2217,7 +2203,7 @@ specified in the call to \fBcatopen\fR.
 '@:This command is provided by Extended Tcl.
 '@endhelp
 '
-.SH "TCL SHELL AND DEVELOPMENT ENVIRONMENT"
+.SH "EXTENDED TCL SHELL"
 .sp
 '@help: tcl/tclshell/intro
 '@brief: Introduction to the tcl shell.
@@ -2310,100 +2296,6 @@ commands to run Unix commands.
 '@:This functionallity is provided by Extended Tcl.
 '@endhelp
 '
-.SH "HELP FACILITY"
-'@help: help
-'@brief: Tcl help facility.
-.PP
-The help facility allows one to look up help pages which where extracted
-from the standard Tcl manual pages and Tcl scripts during Tcl
-installation.  Help files are structured as a multilevel tree of
-subjects and help pages.  Help files are found by searching directories
-named \fBhelp\fR in the directories listed in the \fBauto_path\fR
-variable.  All of the files in the list of help directories form a
-virtual root of the help tree.  This method allows multiple applications
-to provide help trees without having the files reside in the same
-directory.  The following commands and options are provided with the
-help package:
-.TP
-.B help
-.br
-Help, without arguments, lists of all the help subjects and pages under
-the current help subject.
-.TP
-.B help \fIsubject\fR
-Displays all of help pages and lower level subjects (if any exist) under
-the subject \fIsubject\fR.
-.TP
-.B help \fIsubject/helppage\fR
-Display the specified help page.  The help output is passed through a simple
-pager if output exceeds 23 lines, pausing waiting for a return to be entered.
-If any other character is entered, the output is terminated.
-.TP
-.B helpcd ?\fIsubject\fR?
-Change the current subject, which is much like the Unix current
-directory.  If
-\fIsubject\fR is not specified, return to the top-level of the help tree.
-Help subject path names may also include ``..'' elements.
-.TP
-.B helppwd
-Displays the current help subject.
-.TP
-.B help help | ?
-Displays help on the help facility at any directory level.
-.TP
-.B apropos \fIpattern\fR
-This command locates subjects by searching their one-line descriptions for a
-pattern.  \fRApropos\fR is useful when you can remember part of the name or
-description of a command, and want to search through the one-line summaries
-for matching lines.  Full regular expressions may be specified (see 
-the \fBregexp\fR command).
-'@:
-'@:These procedures are provided by Extended Tcl.
-'@endhelp
-'
-.SH "TCL SHELL INITIALIZATION SEQUENCE"
-'@help: tcl/tclshell/initialize
-'@brief: Tcl shell initialization.
-.PP
-When Extended Tcl is installed, the standard runtime files are places in the
-Tcl master directory, which is configured when Tcl is built.  This master
-directory normally contains the Tcl initialization file (TclInit.tcl), the
-standard Tcl library files (tcl.tlib, tk.tlib) and the help files.
-The Tcl master directory is named after the version of Tcl it is associated
-with, e.g. \fB/usr/local/tclX7.0a\fR.  The path to the Tcl master directory
-is available from the \fBinfo library\fR command.
-.PP
-The first step in initializing the Tcl shell is to locate the Tcl
-initialization file, normally \fBTclInit.tcl\fR.  If an environment variable
-\fBTCLINIT\fR exists, it contains the path to the Tcl initialization file.
-If the \fBTCLINIT\fR environment variable is not set, the file
-\fBTclInit.tcl\fR is used from the default Tcl master directory.
-.PP
-\fBTcl\fR then evaulates the Tcl initialization file.  The \fBauto_path\fR
-variable is initialized to the Tcl master directory and may be augmented by
-the intialization file or the application.
-Other procedures and variables used by the Extended Tcl shell are also defined
-by this file.
-.PP
-If the Tcl is invoked interactively, it will source a file
-named \fI.tclrc\fR in the
-user's home directory, if it exists.  Tcl is viewed primarily as a programming
-language, not an interactive shell, so the \fI.tclrc\fR is intended for use for
-loading development utilities, not to support applications,
-which should not have
-to rely
-on the user's environment in such a manner.
-.PP
-Some applications, such as \fBwishx\fR, have additional initialization files.
-They may have environment variables that override the default location
-of thise initialization files.
-Tcl global variable \fBauto_path\fR will contain the directories contain those
-initialization files.
-'@:
-'@:This functionallity is provided by Extended Tcl.
-'@endhelp
-'
-.SH "TCL SHELL VARIABLES"
 '@help: tcl/tclshell/variables
 '@brief: Tcl shell variables.
 .PP
@@ -2448,31 +2340,111 @@ are part of the TclX shell.  Don't change this array unless you know what
 your doing.
 '@endhelp
 '
-.SH "TCL SHELL PROCEDURES"
+'@help: tcl/tclshell/initialize
+'@brief: Tcl shell initialization.
 .PP
-The follow additional procedures are defined by the Tcl shell and may be 
-generally useful:
-.TP
-'@help: tcl/libraries/auto_load_file
-'@brief: Search the auto_path for a file to source.
-.B auto_load_file \fIfile\fR
-.br
-Source a file, as with the \fBsource\fR command, except search
-\fBauto_path\fR for the file.
+When Extended Tcl is installed, the standard runtime files are places in the
+Tcl master directory, which is configured when Tcl is built.  This master
+directory normally contains the Tcl initialization file (TclInit.tcl), the
+standard Tcl library file (tcl.tlib) and the help files.
+The Tcl master directory is named after the version of Tcl it is associated
+with, e.g. \fB/usr/local/tclX/7.0a\fR.  The path to the Tcl master directory
+is available from the \fBinfo library\fR command.  The location of the
+Tcl master directory can be overridden with the \fBTCL_LIBRARY\fR environment
+variable.
+.PP
+The first step in initializing the Tcl shell is to locate the Tcl
+initialization file, normally \fBTclInit.tcl\fR.  If an environment variable
+\fBTCLINIT\fR exists, it contains the path to the Tcl initialization file.
+If the \fBTCLINIT\fR environment variable is not set, the file
+\fBTclInit.tcl\fR is used from the default Tcl master directory.
+.PP
+\fBTcl\fR then evaulates the Tcl initialization file.  The \fBauto_path\fR
+variable is initialized to the Tcl master directory and may be augmented by
+the intialization file or the application.
+Other procedures and variables used by the Extended Tcl shell are also defined
+by this file.
+.PP
+If the Tcl is invoked interactively, it will source a file
+named \fI.tclrc\fR in the
+user's home directory, if it exists.  Tcl is viewed primarily as a programming
+language, not an interactive shell, so the \fI.tclrc\fR is intended for use for
+loading development utilities, not to support applications,
+which should not have to rely on the user's environment in such a manner.
+.PP
+The Extended Tcl Tk shell, \fBwishx\fR, has an additional master directory
+and initialization file.  It use the environment variable \fBTK_LIBRARY\fR
+to override the default location of the Tk master directory.
 '@:
-'@:This procedure is provided by Extended Tcl.
+'@:This functionallity is provided by Extended Tcl.
 '@endhelp
 '
+.SH "HELP FACILITY"
+'@help: help
+'@brief: Tcl help facility.
+.PP
+The help facility allows one to look up help pages which where extracted
+from the standard Tcl manual pages and Tcl scripts during Tcl
+installation.  Help files are structured as a multilevel tree of
+subjects and help pages.  Help files are found by searching directories
+named \fBhelp\fR in the directories listed in the \fBauto_path\fR
+variable.  All of the files in the list of help directories form a
+virtual root of the help tree.  This method allows multiple applications
+to provide help trees without having the files reside in the same
+directory. 
+.PP
+The help facility can be accessed in two ways, as interactive commands in the
+Extended Tcl shell or as an interactive Tk-based program (if you have built
+Extended Tcl with Tk).
+.PP
+To run the Tk-based interactive help program:
+.sp
+.nf
+.ft CW
+    tclhelp ?addpaths?
+.ft R
+.fi
+Where \fIaddpaths\fR are additional paths to search for help directories.
+By default, only the \fIauto_path\fR used by \fBtclhelp\fR is search.
+This will result in help on Tcl, Extended Tcl and Tk.
+.PP
+The following interactive Tcl commands and options are provided
+with the help package:
 .TP
-'@help: tcl/libraries/searchpath
-'@brief: Search a path list for a file.
-.B searchpath \fIpath file\fR
+.B help
 .br
-Search all directories in the specified path, which is a Tcl list, for the
-specified file.  Returns the full path name of the file, or an empty string
-if the requested file could not be found.
+Help, without arguments, lists of all the help subjects and pages under
+the current help subject.
+.TP
+.B help \fIsubject\fR
+Displays all of help pages and lower level subjects (if any exist) under
+the subject \fIsubject\fR.
+.TP
+.B help \fIsubject/helppage\fR
+Display the specified help page.  The help output is passed through a simple
+pager if output exceeds 23 lines, pausing waiting for a return to be entered.
+If any other character is entered, the output is terminated.
+.TP
+.B helpcd ?\fIsubject\fR?
+Change the current subject, which is much like the Unix current
+directory.  If
+\fIsubject\fR is not specified, return to the top-level of the help tree.
+Help subject path names may also include ``..'' elements.
+.TP
+.B helppwd
+Displays the current help subject.
+.TP
+.B help help | ?
+Displays help on the help facility at any directory level.
+.TP
+.B apropos \fIpattern\fR
+This command locates subjects by searching their one-line descriptions for a
+pattern.  \fRApropos\fR is useful when you can remember part of the name or
+description of a command, and want to search through the one-line summaries
+for matching lines.  Full regular expressions may be specified (see 
+the \fBregexp\fR command).
 '@:
-'@:This procedure is provided by Extended Tcl.
+'@:These procedures are provided by Extended Tcl.
 '@endhelp
 '
 '@help: tcl/libraries/packagelib
@@ -2536,7 +2508,7 @@ the \fBdirectory_stack\fR portion of the package file to be loaded.
 '@:This functionallity is provided by Extended Tcl.
 '@endhelp
 '
-.SS "PACKAGE LIBRARY MANAGEMENT COMMANDS"
+.SH "PACKAGE LIBRARY MANAGEMENT COMMANDS"
 .PP
 Several commands are available for building and managing package
 libraries.  Commands that are extended versions of the standard
@@ -2636,6 +2608,25 @@ supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 Returns a list of the names of all defined packages. If \fI-location\fR
 is specified, a list of pairs of package name and the \fB.tlib\fR path
 name, offset and length of the package within the library.
+.TP
+'@help: tcl/libraries/auto_load_file
+'@brief: Search the auto_path for a file to source.
+.B auto_load_file \fIfile\fR
+.br
+Source a file, as with the \fBsource\fR command, except search
+\fBauto_path\fR for the file.
+'@:
+'@:This procedure is provided by Extended Tcl.
+'@endhelp
+'
+.TP
+'@help: tcl/libraries/searchpath
+'@brief: Search a path list for a file.
+.B searchpath \fIpath file\fR
+.br
+Search all directories in the specified path, which is a Tcl list, for the
+specified file.  Returns the full path name of the file, or an empty string
+if the requested file could not be found.
 '@:
 '@:This procedure is provided by Extended Tcl.
 '@endhelp
