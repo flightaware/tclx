@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 2.4 1993/06/21 05:58:43 markd Exp markd $
+# $Id: TclInit.tcl,v 2.5 1993/06/24 07:32:30 markd Exp markd $
 #-----------------------------------------------------------------------------
 
 #
@@ -25,8 +25,12 @@ if !$interactiveSession return
 
 # == Interactive Tcl session initialization ==
 
-set TCLENV(topLevelPromptHook) {global programName; concat "$programName>" }
-set TCLENV(downLevelPromptHook) {concat "=>"}
+if ![info exists TCLENV(topLevelPromptHook)] {
+    set TCLENV(topLevelPromptHook) {global programName; concat "$programName>"}
+}
+if ![info exists TCLENV(downLevelPromptHook)] {
+    set TCLENV(downLevelPromptHook) {concat "=>"}
+}
 
 if [file readable ~/.tclrc] {source ~/.tclrc}
 
