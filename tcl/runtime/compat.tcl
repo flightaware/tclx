@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 4.2 1995/03/30 05:25:24 markd Exp markd $
+# $Id: compat.tcl,v 4.3 1995/07/20 02:31:23 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.tcl,v 4.1 1995/01/01 19:49:58 markd Exp markd $
+# $Id: pushd.tcl,v 4.2 1995/06/26 17:56:49 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

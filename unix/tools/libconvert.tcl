@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: libconvert.tcl,v 4.1 1995/01/01 19:49:49 markd Exp markd $
+# $Id: libconvert.tcl,v 4.2 1995/07/05 01:17:36 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 

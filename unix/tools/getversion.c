@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: getversion.c,v 4.0 1994/07/16 05:29:06 markd Rel markd $
+ * $Id: getversion.c,v 4.1 1995/01/01 19:49:48 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXinit.c,v 4.5 1995/06/30 23:27:19 markd Exp markd $
+ * $Id: tkXinit.c,v 4.6 1995/07/05 01:17:36 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
