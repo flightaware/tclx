@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: tkdemo.tcl,v 1.1 1992/12/19 07:50:39 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -26,7 +26,8 @@ proc tkdemo {} {
     }
     set demos [searchpath $TCLPATH demos]
     if {$demos == "" || ![file isdirectory $demos]} {
-        error "can't find Tk `demos' directory on the TCLPATH ($TCLPATH)"
+        error "can't find Tk `demos' directory on the TCLPATH ($TCLPATH)
+Extended Tcl must be installed with the Tk demos option to use this procedure"
     }
     uplevel #0 source $demos/widget
 }
