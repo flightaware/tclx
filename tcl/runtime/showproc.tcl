@@ -1,5 +1,5 @@
 #
-# showprocs.tcl --
+# showproc.tcl --
 #
 # Display procedure headers and bodies.
 #------------------------------------------------------------------------------
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: showproc.tcl,v 2.2 1993/06/21 05:58:43 markd Exp markd $
+# $Id: showproc.tcl,v 2.3 1993/06/24 07:28:33 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
