@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: Startup.man,v 1.2 1992/10/12 16:37:40 markd Exp markd $
+.\" $Id: Startup.man,v 2.0 1992/10/16 04:49:13 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Tcl_Startup" TCL "" "Tcl"
@@ -55,6 +55,7 @@ Tcl_CommandLoop (Tcl_Interp *interp,
 
 void
 Tcl_ErrorAbort (Tcl_Interp  *interp,
+                int          noDumpStack,
                 int          exitCode);
 
 .ft R
@@ -103,6 +104,9 @@ following option is supported:
 .br
 \fB- TCLSH_NO_INIT_FILE\fR - If set, process the default file, but not the
 init file.  This can be used to make the default file do all initialization.
+.br
+\fB- TCLSH_NO_STACK_DUMP\fR - If an error occurs, don't dump out the procedure
+call stack, just print an error message.
 .RE
 .sp
 .RS 2
@@ -198,6 +202,9 @@ Parameters:
 .RS 2
 \fBo \fIinterp\fR - A pointer to the interpreter, should contain the
 error message in `result'.
+.br
+\fBo noStackDump\fR - If TRUE, then the procedure call stack will not be
+displayed.
 .br
 \fBo \fIexitCode\fR - The code to pass to exit.
 .RE

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.0 1992/10/16 04:51:14 markd Rel markd $
+ * $Id: tclXstartup.c,v 2.1 1992/11/10 04:02:06 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -66,12 +66,15 @@ ProcessInitFile _ANSI_ARGS_((Tcl_Interp  *interp));
  * Parameters:
  *   o interp - A pointer to the interpreter, should contain the
  *     error message in `result'.
+ *   o noStackDump - If TRUE, then the procedure call stack will not be
+ *     displayed.
  *   o exitCode - The code to pass to exit.
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_ErrorAbort (interp, exitCode)
+Tcl_ErrorAbort (interp, noDumpStack, exitCode)
     Tcl_Interp  *interp;
+    int          noDumpStack;
     int          exitCode;
 {
     char *errorStack;
@@ -79,9 +82,11 @@ Tcl_ErrorAbort (interp, exitCode)
     fflush (stdout);
     fprintf (stderr, "Error: %s\n", interp->result);
 
-    errorStack = Tcl_GetVar (interp, "errorInfo", 1);
-    if (errorStack != NULL)
-        fprintf (stderr, "%s\n", errorStack);
+    if (noDumpStack != 0) {
+        errorStack = Tcl_GetVar (interp, "errorInfo", 1);
+        if (errorStack != NULL)
+            fprintf (stderr, "%s\n", errorStack);
+    }
     exit (exitCode);
 }
 
@@ -130,12 +135,17 @@ ParseCmdArgs (argc, argv, tclParmsPtr)
      * on to the scripts.  The '-c' or '-f' must also be the last option to
      * allow for script arguments starting with `-'.
      */
-    while ((option = getopt (argc, argv, "qc:f:u")) != -1) {
+    while ((option = getopt (argc, argv, "qc:f:un")) != -1) {
         switch (option) {
             case 'q':
                 if (tclParmsPtr->options & TCLSH_QUICK_STARTUP)
                     goto usageError;
                 tclParmsPtr->options |= TCLSH_QUICK_STARTUP;
+                break;
+            case 'n':
+                if (tclParmsPtr->options & TCLSH_NO_STACK_DUMP)
+                    goto usageError;
+                tclParmsPtr->options |= TCLSH_NO_STACK_DUMP;
                 break;
             case 'c':
                 tclParmsPtr->execCommand = TRUE;
@@ -171,7 +181,7 @@ ParseCmdArgs (argc, argv, tclParmsPtr)
 
 usageError:
     fprintf (stderr, "usage: %s %s\n", argv [0],
-             "[-qu] [[-f] script]|[-c command] [args]");
+             "[-qun] [[-f] script]|[-c command] [args]");
     exit (1);
 }
 
@@ -307,6 +317,8 @@ ProcessInitFile (interp)
  *       o TCLSH_NO_INIT_FILE - If set, process the default file, but not the
  *         init file.  This can be used to make the default file do all
  *         initialization.
+ *       o TCLSH_NO_STACK_DUMP - If an error occurs, don't dump out the
+ *         procedure call stack, just print an error message.
  *   o programName (I) - The name of the program being executed, usually
  *     taken from the main argv [0].  Used to set the Tcl variable.  If NULL
  *     then the variable will not be set.
@@ -423,7 +435,7 @@ errorExit:
     if (defaultFilePath != defaultFile)
         ckfree (defaultFilePath);
     if (options & TCLSH_ABORT_STARTUP_ERR)
-        Tcl_ErrorAbort (interp, 255);
+        Tcl_ErrorAbort (interp, options & TCLSH_NO_STACK_DUMP, 255);
     return TCL_ERROR;
 }
 
@@ -497,6 +509,6 @@ Tcl_Startup (interp, argc, argv, defaultFile, options)
     return;
 
 errorAbort:
-    Tcl_ErrorAbort (interp, 255);
+    Tcl_ErrorAbort (interp, options & TCLSH_NO_STACK_DUMP, 255);
 }
 

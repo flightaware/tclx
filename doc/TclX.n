@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.0 1992/10/16 04:49:16 markd Rel markd $
+.\" $Id: TclX.man,v 2.1 1992/10/25 05:22:07 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1690,7 +1690,7 @@ specified in the call to \fBcatopen\fR.
 .sp
 '@help: tclshell/intro
 '@brief: Introduction to the tcl shell.
-.B tcl [-q] [[-f] \fIscript\fB]|[-c \fIcommand\fB] [\fIargs\fR]
+.B tcl [-qn] [[-f] \fIscript\fB]|[-c \fIcommand\fB] [\fIargs\fR]
 .PP
 \fBTcl\fR starts the interactive Tcl command interpreter.  The Tcl shell
 provides an environment for writing, debugging and executing Tcl scripts.  The
@@ -1727,6 +1727,11 @@ performed is to locate the Tcl default file and save its name in the Tcl
 variable TCLDEFAULT.  The file is not evaluated nor is the TclInit.tcl file.
 This provides for a fast startup, but does not make any of the standard
 Tcl procedures and facilities available.
+.TP
+.B \-n
+No procedure call stack dump.  The procedure call stack will not be displayed
+when an error occurs, only the error message.  Useful in the #! line of
+already debugged scripts.
 .TP
 .B \-f
 Takes the next argument as a script for Tcl to source, rather than entering

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 1.2 1992/10/12 16:38:44 markd Exp markd $
+ * $Id: tclExtend.h,v 2.0 1992/10/16 04:51:29 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -37,6 +37,7 @@ typedef void *void_pt;
 #define TCLSH_QUICK_STARTUP       1   /* Don't process default & init files. */
 #define TCLSH_ABORT_STARTUP_ERR   2   /* Abort on an error.                  */
 #define TCLSH_NO_INIT_FILE        4   /* Don't process the init file.        */
+#define TCLSH_NO_STACK_DUMP       8   /* Don't dump the proc stack on error. */
 
 /*
  * These globals are used by the infox command.  Should be set by main.
@@ -90,6 +91,7 @@ Tcl_DownShift _ANSI_ARGS_((char       *targetStr,
                            CONST char *sourceStr));
 EXTERN void
 Tcl_ErrorAbort _ANSI_ARGS_((Tcl_Interp  *interp,
+                            int          noStackDump,
                             int          exitCode));
 
 EXTERN char * 
