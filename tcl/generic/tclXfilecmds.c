@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.5 1996/02/18 22:03:43 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.6 1996/02/20 09:10:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -109,12 +109,8 @@ Tcl_PipeCmd (clientData, interp, argc, argv)
 
     chans [0] = TclX_SetupFileEntry (interp,  fileNums [0], TCL_READABLE,
                                      FALSE);
-    if (chans [0] == NULL)
-        goto errorExit;
     chans [1] = TclX_SetupFileEntry (interp,  fileNums [1], TCL_WRITABLE,
                                      FALSE);
-    if (chans [1] == NULL)
-        goto errorExit;
 
     if (argc == 1)
         Tcl_AppendResult (interp,

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 5.2 1996/02/12 18:16:16 markd Exp $
+ * $Id: tclXselect.c,v 5.3 1996/02/20 09:10:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -198,8 +198,7 @@ FindPendingData (fileDescCnt, channelList, fileDescSetPtr)
     FD_ZERO (fileDescSetPtr);
 
     for (idx = 0; idx < fileDescCnt; idx++) {
-        if (Tcl_ChannelBufferedData (channelList [idx].channel,
-                                     TCL_READABLE)) {
+        if (Tcl_InputBuffered (channelList [idx].channel)) {
             FD_SET (channelList [idx].readFd, fileDescSetPtr);
             found = TRUE;
         }

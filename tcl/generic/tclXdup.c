@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 5.3 1996/02/12 07:21:13 markd Exp $
+ * $Id: tclXdup.c,v 5.4 1996/02/12 18:15:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -22,7 +22,7 @@
  * Channel options.
  */
 static char *COPT_BLOCKING    = "-blocking";
-static char *COPT_LINEMODE    = "-linemode";
+static char *COPT_BUFFERING   = "-buffering";
 static char *COPT_TRANSLATION = "-translation";
 
 /*
@@ -185,8 +185,6 @@ DupFileHandle (interp, srcFileId, targetFileId)
     }
     
     newChannel = TclX_SetupFileEntry (interp, newFileNum, mode, isSocket);
-    if (newChannel == NULL)
-        goto unixError;
 
     if (seekOffset >= 0) {
         if (Tcl_Seek (newChannel, seekOffset, SEEK_SET) != 0)
@@ -207,11 +205,11 @@ DupFileHandle (interp, srcFileId, targetFileId)
             goto error;
     }
     value = Tcl_GetChannelOption (srcChannel,
-                                  COPT_LINEMODE);
-    if (value [0] == '1') {
+                                  COPT_BUFFERING);
+    if (!STREQU (value, "none")) {
         if (Tcl_SetChannelOption (interp,
                                   newChannel,
-                                  COPT_LINEMODE,
+                                  COPT_BUFFERING,
                                   value) == TCL_ERROR)
             goto error;
     }
@@ -310,15 +308,15 @@ BindOpenFile (interp, fileNumStr)
 
     if (Tcl_GetChannel (interp, TclSubstChannelName (channelName),
                         NULL) != NULL) {
+        Tcl_ResetResult (interp);
         Tcl_AppendResult (interp, "file number \"", fileNumStr,
                           "\" is already bound to a Tcl file channel",
                           (char *) NULL);
         return TCL_ERROR;
     }
-    
+    Tcl_ResetResult (interp);
+
     channel = TclX_SetupFileEntry (interp, fileNum, mode, isSocket);
-    if (channel == NULL)
-        return TCL_ERROR;
 
     /*
      * Set channel options.
@@ -333,8 +331,8 @@ BindOpenFile (interp, fileNumStr)
     if (isatty (fileNum)) {
         if (Tcl_SetChannelOption (interp,
                                   channel,
-                                  COPT_LINEMODE,
-                                  "1") == TCL_ERROR)
+                                  COPT_BUFFERING,
+                                  "line") == TCL_ERROR)
             goto error;
     }
 

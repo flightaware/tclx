@@ -9,7 +9,6 @@
 ./doc/Memory.n
 ./doc/TclX.n
 ./doc/TclXInit.3
-./tcl.patch
 ./tcl/compat/random.c
 ./tcl/compat/rename.c
 ./tcl/generic/tclExtdInt.h

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.4 1996/02/12 18:16:29 markd Exp $
+ * $Id: tclXutil.c,v 5.5 1996/02/17 08:44:02 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -732,7 +732,7 @@ TclX_ChannelFnum (channel, direction)
  *   o mode (I) - Flags consisting of TCL_READABLE, TCL_WRITABLE.
  *   o isSocket (I) - TRUE if its a socket, FALSE otherwise.
  * Returns:
- *   The channel or NULL if an error occured.
+ *   The channel.  No error can occur.
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
@@ -740,36 +740,16 @@ TclX_SetupFileEntry (interp, fileNum, mode, isSocket)
     Tcl_Interp *interp;
     int         fileNum;
     int         mode;
-    int          isSocket;
+    int         isSocket;
 {
-    Tcl_File file;
     Tcl_Channel channel;
-    char *stdName;
 
-    switch (fileNum) {
-      case 0:
-        stdName = "stdin";
-        break;
-      case 1:
-        stdName = "stdout";
-        break;
-      case 2:
-        stdName = "stderr";
-        break;
-      default:
-        stdName = NULL;
-        break;
-    }
-
-    file = Tcl_GetFile ((ClientData) fileNum, TCL_UNIX_FD);
     if (isSocket) {
-        channel = Tcl_MakeTcpClientChannel (interp, file, stdName);
+        channel = Tcl_MakeTcpClientChannel ((ClientData) fileNum);
     } else {
-        channel = Tcl_MakeFileChannel (interp, file, mode, stdName);
-    }
-    if (channel == NULL) {
-        Tcl_FreeFile (file);
-        return NULL;
+        channel = Tcl_MakeFileChannel ((ClientData) fileNum,
+                                       (ClientData) fileNum,
+                                       mode);
     }
         
     Tcl_RegisterChannel (interp, channel);

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 5.4 1996/02/12 18:15:40 markd Exp $
+ * $Id: tclXfcntl.c,v 5.5 1996/02/18 22:08:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -252,11 +252,17 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
         return TCL_OK;
     }
     if (attrib.other == ATTR_NOBUF) {
-        interp->result = Tcl_GetChannelOption (channel, "-unbuffered");
+        if (STREQU (Tcl_GetChannelOption (channel, "-buffering"), "none"))
+            interp->result = "1";
+        else
+            interp->result = "0";
         return TCL_OK;
     }
     if (attrib.other == ATTR_LINEBUF) {
-        interp->result = Tcl_GetChannelOption (channel, "-linemode");
+        if (STREQU (Tcl_GetChannelOption (channel, "-buffering"), "line"))
+            interp->result = "1";
+        else
+            interp->result = "0";
         return TCL_OK;
     }
 
@@ -313,18 +319,15 @@ SetAttrOnFile (interp, channel, fileNum, attrib, value)
     if (attrib.other == ATTR_NONBLOCK) {
         return Tcl_SetChannelOption (interp, channel, "-blocking",
                                      value ? "0" : "1");
-        return TCL_OK;
     }
     if (attrib.other == ATTR_NOBUF) {
-        return Tcl_SetChannelOption (interp, channel, "-unbuffered",
-                                     value ? "1" : "0");
-        return TCL_OK;
+        return Tcl_SetChannelOption (interp, channel, "-buffering",
+                                     value ? "none" : "full");
     }
 
     if (attrib.other == ATTR_LINEBUF) {
-        return Tcl_SetChannelOption (interp, channel, "-linemode",
-                                     value ? "1" : "0");
-        return TCL_OK;
+        return Tcl_SetChannelOption (interp, channel, "-buffering",
+                                     value ? "line" : "full");
     }
 
   unixError:
@@ -370,7 +373,6 @@ SetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName, valueStr)
     /*
      * Validate that this the attribute may be set (or cleared).
      */
-
     if (attrib.access != ATTR_NONE) {
         Tcl_AppendResult (interp, "Attribute \"", attrName, "\" may not be ",
                           "altered after open", (char *) NULL);

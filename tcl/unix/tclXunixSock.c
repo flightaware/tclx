@@ -190,12 +190,10 @@ BindFileHandles (interp, options, socketFD)
 
     channel = TclX_SetupFileEntry (interp, socketFD, 
                                    TCL_READABLE | TCL_WRITABLE, TRUE);
-    if (channel == NULL)
-        goto errorExit;
 
     if (options & SERVER_NOBUF) {
-        if (Tcl_SetChannelOption (interp, channel, "-unbuffered",
-                                  "1") == TCL_ERROR)
+        if (Tcl_SetChannelOption (interp, channel, "-buffering",
+                                  "none") == TCL_ERROR)
             goto errorExit;
     }
 
@@ -515,8 +513,6 @@ Tcl_ServerCreateCmd (clientData, interp, argc, argv)
         goto unixError;
 
     channel = TclX_SetupFileEntry (interp, socketFD, TCL_READABLE, TRUE);
-    if (channel == NULL)
-        goto errorExit;
 
     Tcl_AppendResult (interp, Tcl_GetChannelName (channel), (char *) NULL);
     return TCL_OK;

@@ -1,15 +1,11 @@
                            Extended Tcl (TclX) 7.5a
                            ========================
 
-TclX 7.5 Beta 1 Release
+TclX 7.5 Beta 2 Release
 ========================
 
 This is the first TclX beta release that is compatible with the Tcl 7.5 /
-Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 1 releases.
-
-This release contains mainly changes for compatibility with Tcl 7.5.  Shared
-libraries are not currently built, so its not dynamically loadable out of the
-box.  Eventually, this will be supported.
+Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 2 releases.
 
 No support is currently available for MS Windows or the MacIntosh.  We
 are interested in supporting these platforms, but don't have the time
@@ -128,19 +124,6 @@ version of Berkeley (Ousterhout) Tcl upon which it is based, with
 the addition of a trailing letter in case there are multiple
 releases of Extended Tcl within a single release of Berkeley Tcl.
 This release is TclX 7.5a.
-
-INTERFACING TCL AND C++
-=======================
-
-C++ programmers can include the file "tcl++.h" to define C++ classes
-that can be used to access a Tcl interpreter.  This is based on Tcl
-C++ classes originally developed by Parag Patel.  The files
-
-        src/tclXAppInit.c
-and
-        tksrc/tkXAppInit.c
-
-will compile under both C and C++.
 
 PACKAGE LIBRARIES
 =================
