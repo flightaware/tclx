@@ -36,6 +36,7 @@
 ./src/tclXclock.c
 ./src/tclXcmdloop.c
 ./src/tclXcnvclock.c
+./src/tclXconfig.h.in
 ./src/tclXcreate.c
 ./src/tclXdebug.c
 ./src/tclXdup.c
