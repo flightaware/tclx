@@ -794,6 +794,9 @@
    o Added the server_info command.
    o Always go through Tcl file table for commands like echo and commandloop.
      This make sure redirected stdin, stdout and stderr are picked up.
+-------------------------------------------------------------------------------
+ 1 Jul 94:
+   o Changes to support DEC Alpha.
 ===============================================================================
-29 Jun 94: Released TclX7.3b-beta1.
+ 1 Jul 94: Released TclX7.3b-beta1.
 ===============================================================================

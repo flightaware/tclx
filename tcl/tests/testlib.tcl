@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 3.2 1994/01/24 04:04:57 markd Exp markd $
+# $Id: testlib.tcl,v 3.3 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -86,7 +86,7 @@ proc Test {test_name test_description contents_of_test passing_int_result
     set int_result [catch {uplevel $contents_of_test} result]
 
     if {($int_result != $passing_int_result) ||
-        ($result != $passing_result)} {
+        ![cequal $result $passing_result]} {
         OutTestError $test_name $test_description $contents_of_test \
                      $passing_int_result $passing_result $int_result $result
     }

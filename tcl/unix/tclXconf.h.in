@@ -119,6 +119,9 @@
 /* Define if fd_set is not defined. */
 #undef NO_FD_SET
 
+/* Define if stdlib.h defines random */
+#undef STDLIB_DEFS_RANDOM
+
 /* Define if you have bcopy.  */
 #undef HAVE_BCOPY
 
@@ -172,6 +175,9 @@
 
 /* Define if you have the Xwindow library (-lXwindow).  */
 #undef HAVE_LIBXWINDOW
+
+/* Define if you have the bsd library (-lbsd).  */
+#undef HAVE_LIBBSD
 
 /* Define if you have the c_s library (-lc_s).  */
 #undef HAVE_LIBC_S

@@ -315,7 +315,7 @@ ac_compile='${CC-cc} $CFLAGS $LDFLAGS conftest.${ac_ext} -o conftest $LIBS >/dev
 
 
 #!/bin/sh
-# From configure.in Revision: 3.14 
+# From configure.in Revision: 3.15 
 
 
 
@@ -2407,6 +2407,32 @@ case `uname -sr 2>/dev/null` in
   IRIX\ 4.0.1-5*) LIBOBJS="$LIBOBJS strftime.o" ;;
 esac
 
+
+
+#------------------------------------------------------------------------------
+# Determine if random is declared in stdlib.h.  If it is, we don't want to
+# redeclare it.  Some systems, such as the DEC Alpha, have random declared
+# are returning int rather than long, since long is 64 bit.
+#------------------------------------------------------------------------------
+
+echo '#include "confdefs.h"
+#include <
+{
+test -n "$verbose" && \
+echo "	defining STDLIB_DEFS_RANDOM"
+echo "#define" STDLIB_DEFS_RANDOM "1" >> confdefs.h
+DEFS="$DEFS -DSTDLIB_DEFS_RANDOM=1"
+ac_sed_defs="${ac_sed_defs}\${ac_dA}STDLIB_DEFS_RANDOM\${ac_dB}STDLIB_DEFS_RANDOM\${ac_dC}1\${ac_dD}
+\${ac_uA}STDLIB_DEFS_RANDOM\${ac_uB}STDLIB_DEFS_RANDOM\${ac_uC}1\${ac_uD}
+\${ac_eA}STDLIB_DEFS_RANDOM\${ac_eB}STDLIB_DEFS_RANDOM\${ac_eC}1\${ac_eD}
+"
+}
+>' > conftest.${ac_ext}
+eval "$ac_cpp conftest.${ac_ext} > conftest.out 2>&1"
+if egrep "stdlib.h" conftest.out >/dev/null 2>&1; then
+  :
+fi
+rm -f conftest*
 
 
 #------------------------------------------------------------------------------

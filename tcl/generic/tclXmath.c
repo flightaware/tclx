@@ -12,18 +12,16 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXmath.c,v 3.2 1994/01/25 01:07:01 markd Exp markd $
+ * $Id: tclXmath.c,v 3.3 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
- * Prototypes of random functions, since we may be using one out of osSupport.
- * This breaks with GNU libc headers...really should check with autoconf.
+ * Define return of random function unless stdlib does it.
  */
-
-#ifndef __GNU_LIBRARY__
+#ifndef STDLIB_DEFS_RANDOM
 long random ();
 #endif
 

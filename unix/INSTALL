@@ -395,6 +395,10 @@ DEC Ultrix:
    o flock tests have been reported.  See `General Porting Notes' section
      above.
 
+DEC Alpha:
+   o On OSF/1 V2.0 Rev 240 it has been noted that strtod segmentation faults
+     when the first character of a string has the high order bit set. This
+     breaks string expressions and eight bit characters.
 
 SUN:
    o See note on flock tests hanging under the "general" section.

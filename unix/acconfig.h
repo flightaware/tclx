@@ -49,12 +49,6 @@
 /* Define if you have unistd.h.  */
 #undef HAVE_UNISTD_H
 
-/* Define if you have vfork.h.  */
-#undef HAVE_VFORK_H
-
-/* Define vfork as fork if vfork does not work.  */
-#undef vfork
-
 /* Define if int is 16 bits instead of 32.  */
 #undef INT_16_BITS
 
@@ -171,3 +165,6 @@
 
 /* Define if have gethostbyname (sockets). */
 #undef HAVE_GETHOSTBYNAME
+
+/* Define if stdlib.h defines random */
+#undef STDLIB_DEFS_RANDOM
