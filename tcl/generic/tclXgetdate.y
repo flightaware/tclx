@@ -12,14 +12,14 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgetdate.y,v 4.2 1995/01/01 19:49:43 markd Exp markd $
+ * $Id: tclXgetdate.y,v 4.3 1995/03/28 18:14:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  * This code is a modified version of getdate.y.  It was changed to be able
  * to convert a larger range of years along with other tweaks to make it more
  * portable.  The following header is for the version of getdate.y that this
  * code is based on, theys guys are the real heros here.
  *-----------------------------------------------------------------------------
- * $Revision: 4.2 $
+ * $Revision: 4.3 $
  *
  *  Originally written by Steven M. Bellovin <smb@research.att.com> while
  *  at the University of North Carolina at Chapel Hill.  Later tweaked by
@@ -154,9 +154,9 @@ yylex ();
 }
 
 %token  tAGO tDAY tDAYZONE tID tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
-%token  tSEC_UNIT tSNUMBER tUNUMBER tZONE tEPOCH
+%token  tSEC_UNIT tSNUMBER tUNUMBER tZONE tEPOCH tDST
 
-%type   <Number>        tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT
+%type   <Number>        tDAY tDAYZONE tMINUTE_UNIT tMONTH tMONTH_UNIT tDST
 %type   <Number>        tSEC_UNIT tSNUMBER tUNUMBER tZONE
 %type   <Meridian>      tMERIDIAN o_merid
 
@@ -219,7 +219,11 @@ time    : tUNUMBER tMERIDIAN {
         }
         ;
 
-zone    : tZONE {
+zone    : tZONE tDST {
+            yyTimezone = $1;
+            yyDSTmode = DSTon;
+        }
+        | tZONE {
             yyTimezone = $1;
             yyDSTmode = DSToff;
         }
@@ -494,6 +498,9 @@ static TABLE    TimezoneTable[] = {
     { "nzst",   tZONE,    -HOUR(12) },      /* New Zealand Standard */
     { "nzdt",   tDAYZONE, -HOUR(12) },      /* New Zealand Daylight */
     { "idle",   tZONE,    -HOUR(12) },      /* International Date Line East */
+    /* ADDED BY Marco Nijdam */
+    { "dst",    tDST,     HOUR( 0) },       /* DST on (hour is ignored) */
+    /* End ADDED */
     {  NULL  }
 };
 
