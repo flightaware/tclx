@@ -1,23 +1,45 @@
-                           Extended Tcl (TclX) 7.4a
+                           Extended Tcl (TclX) 7.5a
                            ========================
+
+TclX 7.5 Alpha 1 Release
+========================
+
+This is the first TclX alpha release that is compatible with the Tcl 7.5 /
+Tk 4.1 alpha line.  Its is known to work with the Tcl/Tk alpha 1 releases.
+
+This release contains mainly changes for compatibility with Tcl 7.5.  Shared
+libraries are not currently built, so its not dynamically loadable out of the
+box.  Eventually, this will be supported.
+
+No support is currently available for MS Windows or the MacIntosh.  We
+are interested in supporting these platforms, but don't have the time
+or expertise to do it in the near future.  If anyone is interested in
+working with us on these port, we would like to do it in the same manner
+as Tcl and Tk.  Please contact us if you would like to help.  We are
+interested in having two independent (from each other), experienced developers
+for each platform.  We will handle merge changes into the source tree and
+making changes available.  Please contact us at tcl-project@neosoft.com
+if you think you can help.
+
+
 
 INTRODUCTION
 ============
 
-    Extended Tcl (TclX), is a set of extensions to Tcl 7.4, the Tool Command
+    Extended Tcl (TclX), is a set of extensions to Tcl 7.5, the Tool Command
 Language invented by Dr. John Ousterhout of the University of California at
 Berkeley.  Tcl is a powerful, yet simple embeddable programming language.
 Extended Tcl is oriented towards Unix system programming tasks and large
 application development.  Many additional interfaces to the Unix operating
-system are provided.  It is upwardly compatible with Tcl 7.4.  You take the
-Extended Tcl package, add it to Tcl 7.4, and from that you get Extended Tcl.
+system are provided.  It is upwardly compatible with Tcl 7.5.  You take the
+Extended Tcl package, add it to Tcl 7.5, and from that you get Extended Tcl.
 (Berkeley Tcl is not included in this distribution, obtain it from
 ftp.cs.berkeley.edu).
 
    Support is also included for building a Tk 4.0 wish shell (wishx)
 with the Extended Tcl command set.
 
-   While this TclX distribution is tested with Tcl 7.4 and Tk 4.0, it will
+   While this TclX distribution is tested with Tcl 7.5 and Tk 4.0, it will
 probably work with new versions of Tcl & Tk with little or no changes.
 
    Extended Tcl was designed and implemented by Karl Lehenbauer
@@ -30,22 +52,10 @@ redistributable, including for commercial use and resale.
    Please read the file INSTALL carefully before building and
 installing Extended Tcl.
 
-NEW FEATURES IN TCLX 7.4a
+NEW FEATURES IN TCLX 7.5a
 =========================
 
-  o ccollate command for doing localized string comparisons.
-  o Added the subcommands "groups", "groupids" and "host" to the id command.
-  o Greatly enhanced the TCP/IP server command set.  Includes the ability
-    to create multiple connection severs in Tcl.
-  o Added tclx_errorHandler variable used to specify a procedure to call
-    when an uncaught error occurs.
-  o Added -fileid option to the chmod, chown and chgrp commands, allowing
-    for operations on open files.
-  o Added ftruncate command to truncate file lengths.
-  o Added support in the dup command to bind an open file number to a Tcl file
-    handle.
-  o Improved performance of auto_load facility.
-  o Many bug and portability fixes.
+  o Compatibility with Tcl 7.5 / Tk 4.1 alpha.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
@@ -103,7 +113,7 @@ MANUAL PAGES
 ============
 
     Man pages in nroff/troff format are provided for all of Tcl and
-the extensions in the directory tclX7.4a/man.  Start with the
+the extensions in the directory tclX7.5a/man.  Start with the
 TclX.man manual.
 
 EXTENDED TCL VERSION NAMING
@@ -113,7 +123,7 @@ EXTENDED TCL VERSION NAMING
 version of Berkeley (Ousterhout) Tcl upon which it is based, with
 the addition of a trailing letter in case there are multiple
 releases of Extended Tcl within a single release of Berkeley Tcl.
-This release is TclX 7.4a.
+This release is TclX 7.5a.
 
 INTERFACING TCL AND C++
 =======================
@@ -172,6 +182,13 @@ IMPORTANT NOTE:  libtclx.a must be specified on the link command line
 before libtcl.a.  If the order is reversed, incorrect command line
 parsing code will be used.
 
+DYNAMIC LOADING OF TCLX
+========================
+
+  Instead of linking a custom application based on the TclX shell, it
+is possible to dynamic load it into an application based on another
+shell.  
+
 SUPPORT FOR EXTENDED TCL
 ========================
 
@@ -185,17 +202,17 @@ WHERE TO GET IT
 
 Tcl & Tk is available via anonymous ftp from:
 
-   ftp.cs.berkeley.edu:/ucb/tcl/[tcl7.4.tar.Z tk4.0.tar.Z]
+   ftp.cs.berkeley.edu:/ucb/tcl/[tcl7.5.tar.Z tk4.1.tar.Z]
 or
-   ftp.neosoft.com:/pub/tcl/distrib/[tcl7.4.tar.gz tk4.0.tar.gz]
+   ftp.neosoft.com:/pub/tcl/distrib/[tcl7.5.tar.gz tk4.1.tar.gz]
 or
-   ftp.uu.net:languages/tcl/[tcl7.4.tar.Z tk4.0.tar.Z]
+   ftp.uu.net:languages/tcl/[tcl7.5.tar.Z tk4.1.tar.Z]
 
-Extended Tcl 7.4a can be downloaded by anonymous FTP from:
+Extended Tcl 7.5a can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/distrib/tclX7.4a.tar.gz
+   ftp.neosoft.com:/pub/tcl/distrib/tclX7.5a.tar.gz
 or
-   ftp.aud.alcatel.com:tcl/extensions/tclX7.4a.tar.gz
+   ftp.aud.alcatel.com:tcl/extensions/tclX7.5a.tar.gz
 
 A contributed sources archive resides on ftp.aud.alcatel.com and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently

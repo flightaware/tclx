@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 4.3 1995/07/02 20:31:30 markd Exp markd $
+# $Id: dup.test,v 5.0 1995/07/25 05:40:56 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -131,7 +131,7 @@ if ![fcntl $toChild RDWR] {
 
     Test dup-2.1 {dup tests} {
         set msg [gets $fromChild]
-        if [regexp {^msg1: "file.*" wasn't opened for writing} $msg] {
+        if [regexp {^msg1: file "file.*" wasn't opened for writing} $msg] {
             list OK
         } else {
             list $msg
@@ -140,7 +140,7 @@ if ![fcntl $toChild RDWR] {
 
     Test dup-2.2 {dup tests} {
         set msg [gets $fromChild]
-        if [regexp {^msg2: "file.*" wasn't opened for reading} $msg] {
+        if [regexp {^msg2: file "file.*" wasn't opened for reading} $msg] {
             list OK
         } else {
             list $msg

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.0 1995/07/25 05:42:04 markd Rel markd $
+# $Id: Makefile.in,v 5.1 1995/08/30 05:07:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -44,7 +44,8 @@ LIBTCLX = ../src/libtclx.a
 LDLIBS = ${LIBTCLX} ${TCL_UCB_LIB} ${LIBS} ${XLDLIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
-           -I${bldbasedir}/src -I${TCL_UCB_SRC}
+           -I${bldbasedir}/src -I${TCL_UCB_SRC}/generic -I${TCL_UCB_SRC}/unix
+
 
 LD_FLAGS = ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
@@ -53,7 +54,7 @@ LD_FLAGS = ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 #------------------------------------------------------------------------------
 
-OBJS= tclXtest.o
+OBJS= tclTest.o tclXtest.o
 
 #------------------------------------------------------------------------------
 # Compile the test proram.  It is generated from the Tcl test program with 
@@ -62,18 +63,14 @@ OBJS= tclXtest.o
 
 all: tclXtest runtest
 
-tclXtest: tclXtest.o ${LIBTCLX} ${TCL_UCB_LIB}
-	${CC} ${LD_FLAGS} tclXtest.o ${LDLIBS} -o tclXtest || \
+tclXtest: ${OBJS} ${LIBTCLX} ${TCL_UCB_LIB}
+	${CC} ${LD_FLAGS} ${OBJS} ${LDLIBS} -o tclXtest || \
 	    (rm -f tclXtest; exit 1)
 
-tclXtest.o: tclXtest.c
-
-tclXtest.c: ${TCL_UCB_SRC}/tclTest.c
-	rm -f tclXtest.c	
-	echo '#include "../src/tclXconf.h"' >tclXtest.c
-	sed -e 's/Tcl_Init(/TclX_Init(/' \
-	    -e 's/Tcl_Main(/TclX_Main(/' \
-	    -e '/tcl_RcFileName =/d' ${TCL_UCB_SRC}/tclTest.c >>tclXtest.c
+tclTest.c: ${TCL_UCB_SRC}/generic/tclTest.c
+	rm -f tclTest.c	
+	echo '#include "../src/tclXconf.h"'   >tclTest.c
+	cat ${TCL_UCB_SRC}/generic/tclTest.c >>tclTest.c
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCLX_LIBRARY environment variable at
@@ -82,8 +79,9 @@ tclXtest.c: ${TCL_UCB_SRC}/tclTest.c
 runtest:
 	@echo '#!/bin/sh'                                           >runtest
 	@echo "TCLX_LIBRARY=${bldbasedir}/tclmaster"               >>runtest
+	@echo "TCL_LIBRARY=${TCL_UCB_SRC}/library"                 >>runtest
 	@echo "TCL_PROGRAM=${bldbasedir}/tests/tclXtest"           >>runtest
-	@echo "export TCLX_LIBRARY TCL_PROGRAM"                    >>runtest
+	@echo "export TCLX_LIBRARY TCL_PROGRAM TCL_LIBRARY"        >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest
 	@echo "    exec \$$TCL_PROGRAM"                            >>runtest
@@ -106,7 +104,7 @@ extdtests: all
 #------------------------------------------------------------------------------
 
 clean:
-	-rm -f ${OBJS} tclXtest.c tclXtest runtest
+	-rm -f ${OBJS} tclTest.c tclXtest runtest
 
 #------------------------------------------------------------------------------
 # Restore to the distributed state.

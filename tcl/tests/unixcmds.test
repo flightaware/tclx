@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: unixcmds.test,v 4.1 1995/01/01 19:49:13 markd Exp markd $
+# $Id: unixcmds.test,v 5.0 1995/07/25 05:42:01 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -207,7 +207,7 @@ Test unixcmds-7.4 {mkdir and rmdir tests} {
     set result [list [catch {mkdir MKDIR1.TMP} msg] [string tolower $msg]]
     catch {rmdir MKDIR1.TMP}
     set result
-} 0 {1 {mkdir1.tmp: file exists}}
+} 0 {1 {mkdir1.tmp: file already exists}}
 
 Test unixcmds-7.5 {mkdir and rmdir tests} {
     mkdir

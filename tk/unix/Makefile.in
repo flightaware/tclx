@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.0 1995/07/25 06:00:42 markd Rel markd $
+# $Id: Makefile.in,v 5.1 1995/08/30 05:07:18 markd Exp $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -58,7 +58,9 @@ SHLDLIBS = ${TKX_SHLIBS} ${XLIBSW} ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
-           -I${TK_UCB_SRC} -I${TCL_UCB_SRC} ${XINCLUDES}
+           -I${TK_UCB_SRC}/generic -I${TK_UCB_SRC}/unix \
+           -I${TCL_UCB_SRC}/generic -I${TCL_UCB_SRC}/unix \
+           ${XINCLUDES}
 
 LD_FLAGS = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 

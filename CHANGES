@@ -1027,3 +1027,6 @@
   o Changed Makefiles to pass MAKEFLAGS via the environment, since GNU make
     can't handle passing them on the command line (unlike most other makes).
 -------------------------------------------------------------------------------
+25 Sep 95:
+  o Ported to Tcl7.5a1/Tk4.1a1.
+-------------------------------------------------------------------------------

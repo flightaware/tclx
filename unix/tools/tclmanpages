@@ -27,6 +27,7 @@ return {
     {if.n           tcl/control/if}
     {incr.n         tcl/math/incr}
     {info.n         tcl/status/info}
+    {interp.n       tcl/control/interp}
     {join.n         tcl/lists/join}
     {lappend.n      tcl/lists/lappend}
     {library.n      tcl/libraries/library}
@@ -38,6 +39,7 @@ return {
     {lreplace.n     tcl/lists/lreplace}
     {lsearch.n      tcl/lists/lsearch}
     {lsort.n        tcl/lists/lsort}
+    {load.n         tcl/control/load}
     {open.n         tcl/files/open}
     {pid.n          tcl/processes/pid}
     {proc.n         tcl/control/proc}

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 4.3 1995/07/18 03:39:16 markd Exp markd $
+# $Id: filecmds.test,v 5.0 1995/07/25 05:41:10 markd Rel $
 #------------------------------------------------------------------------------
 #
 
@@ -60,7 +60,7 @@ Test filecmds-3.2 {copyfile tests} {
     set testFH [open IOTEST3.TMP w]
     set testFH2 [open IOTEST2.TMP w]
     set stat [list [catch {copyfile $testFH $testFH2} msg] \
-                   [lrange $msg 1 end]]
+                   [lrange $msg 2 end]]
     close $testFH
     close $testFH2
     set stat
@@ -70,7 +70,7 @@ Test filecmds-3.3 {copyfile tests} {
     set testFH [open IOTEST.TMP r]
     set testFH2 [open IOTEST2.TMP r]
     set stat [list [catch {copyfile $testFH $testFH2} msg] \
-                   [lrange $msg 1 end]]
+                   [lrange $msg 2 end]]
     close $testFH
     close $testFH2
     set stat

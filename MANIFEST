@@ -1,3 +1,4 @@
+
 ./CHANGES
 ./Config.mk
 ./INSTALL
@@ -76,6 +77,8 @@
 ./tclhelp/tcl/control/for
 ./tclhelp/tcl/control/foreach
 ./tclhelp/tcl/control/if
+./tclhelp/tcl/control/interp
+./tclhelp/tcl/control/load
 ./tclhelp/tcl/control/loop
 ./tclhelp/tcl/control/proc
 ./tclhelp/tcl/control/rename
