@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 3.3 1993/12/03 07:01:51 markd Exp markd $
+.\" $Id: TclX.n,v 3.4 1994/01/11 04:38:45 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -92,10 +92,10 @@ useful TCL scripts that do not normally converse interactively with
 a user through a Tcl command interpreter, but which sometimes want
 to enter this mode.
 .sp
-\fIPrompt1\fR is a Tcl command string that is evaluated to determine
-the text of the prompt string.  The old value of \fBtcl_prompt1\fR is
+\fIPrompt1\fR is a Tcl command  that is evaluated to output 
+a prompt string.  The old value of \fBtcl_prompt1\fR is
 saved and it is set to this value for the duration of the command loop.
-\fIPrompt2\fR is a command string that is evaluated to determine
+\fIPrompt2\fR is a command that is evaluated to output
 the ``downlevel prompt'', which is
 the prompt which is issued for continuation input.  The old value of
 \fBtcl_prompt2\fR is
@@ -104,9 +104,7 @@ saved and it is set to this value for the duration of the command loop.
 When the command
 terminates, the variables for the prompt hooks will be set to their old value.
 If these arguments are not specified, the prompt hooks use their current
-value.  Prompt hooks are TCL code that return as their result the prompt to
-output.  The result of the last command executed in the command string (which
-may be a \fBreturn\fR) will be used as the prompt.
+value.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2466,14 +2464,12 @@ Path to search to locate Tcl scripts.  Used by the
 The path is a Tcl list of directory names.
 .TP
 .B tcl_prompt1
-Contains code to run to generate the prompt used when interactively prompting
-for commands.  The code in this hook will be evaluated and the result will be
-used for the prompt.
+Contains code to run to output the prompt used when interactively prompting
+for commands.
 .TP
 .B tcl_prompt2
-Contains code to run to generate the prompt used when interactively prompting
-for continuation of an incomplete command.  The code in this hook
-will be evaluated and the result will be used for the prompt
+Contains code to run to output the prompt used when interactively prompting
+for continuation of an incomplete command.
 .TP
 .B TCLXENV
 Array that contains information used internally by various Tcl procedures that

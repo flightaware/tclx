@@ -18,7 +18,9 @@
 #ifdef HAVE_GETHOSTBYNAME
 
 #include <sys/types.h>
-#include <sys/socket.h>
+#ifndef NO_SYS_SOCKET_H
+#    include <sys/socket.h>
+#endif
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # TclInit.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: TclInit.tcl,v 2.10 1993/11/09 05:42:59 markd Exp markd $
+# $Id: TclInit.tcl,v 3.0 1993/11/19 07:00:27 markd Rel markd $
 #-----------------------------------------------------------------------------
 
 #
@@ -26,8 +26,8 @@ if !$tcl_interactive return
 # == Interactive Tcl session initialization ==
 
 if ![info exists tcl_prompt1] {
-    set tcl_prompt1 {global argv0; return [file tail $argv0]>}
+    set tcl_prompt1 {global argv0; puts -nonewline stdout [file tail $argv0]>}
 }
 if ![info exists tcl_prompt2] {
-    set tcl_prompt2 {return =>}
+    set tcl_prompt2 {puts -nonewline stdout =>}
 }

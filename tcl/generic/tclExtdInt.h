@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 3.0 1993/11/19 06:59:03 markd Rel markd $
+ * $Id: tclExtdInt.h,v 3.1 1993/12/10 05:14:08 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -38,15 +38,8 @@
  * If tclUnix.h has already included time.h, don't include it again, some
  * systems don't #ifdef inside of the file.
  */
-#ifdef TIME_WITH_SYS_TIME
-#    include <sys/time.h>
+#ifndef NO_SYS_TIME_H
 #    include <time.h>
-#else
-#    ifdef NO_SYS_TIME_H
-#        include <time.h>
-#    else
-#        include <sys/time.h>
-#    endif
 #endif
 
 #include <sys/times.h>

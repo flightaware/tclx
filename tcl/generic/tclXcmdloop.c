@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.13 1993/11/08 05:06:40 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 3.0 1993/11/19 06:58:26 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -151,7 +151,6 @@ TclX_OutputPrompt (interp, topLevel)
             fputs ("\n", stderr);
             TclX_PrintResult (interp, result, NULL);
         } else {
-            fputs (interp->result, stdout);
             promptDone = TRUE;
         }
     } 

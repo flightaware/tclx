@@ -12,17 +12,20 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclXInit.3,v 2.10 1993/11/17 15:16:25 markd Exp markd $
+.\" $Id: TclXInit.3,v 3.0 1993/11/19 06:56:53 markd Rel markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclXInit" TCL "" "Tcl"
 .ad b
 .SH NAME
-tclXAppInit, TclX_Init, TclXCmd_Init, TclXLib_Init - Extended Tcl initialization.
+TclX_Init, TclXCmd_Init, TclXLib_Init, TclX_Shell - Extended Tcl initialization.
 '
 .SH SYNOPSIS
 .nf
 .ft CW
+
+-ltclx -ltcl
+
 #include "tclExtend.h"
 
 extern char *tclAppName;
@@ -42,11 +45,18 @@ TclXCmd_Init (Tcl_Interp *interp);
 int
 TclXLib_Init (Tcl_Interp *interp);
 
+void
+TclX_Shell (int    argc,
+            char **argv);
 .ft R
 .fi
 .SH DESCRIPTION
 These functions are used to initialize Extended Tcl and applications based
 on Extended Tcl.
+.P
+IMPORTANT NOTE:  \fBlibtclx.a\fR must be specified on the link command line
+before \fBlibtcl.a\fR.  If the order is reversed, incorrect command line
+parsing code will be used.
 '
 .SS tclAppName
 The application name to be returned by the \fBinfox\fR
@@ -144,3 +154,15 @@ Returns:
 \fBTCL_OK\fR if all is ok, \fBTCL_ERROR\fR if an error occurred.
 .RE
 '
+.SS TclX_Shell
+.PP
+The function is used when a \fBmain\fR other that the default one in
+\fBlibtclx.a\fR is required.
+This function parses the command line according to the TclX shell
+specification.  It creates an interpreter and calls the function
+\fBTcl_AppInit\fR to initialize any application specific commands.
+It then either evaluates the command of script specified on the
+command line or enters an interactive command loop.  No other TclX
+initialization function should be called directly when this function is
+used.
+

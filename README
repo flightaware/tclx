@@ -154,6 +154,10 @@ use for linking programs.  These are in a form that can be included
 from a make file.  These file are in a format that can be included
 from a make file.
 
+IMPORTANT NOTE:  libtclx.a must be specified on the link command line
+before libtcl.a.  If the order is reversed, incorrect command line
+parsing code will be used.
+
 SUPPORT FOR EXTENDED TCL
 ========================
 
