@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.17 1997/07/10 07:21:19 markd Exp $
+ * $Id: tclXutil.c,v 8.18 1997/08/08 09:58:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1213,4 +1213,62 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
     Tcl_SetObjResult (interp, saveObjv [0]);
 
     Tcl_DecrRefCount (saveObjPtr);
+}
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_ShellExit --
+ *
+ *   Handles exiting a shell.  Normally just does an exit, but deletes the
+ * interp if compiled with TCL_MEM_DEBUG or the Tcl global
+ * TCLXENV(deleteInterpAtShellExit) is a true boolean value.  Deleting the
+ * interp before exiting is useful for tracking down memory leaks.  If 
+ * TCL_MEM_DEBUG is set, a list of allocated memory is written to 
+ * "tclmem.$pid.lst" on Unix systems.
+ *
+ * Parameters:
+ *   o interp - Interpreter.
+ *   o exitCode - Code to pass to exit call.
+ *-----------------------------------------------------------------------------
+ */
+void
+TclX_ShellExit (interp, exitCode)
+    Tcl_Interp *interp;
+    int         exitCode;
+{
+#if defined(TCL_MEM_DEBUG)
+    /*
+     * On Unix, Tcl_Exit will dump a list of leaked ckalloc's if this
+     * variable is set.  On Win32, we can't set it, since its in another
+     * DLL.
+     */
+#ifndef __WIN32__
+    extern char *tclMemDumpFileName;
+    static char dumpFileName [128];
+    sprintf (dumpFileName, "tclmem.%d.lst", getpid ());
+    tclMemDumpFileName = dumpFileName;
+#endif
+    Tcl_DeleteInterp (interp);
+    Tcl_Exit (0);
+#else
+    Tcl_Obj *varValue;
+    int deleteInterp;
+
+    /*
+     * If TCLXENV(deleteInterpAtShellExit) is a true boolean, delete interpreter.
+     */
+    deleteInterp = FALSE;
+    varValue = TclX_ObjGetVar2S (interp, "TCLXENV", "deleteInterpAtShellExit",
+                                 TCL_GLOBAL_ONLY);
+    if (varValue != NULL) {
+        Tcl_GetBooleanFromObj (NULL, varValue, &deleteInterp);
+    }
+    
+    if (deleteInterp) {
+        Tcl_Exit (0);
+    } else {
+        Tcl_DeleteInterp (interp);
+        Tcl_Exit (0);
+    }
+#endif    
 }

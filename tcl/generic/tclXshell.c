@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 8.3 1997/06/21 16:21:08 markd Exp $
+ * $Id: tclXshell.c,v 8.4 1997/07/04 21:08:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -20,13 +20,6 @@
 
 extern char *optarg;
 extern int   optind, opterr;
-
-/*
- * If this variable is non-zero, the TclX shell will delete the interpreter
- * at the end of a script instead of exiting immediately.  This is for
- * applications that want to track down memory leaks.
- */
-int tclDeleteInterpAtEnd = FALSE;
 
 static char *TCLXENV = "TCLXENV";
 
@@ -295,38 +288,7 @@ TclX_Main (argc, argv, appInitProc)
                         "\n    while\nevaulating interactive commands");
 
   evalComplete:
-    /* 
-     * Delete the interpreter if memory debugging or explictly requested.
-     * Useful for finding memory leaks.
-     */
-#if defined(TCL_MEM_DEBUG)
-    {
-        /*
-         * On Unix, Tcl_Exit will dump a list of leaked ckalloc's if this
-         * variable is set.  On Win32, we can't set it, since its in another
-         * DLL.
-         */
-#ifndef __WIN32__
-	extern char *tclMemDumpFileName;
-        static char dumpFileName [128];
-        sprintf (dumpFileName, "tclmem.%d.lst", getpid ());
-	tclMemDumpFileName = dumpFileName;
-#endif
-	Tcl_DeleteInterp (interp);
-	Tcl_Exit (0);
-    }
-#endif
-
-    /*
-     * Exit though the exit command to clean up, unless the interpreter is
-     * to be deleted.
-     */
-    if (!tclDeleteInterpAtEnd) {
-        Tcl_Exit (0);
-    } else {
-        Tcl_DeleteInterp (interp);
-        Tcl_Exit (0);
-    }
+    TclX_ShellExit (interp, 0);
 }
 
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 8.3 1997/06/30 07:57:41 markd Exp $
+ * $Id: tclExtend.h,v 8.4 1997/07/03 07:14:11 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -64,14 +64,6 @@ typedef void *void_pt;
  * Entire TclX_ErrorExit message must fit in a buffer of this size.
  */
 #define TCLX_ERR_EXIT_MSG_MAX 1024
-
-/*
- * If this variable is non-zero, the TclX shell will delete the interpreter
- * at the end of a script instead of exiting immediately.  This is for
- * applications that want to track down memory leaks.  This does not alter the
- * behavior of explicit calls to exit.
- */
-extern int tclDeleteInterpAtEnd;
 
 /*
  * Application signal error handler.  Called after normal signal processing,

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.1 1997/04/17 05:00:04 markd Exp $
+ * $Id: tkXshell.c,v 8.2 1997/06/12 21:08:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -88,6 +88,8 @@ TkX_Main(argc, argv, appInitProc)
     Tcl_Channel inChannel, outChannel, errChannel;
     Tcl_Interp *interp;
     int tty;
+    Tcl_Obj *varValue;
+    int deleteInter;
 
     TclX_SetAppInfo (TRUE,
                      "wishx",
@@ -216,7 +218,7 @@ TkX_Main(argc, argv, appInitProc)
      */
 
     Tk_MainLoop();
-    Tcl_Exit(0);
+    TclX_ShellExit (interp, 0);
 
 error:
     msg = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
@@ -228,20 +230,8 @@ error:
         Tcl_Write(errChannel, msg, -1);
         Tcl_Write(errChannel, "\n", 1);
     }
-    /*
-     * FIX: Quick hack for windows. Need to provide a function to determine
-     * if shell should exit.
-     */
-#ifdef __WIN32__
-    Tcl_Exit(1);
-#else
-    if (!tclDeleteInterpAtEnd) {
-        Tcl_Exit(1);
-    } else {
-        Tcl_DeleteInterp (interp);
-        Tcl_Exit(1);
-    }
-#endif
+
+    TclX_ExitShell (interp, 1);
 }
 
 

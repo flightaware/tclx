@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.17 1997/07/04 23:59:13 markd Exp $
+ * $Id: tclExtdInt.h,v 8.18 1997/08/08 10:04:18 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -331,6 +331,11 @@ TclX_AppendObjResult _ANSI_ARGS_(TCL_VARARGS_DEF (Tcl_Interp *,arg1));
 
 extern int
 TclX_IsNullObj _ANSI_ARGS_((Tcl_Obj *objPtr));
+
+void
+TclX_ShellExit _ANSI_ARGS_((Tcl_Interp *interp,
+                            int         exitCode));
+
 
 /*
  * Definitions required to initialize all extended commands.
