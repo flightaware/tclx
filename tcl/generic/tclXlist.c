@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 2.5 1993/08/05 06:41:55 markd Exp markd $
+ * $Id: tclXlist.c,v 2.6 1993/09/07 14:44:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -23,7 +23,7 @@
  *-----------------------------------------------------------------------------
  *
  * Tcl_LvarcatCmd --
- *     Implements the TCL lvarpop command:
+ *     Implements the TCL lvarcat command:
  *         lvarcat var string ?string...?
  *
  * Results:
