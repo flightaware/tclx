@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: flock.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
+# $Id: flock.test,v 2.4 1993/09/02 04:10:46 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -123,11 +123,17 @@ Test flock-2.8 {funlock argument checking} {
 
 #
 # If problems with acquiring locks, bail out now, as some tests may hang.
+# Suns are especially bad at hanging. It appears that having some data in
+# a file and only locking part of it will cause this test to fail rather
+# than hang on a confused system.
 #
-if {[catch {flock $writeFH} msg] != 0} {
+puts $writeFH "This is some silly text to help prevent hangs"
+if {[catch {flock $writeFH 0 8} msg] != 0} {
     puts stderr "*************************************************************"
-    puts stderr "Error acquiring file lock, may be system configuration"
-    puts stderr "rest of lock tests skipped"
+    puts stderr "Error acquiring file lock.  This is probably caused by an"
+    puts stderr "incorrectly configured system or bug in the system software."
+    puts stderr "If NFS is involved, make sure lockd is correctly configured"
+    puts stderr "The error message returned was:"
     puts stderr "    $msg"
     puts stderr "*************************************************************"
     catch {close $writeFH}
@@ -137,7 +143,6 @@ if {[catch {flock $writeFH} msg] != 0} {
     return
 }
 funlock $writeFH
-
 
 #
 # Check locking read/write access checking.
