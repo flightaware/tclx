@@ -1,18 +1,18 @@
+                           Extended Tcl (TclX) 7.3a
+                           ========================
 
-                  *** README file for Extended Tcl 7.3a ***
-
-EXTENDED TCL
+INTRODUCTION
 ============
 
-    Extended Tcl (TclX), is a set of extensions to Tcl 7.3, the Tool
-Command Language invented by Dr. John Ousterhout of the University
-of California at Berkeley.  Tcl is a powerful, yet simple embeddable
-programming language.  Extended Tcl is oriented towards Unix system
-programming tasks, with many additional interfaces to the Unix
-operating system, It is upwardly compatible with Tcl 7.3.  You take
-the Extended Tcl package, add it to Tcl 7.3, and from that you get
-Extended Tcl.  (Berkeley Tcl is not included in this distribution,
-obtain it from ftp.cs.berkeley.edu).
+    Extended Tcl (TclX), is a set of extensions to Tcl 7.3, the Tool Command
+Language invented by Dr. John Ousterhout of the University of California at
+Berkeley.  Tcl is a powerful, yet simple embeddable programming language.
+Extended Tcl is oriented towards Unix system programming tasks and large
+application development.  Many additional interfaces to the Unix operating
+system are provided.  It is upwardly compatible with Tcl 7.3.  You take the
+Extended Tcl package, add it to Tcl 7.3, and from that you get Extended Tcl.
+(Berkeley Tcl is not included in this distribution, obtain it from
+ftp.cs.berkeley.edu).
 
    Support is also included for building a Tk 3.6 wish shell (wishx)
 with the Extended Tcl command set.
@@ -41,8 +41,8 @@ Tcl, see the manual page man/TclX.man.
     o A shell, which provides an environment for developing and
       executing Tcl programs.
 
-    o Advanced Tcl code library facility that is compatible with
-      standard Tcl auto-loading.
+    o Advanced Tcl code library facility that is oriented towards building
+      large applications.  It is compatible with standard Tcl auto-loading.
 
     o General purpose commands which define new programming
       constructs,  debugging and profiling facilities.
@@ -64,7 +64,9 @@ Tcl, see the manual page man/TclX.man.
 
     o Time and date manipulation and conversion commands.
 
-    o A simple command for accessing TCP/IP based servers.
+    o Online help on Tcl, TclX and Tk commands.
+
+    o A simple interface for accessing TCP/IP based servers.
 
     o X/PG based internationalization commands.
 
@@ -165,32 +167,6 @@ Tcl.  Please send questions, bug reports, and bug fixes to:
 
          tcl-project@NeoSoft.com
 
-COMPATIBILITY WITH TclX 6.5c
-============================
-
-   We have attempted to main backwards-compatibility with older
-versions of TclX.  A few changes were made to enhance usability or
-fix problems that have introduced a few incompatibilities, these are
-listed below.  Remember that multiple versions of Tcl may be
-installed on a system using the Tcl default file, so you don't have
-to convert everything at once.  See the CHANGES file for full
-details.  These are the major incompatible changes:
-
-   o TclX auto loading has been made compatible with standard Tcl.
-     The path is now found in the "auto_path" variable instead of
-     "TCLPATH".  The "demand_load" function has been renamed
-     "auto_load" and "load" has been renamed "auto_load_file".
-      The "autoload" procedure no longer exists.
-   o The variable programName was changed to argv0 for compatibility
-     with Tcl.
-   o Removed outdated execvp proc, use execl directly.
-   o Removed "flush" option on "cmdtrace".  Output lines are now
-     flushed after  each command is traced.
-   o Changed "signal trap" to edit the command, replacing %S with
-     the signal name rather than storing in the global variable
-     "signalReceived".  This fixes bugs with signals received in
-     a signal handler.
-
 WHERE TO GET IT
 ===============
 
@@ -206,7 +182,7 @@ Extended Tcl 7.3a can be downloaded by anonymous FTP from:
 
    ftp.neosoft.com:/pub/tcl/distrib/tclX7.3a.tar.gz
 or
-   harbor.ecn.purdue.edu:tcl/extensions/tclX7.3a.tar.Z
+   harbor.ecn.purdue.edu:tcl/extensions/tclX7.3a.tar.gz
 
 A contributed sources archive resides on harbor.ecn.purdue.edu and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently
