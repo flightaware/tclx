@@ -62,99 +62,6 @@ The following directories are included under the TclX directory:
 
   o doc - Unformatted manual pages for TclX.
 
-HOW EXTENDED TCL IS INSTALLED 
-=============================
-
-There are two models for installing TclX, the GNU standard and the master
-directory modes.
-
-Standard Installation Model
----------------------------
-
-The basic approach to installing TclX follows the GNU standards.  Two
-variables are defined on the configure command line, "prefix" and
-"exec_prefix".  The variable "prefix" is the path that will contain the
-directories containing hardware and system independent files:
-
-   o ${prefix}/tclX/7.5.0 - TclX runtime files.
-   o ${prefix}/tkX/4.1.0 - TkX runtime files.
-   o ${prefix}/include - Include files for TclX.
-   o ${prefix}/man - Manual pages for TclX.
-
-The variable "exec_prefix" is the path that will contain the directories
-containing hardware and system dependent files:
-
-   o ${exec_prefix}/bin - tcl, wishx and tclhelp programs.
-   o ${exec_prefix}/lib - libtclx.a and libtkx.a
-
-Both "exec_prefix" and "prefix" default to "/usr/local".  All of these
-directories can be changed independently by editing "Config.mk".  To set
-the prefix directories:
-
-    ./configure --prefix=/usr/site --exec_prefix=/usr/site.cray
-
-If the --with-arch=ARCH option was specified to configure (see below), the bin
-and lib files are stored in architecture-dependent directories with the
-specified architecture as a suffix to the directory name:
-
-   o ${prefix}/tclX/7.5.0/bin.ARCH
-   o ${prefix}/tclX/7.5.0/lib.ARCH
-   o ${prefix}/tkX/4.1.0/bin.ARCH
-   o ${prefix}/tkX/4.1.0/lib.ARCH
-
-Master Directory Installation Model
------------------------------------
-
-With the master directory model, all TclX files are stored in the runtime
-directory.  This approach makes it easy to move a complete distrbution
-to other machines, store multiple versions of TclX on a system and remove
-all of the files associated with an outdated version. 
-
-The master directory model is specified by the --enable-master option to the
-configure command.
-
-The resulting directory layout is:
-
-   o ${prefix}/tclX/7.5.0 - TclX runtime files.
-   o ${prefix}/tclX/7.5.0/include - Include files.
-   o ${prefix}/tclX/7.5.0/man - Manual pages.
-   o ${prefix}/tclX/7.5.0/bin - tcl program.
-   o ${prefix}/tclX/7.5.0/lib - libtclx.a and libtcl.a
-
-   o ${prefix}/tkX/4.1.0 - TkX runtime files.
-   o ${prefix}/tkX/4.1.0/include - Include files.
-   o ${prefix}/tkX/4.1.0/man - Manual pages.
-   o ${prefix}/tkX/4.1.0/bin - wishx and tclhelp programs.
-   o ${prefix}/tkX/4.1.0/lib - libtkx.a and libtk.a
-
-Symbolic links are then built for executables from the standard locations
-to the files in the master directory.
-
-   /usr/local/bin/tcl   -> /usr/local/tclX/7.5.0/bin/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/4.1.0/bin/wishx
-
-NOTE: Symbolic linking must currently be done manually by the user (but this
-is easy with unix wildcards).   This was removed from the makefiles so that
-it doesn't happen automaticly.
-
-If the --with-arch=ARCH option was specified to configure (see below), the bin
-and lib files are stored in architecture-dependent directories with the
-specified architecture as a suffix to the directory name:
-
-   o ${prefix}/tclX/7.5.0/bin.arch
-   o ${prefix}/tclX/7.5.0/lib.arch
-   o ${prefix}/tkX/4.1.0/bin.arch
-   o ${prefix}/tkX/4.1.0/lib.arch
-
-You may defined "arch" to be any string you like; it might include OS type or
-version as well as processor architecture.
-
-Symbolic links are still build from the standard locations of the machines
-of specified architecture to the master directory:
-
-   /usr/local/bin/tcl   -> /usr/local/tclX/7.5.0/bin.sparc/tcl
-   /usr/local/bin/wishx -> /usr/local/tkX/4.1.0/bin.sparc/wishx
-
 HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
 ==========================================
 
@@ -199,22 +106,18 @@ HOW TO BUILD EXTENDED TCL FOR UNIX SYSTEMS
           copy of TclX.
 
         o --with-arch=ARCH
-          If your are using the master directory installation model, this
-          specifies the a suffix to use for the architecture-dependent
-          directories under the master directory.  Use the --execprefix
-          option for installing architecture-dependent under the standard
-          installation model.
+          Append the suffix .ARCH to the bin and lib installation directories.
+          This is an alternative to --exec-prefix for setting up a server
+          for multiple CPU architectures.  ARCH is typically a string such
+          as "i386" or "SPARC".
 
         o --prefix=PREFIX
           Directory under which the "include" and "man" directories are
           found for installation. 
 
-        o --execprefix=EXECPREFIX
+        o --exec-prefix=EXECPREFIX
           Directory under which the "bin" and "lib" directories are
           found for installation.  
-
-        o --enable-master
-          Configure for the master installation model.
 
     o If you decide to change the --with-arch, --prefix or --execprefix,
       just rerun configure and make.  The dependencies will cause the

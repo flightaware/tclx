@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 5.16 1996/04/25 14:32:40 markd Exp $
+# $Id: Common.mk.in,v 5.17 1996/04/30 06:37:25 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -120,16 +120,3 @@ CONVERTLIB         = ${RUNTCL} ${srcbasedir}/unix/tools/libconvert.tcl
 INSTCOPY           = ${RUNTCL} ${bldbasedir}/unix/tools/instcopy
 CPMANPAGES         = ${RUNTCL} ${bldbasedir}/unix/tools/cpmanpages
 
-#------------------------------------------------------------------------------
-# Install directories for public files.  The value is determined by the
-# --with-master configure flag.
-
-TCLX_INST_BIN  = @TCLX_INST_BIN@
-TCLX_INST_LIB  = @TCLX_INST_LIB@
-TCLX_INST_INCL = @TCLX_INST_INCL@
-TCLX_INST_MAN  = @TCLX_INST_MAN@
-
-TKX_INST_BIN  = @TKX_INST_BIN@
-TKX_INST_LIB  = @TKX_INST_LIB@
-TKX_INST_INCL = @TKX_INST_INCL@
-TKX_INST_MAN  = @TKX_INST_MAN@

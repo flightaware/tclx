@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 5.16 1996/04/23 14:46:57 markd Exp $
+# $Id: Config.mk,v 5.17 1996/04/25 14:32:42 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -128,19 +128,19 @@ TKX_INST_RUNTIME=${prefix}/tkX/${TKX_FULL_VERSION}
 # The directory to install the tcl, wishx and tclhelp binaries in when the
 # standard install model is used.
 
-TCLX_BIN=${exec_prefix}/bin${ARCH}
+TCLX_INST_BIN=${exec_prefix}/bin${ARCH}
 
 #------------------------------------------------------------------------------
 # The directory to install the libtclx.a library in when the standard install
 # model is used.
 
-TCLX_LIB=${exec_prefix}/lib${ARCH}
+TCLX_INST_LIB=${exec_prefix}/lib${ARCH}
 
 #------------------------------------------------------------------------------
 # The directory the TclX .h files go in when the standard install model is
 # used.
 
-TCLX_INCL=${prefix}/include
+TCLX_INST_INCL=${prefix}/include
 
 #==============================================================================
 # These defines specify where and how the manual pages are to be installed.
@@ -153,27 +153,15 @@ TCLX_INCL=${prefix}/include
 # o TCLX_MAN - Base manual directory where all of the man* and cat*
 #   directories live.
 
-TCLX_MAN=${prefix}/man
+TCLX_INST_MAN=${prefix}/man
 
 #------------------------------------------------------------------------------
-# o TCLX_MAN_CMD_SECTION - Section for Tcl command manual pages.
-# o TCLX_MAN_FUNC_SECTION - Section for Tcl C level function manual pages.
+# o TCLX_MAN_CMD_SECTION - Section for TclX command manual pages.
+# o TCLX_MAN_FUNC_SECTION - Section for TclX C level function manual pages.
 #
 
 TCLX_MAN_CMD_SECTION=n
 TCLX_MAN_FUNC_SECTION=3
-
-#------------------------------------------------------------------------------
-# o TKX_MAN_CMD_SECTION - Section for Tk command  manual pages.
-# o TKX_MAN_UNIXCMD_SECTION - Section for Tk Unix commands (the wish program)
-#   manual pages.
-#
-# o TK_MAN_FUNC_SECTION - Section for Tk C level function manual pages.
-#
-TKX_MAN_CMD_SECTION=n
-TKX_MAN_UNIXCMD_SECTION=1
-TKX_MAN_FUNC_SECTION=3
-
 
 #------------------------------------------------------------------------------
 # o MAN_DIR_SEPARATOR - The separator character used in the directory name

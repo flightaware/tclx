@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.30 1996/04/25 14:32:48 markd Exp $
+dnl $Id: configure.in,v 5.31 1996/04/30 06:37:42 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.30 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.31 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -96,54 +96,6 @@ case "$TKX_BUILD" in
         ;;
 esac
 AC_SUBST(TKX_BUILD)
-
-#------------------------------------------------------------------------------
-# Check command line looking for the --with-arch= option.
-#------------------------------------------------------------------------------
-
-AC_ARG_WITH(arch,
-    [  --with-arch=ARCH        architecture suffix, appended .ARCH to the bin
-                      and lib directory names],
-    [TCLX_ARCH=.$withval
-     AC_MSG_RESULT("An architecture suffix of \"$TCLX_ARCH\" will be appended to bin and lib directories")
-    ],
-    [AC_MSG_RESULT("No architecture suffix will be used")])
-AC_SUBST(TCLX_ARCH)
-
-#------------------------------------------------------------------------------
-# Handle the --enable-master option.
-#------------------------------------------------------------------------------
-
-AC_ARG_ENABLE(master,
-    [  --enable-master         enable master directory installation model],
-    [AC_MSG_RESULT("Master installation model")
-     TCLX_INST_BIN='${TCLX_INST_RUNTIME}/bin${ARCH}'
-     TCLX_INST_LIB='${TCLX_INST_RUNTIME}/lib${ARCH}'
-     TCLX_INST_INCL='${TCLX_INST_RUNTIME}/include'
-     TCLX_INST_MAN='${TCLX_INST_RUNTIME}/man'
-     TKX_INST_BIN='${TKX_INST_RUNTIME}/bin${ARCH}'
-     TKX_INST_LIB='${TKX_INST_RUNTIME}/lib${ARCH}'
-     TKX_INST_INCL='${TKX_INST_RUNTIME}/include'
-     TKX_INST_MAN='${TKX_INST_RUNTIME}/man'
-    ], 
-    [AC_MSG_RESULT("Standard installation model")
-     TCLX_INST_BIN='${TCLX_BIN}'
-     TCLX_INST_LIB='${TCLX_LIB}'
-     TCLX_INST_INCL='${TCLX_INCL}'
-     TCLX_INST_MAN='${TCLX_MAN}'
-     TKX_INST_BIN='${TCLX_BIN}'
-     TKX_INST_LIB='${TCLX_LIB}'
-     TKX_INST_INCL='${TCLX_INCL}'
-     TKX_INST_MAN='${TCLX_MAN}'])
-
-AC_SUBST(TCLX_INST_BIN)
-AC_SUBST(TCLX_INST_LIB)
-AC_SUBST(TCLX_INST_INCL)
-AC_SUBST(TCLX_INST_MAN)
-AC_SUBST(TKX_INST_BIN)
-AC_SUBST(TKX_INST_LIB)
-AC_SUBST(TKX_INST_INCL)
-AC_SUBST(TKX_INST_MAN)
 
 #------------------------------------------------------------------------------
 # Handle the --enable-shared option.
@@ -553,9 +505,6 @@ fi
 #------------------------------------------------------------------------------
 
 AC_SUBST(TCLX_LIBS)
-
-AC_SUBST(prefix)
-AC_SUBST(execprefix)
 
 AC_OUTPUT(Makefile Common.mk tools/Makefile ../tcl/unix/Makefile ../tk/unix/Makefile ../tcl/unix/tclxConfig.sh ../tk/unix/tkxConfig.sh ../tcl/unix/pkgIndex.proto)
 

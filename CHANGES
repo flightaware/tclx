@@ -1148,5 +1148,7 @@
 ===============================================================================
 29 Apr 96:
   o Fixed build problems with shared libraries on Solaris and HP-UX.
-  o Added *LIB_SPEC variables to tclx/tkxConfig.sh.
+  o Added *LIB_SPEC variables to tclx/tkxConfig.sh. 
+  o Removed explicit support for master installation model.  The same affect
+    can be achieved with --prefix.
 -------------------------------------------------------------------------------
