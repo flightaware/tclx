@@ -1,5 +1,7 @@
 2004-11-22  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	* library/edprocs.tcl (edprocs): harden tmpfile security access
+
 	* Makefile.in: remove TCL_DEFS dependency
 	* configure.in: add TEA_TIME_HANDLER checks to no longer rely on
 	TCL_DEFS (not good for 8.5).

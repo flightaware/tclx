@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: edprocs.tcl,v 8.4 1999/03/31 06:37:47 markd Exp $
+# $Id: edprocs.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -32,17 +32,22 @@ proc saveprocs {fileName args} {
 proc edprocs {args} {
     global env
 
-    set tmpFilename /tmp/tcldev.[id process]
+    set tmpFilename /tmp/tcldev.[pid].[clock seconds]
+    set access [list RDWR CREAT EXCL TRUNC]
+    set perm 0600
+    if {[catch {open $tmpFilename $access $perm} fp]} {
+	# something went wrong
+	return -code error "Could not open temporary file:\n$fp"
+    }
 
-    set fp [open $tmpFilename w]
     try_eval {
         puts $fp "\n# TEMP EDIT BUFFER -- YOUR CHANGES ARE FOR THIS SESSION ONLY\n"
-        puts $fp [eval "showproc $args"]
+        puts $fp [eval [linsert $args 0 showproc]]
     } {} {
         close $fp
     }
 
-    if [info exists env(EDITOR)] {
+    if {[info exists env(EDITOR)]} {
         set editor $env(EDITOR)
     } else {
 	set editor vi
