@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.2 1993/12/16 15:35:43 markd Exp markd $
+# $Id: Makefile.in,v 3.3 1993/12/18 07:42:41 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -153,13 +153,14 @@ runwishx:
 	@echo '# script for testing wishx before installation'    >>runwishx
 	@echo "TCL_LIBRARY=`pwd`/tclmaster"                       >>runwishx
 	@echo "TK_LIBRARY=`pwd`/tkmaster"                         >>runwishx
-	@echo "TCL_PROGRAM=`pwd`/tkmaster/bin${ARCH}/wishx"       >>runwishx
+	@echo "TCL_PROGRAM=`pwd`/tkmaster/bin${ARCH}/tcl"         >>runwishx
+	@echo "WISHX=`pwd`/tkmaster/bin${ARCH}/wishx"             >>runwishx
 	@echo "export TCL_LIBRARY TK_LIBRARY TCL_PROGRAM"         >>runwishx
 	@echo "if [ \$$# = 0 ]"                                   >>runwishx
 	@echo "then"                                              >>runwishx
-	@echo "    exec \$$TCL_PROGRAM"                           >>runwishx
+	@echo "    exec \$$WISHX"                                 >>runwishx
 	@echo "else"                                              >>runwishx
-	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                  >>runwishx
+	@echo "    exec \$$WISHX \"\$$@\""                        >>runwishx
 	@echo "fi"                                                >>runwishx
 	chmod a+rx runwishx
 
