@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.8 1997/07/04 20:23:52 markd Exp $
+ * $Id: tclXkeylist.c,v 8.9 1997/07/26 02:01:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -388,8 +388,8 @@ FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
     }
 
     for (findIdx = 0; findIdx < keylIntPtr->numEntries; findIdx++) {
-        if ((strlen (keylIntPtr->entries [findIdx].key) == keyLen) &&
-             (strncmp (keylIntPtr->entries [findIdx].key, key, keyLen) == 0))
+        if ((strncmp (keylIntPtr->entries [findIdx].key, key, keyLen) == 0) &&
+            (keylIntPtr->entries [findIdx].key [keyLen] == '\0'))
             break;
     }
 
