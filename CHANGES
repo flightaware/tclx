@@ -329,3 +329,9 @@
 ===============================================================================
 15 Oct 92: Extended Tcl 6.4c released
 ===============================================================================
+24 Oct 92:
+  o Fixed problem in tclXprocess were it will not compile if wait status
+    is union wait.
+  o Fixed minor manual page problems.
+  o Corrected problems in RS/6000 config file.
+-------------------------------------------------------------------------------
