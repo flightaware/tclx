@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayprocs.tcl,v 8.3 1999/03/31 06:37:47 markd Exp $
+# $Id: arrayprocs.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -22,8 +22,8 @@
 proc for_array_keys {varName arrayName codeFragment} {
     upvar $varName enumVar $arrayName enumArray
 
-    if ![info exists enumArray] {
-	error "\"$arrayName\" isn't an array"
+    if {![array exists enumArray]} {
+	return -code error "\"$arrayName\" isn't an array"
     }
 
     set code 0
@@ -45,5 +45,3 @@ proc for_array_keys {varName arrayName codeFragment} {
     }
     return -code $code $result
 }
-
-

@@ -2,7 +2,7 @@
 # Modified version of the standard Tcl auto_load_index proc that calls a TclX
 # command load TclX .tndx library indices. 
 #
-# $Id: autoload.tcl,v 8.6 1999/03/31 06:11:01 markd Exp $
+# $Id: autoload.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
 # from Tcl: init.tcl,v 1.1.2.4 1998/12/02 20:08:05 welch Exp
 #
 
@@ -30,10 +30,8 @@
 proc auto_load_index {} {
     global auto_index auto_oldpath auto_path errorInfo errorCode
 
-    if {[info exists auto_oldpath]} {
-	if {$auto_oldpath == $auto_path} {
-	    return 0
-	}
+    if {[info exists auto_oldpath] && ($auto_oldpath == $auto_path)} {
+	return 0
     }
     set auto_oldpath $auto_path
 
@@ -70,7 +68,7 @@ proc auto_load_index {} {
 		      "[file join $dir tclIndex] isn't a proper Tcl index file"
 		}
 	    } msg]
-	    if {$f != ""} {
+	    if {[string compare $f ""]} {
 		close $f
 	    }
 	    if {$error} {
