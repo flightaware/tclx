@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.16 1996/03/01 17:59:20 markd Exp $
+# $Id: Makefile.in,v 5.17 1996/03/02 18:05:16 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -183,7 +183,7 @@ ${bldbasedir}/tk/tests:
 # Run the UCB tests with wishx.
 
 test: all
-	echo "cd ${TK_SRC}/tests; source all; exit" | 
+	echo "cd ${TK_SRC}/tests; source all; exit" | \
 	    ./runtest -n tktest -geometry +0+0
 
 #------------------------------------------------------------------------------
