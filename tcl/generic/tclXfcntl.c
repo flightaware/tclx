@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 4.3 1995/04/25 03:04:32 markd Exp markd $
+ * $Id: tclXfcntl.c,v 4.4 1995/04/30 05:46:07 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,8 +45,9 @@
 
 #define ATTR_RDONLY   1  /* Access checks desired.      */
 #define ATTR_WRONLY   2
+#define ATTR_RDWR     3
 #define ATTR_READ     4
-#define ATTR_WRITE    8
+#define ATTR_WRITE    5
 
 #define ATTR_CLOEXEC  1  /* Other attribute sets */
 #define ATTR_NOBUF    2
@@ -171,7 +172,7 @@ XlateFcntlAttr (interp, attrName, attrPtr)
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "RDWR")) {
-        attrPtr->access = ATTR_READ | ATTR_WRITE;
+        attrPtr->access = ATTR_RDWR;
         return TCL_OK;
     }
     if (STREQU (attrNameUp, "READ")) {
@@ -257,18 +258,23 @@ GetFcntlAttr (interp, tclFilePtr, attrName)
         current = fcntl (fileno (tclFilePtr->f), F_GETFL, 0);
         if (current == -1)
             goto unixError;
+        interp->result = "0";
         switch (current & O_ACCMODE) {
           case O_RDONLY:
-            interp->result = 
-                (attrib.access & (ATTR_RDONLY | ATTR_READ)) ? "1" : "0";
+            if ((attrib.access == ATTR_RDONLY) ||
+                (attrib.access == ATTR_READ))
+                interp->result = "1";
             break;
           case O_WRONLY:
-            interp->result = 
-                (attrib.access & (ATTR_WRONLY | ATTR_WRITE)) ? "1" : "0";
+            if ((attrib.access == ATTR_WRONLY) ||
+                (attrib.access == ATTR_WRITE))
+                interp->result = "1";
             break;
           case O_RDWR:
-            interp->result = 
-                (attrib.access & (ATTR_READ | ATTR_WRITE)) ? "1" : "0";
+            if ((attrib.access == ATTR_RDWR) ||
+                (attrib.access == ATTR_READ) ||
+                (attrib.access == ATTR_WRITE))
+                interp->result = "1";
             break;
         }
         return TCL_OK;
@@ -414,10 +420,13 @@ SetFcntlAttr (interp, tclFilePtr, attrName, valueStr)
         return TCL_ERROR;
     }
 
-    if ((attrib.other & (ATTR_NOBUF | ATTR_LINEBUF)) && !value) {
-        Tcl_AppendResult (interp, "Attribute \"", attrName, "\" may not be ",
-                          "cleared once set", (char *) NULL);
-        return TCL_ERROR;
+    if (!value) {
+        if ((attrib.other == ATTR_NOBUF) || (attrib.other == ATTR_LINEBUF)) {
+            Tcl_AppendResult (interp, "Attribute \"", attrName,
+                              "\" may not be cleared once set",
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
     }
 
     if (SetAttrOnFile (interp, tclFilePtr->f, attrib, value) == TCL_ERROR)

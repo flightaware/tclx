@@ -393,7 +393,7 @@ SVR3 systems (14 character file name limit):
 DEC Ultrix:
    o Setting O_APPEND via the fcntl FSETFL system call returns an EOPNOTSUPP
      (Operation not supported) error.  This causes failures of fcntl tests
-     1.7 and 1.8. This is an Ultrix bug as far as we can tell.
+     2.4 and 2.5. This is an Ultrix bug as far as we can tell.
    o The fstat system call does does not return updated modification times on
      an open file.  This causes fstat test 3.1 to fail. This is an Ultrix bug.
    o Several tests fail when Tcl is run on an NFS mounted file system.
