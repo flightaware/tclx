@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.12.2.1 1998/08/08 16:43:55 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -187,6 +187,17 @@ typedef RETSIGTYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
 #   define SIG_BLOCK       1
 #   define SIG_UNBLOCK     2
 #endif
+
+/*
+ * SunOS has sigaction but uses SA_INTERRUPT rather than SA_RESTART which
+ * has the opposite meaning.
+ */
+#ifndef NO_SIGACTION
+#if defined(SA_INTERRUPT) && !defined(SA_RESTART)
+#define USE_SA_INTERRUPT
+#endif
+#endif
+
 
 /*
  * Symbolic signal actions that can be associated with a signal.
@@ -373,7 +384,11 @@ GetSignalState (signalNum, sigProcPtr, restart)
     if (sigaction (signalNum, NULL, &currentState) < 0)
         return TCL_ERROR;
     *sigProcPtr = currentState.sa_handler;
+#ifdef USE_SA_INTERRUPT
+    *restart = ((currentState.sa_flags & SA_INTERRUPT) == 0);
+#else
     *restart = ((currentState.sa_flags & SA_RESTART) != 0);
+#endif
     return TCL_OK;
 #else
     signalProcPtr_t  actionFunc;
@@ -418,9 +433,15 @@ SetSignalState (signalNum, sigFunc, restart)
     newState.sa_handler = sigFunc;
     sigfillset (&newState.sa_mask);
     newState.sa_flags = 0;
+#ifdef USE_SA_INTERRUPT
+    if (!restart) {
+        newState.sa_flags |= SA_INTERRUPT;
+    }
+#else
     if (restart) {
         newState.sa_flags |= SA_RESTART;
     }
+#endif
 
     if (sigaction (signalNum, &newState, NULL) < 0)
         return TCL_ERROR;
