@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.13 1996/04/30 07:18:27 markd Exp $
+# $Id: Makefile.in,v 5.14 1996/05/04 19:51:46 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -116,7 +116,7 @@ buildhelp:
 #------------------------------------------------------------------------------
 # Install Extended Tcl.
 #
-install: all TCLX_INSTALL TKX_INSTALL_${TKX_BUILD}
+install: all TCLX_INSTALL TKX_INSTALL_${TKX_BUILD} TCLX_INSTALL_MAN
 
 install-exec: all TCLX_INSTALL_EXEC  TKX_INSTALL_EXEC_${TKX_BUILD}
 
