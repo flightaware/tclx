@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.2 1995/01/01 19:50:11 markd Exp markd $
+# $Id: Makefile.in,v 4.3 1995/04/21 21:07:47 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -121,7 +121,6 @@ buildtkhelp:
 	rm -rf ${HELPSRC} help
 	mkdir ${HELPSRC}
 	${BLDMANHELP} ${TK_UCB_SRC}/doc ${TKMANPAGES} ${HELPSRC} Tk.brf
-	rm -rf ${HELP}	
 
 #------------------------------------------------------------------------------
 

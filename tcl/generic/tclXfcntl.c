@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 4.0 1994/07/16 05:26:50 markd Rel markd $
+ * $Id: tclXfcntl.c,v 4.1 1995/01/01 19:49:24 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,6 +45,44 @@
 #define   ATTR_NOBUF    2
 #define   ATTR_LINEBUF  4
 #define   MAX_ATTR_NAME_LEN  20
+
+/*
+ * Determine the field names and defines used to determine if a file is line
+ * buffered or not buffered. This is nasty, _IONBF is the System V flag and
+ * _SNBF is the BSD flag.  However some systems using BSD also define _IONBF
+ * (yuk). Also some BSDs use __SNBF.
+ */
+
+#ifdef HAVE_STDIO_FLAGS
+#   define STDIO_FLAGS _flags
+#endif
+#ifdef HAVE_STDIO__FLAGS
+#   define STDIO_FLAGS __flags
+#endif
+#ifdef HAVE_STDIO_FLAG
+#   define STDIO_FLAGS _flag
+#endif
+#ifndef STDIO_FLAGS
+    Unable to determine stdio flags;
+#endif
+
+
+#ifdef _STDIO_USES_IOSTREAM  /* GNU libc */
+#   define STDIO_NBUF _IONBF
+#   define STDIO_LBUF 0x200
+#endif
+#if (!defined(STDIO_NBUF)) && (defined(_IONBF) && !defined(_SNBF))
+#   define STDIO_NBUF _IONBF
+#   define STDIO_LBUF _IOLBF
+#endif
+#if !defined(STDIO_NBUF)
+#   define STDIO_NBUF _SNBF
+#   define STDIO_LBUF _SLBF
+#endif
+#ifndef STDIO_NBUF
+    Unable to determine stdio defines;
+#endif
+
 
 /*
  * Prototypes of internal functions.
@@ -199,51 +237,15 @@ GetFcntlAttr (interp, filePtr, attrName)
 
     /*
      * Poke the stdio FILE structure to determine the buffering status.
-     * This is nasty, _IONBF is the System V flag and _SNBF is the BSD
-     * flag.  However some systems using BSD also define _IONBF (yuk).
-     * Also some BSDs use __SNBF.
-     */
-#if defined(__SNBF) && !defined (_SNBF)
-#    define _SNBF __SNBF
-#    define _SLBF __SLBF
-#endif
-
-#if defined (__linux__)
-    /*
-     * Linux libc does use _IOLBF
      */
     if (otherAttr & ATTR_NOBUF) {
-        interp->result = (filePtr->_flags & _IONBF) ? "1" : "0";
+        interp->result = (filePtr->STDIO_FLAGS & STDIO_NBUF) ? "1" : "0";
         return TCL_OK;
     }
     if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->_flags & 0x200) ? "1" : "0";
+        interp->result = (filePtr->STDIO_FLAGS & STDIO_LBUF) ? "1" : "0";
         return TCL_OK;
     }
-#define TCL_STDIOBUF
-#endif
-#if (!defined(TCL_STDIOBUF)) && (defined(_IONBF) && !defined(_SNBF))
-    if (otherAttr & ATTR_NOBUF) {
-        interp->result = (filePtr->_flag & _IONBF) ? "1" : "0";
-        return TCL_OK;
-    }
-    if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->_flag & _IOLBF) ? "1" : "0";
-        return TCL_OK;
-    }
-#define TCL_STDIOBUF
-#endif
-#if !defined(TCL_STDIOBUF)
-    if (otherAttr & ATTR_NOBUF) {
-        interp->result = (filePtr->_flags & _SNBF) ? "1" : "0";
-        return TCL_OK;
-    }
-    if (otherAttr & ATTR_LINEBUF) {
-        interp->result = (filePtr->_flags & _SLBF) ? "1" : "0";
-        return TCL_OK;
-    }
-#define TCL_STDIOBUF
-#endif
 
 unixError:
     interp->result = Tcl_PosixError (interp);

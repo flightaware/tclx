@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 4.19 1995/04/15 19:49:30 markd Exp markd $
+dnl $Id: configure.in,v 4.20 1995/04/21 21:07:47 markd Exp markd $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 4.19 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 4.20 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
 
@@ -188,6 +188,67 @@ else
      exit (1);
 }
 ], AC_DEFINE(TIMES_RETS_REAL_TIME), ,AC_DEFINE(TIMES_RETS_REAL_TIME))
+
+#------------------------------------------------------------------------------
+# Determine the name of the flags field
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING([flag field name in stdio FILE struct])
+AC_TRY_COMPILE([#include <stdio.h>],
+        [FILE *fptr = stdin; fptr->_flags = 0;],
+        [AC_DEFINE(HAVE_STDIO_FLAGS)
+         AC_MSG_RESULT(_flags)])
+AC_TRY_COMPILE([#include <stdio.h>],
+        [FILE *fptr = stdin; fptr->__flags = 0;],
+        [AC_DEFINE(HAVE_STDIO__FLAGS)
+         AC_MSG_RESULT(__flags)])
+AC_TRY_COMPILE([#include <stdio.h>],
+        [FILE *fptr = stdin; fptr->_flag = 0;],
+        [AC_DEFINE(HAVE_STDIO_FLAG)
+         AC_MSG_RESULT(_flag)])
+
+#------------------------------------------------------------------------------
+# Figure out how to find out whether a FILE structure contains buffered
+# readable data.  Some known names for the count field:
+#       _cnt:		Most UNIX systems
+#       __cnt:		HPUX
+#       _r:		BSD
+#       readCount:	Sprite
+# Or, in GNU libc there are two fields, _gptr and _egptr, which have to be
+# compared.  They are called _IO_read_ptr and _IO_read_end in some versions.
+# This code is stolen from the Tk configure script, but is greatly modified.
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING([count field in FILE structures])
+AC_TRY_COMPILE([#include <stdio.h>],
+	[FILE *f = stdin; f->_cnt = 0;],
+        [AC_DEFINE(HAVE_STDIO_CNT)
+         AC_MSG_RESULT(_cnt)])
+
+AC_TRY_COMPILE([#include <stdio.h>],
+	[FILE *f = stdin; f->__cnt = 0;],
+        [AC_DEFINE(HAVE_STDIO__CNT)
+         AC_MSG_RESULT(__cnt)])
+
+AC_TRY_COMPILE([#include <stdio.h>],
+	[FILE *f = stdin; f->_r = 0;],
+        [AC_DEFINE(HAVE_STDIO_R)
+         AC_MSG_RESULT(_r)])
+
+AC_TRY_COMPILE([#include <stdio.h>],
+	[FILE *f = stdin; f->readCount = 0;],
+        [AC_DEFINE(HAVE_STDIO_READCOUNT)
+         AC_MSG_RESULT(readCount)])
+
+AC_TRY_COMPILE([#include <stdio.h>],
+	[FILE *f = stdin; f->_gptr = f->egptr;],
+	[AC_DEFINE(HAVE_STDIO_GPTR)
+         AC_MSG_RESULT([_gptr/_egptr])])
+
+AC_TRY_COMPILE([#include <stdio.h>],
+	[FILE *f = stdin; f->_IO_read_ptr = f->_IO_read_end;],
+	[AC_DEFINE(HAVE_STDIO_IO_READ_PTR)
+         AC_MSG_RESULT([_IO_read_ptr/_IO_read_end])])
 
 #------------------------------------------------------------------------------
 # Determine various socket related options:

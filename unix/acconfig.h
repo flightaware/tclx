@@ -186,3 +186,31 @@
 
 /* Define if inet_aton function is available. */
 #undef HAVE_INET_ATON
+
+/* Define if stdio FILE has _flags field */
+#undef HAVE_STDIO_FLAGS
+
+/* Define if stdio FILE has __flags field */
+#undef HAVE_STDIO__FLAGS
+
+/* Define if stdio FILE has _flag field */
+#undef HAVE_STDIO_FLAG
+
+/* Define if stdio FILE has _cnt field */
+#undef HAVE_STDIO_CNT
+
+/* Define if stdio FILE has __cnt field */
+#undef HAVE_STDIO__CNT
+
+/* Define if stdio FILE has _r field */
+#undef HAVE_STDIO_R
+
+/* Define if stdio FILE has readCount field */
+#undef HAVE_STDIO_READCOUNT
+
+/* Define if stdio FILE has the _gptr/_egptr fields */
+#undef HAVE_STDIO_GPTR
+
+/* Define if stdio FILE has the _IO_read_ptr/_IO_read_end fields */
+#undef HAVE_STDIO_IO_READ_PTR
+

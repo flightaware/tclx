@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 4.0 1994/07/16 05:27:46 markd Rel markd $
+ * $Id: tclXselect.c,v 4.1 1995/01/01 19:49:39 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -48,18 +48,26 @@ double floor ();
  * buffer.  Different versions are provided for System V, BSD and GNU stdio.
  */
 
-#ifdef _STDIO_USES_IOSTREAM  /* GNU libc */
-#   ifdef _IO_STDIO_H
-#       define READ_DATA_PENDING(fp) (fp->_IO_read_ptr != fp->_IO_read_end)
-#else
-#       define READ_DATA_PENDING(fp) ((fp)->_gptr < (fp)->_egptr)
-#   endif
+#ifdef HAVE_STDIO_CNT
+#   define READ_DATA_PENDING(fp) (fp->_cnt != 0)
 #endif
-#if (!defined (READ_DATA_PENDING)) && defined __SLBF
+#ifdef HAVE_STDIO__CNT
+#   define READ_DATA_PENDING(fp) (fp->__cnt != 0)
+#endif
+#ifdef HAVE_STDIO_R
 #   define READ_DATA_PENDING(fp) (fp->_r > 0)
 #endif
-#if !defined (READ_DATA_PENDING)
-#   define READ_DATA_PENDING(fp) (fp->_cnt != 0)
+#ifdef HAVE_STDIO_READCOUNT
+#   define READ_DATA_PENDING(fp) (fp->readCount > 0)
+#endif
+#ifdef HAVE_STDIO_GPTR
+#   define READ_DATA_PENDING(fp) ((fp)->_gptr < (fp)->_egptr)
+#endif
+#ifdef HAVE_STDIO_IO_READ_PTR
+#   define READ_DATA_PENDING(fp) (fp->_IO_read_ptr != fp->_IO_read_end)
+#endif
+#ifndef READ_DATA_PENDING
+    Unable to determine stdio read count;
 #endif
 
 /*
