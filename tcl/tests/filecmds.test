@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filecmds.test,v 3.1 1994/01/23 16:58:20 markd Exp markd $
+# $Id: filecmds.test,v 3.2 1994/01/24 04:01:59 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -194,5 +194,5 @@ Test filecmds-6.3 {readdir tests} {
     lsort [readdir READDIR.TMP]
 } 0 {AAA BBB CCC DDD}
 
-catch {exec rm -rf  [glob -nocomplain *.TMP]}
+system {rm -rf *.TMP}
 
