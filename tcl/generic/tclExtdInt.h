@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 1.5 1992/10/05 02:03:10 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.0 1992/10/16 04:51:27 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -208,6 +208,9 @@ Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
                                 int         readable,
                                 int         writable));
+
+void
+Tcl_SetupSigInt _ANSI_ARGS_(());
 
 /*
  * Definitions required to initialize all extended commands.  These are either

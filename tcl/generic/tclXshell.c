@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstartup.c,v 2.1 1992/11/10 04:02:06 markd Exp markd $
+ * $Id: tclXstartup.c,v 2.2 1992/11/15 06:59:52 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -72,9 +72,9 @@ ProcessInitFile _ANSI_ARGS_((Tcl_Interp  *interp));
  *-----------------------------------------------------------------------------
  */
 void
-Tcl_ErrorAbort (interp, noDumpStack, exitCode)
+Tcl_ErrorAbort (interp, noStackDump, exitCode)
     Tcl_Interp  *interp;
-    int          noDumpStack;
+    int          noStackDump;
     int          exitCode;
 {
     char *errorStack;
@@ -82,7 +82,7 @@ Tcl_ErrorAbort (interp, noDumpStack, exitCode)
     fflush (stdout);
     fprintf (stderr, "Error: %s\n", interp->result);
 
-    if (noDumpStack != 0) {
+    if (noStackDump == 0) {
         errorStack = Tcl_GetVar (interp, "errorInfo", 1);
         if (errorStack != NULL)
             fprintf (stderr, "%s\n", errorStack);
@@ -502,13 +502,15 @@ Tcl_Startup (interp, argc, argv, defaultFile, options)
         result = Tcl_Eval (interp, tclParms.execStr, 0, NULL);
         if (result != TCL_OK)
             goto errorAbort;
-    } else
+    } else {
+        Tcl_SetupSigInt ();
         Tcl_CommandLoop (interp, stdin, stdout, tclShellCmdEvalProc, 0);
+    }
 
     Tcl_ResetResult (interp);
     return;
 
 errorAbort:
-    Tcl_ErrorAbort (interp, options & TCLSH_NO_STACK_DUMP, 255);
+    Tcl_ErrorAbort (interp, tclParms.options & TCLSH_NO_STACK_DUMP, 255);
 }
 

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.1 1992/10/25 05:22:07 markd Exp markd $
+.\" $Id: TclX.man,v 2.2 1992/11/15 06:59:52 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -589,9 +589,12 @@ performed to retrieve the exit status of the child process before issuing
 another \fBsignal SIGCHLD \fI...\fR command.  For code that is to be portable
 between both types of systems, use this approach.
 .sp
-Signals are not
-processed until after the completion of the Tcl command that is executing when
-the signal is received.
+Signals are not processed until after the completion of the Tcl command that
+is executing when the signal is received.  If an interactive Tcl shell is
+running, then the \fBSIGINT\fR will be set to \fBerror\fR, non-interactive
+Tcl sessions leave \fBSIGINT\fR unchanged from when the process started
+(normally \fBdefault\fR for foreground processes and \fBignore\fR for
+processes in the background).
 '@endhelp
 '@help: time/sleep
 '@brief: Sleep for the specified number of seconds.
