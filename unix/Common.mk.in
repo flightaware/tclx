@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 8.0.2.1 1996/12/22 08:51:08 markd Exp $
+# $Id: Common.mk.in,v 8.2 1997/04/14 00:52:17 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -57,7 +57,6 @@ TK_STLIB_NAME   = @TK_STLIB_NAME@
 TCLX_SHLIB_NAME = @TCLX_SHLIB_NAME@
 TCLX_STLIB_NAME = @TCLX_STLIB_NAME@
 
-<<<<<<< Common.mk.in
 TKX_SHLIB_NAME       = @TKX_SHLIB_NAME@
 TKX_STLIB_NAME       = @TKX_STLIB_NAME@
 
