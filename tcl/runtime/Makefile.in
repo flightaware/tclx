@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.2 1993/11/25 05:03:37 markd Exp markd $
+# $Id: Makefile.in,v 3.3 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -44,6 +44,7 @@ LOADOUSTER.TCL = ${bldbasedir}/tclmaster/loadouster.tcl
 HELP           = ${bldbasedir}/tclmaster/help
 HELPSRC        = ${srcbasedir}/tclhelp
 TCLMANPAGES    = ${srcbasedir}/tools/tclmanpages
+GENINDEX       = ../runtcl ${srcbasedir}/tools/genindex.tcl
 BLDMANHELP     = ../runtcl ${srcbasedir}/tools/bldmanhelp
 
 #------------------------------------------------------------------------------
@@ -75,7 +76,7 @@ ${TCL.TLIB}: ${TCL_SRCS} ${BUILDIDX.TCL} ${TCLINIT.TCL}
 	-rm -f ${TCL.TLIB} ${TCL.TNDX}
 	(cd ${srcdir}; cat ${TCL_SRCS}) | \
 	    egrep -v '^#$$|^#  *|^#-|^#=|^  *#' > $@
-	../runtcl -c "buildpackageindex ${TCL.TLIB}"
+	${GENINDEX} ${TCL.TLIB}
 
 #------------------------------------------------------------------------------
 # Copy help files to the master directory.

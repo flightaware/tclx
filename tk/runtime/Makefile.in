@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.2 1993/11/25 05:03:37 markd Exp markd $
+# $Id: Makefile.in,v 3.3 1994/05/28 03:38:22 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -42,8 +42,10 @@ PROLOG.PS   = ${bldbasedir}/tkmaster/prolog.ps
 TCLHELP     = ${bldbasedir}/tkmaster/bin${ARCH}/tclhelp
 DEMOS       = ${bldbasedir}/tkmaster/demos
 HELP        = ${bldbasedir}/tkmaster/help
-HELPSRC    =  ${srcbasedir}/tkhelp
+HELPSRC     = ${srcbasedir}/tkhelp
 TKMANPAGES  = ${srcbasedir}/tools/tkmanpages
+CONVERTLIB  = ../runtcl ${srcbasedir}/tools/libconvert.tcl
+GENINDEX    = ../runtcl ${srcbasedir}/tools/genindex.tcl
 INSTCOPY    = ../runtcl ../tools/instcopy
 BLDMANHELP  = ../runtcl ${srcbasedir}/tools/bldmanhelp
 
@@ -58,9 +60,9 @@ ${TK.TCL}: ${TK_UCB_SRC}/library/tk.tcl
 	cp ${TK_UCB_SRC}/library/tk.tcl ${TK.TCL}
 
 ${TK.TLIB} ${TK.TNDX}: ${TK_UCB_SRC}/library/tclIndex tkdemo.tcl
-	../runtcl "-c convert_lib ${TK_UCB_SRC}/library/tclIndex ${TK.TLIB}"
+	${CONVERTLIB} ${TK_UCB_SRC}/library/tclIndex ${TK.TLIB}
 	cat ${srcdir}/tkdemo.tcl >>${TK.TLIB}
-	../runtcl "-c buildpackageindex ${TK.TLIB}"
+	${GENINDEX} ${TK.TLIB}
 	
 ${PROLOG.PS}: ${TK_UCB_SRC}/library/prolog.ps
 	cp ${TK_UCB_SRC}/library/prolog.ps ${PROLOG.PS}

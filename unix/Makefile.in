@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.9 1994/07/03 03:48:52 markd Exp markd $
+# $Id: Makefile.in,v 3.10 1994/07/03 06:03:34 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -22,6 +22,7 @@ SHELL=/bin/sh
 # Autoconfig defines that can be overridden in Config.mk
 
 CC                = @CC@
+MCS               = @MCS_CMD@
 RANLIB            = @RANLIB@
 srcdir            = @srcdir@
 srcbasedir        = @srcbasedir@
@@ -239,6 +240,8 @@ TCLXINSTALL:
 
 TCLXINSTALL-EXEC:
 	${INSTCOPY} tclmaster/bin${ARCH}/tcl ${TCL_BINDIR}
+	strip ${TCL_BINDIR}/tcl
+	${MCS} ${TCL_BINDIR}/tcl
 	${INSTCOPY} tclmaster/lib${ARCH}/libtclx.a ${TCL_LIBDIR}
 	${RANLIB} ${TCL_LIBDIR}/libtclx.a
 
@@ -250,6 +253,8 @@ TKXINSTALL:
 
 TKXINSTALL-EXEC:
 	${INSTCOPY} tkmaster/bin${ARCH}/wishx ${TCL_BINDIR}
+	strip ${TCL_BINDIR}/wishx
+	${MCS} ${TCL_BINDIR}/wishx
 	${INSTCOPY} tkmaster/bin${ARCH}/tclhelp ${TCL_BINDIR}
 	${INSTCOPY} tkmaster/lib${ARCH}/libtkx.a ${TCL_LIBDIR}
 	${RANLIB} ${TCL_LIBDIR}/libtkx.a
@@ -284,6 +289,8 @@ TCLXMINSTALL:
 	@echo ""
 	rm -rf ${TCL_INST_MASTER}
 	${INSTCOPY} -dirname tclmaster ${TCL_INST_MASTER}
+	strip ${TCL_INST_MASTER}/bin/tcl
+	${MCS}  ${TCL_INST_MASTER}/bin/tcl
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
@@ -300,6 +307,8 @@ TCLXMINSTALL-EXEC:
 	@echo "   Install TclX executables only"
 	@echo ""
 	${INSTCOPY} tclmaster/bin${ARCH} ${TCL_INST_MASTER}
+	strip ${TCL_INST_MASTER}/bin/tcl
+	${MCS}  ${TCL_INST_MASTER}/bin/tcl
 	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
@@ -311,6 +320,8 @@ TKXMINSTALL:
 	@echo ""
 	rm -rf ${TK_INST_MASTER}
 	${INSTCOPY} -dirname tkmaster ${TK_INST_MASTER}
+	strip ${TK_INST_MASTER}/bin/wishx
+	${MCS}  ${TK_INST_MASTER}/bin/wishx
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
@@ -325,6 +336,8 @@ TKXMINSTALL-EXEC:
 	@echo "   Install TkX executables only"
 	@echo ""
 	${INSTCOPY} tkmaster/bin${ARCH} ${TK_INST_MASTER}
+	strip ${TK_INST_MASTER}/bin/wishx
+	${MCS}  ${TK_INST_MASTER}/bin/wishx
 	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}

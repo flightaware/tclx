@@ -355,8 +355,10 @@
 ./tools/buildutil.tcl
 ./tools/cphelpdir.sh
 ./tools/cpmanpages.tcl
+./tools/genindex.tcl
 ./tools/getversion.c
 ./tools/instcopy.tcl
+./tools/libconvert.tcl
 ./tools/symlinkext.sh
 ./tools/tclmanpages
 ./tools/tkmanpages
