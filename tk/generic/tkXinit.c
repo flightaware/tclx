@@ -12,12 +12,13 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXstartup.c,v 1.2 1993/07/19 06:25:21 markd Exp markd $
+ * $Id: tkXstartup.c,v 1.3 1993/07/23 06:42:57 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tk.h"
+#include "tkX.h"
 
 /*
  * Code taken from wish.tcl that we still need for wishx.  Its so small that
@@ -41,12 +42,16 @@ static char *wishRom = "if [info exists geometry] {wm geometry . $geometry}";
  * Parameters:
  *   o interp - A pointer to the interpreter.
  *   o interactive (I) - TRUE if this is interactive, FALSE otherwise.
+ *   o errorSignalProc (I) - Function to call when an error signal occurs.
+ *     This can handle flushing of interactive input buffers if necessary.
+ *     Ignored if interactive is FALSE.
  *-----------------------------------------------------------------------------
  */
 void
-TkX_Startup (interp, interactive)
-    Tcl_Interp *interp;
-    int         interactive;
+TkX_Startup (interp, interactive, errorSignalProc)
+    Tcl_Interp          *interp;
+    int                  interactive;
+    TkX_ShellSignalProc *errorSignalProc;
 {
 
     tclAppName     = "Wishx";
@@ -55,6 +60,9 @@ TkX_Startup (interp, interactive)
     Tcl_ShellEnvInit (interp, 
                       TCLSH_ABORT_STARTUP_ERR |
                           (interactive ? TCLSH_INTERACTIVE : 0));
+
+    if (interactive)
+        tkXshellSignalProc = errorSignalProc;
 
     Tcl_SetLibraryDirEnvVar (interp,
                              "TK_LIBRARY",

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.9 1993/07/13 03:04:02 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.10 1993/07/18 19:08:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -124,11 +124,18 @@ typedef SIG_PROC_RET_TYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
 static char *noPosix = "Posix signals are not available on this system";
 
 /*
- * Globals that indicate that some signal was received and how many of each
- * signal type has not yet been processed.
+ * External globals that indicate that some signal was received.  Cleared
+ * when no signals are pending.  Also a flag indicating that an "error"
+ * signal has occured.  This is used to flush interactive input in commands and
+ * is only cleared there.
  */
-int             tclReceivedSignal = FALSE;    /* A signal was received */ 
-static unsigned signalsReceived [MAXSIG];     /* Counters of signals   */
+int tclReceivedSignal = FALSE;
+int tclGotErrorSignal = FALSE;
+
+/*
+ * Counters of signals that have occured but have not been processed.
+ */
+static unsigned signalsReceived [MAXSIG];
 
 /*
  * Table of commands to evaluate when a signal occurs.  If the command is
@@ -162,6 +169,10 @@ FormatTrapCode  _ANSI_ARGS_((Tcl_Interp  *interp,
 static int
 EvalTrapCode _ANSI_ARGS_((Tcl_Interp *interp,
                           int         signalNum));
+
+static int
+ProcessASignal _ANSI_ARGS_((Tcl_Interp *interp,
+                            int         signalNum));
 
 static int
 ParseSignalList _ANSI_ARGS_((Tcl_Interp *interp,
@@ -344,7 +355,7 @@ GetSignalState (signalNum, sigProcPtr)
  *   o signalNum (I) - Signal number to query.
  *   o sigFunc (O) - The signal function or SIG_DFL or SIG_IGN.
  * Results
- *   TRUE if ok,  FALSE if an error (check errno).
+ *   TCL_OK or TCL_ERROR (check errno).
  *-----------------------------------------------------------------------------
  */
 static int
@@ -360,14 +371,14 @@ SetSignalAction (signalNum, sigFunc)
     newState.sa_flags = 0;
 
     if (sigaction (signalNum, &newState, NULL) < 0)
-        return FALSE;
+        return TCL_ERROR;
 
-    return TRUE;
+    return TCL_OK;
 #else
     if (signal (signalNum, sigFunc) == SIG_ERR)
-        return FALSE;
+        return TCL_ERROR;
     else
-        return TRUE;
+        return TCL_OK;
 #endif
 }
 
@@ -393,6 +404,12 @@ TclSignalTrap (signalNum)
     signalsReceived [signalNum]++;
     tclReceivedSignal = TRUE;
 
+    /*
+     * Flag used by command input functions to flush input.
+     */
+    if (signalTrapCmds [signalNum] == NULL)
+        tclGotErrorSignal = TRUE;
+
 #ifndef TCL_POSIX_SIG
     /*
      * For old-style Unix signals, the signal must be explictly re-enabled.
@@ -401,7 +418,7 @@ TclSignalTrap (signalNum)
      * BSD, but it done this way for consistency.
      */
     if (signalNum != SIGCHLD) {
-        if (SetSignalAction (signalNum, TclSignalTrap) < 0)
+        if (SetSignalAction (signalNum, TclSignalTrap) == TCL_ERROR)
             panic ("TclSignalTrap bug");
     }
 #endif
@@ -538,29 +555,61 @@ EvalTrapCode (interp, signalNum)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_ResetSignals --
+ * ProcessASignal --
  *  
- *   Reset all of the signal flags to indicate that no signals have 
- * occured.  This is used by the shell at the beginning of each interactive
- * command
+ *   Do processing on the specified signal.
  *
+ * Parameters:
+ *   o interp (O) - Result will contain the result of the signal handling
+ *     code that was evaled.
+ *   o signalNum - The signal to process.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-void
-Tcl_ResetSignals ()
+static int
+ProcessASignal (interp, signalNum)
+    Tcl_Interp *interp;
+    int         signalNum;
 {
-    int  signalNum;
+    char *signalName;
+    int   result = TCL_OK;
 
-    tclReceivedSignal = 0;
-    for (signalNum = 0; signalNum < MAXSIG; signalNum++) 
+    /*
+     * Either return an error or evaluate code associated with this signal.
+     * If evaluating code, call it for each time the signal occured.
+     */
+    if (signalTrapCmds [signalNum] == NULL) {
         signalsReceived [signalNum] = 0;
 
+        /*
+         * Force name to always be SIGCHLD, even if system defines only SIGCLD.
+         */
+        if (signalNum == SIGCHLD)
+            signalName = "SIGCHLD";
+        else
+            signalName = Tcl_SignalId (signalNum);
+
+        Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);
+        Tcl_AppendResult (interp, signalName, " signal received", 
+                          (char *)NULL);
+        Tcl_SetVar (interp, "errorInfo", "", TCL_GLOBAL_ONLY);
+        result = TCL_ERROR;
+    } else {
+        while (signalsReceived [signalNum] > 0) {
+            (signalsReceived [signalNum])--;
+            result = EvalTrapCode (interp, signalNum);
+            if (result == TCL_ERROR)
+                break;
+        }
+    }
+    return result;
 }
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tcl_CheckForSignal --
+ * Tcl_ProcessSignals --
  *  
  *   Called by Tcl_Eval to check if a signal was received when Tcl_Eval is in
  * a safe state.  If the signal was received, this handles processing the
@@ -589,12 +638,12 @@ Tcl_ResetSignals ()
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_CheckForSignal (interp, cmdResultCode)
+Tcl_ProcessSignals (interp, cmdResultCode)
     Tcl_Interp *interp;
     int         cmdResultCode;
 {
-    char   *savedResult;
-    int     signalNum, result, sigCnt, retErrorForSignal = -1;
+    char   *varValue, *savedResult, *savedErrorInfo, *savedErrorCode;
+    int     signalNum, result;
 
     if (!tclReceivedSignal)
         return cmdResultCode;  /* No signal received */
@@ -602,59 +651,73 @@ Tcl_CheckForSignal (interp, cmdResultCode)
     /*
      * Clear so we don't call this routine recursively in the fault handler.
      */
-    tclReceivedSignal = 0;
+    tclReceivedSignal = FALSE;
 
+    /*
+     * Save the error state.
+     */
     savedResult = ckstrdup (interp->result);
     Tcl_ResetResult (interp);
+
+    savedErrorInfo = NULL;
+    varValue = Tcl_GetVar (interp, "errorInfo", TCL_GLOBAL_ONLY);
+    if (varValue != NULL) {
+        savedErrorInfo = ckstrdup (varValue);
+    }
+
+    savedErrorCode = NULL;
+    varValue = Tcl_GetVar (interp, "errorCode", TCL_GLOBAL_ONLY);
+    if (varValue != NULL) {
+        savedErrorCode = ckstrdup (varValue);
+    }
+
+    /*
+     * Process all signals.  Don't process any more if one returns an error.
+     */
+    result = TCL_OK;
 
     for (signalNum = 1; signalNum < MAXSIG; signalNum++) {
         if (signalsReceived [signalNum] == 0)
             continue;
-        
-        if (signalTrapCmds [signalNum] == NULL) {
-            retErrorForSignal = signalNum;
-            signalsReceived [signalNum] = 0;
-        } else {
-            sigCnt = signalsReceived [signalNum];
-            signalsReceived [signalNum] = 0;
-            
-            while (sigCnt-- > 0) {
-                result = EvalTrapCode (interp, signalNum);
-                if (result == TCL_ERROR)
-                    goto exitPoint;
-            }
-        }
+        result = ProcessASignal (interp, signalNum);
+        if (result == TCL_ERROR)
+            break;
     }
 
-    if (retErrorForSignal >= 0) {
-        char *signalName;
-
-        /*
-         * Force name to always be SIGCHLD, even if system defines only SIGCLD.
-         */
-        if (retErrorForSignal == SIGCHLD)
-            signalName = "SIGCHLD";
-        else
-            signalName = Tcl_SignalId (retErrorForSignal);
-
-        Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);
-        Tcl_AppendResult (interp, signalName, " signal received", 
-                          (char *)NULL);
-        Tcl_SetVar (interp, "errorInfo", "", TCL_GLOBAL_ONLY);
-        result = TCL_ERROR;
-    } else {
+    /*
+     * Restore result and error state if we didn't get an error in signal
+     * handling.
+     */
+    if (result != TCL_ERROR) {
         Tcl_SetResult (interp, savedResult, TCL_DYNAMIC);
         savedResult = NULL;
         result = cmdResultCode;
+
+        if (savedErrorInfo != NULL) {
+            Tcl_SetVar (interp, "errorInfo", savedErrorInfo, TCL_GLOBAL_ONLY);
+            ckfree (savedErrorInfo);
+        }
+
+        if (savedErrorCode != NULL) {
+            Tcl_SetVar (interp, "errorCode", savedErrorCode, TCL_GLOBAL_ONLY);
+            ckfree (savedErrorCode);
+        }
+
+    } else {
+        ckfree (savedResult);
+        if (savedErrorInfo != NULL)
+            ckfree (savedErrorInfo);
+        if (savedErrorCode != NULL)
+            ckfree (savedErrorCode);
     }
 
-exitPoint:
-    if (savedResult != NULL)
-        ckfree (savedResult);
     /*
-     * An error might have caused clearing of some signal flags to be missed.
+     * Reset the signal received flag in case more signals are pending.
      */
-    Tcl_ResetSignals ();
+    for (signalNum = 1; signalNum < MAXSIG; signalNum++) {
+        if (signalsReceived [signalNum] != 0)
+            tclReceivedSignal = TRUE;
+    }
     return result;
 }
 
@@ -884,7 +947,7 @@ SetSignalStates (interp, signalListSize, signalList, actionFunc, command)
             ckfree (signalTrapCmds [signalNum]);
             signalTrapCmds [signalNum] = NULL;
         }
-        if (!SetSignalAction (signalNum, actionFunc))
+        if (SetSignalAction (signalNum, actionFunc) == TCL_ERROR)
             goto unixSigError;
 
         if (command != NULL)

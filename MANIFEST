@@ -346,6 +346,7 @@
 ./tkmaster/help/tk/widgets/toplevel
 ./tksrc/Makefile
 ./tksrc/tkMain.c
+./tksrc/tkX.h
 ./tksrc/tkXsignal.c
 ./tksrc/tkXstartup.c
 ./tktclsrc/Makefile

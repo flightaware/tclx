@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 2.21 1993/07/19 15:30:04 markd Exp markd $
+# $Id: Config.mk,v 2.22 1993/07/20 08:35:45 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -38,7 +38,7 @@ TCL_CONFIG_FILE=scoodt2.0
 # Location of the UCB Tcl distribution relative to this directory.  TclX works
 # with Tcl 7.0
 #
-TCL_UCB_DIR=../tcl7.0b1
+TCL_UCB_DIR=../tcl7.0b2
 
 #------------------------------------------------------------------------------
 # If you are a Tk user and would like to build a version "wish", the Tk shell,
@@ -48,7 +48,7 @@ TCL_UCB_DIR=../tcl7.0b1
 # required to link Tk are defined in the system specific sections below.
 
 TK_BUILD=WISHX
-TK_UCB_DIR=../tk3.3b1
+TK_UCB_DIR=../tk3.3b2
 
 #------------------------------------------------------------------------------
 # Compiler debug/optimization/profiling flag to use.  Not that if debugging or

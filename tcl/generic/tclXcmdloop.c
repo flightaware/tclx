@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 2.4 1993/06/21 06:08:05 markd Exp markd $
+ * $Id: tclXcmdloop.c,v 2.5 1993/07/12 05:26:12 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -215,13 +215,19 @@ Tcl_CommandLoop (interp)
 
     while (TRUE) {
         /*
-         * If a signal came in, process it and drop any pending command.
+         * If a signal came in, process it. Drop any pending command
+         * if a "error" signal occured since the last time we were
+         * through here.
          */
         if (tclReceivedSignal) {
-            Tcl_CheckForSignal (interp, TCL_OK); 
+            Tcl_ProcessSignals (interp, TCL_OK); 
+        }
+        if (tclGotErrorSignal) {
+            tclGotErrorSignal = FALSE;
             Tcl_DStringFree (&cmdBuf);
             topLevel = TRUE;
         }
+
         /*
          * Output a prompt and input a command.
          */

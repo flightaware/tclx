@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 2.8 1993/07/18 15:19:48 markd Exp markd $
+ * $Id: tclExtend.h,v 2.9 1993/07/19 15:30:04 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -53,17 +53,25 @@ extern char *tclAppVersion;      /* Version number of the application       */
 /*
  * If non-zero, a signal was received.  Normally signals are handled in
  * Tcl_Eval, but if an application does not return to eval for some period
- * of time, then this should be checked and Tcl_CheckForSignal called if
+ * of time, then this should be checked and Tcl_ProcessSignals called if
  * this is set.
  */
 extern int tclReceivedSignal;
+
+/*
+ * Flag user to indicate that a signal that was setup to return an error
+ * occured (it may not have been processed yet).  This is used by interactive
+ * command loops to flush input.  It should be explictly cleared by any routine
+ * that cares about it.
+ */
+extern int tclGotErrorSignal;
 
 /*
  * Exported Extended Tcl functions.
  */
 
 EXTERN int
-Tcl_CheckForSignal _ANSI_ARGS_((Tcl_Interp *interp,
+Tcl_ProcessSignals _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         cmdResultCode));
 
 EXTERN Tcl_Interp * 
