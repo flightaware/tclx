@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id$
+.\" $Id: Memory.man,v 1.1 1992/09/20 23:08:54 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Memory" TCL "" "Tcl"
@@ -181,7 +181,7 @@ This allows you to detect the common sorts of one-off problems, where
 not enough space was allocated to contain the data written, for example.
 '
 .SH THE MEMORY COMMAND
-'@help: misc/memory
+'@help: debug/memory
 '@brief: display and debug memory problems
 '
 .TP
