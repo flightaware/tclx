@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.5 1992/10/05 20:20:22 markd Exp markd $
+# $Id: Config.mk,v 1.6 1992/10/06 03:43:12 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -77,7 +77,7 @@ AR=ar
 XCFLAGS=
 XLDFLAGS=
 YACC=yacc
-#YCC=bison -b y
+#YACC=bison -b y
 
 #------------------------------------------------------------------------------
 # If C++ is to be used these should be used.  Specifying CPLUSOBJS includes the
