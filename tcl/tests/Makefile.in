@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.10 1995/07/01 00:12:12 markd Exp markd $
+# $Id: Makefile.in,v 1.11 1995/07/05 01:17:36 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -42,10 +42,12 @@ LIBS        = @LIBS@ @MATH_LIBS@
 LIBTCL       = ${TCL_UCB_LIB}/libtcl.a
 LIBTCLX      = ../src/libtclx.a
 
-LDLIBS = -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS}
+LDLIBS = -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS} ${XLDLIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${bldbasedir}/src -I${TCL_UCB_SRC}
+
+LD_FLAGS = ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 .c.o:
 	${CC} ${CC_FLAGS} -c $<
@@ -62,8 +64,8 @@ OBJS= tclXtest.o
 all: tclXtest runtest
 
 tclXtest: tclXtest.o ${LIBTCLX} ${LIBTCL}
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXtest.o ${LDLIBS} ${XLDLIBS} \
-	      -o tclXtest || (rm -f tclXtest; exit 1)
+	${CC} ${LD_FLAGS} tclXtest.o ${LDLIBS} -o tclXtest || \
+	    (rm -f tclXtest; exit 1)
 
 tclXtest.o: tclXtest.c
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.14 1995/07/01 00:12:12 markd Exp markd $
+# $Id: Makefile.in,v 4.15 1995/07/05 04:00:59 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -50,16 +50,20 @@ INSTCOPY     = ../runtcl ../tools/instcopy
 SYMLINKEXT   = ../tools/symlinkext
 
 # The ordering of the libraries is important.  Some X libs on SysV include
-# "random" in a BSD module.  This would conflict with the one in the Tcl
+# "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
 LDLIBS = -L. -ltkx -L${TK_UCB_LIB} -ltk ${XLIBSW} \
-	 -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS}
+	 -L../src -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS} ${XLDLIBS}
 
+SHLDLIBS = -L${TCL_LIBDIR} -ltkx -ltk ${XLIBSW} -ltclx -ltcl ${LIBS} \
+	   ${XLDLIBS}
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
            -I${srcbasedir}/src -I${bldbasedir}/src -I${srcbasedir}/tksrc \
            -I${TK_UCB_SRC} -I${TCL_UCB_SRC} ${XINCLUDES}
+
+LD_FLAGS = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 .c.o:
 	${CC} ${CC_FLAGS} -c $<
@@ -75,8 +79,8 @@ OBJS=tkXinit.o tkXshell.o
 all: made.tmp wishx
 
 wishx: tkXAppInit.o libtkx.a ${LIBTK} ${LIBTCLX} ${LIBTCL} made.tmp
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tkXAppInit.o ${LDLIBS} ${XLDLIBS} \
-	    -o wishx || (rm -f wishx; exit 1)
+	${CC} ${LD_FLAGS} tkXAppInit.o ${LDLIBS} -o wishx || \
+	    (rm -f wishx; exit 1)
 
 made.tmp libtkx.a: ${OBJS}
 	${AR} cr libtkx.a ${OBJS} ${UCBOBJS}
@@ -86,6 +90,14 @@ made.tmp libtkx.a: ${OBJS}
 tkXinit.o: ${srcdir}/tkXinit.c
 	${CC} -c -I${TK_UCB_SRC} ${CC_FLAGS} ${DEFS} \
 	    -DTKX_LIBRARY=\"${INST_MASTER}\" ${srcdir}/tkXinit.c
+
+#------------------------------------------------------------------------------
+# Relink using shared libraries.  The libraries must be built and installed
+# by hand.
+
+shlink:
+	${CC} ${LD_FLAGS} tkXAppInit.o ${SHLDLIBS} -o wishx || \
+	    (rm -f wishx; exit 1)
 
 #------------------------------------------------------------------------------
 

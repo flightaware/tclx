@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.18 1995/07/01 00:12:12 markd Exp markd $
+# $Id: Makefile.in,v 4.19 1995/07/05 04:00:59 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -49,13 +49,20 @@ INST_MASTER   = ${TCL_MASTERDIR}/`../tools/tclxversion`
 INSTCOPY      = ../runtcl ../tools/instcopy
 SYMLINKEXT    = ../tools/symlinkext
 
-LDLIBS = -L. -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS}
+LDLIBS = -L. -ltclx -L${TCL_UCB_LIB} -ltcl ${LIBS} ${XLDLIBS}
+
+SHLDLIBS = -L${TCL_LIBDIR} -ltclx -ltcl ${LIBS} ${XLDLIBS}
+
 
 CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
            -I${bldbasedir}/src -I${TCL_UCB_SRC}
 
+LD_FLAGS = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
+
 CXX_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CXXFLAGS} -I${srcbasedir}/src \
            -I${bldbasedir}/src -I${TCL_UCB_SRC}
+
+LDXX_FLAGS = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CXXFLAGS}
 
 .c.o:
 	${CC} ${CC_FLAGS} -c $<
@@ -80,8 +87,8 @@ OBJS= \
 all: made.tmp tcl TCLXX_${TCLXX}
 
 tcl: tclXAppInit.o libtclx.a ${LIBTCL} made.tmp 
-	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXAppInit.o ${LDLIBS} ${XLDLIBS} \
-	      -o tcl || (rm -f tcl; exit 1)
+	${CC} ${LD_FLAGS} tclXAppInit.o ${LDLIBS} -o tcl || \
+	    (rm -f tcl; exit 1)
 
 made.tmp libtclx.a: ${OBJS} TCLXX_O_${TCLXX}
 	${AR} cr libtclx.a ${OBJS}
@@ -127,8 +134,7 @@ TCLXX_YES:  tcl++
 TCLXX_NO:
 
 tcl++: tclXAppInit++.o tcl++.o made.tmp
-	${CXX} ${CXX_FLAGS} ${XLDFLAGS} tclXAppInit++.o \
-           ${LDLIBS} ${XLDLIBS} -o tcl++
+	${CXX} ${LDXX_FLAGS} tclXAppInit++.o ${LDLIBS} -o tcl++
 
 tclXAppInit++.o: ${srcdir}/tcl++.h tclXAppInit++.C
 	${CXX} -c ${CXX_FLAGS} tclXAppInit++.C
@@ -136,6 +142,14 @@ tclXAppInit++.o: ${srcdir}/tcl++.h tclXAppInit++.C
 tclXAppInit++.C: ${srcdir}/tclXAppInit.c
 	rm -f tclXAppInit++.C
 	cp ${srcdir}/tclXAppInit.c tclXAppInit++.C
+
+#------------------------------------------------------------------------------
+# Relink using shared libraries.  The libraries must be built and installed
+# by hand.
+
+shlink:
+	${CC} ${LD_FLAGS} tclXAppInit.o ${SHLDLIBS} -o tcl || \
+	    (rm -f tcl; exit 1)
 
 #------------------------------------------------------------------------------
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.16 1995/07/05 01:17:36 markd Exp markd $
+# $Id: Makefile.in,v 4.17 1995/07/15 18:54:41 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -44,7 +44,7 @@ ARCH              = @TCL_ARCH@
 # Flags that were passed on the command line that are to be passed on to
 # second level makes.  C++ flags are only passed to the src dir build.
 
-PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}"
+PASS_FLAGS = "CC=${CC}" "CFLAGS=${CFLAGS}" "LDFLAGS=${LDFLAGS}"
 PASSXX_FLAGS = ${PASS_FLAGS} "CXX=${CXX}" "CXXFLAGS=${CXXFLAGS}"
 
 #------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ TKMADE.TMP  = tksrc/made.tmp
 
 #------------------------------------------------------------------------------
 
-all: TCLX runtcl ${TK_BUILD}
+all: TCLX runtcl COMP_${TK_BUILD}
 
 #------------------------------------------------------------------------------
 # Compile the Extended Tcl library and link the Tcl shell.
@@ -75,10 +75,12 @@ TCLX: runtcl
 # Generate a wish shell {wishx} with Extended Tcl commands.
 #
 
-WISHX: runwishx
+COMP_WISHX: runwishx
 	cd tksrc;    ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tktclsrc; ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
 	cd tktests;  ${MAKE} -${MAKEFLAGS} ${PASS_FLAGS} all
+
+COMP_:
 
 #------------------------------------------------------------------------------
 # Generate scripts to point the TCLX_LIBRARY/TKX_LIBRARY environment variable
@@ -121,6 +123,20 @@ tcl++:
 	cd src;${MAKE} -${MAKEFLAGS} tcl++
 
 #------------------------------------------------------------------------------
+# Relink using shared libraries.  The libraries must be built and installed
+# by hand.
+
+shlink: TCL_SHLINK SHLINK_${TK_BUILD}
+
+TCL_SHLINK:
+	cd src;  ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} shlink
+
+SHLINK_WISHX:
+	cd tksrc;  ${MAKE} -${MAKEFLAGS} ${PASSXX_FLAGS} shlink
+
+SHLINK_:
+
+#------------------------------------------------------------------------------
 # Run the tests.
 
 test: all
@@ -149,9 +165,9 @@ buildtkhelp:
 
 #------------------------------------------------------------------------------
 
-install: all TCLXINSTALL ${TK_BUILD}MAYBE
+install: all TCLXINSTALL INST_${TK_BUILD}
 
-install-exec: all TCLXINSTALL-EXEC ${TK_BUILD}MAYBE-EXEC
+install-exec: all TCLXINSTALL_EXEC INST_EXEC_${TK_BUILD}
 
 TCLXINSTALL:
 	@echo ""
@@ -161,7 +177,7 @@ TCLXINSTALL:
 	cd tclsrc;    ${MAKE} -${MAKEFLAGS} install
 	cd man;       ${MAKE} -${MAKEFLAGS} install
 
-TCLXINSTALL-EXEC:
+TCLXINSTALL_EXEC:
 	@echo ""
 	@echo "   Install Extended Tcl executables using standard model"
 	@echo ""
@@ -171,17 +187,17 @@ TKXINSTALL:
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} install
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install
 
-TKXINSTALL-EXEC:
+TKXINSTALL_EXEC:
 	cd tksrc;     ${MAKE} -${MAKEFLAGS} install-exec
 	cd tktclsrc;  ${MAKE} -${MAKEFLAGS} install-exec
 
 # Targets to decide if we install wishx or not.
 
-MAYBE:
-MAYBE-EXEC:
+INST_WISHX: TKXINSTALL
+INST_EXEC_WISHX: TKXINSTALL_EXEC
 
-WISHXMAYBE: TKXINSTALL
-WISHXMAYBE-EXEC: TKXINSTALL-EXEC
+INST_:
+INST_EXEC_:
 
 #------------------------------------------------------------------------------
 # Install Extended Tcl using the master directory model.
