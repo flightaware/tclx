@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.4 1995/04/24 06:38:31 markd Exp markd $
+# $Id: Makefile.in,v 4.5 1995/04/30 06:13:55 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -67,7 +67,7 @@ made.tmp:
 
 ${TKTCL}: ${TK_UCB_SRC}/library/tk.tcl made.tmp
 	rm -f ${TKTCL}
-	cp ${TK_UCB_SRC}/library/tk.tcl ${TKTCL}
+	sed -f ${srcdir}/tk.tcl.sed ${TK_UCB_SRC}/library/tk.tcl >${TKTCL}
 
 ${TKTLIB}: ${TK_UCB_SRC}/library/tclIndex tkdemo.tcl made.tmp
 	${CONVERTLIB} ${TK_UCB_SRC}/library/tclIndex ${TKTLIB}
