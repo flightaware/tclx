@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 2.3 1993/07/20 08:35:45 markd Exp markd $
+# $Id: filescan.test,v 2.4 1993/08/03 06:13:44 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -55,75 +55,72 @@ proc GenScanRec {Key LineNum} {
 
 # Proc to validate a matched record.
 
-proc ValMatch {scanInfo errId} {
+proc ValMatch {scanInfo id} {
     global testFH matchInfo
 
-    Test filescan-${errId}.1 {filescan tests} {
+    Test filescan-${id}.1 {filescan tests} {
          set matchInfo(line)
     } 0 [GenScanRec [lindex $scanInfo 0] [lindex $scanInfo 2]]
 
-    Test filescan-${errId}.2 {filescan tests} {
+    Test filescan-${id}.2 {filescan tests} {
          set matchInfo(offset)
     } 0 [lindex $scanInfo 1]
 
-    Test filescan-${errId}.3 {filescan tests} {
+    Test filescan-${id}.3 {filescan tests} {
          set matchInfo(linenum)
     } 0 [lindex $scanInfo 2]
 
-    Test filescan-${errId}.4 {filescan tests} {
+    Test filescan-${id}.4 {filescan tests} {
          set matchInfo(handle)
     } 0 $testFH
 
     set matchType [lindex $scanInfo 3] 
-    global matchCnt.$matchType
-    incr matchCnt.$matchType
+    global matchCnt
+    incr matchCnt($matchType)
 }
 
-global matchInfo
-global matchCnt.0    matchCnt.1    matchCnt.2    matchCnt.3    DefaultCnt 
-global chkMatchCnt.0 chkMatchCnt.1 chkMatchCnt.2 chkMatchCnt.3 chkDefaultCnt
-global testFH
+global matchInfo matchCnt chkMatchCnt testFH
 
-set matchCnt.0      0
-set matchCnt.1      0
-set matchCnt.2      0
-set matchCnt.3      0
-set defaultCnt      0
-set chkMatchCnt.0   0
-set chkMatchCnt.1   0
-set chkMatchCnt.2   0
-set chkMatchCnt.3   0
-set chkDefaultCnt   0
+foreach i {0 1 2 3 df} {
+    set chkMatchCnt($i)  0
+}
 set scanList       {}
 set maxRec        200
-
-catch {unlink TEST.TMP}
-set testFH [open TEST.TMP w]
 
 # Build a test file and a list of records to scan for.  Each element in the 
 # list will have the following info:
 #   {key fileOffset fileLineNumber matchType}
+# Also build a file to diff against for the -copyfile option.
+
+unlink -nocomplain {TEST.TMP TEST2.TMP TESTCHK.TMP}
+set testFH [open TEST.TMP w]
+set testChkFH [open TESTCHK.TMP w]
 
 set key FatHeadAAAA
 for {set cnt 0} {$cnt < $maxRec} {incr cnt} {
+    set rec [GenScanRec $key [expr $cnt+1]]
     if {($cnt % 10) == 0} {
         set matchType [random 4]
-        incr chkMatchCnt.$matchType
+        incr chkMatchCnt($matchType)
         set scanInfo [list "$key [tell $testFH] [expr $cnt+1] $matchType"]
         if {[random 2]} {
             set scanList [concat $scanList $scanInfo]
         } else {
-            set scanList [concat $scanInfo $scanList]}
+            set scanList [concat $scanInfo $scanList]
+        }
     } else {
-        incr chkDefaultCnt}
+        incr chkMatchCnt(df)
+        puts $testChkFH $rec
+    }
     if {$cnt == [expr $maxRec/2]} {
         set midKey $key
-        }
-    puts $testFH [GenScanRec $key [expr $cnt+1]]
+    }
+    puts $testFH $rec
     set key [IncrName $key 1]  ;# Upper case only
 }
 
 close $testFH
+close $testChkFH
 
 # Build up the scan context.
 
@@ -142,50 +139,75 @@ foreach scanInfo $scanList {
 }
 
 scanmatch $testCH {
-    global defaultCnt testFH matchInfo
+    global matchCnt testFH matchInfo
 
-    incr defaultCnt
+    incr matchCnt(df)
 
     Test filescan-1.2 {filescan tests} {
         set matchInfo(handle)
     } 0 $testFH
 }
 
+proc ValScan id {
+    global matchInfo matchCnt chkMatchCnt testFH
+
+    Test filescan-${id}.1 {filescan tests} {
+        set matchCnt(0)
+    } 0 [set chkMatchCnt(0)]
+
+    Test filescan-${id}.2 {filescan tests} {
+        set matchCnt(1)
+    } 0 [set chkMatchCnt(1)]
+
+    Test filescan-${id}.3 {filescan tests} {
+        set matchCnt(2)
+    } 0 [set chkMatchCnt(2)]
+
+    Test filescan-${id}.4 {filescan tests} {
+        set matchCnt(3)
+    } 0 [set chkMatchCnt(3)]
+
+    Test filescan-${id}.5 {filescan tests} {
+        set matchCnt(df)
+    } 0 [set chkMatchCnt(df)]
+}
+
+foreach i {0 1 2 3 df} {
+    set matchCnt($i)  0
+}
 set testFH [open TEST.TMP r]
 scanfile $testCH $testFH
+close $testFH
+ValScan 1.3
 
-Test filescan-1.3 {filescan tests} {
-    set {matchCnt.0}
-} 0 ${chkMatchCnt.0}
-
-Test filescan-1.4 {filescan tests} {
-    set {matchCnt.1}
-} 0 ${chkMatchCnt.1}
+foreach i {0 1 2 3 df} {
+    set matchCnt($i)  0
+}
+set testFH [open TEST.TMP r]
+set test2FH [open TEST2.TMP w]
+scanfile -copyfile $test2FH $testCH $testFH
+close $testFH
+close $test2FH
+ValScan 1.4
 
 Test filescan-1.5 {filescan tests} {
-    set {matchCnt.2}
-} 0 ${chkMatchCnt.2}
-
-Test filescan-1.6 {filescan tests} {
-   set {matchCnt.3}
-} 0 ${chkMatchCnt.3}
-
-Test filescan-1.7 {filescan tests} {
-    set defaultCnt
-} 0 $chkDefaultCnt
+    system "diff TESTCHK.TMP TEST2.TMP"
+} 0 0
 
 scancontext delete $testCH
 
 # Test return and continue from within match commands
 
+set testFH [open TEST.TMP r]
+
 set testCH [scancontext create]
 seek $testFH 0
 global matchCnt
-set matchCnt 0
+set matchCnt(0) 0
 
 scanmatch $testCH $midKey {
     global matchCnt
-    incr matchCnt
+    incr matchCnt(0)
     continue;
 }
 
@@ -219,7 +241,7 @@ Test filescan-3.3 {filescan tests} {
 
 Test filescan-3.4 {filescan tests} {
     scanfile
-} 1 {wrong # args: scanfile contexthandle filehandle}
+} 1 {wrong # args: scanfile ?-copyfile filehandle? contexthandle filehandle}
 
 Test filescan-3.5 {filescan tests} {
     set testCH [scancontext create]
@@ -283,13 +305,11 @@ scanmatch -nocase $testCH {\Aa(x*)B(C*)Dd} {
 scanfile $testCH $testFH
 
 close $testFH
-unlink TEST.TMP
+unlink {TEST.TMP TEST2.TMP TESTCHK.TMP}
 
 rename GenScanRec {}
 rename ValMatch {}
+rename ValScan {}
 rename ChkSubMatch {}
 
-unset matchCnt matchInfo
-unset matchCnt.0    matchCnt.1    matchCnt.2    matchCnt.3    defaultCnt 
-unset chkMatchCnt.0 chkMatchCnt.1 chkMatchCnt.2 chkMatchCnt.3 chkDefaultCnt
-unset testFH
+unset matchCnt chkMatchCnt matchInfo testFH test2FH testChkFH

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.32 1993/09/16 05:37:54 markd Exp markd $
+.\" $Id: TclX.man,v 2.33 1993/09/16 14:01:43 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1495,12 +1495,16 @@ specified context.
 '@help: tcl/filescan/scanfile
 '@brief: Scan a file, executing match code when their patterns are matched.
 .TP
-.B scanfile \fIcontexthandle\fR \fIfileId\fR
+.B scanfile ?\fI-copyfile copyFileId\fR? \fIcontexthandle\fR \fIfileId\fR
 .br
-Scan the file specified by \fIfileId\fR, starting at the
+Scan the file specified by \fIfileId\fR, starting from the
 current file position.  Check all patterns in the scan context specified by
 \fIcontexthandle\fR against
 it, executing the match commands corresponding to patterns matched.
+.sp
+If the optional \fI-copyfile\fR argument is specified, the next argument
+is a file ID to which all lines not matched by any pattern (excluding
+the default pattern) are to be written.
 '@:
 '@:This command is provided by Extended Tcl.
 '@endhelp
@@ -1549,6 +1553,10 @@ file.  The first line is line number one.
 .TP
 .B matchInfo(handle)
 The file id (handle) of the file currently being scanned.
+.TP
+.B matchInfo(copyHandle)
+The file id (handle) of the file specified by the \fB-copyfile\fR option.
+The element does not exist if \fB-copyfile\fR was not specified.
 .TP
 .B matchInfo(submatch0)
 Will contain the characters matching the first parenthesized subexpression.

@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.7 1993/07/20 08:20:26 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.8 1993/08/03 06:13:44 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -76,7 +76,8 @@ static int
 SetMatchVar _ANSI_ARGS_((Tcl_Interp *interp,
                          char       *fileLine,
                          long        scanLineNum,
-                         FILE       *filePtr));
+                         FILE       *filePtr,
+                         FILE       *copyFilePtr));
 
 static int
 SetSubMatchVar _ANSI_ARGS_((Tcl_Interp       *interp,
@@ -328,37 +329,46 @@ argError:
  *-----------------------------------------------------------------------------
  */
 static int
-SetMatchVar (interp, fileLine, scanLineNum, filePtr)
+SetMatchVar (interp, fileLine, scanLineNum, filePtr, copyFilePtr)
     Tcl_Interp *interp;
     char       *fileLine;
     long        scanLineNum;
     FILE       *filePtr;
+    FILE       *copyFilePtr;
 {
-    int  matchOffset;
-    char buf [32];
+    static char *MATCHINFO = "matchInfo";
+    static char *FILEFMT   = "file%d";
+    int          matchOffset;
+    char         buf [32];
 
-    Tcl_UnsetVar (interp, "matchInfo", 0);
+    Tcl_UnsetVar (interp, MATCHINFO, 0);
 
     matchOffset = ftell (filePtr) - (strlen (fileLine) + 1);
 
-    if (Tcl_SetVar2 (interp, "matchInfo", "line", fileLine, 
+    if (Tcl_SetVar2 (interp, MATCHINFO, "line", fileLine, 
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
     sprintf (buf, "%ld", matchOffset);
-    if (Tcl_SetVar2 (interp, "matchInfo", "offset", buf,
+    if (Tcl_SetVar2 (interp, MATCHINFO, "offset", buf,
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
     sprintf (buf, "%ld", scanLineNum);
-    if (Tcl_SetVar2 (interp, "matchInfo", "linenum", buf,
+    if (Tcl_SetVar2 (interp, MATCHINFO, "linenum", buf,
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
 
-    sprintf (buf, "file%d", fileno (filePtr));
-    if (Tcl_SetVar2 (interp, "matchInfo", "handle", buf, 
+    sprintf (buf, FILEFMT, fileno (filePtr));
+    if (Tcl_SetVar2 (interp, MATCHINFO, "handle", buf, 
                      TCL_LEAVE_ERR_MSG) == NULL)
         return TCL_ERROR;
+    if (copyFilePtr != NULL) {
+        sprintf (buf, FILEFMT, fileno (copyFilePtr));
+        if (Tcl_SetVar2 (interp, MATCHINFO, "copyHandle", buf, 
+                         TCL_LEAVE_ERR_MSG) == NULL)
+            return TCL_ERROR;
+    }
     return TCL_OK;
 }
 
@@ -423,22 +433,37 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
     Tcl_DString       dynBuf, lowerDynBuf;
     FILE             *filePtr;
     matchDef_t       *matchPtr;
+    int               contextHandleIndex, fileHandleIndex;
     int               result, matchedAtLeastOne, status, storedThisLine;
     long              scanLineNum = 0;
     char             *fileHandle;
     Tcl_SubMatchInfo  subMatchInfo;
+    FILE             *copytoFilePtr;
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " contexthandle filehandle", (char *) NULL);
-        return TCL_ERROR;
+    if ((argc != 3) && (argc != 5)) goto argError;
+
+    if (argc == 3) {
+	contextHandleIndex = 1;
+	fileHandleIndex = 2;
+	copytoFilePtr = NULL;
+    } else {
+	if (!STREQU (argv[1], "-copyfile")) goto argError;
+	contextHandleIndex = 3;
+	fileHandleIndex = 4;
+
+        if (Tcl_GetOpenFile (interp, argv [2],
+			     TRUE,  /* Write access  */
+			     TRUE,   /* Check access */
+			     &copytoFilePtr) != TCL_OK) {
+	    return TCL_ERROR;
+	}
     }
 
     if ((contextPtr = Tcl_HandleXlate (interp, scanGlobPtr->tblHdrPtr, 
-                                       argv [1])) == NULL)
+                                       argv [contextHandleIndex])) == NULL)
         return TCL_ERROR;
 
-    if (Tcl_GetOpenFile (interp, argv [2],
+    if (Tcl_GetOpenFile (interp, argv [fileHandleIndex],
                          FALSE,  /* Read access  */
                          TRUE,   /* Check access */
                          &filePtr) != TCL_OK)
@@ -491,7 +516,8 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
                 result = SetMatchVar (interp,
                                       dynBuf.string,
                                       scanLineNum,
-                                      filePtr);
+                                      filePtr,
+                                      copytoFilePtr);
                 if (result != TCL_OK)
                     goto scanExit;
                 storedThisLine = TRUE;
@@ -540,7 +566,17 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
             if (result == TCL_BREAK)
                 goto scanExit;
         }
-        
+
+	if ((copytoFilePtr != NULL) && (!matchedAtLeastOne)) {
+	    if (fputs (dynBuf.string, copytoFilePtr) == EOF) {
+		interp->result = Tcl_PosixError (interp);
+		return TCL_ERROR;
+	    }
+	    if (fputs ("\n", copytoFilePtr) == EOF) {
+		interp->result = Tcl_PosixError (interp);
+		return TCL_ERROR;
+	    }
+	}
     }
 scanExit:
     Tcl_DStringFree (&dynBuf);
@@ -548,6 +584,12 @@ scanExit:
     if (result == TCL_ERROR)
         return TCL_ERROR;
     return TCL_OK;
+
+argError:
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+		      " ?-copyfile filehandle? contexthandle filehandle", 
+		      (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*
