@@ -13,7 +13,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.21 2004/02/13 00:50:49 hobbs Exp $
+.\" $Id: TclX.n,v 8.22 2004/05/24 22:55:33 hobbs Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1566,14 +1566,10 @@ To obtain the host name of the system the local system, use the
 '\"@help: tcl/sockets/host_info
 '\"@brief: Obtain information about an Internet host.
 .TP
-\fBhost_info addresses\fR \fIhost\fR
-.TP
-\fBhost_info official_name\fR \fIhost\fR
-.TP
-\fBhost_info aliases\fR \fIhost\fR
+\fBhost_info \fIoption\fR \fIhost\fR
 .br
-Obtain information about a Internet host. The argument \fIhost\fR can be either
-a host name or an IP address.
+Obtain information about an Internet host. The argument \fIhost\fR can be
+either a host name or an IP address.
 .IP
 The following subcommands are recognized:
 .RS
