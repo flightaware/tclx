@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixSock.c,v 8.1 2001/10/24 23:31:50 hobbs Exp $
+ * $Id: tclXunixSock.c,v 8.2 2002/09/26 00:23:30 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -92,8 +92,7 @@ BindFileHandles (interp, options, socketFD)
     unsigned    options;
     int         socketFD;
 {
-    int socketFD2 = -1;
-    Tcl_Channel channel = NULL, channel2 = NULL;
+    Tcl_Channel channel;
 
     channel = Tcl_MakeTcpClientChannel ((ClientData) socketFD);
     Tcl_RegisterChannel (interp, channel);
@@ -109,7 +108,6 @@ BindFileHandles (interp, options, socketFD)
 
   errorExit:
     CloseForError (interp, channel, socketFD);
-    CloseForError (interp, channel2, socketFD2);
     return TCL_ERROR;
 }
 
