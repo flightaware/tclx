@@ -57,6 +57,7 @@ page man/TclX.man.
 
     o Extended string and character manipulation commands.
 
+    o Time and date manipulation and conversion commands.
 
 NEW FEATURES IN THIS RELEASE
 ============================
