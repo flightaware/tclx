@@ -401,6 +401,6 @@
 ./unix/tools/libconvert.tcl
 ./unix/tools/tclmanpages
 ./unix/tools/tkmanpages
-./win/INSTALL
+./win/INSTALL.txt
 ./win/common.vc
 ./win/makefile.vc

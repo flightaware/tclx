@@ -17,7 +17,8 @@ in this distribution, obtain it from ftp.smli.com).
    Support is also included for building a Tk 4.2 wish shell (wishx)
 with the Extended Tcl command set and signal handling.
 
-   Extended Tcl runs on most Unix like systems and Windows 95/NT.
+   Extended Tcl runs on most Unix like systems and Windows 95/NT.  However
+the Windows 95/NT work is not complete and should be considered alpha quality.
 
    While this TclX distribution is tested with Tcl 7.6 and Tk 4.2, it will
 probably work with new versions of Tcl & Tk with little or no changes.
@@ -33,7 +34,7 @@ BUILDING TCLX
 =============
 
    For instructions on how to build TclX on Unix and Unix-like systems,
-see unix/INSTALL.  For Windows 95/NT see win/INSTALL.
+see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
 
 CHANGES IN TCLX 7.6.0
 =====================

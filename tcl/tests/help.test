@@ -13,11 +13,16 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 7.3 1996/10/04 05:02:37 markd Exp $
+# $Id: help.test,v 7.4 1996/10/04 15:30:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 if [cequal [info procs Test] {}] {source testlib.tcl}
+
+if [cequal $tcl_platform(platform) windows] {
+    echo "    * The help tests have not been ported to Win32" 
+    return
+}
 
 TestRemove HELP.PRG
 

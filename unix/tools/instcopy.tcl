@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: instcopy.tcl,v 7.1 1996/10/04 15:30:35 markd Exp $
+# $Id: instcopy.tcl,v 7.2 1996/11/07 02:28:38 markd Exp $
 #------------------------------------------------------------------------------
 #
 # It is run in the following manner:
@@ -25,6 +25,7 @@
 #
 #  o -filename - If specified, then the last file is the name of a file rather
 #    than a directory. 
+#  o -bin - Force file to be copied without translation. (not implemented).
 #  o files - List of files to copy. If one of directories are specified, they
 #    are copied.
 #  o targetdir - Target directory to copy the files to.  If the directory does
@@ -82,14 +83,21 @@ if {$argc < 2} {
     Usage "Not enough arguments"
 }
 
-switch -exact -- [lindex $argv 0] {
-    -filename {
-        set mode FILENAME
-        lvarpop argv
-        incr argc -1
-    }
-    default {
-        set mode {}
+set mode {}
+set binary 0
+while {[string match -* [lindex $argv 0]]} {
+    set flag [lvarpop argv]
+    incr argc -1
+    switch -exact -- $flag {
+        -filename {
+            set mode FILENAME
+        }
+        -bin {
+            set binary 1
+        }
+        default {
+            puts stderr "unknown flag
+        }
     }
 }
 
