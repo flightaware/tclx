@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.4 1993/07/18 15:21:42 markd Exp markd $
+# $Id: Makefile,v 2.5 1993/07/18 21:14:28 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -35,7 +35,7 @@ LDLIBS= ${LIBTKX.A} ${LIBTCLX.A} ${TK_LIBS} ${LIBS}
 
 #------------------------------------------------------------------------------
 
-OBJS= tkMain.o tkXstartup.o tkXsignal.o
+OBJS=tkXstartup.o tkXsignal.o
 
 #------------------------------------------------------------------------------
 
@@ -50,6 +50,7 @@ ${WISHX}: tkMain.o ${LIBTKX.A} ${LIBTCLX.A} made.tmp
 made.tmp: ${OBJS}
 	${RANLIB_CMD} ${LIBTKX.A}
 	${AR} cr ${LIBTKX.A} ${OBJS}
+	touch made.tmp
 
 tkXstartup.o: tkXstartup.c
 	${CC} -c ${CFLAGS} -DTK_MASTERDIR=\"${TK_MASTERDIR}\" tkXstartup.c
