@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 1.1 1992/09/20 23:21:50 markd Exp markd $
+ * $Id: tclXsignal.c,v 1.2 1992/10/04 20:15:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -308,7 +308,7 @@ GetSignalState (signalNum)
         return SIG_DFL;
 
     actionFunc = signal (signalNum, SIG_DFL);
-    if ((actionFunc == SIG_ERR) || (actionFunc == NULL))
+    if (actionFunc == SIG_ERR)
         return SIG_ERR;
     if (actionFunc != SIG_DFL)
         signal (signalNum, actionFunc);  /* reset */
@@ -659,7 +659,7 @@ exitPoint:
  * SignalBlocked --
  *     
  *    Determine if a signal is blocked.  On non-Posix systems, always returns
- * "1".
+ * "0".
  *
  * Parameters::
  *   o interp (O) - Error messages are returned in result.
@@ -684,7 +684,7 @@ SignalBlocked (interp, signalNum)
     }
     return sigismember (&sigBlockSet, signalNum) ? "1" : "0";
 #else
-    return "1";
+    return "0";
 #endif
 }
 
@@ -934,7 +934,7 @@ Tcl_SignalCmd (clientData, interp, argc, argv)
         } else {
             Tcl_AppendResult (interp, "invalid signal action specified: ", 
                               argv [1], ": expected one of \"default\", ",
-                              "\"ignore\", \"error\", \"trap\", or \"get\", "
+                              "\"ignore\", \"error\", \"trap\", or \"get\", ",
                               "\"block\", \"unblock\"", (char *) NULL);
             return TCL_ERROR;
         }
