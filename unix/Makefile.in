@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.1 1993/11/25 03:21:14 markd Exp markd $
+# $Id: Makefile.in,v 3.2 1993/12/16 15:35:43 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -289,7 +289,7 @@ TCLXMINSTALL:
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
 	    ${srcbasedir}/man ${TCL_INST_MASTER}/man
-	if test ! -d ${TCL_BINDIR} ; then mkdir ${TCL_BINDIR}; fi
+	test -d ${TCL_BINDIR} || mkdir ${TCL_BINDIR}
 	rm -f ${TCL_BINDIR}/tcl
 	ln -s ${TCL_INST_MASTER}/bin${ARCH}/tcl ${TCL_BINDIR}/tcl
 
@@ -300,7 +300,7 @@ TCLXMINSTALL-EXEC:
 	${INSTCOPY} tclmaster/bin${ARCH} ${TCL_INST_MASTER}
 	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
-	if test ! -d ${TCL_BINDIR} ; then mkdir ${TCL_BINDIR}; fi
+	test -d ${TCL_BINDIR} || ${TCL_BINDIR}
 	rm -f ${TCL_BINDIR}/tcl
 	ln -s ${TCL_INST_MASTER}/bin${ARCH}/tcl ${TCL_BINDIR}/tcl
 
@@ -316,7 +316,7 @@ TKXMINSTALL:
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
 	    ${TK_MAN_UNIXCMD_SECTION} \
 	    ${TK_UCB_SRC}/doc ${TK_INST_MASTER}/man
-	if test ! -d ${TCL_BINDIR} ; then mkdir ${TCL_BINDIR}; fi
+	test -d ${TCL_BINDIR} || mkdir ${TCL_BINDIR}
 	rm -f ${TCL_BINDIR}/wishx
 	ln -s ${TK_INST_MASTER}/bin${ARCH}/wishx ${TCL_BINDIR}/wishx
 	rm -f ${TCL_BINDIR}/tclhelp
@@ -329,7 +329,7 @@ TKXMINSTALL-EXEC:
 	${INSTCOPY} tkmaster/bin${ARCH} ${TK_INST_MASTER}
 	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
-	if test ! -d ${TCL_BINDIR} ; then mkdir ${TCL_BINDIR}; fi
+	test -d ${TCL_BINDIR} || mkdir ${TCL_BINDIR}
 	rm -f ${TCL_BINDIR}/wishx
 	ln -s ${TK_INST_MASTER}/bin${ARCH}/wishx ${TCL_BINDIR}/wishx
 	rm -f ${TCL_BINDIR}/tclhelp
