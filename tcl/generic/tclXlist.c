@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.4 1997/06/30 01:26:37 markd Exp $
+ * $Id: tclXlist.c,v 8.5 1997/06/30 07:57:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -79,61 +79,52 @@ TclX_LvarcatObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    Tcl_Obj *strVarPtr, *strObjPtr;
-    int strArgc, idx, argIdx, strLen;
-    char **strArgv, *staticArgv [32], *newStr;
+    Tcl_Obj *varObjPtr, *newObjPtr;
+    int catObjc, idx, argIdx;
+    Tcl_Obj **catObjv, *staticObjv [32];
 
-/*FIX: Not binary clean */
     if (objc < 3) {
         return TclX_WrongArgs (interp, objv [0], "var string ?string...?");
     }
-    strArgv = staticArgv;
+    catObjv = staticObjv;
 
     /*
-     * Get the variable that we are going to update.  If the var doesn't exist,
-     * create it.  If it is shared by more than being a variable, duplicated
-     * it.
+     * Get the variable that we are going to update.  Include it if it
+     * exists.
      */
-    strVarPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_PARSE_PART1);
+    varObjPtr = Tcl_ObjGetVar2 (interp, objv [1], NULL, TCL_PARSE_PART1);
 
-    /*
-     * FIX: Figure out how to do this without converting to strings, or if
-     * that would even be compatible.  Maybe if all lists, then build a big
-     * list, otherwise, this way.
-     */
-    if (strVarPtr != NULL) {
-        strArgc = objc - 1;
+    if (varObjPtr != NULL) {
+        catObjc = objc - 1;
     } else {
-        strArgc = objc - 2;
+        catObjc = objc - 2;
     }
 
-    if (strArgc >= (sizeof (staticArgv) / sizeof (char *))) {
-        strArgv = (char **) ckalloc (strArgc * sizeof (char *));
+    if (catObjc >= (sizeof (staticObjv) / sizeof (char *))) {
+        catObjv = (Tcl_Obj **) ckalloc (catObjc * sizeof (Tcl_Obj *));
     }
     
-    if (strVarPtr != NULL) {
-        strArgv [0] = Tcl_GetStringFromObj (strVarPtr, &strLen);
+    if (varObjPtr != NULL) {
+        catObjv [0] = varObjPtr;
         argIdx = 1;
     } else {
         argIdx = 0;
     }
     for (idx = 2; idx < objc; idx++, argIdx++) {
-        strArgv [argIdx] = Tcl_GetStringFromObj (objv [idx], &strLen);
+        catObjv [argIdx] = objv [idx];
     }
 
-    newStr = Tcl_Concat (strArgc, strArgv);
-    strObjPtr = Tcl_NewStringObj (newStr, -1);
-    ckfree (newStr);
+    newObjPtr = Tcl_ConcatObj (catObjc, catObjv);
 
-    if (strArgv != staticArgv)
-        ckfree ((char *) strArgv);
+    if (catObjv != staticObjv)
+        ckfree ((char *) catObjv);
 
-    if (Tcl_ObjSetVar2 (interp, objv [1], NULL, strObjPtr,
+    if (Tcl_ObjSetVar2 (interp, objv [1], NULL, newObjPtr,
                         TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL) {
-        Tcl_DecrRefCount (strObjPtr);
+        Tcl_DecrRefCount (newObjPtr);
         return TCL_ERROR;
     }
-    Tcl_SetObjResult (interp, strObjPtr);
+    Tcl_SetObjResult (interp, newObjPtr);
     return TCL_OK;
 }
 
