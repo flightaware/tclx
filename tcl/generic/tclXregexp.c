@@ -16,7 +16,7 @@
  *     torek-boyer-moore/27-Aug-90 by
  *     chris@mimsy.umd.edu (Chris Torek)
  *-----------------------------------------------------------------------------
- * $Id: tclXregexp.c,v 8.7 1997/07/04 08:41:03 markd Exp $
+ * $Id: tclXregexp.c,v 8.8 1997/07/04 20:24:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -339,11 +339,12 @@ PreParseRegExp (expression, infoPtr)
             gotMeta = TRUE;
             if (*scanPtr == ']')
                 scanPtr++;  /* ] as first character. */
-            while ((*scanPtr != '\0') && (*scanPtr++ != ']')) {
-                continue;
+            while ((*scanPtr != '\0') && (*scanPtr != ']')) {
+                scanPtr++;
             }
             if (*scanPtr == '\0')
                 return FALSE;
+            scanPtr++;
             break;
           case '(':
             gotMeta = TRUE;

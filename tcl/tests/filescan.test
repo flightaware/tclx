@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 8.3 1997/04/17 04:59:19 markd Exp $
+# $Id: filescan.test,v 8.4 1997/08/23 18:55:37 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -486,6 +486,15 @@ Test 9.1 {filescan tests} {
     close $testFH
     set linesMatched
 } 0 {{Sun Dec 01 14:56:08 1996 mask1a.ps kelson bigdog.ucolick.org 1}}
+
+#
+# Test some regexps that have caused probelms in the past.
+#
+Test 9.2 {filescan tests} {
+    set ch [scancontext create]
+    scanmatch -nocase $ch {^[a-z]} {echo foo}
+} 0 {}
+
 
 TestRemove TEST.TMP TEST2.TMP TESTCHK.TMP TESTCHK2.TMP
 
