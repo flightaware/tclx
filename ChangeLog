@@ -1,3 +1,8 @@
+2000-04-03  Lee Bernhard  <lfb@scriptics.com>
+
+	* tcl/win/tclXwinOS.c (TclXOSkill): Added support for "kill"
+	command on Windows platforms.
+
 1999-08-20  Scott Stanton  <stanton@scriptics.com>
 
 	* win/aclocal.m4: Updated from latest tcl.m4.
