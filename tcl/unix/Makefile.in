@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.36 2000/07/14 18:07:40 welch Exp $
+# $Id: Makefile.in,v 8.37 2000/08/01 18:02:39 welch Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -312,9 +312,9 @@ BUILDHELP=@BUILDHELP@
 buildhelp: tcl tcl.tndx
 	rm -rf ${HELP_DIR} help help.tmp
 	if test ! -d @HELP_DIR@ ; then \
-	    mkdir @HELP_DIR@ ; \
+	    mkdir -p @HELP_DIR@ ; \
 	fi
-	mkdir ${HELP_DIR}
+	mkdir -p ${HELP_DIR}
 	${BLDMANHELP} ${TCL_SRC_DIR}/doc ${TCLX_TOOLS_SRC_DIR}/tclmanpages \
 	    ${HELP_DIR} Tcl.brf
 	${RUNTCL} -c "buildhelp ${HELP_DIR} TclX.brf ${TCLX_DOC_DIR}/TclX.n"

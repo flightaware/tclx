@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.41 2000/07/14 18:07:45 welch Exp $
+# $Id: Makefile.in,v 8.42 2000/08/01 18:02:43 welch Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -204,9 +204,9 @@ BUILDHELP=@BUILDHELP@
 buildhelp:
 	rm -rf ${HELP_DIR} help help.tmp
 	if test ! -d @HELP_DIR@ ; then \
-	    mkdir @HELP_DIR@ ;\
+	    mkdir -p @HELP_DIR@ ;\
 	fi
-	mkdir ${HELP_DIR}
+	mkdir -p ${HELP_DIR}
 	${BLDMANHELP} ${TK_SRC_DIR}/doc ${TCLX_TOOLS_SRC_DIR}/tkmanpages \
 	    ${HELP_DIR} Tk.brf
 	${INSTCOPY} ${HELP_DIR} ${INSTALL_ROOT}${TKX_INST_RUNTIME}/help
