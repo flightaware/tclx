@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 1.2 1992/09/21 07:11:03 markd Exp markd $
+# $Id: Config.mk,v 1.3 1992/10/03 18:02:10 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -22,7 +22,8 @@
 # Configuration file specification.  Set the macro TCL_CONFIG_FILE to the 
 # name of the file to use in the config directory (don't include the directory
 # name).  If you find problems with these files or have new onces please send
-# them to us (tcl-project@neosoft.com).
+# them to us (tcl-project@neosoft.com).  At the end of this file is a
+# description of all the flags that can be set in the config file.
 #
 TCL_CONFIG_FILE=scoodt2.0
 
@@ -35,9 +36,8 @@ TCL_CONFIG_FILE=scoodt2.0
 
 #------------------------------------------------------------------------------
 # Location of the UCB Tcl distribution relative to this directory.  TclX works
-# with either Tcl 6.3 or 6.4
+# with Tcl 6.3 and Tcl 6.4.
 #
-#TCL_UCB_DIR=../tcl6.3
 TCL_UCB_DIR=../tcl6.4
 
 #------------------------------------------------------------------------------
@@ -150,13 +150,14 @@ TCL_INCLUDEDIR=/usr/local/include
 TCL_TCLDIR=/usr/local/tcl
 
 #==============================================================================
-# This section defines where and how the manual pages are to be installed.
-# This is somewhat problematic, so a global option not to install manual pages
-# is provided. Since there are so many manual pages provided, they are placed
-# together in one Tcl manual page directory, rather than splitting into the
-# standard manual pages directories.  The actual definitions of these variables
-# are set for in the system dependent file.  You might want to modify these
-# values.
+# These defines specify where and how the manual pages are to be installed.
+# They are actually defined in the system specific configuration file in the
+# config directory.  Install manual pages is somewhat problematic, so a global
+# option not to install manual pages is provided. Since there are so many
+# manual pages provided, they are placed together in one Tcl manual page
+# directory, rather than splitting into the standard manual pages directories.
+# The actual definitions of these variables are set for in the system
+# dependent file.  You might want to modify these values.
 #..............................................................................
 
 #
@@ -201,11 +202,12 @@ TCL_MAN_INSTALL=1
 #
 
 #==============================================================================
-# System specific configuration.  A config file defines the following mactos
-# required for your version of Unix.  In addition to the options defined in the
-# Berkeley source the following options can be defined here.  This information
-# will help you build your own system configuration if one is not supplied
-# here.  The configuration file name is specified an the end of this section.
+# System specific configuration.  A system configuration file in the config
+# directory defines the following mactos required for your version of Unix.
+# In addition to the options defined in the Berkeley source the following
+# options can be defined here.  This information will help you build your own
+# system configuration if one is not supplied here.  The configuration file
+# name is specified an the end of this section.
 #
 #    o SYS_DEP_FLAGS - The system dependency flags.  The following options are
 #      available, these should be defined using -Dflag.
