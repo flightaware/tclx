@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 7.3 1996/07/26 05:56:28 markd Exp $
+ * $Id: tclXunixPort.h,v 7.4 1996/08/17 02:10:17 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -80,9 +80,17 @@ extern int h_errno;
 #    define INADDR_NONE  ((long) -1)
 #endif
 
+/*
+ * BSD functions.
+ */
 #ifdef NO_BCOPY
-#    define bcopy(from, to, length)    memmove((to), (from), (length))
+#    define bcopy(from, to, length) memmove((to), (from), (length))
 #endif
+
+#ifdef NO_BZERO
+#    define bzero(to,length) memset(to,'\0',length)
+#endif
+
 
 /*
  * Define C lib prototypes that are either missing or being emulated by

@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 7.3 1996/07/26 05:55:57 markd Exp $
+ * $Id: tclXselect.c,v 7.4 1996/08/08 01:52:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,15 +28,6 @@
 
 #ifndef NO_SYS_SELECT_H
 #   include <sys/select.h>
-#endif
-
-/*
- * A couple of systems (Xenix and older SCO unix) have bzero hidden away
- * in the X library that we don't use, but the select macros use bzero.
- * Make them use memset.
- */
-#ifdef NO_BZERO
-#    define bzero(to,length)  memset(to,'\0',length)
 #endif
 
 /*
