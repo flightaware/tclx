@@ -165,12 +165,16 @@ HOW TO BUILD EXTENDED TCL
           found for installation.  
  
     o Edit Config.mk in the build directory following the instructions in the
-      file.  If the --srcdir option to configure is used, it is copied from
-      the source directory to the build directory.  This file is used to
-      specify values that can't be figured out by the configure script.  This
-      includes the location of the Tcl and Tk distributions.  It's also used
-      to specify the sections that the Tcl manual pages are to be installed
-      in.
+      file.  You normally don't need to do this, only if special configuration
+      options are required.  If the --srcdir option to configure is used, it is
+      copied from the source directory to the build directory.  This file is
+      used to specify values that can't be figured out by the configure script.
+      This includes the location of the Tcl and Tk distributions.  It's also
+      used to specify the sections that the Tcl manual pages are to be
+      installed in.
+
+    o If you want to use the C++ classes provided in tcl++.h, edit Config.mk
+      to define TCL_PLUS_BUILD.
 
     o Note that the site specific installation options should be set in
       Config.mk before compiling.  It is especially important to set the value
