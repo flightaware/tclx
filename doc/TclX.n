@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.33 1993/09/16 14:01:43 markd Exp markd $
+.\" $Id: TclX.man,v 2.34 1993/09/20 01:13:11 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2607,7 +2607,7 @@ This command overrides the standard Tcl procedure of the same name.
 .br
 Load the package library index of the library file \fBlibfile\fR (which
 must have the suffix \fI.tlib\fR).  Package library indexes along the
-\fauto_path\fR are loaded automatically on the first \fBdemand_load\fR;
+\fBauto_path\fR are loaded automatically on the first \fBdemand_load\fR;
 this command is provided to explicitly load libraries that are not in
 the path.  If the index file (with a \fI.tndx\fR suffix) does not exists
 or is out of date, it will be rebuilt if the user has directory
