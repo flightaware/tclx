@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 7.1 1996/07/22 17:10:15 markd Exp $
+# $Id: Makefile.in,v 7.2 1996/07/26 05:56:28 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -202,8 +202,8 @@ tclXoscmds.o: ${TCLX_GENERIC_DIR}/tclXoscmds.c
 tclXutil.o: ${TCLX_GENERIC_DIR}/tclXutil.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXutil.c
 
-tclXchmod.o: ${TCLX_UNIX_SRC_DIR}/tclXchmod.c
-	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXchmod.c
+tclXchmod.o: ${TCLX_GENERIC_DIR}/tclXchmod.c
+	${CC} -c ${CC_SWITCHES} ${TCLX_GENERIC_DIR}/tclXchmod.c
 
 tclXid.o: ${TCLX_UNIX_SRC_DIR}/tclXid.c
 	${CC} -c ${CC_SWITCHES} ${TCLX_UNIX_SRC_DIR}/tclXid.c

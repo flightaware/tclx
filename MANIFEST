@@ -13,6 +13,7 @@
 ./tcl/generic/tclExtdInt.h
 ./tcl/generic/tclExtend.h
 ./tcl/generic/tclXbsearch.c
+./tcl/generic/tclXchmod.c
 ./tcl/generic/tclXcmdInit.c
 ./tcl/generic/tclXcmdloop.c
 ./tcl/generic/tclXdebug.c
@@ -295,7 +296,6 @@
 ./tcl/unix/Makefile.in
 ./tcl/unix/pkgIndex.proto.in
 ./tcl/unix/tclXAppInit.c
-./tcl/unix/tclXchmod.c
 ./tcl/unix/tclXunixCmds.c
 ./tcl/unix/tclXunixId.c
 ./tcl/unix/tclXunixOS.c
