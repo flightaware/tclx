@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 3.8 1994/05/28 03:38:22 markd Exp markd $
+# $Id: Makefile.in,v 3.9 1994/07/03 03:48:52 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -292,7 +292,7 @@ TCLXMINSTALL:
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
 	    ${srcbasedir}/man ${TCL_INST_MASTER}/man
 	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TCL_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
+	${SYMLINKEXT} ${TCL_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
 	${SYMLINKEXT} ${TCL_INST_MASTER}/include/* ${TCL_INCLUDEDIR}
 
 TCLXMINSTALL-EXEC:
@@ -303,7 +303,7 @@ TCLXMINSTALL-EXEC:
 	${INSTCOPY} tclmaster/lib${ARCH} ${TCL_INST_MASTER}
 	${RANLIB} ${TCL_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TCL_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TCL_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
+	${SYMLINKEXT} ${TCL_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
 
 TKXMINSTALL:
 	@echo ""
@@ -317,7 +317,7 @@ TKXMINSTALL:
 	    ${TK_MAN_UNIXCMD_SECTION} \
 	    ${TK_UCB_SRC}/doc ${TK_INST_MASTER}/man
 	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TK_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
+	${SYMLINKEXT} ${TK_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
 	${SYMLINKEXT} ${TK_INST_MASTER}/include/* ${TCL_INCLUDEDIR}
 
 TKXMINSTALL-EXEC:
@@ -328,7 +328,7 @@ TKXMINSTALL-EXEC:
 	${INSTCOPY} tkmaster/lib${ARCH} ${TK_INST_MASTER}
 	${RANLIB} ${TK_INST_MASTER}/lib${ARCH}/*.a
 	${SYMLINKEXT} ${TK_INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${TK_INST_MASTER}/lib{ARCH}/* ${TCL_LIBDIR}
+	${SYMLINKEXT} ${TK_INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
 
 # Fake targets to decide if we install wishx or not.
 
