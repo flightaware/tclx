@@ -167,6 +167,11 @@ HOW TO BUILD EXTENDED TCL
         o --execprefix=EXECPREFIX
           Directory under which the "bin" and "lib" directories are
           found for installation.  
+
+    o If you decide to change the --with-arch, --prefix or --execprefix,
+      just rerun configure and make. The configure script will purge the
+      minimum set of files that have to be rebuilt due to any of these
+      changing.
  
     o Edit Config.mk in the build directory following the instructions in the
       file.  You normally don't need to do this, only if special configuration

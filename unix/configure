@@ -315,12 +315,12 @@ ac_compile='${CC-cc} $CFLAGS $LDFLAGS conftest.${ac_ext} -o conftest $LIBS >/dev
 
 
 #!/bin/sh
-# From configure.in Revision: 3.16 
+# From configure.in Revision: 3.17 
 
 
 
 #------------------------------------------------------------------------------
-#      command line looking for the --arch= option.
+#      Check command line looking for the --arch= option.
 #------------------------------------------------------------------------------
 
 # check whether --with-arch or --without-arch was given.
@@ -400,6 +400,15 @@ fi
 test -z "$MCS_CMD" && MCS_CMD="touch"
 test -n "$MCS_CMD" && test -n "$verbose" && echo "	setting MCS_CMD to $MCS_CMD"
 
+
+#------------------------------------------------------------------------------
+# Purge the specific set of files that must be rebuild if the arch or prefix
+# flags are changed.
+#------------------------------------------------------------------------------
+
+rm -f tclmaster/bin*/* tclmaster/lib*/* tclmaster/src/SYSLIBS* 2>/dev/null
+rm -f tkmaster/bin*/* tkmaster/lib*/* tkmaster/src/SYSLIBS* 2>/dev/null
+rm -f src/tclCmdIL.o src/tclXinit.o tksrc/tkWindow.o  */*.tmp 2>/dev/null
 
 #------------------------------------------------------------------------------
 #       Some versions of Sun OS require -ldl to link anything, even the
