@@ -2,7 +2,6 @@
 # tcl/unix/Makefile.in  --
 #
 # Makefile for Extended Tcl C sources. 
-# 
 #------------------------------------------------------------------------------
 # Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
 #
@@ -13,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.24 1996/03/17 08:48:47 markd Exp $
+# $Id: Makefile.in,v 5.25 1996/03/19 08:19:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilecmds.c,v 5.10 1996/03/15 07:35:51 markd Exp $
+ * $Id: tclXfilecmds.c,v 5.11 1996/03/19 07:52:49 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -848,7 +848,7 @@ Tcl_FtruncateCmd (clientData, interp, argc, argv)
 /*-----------------------------------------------------------------------------
  * Tcl_ReaddirCmd --
  *     Implements the rename TCL command:
- *         readdir dirPath
+ *         readdir ?-hidden? dirPath
  *
  * Results:
  *      Standard TCL result.
@@ -864,20 +864,32 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
     Tcl_DString pathBuf;
     char *dirPath;
     TCLX_DIRHANDLE handle;
-    int status, caseSensitive;
+    int hidden, status, caseSensitive;
     Tcl_DString fileList;
     char *fileName;
-
-    if (argc != 2) {
+    
+    if ((argc < 2) || (argc > 3)) {
         Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " dirPath", (char *) NULL);
+                          " ?-hidden? dirPath", (char *) NULL);
         return TCL_ERROR;
+    }
+    if (argc == 2) {
+        dirPath = argv [1];
+        hidden = FALSE;
+    } else {
+        if (!STREQU (argv [1], "-hidden")) {
+            Tcl_AppendResult (interp, "expected option of \"-hidden\", got \"",
+                              argv [1], "\"", (char *) NULL);
+            return TCL_ERROR;
+        }
+        dirPath = argv [2];
+        hidden = TRUE;
     }
 
     Tcl_DStringInit (&pathBuf);
     Tcl_DStringInit (&fileList);
 
-    dirPath = Tcl_TranslateFileName (interp, argv [1], &pathBuf);
+    dirPath = Tcl_TranslateFileName (interp, dirPath, &pathBuf);
     if (dirPath == NULL)
         goto errorExit;
 
@@ -885,7 +897,7 @@ Tcl_ReaddirCmd (clientData, interp, argc, argv)
         goto errorExit;
     
     while (TRUE) {
-        status = TclX_OSreaddir (interp, handle, &fileName);
+        status = TclX_OSreaddir (interp, handle, hidden, &fileName);
         if (status == TCL_ERROR)
             goto errorExit2;
         if (status == TCL_BREAK)

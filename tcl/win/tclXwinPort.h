@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 1.1 1996/03/18 08:50:04 markd Exp $
+ * $Id: tclXwinPort.h,v 1.2 1996/03/19 07:53:10 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -45,4 +45,9 @@
  * it delays signals.
  */
 #define TCLX_WAITPID(pid, status, options) Tcl_WaitPid (pid, status, options)
+/*
+ * Handle used to access directories.
+ */
+#define TCLX_DIRHANDLE HANDLE
+
 #endif

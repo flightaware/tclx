@@ -2,7 +2,7 @@
                            =========================
 
 TclX 7.5.0 Beta 3 Release
-========================
+=========================
 
 This is the third TclX beta release that is compatible with the Tcl 7.5 /
 Tk 4.1 beta line.  Its is known to work with the Tcl/Tk beta 3 releases
@@ -36,6 +36,10 @@ in the early stages from Peter da Silva (peter@NeoSoft.com).
    As with Tcl, all of Extended Tcl is freely redistributable, including for
 commercial use and resale.
 
+MS WINDOWS 95/NT
+================
+  A port of TclX to MS Windows 95 & NT is under way, contact us at 
+tcl-project@neosoft.com if you would like to be an alpha tester.
 
 BUILDING TCLX
 =============
@@ -67,7 +71,12 @@ CHANGES IN TCLX 7.5.0
     server_cntl functionallity has been incorporated in the fcntl
     command.  All old scripts using the server_* commands will continue
     to work.
-  
+
+  o Modified the commandloop command to support event based command input.
+
+  o Added a procedure, mainloop, which makes it easy to build event oriented
+    programs in the TclX shell (tcl Unix command) in a manner similar to 
+    wish.
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================

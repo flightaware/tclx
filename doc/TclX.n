@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 5.12 1996/03/17 08:48:35 markd Exp $
+.\" $Id: TclX.n,v 5.13 1996/03/17 19:43:14 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -747,10 +747,13 @@ The new priority is returned.
 '\"@help: tcl/files/readdir
 '\"@brief: Read the contents of a directory.
 .TP
-.B readdir \fIdirPath\fR
+.B readdir ?-hidden? \fIdirPath\fR
 .br
 Returns a list containing the contents of the directory \fIdirPath\fR.  The
 directory entries "." and ".." are not returned.
+.br
+On MS Windows systems, \fB-hidden\fR maybe specified include hidden files
+in the result.  This flag is ignored on Unix systems.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

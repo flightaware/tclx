@@ -17,7 +17,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 1.1 1996/03/18 08:50:03 markd Exp $
+ * $Id: tclXwinOS.c,v 1.2 1996/03/19 07:53:06 markd Exp $
+ *-----------------------------------------------------------------------------
+ * The code for reading directories is based on TclMatchFiles from the Tcl
+ * distribution file win/tclWinFile.c
+ * Copyright (c) 1995 Sun Microsystems, Inc.
  *-----------------------------------------------------------------------------
  */
 
@@ -478,19 +482,107 @@ TclX_OSopendir (interp, path, handlePtr, caseSensitive)
     TCLX_DIRHANDLE *handlePtr;
     int            *caseSensitive;
 {
-    DIR *handle;
+    Tcl_DString dirPath;
+    char *rootEnd, *dummy1, *dummy2;
+    int baseLength;
+    Tcl_DString buffer;
+    DWORD volFlags;
+    HANDLE handle;
+    WIN32_FIND_DATA data;
+    BOOL found;
+    char *newDir;
+
+    /*
+     * Local copy of the directory path.
+     */
+    Tcl_DStringInit (&dirPath);
+    Tcl_DStringAppend (&dirPath, path, -1);
+    baseLength = Tcl_DStringLength (&dirPath);
+
+    /*
+     * Ensure that the passed in path is actually a directory.
+     */
+    if (baseLength == 0) {
+	newDir = ".";
+    } else {
+	newDir = dirPath.string;
+    }
+
+    /*
+     * Next check the volume information for the directory to see whether
+     * comparisons should be case sensitive or not.  If the root is null, then
+     * we use the root of the current directory.  If the root is just a drive
+     * specifier, we use the root directory of the given drive.
+     */
+    TclParseFileName (newDir, &rootEnd, &dummy1, &dummy2);
+    if (rootEnd == NULL) {
+	found = GetVolumeInformation (NULL, NULL, 0, NULL, NULL,
+                                      &volFlags, NULL, 0);
+    } else if (*rootEnd == ':') {
+	char root[4] = "?:\\";
+	root[0] = *newDir;
+	found = GetVolumeInformation (root, NULL, 0, NULL, NULL,
+                                      &volFlags, NULL, 0);
+    } else {
+	char *p;
+
+	/*
+	 * Since Win32 doesn't accept UNC names with // in
+	 * GetVolumeInformation, substitute \ for / before the call.
+	 */
+	Tcl_DStringInit (&buffer);
+	Tcl_DStringAppend (&buffer, newDir, (rootEnd - newDir) + 1);
+	for (p = buffer.string; *p != '\0'; p++) {
+	    if (*p == '/') {
+		*p = '\\';
+	    }
+	}
+	found = GetVolumeInformation (buffer.string, NULL, 0, NULL, NULL,
+                                      &volFlags, NULL, 0);
+	Tcl_DStringFree (&buffer);
+    }
+    if (!found) {
+	TclWinConvertError (GetLastError ());
+	Tcl_ResetResult (interp);
+	Tcl_AppendResult (interp, "couldn't read volume information for \"",
+                          dirPath.string, "\": ", Tcl_PosixError (interp),
+                          (char *) NULL);
+	goto errorExit;
+    }
+    *caseSensitive = (volFlags & FS_CASE_SENSITIVE) ? TRUE : FALSE;
     
-    handle = opendir (path);
-    if (handle == NULL)  {
+    /*
+     * We need to check all files in the directory, so append a *.*
+     * to the path.  If the path ends in a non-separator character,
+     * we also need to add a directory separator before the *.*.
+     */
+    if ((baseLength > 0)
+	    && (strchr (":/\\", dirPath.string [baseLength-1]) == 0)) {
+	Tcl_DStringAppend (&dirPath, "\\*.*", 4);
+    } else {
+	Tcl_DStringAppend (&dirPath, "*.*", 3);
+    }
+
+    /*
+     * Now open the directory for reading.
+     */
+    handle = FindFirstFile (dirPath.string, &data);
+    if (handle == INVALID_HANDLE_VALUE) {
+	TclWinConvertError (GetLastError());
         if (interp != NULL)
             Tcl_AppendResult (interp, "open of directory \"", path,
                               "\" failed: ", Tcl_PosixError (interp),
                               (char *) NULL);
-        return TCL_ERROR;
+	goto errorExit;
     }
+    
     *handlePtr = handle;
-    *caseSensitive = TRUE;
+    Tcl_DStringFree (&dirPath);
     return TCL_OK;
+
+  errorExit:
+    Tcl_DStringFree (&dirPath);
+    return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
@@ -500,7 +592,8 @@ TclX_OSopendir (interp, path, handlePtr, caseSensitive)
  *
  * Parameters:
  *   o interp (I) - Errors returned in result.
- *   o handle (O) - The handle returned by TclX_OSreaddir.
+ *   o handle (I) - The handle returned by TclX_OSopendir.
+ *   o hidden (I) - Include hidden files.
  *   o fileNamePtr (O) - A pointer to the filename is returned here.
  * Results:
  *   TCL_OK, TCL_ERROR or TCL_BREAK if there are no more directory entries.
@@ -510,22 +603,25 @@ int
 TclX_OSreaddir (interp, handle, fileNamePtr)
     Tcl_Interp     *interp;
     TCLX_DIRHANDLE  handle;
+    int             hidden;
     char          **fileNamePtr;
 {
-    struct dirent *entryPtr;
-   
+    WIN32_FIND_DATA data;
+
     while (TRUE) {
-        entryPtr = readdir (handle);
-        if (entryPtr == NULL)
+        if (!FindNextFile (handle, &data))
             return TCL_BREAK;
-        if (entryPtr->d_name [0] == '.') {
-            if (entryPtr->d_name [1] == '\0')
+
+	if ((data.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) && !hidden)
+            continue;
+        if (data.cFileName [0] == '.') {
+            if (data.cFileName [1] == '\0')
                 continue;
-            if ((entryPtr->d_name [1] == '.') &&
-                (entryPtr->d_name [2] == '\0'))
+            if ((data.cFileName [1] == '.') &&
+                (data.cFileName [2] == '\0'))
                 continue;
         }
-        *fileNamePtr = entryPtr->d_name;
+        *fileNamePtr = data.cFileName;
         return TCL_OK;
     }
 }
@@ -537,7 +633,7 @@ TclX_OSreaddir (interp, handle, fileNamePtr)
  * Parameters:
  *   o interp (I) - Errors returned in result.  Maybe NULL if error text is
  *     not to be returned.
- *   o handle (O) - The handle returned by TclX_OSreaddir.
+ *   o handle (I) - The handle returned by TclX_OSopendir.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
@@ -547,11 +643,6 @@ TclX_OSclosedir (interp, handle)
     Tcl_Interp     *interp;
     TCLX_DIRHANDLE  handle;
 {
-    if (closedir (handle) < 0) {
-        if (interp != NULL)
-            Tcl_AppendResult (interp, "close of directory failed: ",
-                              Tcl_PosixError (interp), (char *) NULL);
-        return TCL_ERROR;
-    }
+    FindClose (handle);
     return TCL_OK;
 }

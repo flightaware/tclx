@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 5.2 1996/03/18 08:49:57 markd Exp $
+ * $Id: tclXunixOS.c,v 5.3 1996/03/19 07:53:01 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -706,17 +706,18 @@ TclX_OSopendir (interp, path, handlePtr, caseSensitive)
  *
  * Parameters:
  *   o interp (I) - Errors returned in result.
- *   o handle (O) - The handle returned by TclX_OSreaddir.
+ *   o handle (I) - The handle returned by TclX_OSopendir.
+ *   o hidden (I) - Include hidden files.  Ignored on Unix.
  *   o fileNamePtr (O) - A pointer to the filename is returned here.
  * Results:
- *   TCL_OK or TCL_BREAK if there are no more directory entries.  Some systems
- * might return TCL_ERROR, but not Unix.
+ *   TCL_OK, TCL_ERROR or TCL_BREAK if there are no more directory entries.
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSreaddir (interp, handle, fileNamePtr)
+TclX_OSreaddir (interp, handle, hidden, fileNamePtr)
     Tcl_Interp     *interp;
     TCLX_DIRHANDLE  handle;
+    int             hidden;
     char          **fileNamePtr;
 {
     struct dirent *entryPtr;
@@ -744,7 +745,7 @@ TclX_OSreaddir (interp, handle, fileNamePtr)
  * Parameters:
  *   o interp (I) - Errors returned in result.  Maybe NULL if error text is
  *     not to be returned.
- *   o handle (O) - The handle returned by TclX_OSreaddir.
+ *   o handle (I) - The handle returned by TclX_OSopendir.
  * Results:
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
