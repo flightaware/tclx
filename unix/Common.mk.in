@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 8.7 1997/08/30 22:30:13 markd Exp $
+# $Id: Common.mk.in,v 8.7.2.1 1998/08/09 06:46:36 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -96,6 +96,7 @@ TCL_LD_FLAGS         = @TCL_LD_FLAGS@
 TCL_DL_LIBS          = @TCL_DL_LIBS@
 TCL_SHLIB_LD         = @TCL_SHLIB_LD@
 TCL_SHLIB_LD_LIBS    = @TCL_SHLIB_LD_LIBS@
+TCL_DBGX             = @TCL_DBGX@
 TCL_BUILD_LIB_SPEC   = @TCL_BUILD_LIB_SPEC@
 TCL_LIB_SPEC         = @TCL_LIB_SPEC@
 TCL_LD_SEARCH_FLAGS  = @TCL_LD_SEARCH_FLAGS@
@@ -105,6 +106,7 @@ TK_LIBS              = @TK_LIBS@
 TK_EXEC_PREFIX       = @TK_EXEC_PREFIX@
 TK_XINCLUDES         = @TK_XINCLUDES@
 TK_XLIBSW            = @TK_XLIBSW@
+TK_DBGX              = @TK_DBGX@
 TK_BUILD_LIB_SPEC    = @TK_BUILD_LIB_SPEC@
 TK_LIB_SPEC          = @TK_LIB_SPEC@
 TK_LD_SEARCH_FLAGS   = @TK_LD_SEARCH_FLAGS@
