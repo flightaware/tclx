@@ -1323,3 +1323,8 @@
   o Merged in port of 8.0.0 code to Win32.  Contributed by Viktor Dukhovni
     <viktor@esm.com>.  Thanks Viktor!
 -------------------------------------------------------------------------------
+10 Aug 97:
+  o Removed C global tclDeleteInterpAtEnd, as it caused problems with windows
+    ports.  Instead, a Tcl global TCLXENV(deleteInterpAtShellExit) enables
+    deleting the interp when the shell exits.
+-------------------------------------------------------------------------------
