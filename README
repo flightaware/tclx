@@ -167,12 +167,8 @@ WHERE TO GET IT
 
 Extended Tcl 7.5.0 can be downloaded by anonymous FTP from:
 
-   ftp.neosoft.com:/pub/tcl/distrib/tclX7.5.0.tar.gz
-or
-   ftp.aud.alcatel.com:tcl/extensions/tclX7.5.0.tar.gz
+   ftp.neosoft.com:/pub/tcl/tclx-distrib/tclX7.5.0.tar.gz
 
-Always check ftp.neosoft.com first, as there is often a delay in
-updating the Alcatel archives.
 
 A contributed sources archive resides on ftp.aud.alcatel.com and
 is mirrored on ftp.ibp.fr for our friends in Europe.  An Frequently
