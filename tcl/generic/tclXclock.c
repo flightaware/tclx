@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXclock.c,v 2.2 1993/03/06 21:42:30 markd Exp markd $
+ * $Id: tclXclock.c,v 2.3 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -100,7 +100,7 @@ Tcl_FmtclockCmd (clientData, interp, argc, argv)
 
     stat = strftime (interp->result, TCL_RESULT_SIZE, format, timeDataPtr);
     if (stat <= 0) {
-        Tcl_AppendResult (interp, "error formating time", (char *) NULL);
+        Tcl_AppendResult (interp, "error formatting time", (char *) NULL);
         return TCL_ERROR;
     }
     return TCL_OK;
