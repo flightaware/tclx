@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.3 1995/04/21 21:07:47 markd Exp markd $
+# $Id: Makefile.in,v 4.4 1995/04/24 06:38:31 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -60,8 +60,9 @@ TMPHELP      = ${TMPMASTER}/help
 all: made.tmp ${TKTCL} ${TKTLIB} ${TKTNDX} ${PROLOGPS} tclhelp ${TMPHELP} \
      ${TMPDEMOS}
 
+# Can't use 'test -d X || mkdir X', it don't work on Ultrix
 made.tmp:
-	test -d ${TMPMASTER} || mkdir ${TMPMASTER}
+	if [ ! -d ${TMPMASTER} ] ; then mkdir ${TMPMASTER} ; else exit 0; fi
 	touch made.tmp
 
 ${TKTCL}: ${TK_UCB_SRC}/library/tk.tcl made.tmp
@@ -93,7 +94,7 @@ tclhelp: ${srcdir}/tclhelp.tcl
 # on make.tmp causes it to be always rebuilt).
 
 ${TMPHELP}:
-	test -d ${TMPMASTER} || mkdir ${TMPMASTER}
+	if [ ! -d ${TMPMASTER} ] ; then mkdir ${TMPMASTER} ; else exit 0; fi
 	if [ "@HAVE_SYML@" = "YES" ] ; then \
 	    rm -rf ${TMPHELP} ;\
 	    ln -s ${HELPSRC} ${TMPHELP} ;\
@@ -104,7 +105,7 @@ ${TMPHELP}:
 	fi
 
 ${TMPDEMOS}:
-	test -d ${TMPMASTER} || mkdir ${TMPMASTER}
+	if [ ! -d ${TMPMASTER} ] ; then mkdir ${TMPMASTER} ; else exit 0; fi
 	if [ "@HAVE_SYML@" = "YES" ] ; then \
 	    rm -rf ${TMPDEMOS}  ;\
 	    ln -s ${DEMOSSRC} ${TMPDEMOS} ;\
