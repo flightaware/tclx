@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 8.9 1997/08/30 22:29:54 markd Exp $
+ * $Id: tclXinit.c,v 8.10 1997/08/31 18:34:48 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -28,6 +28,9 @@
  *      default directory does not work.
  *    o [info nameofexectutable]/../../tclX$version/$w/$platform, for
  *      running before installation.  Platform is either "unix" or "win".
+ * The source -rsrc commands are used when TclX has standalone support built
+ * in.  It can't be ifdefed, as many cpp can't handled an #ifdef in a string.
+ *
  * Parameters:
  *   o w - Which are we configuring. Either "tcl" or "tk".
  *   o defaultLib - Default path to the library directory
@@ -48,12 +51,10 @@ static char tclx_findinit [] =
     }\n\
     lappend dirs $defaultLib\n\
     set libDir {}\n\
-#ifdef HAVE_TCL_STANDALONE
     if ![catch {uplevel #0 source -rsrc ${w}x}] {\n\
-	uplevel #0 source -rsrc ${w}x:tclIndex
+	uplevel #0 source -rsrc ${w}x:tclIndex\n\
 	return\n\
     }\n\
-#endif
     set prefix [file dirname [info nameofexecutable]]\n\
     set plat [file tail $prefix]\n\
     set prefix [file dirname $prefix]\n\

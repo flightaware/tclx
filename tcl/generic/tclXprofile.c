@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 8.12 1997/07/18 16:40:29 markd Exp $
+ * $Id: tclXprofile.c,v 8.13 1997/08/16 16:25:57 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -811,9 +811,9 @@ TurnOffProfiling (interp, infoPtr, varName)
         dataEntryPtr = 
             (profDataEntry_t *) Tcl_GetHashValue (hashEntryPtr);
 
-        sprintf (countBuf, "%ld", dataEntryPtr->count);
-        sprintf (realTimeBuf,"%ld", dataEntryPtr->realTime);
-        sprintf (cpuTimeBuf, "%ld", dataEntryPtr->cpuTime);
+        sprintf (countBuf,    "%ld", (long) dataEntryPtr->count);
+        sprintf (realTimeBuf, "%ld", (long) dataEntryPtr->realTime);
+        sprintf (cpuTimeBuf,  "%ld", (long) dataEntryPtr->cpuTime);
 
         dataListPtr = Tcl_Merge (3, dataArgv);
 
