@@ -788,3 +788,12 @@
    o Added "signal set" to restore state of signals saved with "signal get".
    o Added "infox have_flock" option.
 -------------------------------------------------------------------------------
+28 Jun 94:
+   o Modified server_open to try other addresses for a hostname when connect
+     fails.
+   o Added the server_info command.
+   o Always go through Tcl file table for commands like echo and commandloop.
+     This make sure redirected stdin, stdout and stderr are picked up.
+===============================================================================
+29 Jun 94: Released TclX7.3b-beta1.
+===============================================================================
