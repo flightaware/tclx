@@ -396,3 +396,5 @@
 ./unix/tools/tclmanpages
 ./unix/tools/tkmanpages
 ./win/INSTALL
+./win/common.vc
+./win/makefile.vc

@@ -1,0 +1,25 @@
+#
+# win/makefile.vc  --
+#
+# Visual C++ 2.x and 4.0 makefile for Extended Tcl/Tk on Windows.
+#------------------------------------------------------------------------------
+# Copyright 1996-1996 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: makefile.vc,v 7.0 1996/06/16 05:34:07 markd Exp $
+#------------------------------------------------------------------------------
+#
+
+all:
+        cd ../tcl/win; nmake -f makefile.vc all
+        cd ../tk/win; nmake -f makefile.vc all
+
+test:
+        cd ../tcl/win; nmake -f makefile.vc test
+        
