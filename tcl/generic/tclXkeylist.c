@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 8.10 1997/07/26 02:04:55 markd Exp $
+ * $Id: tclXkeylist.c,v 8.11 1997/10/22 08:07:44 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -78,8 +78,10 @@ typedef struct {
 /*
  * Prototypes of internal functions.
  */
+#ifdef TCLX_DEBUG
 static void
 ValidateKeyedList _ANSI_ARGS_((keylIntObj_t *keylIntPtr));
+#endif
 
 static int
 ValidateKey _ANSI_ARGS_((Tcl_Interp *interp,
