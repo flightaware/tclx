@@ -336,3 +336,6 @@
   o Corrected problems in RS/6000 config file.
   o Fixed problem with buildhelp.tcl always truncating filenames.
 -------------------------------------------------------------------------------
+27 Oct 92:
+  o Added configure file for new version of Ultrix (4.2+).
+-------------------------------------------------------------------------------
