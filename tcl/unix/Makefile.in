@@ -15,7 +15,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile,v 2.1 1992/11/21 19:06:01 markd Exp markd $
+# $Id: Makefile,v 2.2 1992/12/11 04:48:07 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -72,7 +72,7 @@ tclXgetdate.c: tclXgetdate.y
 # C++ directories first.
 
 tcl++.o: tcl++.C tcl++.h
-	$(CCPLUS) -c -I$(CCPLUSINCL) $(CFLAGS) $(HISTORY_FLAG) tcl++.C
+	$(CCPLUS) -c -I$(CPLUSINCL) $(CFLAGS) $(HISTORY_FLAG) tcl++.C
 
 #------------------------------------------------------------------------------
 # This is just to test if it compiles.
@@ -84,7 +84,7 @@ TCL++: ../tcl++
 	-o ../tcl++
 
 main++.o: tcl++.h main++.C
-	$(CCPLUS) -c -I$(CCPLUSINCL) $(CFLAGS) $(HISTORY_FLAG) main++.C
+	$(CCPLUS) -c -I$(CPLUSINCL) $(CFLAGS) $(HISTORY_FLAG) main++.C
 
 
 #------------------------------------------------------------------------------
