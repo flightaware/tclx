@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 1.1 1992/09/20 23:18:59 markd Exp markd $
+ * $Id: tclXhandles.c,v 2.0 1992/10/16 04:50:49 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -143,7 +143,8 @@ ExpandTable (tblHdrPtr, neededIdx)
     newSize = (tblHdrPtr->tableSize + numNewEntries) * tblHdrPtr->entrySize;
 
     tblHdrPtr->bodyP = (ubyte_pt) ckalloc (newSize);
-    memcpy (tblHdrPtr->bodyP, oldBodyP, newSize);
+    memcpy (tblHdrPtr->bodyP, oldBodyP, 
+            (tblHdrPtr->tableSize * tblHdrPtr->entrySize));
     LinkInNewEntries (tblHdrPtr, tblHdrPtr->tableSize, numNewEntries);
     tblHdrPtr->tableSize += numNewEntries;
     ckfree (oldBodyP);
