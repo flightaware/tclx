@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 4.7 1995/01/16 07:39:53 markd Exp markd $
+.\" $Id: TclX.n,v 4.8 1995/01/23 23:41:30 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1746,8 +1746,8 @@ may take expressions as arguments.
 .TP
 .B expr max(num1, num2)
 .br
-Returns the argument that has the highest numeric value. The arguments,
-\fInumN\fR may be any interger or floating point values.
+Returns the argument that has the highest numeric value. Each
+argument may be any integer or floating point value.
 .sp
 This functionality is also available as a math function \fBmax\fR in the
 Tcl \fBexpr\fR command.
@@ -1762,8 +1762,8 @@ Tcl \fBexpr\fR command.
 .TP
 .B expr min(num1, num2)
 .br
-Returns the argument that has the lowest numeric value. The arguments,
-\fInumN\fR may be any interger or floating point values.
+Returns the argument that has the lowest numeric value.  Each
+argument may be any integer or floating point value.
 .sp
 This functionality is also available as a math function \fBmin\fR in the
 Tcl \fBexpr\fR command.
