@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 2.5 1993/04/03 23:23:43 markd Exp markd $
+ * $Id: tclXsignal.c,v 2.6 1993/04/06 05:58:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,11 @@
 #endif
 
 #ifndef MAXSIG
+#  ifdef NSIG
+#    define MAXSIG NSIG
+#  else
 #    define MAXSIG 32
+#  endif
 #endif
 
 /*
@@ -259,7 +263,7 @@ Tcl_KillCmd (clientData, interp, argc, argv)
         if (!Tcl_StrToInt (argv[1], 0, &signalNum)) {
             signalNum = SigNameToNum (argv[1]);
         }
-        if ((signalNum < 0) || (signalNum > NSIG)) {
+        if ((signalNum < 0) || (signalNum > MAXSIG)) {
             Tcl_AppendResult (interp, "invalid signal", (char *) NULL);
             return TCL_ERROR;
         }
@@ -656,7 +660,7 @@ ParseSignalList (interp, signalListStr, signalList)
             goto exitPoint;
         }
 
-        if ((signalNum < 1) || (signalNum > NSIG)) {
+        if ((signalNum < 1) || (signalNum > MAXSIG)) {
             Tcl_AppendResult (interp, "invalid signal name: ",
                               signalName, (char *) NULL);
             goto exitPoint;
