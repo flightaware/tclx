@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.39 1993/09/27 04:03:21 markd Exp markd $
+.\" $Id: TclX.n,v 2.40 1993/10/07 06:51:11 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -2622,6 +2622,9 @@ supplied with standard Tcl.  This file must be named "\fBtclIndex\fR".
 Returns a list of the names of all defined packages. If \fI-location\fR
 is specified, a list of pairs of package name and the \fB.tlib\fR path
 name, offset and length of the package within the library.
+'@:
+'@:This procedure is provided by Extended Tcl.
+'@endhelp
 .TP
 '@help: tcl/libraries/auto_load_file
 '@brief: Search the auto_path for a file to source.
