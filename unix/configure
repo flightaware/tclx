@@ -516,7 +516,7 @@ else
 fi
 
 
-# From configure.in Revision: 8.13 dnl
+# From configure.in Revision: 8.14 dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have

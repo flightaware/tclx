@@ -3,7 +3,7 @@
 #
 # Utility procedures used by the build and install tools.
 #------------------------------------------------------------------------------
-# Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1997 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: buildutil.tcl,v 8.3 1997/07/04 21:17:45 markd Exp $
+# $Id: buildutil.tcl,v 8.4 1997/07/08 05:15:30 markd Exp $
 #------------------------------------------------------------------------------
 #
 

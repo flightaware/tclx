@@ -15,7 +15,7 @@
 #     Unix we are compiled on.  Hopefully this will alert people to improper
 #     configuration.
 #------------------------------------------------------------------------------
-# Copyright 1995-1996 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1995-1997 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -24,7 +24,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: checkup.tcl,v 8.0.4.1 1997/04/14 02:03:19 markd Exp $
+# $Id: checkup.tcl,v 8.1 1997/04/17 05:00:24 markd Exp $
 #------------------------------------------------------------------------------
 #
 

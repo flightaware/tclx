@@ -7,7 +7,7 @@
 # Set the global variable or environment variable TEST_ERROR_INFO to display
 # errorInfo when a test fails.
 #------------------------------------------------------------------------------
-# Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1997 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -16,7 +16,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id:$
+# $Id: testlib.tcl,v 8.2 1997/04/17 04:59:40 markd Exp $
 #------------------------------------------------------------------------------
 #
 

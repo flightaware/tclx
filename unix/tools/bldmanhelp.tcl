@@ -21,7 +21,7 @@
 #    o helpdir is the directory to create the help files in.
 #    o brief is the brief file to create.
 #------------------------------------------------------------------------------
-# Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1992-1997 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -30,7 +30,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: bldmanhelp.tcl,v 8.0.4.1 1997/04/14 02:03:18 markd Exp $
+# $Id: bldmanhelp.tcl,v 8.1 1997/04/17 05:00:23 markd Exp $
 #------------------------------------------------------------------------------
 #
 

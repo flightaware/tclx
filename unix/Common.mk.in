@@ -3,7 +3,7 @@
 #
 # Common macro definitions used by all include files.
 #------------------------------------------------------------------------------
-# Copyright 1995-1996 Karl Lehenbauer and Mark Diekhans.
+# Copyright 1995-1997 Karl Lehenbauer and Mark Diekhans.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Common.mk.in,v 8.4 1997/04/17 05:00:16 markd Exp $
+# $Id: Common.mk.in,v 8.5 1997/08/17 04:08:45 markd Exp $
 #------------------------------------------------------------------------------
 #
 

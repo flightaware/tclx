@@ -5,7 +5,7 @@
  * applications built with Extended Tcl and Tk on Windows 95/NT systems.
  * This is based on the the UCB Tk file tkAppInit.c
  *-----------------------------------------------------------------------------
- * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 1991-1997 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 8.2 1997/08/08 16:51:19 markd Exp $
+ * $Id: tkXAppInit.c,v 8.3 1997/08/18 00:04:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
