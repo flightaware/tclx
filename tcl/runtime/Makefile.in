@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.6 1995/04/30 06:13:55 markd Exp markd $
+# $Id: Makefile.in,v 4.7 1995/07/01 00:12:12 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -119,8 +119,9 @@ buildtclhelp: ${TCLINITTCL} ${TCLTLIB}
 
 install:
 	${INSTCOPY} ${srcdir}/TclInit.tcl ${TCLTLIB} ${TCLTNDX} \
-	    ${srcdir}/buildidx.tcl ${srcdir}/loadouster.tcl ${INST_MASTER}
-	${INSTCOPY} ${HELPSRC} ${INST_MASTER}/help
+	    ${srcdir}/buildidx.tcl ${srcdir}/loadouster.tcl \
+	    ${INSTALL_ROOT}${INST_MASTER}
+	${INSTCOPY} ${HELPSRC} ${INSTALL_ROOT}${INST_MASTER}/help
 
 install-master: install
 

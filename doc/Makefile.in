@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.2 1995/07/01 16:54:48 markd Exp markd $
+# $Id: Makefile.in,v 1.3 1995/07/15 18:54:21 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -44,21 +44,21 @@ CPMANPAGES       = ../runtcl ../tools/cpmanpages
 install:
 	${CPMANPAGES} -rmcat @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${srcbasedir}/man ${TCL_MAN_BASEDIR}
+	    ${srcbasedir}/man ${INSTALL_ROOT}${TCL_MAN_BASEDIR}
 
 install-master:
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${TCL_UCB_SRC}/doc ${TCL_INST_MASTER}/man
+	    ${TCL_UCB_SRC}/doc ${INSTALL_ROOT}${TCL_INST_MASTER}/man
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TCL_MAN_CMD_SECTION} ${TCL_MAN_FUNC_SECTION} @@ \
-	    ${srcbasedir}/man ${TCL_INST_MASTER}/man
+	    ${srcbasedir}/man ${INSTALL_ROOT}${TCL_INST_MASTER}/man
 
 install-tk-master:
 	${CPMANPAGES} @${MAN_DIR_SEPARATOR}@ \
 	    ${TK_MAN_CMD_SECTION} ${TK_MAN_FUNC_SECTION} \
 	    ${TK_MAN_UNIXCMD_SECTION} \
-	    ${TK_UCB_SRC}/doc ${TK_INST_MASTER}/man
+	    ${TK_UCB_SRC}/doc ${INSTALL_ROOT}${TK_INST_MASTER}/man
 
 #------------------------------------------------------------------------------
 clean:

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.8 1995/07/01 00:12:12 markd Exp markd $
+# $Id: Makefile.in,v 4.9 1995/07/01 16:57:47 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -133,17 +133,19 @@ buildtkhelp:
 install: install-exec install-library
 
 install-library:
-	${INSTCOPY} ${TKTCL} ${TKTLIB} ${TKTNDX} ${INST_MASTER}
-	${INSTCOPY} ${TK_UCB_SRC}/library/prolog.ps  ${INST_MASTER}
-	${INSTCOPY} ${HELPSRC} ${INST_MASTER}/help
-	${INSTCOPY} ${DEMOS} ${INST_MASTER}/demos
+	${INSTCOPY} ${TKTCL} ${TKTLIB} ${TKTNDX} ${INSTALL_ROOT}${INST_MASTER}
+	${INSTCOPY} ${TK_UCB_SRC}/library/prolog.ps \
+	    ${INSTALL_ROOT}${INST_MASTER}
+	${INSTCOPY} ${HELPSRC} ${INSTALL_ROOT}${INST_MASTER}/help
+	${INSTCOPY} ${DEMOS} ${INSTALL_ROOT}${INST_MASTER}/demos
 
 install-exec:
-	${INSTCOPY} tclhelp ${TCL_BINDIR}
+	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TCL_BINDIR}
 
 install-master: install
-	${INSTCOPY} tclhelp ${INST_MASTER}/bin${ARCH}
-	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/tclhelp ${TCL_BINDIR}
+	${INSTCOPY} tclhelp ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}
+	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/tclhelp \
+	    ${INSTALL_ROOT}${TCL_BINDIR}
 
 install-master-exec: install-exec
 

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.15 1995/07/05 04:00:59 markd Exp markd $
+# $Id: Makefile.in,v 4.16 1995/07/16 23:57:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -104,24 +104,24 @@ shlink:
 install: install-exec
 
 install-exec:
-	${INSTCOPY} wishx ${TCL_BINDIR}
-	${STRIP} ${TCL_BINDIR}/wishx
-	${INSTCOPY} libtkx.a ${TCL_LIBDIR}
-	${RANLIB} ${TCL_LIBDIR}/libtkx.a
-	${INSTCOPY} tkxlibs.mk ${TCL_LIBDIR}
+	${INSTCOPY} wishx ${INSTALL_ROOT}${TCL_BINDIR}
+	${STRIP} ${INSTALL_ROOT}${TCL_BINDIR}/wishx
+	${INSTCOPY} libtkx.a ${INSTALL_ROOT}${TCL_LIBDIR}
+	${RANLIB} ${INSTALL_ROOT}${TCL_LIBDIR}/libtkx.a
+	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
 
 install-master: install-master-exec
-	${INSTCOPY} ${TK_UCB_SRC}/tk.h ${INST_MASTER}/include
-	${SYMLINKEXT} ${INST_MASTER}/include/* ${TCL_INCLUDEDIR}
+	${INSTCOPY} ${TK_UCB_SRC}/tk.h ${INSTALL_ROOT}${INST_MASTER}/include
+	${SYMLINKEXT} ${INST_MASTER}/include/* ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 
 install-master-exec:
-	${INSTCOPY} wishx ${INST_MASTER}/bin${ARCH}
-	${STRIP} ${INST_MASTER}/bin${ARCH}/wishx
-	${INSTCOPY} ${LIBTK} libtkx.a ${INST_MASTER}/lib${ARCH}
-	${RANLIB} ${INST_MASTER}/lib${ARCH}/*.a
-	${INSTCOPY} tkxlibs.mk ${INST_MASTER}/lib${ARCH}
-	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
+	${INSTCOPY} wishx ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}
+	${STRIP} ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}/wishx
+	${INSTCOPY} ${LIBTK} libtkx.a ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
+	${RANLIB} ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}/*.a
+	${INSTCOPY} tkxlibs.mk ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
+	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${INSTALL_ROOT}${TCL_BINDIR}
+	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${INSTALL_ROOT}${TCL_LIBDIR}
 
 #------------------------------------------------------------------------------
 clean:

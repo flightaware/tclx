@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 4.12 1995/07/01 04:33:24 markd Exp markd $
+# $Id: Config.mk,v 4.13 1995/07/15 23:08:32 markd Exp markd $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -113,6 +113,15 @@ XLDLIBS=
 #TCLXX=NO
 #CXX=CC
 #CXXFLAGS=-O
+
+
+#------------------------------------------------------------------------------
+# The following definition can be set to non-null for special systems
+# like AFS with replication.  It allows the pathnames used for installation
+# to be different than those used for actually reference files at
+# run-time.  INSTALL_ROOT is prepended to $prefix and $exec_prefix
+# when installing files.
+INSTALL_ROOT =
 
 #------------------------------------------------------------------------------
 # The master Tcl directory that the Extended Tcl runtime files are installed

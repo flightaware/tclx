@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.19 1995/07/05 04:00:59 markd Exp markd $
+# $Id: Makefile.in,v 4.20 1995/07/16 23:57:54 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -154,28 +154,30 @@ shlink:
 #------------------------------------------------------------------------------
 
 install: install-exec
-	${INSTCOPY} ${srcdir}/tclExtend.h ${srcdir}/tcl++.h ${TCL_INCLUDEDIR}
+	${INSTCOPY} ${srcdir}/tclExtend.h ${srcdir}/tcl++.h \
+	    ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 
 install-exec:
-	${INSTCOPY} tcl ${TCL_BINDIR}
-	${STRIP} ${TCL_BINDIR}/tcl
-	${INSTCOPY} libtclx.a ${TCL_LIBDIR}
-	${RANLIB} ${TCL_LIBDIR}/libtclx.a
-	${INSTCOPY} tclxlibs.mk ${TCL_LIBDIR}
+	${INSTCOPY} tcl ${INSTALL_ROOT}${TCL_BINDIR}
+	${STRIP} ${INSTALL_ROOT}${TCL_BINDIR}/tcl
+	${INSTCOPY} libtclx.a ${INSTALL_ROOT}${TCL_LIBDIR}
+	${RANLIB} ${INSTALL_ROOT}${TCL_LIBDIR}/libtclx.a
+	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
 
 install-master: install-master-exec
 	${INSTCOPY} ${TCL_UCB_SRC}/tcl.h ${srcdir}/tclExtend.h \
-	    ${srcdir}/tcl++.h ${INST_MASTER}/include
-	${SYMLINKEXT} ${INST_MASTER}/include/* ${TCL_INCLUDEDIR}
+	    ${srcdir}/tcl++.h ${INSTALL_ROOT}${INST_MASTER}/include
+	${SYMLINKEXT} ${INST_MASTER}/include/* ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 
 install-master-exec:
-	${INSTCOPY} tcl ${INST_MASTER}/bin${ARCH}
-	${STRIP} ${INST_MASTER}/bin${ARCH}/tcl
-	${INSTCOPY} ${LIBTCL} libtclx.a ${INST_MASTER}/lib${ARCH}
-	${RANLIB} ${INST_MASTER}/lib${ARCH}/*.a
-	${INSTCOPY} tclxlibs.mk ${INST_MASTER}/lib${ARCH}
-	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${TCL_BINDIR}
-	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${TCL_LIBDIR}
+	${INSTCOPY} tcl ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}
+	${STRIP} ${INSTALL_ROOT}${INST_MASTER}/bin${ARCH}/tcl
+	${INSTCOPY} ${LIBTCL} libtclx.a \
+	    ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
+	${RANLIB} ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}/*.a
+	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${INST_MASTER}/lib${ARCH}
+	${SYMLINKEXT} ${INST_MASTER}/bin${ARCH}/* ${INSTALL_ROOT}${TCL_BINDIR}
+	${SYMLINKEXT} ${INST_MASTER}/lib${ARCH}/* ${INSTALL_ROOT}${TCL_LIBDIR}
 
 #------------------------------------------------------------------------------
 
