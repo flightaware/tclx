@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 8.2 1997/06/12 21:08:10 markd Exp $
+ * $Id: tclExtdInt.h,v 8.3 1997/06/25 08:23:38 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -167,6 +167,7 @@ typedef struct {
 
 /*
  * Used to return argument messages by most commands.
+ * FIX: Should be internal, got thought TclX_WrongArgs.
  */
 extern char *tclXWrongArgs;
 extern Tcl_Obj *tclXWrongArgsObj;
@@ -334,11 +335,13 @@ TclX_ChownObjCmd _ANSI_ARGS_((ClientData clientData,
 extern int 
 TclX_ChgrpObjCmd _ANSI_ARGS_((ClientData clientData, 
     Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+
 /*
  * from tclXcmdloop.c
  */
 extern int 
-TclX_CommandloopCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+TclX_CommandloopObjCmd  _ANSI_ARGS_((ClientData clientData, 
+    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
 
 /*
  * from tclXdebug.c

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 8.3 1997/04/17 04:58:35 markd Exp $
+ * $Id: tclXcmdloop.c,v 8.4 1997/06/12 21:08:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -672,7 +672,7 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
 }
 
 /*-----------------------------------------------------------------------------
- * Tcl_CommandloopCmd --
+ * Tcl_CommandloopObjCmd --
  *    Implements the commandloop command:
  *       commandloop -async -interactive on|off|tty -prompt1 cmd
  *                   -prompt2 cmd -endcommand cmd
@@ -681,48 +681,52 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_CommandloopCmd (clientData, interp, argc, argv)
+TclX_CommandloopObjCmd (clientData, interp, objc, objv)
     ClientData  clientData;
     Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
     int options = 0, async = FALSE, argIdx, interactive;
-    char *endCommand = NULL;
+    char *argStr,  *endCommand = NULL;
     char *prompt1 = NULL, *prompt2 = NULL;
 
     interactive = isatty (0);
-    for (argIdx = 1; (argIdx < argc) && (argv [argIdx][0] == '-'); argIdx++) {
-        if (STREQU (argv [argIdx], "-async")) {
+    for (argIdx = 1; argIdx < objc; argIdx++) {
+        argStr = Tcl_GetStringFromObj (objv [argIdx], NULL);
+        if (argStr [0] != '-')
+            break;
+        if (STREQU (argStr, "-async")) {
             async = TRUE;
-        } else if (STREQU (argv [argIdx], "-prompt1")) {
-            if (argIdx == argc - 1)
+        } else if (STREQU (argStr, "-prompt1")) {
+            if (argIdx == objc - 1)
                 goto argRequired;
-            prompt1 = argv [++argIdx];
-        } else if (STREQU (argv [argIdx], "-prompt2")) {
-            if (argIdx == argc - 1)
+            prompt1 = Tcl_GetStringFromObj (objv [++argIdx], NULL);;
+        } else if (STREQU (argStr, "-prompt2")) {
+            if (argIdx == objc - 1)
                 goto argRequired;
-            prompt2 = argv [++argIdx];
-        } else if (STREQU (argv [argIdx], "-interactive")) {
-            if (argIdx == argc - 1)
+            prompt2 = Tcl_GetStringFromObj (objv [++argIdx], NULL);
+        } else if (STREQU (argStr, "-interactive")) {
+            if (argIdx == objc - 1)
                 goto argRequired;
             argIdx++;
-            if (STREQU (argv [argIdx], "tty")) {
+            argStr = Tcl_GetStringFromObj (objv [argIdx], NULL);
+            if (STREQU (argStr, "tty")) {
                 interactive = TRUE;
             } else {
-                if (Tcl_GetBoolean (interp, argv [argIdx],
-                                    &interactive) != TCL_OK)
+                if (Tcl_GetBooleanFromObj (interp, objv [argIdx],
+                                           &interactive) != TCL_OK)
                     return TCL_ERROR;
             }
-        } else if (STREQU (argv [argIdx], "-endcommand")) {
-            if (argIdx == argc - 1)
+        } else if (STREQU (argStr, "-endcommand")) {
+            if (argIdx == objc - 1)
                 goto argRequired;
-            endCommand = argv [++argIdx];
+            endCommand = Tcl_GetStringFromObj (objv [++argIdx], NULL);
         } else {
             goto unknownOption;
         }
     }
-    if (argIdx != argc)
+    if (argIdx != objc)
         goto wrongArgs;
 
     if (interactive)
@@ -744,26 +748,24 @@ TclX_CommandloopCmd (clientData, interp, argc, argv)
 
 
     /*
-     * Argument error message generation.  argv [argIdx] should contain the
+     * Argument error message generation.  argStr should contain the
      * option being processed.
      */
   argRequired:
-    Tcl_AppendResult (interp, "argument required for ", argv [argIdx],
+    Tcl_AppendResult (interp, "argument required for ", argStr,
                       " option", (char *) NULL);
     return TCL_ERROR;
 
   unknownOption:
-    Tcl_AppendResult (interp, "unknown option \"", argv [argIdx],
+    Tcl_AppendResult (interp, "unknown option \"", argStr,
                       "\", expected one of \"-async\", ",
                       "\"-interactive\", \"-prompt1\", \"-prompt2\", ",
                       " or \"-endcommand\"", (char *) NULL);
     return TCL_ERROR;
     
   wrongArgs:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?-async? ",
-                      "?-interactive on|off|tty? ?-prompt1 cmd? ",
-                      "?-prompt2 cmd? ?-endcommand cmd?",
-                      (char *) NULL);
+    TclX_WrongArgs (interp, objv [0],
+                    "?-async? ?-interactive on|off|tty? ?-prompt1 cmd? ?-prompt2 cmd? ?-endcommand cmd?");
     return TCL_ERROR;
 }
 

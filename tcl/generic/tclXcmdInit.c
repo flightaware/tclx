@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 8.1 1997/04/17 04:58:34 markd Exp $
+ * $Id: tclXcmdInit.c,v 8.2 1997/06/12 21:08:13 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -67,12 +67,12 @@ Tclxcmd_Init (interp)
     /*
      * from tclXcmdloop.c
      */
-    Tcl_CreateCommand (interp,
-		       "commandloop",
-		       TclX_CommandloopCmd, 
-                       (ClientData) NULL,
-		       (Tcl_CmdDeleteProc*) NULL);
-
+    Tcl_CreateObjCommand (interp,
+                          "commandloop",
+                          TclX_CommandloopObjCmd, 
+                          (ClientData) NULL,
+                          (Tcl_CmdDeleteProc*) NULL);
+    
     /*
      * from tclXdebug.c
      */
