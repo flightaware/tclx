@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.7 1995/06/30 22:37:25 markd Exp markd $
+ * $Id: tkXshell.c,v 4.8 1995/06/30 23:27:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,25 +27,11 @@
  *	applications.
  *
  * Copyright (c) 1990-1994 The Regents of the University of California.
- * Copyright (c) 1994 Sun Microsystems, Inc.
+ * Copyright (c) 1994-1995 Sun Microsystems, Inc.
  * All rights reserved.
  *
- * Permission is hereby granted, without written agreement and without
- * license or royalty fees, to use, copy, modify, and distribute this
- * software and its documentation for any purpose, provided that the
- * above copyright notice and the following two paragraphs appear in
- * all copies of this software.
- * 
- * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT
- * OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF
- * CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
- * AND FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * See the file "license.terms" for information on usage and redistribution
+ * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  */
 
 #include "tclExtdInt.h"
@@ -79,10 +65,10 @@ static char *display = NULL;
 static char *geometry = NULL;
 
 static Tk_ArgvInfo argTable[] = {
-    {"-geometry", TK_ARGV_STRING, (char *) NULL, (char *) &geometry,
-	"Initial geometry for window"},
     {"-display", TK_ARGV_STRING, (char *) NULL, (char *) &display,
 	"Display to use"},
+    {"-geometry", TK_ARGV_STRING, (char *) NULL, (char *) &geometry,
+	"Initial geometry for window"},
     {"-name", TK_ARGV_STRING, (char *) NULL, (char *) &name,
 	"Name to use for application"},
     {"-sync", TK_ARGV_CONSTANT, (char *) 1, (char *) &synchronize,
@@ -129,7 +115,8 @@ TkX_Main (argc, argv, appInitProc)
 {
     char *args, *p, *msg, *argv0, *class;
     char buf[20];
-    int code, length;
+    int code;
+    size_t length;
     FILE *stderrPtr;
 
     stderrPtr = TCL_STDERR;
@@ -183,8 +170,7 @@ TkX_Main (argc, argv, appInitProc)
 
     /*
      * Make command-line arguments available in the Tcl variables "argc"
-     * and "argv".    Also set the "geometry" variable from the geometry
-     * specified on the command line.
+     * and "argv".
      */
 
     args = Tcl_Merge(argc-1, argv+1);
@@ -194,9 +180,6 @@ TkX_Main (argc, argv, appInitProc)
     Tcl_SetVar(interp, "argc", buf, TCL_GLOBAL_ONLY);
     Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv0,
 	    TCL_GLOBAL_ONLY);
-    if (geometry != NULL) {
-	Tcl_SetVar(interp, "geometry", geometry, TCL_GLOBAL_ONLY);
-    }
 
     /*
      * If a display was specified, put it into the DISPLAY
@@ -225,7 +208,7 @@ TkX_Main (argc, argv, appInitProc)
 	    name = p;
 	}
     }
-    class = ckalloc((unsigned) (strlen(name) + 1));
+    class = (char *) ckalloc((unsigned) (strlen(name) + 1));
     strcpy(class, name);
     class[0] = toupper((unsigned char) class[0]);
     mainWindow = Tk_CreateMainWindow(interp, display, name, class);
@@ -249,6 +232,19 @@ TkX_Main (argc, argv, appInitProc)
         Tcl_SetupSigInt ();
 
     /*
+     * Set the geometry of the main window, if requested.  Put the
+     * requested geometry into the "geometry" variable.
+     */
+
+    if (geometry != NULL) {
+	Tcl_SetVar(interp, "geometry", geometry, TCL_GLOBAL_ONLY);
+	code = Tcl_VarEval(interp, "wm geometry . ", geometry, (char *) NULL);
+	if (code != TCL_OK) {
+	    fprintf(stderr, "%s\n", interp->result);
+	}
+    }
+
+    /*
      * Invoke application-specific initialization.
      */
 
@@ -270,13 +266,15 @@ TkX_Main (argc, argv, appInitProc)
 	}
 	tty = 0;
     } else {
+	/*
+	 * Commands will come from standard input, so set up an event
+	 * handler for standard input.  Evaluate the .rc file, if one
+	 * has been specified, set up an event handler for standard
+	 * input, and print a prompt if the input device is a terminal.
+	 */
+
         TclX_EvalRCFile (interp);
 
-	/*
-	 * Commands will come from standard input.  Set up a handler
-	 * to receive those characters and print a prompt if the input
-	 * device is a terminal.
-	 */
         tclErrorSignalProc = SignalProc;
 	Tk_CreateFileHandler(0, TK_READABLE, StdinProc, (ClientData) 0);
 	if (tty) {
