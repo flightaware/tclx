@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 2.0 1992/10/16 04:49:38 markd Rel markd $
+# $Id: dup.test,v 2.1 1993/06/21 05:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -72,7 +72,7 @@ if {[set childPid [fork]] == 0} {
     dup $outFH stdout
     close $outFH
         
-    execl ../tcl [list -qc {commandloop {return ""} {return ""}}]
+    execl ../tclmaster/bin/tcl [list -qc {commandloop {return ""} {return ""}}]
     error "Should never make it here"
 }
 
