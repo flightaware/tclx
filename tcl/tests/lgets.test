@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: lgets.test,v 2.0 1992/10/16 04:49:57 markd Rel markd $
+# $Id: lgets.test,v 2.1 1993/03/06 21:43:53 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -89,7 +89,7 @@ nypq}]
     set data(6) [list [replicate ABD 200]  "\n" [replicate XYZ 100]]
     set data(7) [list [replicate ABD 255]  "\n" [replicate XYZ 100]]
     set data(8) [list [replicate ABD 256]  "\n" [replicate XYZ 100]]
-    set data(9) [list [replicate "AAA\nBBB" 100]]
+    set data(9) [list [replicate "AAA\n \{B \"BB" 100]]
 
     set fh [open test1.tmp w]
     loop idx 0 10 {
@@ -148,5 +148,20 @@ Test lgets-2.11 {lgets command} {
 } 0 $data(9)
 
 catch {close $fh}
+unset data
+
+set data "ERR_REQUEST_PROCESSOR_FAILURE \\ {sc\\ ...\""
+
+Test lgets-3.1 {lgets command} {
+    set fh [open test1.tmp w+]
+    puts $fh $data
+    seek $fh 0
+    lgets $fh
+} 0 $data
+
+catch {close $fh}
+unset data
+
+
 unlink -nocomplain {test1.tmp test2.tmp}
 

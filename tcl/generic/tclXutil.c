@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXutil.c,v 2.6 1993/07/12 06:28:33 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -262,14 +262,15 @@ Tcl_UpShift (targetStr, sourceStr)
  *
  *    Reads a line from a file into a dynamic string.  The string will be
  * expanded, if necessary and reads are done until EOL or EOF is reached.
+ * The line is appended to any data already in the string.
  *
  * Parameter
  *   o filePtr (I) - File to read from.
  *   o dynStrPtr (I) - String to return the data in.
  * Returns:
- *    0 - EOF
- *    1 - If data was transfered.
- *   -1 - An error occured.
+ *    o TCL_BREAK - EOF
+ *    o TCL_OK - If data was transfered.
+ *    o TCL_ERROR - An error occured.
  *-----------------------------------------------------------------------------
  */
 int
@@ -280,8 +281,7 @@ Tcl_DStringGets (filePtr, dynStrPtr)
     char           buffer [128];
     register char *bufPtr, *bufEnd;
     register int   readVal;
-
-    Tcl_DStringFree (dynStrPtr);
+    int            startLength = dynStrPtr->length;
 
     bufPtr = buffer;
     bufEnd = buffer + sizeof (buffer) - 1;
@@ -299,13 +299,16 @@ Tcl_DStringGets (filePtr, dynStrPtr)
         }
     }
     if ((readVal == EOF) && ferror (filePtr))
-        return -1;   /* Error */
+        return TCL_ERROR;   /* Error */
 
     if (bufPtr != buffer) {
         Tcl_DStringAppend (dynStrPtr, buffer, bufPtr - buffer);
     }
 
-    return (readVal == EOF) ? 0 : 1;
+    if ((readVal == EOF) && dynStrPtr->length == startLength)
+        return TCL_BREAK;
+    else
+        return TCL_OK;
 }
 
 /*

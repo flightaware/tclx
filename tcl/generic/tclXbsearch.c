@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 2.4 1993/07/13 03:04:02 markd Exp markd $
+ * $Id: tclXbsearch.c,v 2.5 1993/07/18 05:59:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -187,16 +187,18 @@ ReadAndCompare (fileOffset, searchCBPtr)
 
     searchCBPtr->lastRecOffset = fileOffset;
 
+    Tcl_DStringFree (&searchCBPtr->dynBuf);
+
     status = Tcl_DStringGets (searchCBPtr->fileCBPtr,
                               &searchCBPtr->dynBuf);
-    if (status < 0)
+    if (status == TCL_ERROR)
         goto unixError;
 
     /* 
      * Only compare if EOF was not hit, otherwise, treat as if we went
      * above the key we are looking for.
      */
-    if (status == 0) {
+    if (status == TCL_BREAK) {
         searchCBPtr->cmpResult = -1;
         return TCL_OK;
     }

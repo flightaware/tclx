@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlib.c,v 2.5 1993/06/21 06:09:09 markd Exp markd $
+ * $Id: tclXlib.c,v 2.6 1993/07/13 03:04:02 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -578,10 +578,11 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath, overwrite)
     Tcl_DStringInit (&lineBuffer);
 
     while (TRUE) {
+        Tcl_DStringFree (&lineBuffer);
         status = Tcl_DStringGets (indexFilePtr, &lineBuffer);
-        if (status == 0)
+        if (status == TCL_BREAK)
             goto reachedEOF;
-        if (status < 0)
+        if (status == TCL_ERROR)
             goto fileError;
 
         if ((Tcl_SplitList (interp, lineBuffer.string, &lineArgc,

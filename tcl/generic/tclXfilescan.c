@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 2.5 1993/07/13 03:04:02 markd Exp markd $
+ * $Id: tclXfilescan.c,v 2.6 1993/07/18 05:59:41 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -409,17 +409,19 @@ Tcl_ScanfileCmd (clientData, interp, argc, argv)
     result = TCL_OK;  /* Assume the best */
 
     while (result == TCL_OK) {
-        int storedThisLine = FALSE;
+        int status, storedThisLine = FALSE;
 
-        switch (Tcl_DStringGets (filePtr, &dynBuf)) {
-          case -1:  /* Error */
+        Tcl_DStringFree (&dynBuf);
+        status = Tcl_DStringGets (filePtr, &dynBuf) ;
+
+        if (status == TCL_ERROR) {
             interp->result = Tcl_PosixError (interp);
             result = TCL_ERROR;
             goto scanExit;
-            
-          case 0:  /* EOF */
-            goto scanExit;
         }
+        if (status == TCL_BREAK)
+            goto scanExit;  /* EOF */
+
         scanLineNum++;
         storedThisLine = 0;
         matchedAtLeastOne = 0;
