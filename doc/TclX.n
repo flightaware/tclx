@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.4 1996/08/09 04:12:23 markd Exp $
+.\" $Id: TclX.n,v 7.5 1996/08/21 06:54:54 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -485,8 +485,10 @@ data is for.  The data in each entry is a list consisting of the procedure
 call count and the real time and CPU time in milliseconds spent in the
 procedure (and all procedures it called). The list is in the form {\fIcount
 real cpu\fR}.
+Upleveled code is reported in the context that it was executed in, not
+the context that the uplevel was called in.
 A Tcl procedure \fBprofrep\fR is supplied for reducing the data and
-producing a report
+producing a report.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -503,6 +505,19 @@ It should be one of "\fBcalls\fR", "\fBcpu\fR" or "\fBreal\fR".
 \fBOutFile\fR is the name of file to write the report to.  If omitted,
 stdout is assumed.  \fBUserTitle\fR is an optional title line to add to
 output.
+.P
+Listed with indentation below each procedure or command is the procedure
+call stack.
+The first indented line being the procedure that invoked the reported
+procedure or command.
+The next line is the procedure that invoked the procedure above it, and
+so on.
+If no indented procedures are shown, the procedure or command was called from
+the global context.
+Time actually spent in the global context is listed on a line labeled
+\fB<global>\fR.
+Upleveled code is reported in the context that it was executed in, not
+the context that the uplevel was called in.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
 '\"@endhelp
@@ -1818,6 +1833,18 @@ and \fIlongName\fR to ``Dave Foo''.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+'\"@help: tcl/lists/lcontain
+'\"@brief: Determine if a list contains an element.
+.TP
+.B  lcontain \fIlist element\fR
+.br
+Determine if the \fIelement\fR is a list element of \fIlist\fR.
+If the element is contained in the list, 1 is returned, otherwise, 0 is
+returned.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
 '\"@help: tcl/lists/lempty
 '\"@brief: Determine if a list is empty. 
 .TP
@@ -1825,7 +1852,8 @@ and \fIlongName\fR to ``Dave Foo''.
 .br
 Determine if the specified list is empty.
 If empty, 1 is returned, otherwise, 0 is returned.  This command is an
-alternative to comparing a list to an empty string.
+alternative to comparing a list to an empty string, however it checks 
+for a string of all whitespaces, which is an empty list.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
@@ -2067,11 +2095,24 @@ collation environment of the current locale.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+'\"@help: tcl/strings/cconcat
+'\"@brief: Concatenate strings.
+.TP
+.B cconcat \fI?string1? ?string2? ?...?\fR 
+.br
+Concatenate the arguments, returning the resulting string.
+While string concatenation is normally performed by the parser, it is
+occasionally useful to have a command that returns a string.
+The is generally useful when a command to evaluate is required.
+No separators are inserted between the strings.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
 '
 '\"@help: tcl/strings/cequal
 '\"@brief: String equality convenience command.
 .TP
-.B cequal \fIstring1 string2\fR
+.B cequal \fIstring string\fR
 .br
 This command compares two strings for equality.
 It returns \fB1\fR if \fIstring1\fR and \fIstring2\fR are the identical

@@ -88,11 +88,11 @@ Test lmatch-2.7 {search modes} {
 
 Test lmatch-3.1 {lmatch errors} {
     lmatch
-} 1 {wrong # args: should be "lmatch ?mode? list pattern"}
+} 1 {wrong # args: lmatch ?mode? list pattern}
 
 Test lmatch-3.2 {lmatch errors} {
     lmatch a
-} 1 {wrong # args: should be "lmatch ?mode? list pattern"}
+} 1 {wrong # args: lmatch ?mode? list pattern}
 
 Test lmatch-3.3 {lmatch errors} {
     lmatch a b c
@@ -100,7 +100,7 @@ Test lmatch-3.3 {lmatch errors} {
 
 Test lmatch-3.4 {lmatch errors} {
     lmatch a b c d
-} 1 {wrong # args: should be "lmatch ?mode? list pattern"}
+} 1 {wrong # args: lmatch ?mode? list pattern}
 
 Test lmatch-3.5 {lmatch errors} {
     lmatch "\{" b

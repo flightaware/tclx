@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 7.2 1996/07/22 17:10:00 markd Exp $
+ * $Id: tclXcmdInit.c,v 7.3 1996/07/26 05:55:52 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -244,6 +244,8 @@ Tclxcmd_SafeInit (interp)
                      (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand(interp, "lmatch", Tcl_LmatchCmd, 
                      (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand(interp, "lcontain", Tcl_LcontainCmd, 
+                     (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
     /*
      * from tclXmath.c
@@ -267,6 +269,8 @@ Tclxcmd_SafeInit (interp)
     Tcl_CreateCommand(interp, "cindex", Tcl_CindexCmd, 
                      (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand(interp, "clength", Tcl_ClengthCmd, 
+                     (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateCommand(interp, "cconcat", Tcl_CconcatCmd, 
                      (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateCommand(interp, "crange", Tcl_CrangeCmd, 
                      (ClientData) TRUE, (Tcl_CmdDeleteProc*) NULL);

@@ -1,3 +1,5 @@
+
+
 ./CHANGES
 ./MANIFEST
 ./README
@@ -152,6 +154,7 @@
 ./tcl/help/tcl/lists/join
 ./tcl/help/tcl/lists/lappend
 ./tcl/help/tcl/lists/lassign
+./tcl/help/tcl/lists/lcontain
 ./tcl/help/tcl/lists/lempty
 ./tcl/help/tcl/lists/lindex
 ./tcl/help/tcl/lists/linsert
@@ -198,6 +201,7 @@
 ./tcl/help/tcl/status/umask
 ./tcl/help/tcl/strings/append
 ./tcl/help/tcl/strings/ccollate
+./tcl/help/tcl/strings/cconcat
 ./tcl/help/tcl/strings/cequal
 ./tcl/help/tcl/strings/cindex
 ./tcl/help/tcl/strings/clength
@@ -258,14 +262,16 @@
 ./tcl/tests/cmdtrace.test
 ./tcl/tests/compat.test
 ./tcl/tests/convlib.test
+./tcl/tests/copyfile.test
 ./tcl/tests/dup.test
 ./tcl/tests/fcntl.test
-./tcl/tests/filecmds.test
 ./tcl/tests/filescan.test
 ./tcl/tests/flock.test
 ./tcl/tests/fmath.test
 ./tcl/tests/forfile.test
+./tcl/tests/frename.test
 ./tcl/tests/fstat.test
+./tcl/tests/ftrunc.test
 ./tcl/tests/globrecur.test
 ./tcl/tests/help.test
 ./tcl/tests/init.test
@@ -278,9 +284,11 @@
 ./tcl/tests/math.test
 ./tcl/tests/msgcat.test
 ./tcl/tests/nice.test
+./tcl/tests/pipe.test
 ./tcl/tests/process.test
 ./tcl/tests/profile.test
 ./tcl/tests/pushd.test
+./tcl/tests/readdir.test
 ./tcl/tests/select.test
 ./tcl/tests/server.test
 ./tcl/tests/setfuncs.test

@@ -1,8 +1,7 @@
 #
 # string.test
 #
-# Tests for the cindex, clength, crange, replicate, csubstr, and translit
-# commands.
+# Tests for the string-related commands.
 #---------------------------------------------------------------------------
 # Copyright 1992-1996 Karl Lehenbauer and Mark Diekhans.
 #
@@ -13,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 6.0 1996/05/10 16:18:13 markd Exp $
+# $Id: string.test,v 7.0 1996/06/16 05:32:57 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -247,7 +246,6 @@ Test string-10.7 {ccollate tests} {
     ccollate abcde abcdef
 } 0 -1
 
-
 Test string-10.8 {ccollate tests} {
     ccollate -local abcdefg abcdef
 } 0 1
@@ -255,5 +253,21 @@ Test string-10.8 {ccollate tests} {
 Test string-10.9 {ccollate tests} {
     ccollate -local abcde abcdef
 } 0 -1
+
+Test string-11.1 {cconcat tests} {
+    cconcat
+} 0 {}
+
+Test string-11.2 {cconcat tests} {
+    cconcat Aaa Bbb
+} 0 {AaaBbb}
+
+
+Test string-11.3 {cconcat tests} {
+    cconcat Aaa " " Bbb
+} 0 {Aaa Bbb}
+
+
+
 
 

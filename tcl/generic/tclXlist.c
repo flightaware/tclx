@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 6.0 1996/05/10 16:15:48 markd Exp $
+ * $Id: tclXlist.c,v 7.0 1996/06/16 05:30:37 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -331,39 +331,41 @@ Tcl_LassignCmd (clientData, interp, argc, argv)
  *----------------------------------------------------------------------
  */
 int
-Tcl_LmatchCmd(notUsed, interp, argc, argv)
-    ClientData notUsed;                 /* Not used. */
-    Tcl_Interp *interp;                 /* Current interpreter. */
-    int argc;                           /* Number of arguments. */
-    char **argv;                        /* Argument strings. */
+Tcl_LmatchCmd (notUsed, interp, argc, argv)
+    ClientData notUsed;
+    Tcl_Interp *interp;
+    int argc;
+    char **argv;
 {
 #define EXACT   0
 #define GLOB    1
 #define REGEXP  2
-    int listArgc;
+    int listArgc, idx, match, mode;
     char **listArgv;
     Tcl_DString resultList;
-    int i, match, mode;
+
 
     mode = GLOB;
     if (argc == 4) {
-        if (STREQU(argv[1], "-exact")) {
+        if (STREQU (argv [1], "-exact")) {
             mode = EXACT;
-        } else if (STREQU(argv[1], "-glob")) {
+        } else if (STREQU (argv [1], "-glob")) {
             mode = GLOB;
-        } else if (STREQU(argv[1], "-regexp")) {
+        } else if (STREQU (argv [1], "-regexp")) {
             mode = REGEXP;
         } else {
-            Tcl_AppendResult(interp, "bad search mode \"", argv[1],
-                    "\": must be -exact, -glob, or -regexp", (char *) NULL);
+            Tcl_AppendResult (interp, "bad search mode \"", argv [1],
+                              "\": must be -exact, -glob, or -regexp",
+                              (char *) NULL);
             return TCL_ERROR;
         }
     } else if (argc != 3) {
-        Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-                " ?mode? list pattern\"", (char *) NULL);
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0],
+                         " ?mode? list pattern", (char *) NULL);
         return TCL_ERROR;
     }
-    if (Tcl_SplitList(interp, argv[argc-2], &listArgc, &listArgv) != TCL_OK) {
+    if (Tcl_SplitList (interp, argv [argc-2],
+                       &listArgc, &listArgv) != TCL_OK) {
         return TCL_ERROR;
     }
     if (listArgc == 0) {
@@ -372,17 +374,18 @@ Tcl_LmatchCmd(notUsed, interp, argc, argv)
     }
     
     Tcl_DStringInit (&resultList);
-    for (i = 0; i < listArgc; i++) {
+    for (idx = 0; idx < listArgc; idx++) {
         match = 0;
         switch (mode) {
             case EXACT:
-                match = (STREQU (listArgv [i], argv [argc-1]));
+                match = (STREQU (listArgv [idx], argv [argc-1]));
                 break;
             case GLOB:
-                match = Tcl_StringMatch (listArgv [i], argv [argc-1]);
+                match = Tcl_StringMatch (listArgv [idx], argv [argc-1]);
                 break;
             case REGEXP:
-                match = Tcl_RegExpMatch (interp, listArgv [i], argv [argc-1]);
+                match = Tcl_RegExpMatch (interp, listArgv [idx],
+                                         argv [argc-1]);
                 if (match < 0) {
                     ckfree ((char *) listArgv);
                     Tcl_DStringFree (&resultList);
@@ -391,10 +394,52 @@ Tcl_LmatchCmd(notUsed, interp, argc, argv)
                 break;
         }
         if (match) {
-            Tcl_DStringAppendElement (&resultList, listArgv [i]);
+            Tcl_DStringAppendElement (&resultList, listArgv [idx]);
         }
     }
     ckfree ((char *) listArgv);
     Tcl_DStringResult (interp, &resultList);
+    return TCL_OK;
+}
+
+/*----------------------------------------------------------------------
+ * Tcl_LcontainCmd --
+ *
+ *      This procedure is invoked to process the "lcontain" Tcl command.
+ *      See the user documentation for details on what it does.
+ *
+ * Results:
+ *      A standard Tcl result.
+ *
+ * Side effects:
+ *      See the user documentation.
+ *----------------------------------------------------------------------
+ */
+int
+Tcl_LcontainCmd (notUsed, interp, argc, argv)
+    ClientData notUsed;
+    Tcl_Interp *interp;
+    int argc;
+    char **argv;
+{
+    int listArgc, idx;
+    char **listArgv, *element;
+
+    if (argc != 3) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                          " list element", (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (Tcl_SplitList (interp, argv [1],
+                       &listArgc, &listArgv) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    
+    for (idx = 0; idx < listArgc; idx++) {
+        if (STREQU (listArgv [idx], argv [2]))
+            break;
+    }
+    ckfree ((char *) listArgv);
+    Tcl_SetResult (interp, (idx < listArgc) ? "1" : "0", TCL_STATIC);
     return TCL_OK;
 }
