@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.9 1995/02/25 02:54:53 markd Exp markd $
+# $Id: Makefile.in,v 4.10 1995/03/23 07:40:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -74,7 +74,7 @@ OBJS= \
     tclXlist.o       tclXmath.o       tclXmsgcat.o     tclXlibInit.o \
     tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
     tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
-    tclXunixcmds.o   tclXutil.o       tclXdata.o
+    tclXunixcmds.o   tclXutil.o
 
 UCBOBJS=tclCmdIL.o
 

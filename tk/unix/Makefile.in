@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 4.8 1995/03/13 06:12:11 markd Exp markd $
+# $Id: Makefile.in,v 4.9 1995/03/23 07:40:06 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -66,7 +66,7 @@ CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 
 #------------------------------------------------------------------------------
 
-OBJS=tkXinit.o tkXshell.o tkXdata.o
+OBJS=tkXinit.o tkXshell.o
 
 #------------------------------------------------------------------------------
 # Compile the TkX library and link wishx.  If the link fails, purge
