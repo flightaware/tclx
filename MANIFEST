@@ -1,13 +1,18 @@
-
-
 ./CHANGES
 ./MANIFEST
 ./README
+./TCL-REQUIRED_PATCHES/cmdtrace.patch
+./TCL-REQUIRED_PATCHES/compile_80b1.patch
+./TCL-REQUIRED_PATCHES/namesp_80b1.patch
+./TCL-REQUIRED_PATCHES/proc_80b1.patch
+./TCL-REQUIRED_PATCHES/result.patch
+./TCL-REQUIRED_PATCHES/unixnotfy_80b1.patch
+./doc/CONVERSION-NOTES
 ./doc/CmdWrite.3
 ./doc/Handles.3
 ./doc/Keylist.3
 ./doc/Memory.n
-./doc/ObjCmdWrite.3 
+./doc/ObjCmdWrite.3
 ./doc/TclX.n
 ./doc/TclXInit.3
 ./tcl/compat/getopt.c
@@ -65,6 +70,7 @@
 ./tcl/help/tcl/control/proc
 ./tcl/help/tcl/control/rename
 ./tcl/help/tcl/control/return
+./tcl/help/tcl/control/safe
 ./tcl/help/tcl/control/source
 ./tcl/help/tcl/control/switch
 ./tcl/help/tcl/control/tclx_errorHandler
@@ -94,6 +100,7 @@
 ./tcl/help/tcl/files/fblocked
 ./tcl/help/tcl/files/fcntl
 ./tcl/help/tcl/files/fconfigure
+./tcl/help/tcl/files/fcopy
 ./tcl/help/tcl/files/file
 ./tcl/help/tcl/files/filename
 ./tcl/help/tcl/files/flock
@@ -127,6 +134,7 @@
 ./tcl/help/tcl/internation/catopen
 ./tcl/help/tcl/intro/keyedlists
 ./tcl/help/tcl/intro/syntax
+./tcl/help/tcl/intro/tclsh
 ./tcl/help/tcl/keyedlists/keyldel
 ./tcl/help/tcl/keyedlists/keylget
 ./tcl/help/tcl/keyedlists/keylkeys
@@ -184,6 +192,7 @@
 ./tcl/help/tcl/processes/wait
 ./tcl/help/tcl/signals/signal
 ./tcl/help/tcl/sockets/host_info
+./tcl/help/tcl/sockets/http
 ./tcl/help/tcl/sockets/socket
 ./tcl/help/tcl/status/cd
 ./tcl/help/tcl/status/dirs
@@ -197,6 +206,7 @@
 ./tcl/help/tcl/status/showproc
 ./tcl/help/tcl/status/umask
 ./tcl/help/tcl/strings/append
+./tcl/help/tcl/strings/binary
 ./tcl/help/tcl/strings/ccollate
 ./tcl/help/tcl/strings/cconcat
 ./tcl/help/tcl/strings/cequal
@@ -224,6 +234,7 @@
 ./tcl/help/tcl/variables/array
 ./tcl/help/tcl/variables/for_array_keys
 ./tcl/help/tcl/variables/global
+./tcl/help/tcl/variables/namespace
 ./tcl/help/tcl/variables/set
 ./tcl/help/tcl/variables/stdvars
 ./tcl/help/tcl/variables/trace
@@ -311,6 +322,7 @@
 ./tcl/unix/tclxConfig.sh.in
 ./tcl/win/cattcl.c
 ./tcl/win/makefile.vc
+./tcl/win/pkgIndex.tcl.in
 ./tcl/win/tcl.rc
 ./tcl/win/tclXAppInit.c
 ./tcl/win/tclXwinCmds.c
@@ -329,7 +341,9 @@
 ./tk/help/tk/control/bindtags
 ./tk/help/tk/control/clipboard
 ./tk/help/tk/control/destroy
+./tk/help/tk/control/event
 ./tk/help/tk/control/focus
+./tk/help/tk/control/font
 ./tk/help/tk/control/grab
 ./tk/help/tk/control/grid
 ./tk/help/tk/control/lower
@@ -367,8 +381,11 @@
 ./tk/help/tk/widgets/scale
 ./tk/help/tk/widgets/scrollbar
 ./tk/help/tk/widgets/text
+./tk/help/tk/widgets/tk_chooseColor
 ./tk/help/tk/widgets/tk_dialog
+./tk/help/tk/widgets/tk_getOpenFile
 ./tk/help/tk/widgets/tk_menuBar
+./tk/help/tk/widgets/tk_messageBox
 ./tk/help/tk/widgets/tk_optionMenu
 ./tk/help/tk/widgets/tk_popup
 ./tk/help/tk/widgets/toplevel
@@ -405,5 +422,7 @@
 ./unix/tools/tclmanpages
 ./unix/tools/tkmanpages
 ./win/INSTALL.txt
+./win/common.bc
 ./win/common.vc
+./win/makefile.bc
 ./win/makefile.vc

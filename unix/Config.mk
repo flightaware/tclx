@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 8.2 1997/04/17 05:00:17 markd Exp $
+# $Id: Config.mk,v 8.3 1997/06/12 21:08:50 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -80,7 +80,6 @@ TK_LIB=${TK_BUILD_LIB_SPEC}
 
 #CC=cc
 #CFLAGS=-O
-CFLAGS=-g -O -DTCL_MEM_DEBUG
 
 #------------------------------------------------------------------------------
 # Definition of programs you wish to use. RANLIB is set by configure in the

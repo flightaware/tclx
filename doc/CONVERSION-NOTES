@@ -1,5 +1,5 @@
 
-$Id: CONVERSION-NOTES,v 1.1 1997/06/10 11:26:24 karl Exp $
+$Id: CONVERSION-NOTES,v 8.1 1997/06/12 21:08:01 markd Exp $
 
 Notes on converting to the new object system:
 
@@ -74,13 +74,3 @@ way you built up errors by manipulating interp->result, through
 commands like Tcl_AddErrInfo, Tcl_SetResult, etc.  Object-based commands
 return object results.  If an object command tries to return a result
 the old way, no result will be returned at all!
-
-You can use a routine called TclSetObjResultFromStrResult to make
-a partially ported object-style command that still creates and manipulates
-error (and even normal) results the old way still work.  But if you do,
-you'll want to go back and fix it, since, returning object-based results
-should always be be faster as it'll take full advantage of lazy
-conversion and read-only sharing of objects.
-
-
-
