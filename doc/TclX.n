@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 2.29 1993/09/07 14:44:09 markd Exp markd $
+.\" $Id: TclX.man,v 2.30 1993/09/08 14:18:12 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -550,6 +550,18 @@ Some examples are:
 Do an execl, replacing the current program (either Extended Tcl or an
 application with Extended Tcl embedded into it) with \fIprog\fR and
 passing the arguments in the list \fIarglist\fR.
+.sp
+Note: If you are using \fBexecl\fR in a Tk application and it fails,
+you may not do anything that accesses the X server or you will receive
+a \fBBadWindow\fR error from the X server.  This includes executing the
+Tk version of the \fBexit\fR command.  We suggest using the following
+command to abort Tk applications after an \fBexecl\fR failure:
+.sp
+.nf
+.ft CW
+    kill [id process]
+.ft R
+.fi
 '@endhelp
 '
 '@help: tcl/time/fmtclock
@@ -625,6 +637,10 @@ going to be performed before the child process does output, or if a
 open output file before doing the \fBfork\fR. Otherwise characters from the
 parent process pending in the buffers will be output by both the parent
 and child processes.
+.sp
+Note: If you are \fBfork\fRing in a Tk based apllication you must \fBexecl\fR
+before doing any window operations in the child or you will receive a
+\fBBadWindow\fR error from the X server.
 '@endhelp
 '
 '@help: tcl/time/getclock
@@ -702,14 +718,19 @@ Set the process group ID of the current process to its process ID.
 '@help: tcl/processes/kill
 '@brief: Send a signal to the specified process.
 .TP
-.B kill ?\fIsignal\fR? \fIprocesslist\fR
+.B kill ?\fB-pgroup\fR ?\fIsignal\fR? \fIidlist\fR
 .br
-Send a signal to the each process in the list \fIprocesslist\fR, if permitted.
+Send a signal to the each process in the list \fIidlist\fR, if permitted.
 \fISignal\fR, if present, is the signal number or the symbolic name of the
 signal, see the signal system call manual page.  The leading ``SIG''
 is optional
 when the signal is specified by its symbolic name.
 The default for \fIsigno\fR is 15, SIGTERM.
+.sp
+If \fB-pgroup\fR is specified, the numbers in \fIidlist\fR are take
+as process group ids and the signal is sent to all of the process in that
+process group.  A process group id of \fB0\fR specifies the current process
+group.
 '@endhelp
 '
 '@help: tcl/files/link
