@@ -34,7 +34,7 @@
 # ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #------------------------------------------------------------------------------
-# $Id: tclshell.tcl,v 1.1 1993/06/21 05:58:43 markd Exp markd $
+# $Id: tclshell.tcl,v 1.2 1993/06/24 07:32:30 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -52,16 +52,22 @@ proc tclx_unknown2 {cmd} {
 
     set name [lindex $cmd 0]
 
-    if {!$interactiveSession || ([info level] > 2) || [info script] != ""} {
-        error "invalid command name \"$name\""
-    }
-
     if ![info exists auto_noexec] {
 	if [auto_execok $name] {
+            if {!$interactiveSession || ([info level] > 2) ||
+                [info script] != ""} {
+                error "Auto execution of Unix commands only supported as interactive commands.\nUse \"exec\" to execute \"$name\""
+            }
 	    uplevel 2 system [list $cmd]
             return
 	}
     }
+
+    if {!$interactiveSession || ([info level] > 2) || [info script] != ""} {
+        error "invalid command name \"$name\""
+    }
+
+    # csh-style redo.
 
     if {([info level] == 2) && ([info script] == "")} {
 	if {$name == "!!"} {
