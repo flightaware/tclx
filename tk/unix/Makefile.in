@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.7 1997/06/21 16:45:37 markd Exp $
+# $Id: Makefile.in,v 8.8 1997/07/08 06:36:47 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -142,15 +142,16 @@ tkx.tcl: ${RUNTIME_DIR}/tkx.tcl
 
 tclhelp: ${srcdir}/../runtime/tclhelp.tcl
 	rm -f tclhelp
-	echo "#!/bin/sh"       >tclhelp
-	echo "# The next line restarts using wishx \\"	>>tclhelp
-	echo 'exec wishx $$0 $${1+"$$@"}'		>>tclhelp
-	echo ""						>>tclhelp
-	echo "package require Tk ${TK_VERSION}"		>>tclhelp
-	echo "package require Tclx ${TCLX_VERSION}"	>>tclhelp
-	echo ""						>>tclhelp
-	cat ${srcdir}/../runtime/tclhelp.tcl >>tclhelp
-	chmod +rx tclhelp
+	echo Creating tclhelp script
+	@echo "#!/bin/sh"       			 >tclhelp
+	@echo "# The next line restarts using wishx \\"	>>tclhelp
+	@echo 'exec wishx $$0 $${1+"$$@"}'		>>tclhelp
+	@echo ""					>>tclhelp
+	@echo "package require Tk ${TK_VERSION}"	>>tclhelp
+	@echo "package require Tclx ${TCLX_VERSION}"	>>tclhelp
+	@echo ""					>>tclhelp
+	@cat ${srcdir}/../runtime/tclhelp.tcl 		>>tclhelp
+	@chmod +rx tclhelp
 
 help.tmp: help
 	touch help.tmp
