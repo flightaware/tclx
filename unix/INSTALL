@@ -386,7 +386,10 @@ PORTING NOTES
 =============
 
 General Porting Notes:
-   o Flock tests hanging:  Problems have been encountered on some Sun
+   o Flock test hanging:  Running the flock tests on a tmpfs filesystem will
+     cause flock failures on some systems.
+
+   o Other flock tests hanging:  Problems have been encountered on some Sun
      systems with the flock tests.  This might occur on other systems as
      well.  These are probably due to an incorrectly configured NFS lockd.
      The tests have been modified to try and report problems rather than
