@@ -83,9 +83,10 @@ Test nice-1.6 {nice tests} {
 if {[id user] != "root"} {
 
     Test nice-1.7 {nice tests} {
+        set errList {{not owner} {permission denied}  {not privileged}}
         set stat [catch {nice -1} msg]
         set msg [string tolower $msg]
-        if {[lsearch {{not owner} {permission denied}} $msg] < 0} {
+        if {[lsearch $errList $msg] < 0} {
             set stat [list $stat $msg]
         }
         set stat
