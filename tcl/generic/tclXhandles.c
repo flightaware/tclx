@@ -14,11 +14,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXhandles.c,v 2.5 1993/07/18 05:59:41 markd Exp markd $
+ * $Id: tclXhandles.c,v 3.0 1993/11/19 06:58:45 markd Rel markd $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
+
+/*
+ * Marco to rounded up a size to be a multiple of (void *).  This is required
+ * for systems that have alignment restrictions on pointers and data.
+ */
+#define ROUND_ENTRY_SIZE(size) \
+    ((((size) + sizeof (void *) - 1) / sizeof (void *)) * sizeof (void *))
 
 /*
  * This is the table header.  It is separately allocated from the table body,
@@ -50,6 +57,8 @@ typedef struct {
   } entryHeader_t;
 typedef entryHeader_t *entryHeader_pt;
 
+#define ENTRY_HEADER_SIZE (ROUND_ENTRY_SIZE (sizeof (entryHeader_t)))
+
 /*
  * This macro is used to return a pointer to an entry, given its index.
  */
@@ -61,9 +70,9 @@ typedef entryHeader_t *entryHeader_pt;
  * an table entry.
  */
 #define USER_AREA(entryPtr) \
- (void_pt) (((ubyte_pt) entryPtr) + sizeof (entryHeader_t));
+ (void_pt) (((ubyte_pt) entryPtr) + ENTRY_HEADER_SIZE);
 #define HEADER_AREA(entryPtr) \
- (entryHeader_pt) (((ubyte_pt) entryPtr) - sizeof (entryHeader_t));
+ (entryHeader_pt) (((ubyte_pt) entryPtr) - ENTRY_HEADER_SIZE);
 
 /*
  * Prototypes of internal functions.
@@ -245,14 +254,13 @@ Tcl_HandleTblInit (handleBase, entrySize, initEntries)
     strcpy (tblHdrPtr->handleBase, (char *) handleBase);
 
     /* 
-     * Calculate entry size, including header, rounded up to sizeof (int). 
+     * Calculate entry size, including header, rounded up to sizeof (void *). 
      */
-    tblHdrPtr->entrySize = entrySize + sizeof (entryHeader_t);
-    tblHdrPtr->entrySize = ((tblHdrPtr->entrySize + sizeof (int) - 1) / 
-                          sizeof (int)) * sizeof (int);
+    tblHdrPtr->entrySize = ENTRY_HEADER_SIZE + ROUND_ENTRY_SIZE (entrySize);
     tblHdrPtr->freeHeadIdx = NULL_IDX;
     tblHdrPtr->tableSize = initEntries;
-    tblHdrPtr->bodyPtr = (ubyte_pt) ckalloc (initEntries * tblHdrPtr->entrySize);
+    tblHdrPtr->bodyPtr =
+        (ubyte_pt) ckalloc (initEntries * tblHdrPtr->entrySize);
     LinkInNewEntries (tblHdrPtr, 0, initEntries);
 
     return (void_pt) tblHdrPtr;
