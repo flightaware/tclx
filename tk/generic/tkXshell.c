@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 4.8 1995/06/30 23:27:19 markd Exp markd $
+ * $Id: tkXshell.c,v 4.9 1995/06/30 23:53:19 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -153,20 +153,6 @@ TkX_Main (argc, argv, appInitProc)
 	fprintf(stderr, "%s\n", interp->result);
 	exit(1);
     }
-    if (name == NULL) {
-	if (fileName != NULL) {
-	    p = fileName;
-	} else {
-	    p = argv[0];
-	}
-	name = strrchr(p, '/');
-	if (name != NULL) {
-	    name++;
-	} else {
-	    name = p;
-	}
-    }
-
 
     /*
      * Make command-line arguments available in the Tcl variables "argc"
