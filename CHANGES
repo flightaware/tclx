@@ -1409,6 +1409,10 @@
 28 Sept 98:
   o Handle systems that don't implement restart of system calls on signal.
     Added infox have_signal_restart.
+-------------------------------------------------------------------------------
+5 May 99:
+  o Ported most commands work with 8.1 Unicode.
+  o Completed port to 8.1.
 ===============================================================================
-6 Dec 98: Released TclX 8.0.4
+5 May 99: Released TclX 8.1.0
 ===============================================================================
