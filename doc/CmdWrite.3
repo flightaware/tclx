@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: CmdWrite.3,v 4.1 1995/01/01 19:46:29 markd Exp markd $
+.\" $Id: CmdWrite.3,v 4.2 1995/03/01 05:03:37 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "Command Writing" TCL "" "Tcl"
@@ -496,7 +496,7 @@ page in the \fIdoc\fR directory of the Berkeley Tcl distribution.
 .PP
 .SH LINKING TCL VARIABLES TO C VARIABLES
 
-\fBTcl_LinkVar\R and \fBTcl_UnlinkVar\fR can be used to automatically
+\fBTcl_LinkVar\fR and \fBTcl_UnlinkVar\fR can be used to automatically
 keep Tcl variables synchronized with corresponding C variables.  Once
 a Tcl variable has been linked to a C variable with \fBTcl_LinkVar\fR,
 anytime the Tcl variable is read the value of the C variable will be
