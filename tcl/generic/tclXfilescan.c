@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 8.8 1997/07/05 08:00:30 markd Exp $
+ * $Id: tclXfilescan.c,v 8.9 1998/01/28 17:34:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -471,7 +471,7 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
      */
 
     newmatch = (matchDef_t *) ckalloc(sizeof (matchDef_t));
-    newmatch->matchflags = 0;
+    newmatch->matchflags = 0;  /*FIX: Not needed???*/
 
     if (regExpFlags & REG_ICASE) {
         /*FIX: This is probably not needed unless BM is fixed*/
@@ -486,8 +486,9 @@ TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
     }
 
     newmatch->regExpObj = objv[firstArg + 1],
-    Tcl_IncrRefCount (objv [firstArg + 2]);
+    Tcl_IncrRefCount (newmatch->regExpObj);
     newmatch->command = objv [firstArg + 2];
+    Tcl_IncrRefCount (newmatch->command);
 
     /*
      * Link in the new match.
@@ -672,9 +673,10 @@ ScanFile (interp, contextPtr, channel)
              data.matchPtr != NULL; 
              data.matchPtr = data.matchPtr->nextMatchDefPtr) {
 
-            if (!TclRegExpMatchObj(interp,
-                                   data.line,
-                                   data.matchPtr->regExpObj))
+            if (!Tcl_RegExpExec(interp,
+                                (Tcl_RegExp) data.matchPtr->regExp,
+                                data.line,
+                                data.line))
                 continue;  /* Try next match pattern */
 
             matchedAtLeastOne = TRUE;
