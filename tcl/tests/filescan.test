@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 8.4 1997/08/23 18:55:37 markd Exp $
+# $Id: filescan.test,v 8.5 1997/09/18 15:57:31 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -400,12 +400,8 @@ scancontext delete $testCH
 set testCH [scancontext create]
 
 Test filescan-7.1 {filescan tests} {
-    scanmatch $testCH {a(} {}
-} 1 {error in regular expression: unmatched ()}
-
-Test filescan-7.2 {filescan tests} {
-    scanmatch $testCH (x)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.) {}
-} 1 {error in regular expression: too many ()}
+    scanmatch $testCH {a[} {}
+} 1 {error in regular expression: unmatched []}
 
 #
 # Test the copy file manipulation by sorting a file of numbered lines into two

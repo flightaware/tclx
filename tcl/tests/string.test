@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: string.test,v 8.7 1997/08/23 18:55:57 markd Exp $
+# $Id: string.test,v 8.8 1998/02/01 08:52:10 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -256,6 +256,15 @@ Test string-6.3 {translit tests} {
 Test string-6.4 {translit tests} {
     translit
 } 1 {wrong # args: translit from to string}
+
+# Type conversion was broken.
+Test string-6.5 {translit tests} {
+    catch {unset xxx}
+    set s [list This_is_a_test value]
+    array set xxx [translit _ - $s]
+    array get xxx
+} 0 {This-is-a-test value}
+catch {unset xxx}
 
 # Test the ctoken command
 

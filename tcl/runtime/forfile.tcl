@@ -12,14 +12,14 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.tcl,v 8.2 1997/08/23 18:55:21 markd Exp $
+# $Id: forfile.tcl,v 8.3 1997/11/12 07:21:00 markd Exp $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-forfile for_file
 
 proc for_file {var filename cmd} {
-    upvar $var line
+    upvar 1 $var line
     set fp [open $filename r]
     try_eval {
         set code 0

@@ -1,7 +1,19 @@
                          TclX bug, idea and task list
 
+switch to using Tcl's save/restore result functionality./
+
 *** Porting to 8.1 ***
+
+o merge in init.tcl changes!!!!
+
+O tcl>auto_packages
+  Error: no value given for parameter "cmd" to "auto_load"
+
+o ::FSSP and FSSP autoload are not equiv.
+
 o Is Tcl_EvalObjv useful to us?
+
+Have try_eval create an errorSave so one can do eval error $errorSave
 
 o Boyer-Moore is not being used.
 
@@ -12,6 +24,13 @@ o EvalFilePart should do everything Tcl_Eval files does with
   objects.
 
 *** Serious Bugs ***
+
+    From: jph@solo.com (Jean-Pierre Hebert)
+    I am put off not being able to say:
+            translit A-z "" $foo 
+    or similar anymore. This was very handy.
+    Is that a bug or a new feature?
+    Any workaround to suggest?
 
 o Results of "runtest nonexistant-file" is bogus.  errorInfo is never
   getting set, as Tcl_EvalFile does not set errorInfo if file can't
@@ -30,14 +49,12 @@ o loop i 0 1 {error arf}
 
 o objcmd writing man page not installed.
 
-o looks like a bug in signal handling, got:
-       Tcl_AppendToObj called with shared object
-       Abort (core dumped)
-  when did an interactive ^C.
-
 o TclX creates a global variable `e'
 
 *** Minor bugs and enhancements ***
+
+o detect .tndx file that doesn't have anything in it.
+
 From: ellson@hotair.hobl.lucent.com
     Just a small gripe.   Could you please arrange the tclX Makefiles
     so that they don't depend on libtcl8.0.so in tcl's build area?
