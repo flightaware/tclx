@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 3.4 1994/04/12 01:50:24 markd Exp markd $
+ * $Id: tkXshell.c,v 3.5 1994/05/28 03:38:22 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -399,7 +399,7 @@ StdinProc(clientData, mask)
     Tk_CreateFileHandler(0, 0, StdinProc, (ClientData) 0);
     code = Tcl_RecordAndEval(interp, cmd, 0);
     Tk_CreateFileHandler(0, TK_READABLE, StdinProc, (ClientData) 0);
-    if (tty)
+    if ((code != TCL_OK) || tty)
         TclX_PrintResult (interp, code, cmd);
     Tcl_DStringFree(&command);
 
