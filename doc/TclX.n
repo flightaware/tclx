@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 8.7 1997/07/04 15:04:49 markd Exp $
+.\" $Id: TclX.n,v 8.8 1997/07/04 21:17:33 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -350,6 +350,37 @@ them if it is not already loaded.  If no procedure names are supplied,
 the definitions of all currently loaded procedures are returned.
 '\"@:
 '\"@:This procedure is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/control/try_eval
+'\"@brief: Evaluate commands with error catch and finalization.
+.TP
+.B try_eval \fIcode\fR \fIcatch\fR ?\fIfinally\fR?
+
+The \fBtry_eval\fR command evaluates \fIcode\fR in the current context.
+.P
+If an error occurs during the evaluation and \fIcatch\fR is not
+empty, then \fIcatch\fR is evaluated to handler the error.  The result
+of the command, containing the error message, will be stored in a global
+variable \fBerrorResult\fR.  The global variables \fBerrorResult\fR,
+\fBerrorInfo\fR and \fBerrorCode\fR will be imported into the current
+scope, there is no need to execute a \fBglobal\fR command.  The result
+of the \fIcatch\fR command becomes the result of the \fBtry_eval\fR command.
+If the error that caused the \fIcatch\fR to be evaluate is to be continued,
+the following command should be used:
+.br
+.nf
+	\fBerror $errorResult $errorCode $errorInfo\fR
+.fi
+.br
+.P
+If the \fIfinally\fR argument is supplied and not empty, it is evaluated
+after the evaluation of the \fIcode\fR and the \fIcatch\fR commands.
+If an error occurs during the evaluation of the \fIfinally\fR command, it
+becomes the result of the \fBtry_eval\fR command.  Otherwise, the result
+of either \fIcode\fR  or \fIcatch\fR is preserved, as described above.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
 .bp

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.15 1997/07/04 22:43:06 markd Exp $
+ * $Id: tclXutil.c,v 8.16 1997/07/04 23:59:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1190,6 +1190,8 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
 {
     Tcl_Obj **saveObjv;
     int saveObjc;
+    char *errorInfo;
+    int errorInfoLen;
 
     if ((Tcl_ListObjGetElements (NULL, saveObjPtr, &saveObjc,
                                  &saveObjv) != TCL_OK) ||
@@ -1197,11 +1199,16 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
         panic ("invalid TclX result save object");
     }
 
-    TclX_ObjSetVar2S (interp, ERRORINFO, NULL, saveObjv [1],
-                      TCL_GLOBAL_ONLY);
+    /*
+     * Need to clear flags and result so that errorInfo/errorCode are set
+     * correctly.
+     */
+    Tcl_ResetResult (interp);
 
-    TclX_ObjSetVar2S (interp, ERRORCODE, NULL, saveObjv [2],
-                      TCL_GLOBAL_ONLY);
+    Tcl_SetObjErrorCode (interp, saveObjv [2]);
+
+    errorInfo = Tcl_GetStringFromObj (saveObjv [1], &errorInfoLen);
+    Tcl_AddObjErrorInfo (interp, errorInfo, errorInfoLen);
 
     Tcl_SetObjResult (interp, saveObjv [0]);
 

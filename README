@@ -52,6 +52,8 @@ CHANGES IN TCLX 8.0.0
   o Extensive internal use of Tcl 8.0's new object structures makes
     TclX execute very quickly.
 
+  o New try_eval command, similar to Java try/catch/finally.
+
 FEATURES ADDED BY EXTENDED TCL
 ==============================
 

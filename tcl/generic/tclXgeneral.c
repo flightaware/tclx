@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXgeneral.c,v 8.6 1997/07/03 07:14:14 markd Exp $
+ * $Id: tclXgeneral.c,v 8.7 1997/07/04 20:23:51 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -31,15 +31,30 @@ static int   tclAppPatchlevel  = -1;
 
 static int 
 TclX_EchoObjCmd _ANSI_ARGS_((ClientData clientData, 
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+                             Tcl_Interp *interp,
+                             int         objc,
+                             Tcl_Obj    *CONST objv[]));
 
 static int 
-TclX_InfoxObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+TclX_InfoxObjCmd _ANSI_ARGS_((ClientData clientData, 
+                              Tcl_Interp *interp,
+                              int         objc,
+                              Tcl_Obj    *CONST objv[]));
 
 static int 
-TclX_LoopObjCmd _ANSI_ARGS_((ClientData clientData,
-    Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[]));
+TclX_LoopObjCmd _ANSI_ARGS_((ClientData clientData, 
+                             Tcl_Interp *interp,
+                             int         objc,
+                             Tcl_Obj    *CONST objv[]));
+
+static int
+GlobalImport (Tcl_Interp *interp);
+
+static int
+TclX_Try_EvalObjCmd _ANSI_ARGS_((ClientData clientData, 
+                                 Tcl_Interp *interp,
+                                 int         objc,
+                                 Tcl_Obj    *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -90,7 +105,7 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
 
 /*-----------------------------------------------------------------------------
  * TclX_EchoObjCmd --
- *    Implements the TCL echo command:
+ *    Implements the TclX echo command:
  *        echo ?str ...?
  *
  * Results:
@@ -99,10 +114,10 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
  */
 static int
 TclX_EchoObjCmd (dummy, interp, objc, objv)
-     ClientData  dummy;
-     Tcl_Interp *interp;
-     int         objc;
-     Tcl_Obj    *CONST objv[];
+    ClientData  dummy;
+    Tcl_Interp *interp;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
     int   idx;
     Tcl_Channel channel;
@@ -114,7 +129,7 @@ TclX_EchoObjCmd (dummy, interp, objc, objv)
         return TCL_ERROR;
 
     for (idx = 1; idx < objc; idx++) {
-	stringPtr = Tcl_GetStringFromObj (objv [idx], &stringPtrLen);
+        stringPtr = Tcl_GetStringFromObj (objv [idx], &stringPtrLen);
         if (Tcl_Write (channel, stringPtr, stringPtrLen) < 0)
             goto posixError;
         if (idx < (objc - 1)) {
@@ -133,7 +148,7 @@ TclX_EchoObjCmd (dummy, interp, objc, objv)
 
 /*-----------------------------------------------------------------------------
  * TclX_InfoxObjCmd --
- *    Implements the TCL infox command:
+ *    Implements the TclX infox command:
  *        infox option
  *-----------------------------------------------------------------------------
  */
@@ -151,8 +166,9 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
      * FIX: Need a way to get the have_ functionality from the OS-dependent
      * code.
      */
-    if (objc != 2)
-	return TclX_WrongArgs (interp, objv[0], "option");
+    if (objc != 2) {
+        return TclX_WrongArgs (interp, objv[0], "option");
+    }
 
     optionPtr = Tcl_GetStringFromObj (objv[1], NULL);
 
@@ -163,7 +179,7 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
         return TCL_OK;
     }
     if (STREQU ("patchlevel", optionPtr)) {
-	Tcl_SetIntObj (resultPtr, tclxPatchlevel);
+        Tcl_SetIntObj (resultPtr, tclxPatchlevel);
         return TCL_OK;
     }
     if (STREQU ("have_fchown", optionPtr)) {
@@ -183,10 +199,10 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
         return TCL_OK;
     }
     if (STREQU ("have_flock", optionPtr)) {
-	if (TclXOSHaveFlock ())
-	    Tcl_SetBooleanObj (resultPtr, TRUE);
-	else
-	    Tcl_SetBooleanObj (resultPtr, FALSE);
+        if (TclXOSHaveFlock ())
+            Tcl_SetBooleanObj (resultPtr, TRUE);
+        else
+            Tcl_SetBooleanObj (resultPtr, FALSE);
         return TCL_OK;
     }
     if (STREQU ("have_fsync", optionPtr)) {
@@ -262,10 +278,10 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
         return TCL_OK;
     }
     if (STREQU ("apppatchlevel", optionPtr)) {
-	if (tclAppPatchlevel >= 0)
-	    Tcl_SetIntObj (resultPtr, tclAppPatchlevel);
-	else
-	    Tcl_SetIntObj (resultPtr, 0);
+        if (tclAppPatchlevel >= 0)
+            Tcl_SetIntObj (resultPtr, tclAppPatchlevel);
+        else
+            Tcl_SetIntObj (resultPtr, 0);
         return TCL_OK;
     }
     TclX_AppendObjResult (interp, "illegal option \"", optionPtr,
@@ -281,7 +297,7 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
 
 /*-----------------------------------------------------------------------------
  * TclX_LoopObjCmd --
- *     Implements the TCL loop command:
+ *     Implements the TclX loop command:
  *         loop var start end ?increment? command
  *
  * Results:
@@ -290,18 +306,19 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
  */
 static int
 TclX_LoopObjCmd (dummy, interp, objc, objv)
-     ClientData  dummy;
-     Tcl_Interp *interp;
-     int         objc;
-     Tcl_Obj    *CONST objv[];
+    ClientData  dummy;
+    Tcl_Interp *interp;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
 {
     int       result = TCL_OK;
     long      i, first, limit, incr = 1;
     Tcl_Obj  *command, *iObj;
 
-    if ((objc < 5) || (objc > 6))
-	return TclX_WrongArgs (interp, objv [0], 
+    if ((objc < 5) || (objc > 6)) {
+        return TclX_WrongArgs (interp, objv [0], 
                                "var first limit ?incr? command");
+    }
 
     if (Tcl_ExprLongObj (interp, objv [2], &first) != TCL_OK)
         return TCL_ERROR;
@@ -312,8 +329,8 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
     if (objc == 5) {
         command = objv [4];
     } else {
-	if (Tcl_ExprLongObj (interp, objv [4], &incr) != TCL_OK)
-	    return TCL_ERROR;
+        if (Tcl_ExprLongObj (interp, objv [4], &incr) != TCL_OK)
+            return TCL_ERROR;
         command = objv [5];
     }
 
@@ -322,7 +339,7 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
          i += incr) {
         
         
-	iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
+        iObj = Tcl_ObjGetVar2 (interp, objv [1], (Tcl_Obj *) NULL,
                                TCL_PARSE_PART1);
         if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
             iObj = Tcl_NewLongObj (first);
@@ -345,7 +362,7 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
                 
                 sprintf (buf, "\n    (\"loop\" body line %d)", 
                          interp->errorLine);
-		Tcl_AppendStringsToObj (Tcl_GetObjResult (interp), buf, 
+                Tcl_AppendStringsToObj (Tcl_GetObjResult (interp), buf, 
                                         (char *) NULL);
             }
             break;
@@ -372,6 +389,140 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
 
 
 /*-----------------------------------------------------------------------------
+ * GlobalImport --
+ *   Import the errorResult, errorInfo, and errorCode global variable into the
+ * current environment by calling the global command directly.
+ *
+ * Parameters:
+ *   o interp (I) - Current interpreter,  Result is preserved.
+ * Returns:
+ *   TCL_OK or TCL_ERROR.
+ *-----------------------------------------------------------------------------
+ */
+static int
+GlobalImport (interp)
+    Tcl_Interp *interp;
+{
+    static char global [] = "global";
+    Tcl_Obj *savedResult;
+    Tcl_CmdInfo cmdInfo;
+    static int globalObjc = 4;
+    Tcl_Obj *globalObjv [globalObjc];
+    int idx, code = TCL_OK;
+
+    savedResult = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
+
+    if (!Tcl_GetCommandInfo (interp, global, &cmdInfo)) {
+        TclX_AppendObjResult (interp, "can't find \"global\" command", 
+                              (char *) NULL);
+        goto errorExit;
+    }
+    
+    globalObjv [0] = Tcl_NewStringObj (global, -1);
+    globalObjv [1] = Tcl_NewStringObj ("errorResult", -1);
+    globalObjv [2] = Tcl_NewStringObj ("errorInfo", -1);
+    globalObjv [3] = Tcl_NewStringObj ("errorCode", -1);
+
+    for (idx = 0; idx < globalObjc; idx++) {
+        Tcl_IncrRefCount (globalObjv [idx]);
+    }
+    
+    code = (*cmdInfo.objProc) (cmdInfo.objClientData,
+                               interp,
+                               globalObjc,
+                               globalObjv);
+    for (idx = 0; idx < globalObjc; idx++) {
+        Tcl_DecrRefCount (globalObjv [idx]);
+    }
+
+    if (code == TCL_ERROR)
+        goto errorExit;
+
+    Tcl_SetObjResult (interp, savedResult);
+    return TCL_OK;
+
+  errorExit:
+    Tcl_DecrRefCount (savedResult);
+    return TCL_ERROR;
+}
+
+
+/*-----------------------------------------------------------------------------
+ * TclX_Try_EvalObjCmd --
+ *     Implements the TclX try_eval command:
+ *          try_eval code catch ?finally?
+ *
+ * Results:
+ *      Standard TCL results.
+ *-----------------------------------------------------------------------------
+ */
+static int
+TclX_Try_EvalObjCmd (dummy, interp, objc, objv)
+    ClientData  dummy;
+    Tcl_Interp *interp;
+    int         objc;
+    Tcl_Obj    *CONST objv[];
+{
+    int code, code2;
+    int haveFinally;
+    Tcl_Obj *savedResultsPtr, *resultObjPtr;
+
+    if ((objc < 3) || (objc > 4)) {
+        return TclX_WrongArgs (interp, objv [0], "code catch ?finally?");
+    }
+    haveFinally = (objc >= 4) && !TclX_IsNullObj (objv [3]);
+
+    /*
+     * Evaluate the command.  If not error and no finally command, we are done.
+     */
+    code = Tcl_EvalObj (interp, objv [1]);
+    if ((code != TCL_ERROR) && !haveFinally) {
+        return code;
+    }
+
+    /*
+     * Process error block, if available.  It's results becomes the command's
+     * result.
+     */
+    if ((!TclX_IsNullObj (objv [2])) && (code == TCL_ERROR)) {
+        resultObjPtr = Tcl_DuplicateObj (Tcl_GetObjResult (interp));
+        Tcl_IncrRefCount (resultObjPtr);
+        Tcl_ResetResult (interp);
+
+        code = GlobalImport (interp);
+        if (code != TCL_ERROR) {
+            if (TclX_ObjSetVar2S (interp, "errorResult", NULL, 
+                                  resultObjPtr, TCL_LEAVE_ERR_MSG) == NULL) {
+                code = TCL_ERROR;
+            }
+        }
+        if (code != TCL_ERROR) {
+            code = Tcl_EvalObj (interp, objv [2]);
+        }
+        Tcl_DecrRefCount (resultObjPtr);
+   }
+
+    /*
+     * If a finally command is supplied, evaulate it, preserving the error
+     * status.
+     */
+    if (haveFinally) {
+        savedResultsPtr = TclX_SaveResultErrorInfo (interp);
+        Tcl_ResetResult (interp);
+    
+        code2 = Tcl_EvalObj (interp, objv [3]);
+        if (code2 == TCL_ERROR) {
+            Tcl_DecrRefCount (savedResultsPtr);  /* Don't restore results */
+            code = code2;
+        } else {
+            TclX_RestoreResultErrorInfo (interp, savedResultsPtr);
+        }
+    }
+    return code;
+}
+
+
+/*-----------------------------------------------------------------------------
  * TclX_GeneralInit --
  *     Initialize the command.
  *-----------------------------------------------------------------------------
@@ -381,21 +532,27 @@ TclX_GeneralInit (interp)
     Tcl_Interp *interp;
 {
     Tcl_CreateObjCommand (interp, 
-			  "echo",
-			  TclX_EchoObjCmd,
+                          "echo",
+                          TclX_EchoObjCmd,
                           (ClientData) NULL,
-			  (Tcl_CmdDeleteProc*) NULL);
+                          (Tcl_CmdDeleteProc*) NULL);
 
     Tcl_CreateObjCommand(interp, 
-			 "infox",
-			 TclX_InfoxObjCmd,
+                         "infox",
+                         TclX_InfoxObjCmd,
                          (ClientData) NULL,
-			 (Tcl_CmdDeleteProc*) NULL);
+                         (Tcl_CmdDeleteProc*) NULL);
 
     Tcl_CreateObjCommand(interp, 
-			 "loop",
-			 TclX_LoopObjCmd,
+                         "loop",
+                         TclX_LoopObjCmd,
                          (ClientData) NULL,
-			 (Tcl_CmdDeleteProc*) NULL);
+                         (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand(interp, 
+                         "try_eval",
+                         TclX_Try_EvalObjCmd,
+                         (ClientData) NULL,
+                         (Tcl_CmdDeleteProc*) NULL);
 }
 
