@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 1.3 1992/10/04 23:28:42 markd Exp markd $
+ * $Id: tclXsignal.c,v 1.4 1992/10/05 02:03:10 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -114,10 +114,11 @@ typedef SIG_PROC_RET_TYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
 static char *noPosix = "Posix signals are not available on this system";
 
 /*
- * Globals that indicate if we got a signal and which ones we got.
+ * Globals that indicate that some signal was received and how many of each
+ * signal type has not yet been processed.
  */
-int                  tclReceivedSignal = FALSE;
-static unsigned char signalsReceived [MAXSIG];
+int             tclReceivedSignal = FALSE;    /* A signal was received */ 
+static unsigned signalsReceived [MAXSIG];     /* Counters of signals   */
 
 /*
  * Table of commands to evaluate when a signal occurs.  If the command is
@@ -361,8 +362,7 @@ SetSignalAction (signalNum, sigFunc)
  *     will be seen by the interpreter when its safe to trap.
  * Globals:
  *   o tclReceivedSignal (O) - Set to TRUE, to indicate a signal was received.
- *   o signalsReceived (O) - The entry indicating which signal we received
- *     will be set to TRUE;
+ *   o signalsReceived (O) - The count of each signal that was received.
  *-----------------------------------------------------------------------------
  */
 static SIG_PROC_RET_TYPE
@@ -372,7 +372,7 @@ TclSignalTrap (signalNum)
     /*
      * Set flags that are checked by the eval loop.
      */
-    signalsReceived [signalNum] = TRUE;
+    signalsReceived [signalNum]++;
     tclReceivedSignal = TRUE;
 
 #ifndef TCL_POSIX_SIG
@@ -470,7 +470,7 @@ EvalTrapCode (interp, signalNum, command)
  *
  * Globals:
  *   o tclReceivedSignal (O) - Will be cleared.
- *   o signalsReceived (O) - The indicates which signal where received.
+ *   o signalsReceived (O) - The count of each signal that was received.
  *-----------------------------------------------------------------------------
  */
 void
@@ -478,9 +478,9 @@ Tcl_ResetSignals ()
 {
     int  signalNum;
 
-    tclReceivedSignal = FALSE;
+    tclReceivedSignal = 0;
     for (signalNum = 0; signalNum < MAXSIG; signalNum++) 
-        signalsReceived [signalNum] = FALSE;
+        signalsReceived [signalNum] = 0;
 
 }
 
@@ -498,7 +498,9 @@ Tcl_ResetSignals ()
  * will be returned indicating that the signal occured.  If an error is
  * returned, clear the errorInfo variable.  This makes sure it exists and
  * that it is empty, otherwise bogus or non-existant information will be
- * returned if this routine was called somewhere besides Tcl_Eval.
+ * returned if this routine was called somewhere besides Tcl_Eval.  If a
+ * signal was received multiple times and a trap is set on it, then that
+ * trap will be executed for each time the signal was received.
  * 
  * Parameters:
  *   o interp (I/O) - interp->result should contain the result for
@@ -508,8 +510,8 @@ Tcl_ResetSignals ()
  *     Tcl_Eval just completed.  Should be TCL_OK if not called from
  *     Tcl_Eval.
  * Globals:
- *   o tclReceivedSignal (O) - Will be cleared.
- *   o signalsReceived (O) - The indicates which signal where received.
+ *   o tclReceivedSignal (I/O) - Will be cleared.
+ *   o signalsReceived (I/O) - The count of each signal that was received.
  * Returns:
  *   Either the original result code, an error result if one of the
  *   trap commands returned an error, or an error indicating the
@@ -522,21 +524,27 @@ Tcl_CheckForSignal (interp, cmdResultCode)
     int         cmdResultCode;
 {
     char   *savedResult;
-    int     signalNum, result, retErrorForSignal = -1;
+    int     signalNum, result, sigCnt, retErrorForSignal = -1;
 
     if (!tclReceivedSignal)
-        return cmdResultCode;  /* Not signal received */
+        return cmdResultCode;  /* No signal received */
 
     savedResult = ckalloc (strlen (interp->result) + 1);
     strcpy (savedResult, interp->result);
     Tcl_ResetResult (interp);
 
     for (signalNum = 1; signalNum < MAXSIG; signalNum++) {
-        if (signalsReceived [signalNum]) {
-            signalsReceived [signalNum] = FALSE;
-            if (signalTrapCmds [signalNum] == NULL)
-                retErrorForSignal = signalNum;
-            else {
+        if (signalsReceived [signalNum] == 0)
+            continue;
+        
+        if (signalTrapCmds [signalNum] == NULL) {
+            retErrorForSignal = signalNum;
+            signalsReceived [signalNum] = 0;
+        } else {
+            sigCnt = signalsReceived [signalNum];
+            signalsReceived [signalNum] = 0;
+            
+            while (sigCnt-- > 0) {
                 result = EvalTrapCode (interp, signalNum,
                                        signalTrapCmds [signalNum]);
                 if (result == TCL_ERROR)
@@ -1005,7 +1013,7 @@ Tcl_InitSignalHandling (interp)
     int idx;
 
     for (idx = 0; idx < MAXSIG; idx++) {
-        signalsReceived [idx] = FALSE;
+        signalsReceived [idx] = 0;
         signalTrapCmds [idx] = NULL;
     }
     Tcl_CreateCommand (interp, "kill", Tcl_KillCmd, (ClientData)NULL,
