@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.32 2000/07/14 18:07:50 welch Exp $
+dnl $Id: configure.in,v 8.33 2000/08/10 02:07:10 wart Exp $
 dnl----------------------------------------------------------------------------
-AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.32 $),)dnl
+AC_INIT(../generic/tclExtend.h)
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.33 $),)dnl
 
 #------------------------------------------------------------------------------
 # Define srcbasedir and bldbasedir as absolute paths to the top of the TclX
@@ -66,30 +66,6 @@ fi
 if test ! -d ../tk/unix ; then
    mkdir ../tk/unix || exit 1
 fi
-
-#------------------------------------------------------------------------------
-# Check command line looking for the --enable-tk=YES/NO option.
-#------------------------------------------------------------------------------
-
-AC_ARG_ENABLE(tk,
-    [  --enable-tk=YES|NO         build Tk specific code and wishx],
-    [TKX_BUILD=$enableval],
-    [TKX_BUILD=YES])
-
-case "$TKX_BUILD" in
-    YES|yes)
-        AC_MSG_RESULT(Will build Tk specific code and wishx)
-        TKX_BUILD=YES
-        ;;
-    NO|no)
-        AC_MSG_RESULT(Will not build Tk specific code and wishx)
-        TKX_BUILD=NO
-        ;;
-     *)
-        AC_MSG_ERROR(Invalid argument to --enable-tk=, expected YES or NO)
-        ;;
-esac
-AC_SUBST(TKX_BUILD)
 
 #------------------------------------------------------------------------------
 # Check for the --enable-shared option.
@@ -773,34 +749,7 @@ AC_SUBST(TCLX_LIBS)
 
 AC_OUTPUT(Makefile \
           Common.mk \
-          runtcl \
-          runtcl.static \
-          runtcl.standalone \
-          runwishx \
-          runwishx.static \
-          runwishx.standalone \
           tools/Makefile \
           ../tcl/unix/Makefile \
           ../tcl/unix/tclxConfig.sh \
-          ../tcl/unix/pkgIndex.tcl \
-          ../tcl/unix/runtest \
-          ../tcl/unix/runtest.static \
-          ../tcl/unix/runtest.standalone \
-          ../tk/unix/Makefile \
-          ../tk/unix/tkxConfig.sh \
-          ../tk/unix/pkgIndex.tcl \
-          ../tk/unix/runtest \
-          ../tk/unix/runtest.static \
-          ../tk/unix/runtest.standalone,
-          [chmod a+xr,go-w runtcl
-           chmod a+xr,go-w runtcl.static
-           chmod a+xr,go-w runtcl.standalone
-           chmod a+xr,go-w runwishx
-           chmod a+xr,go-w runwishx.static
-           chmod a+xr,go-w runwishx.standalone
-           chmod a+xr,go-w ../tcl/unix/runtest
-           chmod a+xr,go-w ../tcl/unix/runtest.static
-           chmod a+xr,go-w ../tcl/unix/runtest.standalone
-           chmod a+xr,go-w ../tk/unix/runtest
-           chmod a+xr,go-w ../tk/unix/runtest.static
-           chmod a+xr,go-w ../tk/unix/runtest.standalone])
+          ../tcl/unix/pkgIndex.tcl)
