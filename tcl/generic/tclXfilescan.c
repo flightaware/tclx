@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 4.8 1995/01/01 19:49:28 markd Exp markd $
+ * $Id: tclXfilescan.c,v 4.9 1995/02/21 06:26:09 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -621,9 +621,11 @@ ScanFile (interp, contextPtr, filePtr)
                 goto scanExit;
 
             result = Tcl_Eval (interp, contextPtr->defaultAction);
-            if (result == TCL_ERROR)
+            if (result == TCL_ERROR) {
                 Tcl_AddErrorInfo (interp, 
                     "\n    while executing a match default command");
+                goto scanExit;
+            }
             if ((result == TCL_BREAK) || (result == TCL_RETURN)) {
                 /*
                  * Terminate scan.
