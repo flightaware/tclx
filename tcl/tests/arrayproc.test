@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: arrayproc.test,v 4.0 1994/07/16 05:24:31 markd Rel markd $
+# $Id: arrayproc.test,v 4.1 1994/11/17 06:09:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -38,7 +38,7 @@ Test for_array_keys-1.2 {errors in for_array_keys command} {
             error fakeResult fakeInfo fakeCode
         }
     } msg] $msg [crange $errorInfo 0 7] $errorCode
-} 0 {}
+} 0 {1 fakeResult fakeInfo fakeCode}
 
 Test for_array_keys-1.3 {break in for_array_keys command} {
     set cnt 0
@@ -48,7 +48,7 @@ Test for_array_keys-1.3 {break in for_array_keys command} {
             break
         }
     } msg] $msg $cnt
-} 0 {}
+} 0 {0 {} 1}
 
 Test for_array_keys-1.4 {break in for_array_keys command} {
     set cnt 0
@@ -59,7 +59,7 @@ Test for_array_keys-1.4 {break in for_array_keys command} {
             incr cnt 20
         }
     } msg] $msg $cnt
-} 0 {}
+} 0 {0 {} 4}
 
 Test for_array_keys-1.5 {return in for_array_keys command} {
     proc for_array_keys_test {testArrayVar cntVar} {
@@ -70,7 +70,7 @@ Test for_array_keys-1.5 {return in for_array_keys command} {
         }
     }
     set cnt 0
-    list [catch {for_array_keys_test cnt} msg] $msg $cnt
+    list [catch {for_array_keys_test testArray cnt} msg] $msg $cnt
 } 0 {0 abcd 1}
 rename for_array_keys_test {}
 
