@@ -1,11 +1,12 @@
 #
 # Modified version of the standard Tcl auto_load proc that calls a TclX
 # command load TclX .tndx library indices.
+# init.tcl --
 #
 # Default system startup file for Tcl-based applications.  Defines
 # "unknown" procedure and auto-load facilities.
 #
-# SCCS: @(#) init.tcl 1.92 97/11/17 18:52:22
+# SCCS: @(#) init.tcl 1.95 97/11/19 17:16:34
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.
@@ -13,6 +14,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
+
 
 # auto_load --
 # Checks a collection of library directories to see if a procedure
@@ -26,7 +28,7 @@
 #                       a canonical namespace as returned [namespace current]
 #                       for instance. If not given, namespace current is used.
 
-proc auto_load {cmd {namespace {}}} {
+ proc auto_load {cmd {namespace {}}} {
     global auto_index auto_oldpath auto_path env errorInfo errorCode
 
     if {[string length $namespace] == 0} {
@@ -51,11 +53,6 @@ proc auto_load {cmd {namespace {}}} {
 	}
     }
     set auto_oldpath $auto_path
-
-    # Load all available index resources.
-    foreach pkg "{{} Tcl} [info loaded {}]" {
-	catch {source -rsrc [string tolower [lindex $pkg 1]]:tclIndex}
-    }
 
     # Check if we are a safe interpreter. In that case, we support only
     # newer format tclIndex files.
