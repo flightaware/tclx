@@ -1,3 +1,8 @@
+2000-07-10 Brent Welch <welch@ajubasolutions.com>
+	* tcl/win/tclXAppInit.c, tk/generic/tkXshell.c, tk/win/tkXAppInit.c
+	    - turn off USE_TCL_STUBS
+	* win/Makefile.in, win/configure.in: Cleanup use of stubs library.
+
 2000-04-03  Lee Bernhard  <lfb@scriptics.com>
 
 	* tcl/win/tclXwinOS.c (TclXOSkill): Added support for "kill"
