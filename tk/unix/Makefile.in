@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.5 1997/04/17 05:00:08 markd Exp $
+# $Id: Makefile.in,v 8.6 1997/06/13 16:47:03 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -243,11 +243,11 @@ install-exec:
 	${STRIP} ${INSTALL_ROOT}${TKX_INST_BIN}/wishx
 	${INSTCOPY} ${TKX_STLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TKX_INST_LIB}/${TKX_STLIB_NAME}
+	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${INSTCOPY} ${TKX_SHLIB_NAME} ${INSTALL_ROOT}${TKX_INST_LIB} ;\
+	    ${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TKX_EXEC_RUNTIME} ;\
 	fi
-	${INSTCOPY} tkxConfig.sh ${INSTALL_ROOT}${TKX_INST_LIB}
-	${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TKX_INST_RUNTIME}
 	${INSTCOPY} tclhelp ${INSTALL_ROOT}${TKX_INST_BIN}
 
 #------------------------------------------------------------------------------

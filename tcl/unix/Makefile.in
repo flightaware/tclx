@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 8.5 1997/04/17 04:59:45 markd Exp $
+# $Id: Makefile.in,v 8.6 1997/06/12 21:08:42 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -653,11 +653,11 @@ install-exec:
 	${STRIP} ${INSTALL_ROOT}${TCLX_INST_BIN}/tcl
 	${INSTCOPY} ${TCLX_STLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB}
 	${RANLIB} ${INSTALL_ROOT}${TCLX_INST_LIB}/${TCLX_STLIB_NAME}
+	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
 	if test "@BUILD_SHARED@" = "YES"; then \
 	    ${INSTCOPY} ${TCLX_SHLIB_NAME} ${INSTALL_ROOT}${TCLX_INST_LIB} ;\
+	    ${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TCLX_EXEC_RUNTIME} ;\
 	fi
-	${INSTCOPY} tclxConfig.sh ${INSTALL_ROOT}${TCLX_INST_LIB}
-	${INSTCOPY} pkgIndex.tcl ${INSTALL_ROOT}${TCLX_INST_RUNTIME}
 
 #------------------------------------------------------------------------------
 
