@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: profile.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -28,7 +28,7 @@ profile on
 ProcA1
 profile off profData
 foreach idx [array names profData] {
-   if [string match "::ProcA1 *" $idx] break
+    if {[string match "::ProcA1 *" $idx]} break
 }
 
 if {([lindex $profData($idx) 1] == 0) && \
@@ -323,6 +323,9 @@ test profile-4.4 {profile count tests} {
 #
 # Test of a command that calls procedures from different levels.
 #
+set ::tcltest::testConstraints(tclx_test_eval) \
+	[llength [info commands tclx_test_eval]]
+
 proc ProcA5 {} {ProcB5}
 proc ProcB5 {} {tclx_test_eval 0 ProcC5a #0 ProcC5b 0 ProcC5c 1 ProcC5d }
 proc ProcC5a {} {ProcD5}
@@ -331,98 +334,93 @@ proc ProcC5c {} {ProcD5}
 proc ProcC5d {} {ProcD5}
 proc ProcD5 {} {concat a b; list c d}
 
-if [cequal [info commands tclx_test_eval] {}] {
-    puts "*** Command \"tclx_test_eval\" is not available in the interpreter,"
-    puts "*** some tests skipped\n"
-} else {
-    test profile-5.1 {profile count tests} {
-       profile on
-       ProcA5
-       profile off profData
-       SumCntData profData
-    } [list {<global> 1} {<global> 1} \
-	    {{::ProcA5 <global>} 1} \
-	    {{::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5b <global>} 1} \
-	    {{::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5d ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5b <global>} 1} \
-	    {{::ProcD5 ::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5d ::ProcA5 <global>} 1}]
+test profile-5.1 {profile count tests} {tclx_test_eval} {
+    profile on
+    ProcA5
+    profile off profData
+    SumCntData profData
+} [list {<global> 1} {<global> 1} \
+	{{::ProcA5 <global>} 1} \
+	{{::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5b <global>} 1} \
+	{{::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5d ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5b <global>} 1} \
+	{{::ProcD5 ::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5d ::ProcA5 <global>} 1}]
 
-    test profile-5.2 {profile count tests} {
-       profile -commands on
-       ProcA5
-       profile off profData
-       SumCntData profData
-    } [list {<global> 1} {<global> 1} \
-	    {{::ProcA5 <global>} 1} \
-	    {{::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5b <global>} 1} \
-	    {{::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5d ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5b <global>} 1} \
-	    {{::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5b <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5b <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
-	    {{::profile <global>} 1} \
-	    {{::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1}]
+test profile-5.2 {profile count tests} {tclx_test_eval} {
+    profile -commands on
+    ProcA5
+    profile off profData
+    SumCntData profData
+} [list {<global> 1} {<global> 1} \
+	{{::ProcA5 <global>} 1} \
+	{{::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5b <global>} 1} \
+	{{::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5d ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5b <global>} 1} \
+	{{::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5b <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5b <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
+	{{::profile <global>} 1} \
+	{{::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1}]
 
-    test profile-5.3 {profile count tests} {
-       profile -eval on
-       ProcA5
-       profile off profData
-       SumCntData profData
-    } [list {<global> 1} {<global> 1} \
-	    {{::ProcA5 <global>} 1} \
-	    {{::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5b ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5d ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5b ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5d ::ProcB5 ::ProcA5 <global>} 1}]
+test profile-5.3 {profile count tests} {tclx_test_eval} {
+    profile -eval on
+    ProcA5
+    profile off profData
+    SumCntData profData
+} [list {<global> 1} {<global> 1} \
+	{{::ProcA5 <global>} 1} \
+	{{::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5b ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5d ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5a ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5b ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5c ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5d ::ProcB5 ::ProcA5 <global>} 1}]
 
-    test profile-5.4 {profile count tests} {
-       profile -eval -commands on
-       ::ProcA5
-       profile off profData
-       SumCntData profData
-    } [list {<global> 1} {<global> 1} \
-	    {{::ProcA5 <global>} 1} \
-	    {{::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::concat ::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::list ::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	    {{::profile <global>} 1} \
-	    {{::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1}]
-}
+test profile-5.4 {profile count tests} {tclx_test_eval} {
+    profile -eval -commands on
+    ::ProcA5
+    profile off profData
+    SumCntData profData
+} [list {<global> 1} {<global> 1} \
+	{{::ProcA5 <global>} 1} \
+	{{::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::concat ::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::list ::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::profile <global>} 1} \
+	{{::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1}]
 
 #
 # Test evaling from other commands.

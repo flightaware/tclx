@@ -4,152 +4,70 @@
 # Test support routines.  Some of these are based on routines provided with
 # standard Tcl.
 #------------------------------------------------------------------------------
-# Set the global variable or environment variable TEST_ERROR_INFO to display
-# errorInfo when a test fails.
-#------------------------------------------------------------------------------
 # Copyright 1992-1999 Karl Lehenbauer and Mark Diekhans.
+# Copyright 2002 ActiveState Corporation.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation for any purpose and without fee is hereby granted, provided
-# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# that the above copyright notice appear in all copies.	 Karl Lehenbauer and
 # Mark Diekhans make no representations about the suitability of this
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 1.2 2002/04/02 02:29:43 hobbs Exp $
+# $Id: testlib.tcl,v 1.3 2002/04/03 02:44:21 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
-# Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
+# Save the unknown command in a variable SAVED_UNKNOWN.	 To get it back, eval
 # that variable.
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
     package require tcltest
     namespace import ::tcltest::*
 }
+package require Tclx 8.4
 
-set ::tcltest::testConstraints(have_fchown) [infox have_fchown]
-
-global env TEST_ERROR_INFO tcl_platform testXConfig
-global TEST_VERBOSE
-
-if [info exists env(TEST_ERROR_INFO)] {
-    set TEST_ERROR_INFO 1
+foreach need {
+    fchown fchmod flock fsync ftruncate msgcats posix_signals symlink
+    signal_restart truncate waitpid
+} {
+    set ::tcltest::testConstraints(need_$need) [infox have_$need]
 }
 
-if [info exists env(TEST_VERBOSE)] {
-    set TEST_VERBOSE 1
+set ::tcltest::testConstraints(need_chmod) [llength [info commands chmod]]
+if {[cequal $::tcl_platform(platform) "unix"]} {
+    set ::tcltest::testConstraints(isRoot)     [cequal [id user] "root"]
+    set ::tcltest::testConstraints(isNotRoot)  \
+	    [expr {![cequal [id user] "root"]}]
 }
 
-# Check configuration information that will determine which tests
-# to run.  To do this, create an array testXConfig.  Each element
-# has a 0 or 1 value, and the following elements are defined:
-#	unixOnly -	1 means this is a UNIX platform, so it's OK
-#			to run tests that only work under UNIX.
-#	pcOnly -	1 means this is a PC platform, so it's OK to
-#			run tests that only work on PCs.
-#	unixOrPc -	1 means this is a UNIX or PC platform.
-#	tempNotPc -	The inverse of pcOnly.  This flag is used to
-#			temporarily disable a test.
 
-catch {unset testXConfig}
-if {$tcl_platform(platform) == "unix"} {
-    set testXConfig(unixOnly) 1
-    set testXConfig(tempNotPc) 1
-} else {
-    set testXConfig(unixOnly) 0
-} 
-if {$tcl_platform(platform) == "windows"} {
-    set testXConfig(pcOnly) 1
-} else {
-    set testXConfig(pcOnly) 0
-}
-set testXConfig(unixOrPc) [expr $testXConfig(unixOnly) || $testXConfig(pcOnly)]
+# Genenerate a unique file record that can be verified.	 The record
+# grows quite large to test the dynamic buffering in the file I/O.
 
-#
-# Convert a Tcl result code to a string.
-#
-proc TestResultCode code {
-    switch -- $code {
-        0 {return TCL_OK}
-        1 {return TCL_ERROR}
-        2 {return TCL_RETURN}
-        3 {return TCL_BREAK}
-        4 {return TCL_CONTINUE}
-        default {return "***Unknown error code $code***"}
-    }
-}
-
-#
-# Output a test error.
-#
-proc OutTestError {test_name test_description contents_of_test
-                   passing_int_result passing_result int_result result} {
-    global TEST_ERROR_INFO errorInfo errorCode
-
-    puts stderr "==== $test_name $test_description"
-    puts stderr "==== Contents of test case:"
-    puts stderr "$contents_of_test"
-    puts stderr "==== Result was: [TestResultCode $int_result]"
-    puts stderr "$result"
-    puts stderr "---- Result should have been: [TestResultCode $passing_int_result]"
-    puts stderr "$passing_result"
-    puts stderr "---- $test_name FAILED" 
-    if {[info exists TEST_ERROR_INFO] && [info exists errorInfo]} {
-        puts stderr $errorCode
-        puts stderr $errorInfo
-        puts stderr "---------------------------------------------------"
-    }
+proc GenRec {id} {
+    return [format "Key:%04d {This is a test of file I/O (%d)} KeyX:%04d %s" \
+	    $id $id $id [replicate :@@@@@@@@: $id]]
 }
 
 #
 # Routine to execute tests and compare to expected results.
 #
-proc Test {test_name test_description contents_of_test passing_int_result
-           passing_result {constraints {}}} {
-    global testXConfig TEST_VERBOSE
-
-    # Check constraints to see if we should run this test.
-    foreach constraint $constraints {
-        if {![info exists testXConfig($constraint)] ||
-            !$testXConfig($constraint)} {
-                return
-        }
-    }
-    if {$passing_int_result == 0} {
-	uplevel 1 [list test $test_name $test_description \
-		$contents_of_test $passing_result]
-    } elseif {$passing_int_result == 1} {
-	uplevel 1 [list test $test_name $test_description \
-		"list \[catch {$contents_of_test} msg\] \$msg" \
-		[list $passing_int_result $passing_result]]
+proc Test {name description body int_result result} {
+    if {$int_result == 0} {
+	uplevel 1 [list test $name $description $body $result]
+    } elseif {$int_result == 1} {
+	uplevel 1 [list test $name $description \
+		"list \[catch {$body} msg\] \$msg" [list 1 $result]]
     } else {
-	if {[info exists TEST_VERBOSE]} {
-	    puts "$test_name $test_description"
-	}
-
-	set int_result [catch {uplevel $contents_of_test} result]
-
-	if {($int_result != $passing_int_result) \
-		|| ![cequal $result $passing_result]} {
-	    OutTestError $test_name $test_description $contents_of_test \
-		    $passing_int_result $passing_result $int_result $result
-	}
+	puts stderr "FIX OUTDATED TEST: $test_name $test_description"
     }
-}
-
-# Genenerate a unique file record that can be verified.  The record
-# grows quite large to test the dynamic buffering in the file I/O.
-
-proc GenRec {id} {
-    return [format "Key:%04d {This is a test of file I/O (%d)} KeyX:%04d %s" \
-                    $id $id $id [replicate :@@@@@@@@: $id]]
 }
 
 # Proc to fork and exec child that loops until it gets a signal.
 # Can optionally set its pgroup.  Wait till child has actually execed or
 # kill breaks on some systems (i.e. AIX).  Windows is a drag, since the
-# command line parsing is really dumb.  Pass it in a file instead.
+# command line parsing is really dumb.	Pass it in a file instead.
 
 proc ForkLoopingChild {{setPGroup 0}} {
     global tcl_platform
@@ -167,27 +85,27 @@ proc ForkLoopingChild {{setPGroup 0}} {
     flush stdout
     flush stderr
 
-    if [cequal $tcl_platform(platform) unix] {
-        set newPid [fork]
-        if {$newPid == 0} {
-            if $setPGroup {
-                id process group set
-            }
-            catch {execl $::tcltest::tcltest CHILD.RUN} msg
-            puts stderr "execl failed (ForkLoopingChild): $msg"
-            exit 1
-        }
+    if {[cequal $tcl_platform(platform) unix]} {
+	set newPid [fork]
+	if {$newPid == 0} {
+	    if $setPGroup {
+		id process group set
+	    }
+	    catch {execl $::tcltest::tcltest CHILD.RUN} msg
+	    puts stderr "execl failed (ForkLoopingChild): $msg"
+	    exit 1
+	}
     }
-    if [cequal $tcl_platform(platform) windows] {
-        if $setPGroup {
-            error "setpgroup not supported on windows"
-        }
-        set newPid [execl $::tcltest::tcltest CHILD.RUN]
+    if {[cequal $tcl_platform(platform) windows]} {
+	if $setPGroup {
+	    error "setpgroup not supported on windows"
+	}
+	set newPid [execl $::tcltest::tcltest CHILD.RUN]
     }
 
     # Wait till the child is actually running.
     while {[file exists CHILD.RUN]} {
-        sleep 1
+	sleep 1
     }
     return $newPid
 }
@@ -205,8 +123,6 @@ proc TestTouch file {
 #
 proc TestRemove args {
     foreach f $args {
-        catch {file delete -force $f}
+	catch {file delete -force $f}
     }
 }
-
-

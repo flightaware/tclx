@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pipe.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: pipe.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -23,12 +23,11 @@ if {[cequal [info procs Test] {}]} {
 #
 # Fork without exec will not work under Tk, skip this test
 #
-if ![lempty [info commands button]] {
-    puts "*************************************************************"
-    puts "The pipe commands test are constructed in a way that does not"
-    puts "work under Tk.  Test skipped."
-    puts "*************************************************************"
-    puts ""
+if {[info exists tk_version]} {
+    puts "******************************************************************"
+    puts "The pipe commands test require fork, which does not work under Tk."
+    puts "Test skipped."
+    puts "******************************************************************"
     return
 }
 # FIX: Need win95 tests for pipe.
@@ -57,11 +56,11 @@ proc PipeChild {id numRecs readChan} {
     exit 0
 }
 
-Test pipe-1.1 {pipe tests} {
-    pipe x y z
-} 1 {wrong # args: pipe ?fileId_var_r fileId_var_w?}
+test pipe-1.1 {pipe tests} {
+    list [catch {pipe x y z} msg] $msg
+} {1 {wrong # args: pipe ?fileId_var_r fileId_var_w?}}
 
-Test pipe-1.2 {pipe tests} {
+test pipe-1.2 {pipe tests} {unixOnly} {
     pipe readChan writeChan
 
     set pid [PipeChild pipe-1.3 50 $readChan]
@@ -75,7 +74,7 @@ Test pipe-1.2 {pipe tests} {
         
     close $readChan
     close $writeChan
-} 0 {} {unixOnly}
+} {}
 
 # cleanup
 ::tcltest::cleanupTests
