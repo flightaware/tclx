@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 7.11 1996/11/16 08:10:06 markd Exp $
+.\" $Id: TclX.n,v 8.0 1996/11/21 00:23:52 markd Exp $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -1154,9 +1154,9 @@ command will bind that file to a Tcl file id.  This is usedful for accessing
 files that are passed from the parent process.
 The argument ?\fItargetFileId\fR? is not valid with this operation.
 .sp
-On \fBWindows 95/NT\fR, only \fBstdin\fR, \fBstdout\fR, or
-\fBstderr\fR maybe specified for \fItargetFileId\fR.  The \fBdup\fR
-command does not work on sockets on \fBWindows 95/NT\fR.
+On \fBWindows 95/NT\fR, only \fBstdin\fR, \fBstdout\fR, or \fBstderr\fR or a
+non-socket file handle number maybe specified for \fItargetFileId\fR.  The
+\fBdup\fR command does not work on sockets on \fBWindows 95/NT\fR.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

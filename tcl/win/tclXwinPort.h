@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinPort.h,v 7.7 1996/10/21 03:07:48 markd Exp $
+ * $Id: tclXwinPort.h,v 8.0 1996/11/21 00:25:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -41,7 +41,6 @@
 #define NO_SIGACTION
 #define NO_SYS_SELECT_H
 #define NO_TRUNCATE    /* FIX: Are we sure there is no way to truncate???*/
-#define NO_FTRUNCATE
 #define RETSIGTYPE void
 
 #include <math.h>

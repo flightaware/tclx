@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 7.13 1996/11/07 01:09:49 markd Exp $
+ * $Id: tclXwinOS.c,v 8.0 1996/11/21 00:25:25 markd Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -885,7 +885,56 @@ TclXOSftruncate (Tcl_Interp  *interp,
                  off_t        newSize,
                  char        *funcName)
 {
-    return TclXNotAvailableError (interp, funcName);
+    HANDLE handle;
+    int pos;
+
+    handle = ChannelToHandle (channel, TCL_WRITABLE, NULL);
+    if (handle == NULL) {
+        TclWinConvertError (GetLastError ());
+        Tcl_AppendResult (interp, "truncation of \"",
+                          Tcl_GetChannelName (channel),
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+    pos = Tcl_Tell (channel);
+    if (SetFilePointer (handle, (LONG)newSize, NULL,
+                        FILE_BEGIN) == 0xFFFFFFFF) {
+        TclWinConvertError (GetLastError ());
+        Tcl_AppendResult (interp, "truncation of \"",
+                          Tcl_GetChannelName (channel),
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+    /*
+     * FIX: we really ought to interpolate zeros when extending the file,
+     * since SetEndOfFile does not promise to do this.
+     */
+    if (!SetEndOfFile (handle)) {
+        TclWinConvertError (GetLastError ());
+        Tcl_AppendResult (interp, "truncation of \"",
+                          Tcl_GetChannelName (channel),
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        if (pos >= 0) {
+            (void) SetFilePointer (handle, (LONG)pos, NULL, FILE_BEGIN);
+        }
+        return TCL_ERROR;
+    }
+    if (pos >= 0) {
+        if (SetFilePointer (handle, (LONG)pos, NULL,
+                            FILE_BEGIN) == 0xFFFFFFFF) {
+            TclWinConvertError (GetLastError ());
+            Tcl_AppendResult (interp,
+                              "couldn't restore position after truncating \"",
+                              Tcl_GetChannelName (channel),
+                              "\": ", Tcl_PosixError (interp),
+                              (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1586,9 +1635,28 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
     Tcl_Channel channel;
     int        *valuePtr;
 {
-    /* FIX: Implement */
-    return TclXNotAvailableError (interp,
-                                  "close-on-exec mode");
+    HANDLE handle;
+    int type;
+    DWORD flags;
+
+    handle = ChannelToHandle (channel, 0, &type);
+    /*
+     * The following works on Windows NT, but not on Windows 95.
+     */
+    if (!GetHandleInformation (handle, &flags)) {
+        TclWinConvertError (GetLastError ());
+        Tcl_AppendResult (interp, "getting close-on-exec for \"",
+                          Tcl_GetChannelName (channel),
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    /*
+     * N.B. The value of the CLOEXEC flag is the inverse of HANDLE_FLAG_INHERIT.
+     */
+    *valuePtr = (flags & HANDLE_FLAG_INHERIT) ? 0 : 1;
+    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1610,7 +1678,23 @@ TclXOSSetCloseOnExec (interp, channel, value)
     Tcl_Channel channel;
     int         value;
 {
-    /* FIX: Implement */
-    return TclXNotAvailableError (interp,
-                                  "close-on-exec mode");
+    HANDLE handle;
+    int type;
+
+    handle = ChannelToHandle (channel, 0, &type);
+    /*
+     * The following works on Windows NT, but not on Windows 95.
+     * N.B. The value of the CLOEXEC flag is the inverse of HANDLE_FLAG_INHERIT.
+     */
+    if (!SetHandleInformation (handle,
+                               HANDLE_FLAG_INHERIT,
+                               value ? 0 : HANDLE_FLAG_INHERIT)) {
+        TclWinConvertError (GetLastError ());
+        Tcl_AppendResult (interp, "setting close-on-exec for \"",
+                          Tcl_GetChannelName (channel),
+                          "\" failed: ", Tcl_PosixError (interp),
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
 }

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinDup.c,v 7.1 1996/09/03 23:39:10 markd Exp $
+ * $Id: tclXwinDup.c,v 8.0 1996/11/21 00:25:24 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -162,8 +162,70 @@ TclXOSBindOpenFile (interp, fileNumStr)
     Tcl_Interp *interp;
     char       *fileNumStr;
 {
-    /* FIX: Can probably make something work */
-    TclXNotAvailableError (interp,
-                           "binding an open file to a Tcl channel");
+    unsigned fileNum;
+    HANDLE fileHandle;
+    DWORD fileType;
+    int mode, isSocket;
+    char channelName[20];
+    Tcl_Channel channel = NULL;
+
+    if (!Tcl_StrToUnsigned (fileNumStr, 0, &fileNum)) {
+        Tcl_AppendResult (interp, "invalid integer file number \"", fileNumStr,
+                          "\", expected unsigned integer or Tcl file id",
+                          (char *) NULL);
+        return NULL;
+    }
+
+    /*
+     * Make sure file is open and determine the access mode and file type.
+     * Currently, we just make sure it's open, and assume both read and write.
+     * FIX: find an API under Windows that returns the read/write info.
+     */
+    fileHandle = (HANDLE) fileNum;
+    fileType = GetFileType (fileHandle);
+    if (fileType == FILE_TYPE_UNKNOWN) {
+        TclWinConvertError (GetLastError ());
+        goto posixError;
+    }
+    mode = TCL_READABLE | TCL_WRITABLE;
+
+    /*
+     * FIX: we don't deal with sockets.
+     */
+    isSocket = 0;
+
+    if (isSocket)
+        sprintf (channelName, "sock%d", fileNum);
+    else
+        sprintf (channelName, "file%d", fileNum);
+
+    if (Tcl_GetChannel (interp, channelName, NULL) != NULL) {
+        Tcl_ResetResult (interp);
+        Tcl_AppendResult (interp, "file number \"", fileNumStr,
+                          "\" is already bound to a Tcl file channel",
+                          (char *) NULL);
+        return NULL;
+    }
+    Tcl_ResetResult (interp);
+
+    if (isSocket) {
+        channel = Tcl_MakeTcpClientChannel ((ClientData) fileNum);
+    } else {
+        channel = Tcl_MakeFileChannel ((ClientData) fileNum,
+                                       (ClientData) fileNum,
+                                       mode);
+    }
+    Tcl_RegisterChannel (interp, channel);
+
+    return channel;
+
+  posixError:
+    Tcl_AppendResult (interp, "binding open file ", fileNumStr,
+                      " to Tcl channel failed: ", Tcl_PosixError (interp),
+                      (char *) NULL);
+
+    if (channel != NULL) {
+        Tcl_UnregisterChannel (interp, channel);
+    }
     return NULL;
 }
