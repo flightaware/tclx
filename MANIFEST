@@ -1,3 +1,4 @@
+
 ./CHANGES
 ./Config.mk
 ./MANIFEST
@@ -88,8 +89,6 @@
 ./tcllib/help/control/commandloop
 ./tcllib/help/control/continue
 ./tcllib/help/control/error
-./tcllib/help/control/errorCode
-./tcllib/help/control/errorInfo
 ./tcllib/help/control/eval
 ./tcllib/help/control/exit
 ./tcllib/help/control/for
@@ -152,17 +151,18 @@
 ./tcllib/help/intro/backslash
 ./tcllib/help/intro/braces
 ./tcllib/help/intro/brackets
-./tcllib/help/intro/built-in-vars
 ./tcllib/help/intro/comments
 ./tcllib/help/intro/data_types
 ./tcllib/help/intro/dollar
 ./tcllib/help/intro/double_quotes
 ./tcllib/help/intro/expressions
 ./tcllib/help/intro/keyedlists
+./tcllib/help/intro/lists
 ./tcllib/help/intro/procedures
 ./tcllib/help/intro/regexps
 ./tcllib/help/intro/results
 ./tcllib/help/intro/semi-colons
+./tcllib/help/intro/summary
 ./tcllib/help/intro/syntax
 ./tcllib/help/intro/variables
 ./tcllib/help/keyedlists/keyldel
@@ -178,14 +178,14 @@
 ./tcllib/help/libraries/loadlibindex
 ./tcllib/help/libraries/packagelib
 ./tcllib/help/libraries/packages
+./tcllib/help/libraries/searchpath
 ./tcllib/help/libraries/unknown
-./tcllib/help/libraries/utilprocs
-./tcllib/help/lists/assign_fields
 ./tcllib/help/lists/concat
 ./tcllib/help/lists/intersect
 ./tcllib/help/lists/intersect3
 ./tcllib/help/lists/join
 ./tcllib/help/lists/lappend
+./tcllib/help/lists/lassign
 ./tcllib/help/lists/lempty
 ./tcllib/help/lists/lindex
 ./tcllib/help/lists/linsert
@@ -269,6 +269,8 @@
 ./tcllib/help/time/times
 ./tcllib/help/variables/array
 ./tcllib/help/variables/env
+./tcllib/help/variables/errorCode
+./tcllib/help/variables/errorInfo
 ./tcllib/help/variables/for_array_keys
 ./tcllib/help/variables/global
 ./tcllib/help/variables/set
@@ -277,7 +279,7 @@
 ./tcllib/help/variables/upvar
 ./tclsrc/Makefile
 ./tclsrc/arrayprocs.tcl
-./tclsrc/asgnfields.tcl
+./tclsrc/bldtkhelp.tcl
 ./tclsrc/compat.tcl
 ./tclsrc/convlib.tcl
 ./tclsrc/edprocs.tcl
@@ -295,7 +297,6 @@
 ./tclsrc/tkdemo.tcl
 ./tests/all
 ./tests/arrayproc.test
-./tests/asgnfield.test
 ./tests/bsearch.test
 ./tests/chartype.test
 ./tests/chmod.test
@@ -315,6 +316,7 @@
 ./tests/globrecur.test
 ./tests/help.test
 ./tests/keylist.test
+./tests/lassign.test
 ./tests/lgets.test
 ./tests/list.test
 ./tests/loop.test
