@@ -12,14 +12,11 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 8.9 1997/07/18 16:40:30 markd Exp $
+ * $Id: tclXstring.c,v 8.10 1997/07/29 03:03:09 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
-
-/*FIX: remove last before first checks, here and in list commands.  Make em
-  like Tcl. */
 
 
 /*
@@ -235,11 +232,8 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
     }
         
     if (isRange) {
-        if (subLen < first) {
-            TclX_AppendObjResult (interp, " last is before first",
-                                  (char *) NULL);
-            return TCL_ERROR;
-        }
+        if (subLen < first)
+            return TCL_OK;
         subLen = subLen - first +1;
     }
 

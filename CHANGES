@@ -1315,3 +1315,7 @@
   o Fixed invalid keyed list key comparisons when two keys started with the
     same string.
 -------------------------------------------------------------------------------
+30 Jul 97:
+  o Removed check for last being before first in crange and csubstr.  Now
+    returns an empty string.
+-------------------------------------------------------------------------------
