@@ -307,4 +307,8 @@
   o Delete chamge bar macros when installing manual pages.
   o Changed startup so if no longer looks for a local TCLDEFAULT file.  Initial
     tests are now run by setting the environment variable.
+  o Fixed bug in chmod were set permissions for two difference classes (u,g,o)
+    with = in the same command did not work.
+  o Changed help and buildhelp.tcl so that multiple brief files are allowed
+    (extension .brf).
 -------------------------------------------------------------------------------
