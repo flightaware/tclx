@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id:$
+ * $Id: tclXinit.c,v 8.2 1997/04/14 00:52:08 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,6 +21,7 @@
 /*
  * Tcl procedure to search for an init for either TclX or TkX startup file.  
  * The algorithm is, with $w being either tcl or tk:
+ *    o Pre-existing ${w}x_library Tcl variable.
  *    o The directory specified in the environment variable ${w}X_LIBRARY,
  *      if it exists, with $w upshifted.
  *    o The specified default library directory,
@@ -41,6 +42,7 @@ static char tclx_fileinit [] =
 "proc tclx_findinit {w defaultLib version noInit} {\n\
     upvar #0 env env ${w}x_library libDir tcl_platform tcl_platform\n\
     set dirs {}\n\
+    if [info exists libDir] {lappend dirs $libDir}\n\
     set envVar [string toupper ${w}X_LIBRARY]\n\
     if [info exists env($envVar)] {lappend dirs $env($envVar)}\n\
     lappend dirs $defaultLib\n\
