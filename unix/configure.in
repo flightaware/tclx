@@ -1,0 +1,337 @@
+dnl--------------------------------------------------------------------
+dnl configure.in --
+dnl--------------------------------------------------------------------
+dnl	This file is an input file used by the GNU "autoconf" program to
+dnl	generate the file "configure", which is run during Tcl installation
+dnl	to configure the system for the local environment.  Many of these
+dnl     checks are duplicates of those required by Tcl & Tk, since TclX
+dnl	includes there internal header files.
+dnl
+dnl	Although the generated configure script is under the GNU Public,
+dnl	License Extended Tcl remains freely redistributable for any purpose,
+dnl	including commercial use.
+dnl--------------------------------------------------------------------
+dnl $Id$
+dnl--------------------------------------------------------------------
+
+AC_INIT(src/tclExtend.h)
+ifdef([AC_REVISION],AC_REVISION($Revision: 1.30 $),)dnl
+
+
+AC_CONFIG_HEADER(src/tclXconfig.h)
+
+AC_PROG_YACC
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_RANLIB
+
+dnl--------------------------------------------------------------------
+dnl	Some make programs require includes to be 
+dnl         .include "file"
+dnl     others...
+dnl         include file
+dnl--------------------------------------------------------------------
+
+echo checking how make handles includes
+rm -fr conftestdir
+if mkdir conftestdir; then
+  cd conftestdir
+  cat > Makeinclude <<EOF
+
+EOF
+  cat > Makefile <<EOF
+include Makeinclude
+
+all:
+EOF
+  if make >/dev/null 2>/dev/null; then
+    MAKEINCLUDE="include"
+    MAKEQUOTE=''
+  else
+    MAKEINCLUDE=".include"
+    MAKEQUOTE='"'
+  fi
+  cd ..
+  rm -fr conftestdir
+fi
+AC_SUBST(MAKEINCLUDE)
+AC_SUBST(MAKEQUOTE)
+
+
+dnl--------------------------------------------------------------------
+dnl	If a system doesn't have an opendir function (man, that's old!)
+dnl	then we use the version of dirent.h Ouster supplied, which
+dnl	is compatible with the substitute version of opendir that's
+dnl	provided.  This version only works with V7-style directories.
+dnl--------------------------------------------------------------------
+
+AC_FUNC_CHECK(opendir, , AC_DEFINE(USE_DIRENT2_H))
+
+
+dnl--------------------------------------------------------------------
+dnl	Do we have the catgets call (X/PG3 message catalogs)?
+dnl	Do we have the getcwd system call?
+dnl	Do we have the select system call?
+dnl	Do we have the setitimer system call?
+dnl	Do we have the setlinebuf call?
+dnl	Do we have the sigaction call?
+dnl     Do we have the getpgid call?
+dnl--------------------------------------------------------------------
+AC_HAVE_FUNCS(catgets getcwd select setitimer setlinebuf)
+AC_HAVE_FUNCS(sigaction setpgid)
+
+
+dnl--------------------------------------------------------------------
+dnl	Check for bzero.  We don't use bzero directly, but older SCO
+dnl	systems have a select FD_ZERO macro that calls bzero, which is
+dnl     only in the X library.  We redefine bzero as a memset call if
+dnl     there is no bzero.  If its not needed, it doesn't hurt
+dnl     anything.
+dnl--------------------------------------------------------------------
+AC_HAVE_FUNCS(bzero)
+
+dnl--------------------------------------------------------------------
+dnl	Check for missing functions that we need.  They will be
+dnl     compiled in the osSupport directory. Must check for SCO
+dnl	-lintl, which is were strftime is hidden.
+dnl--------------------------------------------------------------------
+
+AC_SCO_INTL
+AC_FUNC_CHECK(strftime, ,[LIBOBJS="$LIBOBJS strftime.o"])
+AC_FUNC_CHECK(random, ,[LIBOBJS="$LIBOBJS random.o"])
+AC_SUBST(LIBOBJS)
+
+dnl--------------------------------------------------------------------
+dnl	Supply substitutes for missing POSIX header files.  Special
+dnl	notes:
+dnl	    - Sprite's dirent.h exists but is bogus.
+dnl	    - stdlib.h doesn't define strtol, strtoul, or
+dnl	      strtod insome versions of SunOS
+dnl	    - some versions of string.h don't declare procedures such
+dnl	      as strstr
+dnl--------------------------------------------------------------------
+
+AC_UNISTD_H
+AC_COMPILE_CHECK(dirent.h, [#include <sys/types.h>
+#include <dirent.h>], [
+DIR *d;
+struct dirent *entryPtr;
+char *p;
+d = opendir("foobar");
+entryPtr = readdir(d);
+p = entryPtr->d_name;
+closedir(d);
+], , AC_DEFINE(NO_DIRENT_H))
+
+AC_HEADER_EGREP([Sprite version.* NOT POSIX], AC_DEFINE(NO_DIRENT_H))
+AC_HEADER_CHECK(float.h, , AC_DEFINE(NO_FLOAT_H))
+AC_HEADER_CHECK(values.h, , AC_DEFINE(NO_VALUES_H))
+AC_HEADER_CHECK(limits.h, , AC_DEFINE(NO_LIMITS_H))
+AC_HEADER_CHECK(stdlib.h, , AC_DEFINE(NO_STDLIB_H))
+AC_HEADER_EGREP(strtol, stdlib.h, , AC_DEFINE(NO_STDLIB_H))
+AC_HEADER_EGREP(strtoul, stdlib.h, , AC_DEFINE(NO_STDLIB_H))
+AC_HEADER_EGREP(strtod, stdlib.h, , AC_DEFINE(NO_STDLIB_H))
+AC_HEADER_CHECK(string.h, , AC_DEFINE(NO_STRING_H))
+AC_HEADER_EGREP(strstr, string.h, , AC_DEFINE(NO_STRING_H))
+AC_HEADER_EGREP(strerror, string.h, , AC_DEFINE(NO_STRING_H))
+AC_HEADER_CHECK(sys/time.h, , AC_DEFINE(NO_SYS_TIME_H))
+AC_HEADER_CHECK(sys/wait.h, , AC_DEFINE(NO_SYS_WAIT_H))
+AC_HEADER_CHECK(sys/socket.h, , AC_DEFINE(NO_SYS_SOCKET_H))
+
+dnl--------------------------------------------------------------------
+dnl	Include sys/select.h if it exists and if it supplies things
+dnl	that appear to be useful.  This appears to be true only on
+dnl	the RS/6000 under AIX.  Some systems like OSF/1 have a
+dnl	sys/select.h that's of no use, and other systems like SCO
+dnl	UNIX have a sys/select.h that's pernicious.
+dnl--------------------------------------------------------------------
+
+echo checking for sys/select.h
+AC_HEADER_EGREP(fd_mask, sys/select.h, AC_DEFINE(HAVE_SYS_SELECT_H))
+
+dnl--------------------------------------------------------------------
+dnl	Check for missing pid_t, gid_t and uid_t typedefs.
+dnl--------------------------------------------------------------------
+
+AC_PID_T
+AC_GETGROUPS_T
+AC_UID_T
+
+
+dnl--------------------------------------------------------------------
+dnl	Make "const" work no matter what.
+dnl--------------------------------------------------------------------
+
+AC_CONST
+
+
+dnl--------------------------------------------------------------------
+dnl	What type do signals return?
+dnl--------------------------------------------------------------------
+
+AC_RETSIGTYPE
+
+
+dnl--------------------------------------------------------------------
+dnl	Find out all about time handling differences.
+dnl--------------------------------------------------------------------
+
+AC_TIME_WITH_SYS_TIME
+AC_TIMEZONE
+
+AC_COMPILE_CHECK([tm_tzadj in struct tm], $decl,
+[struct tm tm; tm.tm_tzadj;], AC_DEFINE(HAVE_TM_TZADJ), )
+
+AC_COMPILE_CHECK([tm_gmtoff in struct tm], $decl,
+[struct tm tm; tm.tm_gmtoff;], AC_DEFINE(HAVE_TM_GMTOFF), )
+
+AC_HAVE_FUNCS(gettimeofday)
+
+AC_COMPILE_CHECK([timezone variable], , [
+extern long timezone;
+timezone += 1;
+exit (0);
+], AC_DEFINE(HAVE_TIMEZONE_VAR))
+
+dnl--------------------------------------------------------------------
+dnl     Test to see if "times" returns a status or the amount of
+dnl     elapsed real time.
+dnl--------------------------------------------------------------------
+
+AC_COMPILE_CHECK(["times" returning elapsed real time], [
+#include <sys/types.h>
+#include <sys/times.h>], [
+struct tms cpu;
+times (&cpu);
+sleep (2);
+if (times (&cpu) > 0)
+     exit (0);
+else 
+     exit (255);
+], AC_DEFINE(TIMES_RETS_REAL_TIME), [
+echo "times" does not appear to return the elasped real time])
+
+dnl--------------------------------------------------------------------
+dnl     Determine if "." is used as separator for the manual directory
+dnl     names.  i.e. man/man.1 vs man/man1
+dnl--------------------------------------------------------------------
+
+echo "checking man directory/section separator (man/man.1 vs man/man1)"
+mandirs="/usr/man/man.1 /usr/man/cat.1 /usr/share/man.1 /usr/share/man.1 
+        /usr/man/cat.C"
+gotdotdir="NO"
+for d in $mandirs
+do
+    if test -d $d
+    then
+        gotdotdir="YES"
+    fi
+done
+
+mandirs="/usr/man/man1 /usr/man/cat1 /usr/share/man1 /usr/share/man1"
+gotnodotdir="NO"
+for d in $mandirs
+do
+    if test -d $d
+    then
+        gotnodotdir="YES"
+    fi
+done
+
+if test $gotdotdir = YES -a $gotnodotdir = NO
+then
+    MAN_DIR_SEPARATOR="."
+elif test $gotdotdir = NO -a $gotnodotdir = YES
+then
+    MAN_DIR_SEPARATOR=""
+else
+    MAN_DIR_SEPARATOR="."
+    echo "WARNING: could not determine man directory/section separator"
+    echo "         assuming man/man.1 (can override in Config.mk)."
+fi
+AC_SUBST(MAN_DIR_SEPARATOR)
+
+dnl--------------------------------------------------------------------
+dnl	The check below checks whether <sys/wait.h> defines the type
+dnl	"union wait" correctly.  It's needed because of weirdness in
+dnl	HP-UX where "union wait" is defined in both the BSD and SYS-V
+dnl	environments.  Checking the usability of WIFEXITED seems to do
+dnl	the trick.
+dnl--------------------------------------------------------------------
+
+AC_COMPILE_CHECK([union wait], [#include <sys/types.h> 
+#include <sys/wait.h>], [
+union wait x;
+WIFEXITED(x);		/* Generates compiler error if WIFEXITED
+			 * uses an int. */
+], , AC_DEFINE(NO_UNION_WAIT))
+
+dnl--------------------------------------------------------------------
+dnl	Add socket and nsl libraries, if found.  
+dnl	Use C shared library if possible.
+dnl--------------------------------------------------------------------
+
+AC_HAVE_LIBRARY(socket, [LIBS="$LIBS -lsocket"])
+AC_HAVE_LIBRARY(nsl, [LIBS="$LIBS -lnsl"])
+AC_HAVE_LIBRARY(c_s, [LIBS="$LIBS -lc_s"])
+
+dnl--------------------------------------------------------------------
+dnl	Locate the X11 header files and the X11 library archive.
+dnl--------------------------------------------------------------------
+
+echo checking for X11 header files
+XINCLUDES="# no special path needed"
+AC_TEST_CPP([#include <X11/Intrinsic.h>], , XINCLUDES="nope")
+if test "$XINCLUDES" = nope; then
+    dirs="/usr/unsupported/include /usr/local/include /usr/X386/include /usr/include/X11R4 /usr/X11R5/include /usr/include/X11R5 /usr/openwin/include"
+    for i in $dirs ; do
+	if test -r $i/X11/Intrinsic.h; then
+	    XINCLUDES=" -I$i"
+	fi
+    done
+fi
+if test "$XINCLUDES" = nope; then
+  echo "Warning:  couldn't find any X11 include files."
+  XINCLUDES="# no include files found"
+fi
+AC_SUBST(XINCLUDES)
+
+echo "checking for X11 library archive"
+AC_HAVE_LIBRARY(X11_s, XLIBSW="-lX11_s")
+AC_HAVE_LIBRARY(libX11.a, XLIBSW="$XLIBSW -lX11", XLIBSW=nope)
+if test "$XLIBSW" = nope; then
+    dirs="/usr/unsupported/lib /usr/local/lib /usr/X386/lib /usr/lib/X11R4 /usr/X11R5/lib /usr/lib/X11R5 /usr/openwin/lib"
+    for i in $dirs ; do
+	if test -r $i/libX11.a; then
+	    XLIBSW="-L$i -lX11"
+	fi
+    done
+fi
+if test "$XLIBSW" = nope ; then
+    AC_HAVE_LIBRARY(libXwindow.a, XLIBSW=-lXwindow)
+fi
+if test "$XLIBSW" = nope ; then
+    echo "Warning:  couldn't find the X11 library archive.  Using -lX11."
+    XLIBSW=-lX11
+fi
+AC_SUBST(XLIBSW)
+
+dnl--------------------------------------------------------------------
+dnl	The code below cleans up the DEFS variable to eliminate
+dnl	duplicate entries.  This makes the eventual make output
+dnl	look a bit cleaner.
+dnl--------------------------------------------------------------------
+
+newDefs=""
+for i in $DEFS; do
+    if test -z "$newDefs"; then
+        newDefs=$i
+    elif echo $newDefs | fgrep -v -e $i >/dev/null 2>&1; then
+        newDefs="$newDefs $i"
+    fi
+done
+DEFS=$newDefs
+
+AC_OUTPUT(Makefile osSupport/Makefile src/Makefile tclsrc/Makefile
+tksrc/Makefile tktclsrc/Makefile tkucbsrc/Makefile tools/Makefile
+ucbsrc/Makefile)
