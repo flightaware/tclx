@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXshell.c,v 8.7 1999/06/23 00:24:57 surles Exp $
+ * $Id: tclXshell.c,v 8.8 1999/06/25 23:59:31 redman Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -236,7 +236,7 @@ TclX_MainEx (argc, argv, appInitProc, interp)
 	abort();
     }
 
-#ifdef WIN32
+#ifdef __WIN32
 #ifndef BORLAND
     TclX_SplitWinCmdLine (&argc, &argv);
 #endif

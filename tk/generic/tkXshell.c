@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 8.7 1999/03/31 06:37:55 markd Exp $
+ * $Id: tkXshell.c,v 8.8 1999/06/26 00:25:13 surles Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -109,7 +109,7 @@ TkX_MainEx(argc, argv, appInitProc, interp)
     Tcl_InitMemory(interp);
 #endif
 
-#ifdef __WIN32
+#ifdef WIN32
 #ifndef BORLAND
     /*
      * Parse the command line. Since Windows programs don't get passed the
