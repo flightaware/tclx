@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdloop.c,v 5.5 1996/03/12 07:52:32 markd Exp $
+ * $Id: tclXcmdloop.c,v 5.6 1996/03/17 06:52:04 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -737,7 +737,7 @@ Tcl_CommandloopCmd (clientData, interp, argc, argv)
   unknownOption:
     Tcl_AppendResult (interp, "unknown option \"", argv [argIdx],
                       "\", expected one of \"-async\", ",
-                      "\"-interactive\", \"-prompt1\", \"-prompt2\", "
+                      "\"-interactive\", \"-prompt1\", \"-prompt2\", ",
                       " or \"-endcommand\"", (char *) NULL);
     return TCL_ERROR;
     
