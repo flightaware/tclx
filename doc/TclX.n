@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.41 1993/10/07 15:15:12 markd Exp markd $
+.\" $Id: TclX.n,v 2.42 1993/10/24 18:56:27 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -578,11 +578,14 @@ Some examples are:
 '@help: tcl/processes/execl
 '@brief: Perform a process exec, executing a file.
 .TP
-.B execl \fIprog\fR ?\fIarglist\fR?
+.B execl \fR?\fB-argv0\fR argv0\fR? \fIprog\fR ?\fIarglist\fR?
 .br
 Do an execl, replacing the current program (either Extended Tcl or an
 application with Extended Tcl embedded into it) with \fIprog\fR and
 passing the arguments in the list \fIarglist\fR.
+.sp
+The \fB-argv0\fR options specifies that \fIargv0\fR is to be passed to the
+program as argv [0] rather than \fIprog\fR.
 .sp
 Note: If you are using \fBexecl\fR in a Tk application and it fails,
 you may not do anything that accesses the X server or you will receive

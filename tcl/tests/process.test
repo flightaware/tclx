@@ -12,20 +12,19 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: process.test,v 2.6 1993/09/09 06:07:15 markd Exp markd $
+# $Id: process.test,v 2.7 1993/09/23 04:53:09 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 if {[info procs test] != "test"} then {source testlib.tcl}
-
 
 # Test fork, execl, and wait commands.
 
 Test process-1.1 {fork, execl, wait tests} {
     set newPid [fork]
     if {$newPid == 0} {
-        execl ../tclmaster/bin/tcl {-qc {sleep 1;exit 12}}
-        puts stderr "execl failed"
+        catch {execl $TCL_PROGRAM {-qc {sleep 1;exit 12}}} msg
+        puts stderr "execl failed 1.1: $msg"
         exit 1
     }
     lrange [wait $newPid] 1 end
@@ -65,6 +64,88 @@ Test process-1.6 {fork, execl, wait tests} {
     set result [wait $testPid]
     lrange $result 1 end
 } 0 {SIG SIGTERM}
+
+Test process-1.7 {fork, execl, wait tests} {
+    set newPid [fork]
+    if {$newPid == 0} {
+        catch {
+            execl -argv0 FOOPROC $TCL_PROGRAM \
+                {-qc {sleep 1;if {"$argv0" == "FOOPROC"} {exit 10} {exit 18}}}
+        } msg
+        puts stderr "execl failed 1.7: $msg"
+        exit 1
+    }
+    lrange [wait $newPid] 1 end
+} 0 {EXIT 10}
+
+# Try execl in various wrong ways.  We try it in a separate process, first,
+# in case by error we exec something.
+
+Test process-1.8 {fork, execl, wait tests} {
+    set newPid [fork]
+    if {$newPid == 0} {
+	catch {execl -argv0 FOOPROC}
+	exit 24
+    }
+    if {[lrange [wait $newPid] 1 end] == {EXIT 24}} {
+	execl -argv0 FOOPROC
+    } else {
+        concat "appears to have exec-ed something"
+    }
+} 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
+
+Test process-1.9 {fork, execl, wait tests} {
+    set newPid [fork]
+    if {$newPid == 0} {
+	catch {execl -argv0 FOOPROC $TCL_PROGRAM {-qc {exit 0}} badarg}
+	exit 23
+    }
+    if {[lrange [wait $newPid] 1 end] == {EXIT 23}} {
+	execl -argv0 FOOPROC $TCL_PROGRAM {-qc {exit 0}} badarg
+    } else {
+        concat "appears to have exec-ed something"
+    }
+} 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
+
+Test process-1.10 {fork, execl, wait tests} {
+    set newPid [fork]
+    if {$newPid == 0} {
+	catch {execl $TCL_PROGRAM {-qc {exit 0}} badarg}
+	exit 24
+    }
+    sleep 1
+    if {[lrange [wait $newPid] 1 end] == {EXIT 24}} {
+	execl ../runtcl {-qc {exit 0}} badarg
+    }
+} 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
+
+Test process-1.11 {fork, execl, wait tests} {
+    set newPid [fork]
+    if {$newPid == 0} {
+	catch {execl}
+	exit 24
+    }
+    sleep 1
+    if {[lrange [wait $newPid] 1 end] == {EXIT 24}} {
+	execl
+    } else {
+        concat "appears to have exec-ed something"
+    }
+} 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
+
+Test process-1.12 {fork, execl, wait tests} {
+    set newPid [fork]
+    if {$newPid == 0} {
+	catch {execl -argv0}
+	exit 24
+    }
+    sleep 1
+    if {[lrange [wait $newPid] 1 end] == {EXIT 24}} {
+	execl -argv0
+    } else {
+        concat "appears to have exec-ed something"
+    }
+} 1 {wrong # args: execl ?-argv0 argv0? prog ?argList?}
 
 # Test extended wait functionality, if available.
 

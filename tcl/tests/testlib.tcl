@@ -16,14 +16,25 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 2.5 1993/09/18 22:58:22 markd Exp markd $
+# $Id: testlib.tcl,v 2.6 1993/09/23 04:55:14 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
 # Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
 # that variable.  Don't do this more than once.
 
-global SAVED_UNKNOWN
+global SAVED_UNKNOWN TCL_PROGRAM env
+
+#
+# Save path to Tcl program to exec, use it when running children in the
+# tests.
+#
+if [info exists env(TCL_PROGRAM)] {
+   set TCL_PROGRAM $env(TCL_PROGRAM)
+} else {
+   puts stderr {No environment variable TCL_PROGRAM, assuming "tcl" as test program}
+   set TCL_PROGRAM tcl
+}
 
 if {([info command unknown] == "") && ![info exists SAVED_UNKNOWN]} {
     error "can't find either unknown or SAVED_UNKNOWN"
@@ -111,6 +122,7 @@ proc GenRec {id} {
 # kill breaks on some systems (i.e. AIX).
 
 proc ForkLoopingChild {{setPGroup 0}} {
+    global TCL_PROGRAM
     close [open CHILD.RUN w]
     flush stdout
     flush stderr
@@ -125,9 +137,11 @@ proc ForkLoopingChild {{setPGroup 0}} {
     if $setPGroup {
         id process group set
     }
-    execl ../tclmaster/bin/tcl \
-        {-qc {unlink CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}}
-    puts stderr "execl failed"
+    catch {
+        execl $TCL_PROGRAM \
+            {-qc {unlink CHILD.RUN; catch {while {1} {sleep 1}}; exit 10}}
+    } msg
+    puts stderr "execl failed (ForkLoopingChild): $msg"
     exit 1
 }
 

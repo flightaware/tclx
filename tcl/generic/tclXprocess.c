@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprocess.c,v 2.7 1993/07/27 15:06:08 markd Exp markd $
+ * $Id: tclXprocess.c,v 2.8 1993/08/18 06:12:37 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -52,20 +52,29 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
     char  *staticArgv [STATIC_ARG_SIZE];
     char **argInList = NULL;
     char **argList   = staticArgv;
+    char  *argv0     = NULL;
+    int    nextArg   = 1;
     int    argInCnt, idx;
 
-    if ((argc < 2) || (argc > 3)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " prog ?argList?", (char *) NULL);
-        return TCL_ERROR;
+    if (argc < 2)
+        goto wrongArgs;
+
+    if (STREQU ("-argv0", argv [1])) {
+        if (argc < 4)
+            goto wrongArgs;
+        argv0 = argv [2];
+        nextArg = 3;
     }
+    if ((argc - nextArg) > 2)
+        goto wrongArgs;
 
     /*
      * If arg list is supplied, split it and build up the arguments to pass.
      * otherwise, just supply argv[0].  Must be NULL terminated.
      */
-    if (argc > 2) {
-        if (Tcl_SplitList (interp, argv [2], &argInCnt, &argInList) != TCL_OK)
+    if (argc - 1 > nextArg) {
+        if (Tcl_SplitList (interp, argv [nextArg + 1],
+                           &argInCnt, &argInList) != TCL_OK)
             return TCL_ERROR;
 
         if (argInCnt > STATIC_ARG_SIZE - 2)
@@ -79,18 +88,31 @@ Tcl_ExeclCmd (clientData, interp, argc, argv)
         argList [1] = NULL;
     }
 
-    argList [0] = argv [1];  /* Program name */
-
-    if (execvp (argv[1], argList) < 0) {
-        if (argInList != NULL)
-            ckfree (argInList);
-        if (argList != staticArgv)
-            ckfree (argList);
-
-        interp->result = Tcl_PosixError (interp);
-        return TCL_ERROR;
+    if (argv0 != NULL) {
+        argList [0] = argv0;
+    } else {
+	argList [0] = argv [nextArg];  /* Program name */
     }
 
+    execvp (argv [nextArg], argList);
+
+    /*
+     * Can only make it here on an error.
+     */
+    interp->result = Tcl_PosixError (interp);
+
+    if (argInList != NULL)
+        ckfree (argInList);
+    if (argList != staticArgv)
+        ckfree (argList);
+    
+    return TCL_ERROR;
+
+  wrongArgs:
+    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
+                      " ?-argv0 argv0? prog ?argList?",
+                      (char *) NULL);
+    return TCL_ERROR;
 }
 
 /*
