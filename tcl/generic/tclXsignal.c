@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXsignal.c,v 8.7 1997/07/04 09:30:08 markd Exp $
+ * $Id: tclXsignal.c,v 8.8 1997/07/04 09:39:00 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -235,11 +235,6 @@ GetSignalState _ANSI_ARGS_((int              signalNum,
 static int
 SetSignalState _ANSI_ARGS_((int             signalNum,
                             signalProcPtr_t sigFunc));
-static int
-TclX_SignalCmd _ANSI_ARGS_((ClientData  clientData,
-                            Tcl_Interp *interp,
-                            int         argc,
-                            char      **argv));
 
 static int
 BlockSignals _ANSI_ARGS_((Tcl_Interp    *interp,
@@ -284,7 +279,7 @@ ProcessSignals _ANSI_ARGS_((ClientData  clientData,
 
 static int
 ParseSignalList _ANSI_ARGS_((Tcl_Interp    *interp,
-                             char          *signalListStr,
+                             Tcl_Obj       *signalListObjPtr,
                              unsigned char  signals [MAXSIG]));
 
 static int
@@ -312,11 +307,18 @@ SetSignalStates _ANSI_ARGS_((Tcl_Interp *interp,
 static void
 SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
                               Tcl_Interp *interp));
+
 static int
-TclX_KillCmd _ANSI_ARGS_((ClientData  clientData,
-                          Tcl_Interp *interp,
-                          int         argc,
-                          char      **argv));
+TclX_SignalObjCmd _ANSI_ARGS_((ClientData   clientData,
+                               Tcl_Interp  *interp,
+                               int          objc,
+                               Tcl_Obj     *CONST objv[]));
+
+static int
+TclX_KillObjCmd _ANSI_ARGS_((ClientData   clientData,
+                             Tcl_Interp  *interp,
+                             int          objc,
+                             Tcl_Obj     *CONST objv[]));
 
 
 /*-----------------------------------------------------------------------------
@@ -451,7 +453,7 @@ BlockSignals (interp, action, signals)
     }
 
     if (sigprocmask (action, &sigBlockSet, NULL)) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -486,7 +488,7 @@ SignalBlocked (interp, signalNum)
     sigset_t sigBlockSet;
 
     if (sigprocmask (SIG_BLOCK, NULL, &sigBlockSet)) {
-        Tcl_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
+        TclX_AppendResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return NULL;
     }
     return sigismember (&sigBlockSet, signalNum) ? "1" : "0";
@@ -540,7 +542,7 @@ SigNameToNum (interp, sigName, sigNumPtr)
     }
 
   invalidSignal:
-    Tcl_AppendResult (interp, "invalid signal \"", sigName, "\"",
+    TclX_AppendResult (interp, "invalid signal \"", sigName, "\"",
                       (char *) NULL);
     return TCL_ERROR;
 }
@@ -682,7 +684,7 @@ FormatTrapCode (interp, signalNum, command)
         
         badSpec [0] = scanPtr [1];
         badSpec [1] = '\0';
-        Tcl_AppendResult (interp, "bad signal trap command formatting ",
+        TclX_AppendResult (interp, "bad signal trap command formatting ",
                           "specification \"%", badSpec,
                           "\", expected one of \"%%\" or \"%S\"",
                           (char *) NULL);
@@ -775,8 +777,8 @@ ProcessASignal (interp, background, signalNum)
 
         signalsReceived [signalNum] = 0;
         Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);
-        Tcl_AppendResult (interp, signalName, " signal received", 
-                          (char *)NULL);
+        TclX_AppendResult (interp, signalName, " signal received", 
+                           (char *)NULL);
         Tcl_SetVar (interp, "errorInfo", "", TCL_GLOBAL_ONLY);
         result = TCL_ERROR;
 
@@ -911,7 +913,7 @@ ProcessSignals (clientData, interp, cmdResultCode)
  * 
  * Parameters:
  *   o interp (O) - Interpreter for returning errors.
- *   o signalListStr (I) - The Tcl list of signals to convert.
+ *   o signalListObjPtr (I) - The Tcl list object of signals to convert.
  *   o signals (O) - Boolean array indexed by signal number that indicates
  *     which signals are set.
  * Returns:
@@ -919,22 +921,23 @@ ProcessSignals (clientData, interp, cmdResultCode)
  *-----------------------------------------------------------------------------
  */
 static int
-ParseSignalList (interp, signalListStr, signals)
+ParseSignalList (interp, signalListObjPtr, signals)
     Tcl_Interp    *interp;
-    char          *signalListStr;
+    Tcl_Obj       *signalListObjPtr;
     unsigned char  signals [MAXSIG];
 {
-    char  **signalListArgv;
-    int     signalListSize, signalNum, idx, cnt;
+    Tcl_Obj **signalObjv;
+    char     *signalStr;
+    int       signalObjc, signalNum, idx, cnt;
 
-    if (Tcl_SplitList (interp, signalListStr, &signalListSize, 
-                       &signalListArgv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, signalListObjPtr, &signalObjc, 
+                                &signalObjv) != TCL_OK)
         return TCL_ERROR;
 
-    if (signalListSize == 0) {
-        Tcl_AppendResult (interp, "signal list may not be empty",
-                          (char *) NULL);
-        goto errorExit;
+    if (signalObjc == 0) {
+        TclX_AppendResult (interp, "signal list may not be empty",
+                           (char *) NULL);
+        return TCL_ERROR;
     }
 
     memset (signals, FALSE, sizeof (unsigned char) * MAXSIG);
@@ -943,8 +946,9 @@ ParseSignalList (interp, signalListStr, signals)
      * Handle the wild card signal.  Don't return signals that can't be
      * modified.
      */
-    if (STREQU (signalListArgv [0], "*")) {
-        if (signalListSize != 1)
+    signalStr = Tcl_GetStringFromObj (signalObjv [0], NULL);
+    if (STREQU (signalStr, "*")) {
+        if (signalObjc != 1)
             goto wildMustBeAlone;
         cnt = 0;
         for (idx = 0; sigNameTable [idx].name != NULL; idx++) {
@@ -961,28 +965,25 @@ ParseSignalList (interp, signalListStr, signals)
     /*
      * Handle individually specified signals.
      */
-    for (idx = 0; idx < signalListSize; idx++) {
-        if (STREQU (signalListArgv [idx], "*"))
+    for (idx = 0; idx < signalObjc; idx++) {
+        signalStr = Tcl_GetStringFromObj (signalObjv [0], NULL);
+        if (STREQU (signalStr, "*"))
             goto wildMustBeAlone;
 
         signalNum = ParseSignalSpec (interp,
-                                     signalListArgv [idx],
+                                     signalStr,
                                      FALSE);  /* Zero not valid */
         if (signalNum < 0)
-            goto errorExit;
+            return TCL_ERROR;
         signals [signalNum] = TRUE;
     }
 
   okExit:
-    ckfree ((char *) signalListArgv);
     return TCL_OK;
 
   wildMustBeAlone:
-    Tcl_AppendResult (interp, "when \"*\" is specified in the signal list, ",
-                      "no other signals may be specified", (char *) NULL);
-
-  errorExit:
-    ckfree ((char *) signalListArgv);
+    TclX_AppendResult (interp, "when \"*\" is specified in the signal list, ",
+                       "no other signals may be specified", (char *) NULL);
     return TCL_ERROR;
 }
 
@@ -1023,9 +1024,9 @@ SetSignalActions (interp, signals, actionFunc, command)
             signalTrapCmds [signalNum] = ckstrdup (command);
 
         if (SetSignalState (signalNum, actionFunc) == TCL_ERROR) {
-            Tcl_AppendResult (interp, Tcl_PosixError (interp),
-                              " while setting ", Tcl_SignalId (signalNum),
-                              (char *) NULL);
+            TclX_AppendResult (interp, Tcl_PosixError (interp),
+                               " while setting ", Tcl_SignalId (signalNum),
+                               (char *) NULL);
             return TCL_ERROR;
         }
     }
@@ -1086,9 +1087,9 @@ FormatSignalListEntry (interp, signalNum)
     return entry;
 
   unixSigError:
-    Tcl_AppendResult (interp, Tcl_PosixError (interp),
-                      " while getting ", Tcl_SignalId (signalNum),
-                      (char *) NULL);
+    TclX_AppendResult (interp, Tcl_PosixError (interp),
+                       " while getting ", Tcl_SignalId (signalNum),
+                       (char *) NULL);
     return NULL;
 }
 
@@ -1194,8 +1195,8 @@ ProcessSignalListEntry (interp, signalEntry)
     return TCL_OK;
 
   invalidEntry:
-    Tcl_AppendResult (interp, "invalid signal keyed list entry \"",
-                      signalEntry, "\"", (char *) NULL);
+    TclX_AppendResult (interp, "invalid signal keyed list entry \"",
+                       signalEntry, "\"", (char *) NULL);
 
   errorExit:
     if (sigEntry != NULL)
@@ -1291,95 +1292,92 @@ SetSignalStates (interp, signalKeyedList)
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_SignalCmd --
- *     Implements the TCL signal command:
+ * TclX_SignalObjCmd --
+ *     Implements the Tcl signal command:
  *         signal action siglist ?command?
- *
- * Results:
- *      Standard TCL results, may return the UNIX system error message.
- *
- * Side effects:
- *	Signal handling states may be changed.
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_SignalCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+TclX_SignalObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj     *CONST objv[];
 {
-    unsigned char  signals [MAXSIG];
+    unsigned char signals [MAXSIG];
+    char *actionStr;
 
-    if ((argc < 3) || (argc > 4)) {
-        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                          " action signalList ?command?", (char *) NULL);
+    if ((objc < 3) || (objc > 4)) {
+        TclX_WrongArgs (interp, objv [0], " action signalList ?command?");
         return TCL_ERROR;
     }
+
+    actionStr = Tcl_GetStringFromObj (objv [1], NULL);
 
     /*
      * Do the specified action on the signals.  "set" has a special format
      * for the signal list, so do it first.
      */
-    if (STREQU (argv [1], "set")) {
-        if (argc != 3)
+    if (STREQU (actionStr, "set")) {
+        if (objc != 3)
             goto cmdNotValid;
-        return SetSignalStates (interp, argv [2]);
+        return SetSignalStates (interp,
+                                Tcl_GetStringFromObj (objv [2], NULL));
     }
 
     if (ParseSignalList (interp,
-                         argv [2],
+                         objv [2],
                          signals) != TCL_OK)
         return TCL_ERROR;
 
-    if (STREQU (argv [1], SIGACT_TRAP)) {
-        if (argc != 4) {
-            Tcl_AppendResult (interp, "command required for ",
-                             "trapping signals", (char *) NULL);
+    if (STREQU (actionStr, SIGACT_TRAP)) {
+        if (objc != 4) {
+            TclX_AppendResult (interp, "command required for ",
+                               "trapping signals", (char *) NULL);
             return TCL_ERROR;
         }
         return SetSignalActions (interp,
                                  signals,
                                  SignalTrap,
-                                 argv [3]);
+                                 Tcl_GetStringFromObj (objv [3], NULL));
     }
 
-    if (argc != 3)
+    if (objc != 3)
         goto cmdNotValid;
     
-    if (STREQU (argv [1], SIGACT_DEFAULT)) {
+    if (STREQU (actionStr, SIGACT_DEFAULT)) {
         return SetSignalActions (interp,
                                  signals,
                                  SIG_DFL,
                                  NULL);
     }
 
-    if (STREQU (argv [1], SIGACT_IGNORE)) {
+    if (STREQU (actionStr, SIGACT_IGNORE)) {
         return SetSignalActions (interp,
                                  signals,
                                  SIG_IGN,
                                  NULL);
     }
 
-    if (STREQU (argv [1], SIGACT_ERROR)) {
+    if (STREQU (actionStr, SIGACT_ERROR)) {
         return SetSignalActions (interp,
                                  signals,
                                  SignalTrap,
                                  NULL);
     }
 
-    if (STREQU (argv [1], "get")) {
+    if (STREQU (actionStr, "get")) {
         return GetSignalStates (interp,
                                 signals);
     }
 
-    if (STREQU (argv [1], "block")) {
+    if (STREQU (actionStr, "block")) {
         return BlockSignals (interp,
                              SIG_BLOCK,
                              signals);
     }
 
-    if (STREQU (argv [1], "unblock")) {
+    if (STREQU (actionStr, "unblock")) {
         return BlockSignals (interp,
                              SIG_UNBLOCK,
                              signals);
@@ -1388,23 +1386,23 @@ TclX_SignalCmd (clientData, interp, argc, argv)
     /*
      * Not a valid action.
      */
-    Tcl_AppendResult (interp, "invalid signal action specified: ", 
-                      argv [1], ": expected one of \"default\", ",
-                      "\"ignore\", \"error\", \"trap\", \"get\", ",
-                      "\"set\", \"block\", or \"unblock\"", (char *) NULL);
+    TclX_AppendResult (interp, "invalid signal action specified: ", 
+                       actionStr, ": expected one of \"default\", ",
+                       "\"ignore\", \"error\", \"trap\", \"get\", ",
+                       "\"set\", \"block\", or \"unblock\"", (char *) NULL);
     return TCL_ERROR;
 
 
   cmdNotValid:
-    Tcl_AppendResult (interp, "command may not be ",
-                      "specified for \"", argv [1], "\" action",
+    TclX_AppendResult (interp, "command may not be ",
+                       "specified for \"", actionStr, "\" action",
                       (char *) NULL);
     return TCL_ERROR;
 }
 
 /*-----------------------------------------------------------------------------
- * TclX_KillCmd --
- *     Implements the TCL kill command:
+ * TclX_KillObjCmd --
+ *     Implements the Tcl kill command:
  *        kill ?-pgroup? ?signal? idlist
  *
  * Results:
@@ -1412,15 +1410,16 @@ TclX_SignalCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_KillCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int     argc;
-    char      **argv;
+TclX_KillObjCmd (clientData, interp, objc, objv)
+    ClientData   clientData;
+    Tcl_Interp  *interp;
+    int          objc;
+    Tcl_Obj     *CONST objv[];
 {
-    int    signalNum, nextArg, idx, procId, procArgc;
+    int    signalNum, nextArg, idx, procId, procObjc;
     int    pgroup = FALSE;
-    char **procArgv;
+    char  *cmdStr, *argStr;
+    Tcl_Obj **procObjv;
     
 #ifdef SIGTERM
 #   define DEFAULT_KILL_SIGNAL SIGTERM
@@ -1428,57 +1427,58 @@ TclX_KillCmd (clientData, interp, argc, argv)
 #   define DEFAULT_KILL_SIGNAL SIGINT
 #endif
 
-    if (argc < 2)
+    if (objc < 2)
         goto usage;
 
     nextArg = 1;
-    if (STREQU (argv [nextArg], "-pgroup")) {
+    argStr = Tcl_GetStringFromObj (objv [nextArg], NULL);
+    if (STREQU (argStr, "-pgroup")) {
         pgroup = TRUE;
         nextArg++;
     }
         
-    if (((argc - nextArg) < 1) || ((argc - nextArg) > 2))
+    if (((objc - nextArg) < 1) || ((objc - nextArg) > 2))
         goto usage;
 
     /*
      * Get the signal.
      */
-    if ((argc - nextArg) == 1) {
+    if ((objc - nextArg) == 1) {
         signalNum = DEFAULT_KILL_SIGNAL;
     } else {
+        argStr = Tcl_GetStringFromObj (objv [nextArg], NULL);
         signalNum = ParseSignalSpec (interp,
-                                     argv [nextArg],
+                                     argStr,
                                      TRUE);  /* Allow zero */
         if (signalNum < 0)
             return TCL_ERROR;
         nextArg++;
     }
 
-    if (Tcl_SplitList (interp, argv [nextArg], &procArgc, 
-                       &procArgv) != TCL_OK)
+    if (Tcl_ListObjGetElements (interp, objv [nextArg], &procObjc, 
+                       &procObjv) != TCL_OK)
         return TCL_ERROR;
 
-    for (idx = 0; idx < procArgc; idx++) {
-        if (Tcl_GetInt (interp, procArgv [idx], &procId) != TCL_OK)
+    cmdStr = Tcl_GetStringFromObj (objv [0], NULL);
+
+    for (idx = 0; idx < procObjc; idx++) {
+        if (Tcl_GetIntFromObj (interp, procObjv [idx], &procId) != TCL_OK)
             goto errorExit;
         
         if (pgroup)
             procId = -procId;
 
-        if (TclXOSkill (interp, procId, signalNum, argv [0]) != TCL_OK)
+        if (TclXOSkill (interp, procId, signalNum, cmdStr) != TCL_OK)
             goto errorExit;
     }
 
-    ckfree ((char *) procArgv);
     return TCL_OK;
         
   errorExit:
-    ckfree ((char *) procArgv);
-    return TCL_ERROR;;
+    return TCL_ERROR;
 
   usage:
-    Tcl_AppendResult (interp, tclXWrongArgs, argv [0], 
-                      " ?-pgroup? ?signal? idlist", (char *) NULL);
+    TclX_WrongArgs (interp, objv [0], "?-pgroup? ?signal? idlist");
     return TCL_ERROR;
 }
 
@@ -1615,10 +1615,10 @@ TclX_SignalInit (interp)
 
     Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);
 
-    Tcl_CreateCommand (interp, "signal", TclX_SignalCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
-    Tcl_CreateCommand (interp, "kill", TclX_KillCmd,
-                       (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "signal", TclX_SignalObjCmd,
+                          (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+    Tcl_CreateObjCommand (interp, "kill", TclX_KillObjCmd,
+                          (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 }
 
 
