@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: compat.tcl,v 2.3 1993/06/08 14:28:20 markd Exp markd $
+# $Id: compat.tcl,v 2.4 1993/09/29 03:48:18 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -24,7 +24,7 @@ proc execvp {progname args} {
 }
 proc assign_fields {list args} {
     if [lempty $args] {
-        set args {{}}
+        return
     }
     return [uplevel lassign [list $list] $args]
 }
