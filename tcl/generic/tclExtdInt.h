@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.22 1993/08/21 17:19:02 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.23 1993/08/31 23:03:20 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -58,8 +58,9 @@
 
 #define MS_PER_TICK ((1000 + CLK_TCK/2) / CLK_TCK)
 
+#include <math.h>
+
 #ifdef NO_VALUES_H
-#    include <math.h>
 #    include <limits.h>
 #else
 #    include <values.h>
@@ -411,6 +412,9 @@ Tcl_LemptyCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
 Tcl_LassignCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_LmatchCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 /*
  * from tclXmath.c

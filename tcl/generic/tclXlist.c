@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 2.4 1993/05/05 05:15:31 markd Exp markd $
+ * $Id: tclXlist.c,v 2.5 1993/08/05 06:41:55 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -323,4 +323,92 @@ Tcl_LassignCmd (clientData, interp, argc, argv)
   error_exit:
     ckfree((char *) listArgv);
     return TCL_ERROR;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Tcl_LmatchCmd --
+ *
+ *      This procedure is invoked to process the "lmatch" Tcl command.
+ *      See the user documentation for details on what it does.
+ *
+ * Results:
+ *      A standard Tcl result.
+ *
+ * Side effects:
+ *      See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+        /* ARGSUSED */
+int
+Tcl_LmatchCmd(notUsed, interp, argc, argv)
+    ClientData notUsed;                 /* Not used. */
+    Tcl_Interp *interp;                 /* Current interpreter. */
+    int argc;                           /* Number of arguments. */
+    char **argv;                        /* Argument strings. */
+{
+#define EXACT   0
+#define GLOB    1
+#define REGEXP  2
+    int listArgc;
+    char **listArgv;
+    int matchArgc;
+    char **matchArgv;
+    int i, match, mode;
+    char *resultList;
+
+    mode = GLOB;
+    if (argc == 4) {
+        if (strcmp(argv[1], "-exact") == 0) {
+            mode = EXACT;
+        } else if (strcmp(argv[1], "-glob") == 0) {
+            mode = GLOB;
+        } else if (strcmp(argv[1], "-regexp") == 0) {
+            mode = REGEXP;
+        } else {
+            Tcl_AppendResult(interp, "bad search mode \"", argv[1],
+                    "\": must be -exact, -glob, or -regexp", (char *) NULL);
+            return TCL_ERROR;
+        }
+    } else if (argc != 3) {
+        Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
+                " ?mode? list pattern\"", (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (Tcl_SplitList(interp, argv[argc-2], &listArgc, &listArgv) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    matchArgv = (char **) ckalloc (listArgc * sizeof (char *));
+    matchArgc = 0;
+    for (i = 0; i < listArgc; i++) {
+        match = 0;
+        switch (mode) {
+            case EXACT:
+                match = (strcmp(listArgv[i], argv[argc-1]) == 0);
+                break;
+            case GLOB:
+                match = Tcl_StringMatch(listArgv[i], argv[argc-1]);
+                break;
+            case REGEXP:
+                match = Tcl_RegExpMatch(interp, listArgv[i], argv[argc-1]);
+                if (match < 0) {
+                    ckfree((char *) listArgv);
+                    ckfree((char *) matchArgv);
+                    return TCL_ERROR;
+                }
+                break;
+        }
+        if (match) {
+            matchArgv[matchArgc++] = listArgv[i];
+        }
+    }
+    resultList = Tcl_Merge (matchArgc, matchArgv);
+    Tcl_SetResult (interp, resultList, TCL_DYNAMIC);
+    ckfree((char *) listArgv);
+    ckfree((char *) matchArgv);
+    return TCL_OK;
 }
