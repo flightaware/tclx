@@ -5,7 +5,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual Makefile.
 #
-# RCS: @(#) $Id: Makefile.in,v 1.15 2001/07/17 21:37:12 hobbs Exp $
+# RCS: @(#) $Id: Makefile.in,v 1.16 2001/07/17 22:42:49 hobbs Exp $
 
 TCLVERSION = @TCL_VERSION@
 VERSION = @TCLX_VERSION@
@@ -184,7 +184,8 @@ SHLIB_CFLAGS	= @SHLIB_CFLAGS@
 SHLIB_SUFFIX	= @SHLIB_SUFFIX@
 VER		= @TCLX_MAJOR_VERSION@@TCLX_MINOR_VERSION@@TCLX_PATCH_LEVEL@
 DOTVER	        = @TCLX_MAJOR_VERSION@.@TCLX_MINOR_VERSION@.@TCLX_PATCH_LEVEL@
-LIBS		= @LIBS@ Wsock32.lib user32.lib advapi32.lib gdi32.lib comdlg32.lib
+LIBS		= @LIBS@ Wsock32.lib @TCL_LIBS@
+WISHLIBS	= @LIBS@ Wsock32.lib @TK_LIBS@
 RMDIR		= rm -rf
 MKDIR		= mkdir -p
 RM		= rm -f
@@ -351,7 +352,7 @@ $(WISHX): $(TKX_LIB_FILE) $(WISHX_OBJS) wishx.res
 	$(CC) $(CFLAGS) $(WISHX_OBJS) $(TKX_LIB_FILE) $(TCLX_LIB_FILE) \
 	$(TCL_LIB_FILE) $(TK_LIB_FILE) \
 	@STUB_LIBS@ \
-	$(LIBS) wishx.res $(CC_EXENAME) \
+	$(WISHLIBS) wishx.res $(CC_EXENAME) \
 	-link $(LDFLAGS_WINDOW)
 
 $(TKXTEST): $(TKX_LIB_FILE) $(TKXTEST_OBJS) wishx.res

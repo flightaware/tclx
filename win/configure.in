@@ -2,7 +2,7 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.9 2000/07/13 00:23:08 welch Exp $
+# RCS: @(#) $Id: configure.in,v 1.10 2000/07/14 18:08:10 welch Exp $
 
 AC_INIT(../tcl/generic/tclExtend.h)
 
@@ -188,5 +188,8 @@ AC_SUBST(EXESUFFIX)
 AC_SUBST(LIBRARIES)
 AC_SUBST(MAKE_LIB)
 AC_SUBST(MAKE_DLL)
+
+AC_SUBST(TCL_LIBS)
+AC_SUBST(TK_LIBS)
 
 AC_OUTPUT(Makefile)

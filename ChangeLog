@@ -1,3 +1,10 @@
+2002-01-16  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
+
+	* win/Makefile.in:
+	* win/configure.in:
+	* win/configure: Changed to use TCL_LIBS and TK_LIBS as the source
+	  for the list of Windows libraries to link against. Fixes #501990.
+
 2001-09-11  Andreas Kupries  <andreas_kupries@users.sourceforge.net>
 
 	* tcl/generic/tclXlib.c (MakeAbsFile): Replaced a call to the
