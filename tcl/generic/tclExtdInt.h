@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.4 1993/02/17 03:00:50 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.5 1993/04/03 23:23:43 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -211,11 +211,15 @@ int
 Tcl_ReturnDouble _ANSI_ARGS_((Tcl_Interp *interp,
                               double      number));
 
-int
+OpenFile *
 Tcl_SetupFileEntry _ANSI_ARGS_((Tcl_Interp *interp,
                                 int         fileNum,
                                 int         readable,
                                 int         writable));
+
+void
+Tcl_CloseForError  _ANSI_ARGS_((Tcl_Interp *interp,
+                                int         fileNum));
 
 void
 Tcl_SetupSigInt _ANSI_ARGS_(());
@@ -298,11 +302,17 @@ extern int
 Tcl_CopyfileCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
-Tcl_FstatCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
-
-extern int 
 Tcl_LgetsCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
+/*
+ * from tclXfstat.c
+ */
+extern int 
+Tcl_FstatCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+/*
+ * from tclXflock.c
+ */
 extern int
 Tcl_FlockCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
@@ -531,5 +541,11 @@ Tcl_MkdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
 Tcl_RmdirCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+/*
+ * from tclXserver.c
+ */
+extern int
+Tcl_ServerOpenCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 #endif
