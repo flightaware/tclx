@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: common.vc,v 8.5 1997/12/14 21:33:07 markd Exp $
+# $Id: $
 #------------------------------------------------------------------------------
 #
 
@@ -66,9 +66,9 @@ TCL_GENERIC_DIR  = $(TCL_DIR)\generic
 TCL_WIN_DIR      = $(TCL_DIR)\win
 TCL_RUNTIME_DIR  = $(TCL_DIR)\library
 TCL_TESTS_DIR    = $(TCL_DIR)\tests
-TCL_LIB          = $(TCL_WIN_DIR)\tcl80.lib
-TCL_DLL          = $(TCL_WIN_DIR)\tcl80.dll
-TCL_SALIB        = $(TCL_WIN_DIR)\tcl80sa.lib
+TCL_LIB          = $(TCL_WIN_DIR)\Release\tcl80.lib
+TCL_DLL          = $(TCL_WIN_DIR)\Release\tcl80.dll
+TCL_SALIB        = $(TCL_WIN_DIR)\Release\tcl80sa.lib
 
 #
 # TK build directories and files.
@@ -79,9 +79,9 @@ TK_WIN_DIR       = $(TK_DIR)\win
 TK_XLIB_DIR      = $(TK_DIR)\xlib
 TK_RUNTIME_DIR   = $(TK_DIR)\library
 TK_TESTS_DIR     = $(TK_DIR)\tests
-TK_LIB           = $(TK_WIN_DIR)\tk80.lib
-TK_DLL           = $(TK_WIN_DIR)\tk80.dll
-TK_SALIB         = $(TK_WIN_DIR)\tk80sa.dll
+TK_LIB           = $(TK_WIN_DIR)\Release\tk80.lib
+TK_DLL           = $(TK_WIN_DIR)\Release\tk80.dll
+TK_SALIB         = $(TK_WIN_DIR)\Release\tk80sa.dll
 
 #
 # TclX directories.
