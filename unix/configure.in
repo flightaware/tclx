@@ -13,12 +13,17 @@ dnl  Although the generated configure script is under the GNU Public,
 dnl  License Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 5.3 1995/09/05 07:12:01 markd Exp $
+dnl $Id: configure.in,v 5.4 1995/11/05 03:56:23 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(src/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 5.3 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 5.4 $),)dnl
 
 AC_CONFIG_HEADER(src/tclXconf.h)
+
+# If `configure' is invoked (in)directly via `make', ensure that it
+# encounters no `make' conflicts.
+#
+unset MFLAGS MAKEFLAGS
 
 #------------------------------------------------------------------------------
 # Check command line looking for the --arch= option.
@@ -94,6 +99,8 @@ rm -f tksrc/tkXinit.o */made*.tmp 2>/dev/null
 #         .include "file"
 #     others...
 #         include file
+#     Checks the MAKE environment variable for the name of the make command
+#     to use.
 #------------------------------------------------------------------------------
 
 AC_MSG_CHECKING(how make handles includes)
@@ -106,7 +113,7 @@ include confmakeinc
 all:
 EOF
 
-if make -f confmakefile >/dev/null 2>/dev/null; then
+if ${MAKE-make} -f confmakefile >/dev/null 2>/dev/null; then
     MAKEINCLUDE="include"
     MAKEQUOTE=''
     AC_MSG_RESULT(common make include syntax)
