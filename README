@@ -6,9 +6,8 @@ IMPORTANT:
 
    o This release contains a patch to Tcl 7.5 beta 1.  The patch,
      tcl.patch, must be applied and Tcl 7.5 recompiled before
-     compiling TclX.  This is to add functionality to the Tcl I/O
-     system which is not available since they switched from using
-     stdio.  We are working with the Tcl team on resolving this
+     compiling TclX.  This is to add functionality to the new Tcl
+     I/O system.  We are working with the Tcl team on resolving this
      (they are very helpful and the new I/O system is excellent).
 
 
@@ -26,11 +25,9 @@ No support is currently available for MS Windows or the MacIntosh.  We
 are interested in supporting these platforms, but don't have the time
 or expertise to do it in the near future.  If anyone is interested in
 working with us on these port, we would like to do it in the same manner
-as Tcl and Tk.  Please contact us if you would like to help.  We are
-interested in having two independent (from each other), experienced developers
-for each platform.  We will handle merge changes into the source tree and
-making changes available.  Please contact us at tcl-project@neosoft.com
-if you think you can help.
+as Tcl and Tk.  Please contact us if you would like to help.   We will
+handle merge changes into the source tree and making changes available.
+Please contact us at tcl-project@neosoft.com if you think you can help.
 
 POTENTIAL CHANGES:
 ==================

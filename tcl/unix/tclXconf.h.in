@@ -138,36 +138,6 @@
 /* Define struct msghdr contains the msg_accrights field */
 #undef HAVE_MSG_ACCRIGHTS
 
-/* Define if stdio FILE has _flags field */
-#undef HAVE_STDIO_FLAGS
-
-/* Define if stdio FILE has __flags field */
-#undef HAVE_STDIO__FLAGS
-
-/* Define if stdio FILE has _flag field */
-#undef HAVE_STDIO_FLAG
-
-/* Define if stdio FILE has __flag field */
-#undef HAVE_STDIO__FLAG
-
-/* Define if stdio FILE has _cnt field */
-#undef HAVE_STDIO_CNT
-
-/* Define if stdio FILE has __cnt field */
-#undef HAVE_STDIO__CNT
-
-/* Define if stdio FILE has _r field */
-#undef HAVE_STDIO_R
-
-/* Define if stdio FILE has readCount field */
-#undef HAVE_STDIO_READCOUNT
-
-/* Define if stdio FILE has the _gptr/_egptr fields */
-#undef HAVE_STDIO_GPTR
-
-/* Define if stdio FILE has the _IO_read_ptr/_IO_read_end fields */
-#undef HAVE_STDIO_IO_READ_PTR
-
 /* Define if have the function BSDgettimeofday (SGI) */
 #undef HAVE_BSDGETTIMEOFDAY
 
@@ -224,9 +194,6 @@
 
 /* Define if you have the setpgid function.  */
 #undef HAVE_SETPGID
-
-/* Define if you have the setvbuf function.  */
-#undef HAVE_SETVBUF
 
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION

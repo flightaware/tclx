@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.6 1995/12/31 11:24:46 markd Exp $
+# $Id: Makefile.in,v 5.7 1996/02/09 18:43:59 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -31,7 +31,8 @@ srcdir = @srcdir@
 # "random" in a BSD module.  This would conflict with the one in the TclX
 # library if it was brought in.
 
-LDLIBS = libtkx.a ${TK_LIB} ${XLIBSW} ${LIBTCLX} ${TCL_LIB} ${LIBS} ${XLDLIBS}
+LDLIBS = libtkx.a ${TK_LIB} ${XLIBSW} ${LIBTCLX} ${TCL_LIB} ${LIBS} \
+         ${DL_LIBS} ${XLDLIBS}
 
 SHLDLIBS = ${TKX_SHLIBS} ${XLIBSW} ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
@@ -43,7 +44,7 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR} \
 	      ${XINCLUDES}
 
-LD_SWITCHES = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
+LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
@@ -194,7 +195,7 @@ runtest: Makefile
 	@echo "TCLX_LIBRARY=${TCLX_TMP_MASTER}"                    >>runtest
 	@echo "TKX_LIBRARY=${TKX_TMP_MASTER}"                      >>runtest
 	@echo "TCL_PROGRAM=${TCLX_UNIX_BLD_DIR}/tcl"               >>runtest
-	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tkXtest"               >>runtest
+	@echo "TESTWISH=${TKX_UNIX_BLD_DIR}/tktest"                >>runtest
 	@echo "export TCLX_LIBRARY TKX_LIBRARY TCL_PROGRAM"        >>runtest
 	@echo "if [ \$$# = 0 ]"                                    >>runtest
 	@echo "then"                                               >>runtest

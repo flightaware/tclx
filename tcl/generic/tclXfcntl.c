@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfcntl.c,v 5.1 1995/09/05 07:55:47 markd Exp $
+ * $Id: tclXfcntl.c,v 5.2 1996/02/09 18:42:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -44,48 +44,6 @@ typedef struct {
  * The maximum length of any attribute name.
  */
 #define MAX_ATTR_NAME_LEN  20
-
-
-/*
- * Determine the field names and defines used to determine if a file is line
- * buffered or not buffered. This is nasty, _IONBF is the System V flag and
- * _SNBF is the BSD flag.  However some systems using BSD also define _IONBF
- * (yuk). Also some BSDs use __SNBF.
- */
-
-#ifdef HAVE_STDIO_FLAGS
-#   define STDIO_FLAGS _flags
-#endif
-#ifdef HAVE_STDIO__FLAGS
-#   define STDIO_FLAGS __flags
-#endif
-#ifdef HAVE_STDIO_FLAG
-#   define STDIO_FLAGS _flag
-#endif
-#ifdef HAVE_STDIO__FLAG
-#   define STDIO_FLAGS __flag
-#endif
-#ifndef STDIO_FLAGS
-    Unable to determine stdio flags;
-#endif
-
-
-#ifdef _STDIO_USES_IOSTREAM  /* GNU libc */
-#   define STDIO_NBUF _IONBF
-#   define STDIO_LBUF 0x200
-#endif
-#if (!defined(STDIO_NBUF)) && (defined(_IONBF) && !defined(_SNBF))
-#   define STDIO_NBUF _IONBF
-#   define STDIO_LBUF _IOLBF
-#endif
-#if !defined(STDIO_NBUF)
-#   define STDIO_NBUF _SNBF
-#   define STDIO_LBUF _SLBF
-#endif
-#ifndef STDIO_NBUF
-    Unable to determine stdio defines;
-#endif
-
 
 /*
  * Prototypes of internal functions.
@@ -239,8 +197,7 @@ GetFcntlAttr (interp, channel, readFileNum, writeFileNum, attrName)
     aFileNum = (readFileNum >= 0) ? readFileNum : writeFileNum;
 
     /*
-     * Access check.  This assumes that the channel is actually configured
-     * correctly.
+     * Access check.  Assumes Tcl channel is configured correctly.
      */
     if (attrib.access != ATTR_NONE) {
         switch (attrib.access) {

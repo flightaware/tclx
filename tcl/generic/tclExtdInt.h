@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 5.3 1995/09/05 07:55:47 markd Exp $
+ * $Id: tclExtdInt.h,v 5.4 1996/02/09 18:42:32 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -242,17 +242,6 @@ TclX_WriteStr _ANSI_ARGS_((Tcl_Channel  channel,
 
 #define TclX_WriteNL(channel) (Tcl_Write (channel, "\n", 1))
 
-extern int
-Tcl_GetDate _ANSI_ARGS_((char   *p,
-                         time_t  now,
-                         long    zone,
-                         time_t *timePtr));
-
-#if 0
-extern TclOpenFile *
-TclX_FNumToFileStruct _ANSI_ARGS_((Tcl_Interp  *interp,
-                                   int          fnum));
-#endif
 
 extern int
 TclX_ChannelFnum _ANSI_ARGS_((Tcl_Channel channel,
@@ -267,11 +256,6 @@ int
 TclX_GetOpenFnum _ANSI_ARGS_ ((Tcl_Interp *interp,
                                char       *handle,
                                int         accessMode));
-
-extern int
-Tcl_GetTime _ANSI_ARGS_((Tcl_Interp *interp,
-                         CONST char *string,
-                         time_t     *timePtr));
 
 extern int
 Tcl_GetOffset _ANSI_ARGS_((Tcl_Interp *interp,

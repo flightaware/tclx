@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 5.1 1995/09/05 07:55:47 markd Exp $
+ * $Id: tclXutil.c,v 5.2 1996/02/09 18:43:14 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -493,68 +493,6 @@ Tcl_GetUnsigned(interp, string, unsignedPtr)
 
   badUnsigned:
     Tcl_AppendResult (interp, "expected unsigned integer but got \"", 
-                      string, "\"", (char *) NULL);
-    return TCL_ERROR;
-}
-
-/*-----------------------------------------------------------------------------
- * Tcl_GetTime --
- *
- *      Given a string, produce the corresponding time_t value.
- *
- * Results:
- *      The return value is normally TCL_OK;  in this case *timepPtr
- *      will be set to the integer value equivalent to string.  If
- *      string is improperly formed then TCL_ERROR is returned and
- *      an error message will be left in interp->result.
- *
- * Side effects:
- *      None.
- *-----------------------------------------------------------------------------
- */
-int
-Tcl_GetTime(interp, string, timePtr)
-    Tcl_Interp *interp;
-    CONST char *string;
-    time_t     *timePtr;
-{
-    char          *end, *p;
-    unsigned long  i;
-
-    /*
-     * Since some strtoul functions don't detect negative numbers, check
-     * in advance.
-     */
-    errno = 0;
-    for (p = (char *) string; isspace(UCHAR(*p)); p++) {
-        /* Empty loop body. */
-    }
-    if (*p == '-')
-        goto badTime;
-    if (*p == '+') {
-        p++;
-    }
-    i = strtoul(p, &end, 0);
-    if (end == p) {
-        goto badTime;
-    }
-    if (errno == ERANGE) {
-        return ReturnOverflow (interp);
-    }
-    while ((*end != '\0') && isspace(UCHAR(*end))) {
-        end++;
-    }
-    if (*end != '\0') {
-        goto badTime;
-    }
-
-    *timePtr = (time_t) i;
-    if (*timePtr != i)
-        goto badTime;
-    return TCL_OK;
-
-  badTime:
-    Tcl_AppendResult (interp, "expected unsigned time but got \"", 
                       string, "\"", (char *) NULL);
     return TCL_ERROR;
 }

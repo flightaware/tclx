@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXAppInit.c,v 5.0 1995/07/25 06:00:44 markd Rel markd $
+ * $Id: tkXAppInit.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -78,29 +78,13 @@ Tcl_AppInit (interp)
     Tcl_Interp *interp;
 #endif
 {
-    Tk_Window main;
-
-    main = Tk_MainWindow(interp);
-
-    /*
-     * Call the init procedures for included packages.  Each call should
-     * look like this:
-     *
-     * if (Mod_Init(interp) == TCL_ERROR) {
-     *     return TCL_ERROR;
-     * }
-     *
-     * where "Mod" is the name of the module.
-     */
-
     if (TclX_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
-    if (main != NULL) {
-        if ((TkX_Init(interp) == TCL_ERROR)) {
-            return TCL_ERROR;
-        }
+    if (TkX_Init(interp) == TCL_ERROR) {
+        return TCL_ERROR;
     }
+    Tcl_StaticPackage(interp, "Tk", TkX_Init, (Tcl_PackageInitProc *) NULL);
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if
@@ -113,10 +97,6 @@ Tcl_AppInit (interp)
      * where "app" is the name of the application.  If this line is deleted
      * then no user-specific startup file will be run under any conditions.
      */
-#if (TCL_MINOR_VERSION < 5)
-    tcl_RcFileName = "~/.tclrc";
-#else
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.tclrc", TCL_GLOBAL_ONLY);
-#endif
     return TCL_OK;
 }

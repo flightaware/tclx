@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: dup.test,v 5.1 1995/09/26 06:40:09 markd Exp $
+# $Id: dup.test,v 5.2 1996/02/09 18:43:32 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -110,53 +110,94 @@ if {[set childPid [fork]] == 0} {
         append childProgram "set toParent \[dup $toParent\]" \n
         append childProgram "set fromParent \[dup $fromParent\]" \n
         append childProgram {if ![fcntl $fromParent RDWR] } "{\n"
+        append childProgram {    puts $toParent "DOING ACCESS CHECK"} \n
+        append childProgram {    flush $toParent} \n
         append childProgram {    catch {puts $fromParent arf} msg} \n
         append childProgram {    puts $toParent "msg1: $msg"} \n
         append childProgram {    flush $toParent} \n
         append childProgram {    catch {gets $toParent} msg} \n
         append childProgram {    puts $toParent "msg2: $msg"} \n
         append childProgram {    flush $toParent} \n
+        append childProgram "} else {\n"
+        append childProgram {    puts $toParent "SKIPPING ACCESS CHECK"} \n
+        append childProgram {    flush $toParent} \n
         append childProgram "}\n"
         append childProgram {while {[gets $fromParent msg] >= 0} {
             puts $toParent "got: $msg"; flush $toParent}}
         execl $TCL_PROGRAM [list -qc $childProgram]
-    } msg
+    } msgDOING
     puts stderr "child failed: $msg"
     exit 1
 }
 close $toParent
 close $fromParent
 
-if ![fcntl $toChild RDWR] {
+Test dup-2.1 {dup tests} {
+    set line [gets $fromChild]
+    switch $line {
+        {DOING ACCESS CHECK} {
+            set doingAccess 1
+            concat OK
+        }
+        {SKIPPING ACCESS CHECK} {
+            set doingAccess 0
+            concat OK
+        }
+        default {
+            list $line
+        }
+    }
+} 0 OK
 
-    Test dup-2.1 {dup tests} {
+
+if ![fcntl $toChild RDWR] {
+    Test dup-2.2 {dup tests} {
         gets $toChild
     } 1 "channel \"$toChild\" wasn't opened for reading"
 
-    Test dup-2.2 {dup tests} {
+    Test dup-2.3 {dup tests} {
         puts $fromChild arf
     } 1 "channel \"$fromChild\" wasn't opened for writing"
 }
 
-Test dup-2.2 {dup tests} {
+if $doingAccess {
+    Test dup-2.4 {dup tests} {
+        gets $fromChild line
+        if [string match {msg1: channel "*" wasn't opened for writing} $line] {
+            list OK
+        } else {
+            list $line
+        }
+    } 0 OK
+    Test dup-2.5 {dup tests} {
+        gets $fromChild line
+        if [string match {msg2: channel "*" wasn't opened for reading} $line] {
+            list OK
+        } else {
+            list $line
+        }
+    } 0 OK
+}
+
+Test dup-2.6 {dup tests} {
     puts $toChild "test 2.2"
     flush $toChild
     gets $fromChild
 } 0 {got: test 2.2}
 
-Test dup-2.3 {dup tests} {
+Test dup-2.7 {dup tests} {
     puts $toChild "test 2.3"
     flush $toChild
     gets $fromChild
 } 0 {got: test 2.3}
 
-Test dup-2.4 {dup tests} {
+Test dup-2.8 {dup tests} {
     close $toChild
     close $fromChild
     wait $childPid
 } 0 [list $childPid EXIT 0]
 
-Test dup-2.5 {dup tests} {
+Test dup-2.9 {dup tests} {
    set stat [catch {dup 100}]
    list $stat [lrange $errorCode 0 1]
 } 0 {1 {POSIX EBADF}}

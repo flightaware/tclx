@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: help.test,v 5.0 1995/07/25 05:41:21 markd Rel $
+# $Id: help.test,v 5.1 1996/02/09 18:43:41 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -159,11 +159,11 @@ Test help-1.1.1 {help tests} {
     HelpSend "help tcl" promptCnt
 } 0 {
 Subjects available in /tcl:
-   control/         debug/           files/           filescan/
-   internation/     intro/           keyedlists/      libraries/
-   lists/           math/            processes/       server/
-   signals/         status/          strings/         tclshell/
-   time/            variables/
+   control/         debug/           events/          files/
+   filescan/        internation/     intro/           keyedlists/
+   libraries/       lists/           math/            processes/
+   signals/         sockets/         status/          strings/
+   tclshell/        time/            variables/
 }
 
 Test help-1.2 {help tests} {
@@ -182,7 +182,7 @@ Test help-1.4 {help tests} {
 
 Test help-1.5 {help tests} {
     set result [HelpSend "help /tcl/lists/lassign" promptCnt]
-    set fh [open "../tclmaster/help/tcl/lists/lassign"]
+    set fh [open "../unix/help/tcl/lists/lassign"]
     set expect [read $fh]
     close $fh
     set summary {}
@@ -201,7 +201,7 @@ Test help-1.5 {help tests} {
 
 Test help-1.6 {help tests} {
     set result [HelpSend "help /tcl/math/expr" promptCnt]
-    set fh [open "../tclmaster/help/tcl/math/expr"]
+    set fh [open "../unix/help/tcl/math/expr"]
     set expect [read $fh]
     close $fh
     set summary {}
@@ -225,10 +225,8 @@ Test help-1.7 {help tests} {
 
 Test help-1.8 {help tests} {
     HelpSend "apropos clock" promptCnt
-} 0 {tcl/time/alarm - Set a process alarm clock.
-tcl/time/convertclock - Parse and convert a date and time string to integer clock value.
-tcl/time/fmtclock - Convert an integer time value to human-readable format.
-tcl/time/getclock - Return current date and time as an integer value.
+} 0 {tcl/time/clock - Obtain and manipulate time
+tcl/time/alarm - Set a process alarm clock.
 }
 
 Test help-1.9 {help tests} {

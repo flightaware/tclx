@@ -1047,5 +1047,7 @@
 -------------------------------------------------------------------------------
 09 Feb 96:
   o Integrated with Tcl 7.5 beta 1, which includes the new Tcl I/O system.
+  o Replaced the fmtclock, convertclock and getclock commands with
+    compatibility procedures that interface to the new Tcl clock command.
 -------------------------------------------------------------------------------
  

@@ -15,7 +15,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXAppInit.c,v 5.0 1995/07/25 05:59:17 markd Rel markd $
+ * $Id: tclXAppInit.c,v 5.1 1995/09/05 07:55:47 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -78,23 +78,10 @@ Tcl_AppInit (interp)
     Tcl_Interp *interp;
 #endif
 {
-    /*
-     * Call the init procedures for included packages.  Each call should
-     * look like this:
-     *
-     * if (Mod_Init(interp) == TCL_ERROR) {
-     *     return TCL_ERROR;
-     * }
-     *
-     * where "Mod" is the name of the module.
-     */
-
-    /*
-     * Add in Extended Tcl commands and source TclX initialization file.
-     */
     if (TclX_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
     }
+    Tcl_StaticPackage (interp, "Tclx", TclX_Init, TclX_SafeInit);
 
     /*
      * Call Tcl_CreateCommand for application-specific commands, if

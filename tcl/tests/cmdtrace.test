@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cmdtrace.test,v 5.0 1995/07/25 05:40:58 markd Rel $
+# $Id: cmdtrace.test,v 5.1 1996/02/09 18:43:29 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -210,15 +210,11 @@ ERRORCODE]
 
 
 Test cmdtrace-3.2 {command trace argument error checking} {
-    exec $TCL_PROGRAM -qc {cmdtrace on command {foo $NOTDEFINED}
-                           puts stderr "EC=$errorCode"
-                           puts stderr "EI=$errorInfo"}
+    exec $TCL_PROGRAM -qc {cmdtrace on command {foo $NOTDEFINED};set i 0}
 } 1 {cmdtrace callback command error: errorCode = NONE
 can't read "NOTDEFINED": no such variable
     while executing
 "foo $NOTDEFINED..."
-    ("cmdtrace" callback command)
-EC=
-EI=}
+    ("cmdtrace" callback command)}
 
 unlink CMDTRACE.OUT

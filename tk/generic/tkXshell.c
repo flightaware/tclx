@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tkXshell.c,v 5.2 1995/10/03 04:58:30 markd Exp $
+ * $Id: tkXshell.c,v 5.3 1996/02/09 18:43:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 /* 
@@ -37,14 +37,8 @@ static char sccsid[] = "@(#) tkMain.c 1.136 96/01/17 09:32:28";
 
 #include <ctype.h>
 #include <stdio.h>
-#include <string.h>
 #include <tclExtdInt.h>
 #include <tk.h>
-#ifdef NO_STDLIB_H
-#   include "../compat/stdlib.h"
-#else
-#   include <stdlib.h>
-#endif
 
 /*
  * Declarations for various library procedures and variables (don't want
@@ -172,10 +166,17 @@ TkX_Main(argc, argv, appInitProc)
     Tcl_SetVar(interp, "argv0", argv0, TCL_GLOBAL_ONLY);
 
     /*
-     * Set the "tcl_interactive" variable.
+     * For now, under Windows, we assume we are not running as a console mode
+     * app, so we need to use the GUI console.  In order to enable this, we
+     * always claim to be running on a tty.  This probably isn't the right
+     * way to do it.
      */
 
+#ifdef __WIN32__
+    tty = 1;
+#else
     tty = isatty(0);
+#endif
     Tcl_SetVar(interp, "tcl_interactive",
 	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
     if ((fileName == NULL) && tty)
@@ -186,7 +187,7 @@ TkX_Main(argc, argv, appInitProc)
      */
 
     if ((*appInitProc)(interp) != TCL_OK) {
-            TclX_ErrorExit (interp, 255);
+        TclX_ErrorExit (interp, 255);
     }
 
     /*
@@ -375,7 +376,10 @@ StdinProc(clientData, mask)
  *
  * Results:
  *	Returns a string that can be used as the default application
- *	name.
+ *	name.  This is either the last component of the file name
+ *	from which the application was invoked, or "tk" if we don't
+ *	know the name of the application's file (e.g. because Tk was
+ *	loaded as a shared library).
  *
  * Side effects:
  *	None.
@@ -388,6 +392,9 @@ TkDefaultAppName()
 {
     char *p;
 
+    if (argv0 == NULL) {
+	return "tk";
+    }
     p = strrchr(argv0, '/');
     if (p != NULL) {
 	p++;

@@ -12,23 +12,18 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 5.1 1995/09/05 07:55:47 markd Exp $
+ * $Id: tclXdup.c,v 5.2 1996/02/09 18:42:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 
 /*
- * Channel options and index of the names.
+ * Channel options.
  */
-static char *channelOptions [] = {
-    "-blocking",
-    "-linemode",
-    "-translation",
-    NULL};
-#define COPT_BLOCKING    0
-#define COPT_LINEMODE    1
-#define COPT_TRANSLATION 2
+static char *COPT_BLOCKING    = "-blocking";
+static char *COPT_LINEMODE    = "-linemode";
+static char *COPT_TRANSLATION = "-translation";
 
 /*
  * Prototypes of internal functions.
@@ -101,9 +96,10 @@ DupFileHandle (interp, srcFileId, targetFileId)
 {
     Tcl_Channel srcChannel, newChannel = NULL;
     Tcl_ChannelType *channelType;
-    int mode, srcFileNum, isSocket, idx;
+    int mode, srcFileNum, isSocket;
     int newFileNum = -1;
     off_t seekOffset = -1;
+    char *value;
 
     /*
      * Get all the information about the file being duplicated.  On Unix,
@@ -198,17 +194,38 @@ DupFileHandle (interp, srcFileId, targetFileId)
     }
     
     /*
-     * Set channel options.
+     * Set channel options.  Only modify the value if its not the default,
+     * as set blocking on standard files generates an error on some systems.
      */
-    for (idx = 0; channelOptions [idx] != NULL; idx++) {
+    value = Tcl_GetChannelOption (srcChannel,
+                                  COPT_BLOCKING);
+    if (value [0] == '0') {
         if (Tcl_SetChannelOption (interp,
                                   newChannel,
-                                  channelOptions [idx],
-                                  Tcl_GetChannelOption (srcChannel,
-                                                        channelOptions [idx]))
-                                  == TCL_ERROR)
+                                  COPT_BLOCKING,
+                                  value) == TCL_ERROR)
             goto error;
     }
+    value = Tcl_GetChannelOption (srcChannel,
+                                  COPT_LINEMODE);
+    if (value [0] == '1') {
+        if (Tcl_SetChannelOption (interp,
+                                  newChannel,
+                                  COPT_LINEMODE,
+                                  value) == TCL_ERROR)
+            goto error;
+    }
+
+    value = Tcl_GetChannelOption (srcChannel,
+                                  COPT_TRANSLATION);
+    if (!STREQU (value, "auto")) {
+        if (Tcl_SetChannelOption (interp,
+                                  newChannel,
+                                  COPT_TRANSLATION,
+                                  value) == TCL_ERROR)
+            goto error;
+    }
+
 
     Tcl_AppendResult (interp, Tcl_GetChannelName (newChannel),
                       (char *) NULL);
@@ -278,7 +295,13 @@ BindOpenFile (interp, fileNumStr)
 
     if (fstat (fileNum, &fileStat) < 0)
         goto unixError;
-    isSocket = ((fileStat.st_mode & S_IFMT) ==  S_IFSOCK);
+
+    /*
+     * If its a socket but RDONLY or WRONLY, enter it as a file.  This is
+     * a pipe under BSD.
+     */
+    isSocket = S_ISSOCK (fileStat.st_mode) &&
+        (mode == (TCL_READABLE | TCL_WRITABLE)) ;
 
     if (isSocket)
         sprintf (channelName, "sock%d", fileNum);
@@ -300,18 +323,20 @@ BindOpenFile (interp, fileNumStr)
     /*
      * Set channel options.
      */
-    if (Tcl_SetChannelOption (interp,
-                              channel,
-                              channelOptions [COPT_BLOCKING],
-                              fileMode & (O_NONBLOCK | O_NDELAY)  ? "1" : "0")
-        == TCL_ERROR)
-        goto error;
-    if (Tcl_SetChannelOption (interp,
-                              channel,
-                              channelOptions [COPT_LINEMODE],
-                              isatty (fileNum) ? "1" : "0")
-        == TCL_ERROR)
-        goto error;
+    if (fileMode & (O_NONBLOCK | O_NDELAY)) {
+        if (Tcl_SetChannelOption (interp,
+                                  channel,
+                                  COPT_BLOCKING,
+                                  "0") == TCL_ERROR)
+            goto error;
+    }
+    if (isatty (fileNum)) {
+        if (Tcl_SetChannelOption (interp,
+                                  channel,
+                                  COPT_LINEMODE,
+                                  "1") == TCL_ERROR)
+            goto error;
+    }
 
     Tcl_AppendResult (interp, Tcl_GetChannelName (channel),
                       (char *) NULL);

@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.5 1995/12/31 11:24:38 markd Exp $
+# $Id: Makefile.in,v 5.6 1996/02/09 18:43:51 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,7 +27,7 @@ srcdir = @srcdir@
 #------------------------------------------------------------------------------
 # Local macros.
 #
-LDLIBS = libtclx.a ${TCL_LIB} ${LIBS} ${XLDLIBS}
+LDLIBS = libtclx.a ${TCL_LIB} ${LIBS} ${DL_LIBS} ${XLDLIBS}
 
 SHLDLIBS = ${TCLX_SHLIBS} ${LIBS} ${XLDLIBS}
 
@@ -36,27 +36,26 @@ CC_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} \
 	      -I${TCLX_UNIX_BLD_DIR} \
 	      -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
 
-LD_SWITCHES = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
+LD_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CFLAGS}
 
-CXX_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CXXFLAGS} \
+CXX_SWITCHES = ${CPPFLAGS} ${XCFLAGS} ${CXXFLAGS} ${TCL_SHLIB_CFLAGS} \
 	       -I${TCLX_GENERIC_DIR} -I${TCLX_UNIX_SRC_DIR} \
 	       -I${TCL_GENERIC_DIR} -I${TCL_UNIX_DIR}
 
-LDXX_SWITCHES = ${LDFLAGS} ${XLDFLAGS} ${XCFLAGS} ${CXXFLAGS}
+LDXX_SWITCHES = ${LDFLAGS} ${LD_FLAGS} ${XLDFLAGS} ${XCFLAGS} ${CXXFLAGS}
 
 #------------------------------------------------------------------------------
 # Source and target macros.
 #
 GENERIC_OBJS = \
-    tclXbsearch.o    tclXchmod.o      tclXcmdInit.o \
-    tclXcmdloop.o    tclXdebug.o      tclXdup.o     \
-    tclXfcntl.o      tclXfilecmds.o   tclXfilescan.o   tclXflock.o   \
-    tclXfstat.o      tclXgeneral.o    tclXhandles.o \
-    tclXid.o         tclXinit.o       tclXkeylist.o    tclXlib.o     \
-    tclXlist.o       tclXmath.o       tclXmsgcat.o     tclXlibInit.o \
-    tclXprocess.o    tclXprofile.o    tclXregexp.o     tclXselect.o  \
-    tclXserver.o     tclXsignal.o     tclXshell.o      tclXstring.o  \
-    tclXunixcmds.o   tclXutil.o
+    tclXbsearch.o    tclXchmod.o      tclXcmdInit.o    tclXcmdloop.o  \
+    tclXdebug.o      tclXdup.o        tclXfcntl.o      tclXfilecmds.o \
+    tclXfilescan.o   tclXflock.o      tclXfstat.o      tclXgeneral.o  \
+    tclXhandles.o    tclXid.o         tclXinit.o       tclXkeylist.o  \
+    tclXlib.o        tclXlist.o       tclXmath.o       tclXmsgcat.o   \
+    tclXlibInit.o    tclXprocess.o    tclXprofile.o    tclXregexp.o   \
+    tclXselect.o     tclXserver.o     tclXsignal.o     tclXshell.o    \
+    tclXstring.o     tclXunixcmds.o   tclXutil.o
 
 COMPAT_OBJS = @LIBOBJS@
 

@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 5.6 1996/01/19 09:52:12 markd Exp $
+ * $Id: tclExtend.h,v 5.7 1996/02/09 18:42:35 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@
  * version to form the actual extended Tcl version.
  */
 
-#define TCL_EXTD_VERSION_SUFFIX "a-a3"   /* 7.5a-a3 */
+#define TCL_EXTD_VERSION_SUFFIX "a-b1"   /* 7.5a-b1 */
 
 typedef void *void_pt;
 
@@ -143,13 +143,6 @@ EXTERN int
 Tcl_GetLong _ANSI_ARGS_((Tcl_Interp  *interp,
                          CONST char *string,
                          long        *longPtr));
-
-#if 0
-??? Can we support this??
-EXTERN int
-Tcl_GetTimeZone _ANSI_ARGS_((long  currentTime));
-
-#endif
 
 EXTERN int 
 Tcl_GetUnsigned _ANSI_ARGS_((Tcl_Interp  *interp,

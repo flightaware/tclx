@@ -12,20 +12,10 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfstat.c,v 5.0 1995/07/25 05:59:10 markd Rel $
+ * $Id: tclXfstat.c,v 5.1 1996/02/09 18:42:55 markd Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
-
-#ifndef NO_SYS_SOCKET_H
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
-#endif
 
 /*
  * Prototypes of internal functions.
