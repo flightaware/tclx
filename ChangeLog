@@ -2,7 +2,9 @@
 	* tcl/win/configure.in, common.bc, common.vc
 	    Fixed version number to 8.3
 	* {tcl,tk}/unix/Makefile.in, tweaks to get references to LIB_RUNTIME_DIR
-	    properly expanded on irix builds.
+	    properly expanded on irix builds.  Also added BUILDHELP macro
+	    that is conditional on nroff being present so we don't try to
+	    build help files on systems with out nroff.
 
 2000-07-10 Brent Welch <welch@ajubasolutions.com>
 	* tcl/win/tclXAppInit.c, tk/generic/tkXshell.c, tk/win/tkXAppInit.c
