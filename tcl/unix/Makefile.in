@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.1 1995/08/30 05:07:18 markd Exp $
+# $Id: Makefile.in,v 5.2 1995/09/26 06:39:58 markd Exp $
 #------------------------------------------------------------------------------
 #
 SHELL = /bin/sh
@@ -166,7 +166,7 @@ install-exec:
 	${INSTCOPY} tclxlibs.mk ${INSTALL_ROOT}${TCL_LIBDIR}
 
 install-master: install-master-exec
-	${INSTCOPY} ${TCL_UCB_SRC}/tcl.h ${srcdir}/tclExtend.h \
+	${INSTCOPY} ${TCL_UCB_SRC}/generic/tcl.h ${srcdir}/tclExtend.h \
 	    ${srcdir}/tcl++.h ${INSTALL_ROOT}${INST_MASTER}/include
 	${SYMLINKEXT} ${INST_MASTER}/include/* ${INSTALL_ROOT}${TCL_INCLUDEDIR}
 
