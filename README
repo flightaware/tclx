@@ -43,8 +43,8 @@ CHANGES IN TCLX 7.5.0
 =====================
 
   o The TclX runtime is no longer independent of the standard Tcl and
-    Tk runtimes.  Tcl_Init must now be called before TclX_Init and Tk_Init
-    before TkX_Init.
+    Tk runtimes.  Tcl_Init must now be called before Tclx_Init and Tk_Init
+    before Tkx_Init.
     (* Potential Incompatibility for C code *)
 
   o Dropped support for the C++ interfaces in tcl++.h.   This file was
