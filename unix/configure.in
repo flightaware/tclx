@@ -13,10 +13,10 @@ dnl  Although the generated configure script is under the GNU Public
 dnl  License, Extended Tcl remains freely redistributable for any purpose,
 dnl  including commercial use.
 dnl----------------------------------------------------------------------------
-dnl $Id: configure.in,v 8.9 1997/06/12 21:08:53 markd Exp $
+dnl $Id: configure.in,v 8.10 1997/06/17 15:57:47 markd Exp $
 dnl----------------------------------------------------------------------------
 AC_INIT(../tcl/generic/tclExtend.h)
-ifdef([AC_REVISION],AC_REVISION($Revision: 8.9 $),)dnl
+ifdef([AC_REVISION],AC_REVISION($Revision: 8.10 $),)dnl
 
 # If `configure' is invoked (in)directly via `make', ensure that it
 # encounters no `make' conflicts.  Ignore error if shell does not have
@@ -32,9 +32,9 @@ unset MFLAGS MAKEFLAGS MAKELEVEL 2>/dev/null
 # tree.
 #------------------------------------------------------------------------------
 
-srcbasedir=`cd $srcdir/..; pwd`
+srcbasedir=`cd $srcdir/..; pwd|sed -e 's,/tmp_mnt,,'`
 AC_SUBST(srcbasedir)
-bldbasedir=`cd ..; pwd`
+bldbasedir=`cd ..; pwd | sed -e 's,/tmp_mnt,,'`
 AC_SUBST(bldbasedir)
 
 #------------------------------------------------------------------------------
@@ -472,7 +472,10 @@ AC_SUBST(SHARED_LIBS)
 #-----------------------------------------------------------------------------
 
 if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
-    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib:$TCLX_INST_LIB"
+    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib"
+    if test "X$TCLX_INST_LIB" != "X$TCL_EXEC_PREFIX/lib"; then
+      LIB_RUNTIME_DIR="$LIB_RUNTIME_DIR:$TCLX_INST_LIB"
+    fi
 fi
 if test "${TCL_LD_SEARCH_FLAGS}" = '-L${LIB_RUNTIME_DIR}'; then
     LIB_RUNTIME_DIR=`echo ${LIB_RUNTIME_DIR} |sed -e 's/:/ -L/g'`
@@ -487,7 +490,14 @@ AC_SUBST(TCLX_CC_SEARCH_FLAGS)
 #-----------------------------------------------------------------------------
 
 if test "X$TCL_LD_SEARCH_FLAGS" != "X"; then
-    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib:$TCLX_INST_LIB:$TKX_INST_LIB"
+    LIB_RUNTIME_DIR="$TCL_EXEC_PREFIX/lib"
+    if test "X$TCLX_INST_LIB" != "X$TCL_EXEC_PREFIX/lib"; then
+      LIB_RUNTIME_DIR="$LIB_RUNTIME_DIR:$TCLX_INST_LIB"
+    fi
+    if test "X$TKX_INST_LIB" != "X$TCL_EXEC_PREFIX/lib" -a \
+       "X$TKX_INST_LIB" != "X$TCLX_INST_LIB"; then
+      LIB_RUNTIME_DIR="$LIB_RUNTIME_DIR:$TKX_INST_LIB"
+    fi
     X11_LIB_DIR=`echo ${TK_XLIBSW} |sed -e "s|-L||" -e "s/ .*$//g" -e "s/-l.*$//g" -e "s|/libX11.*$||" -e "s|/libXhp11.*$||"`
     if test "x${X11_LIB_DIR}" != "x"; then
 	LIB_RUNTIME_DIR="${LIB_RUNTIME_DIR}:${X11_LIB_DIR}"

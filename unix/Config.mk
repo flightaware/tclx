@@ -22,7 +22,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Config.mk,v 8.3 1997/06/12 21:08:50 markd Exp $
+# $Id: Config.mk,v 8.4 1997/06/13 23:36:27 markd Exp $
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -131,6 +131,13 @@ TKX_EXEC_PREFIX="${exec_prefix}"
 
 TCLX_INST_RUNTIME=${TCLX_PREFIX}/lib/tclX${TCLX_VERSION}
 TKX_INST_RUNTIME=${TKX_PREFIX}/lib/tkX${TKX_VERSION}
+
+#------------------------------------------------------------------------------
+# The TclX and TkX exec runtime directories.  This is where the pkgIndex.tcl
+# files are installed.
+
+TCLX_EXEC_RUNTIME=${TCLX_EXEC_PREFIX}/lib/tclX${TCLX_VERSION}
+TKX_EXEC_RUNTIME=${TKX_EXEC_PREFIX}/lib/tkX${TKX_VERSION}
 
 #------------------------------------------------------------------------------
 # The directories to install the executables in.
