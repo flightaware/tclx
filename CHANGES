@@ -970,3 +970,11 @@
 ===============================================================================
  1 Jul 95: Released TclX 7.4a-beta4.
 ===============================================================================
+ 2 Jun 95:
+  o Fixed fcntl RDWR not returning the correct value.
+  o Modified dup test of binding to a file number to work around the fact that
+    Solaris has pipes open RDWR.
+  o Fix problems with convertclock on Solaris.
+===============================================================================
+ 2 Jul 95: Released TclX 7.4a-beta5.
+===============================================================================
