@@ -36,7 +36,7 @@
  *-----------------------------------------------------------------------------
  * Based on Tcl C++ classes developed by Parag Patel.
  *-----------------------------------------------------------------------------
- * $Id: tcl++.h,v 4.2 1995/01/06 04:05:26 markd Exp markd $
+ * $Id: tcl++.h,v 5.0 1995/07/25 05:59:02 markd Rel $
  *-----------------------------------------------------------------------------
  */
 
@@ -541,6 +541,12 @@ class TclInterp_cl
     XCmdInit ()
     {
         return TclXCmd_Init (interp);
+    }
+
+    inline int
+    XCmdSafeInit ()
+    {
+        return TclXCmd_SafeInit (interp);
     }
 
     inline int

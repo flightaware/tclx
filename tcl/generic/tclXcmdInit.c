@@ -14,27 +14,30 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 5.0 1995/07/25 05:59:14 markd Rel $
+ * $Id: tclXcmdInit.c,v 5.1 1995/11/10 06:50:46 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
 #include "tclExtdInt.h"
 #include "tclXpatchl.h"
 
+/*
+ * Prototypes of internal functions.
+ */
+static void
+InitTclXGlobals _ANSI_ARGS_(());
+
 
 /*
  *-----------------------------------------------------------------------------
  *
- * TclXCmd_Init --
+ * InitTclXGlobals --
  *
- *   Add the Extended Tcl commands to the specified interpreter (except for
- * the library commands that override that standard Tcl procedures).  This
- * does no other startup.
+ *   Initialize global variables used by the infox command.
  *-----------------------------------------------------------------------------
  */
-int
-TclXCmd_Init (interp)
-    Tcl_Interp *interp;
+static void
+InitTclXGlobals ()
 {
     /*
      * Initialized the variables used by infox, these can be overriden later.
@@ -53,6 +56,25 @@ TclXCmd_Init (interp)
         tclAppVersion = tclxVersion;
         tclAppPatchlevel = tclxPatchlevel;
     }
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclXCmd_Init --
+ *
+ *   Add the Extended Tcl commands to the specified interpreter (except for
+ * the library commands that override that standard Tcl procedures).  This
+ * does no other startup.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXCmd_Init (interp)
+    Tcl_Interp *interp;
+{
+    if (TclXCmd_SafeInit (interp) == TCL_ERROR)
+        return TCL_ERROR;
 
     /*
      * from tclCkalloc.c (now part of the UCB Tcl).
@@ -60,12 +82,6 @@ TclXCmd_Init (interp)
 #ifdef TCL_MEM_DEBUG    
     Tcl_InitMemory (interp);
 #endif
-
-    /*
-     * from tclXbsearch.c
-     */
-    Tcl_CreateCommand (interp, "bsearch", Tcl_BsearchCmd, 
-                      (ClientData) NULL, (void (*)()) NULL);
 
     /*
      * from tclXchmod.c
@@ -76,20 +92,6 @@ TclXCmd_Init (interp)
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "chown", Tcl_ChownCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-
-    /*
-     * from tclXclock.c
-     */
-    Tcl_CreateCommand (interp, "getclock", Tcl_GetclockCmd, 
-                      (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "fmtclock", Tcl_FmtclockCmd, 
-                      (ClientData) NULL, (void (*)()) NULL);
-
-    /*
-     * from tclXcnvdate.c
-     */
-    Tcl_CreateCommand (interp, "convertclock", Tcl_ConvertclockCmd,
-                      (ClientData) NULL, (void (*)()) NULL);
 
     /*
      * from tclXcmdloop.c
@@ -107,8 +109,9 @@ TclXCmd_Init (interp)
      */
     Tcl_CreateCommand (interp, "dup",  Tcl_DupCmd, 
                        (ClientData) NULL, (void (*)()) NULL);
+
     /*
-     * from tclXtclXfcntl.c
+     * from tclXfcntl.c
      */
     Tcl_CreateCommand (interp, "fcntl", Tcl_FcntlCmd,
                        (ClientData) NULL, (void (*)()) NULL);
@@ -128,6 +131,96 @@ TclXCmd_Init (interp)
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "readdir", Tcl_ReaddirCmd,
                        (ClientData) NULL, (void (*)()) NULL);
+
+    /*
+     * from tclXmsgcat.c
+     */
+    Tcl_InitMsgCat (interp);
+
+    /*
+     * from tclXprocess.c
+     */
+    Tcl_CreateCommand (interp, "execl", Tcl_ExeclCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "fork", Tcl_ForkCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "wait", Tcl_WaitCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+
+    /*
+     * from tclXsignal.c
+     */
+    Tcl_InitSignalHandling (interp);
+
+    /*
+     * from tclXunixcmds.c
+     */
+    Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "chroot", Tcl_ChrootCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "nice", Tcl_NiceCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
+                       (ClientData) NULL,(void (*)()) NULL);
+    Tcl_CreateCommand (interp, "sync", Tcl_SyncCmd,
+                       (ClientData) NULL,(void (*)()) NULL);
+    Tcl_CreateCommand (interp, "system", Tcl_SystemCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "times", Tcl_TimesCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "umask", Tcl_UmaskCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "link", Tcl_LinkCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "unlink", Tcl_UnlinkCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "mkdir", Tcl_MkdirCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+
+    /*
+     * from tclXserver.c
+     */
+    Tcl_ServerInit (interp);
+
+    return TCL_OK;
+}
+
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclXCmd_SafeInit --
+ *
+ *   Add the safe Extended Tcl commands to the specified interpreter.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclXCmd_SafeInit (interp)
+    Tcl_Interp *interp;
+{
+    InitTclXGlobals ();
+
+    /*
+     * from tclXbsearch.c
+     */
+    Tcl_CreateCommand (interp, "bsearch", Tcl_BsearchCmd, 
+                      (ClientData) NULL, (void (*)()) NULL);
+    /*
+     * from tclXclock.c
+     */
+    Tcl_CreateCommand (interp, "getclock", Tcl_GetclockCmd, 
+                      (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "fmtclock", Tcl_FmtclockCmd, 
+                      (ClientData) NULL, (void (*)()) NULL);
+
+    /*
+     * from tclXcnvdate.c
+     */
+    Tcl_CreateCommand (interp, "convertclock", Tcl_ConvertclockCmd,
+                      (ClientData) NULL, (void (*)()) NULL);
 
     /*
      * from tclXfstat.c
@@ -198,21 +291,6 @@ TclXCmd_Init (interp)
     Tcl_InitMath (interp);
 
     /*
-     * from tclXmsgcat.c
-     */
-    Tcl_InitMsgCat (interp);
-
-    /*
-     * from tclXprocess.c
-     */
-    Tcl_CreateCommand (interp, "execl", Tcl_ExeclCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "fork", Tcl_ForkCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "wait", Tcl_WaitCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-
-    /*
      * from tclXprofile.c
      */
     Tcl_InitProfile (interp);
@@ -222,11 +300,6 @@ TclXCmd_Init (interp)
      */
     Tcl_CreateCommand (interp, "select", Tcl_SelectCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-
-    /*
-     * from tclXsignal.c
-     */
-    Tcl_InitSignalHandling (interp);
 
     /*
      * from tclXstring.c
@@ -252,39 +325,6 @@ TclXCmd_Init (interp)
     Tcl_CreateCommand (interp, "cequal", Tcl_CequalCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 
-    /*
-     * from tclXunixcmds.c
-     */
-    Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "chroot", Tcl_ChrootCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "nice", Tcl_NiceCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
-                       (ClientData) NULL,(void (*)()) NULL);
-    Tcl_CreateCommand (interp, "sync", Tcl_SyncCmd,
-                       (ClientData) NULL,(void (*)()) NULL);
-    Tcl_CreateCommand (interp, "system", Tcl_SystemCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "times", Tcl_TimesCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "umask", Tcl_UmaskCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "link", Tcl_LinkCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "unlink", Tcl_UnlinkCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "mkdir", Tcl_MkdirCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-
-    /*
-     * from tclXserver.c
-     */
-    Tcl_ServerInit (interp);
-
     return TCL_OK;
 }
 
@@ -292,10 +332,10 @@ TclXCmd_Init (interp)
 /*
  *-----------------------------------------------------------------------------
  *
- * Tclxcmd_Init --
+ * Tclxcmd_Init, Tclxcmd_SafeInit --
  *
- *   Version of TclXCmd_Init that conforms to the Tcl dynamic loading naming
- * convention.
+ *   Versions of TclXCmd_Init and TclXCmd_SafeInit that conforms to the Tcl
+ * dynamic loading naming convention.
  *-----------------------------------------------------------------------------
  */
 int
@@ -303,4 +343,11 @@ Tclxcmd_Init (interp)
     Tcl_Interp *interp;
 {
     return TclXCmd_Init (interp);
+}
+
+int
+Tclxcmd_SafeInit (interp)
+    Tcl_Interp *interp;
+{
+    return TclXCmd_SafeInit (interp);
 }

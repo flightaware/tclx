@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXinit.c,v 5.3 1995/09/11 05:00:58 markd Exp $
+ * $Id: tclXinit.c,v 5.4 1995/10/11 03:01:26 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -33,6 +33,9 @@ static int
 InsureVarExists _ANSI_ARGS_((Tcl_Interp *interp,
                              char       *varName,
                              char       *defaultValue));
+
+static int
+InitSetup _ANSI_ARGS_((Tcl_Interp *interp));
 
 
 /*
@@ -205,14 +208,13 @@ ProcessInitFile (interp)
 /*
  *-----------------------------------------------------------------------------
  *
- * TclX_Init --
+ * InitSetup --
  *
- *   Initialize all Extended Tcl commands, set auto_path and source the
- * Tcl init file.
+ *   So setup common to both normal and safe initialization.
  *-----------------------------------------------------------------------------
  */
-int
-TclX_Init (interp)
+static int
+InitSetup (interp)
     Tcl_Interp *interp;
 {
     /*
@@ -225,7 +227,24 @@ TclX_Init (interp)
         return TCL_ERROR;
     if (InsureVarExists (interp, "tcl_interactive", "0") == TCL_ERROR)
         return TCL_ERROR;
+}
 
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * TclX_Init --
+ *
+ *   Initialize all Extended Tcl commands, set auto_path and source the
+ * Tcl init file.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_Init (interp)
+    Tcl_Interp *interp;
+{
+    if (InitSetup (interp) == TCL_ERROR)
+        goto errorExit;
 
     if (TclXCmd_Init (interp) == TCL_ERROR)
         goto errorExit;
@@ -248,14 +267,41 @@ TclX_Init (interp)
                      "\n    (while initializing TclX)");
     return TCL_ERROR;
 }
+
 
 /*
  *-----------------------------------------------------------------------------
  *
- * Tclx_Init --
+ * TclX_SafeInit --
  *
- *   Interface to TclX_Init that follows the Tcl dynamic loading naming
- * conventions.
+ *   Initialize safe Extended Tcl commands.
+ *-----------------------------------------------------------------------------
+ */
+int
+TclX_SafeInit (interp)
+    Tcl_Interp *interp;
+{
+    if (InitSetup (interp) == TCL_ERROR)
+        goto errorExit;
+
+    if (TclXCmd_SafeInit (interp) == TCL_ERROR)
+        goto errorExit;
+
+    return TCL_OK;
+
+  errorExit:
+    Tcl_AddErrorInfo (interp,
+                     "\n    (while initializing safe TclX)");
+    return TCL_ERROR;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tclx_Init, Tclx_SafeInit --
+ *
+ *   Interface to TclX_Init and TclX_SafeInit that follows the Tcl dynamic
+ * loading naming conventions.
  *-----------------------------------------------------------------------------
  */
 int
@@ -263,6 +309,13 @@ Tclx_Init (interp)
     Tcl_Interp *interp;
 {
     return TclX_Init (interp);
+}
+
+int
+Tclx_SafeInit (interp)
+    Tcl_Interp *interp;
+{
+    return TclX_SafeInit (interp);
 }
 
 /*
