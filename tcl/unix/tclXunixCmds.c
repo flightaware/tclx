@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id$
+ * $Id: tclXunixcmds.c,v 1.1 1992/09/20 23:22:28 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -235,17 +235,17 @@ Tcl_UmaskCmd (clientData, interp, argc, argv)
     }
 
     if (argc == 1) {
-        mask = umask (0);  /* Get current mask      */
-        umask (mask);      /* Now set it back (yuk) */
+        mask = umask (0);
+        umask ((unsigned short) mask);
         sprintf (interp->result, "%o", mask);
     } else {
-        if (!Tcl_StrToInt (argv[1], 8, &mask)) {
-            Tcl_AppendResult (interp, "Expected octal number got: ", argv[1],
+        if (!Tcl_StrToInt (argv [1], 8, &mask)) {
+            Tcl_AppendResult (interp, "Expected octal number got: ", argv [1],
                               (char *) NULL);
             return TCL_ERROR;
         }
 
-        umask(mask);
+        umask ((unsigned short) mask);
     }
 
     return TCL_OK;
@@ -255,7 +255,7 @@ Tcl_UmaskCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  *
  * Tcl_LinkCmd --
- *     Implements the TCL unlink command:
+ *     Implements the TCL link command:
  *         link [-sym] srcpath destpath
  *
  * Results:
@@ -340,7 +340,7 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
     char      **argv;
 {
     int    idx, fileArgc;
-    char **fileArgv, *filename;
+    char **fileArgv, *fileName;
     int    noComplain;
     
     if ((argc < 2) || (argc > 3))
@@ -350,18 +350,22 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
         if (!STREQU (argv [1], "-nocomplain"))
             goto badArgs;
         noComplain = TRUE;
-    } else
+    } else {
         noComplain = FALSE;
+    }
 
     if (Tcl_SplitList (interp, argv [argc - 1], &fileArgc,
                        &fileArgv) != TCL_OK)
         return TCL_ERROR;
 
     for (idx = 0; idx < fileArgc; idx++) {
-        filename = Tcl_TildeSubst (interp, fileArgv [idx]);
-        if (filename == NULL)
-           goto errorExit;
-        if ((unlink (filename) != 0) && !noComplain) {
+        fileName = Tcl_TildeSubst (interp, fileArgv [idx]);
+        if (fileName == NULL) {
+            if (!noComplain)
+                goto errorExit;
+            continue;
+        }
+        if ((unlink (fileName) != 0) && !noComplain) {
             Tcl_AppendResult (interp, fileArgv [idx], ": ",
                               Tcl_UnixError (interp), (char *) NULL);
             goto errorExit;
@@ -371,13 +375,13 @@ Tcl_UnlinkCmd (clientData, interp, argc, argv)
     ckfree ((char *) fileArgv);
     return TCL_OK;
 
+errorExit:
+    ckfree ((char *) fileArgv);
+    return TCL_ERROR;
+
 badArgs:
     Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
                       " [-nocomplain] filelist", (char *) NULL);
-    return TCL_ERROR;
-
-errorExit:
-    ckfree ((char *) fileArgv);
     return TCL_ERROR;
 }
 
@@ -462,7 +466,7 @@ usageError:
  *
  * Tcl_RmdirCmd --
  *     Implements the TCL Rmdir command:
- *         rmdir dirList
+ *         rmdir [-nocomplain]  dirList
  *
  * Results:
  *  Standard TCL results, may return the UNIX system error message.
@@ -476,27 +480,47 @@ Tcl_RmdirCmd (clientData, interp, argc, argv)
     int         argc;
     char      **argv;
 {
-    int    idx, dirArgc, result = TCL_ERROR;
-    char **dirArgv;
+    int    idx, dirArgc;
+    char **dirArgv, *dirName;
+    int    noComplain;
+    
+    if ((argc < 2) || (argc > 3))
+        goto badArgs;
 
-    if (argc != 2) {
-        Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
-                          " dirlist", (char *) NULL);
-        return TCL_ERROR;
+    if (argc == 3) {
+        if (!STREQU (argv [1], "-nocomplain"))
+            goto badArgs;
+        noComplain = TRUE;
+    } else {
+        noComplain = FALSE;
     }
-    if (Tcl_SplitList (interp, argv [1], &dirArgc, &dirArgv) != TCL_OK)
+
+    if (Tcl_SplitList (interp, argv [argc - 1], &dirArgc, &dirArgv) != TCL_OK)
         return TCL_ERROR;
 
     for (idx = 0; idx < dirArgc; idx++) {
-        if (rmdir (dirArgv [idx]) != 0) {
+        dirName = Tcl_TildeSubst (interp, dirArgv [idx]);
+        if (dirName == NULL) {
+            if (!noComplain)
+                goto errorExit;
+            continue;
+        }
+        if ((rmdir (dirName) != 0) && !noComplain) {
            Tcl_AppendResult (interp, dirArgv [idx], ": ",
                              Tcl_UnixError (interp), (char *) NULL);
-           goto exitPoint;
+           goto errorExit;
         }
     }
 
-    result = TCL_OK;
-exitPoint:
     ckfree ((char *) dirArgv);
-    return result;
+    return TCL_OK;
+
+errorExit:
+    ckfree ((char *) dirArgv);
+    return TCL_ERROR;;
+
+badArgs:
+    Tcl_AppendResult (interp, "wrong # args: ", argv [0], 
+                      " [-nocomplain] dirlist", (char *) NULL);
+    return TCL_ERROR;
 }

@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.man,v 1.4 1992/10/03 04:45:40 markd Exp markd $
+.\" $Id: TclX.man,v 1.5 1992/10/04 20:14:36 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -530,9 +530,10 @@ created.
 '@help: files/rmdir
 '@brief: Remove directories
 .TP
-.B rmdir \fIdirList\fR
+.B rmdir [\fB-nocomplain\fR] \fIdirList\fR
 .br
 Remove each of the directories in the list \fIdirList\fR.
+If \fB-nocomplain\fR is specified, then errors will be ignored.
 '@endhelp
 '@help: signals/signal
 '@brief: Specify action to take when a signal is received.

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id$
+# $Id: unixcmds.test,v 1.1 1992/09/20 23:49:48 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -200,7 +200,12 @@ Test unixcmds-7.6 {mkdir and rmdir tests} {
 } 0 {1 {mkdir1.tmp: no such file or directory}}
 
 Test unixcmds-7.7 {mkdir and rmdir tests} {
+    catch {rmdir MKDIR1.TMP}
+    rmdir -nocomplain MKDIR1.TMP
+} 0 {}
+
+Test unixcmds-7.8 {mkdir and rmdir tests} {
     rmdir
-} 1 {wrong # args: rmdir dirlist}
+} 1 {wrong # args: rmdir [-nocomplain] dirlist}
 
 
