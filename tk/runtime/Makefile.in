@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 1.6 1993/07/20 08:35:45 markd Exp markd $
+# $Id: Makefile.in,v 1.7 1993/07/30 15:05:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 SHELL=/bin/sh
@@ -68,7 +68,7 @@ ${DEMOS}:
 	    (cd ${DEMOS}; tar -xf -)
 
 ${MAN}:
-	../runtcl ../tools/cpmanpages.tcl TK '${MAN_DIR_SEPARATOR}'
+	../runtcl ../tools/cpmanpages.tcl TK ${MAN_DIR_SEPARATOR}
 
 #------------------------------------------------------------------------------
 # Build help for Tk.

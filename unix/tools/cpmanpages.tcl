@@ -7,7 +7,7 @@
 #
 # It is run in the following manner:
 #
-#     tcl cpmanpages.tcl ?TCL|TK? man-separator-char
+#     tcl cpmanpages.tcl TCL|TK ?man-separator-char?
 #------------------------------------------------------------------------------
 # Copyright 1992-1993 Karl Lehenbauer and Mark Diekhans.
 #
@@ -18,7 +18,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: cpmanpages.tcl,v 1.2 1993/07/18 15:20:56 markd Exp markd $
+# $Id: cpmanpages.tcl,v 1.3 1993/07/30 15:05:15 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -211,8 +211,8 @@ proc InstallManPage {sourceFile manDir section} {
 #------------------------------------------------------------------------------
 # main prorgam
 
-if {[llength $argv] != 2} {
-    puts stderr "wrong # args: cpmanpages ?TCL|TK? manSeparator"
+if {[llength $argv] < 1 || [llength $argv] > 2} {
+    puts stderr "wrong # args: cpmanpages TCL|TK ?manSeparator?"
     exit 1
 }
 set manType [lindex $argv 0]
