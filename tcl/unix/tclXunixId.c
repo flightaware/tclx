@@ -1,8 +1,8 @@
 /*
- * tclXid.c --
+ * tclXunixId.c --
  *
- * Tcl commands to access getuid, setuid, getgid, setgid and friends.
- *---------------------------------------------------------------------------
+ * Tcl commands to access getuid, setuid, getgid, setgid and friends on Unix.
+ *-----------------------------------------------------------------------------
  * Copyright 1991-1996 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXid.c,v 6.0 1996/05/10 16:18:40 markd Exp $
+ * $Id: tclXid.c,v 7.0 1996/06/16 05:33:23 markd Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -105,7 +105,7 @@ IdGroupId _ANSI_ARGS_((Tcl_Interp *interp,
 
 /*-----------------------------------------------------------------------------
  * Tcl_IdCmd --
- *     Implements the TCL id command:
+ *     Implements the TclX id command on Unix.
  *
  *        id user ?name?
  *        id convert user <name>
