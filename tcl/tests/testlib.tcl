@@ -13,15 +13,27 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: testlib.tcl,v 1.1 1992/09/20 23:49:48 markd Exp markd $
+# $Id: testlib.tcl,v 2.0 1992/10/16 04:49:22 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
+# Save the unknown command in a variable SAVED_UNKNOWN.  To get it back, eval
+# that variable.  Don't do this more than once.
 
-rename unknown SAVED_UNKNOWN
+global SAVED_UNKNOWN
+
+if {([info command unknown] == "") && ![info exists SAVED_UNKNOWN]} {
+    error "can't find either unknown or SAVED_UNKNOWN"
+}
+if {[info command unknown] != ""} {
+    set SAVED_UNKNOWN "proc unknown "
+    append SAVED_UNKNOWN "\{[info args unknown]\} "
+    append SAVED_UNKNOWN "\{[info body unknown]\}"
+    rename unknown {}
+}
 
 #
-# 
+# Output a test error.
 #
 proc OutTestError {test_name test_description contents_of_test
                    passing_int_result passing_result int_result result} {
@@ -39,23 +51,11 @@ proc OutTestError {test_name test_description contents_of_test
     puts stdout "---- Result should have been: $int($passing_int_result)"
     puts stdout "$passing_result"
     puts stdout "---- $test_name FAILED" 
-
 }
 
-proc test {test_name test_description contents_of_test passing_results} {
-    set answer [uplevel $contents_of_test]
-    if {$answer != $passing_results}  { 
-        puts stdout "==== $test_name $test_description"
-        puts stdout "==== Contents of test case:"
-        puts stdout "$contents_of_test"
-        puts stdout "==== Result was:"
-        puts stdout "$answer"
-	puts stdout "---- Result should have been:"
-	puts stdout "$passing_results"
-	puts stdout "---- $test_name FAILED" 
-    }
-}
-
+#
+# Routine to execute tests and compare to expected results.
+#
 proc Test {test_name test_description contents_of_test passing_int_result
            passing_result} {
     set int_result [catch {uplevel $contents_of_test} result]
