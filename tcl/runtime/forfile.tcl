@@ -12,18 +12,29 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.tcl,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: forfile.tcl,v 4.0 1994/07/16 05:29:47 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
 #@package: TclX-forfile for_file
 
-proc for_file {var filename code} {
+proc for_file {var filename cmd} {
     upvar $var line
     set fp [open $filename r]
+    set code 0
+    set result {}
     while {[gets $fp line] >= 0} {
-        uplevel $code
+        set code [catch {uplevel 1 $cmd} result]
+        if {$code != 0 && $code != 4} break
     }
     close $fp
-}
 
+    if {$code == 0 || $code == 3 || $code == 4} {
+        return $result
+    }
+    if {$code == 1} {
+        global errorCode errorInfo
+        return -code $code -errorcode $errorCode -errorinfo $errorInfo $result
+    }
+    return -code $code $result
+}

@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: forfile.test,v 3.1 1994/05/28 03:38:22 markd Exp markd $
+# $Id: forfile.test,v 4.0 1994/07/16 05:25:02 markd Rel markd $
 #------------------------------------------------------------------------------
 #
 
@@ -27,15 +27,60 @@ close $outfp
 unset outfp
 
 Test for_file-1.1 {for_file command} {
-    for_file line FORFILE.TMP {lappend result $line}
-    list $result
-} 0 {{line1 line2 line3}}
+    set ret [for_file line FORFILE.TMP {lappend result $line}]
+    list $result $ret
+} 0 {{line1 line2 line3} {line1 line2 line3}}
 
 Test for_file-1.2 {errors in for_file command} {
-    string tolower [list [catch {for_file line _non_existent_ {echo $line}} \
-       msg] $msg $errorCode]
+    string tolower [list [catch {
+        for_file line _non_existent_ {
+            echo $line
+        }
+    } msg] $msg $errorCode]
 } 0 [list 1 {couldn't open "_non_existent_": no such file or directory} \
             {posix enoent {no such file or directory}}]
+
+Test for_file-1.3 {errors in for_file command} {
+    list [catch {
+        for_file line FORFILE.TMP {
+            error fakeResult fakeInfo fakeCode
+        }
+    } msg] $msg [crange $errorInfo 0 7] $errorCode
+} 0 [list 1 fakeResult fakeInfo fakeCode]
+
+Test for_file-1.4 {break in for_file command} {
+    set cnt 0
+    list [catch {
+        for_file line FORFILE.TMP {
+            incr cnt
+            break
+        }
+    } msg] $msg $cnt
+} 0 {0 {} 1}
+
+Test for_file-1.5 {continue in for_file command} {
+    set cnt 0
+    list [catch {
+        for_file line FORFILE.TMP {
+            incr cnt
+            continue
+            incr cnt 20
+        }
+    } msg] $msg $cnt
+} 0 {0 {} 3}
+
+Test for_file-1.6 {return in for_file command} {
+    proc for_file_test {cntVar} {
+        upvar $cntVar cnt
+        for_file line FORFILE.TMP {
+            incr cnt
+            return abcd
+        }
+    }
+    set cnt 0
+    list [catch {for_file_test cnt} msg] $msg $cnt
+} 0 {0 abcd 1}
+rename for_file_test {}
 
 catch {unlink FORFILE.TMP}
 
