@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtend.h,v 4.4 1995/01/01 19:49:41 markd Exp markd $
+ * $Id: tclExtend.h,v 4.5 1995/01/16 07:39:53 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -27,7 +27,7 @@
  * version to form the actual extended Tcl version.
  */
 
-#define TCL_EXTD_VERSION_SUFFIX "a-b1"   /* 7.3a-b1 */
+#define TCL_EXTD_VERSION_SUFFIX "a-b2"   /* 7.3a-b2 */
 
 typedef void *void_pt;
 
@@ -221,8 +221,16 @@ Tcl_HandleXlate _ANSI_ARGS_((Tcl_Interp  *interp,
                              CONST  char *handle));
 
 /*
- * Tk with TclX initialization.
+ * Tk with TclX initialization.  These should really be in there own
+ * include file.
+ *
+ * The variables are Used to override the library and library environment
+ * variable used to find the TkX startup file and runtime library.  The values
+ * of these fields must be changed before TkX_Init is called.
  */
+extern char *tkX_library;
+extern char *tkX_libraryEnv;
+
 EXTERN void
 TkX_Main _ANSI_ARGS_((int    argc,
                       char **argv));
