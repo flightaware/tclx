@@ -818,4 +818,6 @@
    o Due to a difficult to fix bug, the profrep stack depth summary option
      has been removed.  This changes the calling sequence of profrep.
      (*POTENTIAL INCOMPATIBILITY*)
--------------------------------------------------------------------------------
+===============================================================================
+16 Jul 94: Released TclX7.3b.
+===============================================================================
