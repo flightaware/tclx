@@ -1,0 +1,111 @@
+#
+# tests/Makefile.in  --
+#
+# Makefile for Extended Tcl C tests.
+# 
+#------------------------------------------------------------------------------
+# Copyright 1992-1994 Karl Lehenbauer and Mark Diekhans.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Karl Lehenbauer and
+# Mark Diekhans make no representations about the suitability of this
+# software for any purpose.  It is provided "as is" without express or
+# implied warranty.
+#------------------------------------------------------------------------------
+# $Id: Makefile.in,v 4.3 1994/12/29 06:21:39 markd Exp $
+#------------------------------------------------------------------------------
+#
+SHELL = /bin/sh
+
+#------------------------------------------------------------------------------
+# Autoconfig defines that can be overridden in Config.mk
+
+CC          = @CC@
+srcdir      = @srcdir@
+srcbasedir  = @srcbasedir@
+bldbasedir  = @bldbasedir@
+VPATH       = @srcdir@
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+LIBS        = @LIBS@ @MATH_LIBS@
+
+#------------------------------------------------------------------------------
+# Include user-editable defines.
+
+@MAKEINCLUDE@ @MAKEQUOTE@${bldbasedir}/Config.mk@MAKEQUOTE@
+
+#------------------------------------------------------------------------------
+
+LIBTCL_A      = ${bldbasedir}/tclmaster/lib${ARCH}/libtcl.a
+LIBTCLX_A     = ${bldbasedir}/tclmaster/lib${ARCH}/libtclx.a
+
+LDLIBS = ${LIBTCLX_A} ${LIBTCL_A} ${LIBS}
+
+CC_FLAGS = ${CPPFLAGS} ${XCFLAGS} ${CFLAGS} -I${srcbasedir}/src \
+           -I${bldbasedir}/src -I${TCL_UCB_SRC}
+
+.c.o:
+	${CC} ${CC_FLAGS} -c $<
+
+#------------------------------------------------------------------------------
+
+OBJS= tclXtest.o
+
+#------------------------------------------------------------------------------
+# Compile the test proram.  It is generated from the Tcl test program with 
+# a simple sed script.
+# the executable, as some systems leave invalid executables around.
+
+all: tclxtest runtest
+
+tclxtest: tclXtest.o ${LIBTCLX_A} ${LIBTCL_A}
+	${CC} ${CC_FLAGS} ${XLDFLAGS} tclXtest.o ${LDLIBS} ${XLDLIBS} \
+	      -o tclxtest || (rm -f tclxtest; exit 1)
+
+tclXtest.o: tclXtest.c
+
+tclXtest.c: ${TCL_UCB_SRC}/tclTest.c
+	rm -f tclXtest.c	
+	sed -e 's@#include "tclInt.h"@#include "../src/tclExtdInt.h"@' \
+	    -e 's/Tcl_Init(/TclX_Init(/' \
+	    -e '/tcl_RcFileName =/d' ${TCL_UCB_SRC}/tclTest.c >tclXtest.c
+
+#------------------------------------------------------------------------------
+# Generate scripts to point the TCL_LIBRARY environment variable at
+# the local master directories so tclxtest can be run.
+
+runtest:
+	@echo ':'                                                   >runtest
+	@echo "TCL_LIBRARY=${bldbasedir}/tclmaster"                >>runtest
+	@echo "TCL_PROGRAM=${bldbasedir}/tests/tclxtest"           >>runtest
+	@echo "export TCL_LIBRARY TCL_PROGRAM"                     >>runtest
+	@echo "if [ \$$# = 0 ]"                                    >>runtest
+	@echo "then"                                               >>runtest
+	@echo "    exec \$$TCL_PROGRAM"                            >>runtest
+	@echo "else"                                               >>runtest
+	@echo "    exec \$$TCL_PROGRAM \"\$$@\""                   >>runtest
+	@echo "fi"                                                 >>runtest
+	chmod a+rx runtest
+
+#------------------------------------------------------------------------------
+# Run the UCB and Extended Tcl tests.
+
+test: ucbtests extdtests
+
+ucbtests: all
+	./runtest -c "cd ${TCL_UCB_SRC}/tests;source ${srcbasedir}/tests/all"
+
+extdtests: all
+	./runtest all
+	
+#------------------------------------------------------------------------------
+
+clean:
+	-rm -f ${OBJS} tclXtest.c tclxtest runtest
+
+#------------------------------------------------------------------------------
+# Restore to the distributed state.
+
+distclean: clean
+	rm -f Makefile
