@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: edprocs.tcl,v 2.0 1992/10/16 04:51:57 markd Rel markd $
+# $Id: edprocs.tcl,v 2.1 1993/04/07 02:42:32 markd Exp markd $
 #------------------------------------------------------------------------------
 #
 
@@ -22,7 +22,7 @@
 proc saveprocs {fileName args} {
     set fp [open $fileName w]
     puts $fp "# tcl procs saved on [fmtclock [getclock]]\n"
-    puts $fp [eval "showprocs $args"]
+    puts $fp [eval "showproc $args"]
     close $fp
 }
 
@@ -33,7 +33,7 @@ proc edprocs {args} {
 
     set fp [open $tmpFilename w]
     puts $fp "\n# TEMP EDIT BUFFER -- YOUR CHANGES ARE FOR THIS SESSION ONLY\n"
-    puts $fp [eval "showprocs $args"]
+    puts $fp [eval "showproc $args"]
     close $fp
 
     if [info exists env(EDITOR)] {
