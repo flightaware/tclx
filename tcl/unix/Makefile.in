@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: Makefile.in,v 5.28 1996/03/28 07:07:40 markd Exp $
+# $Id: Makefile.in,v 5.29 1996/03/29 22:22:06 markd Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -234,7 +234,7 @@ rename.o: ${COMPAT_DIR}/rename.c
 
 checkup: checkup.done
 
-checkup.done: tcl RUNTIME
+checkup.done: tcl
 	${RUNTCL} -q ${srcbasedir}/unix/tools/checkup.tcl
 	touch checkup.done
 
@@ -246,7 +246,7 @@ checkup.done: tcl RUNTIME
 # unless we don't have them.
 #
 RUNTIME: tcl.tlib tcl.tndx tclx.tcl buildidx.tcl loadouster.tcl help.tmp \
-         dltest.tmp
+         dltest.tmp checkup
 
 tcl.tlib: ${TLIB_SRCS}
 	-rm -f tcl.tlib tcl.tndx
