@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: filescan.test,v 8.4 1997/08/23 18:55:37 markd Exp $
+# $Id$
 #------------------------------------------------------------------------------
 #
 
@@ -493,6 +493,15 @@ Test 9.1 {filescan tests} {
 Test 9.2 {filescan tests} {
     set ch [scancontext create]
     scanmatch -nocase $ch {^[a-z]} {echo foo}
+    scancontext delete $ch
+} 0 {}
+
+Test 9.3 {filescan tests} {
+    # Tuende Kriegl <tuende.kriegl@mch.sni.de> says this
+    # panics on NT but not unix! 
+    set ch [scancontext create]
+    scanmatch $ch {([^(]*).'([^']*).*%OpText %(.*)} {echo foo}
+    scancontext delete $ch
 } 0 {}
 
 
