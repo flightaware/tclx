@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixcmds.c,v 2.6 1993/07/30 15:05:15 markd Exp markd $
+ * $Id: tclXunixcmds.c,v 2.7 1993/09/27 05:03:47 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -105,6 +105,77 @@ Tcl_AlarmCmd (clientData, interp, argc, argv)
 /*
  *-----------------------------------------------------------------------------
  *
+ * Tcl_ChrootCmd --
+ *     Implements the TCL chroot command:
+ *         chroot path
+ *
+ * Results:
+ *      Standard TCL results, may return the UNIX system error message.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_ChrootCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    if (argc != 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " path", 
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (chroot (argv[1]) < 0) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_NiceCmd --
+ *     Implements the TCL nice command:
+ *         nice niceness
+ *
+ * Results:
+ *      Standard TCL results, may return the UNIX system error message.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_NiceCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    int niceness, oldNiceness;
+
+    if (argc != 2) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " niceness", 
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetInt (interp, argv[1], &niceness) != TCL_OK)
+        return TCL_ERROR;
+
+    oldNiceness = nice (niceness);
+    if ((oldNiceness == -1) && (errno != 0)) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+    sprintf (interp->result, "%d", oldNiceness);
+    return TCL_OK;
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
  * Tcl_SleepCmd --
  *     Implements the TCL sleep command:
  *         sleep seconds
@@ -135,6 +206,56 @@ Tcl_SleepCmd (clientData, interp, argc, argv)
     sleep (time);
     return TCL_OK;
 
+}
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tcl_SyncCmd --
+ *     Implements the TCL sync command:
+ *         sync
+ *
+ * Results:
+ *      Standard TCL results.
+ *
+ *-----------------------------------------------------------------------------
+ */
+int
+Tcl_SyncCmd (clientData, interp, argc, argv)
+    ClientData  clientData;
+    Tcl_Interp *interp;
+    int         argc;
+    char      **argv;
+{
+    unsigned time;
+    FILE *filePtr;
+
+    if ((argc < 1) || (argc > 2)) {
+        Tcl_AppendResult (interp, tclXWrongArgs, argv [0], " ?filehandle?",
+                          (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (argc == 1) {
+	sync ();
+	return TCL_OK;
+    }
+
+    if (Tcl_GetOpenFile (interp, argv[1], 
+			 FALSE,   /* no write check */
+			 FALSE,   /* no access check */
+			 &filePtr) != TCL_OK)
+	return TCL_ERROR;
+
+#ifdef HAVE_FSYNC
+    if (fsync (fileno (filePtr)) < 0) {
+        interp->result = Tcl_PosixError (interp);
+        return TCL_ERROR;
+    }
+#else
+    sync ();
+#endif
+    return TCL_OK;
 }
 
 /*

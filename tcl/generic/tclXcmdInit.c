@@ -14,7 +14,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXcmdInit.c,v 2.10 1993/10/24 18:56:27 markd Exp markd $
+ * $Id: tclXcmdInit.c,v 2.11 1993/11/05 07:08:46 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -187,6 +187,7 @@ TclXCmd_Init (interp)
                      (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand(interp, "lmatch", Tcl_LmatchCmd, 
                      (ClientData) NULL, (void (*)()) NULL);
+
     /*
      * from tclXmath.c
      */
@@ -251,6 +252,16 @@ TclXCmd_Init (interp)
     /*
      * from tclXunixcmds.c
      */
+    Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "chroot", Tcl_ChrootCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "nice", Tcl_NiceCmd,
+                       (ClientData) NULL, (void (*)()) NULL);
+    Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
+                       (ClientData) NULL,(void (*)()) NULL);
+    Tcl_CreateCommand (interp, "sync", Tcl_SyncCmd,
+                       (ClientData) NULL,(void (*)()) NULL);
     Tcl_CreateCommand (interp, "system", Tcl_SystemCmd,
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "times", Tcl_TimesCmd,
@@ -265,10 +276,6 @@ TclXCmd_Init (interp)
                        (ClientData) NULL, (void (*)()) NULL);
     Tcl_CreateCommand (interp, "rmdir", Tcl_RmdirCmd,
                        (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "alarm", Tcl_AlarmCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
-    Tcl_CreateCommand (interp, "sleep", Tcl_SleepCmd,
-                       (ClientData) NULL,(void (*)()) NULL);
 
     /*
      * from tclXserver.c

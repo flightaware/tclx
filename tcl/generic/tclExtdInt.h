@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclExtdInt.h,v 2.30 1993/10/07 06:35:45 markd Exp markd $
+ * $Id: tclExtdInt.h,v 2.31 1993/10/24 18:56:27 markd Exp markd $
  *-----------------------------------------------------------------------------
  */
 
@@ -511,7 +511,16 @@ extern int
 Tcl_AlarmCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
+Tcl_ChrootCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_NiceCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
 Tcl_SleepCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
+
+extern int 
+Tcl_SyncCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));
 
 extern int 
 Tcl_SystemCmd _ANSI_ARGS_((ClientData, Tcl_Interp*, int, char**));

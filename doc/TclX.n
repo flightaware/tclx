@@ -12,7 +12,7 @@
 .\" software for any purpose.  It is provided "as is" without express or
 .\" implied warranty.
 .\"----------------------------------------------------------------------------
-.\" $Id: TclX.n,v 2.47 1993/11/08 04:46:07 markd Exp markd $
+.\" $Id: TclX.n,v 2.48 1993/11/09 06:35:19 markd Exp markd $
 .\"----------------------------------------------------------------------------
 .\"
 .TH "TclX" TCL "" "Tcl"
@@ -138,6 +138,12 @@ the documentation for version \fB7.0a\fR.
 .TP
 .B patchlevel
 Return the patchlevel for Extended Tcl.
+.TP
+.B have_fsync
+Return \fB1\fR if the \fBfsync\fR system call is available and the \fBsync\fR
+command will sync individual files.
+\fB0\fR if it is not available and the \fBsync\fR command will always sync
+all file buffers.
 .TP
 .B have_msgcats
 Return \fB1\fR if XPG message catalogs are available, \fB0\fR if they are
@@ -682,6 +688,17 @@ defined by the TIMEZONE environment variable.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+'\"@help: tcl/files/chroot
+'\"@brief: Change root directory.
+.TP
+.B chroot \fIdirname\fR
+.br
+Change root directory to \fIdirname\fR, by invoking the POSIX \fBchroot(2)\fR
+system call.  This command only succeeds if running as root.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
 '\"@help: tcl/processes/fork
 '\"@brief: Fork the current Tcl process.
 .TP
@@ -829,6 +846,22 @@ created.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+'\"@help: tcl/processes/nice
+'\"@brief: Change process priority.
+.TP
+.B nice \fIniceness\fR
+.br
+If \fIniceness\fR is \fB0\fR, the current \fIniceness\fR is returned.  If
+\fIniceness\fR is positive, it is added to the current \fIniceness\fR level,
+up to a maximum of \fB19\fR, and the new value is returned.
+.sp
+Negative \fIniceness\fR values cumulatively increase the program's priority
+down to a minimum value of \fB-19\fR; increasing priority with negative 
+niceness values will only work for the superuser.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
 '\"@help: tcl/files/rmdir
 '\"@brief: Remove directories
 .TP
@@ -929,6 +962,30 @@ result string, and
 expansion, redirection, etc,
 as is normal from an \fBsh\fR command line.  The exit code of
 the command is returned.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
+'\"@help: tcl/files/sync
+'\"@brief: Force a file or all files to be written to disk.
+.TP
+.B sync \fIcommand\fR ?\fIfileId\fR?
+.br
+If \fIfileId\fR is not specified, or if it is and this system does
+not support the \fIfsync\fR system call, issues a \fIsync\fR system
+call to flush all pending disk output.  If \fIfileId\fR is specified
+and the system does support the \fIfsync\fR system call, issues an
+\fIfsync\fR on the file corresponding to the specified Tcl \fIfileId\fR
+to force all pending output to that file out to the disk.
+.sp
+This command does not do a Tcl \fBflush\fR command. You might need to issue a 
+\fBflush\fR command to force process file buffers to be written before
+calling \fBsync\fR.
+.sp
+Since Tcl programs may want to know whether \fBsync\fR \fIfileId\fR will
+do a \fIsync\fR or a \fIfsync\fR, the \fIinfox\fR command has a
+suboption of \fIhave_fsync\fR that will return \fB1\fR if \fIfsync\fR
+is available and \fB0\fR if not.
 '\"@:
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp

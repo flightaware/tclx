@@ -124,7 +124,7 @@ esac
 configure_args="$*"
 
 #!/bin/sh
-# From configure.in Revision: 1.15 
+# From configure.in Revision: 1.16 
 
 
 
@@ -396,7 +396,7 @@ fi
 rm -f conftest*
 done
 
-for func in bzero bcopy gethostbyname
+for func in bzero bcopy gethostbyname fsync
 do
 trfunc=HAVE_`echo $func | tr '[a-z]' '[A-Z]'`
 echo checking for ${func}

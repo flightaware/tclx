@@ -146,6 +146,9 @@
 /* Define if you have gethostbyname.  */
 #undef HAVE_GETHOSTBYNAME
 
+/* Define if you have fsync.  */
+#undef HAVE_FSYNC
+
 /* Define if you have gettimeofday.  */
 #undef HAVE_GETTIMEOFDAY
 
