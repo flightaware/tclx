@@ -919,6 +919,54 @@
   o Deprecated server_open, added server_connect.  The new command
     can return a single file id for buffered files.  The server_open command
     is now a compatibility proc in tcl.tlib.
--------------------------------------------------------------------------------
+===============================================================================
  1 Apr 95: Released TclX7.4a-beta3.
+===============================================================================
+ 7 Apr 95:
+  o Fixed use of now ambigious options in tclhelp.
+  o Use -L for internal library references to make it easier to hack in
+    shared libraries.
+-------------------------------------------------------------------------------
+12 Apr 95:
+  o Use socket send function when sendmsg is not available (like Linux).
+-------------------------------------------------------------------------------
+15 Apr 95:
+  o Modified check for sockets being available.  If was failing on systems
+    that require both -lsocket and -lnsl.
+  o Added tclx_errorHandler variable used to specify a procedure to call
+    when an uncaught error occurs.
+-------------------------------------------------------------------------------
+29 Apr 95:
+  o Reorganized makefiles to avoid unnecessary copying of files during build.
+  o Removed restrictions of size of string returned by fmtclock.
+  o The copyfile command now handles non-blocking I/O in the same manner as
+    the gets command.
+  o Fixed portability problems with server_* command -nobuf option.
+  o Support duping of sockets returned by server_* commands.
+-------------------------------------------------------------------------------
+14 May 95:
+  o Added -fileid option to the chmod, chown and chgrp commands, allowing
+    for operations on open files.
+-------------------------------------------------------------------------------
+24 May 95:
+  o Added ftruncate command to truncate file lengths.
+-------------------------------------------------------------------------------
+13 Jun 95:
+  o Changed convertclock to handle the string "DST" in the timezone (since
+    Solaris has decided to include this as part of the output of strftime).
+    Change provided by Marco Nijdam <marco@west.nl>.
+-------------------------------------------------------------------------------
+25 Jun 95:
+  o Changes for Tcl 7.4b4 and Tk 4.0b4.
+  o Changed "pushd" so that it doesn't change the stack if the directory
+    doesn't exist and "dirs" to return rather than echo the stack.  Changes
+    based on code submitted by Dave Mielke <davem@bnr.ca>.
+  o Added support in the dup command to bind an open file number to a Tcl file
+    handle.
+-------------------------------------------------------------------------------
+30 Jun 95:
+  o Changed auto_load to not reload all library indexes when new directories
+    are appended to auto_path.  Suggested by Dave Mielke <davem@bnr.ca>.
+===============================================================================
+ 1 Jul 95: Released TclX 7.4a-beta4.
 ===============================================================================
