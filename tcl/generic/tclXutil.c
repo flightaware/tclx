@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXutil.c,v 8.21.2.1 1998/04/26 20:03:54 markd Exp $
+ * $Id$
  *-----------------------------------------------------------------------------
  */
 
@@ -1280,9 +1280,9 @@ TclX_ShellExit (interp, exitCode)
     }
     
     if (deleteInterp) {
+        Tcl_DeleteInterp (interp);
         Tcl_Exit (0);
     } else {
-        Tcl_DeleteInterp (interp);
         Tcl_Exit (0);
     }
 #endif    
