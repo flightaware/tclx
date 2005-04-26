@@ -13,7 +13,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXfilescan.c,v 1.2 2002/11/03 21:07:43 karll Exp $
+ * $Id: tclXfilescan.c,v 1.3 2004/11/23 21:33:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -581,7 +581,7 @@ SetMatchInfoVar (interp, scanData)
     }
 
     Tcl_RegExpGetInfo(scanData->matchPtr->regExp, &regExpInfo);
-    for (idx = 0; (unsigned int) idx < regExpInfo.nsubs; idx++) {
+    for (idx = 0; idx < regExpInfo.nsubs; idx++) {
 	start = regExpInfo.matches[idx+1].start;
 	end = regExpInfo.matches[idx+1].end;
 
@@ -658,7 +658,7 @@ ScanFile (interp, contextPtr, channel)
         if (!contextPtr->fileOpen)
             goto scanExit;  /* Closed by a callback */
 
-        data.offset = Tcl_Tell (channel);
+        data.offset = (off_t) Tcl_Tell (channel);
         Tcl_DStringSetLength (&lineBuf, 0);
         if (Tcl_Gets (channel, &lineBuf) < 0) {
             if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))

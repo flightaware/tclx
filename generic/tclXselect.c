@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 1.3 2004/07/14 21:11:54 hobbs Exp $
+ * $Id: tclXselect.c,v 1.4 2005/03/24 05:11:15 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,8 +42,8 @@
 typedef struct {
     Tcl_Obj     *channelIdObj;
     Tcl_Channel  channel;
-    int          readFd;
-    int          writeFd;
+    unsigned int readFd;
+    unsigned int writeFd;
 } channelData_t;
 
 /*
@@ -145,27 +145,25 @@ ParseSelectFileList (interp, chanAccess, handleList, fileSetPtr,
             goto errorExit;
 
         if (chanAccess & TCL_READABLE) {
-            if (TclXOSGetSelectFnum (interp, 
-                                     channelList [idx].channel,
-                                     TCL_READABLE,
-                                     &channelList [idx].readFd) != TCL_OK)
+            if (TclXOSGetSelectFnum (interp, channelList [idx].channel,
+			TCL_READABLE,
+			&channelList [idx].readFd) != TCL_OK)
                 goto errorExit;
             FD_SET (channelList [idx].readFd, fileSetPtr);
-            if (channelList [idx].readFd > *maxFileIdPtr)
-                *maxFileIdPtr = channelList [idx].readFd;
+            if ((int)channelList [idx].readFd > *maxFileIdPtr)
+                *maxFileIdPtr = (int)channelList [idx].readFd;
         } else {
             channelList [idx].readFd = -1;
         }
 
         if (chanAccess & TCL_WRITABLE) {
-            if (TclXOSGetSelectFnum (interp, 
-                                     channelList [idx].channel,
-                                     TCL_WRITABLE,
-                                     &channelList [idx].writeFd) != TCL_OK)
+            if (TclXOSGetSelectFnum (interp, channelList [idx].channel,
+			TCL_WRITABLE,
+			&channelList [idx].writeFd) != TCL_OK)
                 goto errorExit;
             FD_SET (channelList [idx].writeFd, fileSetPtr);
-            if (channelList [idx].writeFd > *maxFileIdPtr)
-                *maxFileIdPtr = channelList [idx].writeFd;
+            if ((int)channelList [idx].writeFd > *maxFileIdPtr)
+                *maxFileIdPtr = (int)channelList [idx].writeFd;
         } else {
             channelList [idx].writeFd = -1;
         }

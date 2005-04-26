@@ -1,3 +1,15 @@
+2005-04-26  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* generic/tclXbsearch.c (ReadAndCompare): Fix Tcl_Tell return casts
+	* generic/tclXdup.c (DupFileChannel):     as it take Tcl_WideInt,
+	* generic/tclXfilescan.c (ScanFile):      but off_t is long on Win.
+	* generic/tclXselect.c (ParseSelectFileList): 
+
+	* generic/tclExtdInt.h (TclXOSGetSelectFnum): take unsigned int
+	* unix/tclXunixOS.c (TclXOSGetSelectFnum):    for fd
+	* win/tclXwinOS.c (TclXOSGetSelectFnum):
+	(TclXOSftruncate): fix cast from Tcl_Tell
+
 2005-03-28  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* configure, configure.in:

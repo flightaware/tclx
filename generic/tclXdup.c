@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXdup.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXdup.c,v 1.2 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 #include "tclExtdInt.h"
@@ -163,7 +163,7 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
      * to the same position. Tcl_Tell returns -1 if seek is not supported.
      */
     if (mode & TCL_READABLE) {
-	int seekOffset = Tcl_Tell (srcChannel);
+	int seekOffset = (int) Tcl_Tell (srcChannel);
 	if (seekOffset >= 0) {
             if (Tcl_Seek (newChannel, seekOffset, SEEK_SET) < 0)
                 goto posixError;

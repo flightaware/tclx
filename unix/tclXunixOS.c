@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.4 2004/05/24 22:55:38 hobbs Exp $
+ * $Id: tclXunixOS.c,v 8.5 2005/01/21 22:42:40 andreas_kupries Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -1465,7 +1465,7 @@ TclXOSGetSelectFnum (interp, channel, direction, fnumPtr)
     Tcl_Interp *interp;
     Tcl_Channel channel;
     int         direction;
-    int        *fnumPtr;
+    unsigned int *fnumPtr;
 {
     ClientData handle;
 
@@ -1476,7 +1476,7 @@ TclXOSGetSelectFnum (interp, channel, direction, fnumPtr)
                               (char *) NULL);
         return TCL_ERROR;
     }
-    *fnumPtr = (int) handle;
+    *fnumPtr = (unsigned int) handle;
     return TCL_OK;
 }
 

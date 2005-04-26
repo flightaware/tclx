@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXbsearch.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
+ * $Id: tclXbsearch.c,v 1.2 2002/09/26 00:19:18 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -186,7 +186,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
             goto posixError;
         }
     }
-    fileOffset = Tcl_Tell (searchCBPtr->channel);  /* Offset of next line */
+    fileOffset = (off_t) Tcl_Tell (searchCBPtr->channel);  /* Offset of next line */
 
     /*
      * If this is the same line as before, then just leave the comparison
