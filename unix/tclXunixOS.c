@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.5 2005/01/21 22:42:40 andreas_kupries Exp $
+ * $Id: tclXunixOS.c,v 8.6 2005/04/26 20:01:34 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -732,9 +732,13 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
     ClientData        clientData;
 {
     DIR *handle;
+#ifdef TclOSreaddir
+    Tcl_DirEntry *entryPtr;
+#else
     struct dirent *entryPtr;
+#endif
     int result = TCL_OK;
-    
+
     handle = opendir (path);
     if (handle == NULL)  {
         if (interp != NULL)
@@ -743,9 +747,13 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
                                   (char *) NULL);
         return TCL_ERROR;
     }
-   
+
     while (TRUE) {
+#ifdef TclOSreaddir
+        entryPtr = TclOSreaddir(handle);
+#else
         entryPtr = readdir (handle);
+#endif
         if (entryPtr == NULL) {
             break;
         }

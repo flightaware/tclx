@@ -1,3 +1,8 @@
+2005-07-07  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* unix/tclXunixOS.c (TclXOSWalkDir): use TclOSreaddir if possible,
+	as regular readdir isn't thread/64-bit-aware.
+
 2005-04-26  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclXbsearch.c (ReadAndCompare): Fix Tcl_Tell return casts
