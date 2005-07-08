@@ -1,7 +1,7 @@
 2005-07-07  Jeff Hobbs  <jeffh@ActiveState.com>
 
-	* unix/tclXunixOS.c (TclXOSWalkDir): use TclOSreaddir if possible,
-	as regular readdir isn't thread/64-bit-aware.
+	* unix/tclXunixOS.c (TclXOSWalkDir): undef readdir as Tcl 8.4 did
+	ifdef'ery that was unnecessary and screwed up threaded builds.
 
 2005-04-26  Jeff Hobbs  <jeffh@ActiveState.com>
 

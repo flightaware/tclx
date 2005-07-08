@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixOS.c,v 8.6 2005/04/26 20:01:34 hobbs Exp $
+ * $Id: tclXunixOS.c,v 8.7 2005/07/07 22:33:30 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -25,6 +25,15 @@
 
 #ifndef NO_GETPRIORITY
 #include <sys/resource.h>
+#endif
+
+/*
+ * Tcl 8.4 had some weird and unnecessary ifdef'ery for readdir
+ * readdir() should be thread-safe according to the Single Unix Spec.
+ * [Bug #1095909]
+ */
+#ifdef readdir
+#undef readdir
 #endif
 
 /*
@@ -722,7 +731,7 @@ TclXOSSeekable (interp, channel, seekablePtr)
  *   TCL_OK if completed directory walk.  TCL_BREAK if callback returned
  * TCL_BREAK and TCL_ERROR if an error occured.
  *-----------------------------------------------------------------------------
- */
+*/
 int
 TclXOSWalkDir (interp, path, hidden, callback, clientData)
     Tcl_Interp       *interp;
@@ -732,11 +741,7 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
     ClientData        clientData;
 {
     DIR *handle;
-#ifdef TclOSreaddir
-    Tcl_DirEntry *entryPtr;
-#else
     struct dirent *entryPtr;
-#endif
     int result = TCL_OK;
 
     handle = opendir (path);
@@ -749,11 +754,7 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
     }
 
     while (TRUE) {
-#ifdef TclOSreaddir
-        entryPtr = TclOSreaddir(handle);
-#else
         entryPtr = readdir (handle);
-#endif
         if (entryPtr == NULL) {
             break;
         }
