@@ -1,3 +1,11 @@
+2005-07-12  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* generic/tclExtdInt.h (TclXOSGetSelectFnum): use int for fd
+	* unix/tclXunixOS.c (TclXOSGetSelectFnum):    (reverses change from
+	* win/tclXwinOS.c (TclXOSGetSelectFnum):      2005-04-26) as TclX
+	* generic/tclXselect.c: 	              uses -1 in handles
+	to indicate unused fd for select.
+
 2005-07-07  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* unix/tclXunixOS.c (TclXOSWalkDir): undef readdir as Tcl 8.4 did

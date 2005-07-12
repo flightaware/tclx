@@ -17,7 +17,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXwinOS.c,v 1.6 2005/01/21 22:42:40 andreas_kupries Exp $
+ * $Id: tclXwinOS.c,v 1.7 2005/04/26 20:01:35 hobbs Exp $
  *-----------------------------------------------------------------------------
  * The code for reading directories is based on TclMatchFiles from the Tcl
  * distribution file win/tclWinFile.c
@@ -1377,7 +1377,7 @@ int
 TclXOSGetSelectFnum (Tcl_Interp *interp,
                      Tcl_Channel channel,
                      int         direction,
-                     unsigned int *fnumPtr)
+                     int        *fnumPtr)
 {
     tclXwinFileType type;
     HANDLE handle = ChannelToHandle (channel, direction, &type);
@@ -1398,9 +1398,8 @@ TclXOSGetSelectFnum (Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    *fnumPtr = (unsigned int) handle;
+    *fnumPtr = (int) handle;
     return TCL_OK;
-    
 }
 
 /*-----------------------------------------------------------------------------

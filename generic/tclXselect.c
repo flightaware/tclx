@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 1.4 2005/03/24 05:11:15 hobbs Exp $
+ * $Id: tclXselect.c,v 1.5 2005/04/26 20:01:34 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,8 +42,8 @@
 typedef struct {
     Tcl_Obj     *channelIdObj;
     Tcl_Channel  channel;
-    unsigned int readFd;
-    unsigned int writeFd;
+    int readFd;
+    int writeFd;
 } channelData_t;
 
 /*
