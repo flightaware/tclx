@@ -1,3 +1,9 @@
+2005-07-27  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* generic/tclXselect.c: use unsigned int on Windows for fd type,
+	as that is what Windows expects.  Not strictly correct, but select
+	usage on Windows is iffy anyways.
+
 2005-07-12  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclExtdInt.h (TclXOSGetSelectFnum): use int for fd

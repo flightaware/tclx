@@ -18,7 +18,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXselect.c,v 1.5 2005/04/26 20:01:34 hobbs Exp $
+ * $Id: tclXselect.c,v 1.6 2005/07/12 19:03:15 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -42,8 +42,17 @@
 typedef struct {
     Tcl_Obj     *channelIdObj;
     Tcl_Channel  channel;
+#ifdef WIN32
+    /*
+     * XXX Not strictly correct, according to TclX's usage of fds, but we
+     * XXX expect noone to really being using select hardcore on Windows
+     */
+    unsigned int readFd;
+    unsigned int writeFd;
+#else
     int readFd;
     int writeFd;
+#endif
 } channelData_t;
 
 /*
