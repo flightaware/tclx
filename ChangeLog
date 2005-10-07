@@ -1,3 +1,10 @@
+2005-10-07  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* unix/tclXunixPort.h: Correct INADDR_NONE define. [Bug 1242825]
+
+	* configure.in, tclconfig/tcl.m4: updated to 3.3, support for
+	Solaris 5.10 and amd64 64-bit builds.
+
 2005-07-27  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* generic/tclXselect.c: use unsigned int on Windows for fd type,
