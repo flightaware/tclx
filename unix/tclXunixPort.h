@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXunixPort.h,v 8.2 2005/03/24 05:11:16 hobbs Exp $
+ * $Id: tclXunixPort.h,v 8.3 2005/03/25 19:31:44 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -74,10 +74,11 @@ extern int h_errno;
 #endif
 
 /*
- * Defines needed for socket code.
+ * Defines needed for socket code.  ((unsigned long) -1) is not correct
+ * for 64-bit systems, use 0XFFFFFFFFUL. [Bug 1242825]
  */
 #ifndef INADDR_NONE
-#    define INADDR_NONE  ((long) -1)
+#    define INADDR_NONE 0xFFFFFFFFUL
 #endif
 
 /*
