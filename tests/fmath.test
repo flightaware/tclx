@@ -14,7 +14,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: fmath.test,v 1.1 2001/10/24 23:31:49 hobbs Exp $
+# $Id: fmath.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -123,9 +123,15 @@ Test fmath-1.20 {pow tests} {
     fchecknum [pow 13.6*.78 1.2] 17.0122
 } 0 1
 
-Test fmath-1.21 {math error tests} {
-    pow 10000 100000
-} 1 {floating-point value too large to represent}
+if {$tcl_version > 8.4} {
+    Test fmath-1.21-8.5 {math error tests} {
+	pow 10000 100000
+    } 0 Inf
+} else {
+    Test fmath-1.21 {math error tests} {
+	pow 10000 100000
+    } 1 {floating-point value too large to represent}
+}
 
 # cleanup
 ::tcltest::cleanupTests
