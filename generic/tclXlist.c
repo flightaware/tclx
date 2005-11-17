@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXlist.c,v 8.17 2001/05/19 16:39:44 andreas_kupries Exp $
+ * $Id: tclXlist.c,v 1.1 2001/10/24 23:31:48 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -21,11 +21,6 @@
 /* FIX: Need way to get lvarpush to append to end, or even fill in empty
    entries
 */
-
-/*
- * Only do look up of type once, its static.
- */
-static Tcl_ObjType *listType;
 
 static int
 TclX_LvarcatObjCmd _ANSI_ARGS_((ClientData   clientData,
@@ -315,9 +310,8 @@ TclX_LemptyObjCmd (clientData, interp, objc, objv)
     int          objc;
     Tcl_Obj    *CONST objv[];
 {
-    int isEmpty, length, idx;
-    char *data;
-    
+    int length;
+
     if (objc != 2) {
         return TclX_WrongArgs (interp, objv [0], "list");
     }
@@ -325,28 +319,21 @@ TclX_LemptyObjCmd (clientData, interp, objc, objv)
     /*
      * A null object.
      */
-    if ((objv [1]->typePtr == NULL) && (objv [1]->bytes == NULL)) {
-        Tcl_SetBooleanObj (Tcl_GetObjResult (interp), TRUE);
+    if ((objv[1]->typePtr == NULL) && (objv[1]->bytes == NULL)) {
+        Tcl_SetBooleanObj(Tcl_GetObjResult(interp), TRUE);
         return TCL_OK;
     }
 
     /*
      * This is a little tricky, because the pre-object lempty never checked
      * for a valid list, it just checked for a string of all white spaces.
-     * If the object is already a list, go off of the length, otherwise scan
-     * the string for while space.
+     * Pass a NULL interp and ignore errors - any thrown are for invalid list
+     * formats, which we accept to be !empty.
      */
-    if (objv [1]->typePtr == listType) {
-        if (Tcl_ListObjLength (interp, objv [1], &length) != TCL_OK)
-            return TCL_ERROR;
-        isEmpty = (length == 0);
-    } else {
-        data = Tcl_GetStringFromObj (objv [1], &length);
-        for (idx = 0; (idx < length) && ISSPACE (data [idx]); idx++)
-            continue;
-        isEmpty = (idx == length);
-    }
-    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), isEmpty);
+    length = 1;
+    Tcl_ListObjLength(NULL, objv[1], &length);
+
+    Tcl_SetBooleanObj (Tcl_GetObjResult (interp), (0 == length));
     return TCL_OK;
 }
 
@@ -561,8 +548,6 @@ void
 TclX_ListInit (interp)
     Tcl_Interp *interp;
 {
-    listType = Tcl_GetObjType ("list");
-
     Tcl_CreateObjCommand(interp, 
 			 "lvarcat", 
 			 TclX_LvarcatObjCmd, 
