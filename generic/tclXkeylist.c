@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.4 2005/02/07 17:05:58 andreas_kupries Exp $
+ * $Id: tclXkeylist.c,v 1.5 2005/03/24 05:06:39 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -70,6 +70,9 @@ typedef struct {
 /*
  * Macro to duplicate a child entry of a keyed list if it is share by more
  * than the parent.
+ * NO_KEYLIST_HASH_TABLE: We don't duplicate the hash table, so ensure
+ * that consistency checks allow for portions where not all entries are
+ * in the hash table.
  */
 #define DupSharedKeyListChild(keylIntPtr, idx) \
     if (Tcl_IsShared(keylIntPtr->entries [idx].valuePtr)) { \
@@ -254,10 +257,8 @@ AllocKeyedListIntRep ()
     keylIntPtr = (keylIntObj_t *) ckalloc (sizeof (keylIntObj_t));
     memset(keylIntPtr, 0, sizeof (keylIntObj_t));
 #ifndef NO_KEYLIST_HASH_TABLE
-#if 1
     keylIntPtr->hashTbl = (Tcl_HashTable *) ckalloc(sizeof(Tcl_HashTable));
     Tcl_InitHashTable(keylIntPtr->hashTbl, TCL_STRING_KEYS);
-#endif
 #endif
     return keylIntPtr;
 }
@@ -351,19 +352,20 @@ DeleteKeyedListEntry (keylIntPtr, entryIdx)
 	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl,
 		keylIntPtr->entries [entryIdx].key);
 	if (entryPtr != NULL) {
-	    idx = (int) Tcl_GetHashValue(entryPtr);
 	    Tcl_DeleteHashEntry(entryPtr);
+	}
 
-	    /*
-	     * In order to maintain consistency, we have to iterate over
-	     * the entire hash table to find and decr relevant idxs.
-	     */
-	    for (entryPtr = Tcl_FirstHashEntry(keylIntPtr->hashTbl, &search);
-		 entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
-		nidx = (int) Tcl_GetHashValue(entryPtr);
-		if (nidx > idx) {
-		    Tcl_SetHashValue(entryPtr, nidx - 1);
-		}
+	/*
+	 * In order to maintain consistency, we have to iterate over
+	 * the entire hash table to find and decr relevant idxs.
+	 * We have to do this even if the previous index was not found
+	 * in the hash table, as Dup'ing doesn't dup the hash tables.
+	 */
+	for (entryPtr = Tcl_FirstHashEntry(keylIntPtr->hashTbl, &search);
+	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
+	    nidx = (int) Tcl_GetHashValue(entryPtr);
+	    if (nidx > entryIdx) {
+		Tcl_SetHashValue(entryPtr, nidx - 1);
 	    }
 	}
     }
@@ -505,6 +507,11 @@ DupKeyedListInternalRep (srcPtr, copyPtr)
     copyIntPtr->hashTbl = (Tcl_HashTable *) ckalloc(sizeof(Tcl_HashTable));
     Tcl_InitHashTable(copyIntPtr->hashTbl, TCL_STRING_KEYS);
 #else
+    /*
+     * NO_KEYLIST_HASH_TABLE: We don't duplicate the hash table, so ensure
+     * that consistency checks allow for portions where not all entries are
+     * in the hash table.
+     */
     copyIntPtr->hashTbl = NULL;
 #endif
 #endif

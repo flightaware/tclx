@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: keylist.test,v 1.2 2002/04/02 02:29:43 hobbs Exp $
+# $Id: keylist.test,v 1.3 2005/02/04 01:41:35 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -556,6 +556,21 @@ Test keylist-6.3 {large list tests} {
     set keyedList
 } 0 {}
 
+#
+# Shared obj subkeys - watch for entries/hash consistency
+#
+Test keylist-7.1 {shared obj key} {
+    set zz {}
+
+    keylset zz aa.foo 1
+    # this will cause the subkey to have a shared obj, causing call to
+    # DupSharedKeyListChild on next set
+    keylget zz aa -
+    keylset zz aa.bar 1
+    keyldel zz aa.foo
+    keyldel zz aa.bar
+    set zz
+} 0 {}
 
 # cleanup
 ::tcltest::cleanupTests
