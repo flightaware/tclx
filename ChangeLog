@@ -1,9 +1,25 @@
+2005-11-17  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* library/tclx.tcl: unused sample pure Tcl readdir
+
+	* tests/cmdtrace.test (cmdtrace-3.2): remove errorInfo, as that
+	varies between Tcl versions, but main error is correct.
+
+	* tests/keylist.test:
+	* generic/tclXkeylist.c (DeleteKeyedListEntry): keep hash entries
+	in sync even if the deleted item was not in the hash.
+
+	* generic/tclXlist.c (TclX_LemptyObjCmd): simplify to force list
+	conversion, but ignore errors on bad lists.
+
+	* tests/fmath.test (fmath-1.21): adjust for bignum math in 8.5
+
 2005-10-07  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* unix/tclXunixPort.h: Correct INADDR_NONE define. [Bug 1242825]
 
-	* configure.in, tclconfig/tcl.m4: updated to 3.3, support for
-	Solaris 5.10 and amd64 64-bit builds.
+	* configure, configure.in, tclconfig/tcl.m4: updated to 3.3,
+	support for Solaris 5.10 and amd64 64-bit builds.
 
 2005-07-27  Jeff Hobbs  <jeffh@ActiveState.com>
 
