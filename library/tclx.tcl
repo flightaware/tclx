@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------------
 # tclx.tcl -- Extended Tcl initialization.
 #-----------------------------------------------------------------------------
-# $Id: tclx.tcl,v 1.3 2002/04/04 06:15:07 hobbs Exp $
+# $Id: tclx.tcl,v 1.4 2004/11/23 05:54:16 hobbs Exp $
 #-----------------------------------------------------------------------------
 
 namespace eval ::tclx {
@@ -42,6 +42,36 @@ namespace eval ::tclx {
 	    uplevel #0 [list source [file join $dir $file]]
 	}
     }
+
+    if 0 {
+	# A pure Tcl equivalent to TclX's readdir, except that it includes
+	# . and .., which should be removed
+	proc ::readdir {args} {
+	    set len [llength $args]
+	    set ptn [list *]
+	    if {![string equal $::tcl_platform(platform) "windows"]} {
+		lappend ptn .*
+	    }
+	    if {$len == 1} {
+		set dir [lindex $args 0]
+	    } elseif {$len == 2} {
+		if {![string equal [lindex $args 0] "-hidden"]} {
+		    return -code error \
+			"expected option of \"-hidden\", got \"[lindex $args 0]\""
+		}
+		if {[string equal $::tcl_platform(platform) "windows"]} {
+		    lappend ptn .*
+		}
+		set dir [lindex $args 1]
+	    } else {
+		set cmd [lindex [info level 0] 0]
+		return -code error \
+		    "wrong \# args: $cmd ?-hidden? dirPath"
+	    }
+	    return [eval [list glob -tails -nocomplain -directory $dir] $ptn]
+	}
+    }
+
 }; # end namespace tclx
 
 # == Put any code you want all Tcl programs to include here. ==
