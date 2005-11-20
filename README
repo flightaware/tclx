@@ -13,20 +13,22 @@ constructs, text manipulation tools, and debugging tools.
 
 TclX is upwardly compatible with Tcl.  You take the Extended Tcl package,
 add it to Tcl, and from that you get Extended Tcl.  Tcl can be obtained at
-    http://tcl.sourceforge.net/ or http://www.tcl.tk/
+
+    http://www.tcl.tk/ or http://tcl.sourceforge.net/
 
 Extended Tcl runs on most Unix-like systems and Windows.
 
-While this TclX distribution is tested with Tcl 8.3 and Tk 8.3, it will
-probably work with newer versions of 8.3.*-series Tcl & Tk with little or
-no changes.  Please check the Extended Tcl homepage at
-    http://www.neosoft.com/tclx/ or http://tclx.sourceforge.net/
+While this TclX distribution is tested with Tcl 8.4 and Tk 8.4, it should
+with Tcl 8.3+.  Please check the Extended Tcl homepage at
+
+    http://tclx.sourceforge.net/
+
 for the latest release and information.
 
 Extended Tcl was designed and implemented by Karl Lehenbauer
 (karl@procplace.com) and Mark Diekhans (markd@Kermodei.com), with help in
 the earliest stages from Peter da Silva (peter@NeoSoft.com).  TclX 8.4
-work was done by Jeff Hobbs.
+work was done by Jeff Hobbs at ActiveState.
 
 TclX 8.4 differs from its predecessors in that it is based more on the
 idea of TclX as an extension to Tcl, and not an alternate environment.
@@ -35,23 +37,72 @@ There is no TkX and no stand-alone shells are built.
 As with Tcl, all of Extended Tcl is freely redistributable, including for
 commercial use and resale (BSD-style license).
 
-BUILDING TCLX
-=============
+BUILDING AND INSTALLING TCLX
+============================
 
-   For instructions on how to build TclX on Unix and Unix-like systems,
-see unix/INSTALL.  For Windows 95/NT see win/INSTALL.txt.
+1. Uncompress and unpack the distribution
+
+   ON UNIX/MAC:
+	gzip -cd tclx<version>.tar.gz | tar xf -
+
+   ON WINDOWS:
+	use something like WinZip to unpack the archive.
+
+   This will create a subdirectory tclx<version> with all the files in it.
+
+2. Configure
+
+   ON UNIX/MAC:
+        cd tclx<version>
+	./configure
+
+   TclX is TEA-based and uses information left in tclConfig.sh when you
+   built tcl.  This file will be found in $exec_prefix/lib/.  You might set
+   the --prefix and --exec-prefix options of configure if you don't want
+   the default (/usr/local).  If building on multiple unix platforms, the
+   following is recommended to isolate build conflicts:
+
+	mkdir <builddir>/<platform>
+	cd !$
+	/path/to/tclx<version>/configure
+
+   ON WINDOWS:
+
+   TclX supports building in the cygwin/msys environment on Windows based
+   on TEA (http://www.tcl.tk/doc/tea/).  Inside this environment, you build
+   the same as on Unix.
+
+   Otherwise, hack makefile.vc until it works and compile.  It was not
+   updated for TclX 8.4.  It has problems executing wish from a path with a
+   space in it, but the DLL builds just fine.
+
+3. Make and Install
+
+   ON UNIX/MAC or WINDOWS with cygwin/msys:
+	make
+	make test (OPTIONAL)
+	make install
+
+   ON WINDOWS (makefile.vc):
+	nmake -f makefile.vc
+	nmake -f makefile.vc test (OPTIONAL)
+	nmake -f makefile.vc install
+
+   TclX is built to comply to the latest tcl package conventions.
 
 CHANGES IN TCLX 8.4
-=====================
+===================
+
   o Restructure of the sources and build system
+
   o Removal of TkX extension
 
 FEATURES ADDED BY EXTENDED TCL
 ==============================
 
-   Here is a summary of the features added by Extended Tcl.  For
-more details on the commands and functionality provided by Extended
-Tcl, see the manual page man/TclX.man.
+Here is a summary of the features added by Extended Tcl.  For more details
+on the commands and functionality provided by Extended Tcl, see the manual
+page man/TclX.man.
 
     o Keyed lists, a type of list that provides functionality
       similar to C structures.
@@ -84,20 +135,20 @@ Tcl, see the manual page man/TclX.man.
 MANUAL PAGES
 ============
 
-    Man pages in nroff/troff format are provided for all of Tcl and the
+Man pages in nroff/troff format are provided for all of Tcl and the
 extensions in the doc directory.  Start with the TclX.n manual.
 
 EXTENDED TCL VERSION NAMING
 ===========================
 
-    Extended Tcl version numbering has been changed to track the 
-Tcl/Tk version numbering roughly.
+Extended Tcl version numbering has been changed to track the Tcl/Tk version
+numbering roughly.
 
 LINKING APPLICATIONS AND EXTENSION WITH TCLX
 ============================================
 
-   There are three basic approaches to linking TclX into applications or
-with other extensions:
+There are three basic approaches to linking TclX into applications or with
+other extensions:
 
    o Dynamically load the C code using either 'package require' or
      the 'load' command.
@@ -107,13 +158,12 @@ with other extensions:
 
 See the TclX_Init.3 manual page for more details.  The pkg_mkIndex does not
 generate a pkgIndex.tcl file that works with TclX.  See TclX_Init.3 for
-instructions on how to setup a pkgIndex.tcl file for use with the
-package require command.   There is no need to dynamically load libtkx, its
-only there to support wishx and applications that want wishx's signal handling.
+instructions on how to setup a pkgIndex.tcl file for use with the package
+require command.  There is no need to dynamically load libtkx, its only
+there to support wishx and applications that want wishx's signal handling.
 
 TclX will build and install a pkgIndex.tcl that will be automatically found
 by Tcl if TclX is installed in the same location.
-
 
 SUPPORT FOR EXTENDED TCL
 ========================
@@ -121,25 +171,18 @@ SUPPORT FOR EXTENDED TCL
 We are committed to providing continuing support for Extended Tcl.
 Please send questions, bug reports, and bug fixes to:
 
-         http://tclx.sourceforge.net/
+	http://tclx.sourceforge.net/
 
-There is a mailing list for the development of TclX on Windows 95/NT.
-To subscribe, mail majordomo@grizzly.com with the command "subscribe tclx-win"
-in the body of the mail.  Send messages to this list at tclx-win@grizzly.com.
-
+Use news:comp.lang.tcl for discussion about TclX development.
 
 WHERE TO GET IT
 ===============
 
-Extended Tcl can be downloaded by anonymous FTP from:
+Extended Tcl can be downloaded from the SF TclX release files area:
 
-   ftp://ftp.neosoft.com:/pub/tcl/TclX/tclX*.tar.gz
+	http://tclx.sourceforge.net/
 
-A contributed sources archive resides on ftp.neosoft.com.
-A Frequently Asked Questions (FAQ) document exists in this archive.
-
-Remember to mail Extended Tcl problems and questions to
-tcl-project@NeoSoft.com not Dr. John Ousterhout.
+Refer to the above site for bug database and other support forums.
 
 THANKS
 ======

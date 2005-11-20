@@ -1,3 +1,13 @@
+2005-11-20  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* Makefile.in: correct dist target
+
+	* README:       updated readme and install notes to TclX 8.4 std.
+	* unix/INSTALL: Windows nmake makefile still needs fixing, but
+	* unix/INSTALL.generic (removed):    TEA-based system works across
+	* win/INSTALL.txt, win/makefile.vc:  the board.
+	* win/common.bc, win/makefile.bc, win/makefile.vc.sub (removed):
+
 2005-11-17  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* library/tclx.tcl: unused sample pure Tcl readdir
