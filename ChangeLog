@@ -1,5 +1,7 @@
 2005-11-20  Jeff Hobbs  <jeffh@ActiveState.com>
 
+	**** TCLX 8.4.0 RELEASE ****
+
 	* Makefile.in: correct dist target
 
 	* README:       updated readme and install notes to TclX 8.4 std.
