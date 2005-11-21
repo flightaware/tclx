@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXstring.c,v 1.2 2002/09/26 00:19:18 hobbs Exp $
+ * $Id: tclXstring.c,v 1.3 2002/09/26 00:23:29 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -210,7 +210,7 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
     Tcl_Obj    *CONST objv[];
 {
     int strLen, utfLen, first, subLen;
-    int isRange = (int) clientData;
+    size_t isRange = (size_t) clientData;
     char *str;
     CONST84 char *start, *end;
 
@@ -236,7 +236,7 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
     if (TclX_RelativeExpr (interp, objv [3], utfLen, &subLen) != TCL_OK) {
         return TCL_ERROR;
     }
-        
+
     if (isRange) {
         if (subLen < first)
             return TCL_OK;
