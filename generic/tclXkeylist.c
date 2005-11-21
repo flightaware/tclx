@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.6 2005/11/18 00:01:50 hobbs Exp $
+ * $Id: tclXkeylist.c,v 1.7 2005/11/21 18:39:11 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -365,7 +365,7 @@ DeleteKeyedListEntry (keylIntPtr, entryIdx)
 	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
 	    nidx = (int) Tcl_GetHashValue(entryPtr);
 	    if (nidx > entryIdx) {
-		Tcl_SetHashValue(entryPtr, (ClientData) nidx - 1);
+		Tcl_SetHashValue(entryPtr, (ClientData) (nidx - 1));
 	    }
 	}
     }
