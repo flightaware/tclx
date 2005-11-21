@@ -1,6 +1,17 @@
-2005-11-20  Jeff Hobbs  <jeffh@ActiveState.com>
+2005-11-21  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	**** TCLX 8.4.0 RELEASE ****
+
+	* generic/tclXstring.c (TclX_CrangeObjCmd): 64-bit cast fix
+
+	* generic/tclXmath.c (TclX_MathInit): restrict to only add min/max
+	expr funcs in <= 8.4
+
+	* generic/tclXkeylist.c: 64-bit cast warning squash
+
+	* library/tclx.tcl: protect scope of variables in init
+
+2005-11-20  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* Makefile.in: correct dist target
 
