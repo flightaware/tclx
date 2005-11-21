@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXkeylist.c,v 1.5 2005/03/24 05:06:39 hobbs Exp $
+ * $Id: tclXkeylist.c,v 1.6 2005/11/18 00:01:50 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -365,7 +365,7 @@ DeleteKeyedListEntry (keylIntPtr, entryIdx)
 	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
 	    nidx = (int) Tcl_GetHashValue(entryPtr);
 	    if (nidx > entryIdx) {
-		Tcl_SetHashValue(entryPtr, nidx - 1);
+		Tcl_SetHashValue(entryPtr, (ClientData) nidx - 1);
 	    }
 	}
     }
@@ -608,7 +608,7 @@ SetKeyedListFromAny (interp, objPtr)
 #ifndef NO_KEYLIST_HASH_TABLE
 	entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
 		keyEntryPtr->key, &dummy);
-	Tcl_SetHashValue(entryPtr, idx);
+	Tcl_SetHashValue(entryPtr, (ClientData) idx);
 #endif
 
 	keylIntPtr->numEntries++;
@@ -821,7 +821,7 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
 	    }
 	    entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
 		    keyEntryPtr->key, &dummy);
-	    Tcl_SetHashValue(entryPtr, findIdx);
+	    Tcl_SetHashValue(entryPtr, (ClientData) findIdx);
 #endif
 	    Tcl_InvalidateStringRep (keylPtr);
 
@@ -871,7 +871,7 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
 	    }
 	    entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
 		    keyEntryPtr->key, &dummy);
-	    Tcl_SetHashValue(entryPtr, findIdx);
+	    Tcl_SetHashValue(entryPtr, (ClientData) findIdx);
 #endif
 	    Tcl_InvalidateStringRep (keylPtr);
 	}
