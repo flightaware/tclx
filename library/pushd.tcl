@@ -13,7 +13,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: pushd.tcl,v 8.3 1999/03/31 06:37:48 markd Exp $
+# $Id: pushd.tcl,v 1.1 2001/10/24 23:31:48 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -27,13 +27,13 @@ proc pushd {{new ""}} {
     global TCLXENV
 
     set current [pwd]
-    if {[clength $new] > 0} {
+    if {[string length $new]} {
         set dirs [glob -nocomplain $new]
         set count [llength $dirs]
         if {$count == 0} {
             error "no such directory: $new"
         } elseif {$count != 1} {
-            error "ambiguous directory: $new: [join $directories ", "]"
+            error "ambiguous directory: $new: [join $dirs {, }]"
         }
         cd [lindex $dirs 0]
         lvarpush TCLXENV(dirPushList) $current
@@ -51,7 +51,7 @@ proc pushd {{new ""}} {
 proc popd {} {
     global TCLXENV
 
-    if [lempty $TCLXENV(dirPushList)] {
+    if {[lempty $TCLXENV(dirPushList)]} {
         error "directory stack empty"
     }
     cd [lvarpop TCLXENV(dirPushList)]
@@ -60,7 +60,7 @@ proc popd {} {
 
 proc dirs {} { 
     global TCLXENV
-    return [concat [list [pwd]] $TCLXENV(dirPushList)]
+    return [linsert $TCLXENV(dirPushList) 0 [pwd]]
 }
 
 

@@ -1,3 +1,8 @@
+2005-11-25  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* library/pushd.tcl (pushd): correct dirs arg [Bug 1156134] and
+	clean up some other code.
+
 2005-11-21  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	**** TCLX 8.4.0 RELEASE ****
