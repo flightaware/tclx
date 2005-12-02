@@ -3,12 +3,12 @@ dnl	This file is an input file used by the GNU "autoconf" program to
 dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.14 2005/03/28 23:38:15 hobbs Exp $
+# RCS: @(#) $Id: configure.in,v 1.15 2005/10/07 23:30:49 hobbs Exp $
 
 AC_INIT([tclx], [8.4])
 FULL_VERSION="8.4.0"
 
-TEA_INIT([3.3])
+TEA_INIT([3.4])
 
 AC_CONFIG_AUX_DIR(tclconfig)
 
@@ -285,7 +285,6 @@ AC_DEFUN([_AC_LIBOBJS_NORMALIZE],[])
 
 AC_CHECK_FUNC(random, ,[AC_LIBOBJ([random])]
               AC_DEFINE(NO_RANDOM))
-AC_CHECK_FUNC(rename, ,[AC_LIBOBJ([rename])])
 
 #------------------------------------------------------------------------------
 # Determine if random is declared in stdlib.h or math.h.  If it is, we don't

@@ -1,3 +1,8 @@
+2005-12-02  Jeff Hobbs  <jeffh@ActiveState.com>
+
+	* tclconfig/tcl.m4, configure: update to TEA 3.4
+	* configure.in: remove 'rename' check (no longer used)
+
 2005-11-25  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* library/pushd.tcl (pushd): correct dirs arg [Bug 1156134] and
