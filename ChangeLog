@@ -1,3 +1,11 @@
+2008-06-30  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* win/makefile.vc:  Updated the NMAKE build files to the
+	* win/rules.vc:     current standard set for extensions.
+	* win/nmakehlp.c:
+	* win/common.vc:    removed
+	* win/tclx.rc:      Added new version resource.
+
 2007-02-27  Jeff Hobbs  <jeffh@ActiveState.com>
 
 	* unix/tclXunixPort.h: h_errno is a macro on AIX
