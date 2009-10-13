@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 1.2 2002/09/26 00:19:18 hobbs Exp $
+ * $Id: tclXprofile.c,v 1.3 2004/11/23 00:12:54 hobbs Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -673,7 +673,7 @@ InitializeProcStack (infoPtr, framePtr)
     profInfo_t *infoPtr;
     CallFrame  *framePtr;
 {
-    if (framePtr == NULL)
+    if (framePtr == NULL || framePtr->objv == NULL)
         return;
     InitializeProcStack (infoPtr, framePtr->callerPtr);
     
