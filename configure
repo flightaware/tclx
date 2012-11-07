@@ -1315,7 +1315,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-FULL_VERSION="8.4.0"
+FULL_VERSION="8.4.1"
 
 
     # TEA extensions pass this us the version of TEA they think they

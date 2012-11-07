@@ -1,3 +1,7 @@
+2012-11-07  Andreas Kupries  <andreask@activestate.com>
+
+	**** TCLX 8.4.1 RELEASE ****
+
 2008-12-15  Andreas Kupries  <andreask@activestate.com>
 
 	* generic/tclExtdInt.h:  Handle TIP#336 addition of API to access
