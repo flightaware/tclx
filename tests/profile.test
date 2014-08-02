@@ -12,7 +12,7 @@
 # software for any purpose.  It is provided "as is" without express or
 # implied warranty.
 #------------------------------------------------------------------------------
-# $Id: profile.test,v 1.4 2002/09/26 00:19:02 hobbs Exp $
+# $Id: profile.test,v 1.5 2005/02/04 01:36:13 hobbs Exp $
 #------------------------------------------------------------------------------
 #
 
@@ -298,19 +298,25 @@ test profile-4.1 {profile count tests} {
 	{{::ProcD4 ::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
 	{{::ProcE4 ::ProcB4 ::ProcA4 <global>} 1}]
 
+set anticipate [list {<global> 1} {<global> 1} \
+	{{::ProcA4 <global>} 1} \
+	{{::ProcB4 ::ProcA4 <global>} 1} \
+	{{::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
+	{{::ProcD4 ::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
+	{{::ProcE4 ::ProcB4 ::ProcA4 <global>} 1}]
+if {$tcl_version < 8.6} {
+	# Error-handler is not subject to profiling under 8.6
+	lappend anticipate \
+	{{::error ::ProcD4 ::ProcC4 ::ProcB4 ::ProcA4 <global>} 1}
+}
+lappend anticipate {{::profile <global>} 1}
+
 test profile-4.2 {profile count tests} {
    profile -commands on
    ProcA4
    profile off profData
    SumCntData profData
-} [list {<global> 1} {<global> 1} \
-	{{::ProcA4 <global>} 1} \
-	{{::ProcB4 ::ProcA4 <global>} 1} \
-	{{::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::ProcD4 ::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::ProcE4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::error ::ProcD4 ::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::profile <global>} 1}]
+} $anticipate
 
 test profile-4.3 {profile count tests} {
    profile -eval on
@@ -329,14 +335,7 @@ test profile-4.4 {profile count tests} {
    ProcA4
    profile off profData
    SumCntData profData
-} [list {<global> 1} {<global> 1} \
-	{{::ProcA4 <global>} 1} \
-	{{::ProcB4 ::ProcA4 <global>} 1} \
-	{{::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::ProcD4 ::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::ProcE4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::error ::ProcD4 ::ProcC4 ::ProcB4 ::ProcA4 <global>} 1} \
-	{{::profile <global>} 1}]
+} $anticipate
 
 #
 # Test of a command that calls procedures from different levels.

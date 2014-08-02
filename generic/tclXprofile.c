@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without express or
  * implied warranty.
  *-----------------------------------------------------------------------------
- * $Id: tclXprofile.c,v 1.3 2004/11/23 00:12:54 hobbs Exp $
+ * $Id: tclXprofile.c,v 1.4 2009/10/13 19:28:23 kot Exp $
  *-----------------------------------------------------------------------------
  */
 
@@ -67,11 +67,8 @@ typedef struct profInfo_t {
     Tcl_Trace       traceHandle;           /* Handle to current trace.       */
     int             commandMode;           /* Prof all commands?             */
     int             evalMode;              /* Use eval stack.                */
-    Command        *currentCmdPtr;         /* Current command table entry.   */
-    Tcl_CmdProc    *savedStrCmdProc;       /* Saved string command function  */
-    ClientData      savedStrCmdClientData; /* and clientData.                */
-    Tcl_ObjCmdProc *savedObjCmdProc;       /* Saved object command function  */
-    ClientData      savedObjCmdClientData; /* and clientData.                */
+    Tcl_Command     currentCmd;            /* Current command table entry.   */
+    Tcl_CmdInfo     savedCmdInfo;          /* Details about the current cmd. */
     int             evalLevel;             /* Eval level when invoked.       */
     clock_t         realTime;              /* Current real and CPU time.     */
     clock_t         cpuTime;
@@ -88,14 +85,14 @@ typedef struct profInfo_t {
 /*
  * Argument to panic on logic errors.  Takes an id number.
  */
-static char *PROF_PANIC = "TclX profile bug id = %d\n";
+static const char *PROF_PANIC = "TclX profile bug id = %d\n";
 
 /*
  * Prototypes of internal functions.
  */
 static void
 PushEntry _ANSI_ARGS_((profInfo_t *infoPtr,
-                       char       *cmdName,
+                       const char *cmdName,
                        int         isProc,
                        int         procLevel,
                        int         scopeLevel,
@@ -111,7 +108,7 @@ PopEntry _ANSI_ARGS_((profInfo_t *infoPtr));
 static void
 UpdateTOSTimes _ANSI_ARGS_((profInfo_t *infoPtr));
 
-static Command *
+static void
 ProfCommandEvalSetup _ANSI_ARGS_((profInfo_t *infoPtr,
                                   int        *isProcPtr));
     
@@ -131,15 +128,7 @@ ProfObjCommandEval _ANSI_ARGS_((ClientData    clientData,
                                 int           objc,
                                 Tcl_Obj      *CONST objv[]));
 
-static void
-ProfTraceRoutine _ANSI_ARGS_((ClientData    clientData,
-                              Tcl_Interp   *interp,
-                              int           evalLevel,
-                              char         *command,
-                              Tcl_CmdProc  *cmdProc,
-                              ClientData    cmdClientData,
-                              int           argc,
-                              char        **argv));
+static Tcl_CmdObjTraceProc ProfTraceRoutine;
 
 static void
 CleanDataTable _ANSI_ARGS_((profInfo_t *infoPtr));
@@ -193,7 +182,7 @@ ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
 static void
 PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
     profInfo_t *infoPtr;
-    char       *cmdName;
+    const char *cmdName;
     int         isProc;
     int         procLevel;
     int         scopeLevel;
@@ -395,39 +384,41 @@ UpdateTOSTimes (infoPtr)
  *   A pointer to the current command table entry.
  *-----------------------------------------------------------------------------
  */
-static Command *
+static void
 ProfCommandEvalSetup (infoPtr, isProcPtr)
     profInfo_t *infoPtr;
     int        *isProcPtr;
 {
     Interp *iPtr = (Interp *) infoPtr->interp;
-    Command *currentCmdPtr;
+    Tcl_CmdInfo cmdInfo;
     CallFrame *framePtr;
     int procLevel, scopeLevel, isProc;
     Tcl_Obj *fullCmdNamePtr;
-    char *fullCmdName;
+    const char *fullCmdName;
 
+    Tcl_GetCommandInfoFromToken(infoPtr->currentCmd, &cmdInfo);
     /*
      * Restore the command table entry.  If the command has modified it, don't
      * mess with it.
      */
-    currentCmdPtr = infoPtr->currentCmdPtr;
-    if (currentCmdPtr->proc == ProfStrCommandEval)
-        currentCmdPtr->proc = infoPtr->savedStrCmdProc;
-    if (currentCmdPtr->clientData == (ClientData) infoPtr)
-        currentCmdPtr->clientData = infoPtr->savedStrCmdClientData;
-    if (currentCmdPtr->objProc == ProfObjCommandEval)
-        currentCmdPtr->objProc = infoPtr->savedObjCmdProc;
-    if (currentCmdPtr->objClientData == (ClientData) infoPtr)
-        currentCmdPtr->objClientData = infoPtr->savedObjCmdClientData;
-    infoPtr->currentCmdPtr = NULL;
-    infoPtr->savedStrCmdProc = NULL;
-    infoPtr->savedStrCmdClientData = NULL;
-    infoPtr->savedObjCmdProc = NULL;
-    infoPtr->savedObjCmdClientData = NULL;
+    if (cmdInfo.proc == ProfStrCommandEval)
+        cmdInfo.proc = infoPtr->savedCmdInfo.proc;
+    if (cmdInfo.clientData == (ClientData) infoPtr)
+        cmdInfo.clientData = infoPtr->savedCmdInfo.clientData;
+    if (cmdInfo.objProc == ProfObjCommandEval)
+        cmdInfo.objProc = infoPtr->savedCmdInfo.objProc;
+    if (cmdInfo.objClientData == (ClientData) infoPtr)
+        cmdInfo.objClientData = infoPtr->savedCmdInfo.objClientData;
+    if (cmdInfo.deleteProc == NULL)
+        cmdInfo.deleteProc = infoPtr->savedCmdInfo.deleteProc;
+    if (cmdInfo.deleteData == NULL)
+        cmdInfo.deleteData = infoPtr->savedCmdInfo.deleteData;
+    cmdInfo.isNativeObjectProc = infoPtr->savedCmdInfo.isNativeObjectProc;
+
+    Tcl_SetCommandInfoFromToken(infoPtr->currentCmd, &cmdInfo);
 
     fullCmdNamePtr = Tcl_NewObj ();
-    Tcl_GetCommandFullName (infoPtr->interp, (Tcl_Command) currentCmdPtr, 
+    Tcl_GetCommandFullName (infoPtr->interp, infoPtr->currentCmd, 
                             fullCmdNamePtr);
     fullCmdName = Tcl_GetStringFromObj (fullCmdNamePtr, NULL);
 
@@ -446,12 +437,13 @@ ProfCommandEvalSetup (infoPtr, isProcPtr)
      * than we are, we have exited into the initial entries that where pushed
      * on the stack before we started.  Pop those entries.
      */
-    if (infoPtr->stackPtr->procLevel > procLevel)
+    if (infoPtr->stackPtr->procLevel > procLevel) {
         UpdateTOSTimes (infoPtr);
-    while (infoPtr->stackPtr->procLevel > procLevel) {
-        if (infoPtr->stackPtr->evalLevel != UNKNOWN_LEVEL) 
-            panic (PROF_PANIC, 2);  /* Not an initial entry */
-        PopEntry (infoPtr);
+        do {
+            if (infoPtr->stackPtr->evalLevel != UNKNOWN_LEVEL) 
+                panic (PROF_PANIC, 2);  /* Not an initial entry */
+            PopEntry (infoPtr);
+        } while (infoPtr->stackPtr->procLevel > procLevel);
     }
 
     /*
@@ -478,7 +470,6 @@ ProfCommandEvalSetup (infoPtr, isProcPtr)
     *isProcPtr = isProc;
 
     Tcl_DecrRefCount (fullCmdNamePtr);
-    return currentCmdPtr;
 }
 
 /*-----------------------------------------------------------------------------
@@ -527,12 +518,11 @@ ProfStrCommandEval (clientData, interp, argc, argv)
     CONST84 char **argv;
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
-    Command *currentCmdPtr;
     int isProc, result;
 
-    currentCmdPtr = ProfCommandEvalSetup (infoPtr, &isProc);
+    ProfCommandEvalSetup (infoPtr, &isProc);
 
-    result = (*currentCmdPtr->proc) (currentCmdPtr->clientData, interp,
+    result = (*infoPtr->savedCmdInfo.proc)(infoPtr->savedCmdInfo.clientData, interp,
                                      argc, argv);
 
     ProfCommandEvalFinishup (infoPtr, isProc);
@@ -559,13 +549,11 @@ ProfObjCommandEval (clientData, interp, objc, objv)
     Tcl_Obj     *CONST objv[];
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
-    Command *currentCmdPtr;
     int isProc, result;
 
-    currentCmdPtr = ProfCommandEvalSetup (infoPtr,
-                                          &isProc);
+    ProfCommandEvalSetup (infoPtr, &isProc);
 
-    result = (*currentCmdPtr->objProc) (currentCmdPtr->objClientData, interp,
+    result = (*infoPtr->savedCmdInfo.objProc)(infoPtr->savedCmdInfo.objClientData, interp,
                                         objc, objv);
 
     ProfCommandEvalFinishup (infoPtr, isProc);
@@ -578,56 +566,43 @@ ProfObjCommandEval (clientData, interp, objc, objv)
  * command being executed by temporarily editing the command table.
  *-----------------------------------------------------------------------------
  */
-static void
-ProfTraceRoutine (clientData, interp, evalLevel, command, cmdProc,
-                  cmdClientData, argc, argv)
+static int
+ProfTraceRoutine (clientData, interp, evalLevel, command, cmd,
+                  objc, objv)
     ClientData    clientData;
     Tcl_Interp   *interp;
     int           evalLevel;
-    char         *command;
-    Tcl_CmdProc  *cmdProc;
-    ClientData    cmdClientData;
-    int           argc;
-    char        **argv;
+    const char   *command;
+    Tcl_Command   cmd;
+    int           objc;
+    struct Tcl_Obj * const *objv;
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
-    Command *cmdPtr;
-    Tcl_Command cmd;
+    Tcl_CmdInfo cmdInfo;
 
-    if (infoPtr->currentCmdPtr != NULL)
-        panic (PROF_PANIC, 3);
-
-    cmd = Tcl_FindCommand (interp, argv [0], NULL, 0);
     if (cmd == NULL)
         panic (PROF_PANIC, 4);
-    cmdPtr = (Command *) cmd;
-
-    if ((cmdPtr->proc != cmdProc) || (cmdPtr->clientData != cmdClientData))
-        panic (PROF_PANIC, 5);
-
-    /*
-     * If command is to be compiled, we can't profile it.
-     */
-    if (cmdPtr->compileProc != NULL)
-        return;
 
     /*
      * Save current state information.
      */
-    infoPtr->currentCmdPtr = cmdPtr;
-    infoPtr->savedStrCmdProc = cmdPtr->proc;
-    infoPtr->savedStrCmdClientData = cmdPtr->clientData;
-    infoPtr->savedObjCmdProc = cmdPtr->objProc;
-    infoPtr->savedObjCmdClientData = cmdPtr->objClientData;
+    Tcl_GetCommandInfoFromToken(cmd, &(infoPtr->savedCmdInfo));
     infoPtr->evalLevel = evalLevel;
+    infoPtr->currentCmd = cmd;
 
     /*
      * Force our routines to be called.
      */
-    cmdPtr->proc = ProfStrCommandEval;
-    cmdPtr->clientData = (ClientData) infoPtr;
-    cmdPtr->objProc = ProfObjCommandEval;
-    cmdPtr->objClientData = (ClientData) infoPtr;
+    cmdInfo.proc = ProfStrCommandEval;
+    cmdInfo.clientData = (ClientData) infoPtr;
+    cmdInfo.objProc = ProfObjCommandEval;
+    cmdInfo.objClientData = (ClientData) infoPtr;
+    cmdInfo.isNativeObjectProc = infoPtr->savedCmdInfo.isNativeObjectProc;
+    cmdInfo.deleteProc = NULL;
+    cmdInfo.deleteData = NULL;
+    Tcl_SetCommandInfoFromToken(cmd, &cmdInfo);
+
+    return TCL_OK;
 }
 
 /*-----------------------------------------------------------------------------
@@ -711,9 +686,9 @@ TurnOnProfiling (infoPtr, commandMode, evalMode)
     CleanDataTable (infoPtr);
 
     infoPtr->traceHandle =
-        Tcl_CreateTrace (infoPtr->interp, MAXINT,
-                         (Tcl_CmdTraceProc *) ProfTraceRoutine,
-                         (ClientData) infoPtr);
+        Tcl_CreateObjTrace (infoPtr->interp, 0,
+                         TCL_ALLOW_INLINE_COMPILATION, ProfTraceRoutine,
+                         (ClientData) infoPtr, NULL);
     infoPtr->commandMode = commandMode;
     infoPtr->evalMode = evalMode;
     infoPtr->realTime = 0;
@@ -973,11 +948,7 @@ TclX_ProfileInit (interp)
     infoPtr->traceHandle = NULL;
     infoPtr->commandMode = FALSE;
     infoPtr->evalMode = FALSE;
-    infoPtr->currentCmdPtr = NULL;
-    infoPtr->savedStrCmdProc = NULL;
-    infoPtr->savedStrCmdClientData = NULL;
-    infoPtr->savedObjCmdProc = NULL;
-    infoPtr->savedObjCmdClientData = NULL;
+    infoPtr->currentCmd = NULL;
     infoPtr->evalLevel = UNKNOWN_LEVEL;
     infoPtr->realTime = 0;
     infoPtr->cpuTime = 0;
@@ -997,6 +968,3 @@ TclX_ProfileInit (interp)
                           (ClientData) infoPtr,
 			  (Tcl_CmdDeleteProc*) NULL);
 }
-
-
-
