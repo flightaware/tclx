@@ -870,7 +870,7 @@ int
 TclX_IsNullObj (objPtr)
     Tcl_Obj *objPtr;
 {
-    static Tcl_ObjType *listType = NULL, *stringType = NULL;
+    static const Tcl_ObjType *listType = NULL, *stringType = NULL;
     int length;
     
     /*

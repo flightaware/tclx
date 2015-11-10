@@ -343,13 +343,11 @@ TclX_ScancontextObjCmd (clientData, interp, objc, objv)
     int         objc;
     Tcl_Obj    *CONST objv[];
 {
-    char *command;
     char *subCommand;
 
     if (objc < 2)
 	return TclX_WrongArgs (interp, objv [0], "option ...");
 
-    command = Tcl_GetStringFromObj (objv [0], NULL);
     subCommand = Tcl_GetStringFromObj (objv [1], NULL);
 
     /*

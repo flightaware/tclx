@@ -84,7 +84,7 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
     char       *targetChannelId;
 {
     ClientData handle;
-    Tcl_ChannelType *channelType;
+    const Tcl_ChannelType *channelType;
     Tcl_Channel newChannel = NULL;
     int srcFileNum, newFileNum = -1;
 

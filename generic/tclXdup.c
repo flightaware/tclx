@@ -128,7 +128,7 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
     char       *targetChannelId;
 {
     Tcl_Channel srcChannel, newChannel = NULL;
-    Tcl_ChannelType *channelType;
+    const Tcl_ChannelType *channelType;
     int mode;
 
     srcChannel = Tcl_GetChannel (interp, srcChannelId, &mode);

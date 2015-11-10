@@ -202,7 +202,7 @@ TraceCode (infoPtr, level, command, argc, argv)
     int          argc;
     CONST84 char **argv;
 {
-    int idx, cmdLen, printLen;
+    int idx, printLen;
     char buf [32];
 
     sprintf (buf, "%2d:", level);
@@ -214,7 +214,7 @@ TraceCode (infoPtr, level, command, argc, argv)
         Tcl_Write (infoPtr->channel, "  ", 2);
 
     if (infoPtr->noEval) {
-        cmdLen = printLen = strlen (command);
+        printLen = strlen (command);
         if ((!infoPtr->noTruncate) && (printLen > CMD_TRUNCATE_SIZE))
             printLen = CMD_TRUNCATE_SIZE;
 

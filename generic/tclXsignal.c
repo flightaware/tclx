@@ -960,7 +960,7 @@ ParseSignalList (interp, signalListObjPtr, signals)
 {
     Tcl_Obj **signalObjv;
     char     *signalStr;
-    int       signalObjc, signalNum, idx, cnt;
+    int       signalObjc, signalNum, idx;
 
     if (Tcl_ListObjGetElements (interp, signalListObjPtr,
                                 &signalObjc, &signalObjv) != TCL_OK)
@@ -982,7 +982,6 @@ ParseSignalList (interp, signalListObjPtr, signals)
     if (STREQU (signalStr, "*")) {
         if (signalObjc != 1)
             goto wildMustBeAlone;
-        cnt = 0;
         for (idx = 0; sigNameTable [idx].name != NULL; idx++) {
             signalNum = sigNameTable [idx].num;
 #ifdef SIGKILL
