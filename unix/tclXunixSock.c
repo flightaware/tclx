@@ -51,10 +51,9 @@ BindFileHandles (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 static void
-CloseForError (interp, channel, fileNum)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         fileNum;
+CloseForError (Tcl_Interp *interp,
+               Tcl_Channel channel,
+               int         fileNum)
 {
     int saveErrNo = Tcl_GetErrno ();
 
@@ -87,10 +86,7 @@ CloseForError (interp, channel, fileNum)
  *-----------------------------------------------------------------------------
  */
 static int
-BindFileHandles (interp, options, socketFD)
-    Tcl_Interp *interp;
-    unsigned    options;
-    int         socketFD;
+BindFileHandles (Tcl_Interp *interp, unsigned options, int socketFD)
 {
     Tcl_Channel channel;
 
@@ -131,11 +127,10 @@ BindFileHandles (interp, options, socketFD)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ServerCreateCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+TclX_ServerCreateCmd (ClientData clientData,
+                      Tcl_Interp *interp,
+                      int argc,
+                      const char **argv)
 {
     int socketFD = -1, nextArg;
     struct sockaddr_in  local;
@@ -258,15 +253,15 @@ TclX_ServerCreateCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ServerAcceptCmd (clientData, interp, argc, argv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         argc;
-    char      **argv;
+TclX_ServerAcceptCmd (ClientData clientData,
+                      Tcl_Interp *interp,
+                      int argc,
+                      const char **argv)
 {
     Tcl_Channel          channel;
     unsigned             options;
-    int                  acceptSocketFD, addrLen;
+    int                  acceptSocketFD;
+    socklen_t            addrLen;
     int                  socketFD = -1;
     int                  nextArg;
     struct sockaddr_in   connectSocket;
@@ -351,8 +346,7 @@ TclX_ServerAcceptCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_ServerInit (interp)
-    Tcl_Interp *interp;
+TclX_ServerInit (Tcl_Interp *interp)
 {
     /*
      * These commands are deprecated in favor of the Tcl socket -server
@@ -360,7 +354,7 @@ TclX_ServerInit (interp)
      * compatibility procs.
      */
     Tcl_CreateCommand (interp, "server_accept", TclX_ServerAcceptCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
     Tcl_CreateCommand (interp, "server_create", TclX_ServerCreateCmd,
                        (ClientData) NULL, (void (*)()) NULL);
 }

@@ -18,12 +18,6 @@
 
 #include "tclExtdInt.h"
 
-/*
- * Prototypes of internal functions.
- */
-static int
-ConvertFileHandle (Tcl_Interp *interp,
-                   char       *handle);
 
 /*-----------------------------------------------------------------------------
  * ConvertFileHandle --
@@ -37,9 +31,8 @@ ConvertFileHandle (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 static int
-ConvertFileHandle (interp, handle)
-    Tcl_Interp *interp;
-    char       *handle;
+ConvertFileHandle (Tcl_Interp *interp,
+                   char       *handle)
 {
     int fileId = -1;
 
@@ -77,11 +70,7 @@ ConvertFileHandle (interp, handle)
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
-    Tcl_Interp *interp;
-    Tcl_Channel srcChannel;
-    int         mode;
-    char       *targetChannelId;
+TclXOSDupChannel(Tcl_Interp *interp, Tcl_Channel srcChannel, int mode, char *targetChannelId)
 {
     ClientData handle;
     const Tcl_ChannelType *channelType;
@@ -159,9 +148,7 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclXOSBindOpenFile (interp, fileNum)
-    Tcl_Interp *interp;
-    int         fileNum;
+TclXOSBindOpenFile(Tcl_Interp *interp, int fileNum)
 {
     int         fcntlMode;
     int         mode = 0;

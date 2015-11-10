@@ -19,13 +19,13 @@
 
 #include "tclExtdInt.h"
 
-static int 
+static int
 TclX_ChrootObjCmd (ClientData clientData,
-                  Tcl_Interp *interp, 
+                  Tcl_Interp *interp,
                   int         objc,
 			      Tcl_Obj     *CONST objv[]);
 
-static int 
+static int
 TclX_TimesObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
                  int          objc,
@@ -43,11 +43,10 @@ TclX_TimesObjCmd (ClientData   clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ChrootObjCmd (clientData, interp, objc, objv)
-       ClientData  clientData;
-       Tcl_Interp *interp;
-       int         objc;
-       Tcl_Obj   *CONST objv[];
+TclX_ChrootObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int         objc,
+			      Tcl_Obj     *CONST objv[])
 {
     char   *chrootString;
     int     chrootStrLen;
@@ -77,11 +76,10 @@ TclX_ChrootObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_TimesObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+TclX_TimesObjCmd (ClientData   clientData,
+                 Tcl_Interp  *interp,
+                 int          objc,
+                 Tcl_Obj      *CONST objv[])
 {
     struct tms tm;
     char       timesBuf [48];
@@ -91,7 +89,7 @@ TclX_TimesObjCmd (clientData, interp, objc, objv)
 
     times (&tm);
 
-    sprintf (timesBuf, "%ld %ld %ld %ld", 
+    sprintf (timesBuf, "%ld %ld %ld %ld",
              (long) TclXOSTicksToMS (tm.tms_utime),
              (long) TclXOSTicksToMS (tm.tms_stime),
              (long) TclXOSTicksToMS (tm.tms_cutime),
@@ -117,11 +115,11 @@ TclX_PlatformCmdsInit (interp)
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc *) NULL);
 
-    Tcl_CreateObjCommand (interp, 
+    Tcl_CreateObjCommand (interp,
 			  "times",
 			  TclX_TimesObjCmd,
                           (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
-    
+
 }
 /* vim: set ts=4 sw=4 sts=4 et : */

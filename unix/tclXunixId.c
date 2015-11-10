@@ -147,9 +147,8 @@ TclX_IdObjCmd (ClientData clientData,
  */
 
 static int
-UseridToUsernameResult (interp, userId)
-    Tcl_Interp *interp;
-    int         userId;
+UseridToUsernameResult (Tcl_Interp *interp,
+                        int         userId)
 {
     uid_t          uid = (uid_t) userId;
     struct passwd *pw = getpwuid (userId);
@@ -171,9 +170,7 @@ UseridToUsernameResult (interp, userId)
 }
 
 static int
-UsernameToUseridResult (interp, userName)
-    Tcl_Interp *interp;
-    char       *userName;
+UsernameToUseridResult (Tcl_Interp *interp, char *userName)
 {
     struct passwd *pw = getpwnam (userName);
     Tcl_Obj       *resultObj = Tcl_GetObjResult (interp);
@@ -192,9 +189,7 @@ UsernameToUseridResult (interp, userName)
 }
 
 static int
-GroupidToGroupnameResult (interp, groupId)
-    Tcl_Interp *interp;
-    int         groupId;
+GroupidToGroupnameResult (Tcl_Interp *interp, int groupId)
 {
     gid_t          gid = (gid_t) groupId;
     struct group  *grp = getgrgid (groupId);
@@ -217,9 +212,7 @@ GroupidToGroupnameResult (interp, groupId)
 }
 
 static int
-GroupnameToGroupidResult (interp, groupName)
-    Tcl_Interp *interp;
-    char       *groupName;
+GroupnameToGroupidResult (Tcl_Interp *interp, char *groupName)
 {
     struct group  *grp = getgrnam (groupName);
     Tcl_Obj       *resultObj = Tcl_GetObjResult (interp);
@@ -238,10 +231,7 @@ GroupnameToGroupidResult (interp, groupName)
  * id convert type value
  */
 static int
-IdConvert (interp, objc, objv)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdConvert (Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     long           uid;
     long           gid;
@@ -282,10 +272,7 @@ IdConvert (interp, objc, objv)
  * id effective type
  */
 static int
-IdEffective (interp, objc, objv)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdEffective (Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     char          *subCommand;
 
@@ -320,10 +307,7 @@ IdEffective (interp, objc, objv)
  * id process ?parent|group? ?set?
  */
 static int
-IdProcess (interp, objc, objv)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdProcess (Tcl_Interp *interp, int objc, Tcl_Obj      *CONST objv[])
 {
     pid_t          pid;
     char          *subCommand;
@@ -384,11 +368,7 @@ IdProcess (interp, objc, objv)
  * id groups
  */
 static int
-IdGroupids (interp, objc, objv, symbolic)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
-    int            symbolic;
+IdGroupids (Tcl_Interp *interp, int objc, Tcl_Obj*CONST objv[], int symbolic)
 {
 #ifndef NO_GETGROUPS
     gid_t         *groups;
@@ -456,10 +436,7 @@ IdGroupids (interp, objc, objv, symbolic)
  * id host
  */
 static int
-IdHost (interp, objc, objv)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdHost (Tcl_Interp *interp, int objc, Tcl_Obj*CONST objv[])
 {
 #ifndef NO_GETHOSTNAME
 #ifndef MAXHOSTNAMELEN
@@ -489,9 +466,7 @@ IdHost (interp, objc, objv)
  * Return error when a get set function has too many args (2 or 3 expected).
  */
 static int
-GetSetWrongArgs (interp, objv)
-    Tcl_Interp    *interp;
-    Tcl_Obj      *CONST objv[];
+GetSetWrongArgs (Tcl_Interp *interp, Tcl_Obj*CONST objv[])
 {
     return TclX_WrongArgs (interp, objv [0], "arg ?value?");
 }
@@ -500,10 +475,7 @@ GetSetWrongArgs (interp, objv)
  * id user
  */
 static int
-IdUser (interp, objc, objv)
-    Tcl_Interp *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdUser (Tcl_Interp *interp, int objc, Tcl_Obj*CONST objv[])
 {
     struct passwd *pw;
     char          *user;
@@ -539,10 +511,7 @@ IdUser (interp, objc, objv)
  * id userid
  */
 static int
-IdUserId (interp, objc, objv)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdUserId (Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     int uid;
 
@@ -569,10 +538,7 @@ IdUserId (interp, objc, objv)
  * id group
  */
 static int
-IdGroup (interp, objc, objv)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdGroup (Tcl_Interp *interp, int objc, Tcl_Obj*CONST objv[])
 {
     struct group *grp;
     char         *groupName;
@@ -608,10 +574,7 @@ IdGroup (interp, objc, objv)
  * id groupid
  */
 static int
-IdGroupId (interp, objc, objv)
-    Tcl_Interp    *interp;
-    int            objc;
-    Tcl_Obj      *CONST objv[];
+IdGroupId (Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     int gid;
     
@@ -635,11 +598,7 @@ IdGroupId (interp, objc, objv)
 }
 
 static int
-TclX_IdObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+TclX_IdObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj*CONST objv[])
 {
     char       *subCommand;
 
@@ -722,8 +681,7 @@ TclX_IdObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_IdInit (interp)
-    Tcl_Interp *interp;
+TclX_IdInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
 			  "id",

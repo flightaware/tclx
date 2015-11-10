@@ -76,9 +76,7 @@ ConvertOwnerGroup (Tcl_Interp  *interp,
  *-----------------------------------------------------------------------------
  */
 int
-TclXNotAvailableError (interp, funcName)
-    Tcl_Interp *interp;
-    char       *funcName;
+TclXNotAvailableError (Tcl_Interp *interp, char *funcName)
 {
     TclX_AppendObjResult (interp, funcName, " is not available on this system",
                           (char *) NULL);
@@ -101,9 +99,7 @@ TclXNotAvailableError (interp, funcName)
  *-----------------------------------------------------------------------------
  */
 static int
-ChannelToFnum (channel, direction)
-    Tcl_Channel channel;
-    int         direction;
+ChannelToFnum (Tcl_Channel channel, int direction)
 {
     ClientData handle;
 
@@ -132,8 +128,7 @@ ChannelToFnum (channel, direction)
  *-----------------------------------------------------------------------------
  */
 clock_t
-TclXOSTicksToMS (numTicks)
-    clock_t numTicks;
+TclXOSTicksToMS (clock_t numTicks)
 {
     static clock_t msPerTick = 0;
 
@@ -173,10 +168,7 @@ TclXOSTicksToMS (numTicks)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetpriority (interp, priority, funcName)
-    Tcl_Interp *interp;
-    int        *priority;
-    char       *funcName;
+TclXOSgetpriority (Tcl_Interp *interp, int *priority, char *funcName)
 {
 #ifndef NO_GETPRIORITY
     *priority = getpriority (PRIO_PROCESS, 0);
@@ -200,11 +192,7 @@ TclXOSgetpriority (interp, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSincrpriority (interp, priorityIncr, priority, funcName)
-    Tcl_Interp *interp;
-    int         priorityIncr;
-    int        *priority;
-    char       *funcName;
+TclXOSincrpriority (Tcl_Interp *interp, int priorityIncr, int *priority, char *funcName)
 {
     errno = 0;  /* Old priority might be -1 */
 
@@ -236,9 +224,7 @@ TclXOSincrpriority (interp, priorityIncr, priority, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSpipe (interp, channels)
-    Tcl_Interp  *interp;
-    Tcl_Channel *channels;
+TclXOSpipe (Tcl_Interp *interp, Tcl_Channel *channels)
 {
     int fileNums [2];
 
@@ -273,10 +259,7 @@ TclXOSpipe (interp, channels)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSsetitimer (interp, seconds, funcName)
-    Tcl_Interp *interp;
-    double     *seconds;
-    char       *funcName;
+TclXOSsetitimer (Tcl_Interp *interp, double *seconds, char *funcName)
 {
 /*
  * A million microseconds per seconds.
@@ -324,8 +307,7 @@ TclXOSsetitimer (interp, seconds, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclXOSsleep (seconds)
-    unsigned seconds;
+TclXOSsleep (unsigned seconds)
 {
     Tcl_Sleep (seconds*1000);
 }
@@ -354,9 +336,7 @@ TclXOSsync ()
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSfsync (interp, channel)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
+TclXOSfsync (Tcl_Interp *interp, Tcl_Channel channel)
 {
     if (Tcl_Flush (channel) < 0)
         goto posixError;
@@ -389,10 +369,7 @@ TclXOSfsync (interp, channel)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSsystem (interp, command, exitCode)
-    Tcl_Interp *interp;
-    char       *command;
-    int        *exitCode;
+TclXOSsystem (Tcl_Interp *interp, char *command, int *exitCode)
 {
     int errPipes [2], childErrno;
     pid_t pid;
@@ -491,11 +468,7 @@ TclXOSsystem (interp, command, exitCode)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSlink (interp, srcPath, targetPath, funcName)
-    Tcl_Interp *interp;
-    char       *srcPath;
-    char       *targetPath;
-    char       *funcName;
+TclX_OSlink (Tcl_Interp *interp, char *srcPath, char *targetPath, char *funcName)
 {
     if (link (srcPath, targetPath) != 0) {
         TclX_AppendObjResult (interp, "linking \"", srcPath, "\" to \"",
@@ -520,11 +493,7 @@ TclX_OSlink (interp, srcPath, targetPath, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_OSsymlink (interp, srcPath, targetPath, funcName)
-    Tcl_Interp *interp;
-    char       *srcPath;
-    char       *targetPath;
-    char       *funcName;
+TclX_OSsymlink (Tcl_Interp *interp, char *srcPath, char *targetPath, char *funcName)
 {
 #ifdef S_IFLNK
     if (symlink (srcPath, targetPath) != 0) {
@@ -552,9 +521,7 @@ TclX_OSsymlink (interp, srcPath, targetPath, funcName)
  *-----------------------------------------------------------------------------
  */
 void
-TclXOSElapsedTime (realTime, cpuTime)
-    clock_t *realTime;
-    clock_t *cpuTime;
+TclXOSElapsedTime (clock_t *realTime, clock_t *cpuTime)
 {
 /*
  * If times returns elapsed real time, this is easy.  If it returns a status,
@@ -599,11 +566,7 @@ TclXOSElapsedTime (realTime, cpuTime)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSkill (interp, pid, signal, funcName)
-    Tcl_Interp *interp;
-    pid_t       pid;
-    int         signal;
-    char       *funcName;
+TclXOSkill (Tcl_Interp *interp, pid_t pid, int signal, char *funcName)
 {
     if (kill (pid, signal) < 0) {
         char pidStr [32];
@@ -650,11 +613,7 @@ TclXOSkill (interp, pid, signal, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFstat (interp, channel, statBuf, ttyDev)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    struct stat *statBuf;
-    int         *ttyDev;
+TclXOSFstat (Tcl_Interp *interp, Tcl_Channel channel, struct stat *statBuf, int *ttyDev)
 {
     int fileNum = ChannelToFnum (channel, 0);
 
@@ -681,10 +640,7 @@ TclXOSFstat (interp, channel, statBuf, ttyDev)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSSeekable (interp, channel, seekablePtr)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int         *seekablePtr;
+TclXOSSeekable (Tcl_Interp *interp, Tcl_Channel channel, int *seekablePtr)
 {
     struct stat statBuf;
     int fileNum = ChannelToFnum (channel, TCL_READABLE);
@@ -733,12 +689,7 @@ TclXOSSeekable (interp, channel, seekablePtr)
  *-----------------------------------------------------------------------------
 */
 int
-TclXOSWalkDir (interp, path, hidden, callback, clientData)
-    Tcl_Interp       *interp;
-    char             *path;
-    int               hidden;
-    TclX_WalkDirProc *callback;
-    ClientData        clientData;
+TclXOSWalkDir (Tcl_Interp *interp, char *path, int hidden, TclX_WalkDirProc *callback, ClientData clientData)
 {
     DIR *handle;
     struct dirent *entryPtr;
@@ -795,9 +746,7 @@ TclXOSWalkDir (interp, path, hidden, callback, clientData)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetFileSize (channel, fileSize)
-    Tcl_Channel  channel;
-    off_t       *fileSize;
+TclXOSGetFileSize (Tcl_Channel channel, off_t *fileSize)
 {
     struct stat statBuf;
 
@@ -822,11 +771,7 @@ TclXOSGetFileSize (channel, fileSize)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSftruncate (interp, channel, newSize, funcName)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    off_t        newSize;
-    char        *funcName;
+TclXOSftruncate (Tcl_Interp *interp, Tcl_Channel channel, off_t newSize, char *funcName)
 {
 #if (!defined(NO_FTRUNCATE)) || defined(HAVE_CHSIZE) 
     int stat;
@@ -859,9 +804,7 @@ TclXOSftruncate (interp, channel, newSize, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSfork (interp, funcNameObj)
-    Tcl_Interp *interp;
-    Tcl_Obj    *funcNameObj;
+TclXOSfork (Tcl_Interp *interp, Tcl_Obj *funcNameObj)
 {
     pid_t pid;
     
@@ -889,10 +832,7 @@ TclXOSfork (interp, funcNameObj)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSexecl (interp, path, argList)
-    Tcl_Interp *interp;
-    char       *path;
-    char      **argList;
+TclXOSexecl (Tcl_Interp *interp, char *path, char **argList)
 {
     execvp (path, argList);
 
@@ -919,10 +859,7 @@ TclXOSexecl (interp, path, argList)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSInetAtoN (interp, strAddress, inAddress)
-    Tcl_Interp     *interp;
-    char           *strAddress;
-    struct in_addr *inAddress;
+TclXOSInetAtoN (Tcl_Interp *interp, const char *strAddress, struct in_addr *inAddress)
 {
 #ifndef NO_INET_ATON
     if (inet_aton (strAddress, inAddress))
@@ -953,11 +890,7 @@ TclXOSInetAtoN (interp, strAddress, inAddress)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetpeername (interp, channel, sockaddr, sockaddrSize)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    void       *sockaddr;
-    int         sockaddrSize;
+TclXOSgetpeername (Tcl_Interp *interp, Tcl_Channel channel, void *sockaddr, socklen_t sockaddrSize)
 {
 
     if (getpeername (ChannelToFnum (channel, 0),
@@ -983,11 +916,7 @@ TclXOSgetpeername (interp, channel, sockaddr, sockaddrSize)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetsockname (interp, channel, sockaddr, sockaddrSize)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    void       *sockaddr;
-    int         sockaddrSize;
+TclXOSgetsockname (Tcl_Interp *interp, Tcl_Channel channel, void *sockaddr, int sockaddrSize)
 {
     if (getsockname (ChannelToFnum (channel, 0),
 		(struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
@@ -1012,11 +941,7 @@ TclXOSgetsockname (interp, channel, sockaddr, sockaddrSize)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetsockopt (interp, channel, option, valuePtr)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          option;
-    int         *valuePtr;
+TclXOSgetsockopt (Tcl_Interp *interp, Tcl_Channel channel, int option, socklen_t *valuePtr)
 {
     int valueLen = sizeof (*valuePtr);
 
@@ -1043,11 +968,7 @@ TclXOSgetsockopt (interp, channel, option, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSsetsockopt (interp, channel, option, value)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          option;
-    int          value;
+TclXOSsetsockopt (Tcl_Interp *interp, Tcl_Channel channel, int option, int value)
 {
     int valueLen = sizeof (value);
 
@@ -1073,10 +994,7 @@ TclXOSsetsockopt (interp, channel, option, value)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSchmod (interp, fileName, mode)
-    Tcl_Interp *interp;
-    char       *fileName;
-    int         mode;
+TclXOSchmod (Tcl_Interp *interp, char *fileName, int mode)
 {
     if (chmod (fileName, mode) < 0) {
         TclX_AppendObjResult (interp, fileName, ": ",
@@ -1100,11 +1018,7 @@ TclXOSchmod (interp, fileName, mode)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSfchmod (interp, channel, mode, funcName)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         mode;
-    char       *funcName;
+TclXOSfchmod (Tcl_Interp *interp, Tcl_Channel channel, int mode, char *funcName)
 {
 #ifndef NO_FCHMOD
     if (fchmod (ChannelToFnum (channel, 0), mode) < 0) {
@@ -1140,13 +1054,12 @@ TclXOSfchmod (interp, channel, mode, funcName)
  *-----------------------------------------------------------------------------
  */
 static int
-ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
-    Tcl_Interp  *interp;
-    unsigned     options;
-    char        *ownerStr;
-    char        *groupStr;
-    uid_t       *ownerId;
-    gid_t       *groupId;
+ConvertOwnerGroup (Tcl_Interp  *interp,
+                   unsigned     options,
+                   char        *ownerStr,
+                   char        *groupStr,
+                   uid_t       *ownerId,
+                   gid_t       *groupId)
 {
     struct passwd *passwdPtr = NULL;
     struct group *groupPtr = NULL;
@@ -1238,13 +1151,12 @@ ConvertOwnerGroup (interp, options, ownerStr, groupStr, ownerId, groupId)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSChangeOwnGrpObj (interp, options, ownerStr, groupStr, fileListObj, funcName)
-    Tcl_Interp  *interp;
-    unsigned     options;
-    char        *ownerStr;
-    char        *groupStr;
-    Tcl_Obj     *fileListObj;
-    char        *funcName;
+TclXOSChangeOwnGrpObj  (Tcl_Interp *interp,
+                        unsigned options,
+                        char *ownerStr,
+                        char *groupStr,
+                        Tcl_Obj *fileListObj,
+                        char *funcName)
 {
     int          idx;
     struct stat  fileStat;
@@ -1321,14 +1233,12 @@ TclXOSChangeOwnGrpObj (interp, options, ownerStr, groupStr, fileListObj, funcNam
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFChangeOwnGrpObj (interp, options, ownerStr, groupStr, channelIdsObj,
-                        funcName)
-    Tcl_Interp *interp;
-    unsigned    options;
-    char       *ownerStr;
-    char       *groupStr;
-    Tcl_Obj    *channelIdsObj;
-    char       *funcName;
+TclXOSFChangeOwnGrpObj (Tcl_Interp *interp,
+                        unsigned options,
+                        char *ownerStr,
+                        char *groupStr,
+                        Tcl_Obj *channelIdsObj,
+                        char *funcName)
 {
 #ifndef NO_FCHOWN
     int          idx, fnum;
@@ -1403,13 +1313,7 @@ TclXOSFChangeOwnGrpObj (interp, options, ownerStr, groupStr, channelIdsObj,
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
-    Tcl_Interp *interp;
-    unsigned    options;
-    char       *ownerStr;
-    char       *groupStr;
-    char      **channelIds;
-    char       *funcName;
+TclXOSFChangeOwnGrp (Tcl_Interp *interp, unsigned options, char *ownerStr, char *groupStr, char **channelIds, char *funcName)
 {
 #ifndef NO_FCHOWN
     int idx, fnum;
@@ -1470,11 +1374,7 @@ TclXOSFChangeOwnGrp (interp, options, ownerStr, groupStr, channelIds, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetSelectFnum (interp, channel, direction, fnumPtr)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         direction;
-    int        *fnumPtr;
+TclXOSGetSelectFnum (Tcl_Interp *interp, Tcl_Channel channel, int direction, int *fnumPtr)
 {
     ClientData handle;
 
@@ -1519,9 +1419,7 @@ TclXOSHaveFlock ()
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFlock (interp, lockInfoPtr)
-    Tcl_Interp     *interp;
-    TclX_FlockInfo *lockInfoPtr;
+TclXOSFlock (Tcl_Interp *interp, TclX_FlockInfo *lockInfoPtr)
 {
 #ifdef F_SETLKW
     int fnum, stat;
@@ -1577,9 +1475,7 @@ TclXOSFlock (interp, lockInfoPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFunlock (interp, lockInfoPtr)
-    Tcl_Interp     *interp;
-    TclX_FlockInfo *lockInfoPtr;
+TclXOSFunlock (Tcl_Interp *interp, TclX_FlockInfo *lockInfoPtr)
 {
 #ifdef F_SETLKW
     int fnum, stat;
@@ -1621,10 +1517,7 @@ TclXOSFunlock (interp, lockInfoPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetAppend (interp, channel, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int        *valuePtr;
+TclXOSGetAppend (Tcl_Interp *interp, Tcl_Channel channel, int *valuePtr)
 {
     int fnum, mode;
 
@@ -1663,10 +1556,7 @@ TclXOSGetAppend (interp, channel, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSSetAppend (interp, channel, value)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         value;
+TclXOSSetAppend (Tcl_Interp *interp, Tcl_Channel channel, int value)
 {
     int fnum, mode;
 
@@ -1709,10 +1599,7 @@ TclXOSSetAppend (interp, channel, value)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetCloseOnExec (interp, channel, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int        *valuePtr;
+TclXOSGetCloseOnExec (Tcl_Interp *interp, Tcl_Channel channel, int *valuePtr)
 {
     int     readFnum;
     int     writeFnum;
@@ -1773,10 +1660,7 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSSetCloseOnExec (interp, channel, value)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         value;
+TclXOSSetCloseOnExec (Tcl_Interp *interp, Tcl_Channel channel, int value)
 {
     int readFnum, writeFnum;
 

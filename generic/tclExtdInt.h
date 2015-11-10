@@ -266,7 +266,7 @@ TclXGetHostInfo (Tcl_Interp *interp,
 
 extern Tcl_Channel
 TclX_GetOpenChannel (Tcl_Interp *interp,
-                     char       *handle,
+                     const char       *handle,
                      int         chanAccess);
 
 extern Tcl_Channel
@@ -519,14 +519,14 @@ TclXOSexecl (Tcl_Interp *interp,
 
 extern int
 TclXOSInetAtoN (Tcl_Interp     *interp,
-                char           *strAddress,
+                const char     *strAddress,
                 struct in_addr *inAddress);
 
 extern int
 TclXOSgetpeername (Tcl_Interp *interp,
                    Tcl_Channel channel,
                    void       *sockaddr,
-                   int         sockaddrSize);
+                   socklen_t   sockaddrSize);
 
 extern int
 TclXOSgetsockname (Tcl_Interp *interp,
@@ -538,7 +538,7 @@ extern int
 TclXOSgetsockopt (Tcl_Interp  *interp,
                   Tcl_Channel  channel,
                   int          option,
-                  int         *valuePtr);
+                  socklen_t   *valuePtr);
 
 extern int
 TclXOSsetsockopt (Tcl_Interp  *interp,

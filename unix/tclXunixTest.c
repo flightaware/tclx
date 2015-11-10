@@ -40,9 +40,7 @@ int (*tclDummyMathPtr)() = matherr;
  *-----------------------------------------------------------------------------
  */
 int
-main (argc, argv)
-    int    argc;
-    char **argv;
+main (int argc, char **argv)
 {
     TclX_Main (argc, argv, Tcl_AppInit);
     return 0;			/* Needed only to prevent compiler warning. */
@@ -59,8 +57,7 @@ main (argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tcl_AppInit (interp)
-    Tcl_Interp *interp;
+Tcl_AppInit (Tcl_Interp *interp)
 {
     if (Tcl_Init (interp) == TCL_ERROR) {
         return TCL_ERROR;
