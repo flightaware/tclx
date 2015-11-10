@@ -36,24 +36,23 @@ typedef struct binSearchCB_t {
  * Prototypes of internal functions.
  */
 static int
-StandardKeyCompare _ANSI_ARGS_((char *key,
-                                char *line));
+StandardKeyCompare (char *key, char *line);
 
 static int
-TclProcKeyCompare _ANSI_ARGS_((binSearchCB_t *searchCBPtr));
+TclProcKeyCompare (binSearchCB_t *searchCBPtr);
 
 static int
-ReadAndCompare _ANSI_ARGS_((off_t          fileOffset,
-                            binSearchCB_t *searchCBPtr));
+ReadAndCompare (off_t          fileOffset,
+                binSearchCB_t *searchCBPtr);
 
 static int
-BinSearch _ANSI_ARGS_((binSearchCB_t *searchCBPtr));
+BinSearch (binSearchCB_t *searchCBPtr);
 
 static int 
-TclX_BsearchObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                Tcl_Interp *interp,
-                                int objc,
-                                Tcl_Obj *CONST objv[]));
+TclX_BsearchObjCmd (ClientData clientData, 
+                    Tcl_Interp *interp,
+                    int objc,
+                    Tcl_Obj *CONST objv[]);
 
 /*-----------------------------------------------------------------------------
  *

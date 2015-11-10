@@ -50,31 +50,31 @@ static struct {
  * Prototypes of internal functions.
  */
 static char *
-StrFileType _ANSI_ARGS_((struct stat  *statBufPtr));
+StrFileType (struct stat  *statBufPtr);
 
 static void
-ReturnStatList _ANSI_ARGS_((Tcl_Interp   *interp,
-                            int           ttyDev,
-                            struct stat  *statBufPtr));
+ReturnStatList (Tcl_Interp   *interp,
+                int           ttyDev,
+                struct stat  *statBufPtr);
 
 static int
-ReturnStatArray _ANSI_ARGS_((Tcl_Interp   *interp,
-                             int           ttyDev,
-                             struct stat  *statBufPtr,
-                             Tcl_Obj      *arrayObj));
+ReturnStatArray (Tcl_Interp   *interp,
+                 int           ttyDev,
+                 struct stat  *statBufPtr,
+                 Tcl_Obj      *arrayObj);
 
 static int
-ReturnStatItem _ANSI_ARGS_((Tcl_Interp   *interp,
-                            Tcl_Channel   channel,
-                            int           ttyDev,
-                            struct stat  *statBufPtr,
-                            char         *itemName));
+ReturnStatItem (Tcl_Interp   *interp,
+                Tcl_Channel   channel,
+                int           ttyDev,
+                struct stat  *statBufPtr,
+                char         *itemName);
 
 static int 
-TclX_FstatObjCmd _ANSI_ARGS_((ClientData clientData, 
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_FstatObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

@@ -32,26 +32,26 @@ static char *FILE_ID_OPT = "-fileid";
  * Prototypes of internal functions.
  */
 static int
-ConvSymMode _ANSI_ARGS_((Tcl_Interp  *interp,
-                         char        *symMode,
-                         int          modeVal));
+ConvSymMode (Tcl_Interp  *interp,
+             char        *symMode,
+             int          modeVal);
 static int 
-TclX_ChmodObjCmd _ANSI_ARGS_((ClientData clientData, 
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_ChmodObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_ChownObjCmd _ANSI_ARGS_((ClientData clientData, 
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_ChownObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_ChgrpObjCmd _ANSI_ARGS_((ClientData clientData, 
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_ChgrpObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

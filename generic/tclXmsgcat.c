@@ -30,35 +30,35 @@ typedef int nl_catd;
 #endif /* NO_CATGETS */
 
 static int
-ParseFailOptionObj _ANSI_ARGS_((Tcl_Interp *interp,
-                                Tcl_Obj    *optionObj,
-                                int        *failPtr));
+ParseFailOptionObj (Tcl_Interp *interp,
+                    Tcl_Obj    *optionObj,
+                    int        *failPtr);
 
 static int
-CatOpFailedObj _ANSI_ARGS_((Tcl_Interp *interp,
-                            CONST char *errorMsg));
+CatOpFailedObj (Tcl_Interp *interp,
+                CONST char *errorMsg);
 
 static int
-TclX_CatopenObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj   *CONST objv[]));
+TclX_CatopenObjCmd (ClientData  clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[]);
 
 static int
-TclX_CatgetsObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj   *CONST objv[]));
+TclX_CatgetsObjCmd (ClientData  clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[]);
 
 static int
-TclX_CatcloseObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj   *CONST objv[]));
+TclX_CatcloseObjCmd (ClientData  clientData,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj   *CONST objv[]);
 
 static void
-MsgCatCleanUp _ANSI_ARGS_((ClientData  clientData,
-                           Tcl_Interp *interp));
+MsgCatCleanUp (ClientData  clientData,
+               Tcl_Interp *interp);
 
 
 /*

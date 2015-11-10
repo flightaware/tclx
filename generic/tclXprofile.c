@@ -91,74 +91,74 @@ static const char *PROF_PANIC = "TclX profile bug id = %d\n";
  * Prototypes of internal functions.
  */
 static void
-PushEntry _ANSI_ARGS_((profInfo_t *infoPtr,
-                       const char *cmdName,
-                       int         isProc,
-                       int         procLevel,
-                       int         scopeLevel,
-                       int         evalLevel));
+PushEntry (profInfo_t *infoPtr,
+           const char *cmdName,
+           int         isProc,
+           int         procLevel,
+           int         scopeLevel,
+           int         evalLevel);
 
 static void
-RecordData _ANSI_ARGS_((profInfo_t  *infoPtr,
-                        profEntry_t *entryPtr));
+RecordData (profInfo_t  *infoPtr,
+            profEntry_t *entryPtr);
 
 static void
-PopEntry _ANSI_ARGS_((profInfo_t *infoPtr));
+PopEntry (profInfo_t *infoPtr);
 
 static void
-UpdateTOSTimes _ANSI_ARGS_((profInfo_t *infoPtr));
+UpdateTOSTimes (profInfo_t *infoPtr);
 
 static void
-ProfCommandEvalSetup _ANSI_ARGS_((profInfo_t *infoPtr,
-                                  int        *isProcPtr));
+ProfCommandEvalSetup (profInfo_t *infoPtr,
+                      int        *isProcPtr);
     
 static void
-ProfCommandEvalFinishup _ANSI_ARGS_((profInfo_t *infoPtr,
-                                     int         isProc));
+ProfCommandEvalFinishup (profInfo_t *infoPtr,
+                         int         isProc);
 
 static int
-ProfStrCommandEval _ANSI_ARGS_((ClientData    clientData,
-                                Tcl_Interp   *interp,
-                                int           argc,
-                                CONST84 char **argv));
+ProfStrCommandEval (ClientData    clientData,
+                    Tcl_Interp   *interp,
+                    int           argc,
+                    CONST84 char **argv);
 
 static int
-ProfObjCommandEval _ANSI_ARGS_((ClientData    clientData,
-                                Tcl_Interp   *interp,
-                                int           objc,
-                                Tcl_Obj      *CONST objv[]));
+ProfObjCommandEval (ClientData    clientData,
+                    Tcl_Interp   *interp,
+                    int           objc,
+                    Tcl_Obj      *CONST objv[]);
 
 static Tcl_CmdObjTraceProc ProfTraceRoutine;
 
 static void
-CleanDataTable _ANSI_ARGS_((profInfo_t *infoPtr));
+CleanDataTable (profInfo_t *infoPtr);
 
 static void
-InitializeProcStack _ANSI_ARGS_((profInfo_t *infoPtr,
-                                 CallFrame  *framePtr));
+InitializeProcStack (profInfo_t *infoPtr,
+                     CallFrame  *framePtr);
 
 static void
-TurnOnProfiling _ANSI_ARGS_((profInfo_t *infoPtr,
-                             int         commandMode,
-                             int         evalMode));
+TurnOnProfiling (profInfo_t *infoPtr,
+                 int         commandMode,
+                 int         evalMode);
 
 static void
-DeleteProfTrace _ANSI_ARGS_((profInfo_t *infoPtr));
+DeleteProfTrace (profInfo_t *infoPtr);
 
 static int
-TurnOffProfiling _ANSI_ARGS_((Tcl_Interp *interp,
-                              profInfo_t *infoPtr,
-                              char       *varName));
+TurnOffProfiling (Tcl_Interp *interp,
+                  profInfo_t *infoPtr,
+                  char       *varName);
 
 static int
-TclX_ProfileObjCmd _ANSI_ARGS_((ClientData   clientData,
-                                Tcl_Interp  *interp,
-                                int          objc,
-                                Tcl_Obj    *CONST objv[]));
+TclX_ProfileObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int          objc,
+                    Tcl_Obj    *CONST objv[]);
 
 static void
-ProfMonCleanUp _ANSI_ARGS_((ClientData  clientData,
-                            Tcl_Interp *interp));
+ProfMonCleanUp (ClientData  clientData,
+                Tcl_Interp *interp);
 
 
 /*-----------------------------------------------------------------------------

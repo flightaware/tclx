@@ -21,20 +21,20 @@
  * Prototypes of internal functions.
  */
 static int
-DupChannelOptions _ANSI_ARGS_((Tcl_Interp  *interp,
-                               Tcl_Channel  srcChannel,
-                               Tcl_Channel  targetChannel));
+DupChannelOptions (Tcl_Interp  *interp,
+                   Tcl_Channel  srcChannel,
+                   Tcl_Channel  targetChannel);
 
 static Tcl_Channel
-DupFileChannel _ANSI_ARGS_((Tcl_Interp *interp,
-                            char       *srcFileId,
-                            char       *targetFileId));
+DupFileChannel (Tcl_Interp *interp,
+                char       *srcFileId,
+                char       *targetFileId);
 
 static int
-TclX_DupObjCmd _ANSI_ARGS_((ClientData   clientData,
-                            Tcl_Interp  *interp,
-                            int          objc,
-                            Tcl_Obj     *CONST objv[]));
+TclX_DupObjCmd (ClientData   clientData,
+                Tcl_Interp  *interp,
+                int          objc,
+                Tcl_Obj     *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

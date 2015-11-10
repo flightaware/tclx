@@ -24,34 +24,34 @@ static char *FILE_ID_OPT = "-fileid";
  * Prototypes of internal functions.
  */
 static int
-TruncateByPath  _ANSI_ARGS_((Tcl_Interp  *interp,
-                             char        *filePath,
-                             off_t        newSize));
+TruncateByPath  (Tcl_Interp  *interp,
+                 char        *filePath,
+                 off_t        newSize);
 
 static int
-ReadDirCallback _ANSI_ARGS_((Tcl_Interp  *interp,
-                             char        *path,
-                             char        *fileName,
-                             int          caseSensitive,
-                             ClientData   clientData));
+ReadDirCallback (Tcl_Interp  *interp,
+                 char        *path,
+                 char        *fileName,
+                 int          caseSensitive,
+                 ClientData   clientData);
 
 static int 
-TclX_PipeObjCmd _ANSI_ARGS_((ClientData  clientData,
-                             Tcl_Interp *interp,
-                             int         objc,
-                             Tcl_Obj    *CONST objv[]));
+TclX_PipeObjCmd (ClientData  clientData,
+                 Tcl_Interp *interp,
+                 int         objc,
+                 Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_FtruncateObjCmd _ANSI_ARGS_((ClientData  clientData, 
-                                  Tcl_Interp *interp, 
-                                  int         objc,
-                                  Tcl_Obj    *CONST objv[]));
+TclX_FtruncateObjCmd (ClientData  clientData, 
+                      Tcl_Interp *interp, 
+                      int         objc,
+                      Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_ReaddirObjCmd _ANSI_ARGS_((ClientData clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj    *CONST objv[]));
+TclX_ReaddirObjCmd (ClientData clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj    *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

@@ -42,59 +42,59 @@ typedef struct traceInfo_t {
  * Prototypes of internal functions.
  */
 static void
-TraceDelete _ANSI_ARGS_((Tcl_Interp   *interp,
-                         traceInfo_pt  infoPtr));
+TraceDelete (Tcl_Interp   *interp,
+             traceInfo_pt  infoPtr);
 
 static void
-PrintStr _ANSI_ARGS_((Tcl_Channel  channel,
-                      CONST84 char *string,
-                      int          numChars,
-                      int          quoted));
+PrintStr (Tcl_Channel  channel,
+          CONST84 char *string,
+          int          numChars,
+          int          quoted);
 
 static void
-PrintArg _ANSI_ARGS_((Tcl_Channel  channel,
-                      CONST84 char *argStr,
-                      int          noTruncate));
+PrintArg (Tcl_Channel  channel,
+          CONST84 char *argStr,
+          int          noTruncate);
 
 static void
-TraceCode  _ANSI_ARGS_((traceInfo_pt infoPtr,
-                        int          level,
-                        char        *command,
-                        int          argc,
-                        CONST84 char **argv));
+TraceCode  (traceInfo_pt infoPtr,
+            int          level,
+            char        *command,
+            int          argc,
+            CONST84 char **argv);
 
 static int
-TraceCallbackErrorHandler _ANSI_ARGS_((ClientData  clientData,
-                                       Tcl_Interp *interp,
-                                       int         code));
+TraceCallbackErrorHandler (ClientData  clientData,
+                           Tcl_Interp *interp,
+                           int         code);
 
 static void
-TraceCallBack _ANSI_ARGS_((Tcl_Interp   *interp,
-                           traceInfo_pt  infoPtr,
-                           int           level,
-                           char         *command,
-                           int           argc,
-                           CONST84 char **argv));
+TraceCallBack (Tcl_Interp   *interp,
+               traceInfo_pt  infoPtr,
+               int           level,
+               char         *command,
+               int           argc,
+               CONST84 char **argv);
 
 static void
-CmdTraceRoutine _ANSI_ARGS_((ClientData    clientData,
-                             Tcl_Interp   *interp,
-                             int           level,
-                             char         *command,
-                             Tcl_CmdProc  *cmdProc,
-                             ClientData    cmdClientData,
-                             int           argc,
-                             CONST84 char **argv));
+CmdTraceRoutine (ClientData    clientData,
+                 Tcl_Interp   *interp,
+                 int           level,
+                 char         *command,
+                 Tcl_CmdProc  *cmdProc,
+                 ClientData    cmdClientData,
+                 int           argc,
+                 CONST84 char **argv);
 
 static int
-TclX_CmdtraceObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                 Tcl_Interp *interp,
-                                 int objc,
-                                 Tcl_Obj *CONST objv[]));
+TclX_CmdtraceObjCmd (ClientData clientData, 
+                     Tcl_Interp *interp,
+                     int objc,
+                     Tcl_Obj *CONST objv[]);
 
 static void
-DebugCleanUp _ANSI_ARGS_((ClientData  clientData,
-                          Tcl_Interp *interp));
+DebugCleanUp (ClientData  clientData,
+              Tcl_Interp *interp);
 
 
 /*-----------------------------------------------------------------------------

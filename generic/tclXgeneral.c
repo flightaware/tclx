@@ -30,36 +30,36 @@ static char *tclAppVersion     = NULL;
 static int   tclAppPatchlevel  = -1;
 
 static int 
-TclX_EchoObjCmd _ANSI_ARGS_((ClientData clientData, 
-                             Tcl_Interp *interp,
-                             int         objc,
-                             Tcl_Obj    *CONST objv[]));
+TclX_EchoObjCmd (ClientData clientData, 
+                 Tcl_Interp *interp,
+                 int         objc,
+                 Tcl_Obj    *CONST objv[]);
 
 static int 
-TclX_InfoxObjCmd _ANSI_ARGS_((ClientData clientData, 
-                              Tcl_Interp *interp,
-                              int         objc,
-                              Tcl_Obj    *CONST objv[]));
+TclX_InfoxObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int         objc,
+                  Tcl_Obj    *CONST objv[]);
 
 static int 
-TclX_LoopObjCmd _ANSI_ARGS_((ClientData clientData, 
-                             Tcl_Interp *interp,
-                             int         objc,
-                             Tcl_Obj    *CONST objv[]));
+TclX_LoopObjCmd (ClientData clientData, 
+                 Tcl_Interp *interp,
+                 int         objc,
+                 Tcl_Obj    *CONST objv[]);
 
 static int
-SetLoopCounter _ANSI_ARGS_((Tcl_Interp *interp,
-                            char *varName,
-                            int idx));
+SetLoopCounter (Tcl_Interp *interp,
+                char *varName,
+                int idx);
 
 static int
-GlobalImport _ANSI_ARGS_((Tcl_Interp *interp));
+GlobalImport (Tcl_Interp *interp);
 
 static int
-TclX_Try_EvalObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                 Tcl_Interp *interp,
-                                 int         objc,
-                                 Tcl_Obj    *CONST objv[]));
+TclX_Try_EvalObjCmd (ClientData clientData, 
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj    *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

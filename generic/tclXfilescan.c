@@ -62,68 +62,68 @@ typedef struct {
  * Prototypes of internal functions.
  */
 static void
-CleanUpContext _ANSI_ARGS_((void_pt         scanTablePtr,
-                            scanContext_t  *contextPtr));
+CleanUpContext (void_pt         scanTablePtr,
+                scanContext_t  *contextPtr);
 
 static int
-ScanContextCreate _ANSI_ARGS_((Tcl_Interp  *interp,
-                               void_pt      scanTablePtr));
+ScanContextCreate (Tcl_Interp  *interp,
+                   void_pt      scanTablePtr);
 
 static int
-ScanContextDelete _ANSI_ARGS_((Tcl_Interp  *interp,
-                               void_pt      scanTablePtr,
-                               Tcl_Obj     *contextHandleObj));
+ScanContextDelete (Tcl_Interp  *interp,
+                   void_pt      scanTablePtr,
+                   Tcl_Obj     *contextHandleObj);
 
 static int
-ScanContextCopyFile _ANSI_ARGS_((Tcl_Interp  *interp,
-                                 void_pt      scanTablePtr,
-                                 Tcl_Obj     *contextHandleObj,
-                                 Tcl_Obj     *fileHandleObj));
+ScanContextCopyFile (Tcl_Interp  *interp,
+                     void_pt      scanTablePtr,
+                     Tcl_Obj     *contextHandleObj,
+                     Tcl_Obj     *fileHandleObj);
 
 static int
-TclX_ScancontextObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                    Tcl_Interp *interp,
-                                    int         objc,
-                                    Tcl_Obj    *CONST objv[]));
+TclX_ScancontextObjCmd (ClientData  clientData,
+                        Tcl_Interp *interp,
+                        int         objc,
+                        Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_ScanmatchObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                  Tcl_Interp *interp,
-                                  int         objc,
-                                  Tcl_Obj    *CONST objv[]));
+TclX_ScanmatchObjCmd (ClientData  clientData,
+                      Tcl_Interp *interp,
+                      int         objc,
+                      Tcl_Obj    *CONST objv[]);
 
 static void
-CopyFileCloseHandler _ANSI_ARGS_((ClientData clientData));
+CopyFileCloseHandler (ClientData clientData);
 
 static int
-SetCopyFileObj _ANSI_ARGS_((Tcl_Interp    *interp,
-                            scanContext_t *contextPtr,
-                            Tcl_Obj       *fileHandleObj));
+SetCopyFileObj (Tcl_Interp    *interp,
+                scanContext_t *contextPtr,
+                Tcl_Obj       *fileHandleObj);
 
 static void
-ClearCopyFile _ANSI_ARGS_((scanContext_t *contextPtr));
+ClearCopyFile (scanContext_t *contextPtr);
 
 static int
-SetMatchInfoVar _ANSI_ARGS_((Tcl_Interp *interp,
-                             scanData_t *scanData));
+SetMatchInfoVar (Tcl_Interp *interp,
+                 scanData_t *scanData);
 
 static int
-ScanFile _ANSI_ARGS_((Tcl_Interp    *interp,
-                      scanContext_t *contextPtr,
-                      Tcl_Channel    channel));
+ScanFile (Tcl_Interp    *interp,
+          scanContext_t *contextPtr,
+          Tcl_Channel    channel);
 
 static void
-ScanFileCloseHandler _ANSI_ARGS_((ClientData clientData));
+ScanFileCloseHandler (ClientData clientData);
 
 static int
-TclX_ScanfileObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                 Tcl_Interp *interp,
-                                 int         objc,
-                                 Tcl_Obj    *CONST objv[]));
+TclX_ScanfileObjCmd (ClientData  clientData,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj    *CONST objv[]);
 
 static void
-FileScanCleanUp _ANSI_ARGS_((ClientData  clientData,
-                             Tcl_Interp *interp));
+FileScanCleanUp (ClientData  clientData,
+                 Tcl_Interp *interp);
 
 
 /*-----------------------------------------------------------------------------

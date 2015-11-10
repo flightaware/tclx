@@ -28,14 +28,14 @@
  * Prototypes of internal functions.
  */
 static void
-CloseForError _ANSI_ARGS_((Tcl_Interp *interp,
-                           Tcl_Channel channel,
-                           int         fileNum));
+CloseForError (Tcl_Interp *interp,
+               Tcl_Channel channel,
+               int         fileNum);
 
 static int
-BindFileHandles _ANSI_ARGS_((Tcl_Interp *interp,
-                             unsigned    options,
-                             int         socketFD));
+BindFileHandles (Tcl_Interp *interp,
+                 unsigned    options,
+                 int         socketFD);
 
 
 /*-----------------------------------------------------------------------------

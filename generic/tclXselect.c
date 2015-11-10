@@ -59,28 +59,28 @@ typedef struct {
  * Prototypes of internal functions.
  */
 static int
-ParseSelectFileList _ANSI_ARGS_((Tcl_Interp     *interp,
-                                 int             chanAccess,
-                                 Tcl_Obj        *handleList,
-                                 fd_set         *fileSetPtr,
-                                 channelData_t **channelListPtr,
-                                 int            *maxFileIdPtr));
+ParseSelectFileList (Tcl_Interp     *interp,
+                     int             chanAccess,
+                     Tcl_Obj        *handleList,
+                     fd_set         *fileSetPtr,
+                     channelData_t **channelListPtr,
+                     int            *maxFileIdPtr);
 
 static int
-FindPendingData _ANSI_ARGS_((int            fileDescCnt,
-                             channelData_t *channelList,
-                             fd_set        *fileDescSetPtr));
+FindPendingData (int            fileDescCnt,
+                 channelData_t *channelList,
+                 fd_set        *fileDescSetPtr);
 
 static Tcl_Obj *
-ReturnSelectedFileList _ANSI_ARGS_((fd_set        *fileDescSetPtr,
-                                    int            fileDescCnt,
-                                    channelData_t *channelListPtr));
+ReturnSelectedFileList (fd_set        *fileDescSetPtr,
+                        int            fileDescCnt,
+                        channelData_t *channelListPtr);
 
 static int 
-TclX_SelectObjCmd _ANSI_ARGS_((ClientData clientData, 
-                               Tcl_Interp *interp,
-                               int objc,
-                               Tcl_Obj *CONST objv[]));
+TclX_SelectObjCmd (ClientData clientData, 
+                   Tcl_Interp *interp,
+                   int objc,
+                   Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

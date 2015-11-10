@@ -38,7 +38,7 @@ static char initScript[] = "if {[info proc ::tclx::Init]==\"\"} {\n\
 /*
  * Prototypes of internal functions.
  */
-static int	Tclxcmd_Init _ANSI_ARGS_((Tcl_Interp *interp));
+static int	Tclxcmd_Init (Tcl_Interp *interp);
 
 
 /*-----------------------------------------------------------------------------

@@ -101,68 +101,68 @@ typedef struct {
  */
 #ifdef TCLX_DEBUG
 static void
-ValidateKeyedList _ANSI_ARGS_((keylIntObj_t *keylIntPtr));
+ValidateKeyedList (keylIntObj_t *keylIntPtr);
 #endif
 static int
-ValidateKey _ANSI_ARGS_((Tcl_Interp *interp, char *key, int keyLen));
+ValidateKey (Tcl_Interp *interp, char *key, int keyLen);
 
 static keylIntObj_t *
-AllocKeyedListIntRep _ANSI_ARGS_((void));
+AllocKeyedListIntRep (void);
 
 static void
-FreeKeyedListData _ANSI_ARGS_((keylIntObj_t *keylIntPtr));
+FreeKeyedListData (keylIntObj_t *keylIntPtr);
 
 static void
-EnsureKeyedListSpace _ANSI_ARGS_((keylIntObj_t *keylIntPtr,
-				  int		newNumEntries));
+EnsureKeyedListSpace (keylIntObj_t *keylIntPtr,
+                      int		newNumEntries);
 
 static void
-DeleteKeyedListEntry _ANSI_ARGS_((keylIntObj_t *keylIntPtr,
-				  int		entryIdx));
+DeleteKeyedListEntry (keylIntObj_t *keylIntPtr,
+                      int		entryIdx);
 
 static int
-FindKeyedListEntry _ANSI_ARGS_((keylIntObj_t *keylIntPtr,
-				char	     *key,
-				int	     *keyLenPtr,
-				char	    **nextSubKeyPtr));
+FindKeyedListEntry (keylIntObj_t *keylIntPtr,
+                    char	     *key,
+                    int	     *keyLenPtr,
+                    char	    **nextSubKeyPtr);
 
 static void
-DupKeyedListInternalRep _ANSI_ARGS_((Tcl_Obj *srcPtr,
-				     Tcl_Obj *copyPtr));
+DupKeyedListInternalRep (Tcl_Obj *srcPtr,
+                         Tcl_Obj *copyPtr);
 
 static void
-FreeKeyedListInternalRep _ANSI_ARGS_((Tcl_Obj *keylPtr));
+FreeKeyedListInternalRep (Tcl_Obj *keylPtr);
 
 static int
-SetKeyedListFromAny _ANSI_ARGS_((Tcl_Interp *interp,
-				 Tcl_Obj    *objPtr));
+SetKeyedListFromAny (Tcl_Interp *interp,
+                     Tcl_Obj    *objPtr);
 
 static void
-UpdateStringOfKeyedList _ANSI_ARGS_((Tcl_Obj *keylPtr));
+UpdateStringOfKeyedList (Tcl_Obj *keylPtr);
 
 static int 
-TclX_KeylgetObjCmd _ANSI_ARGS_((ClientData   clientData,
-				Tcl_Interp  *interp,
-				int	     objc,
-				Tcl_Obj	    *CONST objv[]));
+TclX_KeylgetObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int	     objc,
+                    Tcl_Obj	    *CONST objv[]);
 
 static int
-TclX_KeylsetObjCmd _ANSI_ARGS_((ClientData   clientData,
-				Tcl_Interp  *interp,
-				int	     objc,
-				Tcl_Obj	    *CONST objv[]));
+TclX_KeylsetObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int	     objc,
+                    Tcl_Obj	    *CONST objv[]);
 
 static int 
-TclX_KeyldelObjCmd _ANSI_ARGS_((ClientData   clientData,
-				Tcl_Interp  *interp,
-				int	     objc,
-				Tcl_Obj	    *CONST objv[]));
+TclX_KeyldelObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int	     objc,
+                    Tcl_Obj	    *CONST objv[]);
 
 static int 
-TclX_KeylkeysObjCmd _ANSI_ARGS_((ClientData   clientData,
-				 Tcl_Interp  *interp,
-				 int	      objc,
-				 Tcl_Obj     *CONST objv[]));
+TclX_KeylkeysObjCmd (ClientData   clientData,
+                     Tcl_Interp  *interp,
+                     int	      objc,
+                     Tcl_Obj     *CONST objv[]);
 
 /*
  * Type definition.

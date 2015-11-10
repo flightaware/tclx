@@ -22,8 +22,8 @@
  * Prototypes of internal functions.
  */
 static int
-ConvertFileHandle _ANSI_ARGS_((Tcl_Interp *interp,
-                               char       *handle));
+ConvertFileHandle (Tcl_Interp *interp,
+                   char       *handle);
 
 /*-----------------------------------------------------------------------------
  * ConvertFileHandle --

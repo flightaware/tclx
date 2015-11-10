@@ -25,76 +25,76 @@
  * Prototypes of internal functions.
  */
 static int
-CheckForUniCode _ANSI_ARGS_((Tcl_Interp *interp,
-                             char *str,
-                             int strLen,
-                             char *which));
+CheckForUniCode (Tcl_Interp *interp,
+                 char *str,
+                 int strLen,
+                 char *which);
 
 static unsigned int
-ExpandString _ANSI_ARGS_((unsigned char *inStr,
-                          int            inLength,
-                          unsigned char  outStr [],
-                          int           *outLengthPtr));
+ExpandString (unsigned char *inStr,
+              int            inLength,
+              unsigned char  outStr [],
+              int           *outLengthPtr);
 
 static int 
-TclX_CindexObjCmd _ANSI_ARGS_((ClientData clientData,
-                               Tcl_Interp *interp,
-                               int         objc,
-                               Tcl_Obj   *CONST objv[]));
+TclX_CindexObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_ClengthObjCmd _ANSI_ARGS_((ClientData clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj   *CONST objv[]));
+TclX_ClengthObjCmd (ClientData clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[]);
 
 static int
-TclX_CconcatObjCmd _ANSI_ARGS_((ClientData clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj   *CONST objv[]));
+TclX_CconcatObjCmd (ClientData clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_CrangeObjCmd _ANSI_ARGS_((ClientData clientData,
-                               Tcl_Interp *interp,
-                               int         objc,
-                               Tcl_Obj   *CONST objv[]));
+TclX_CrangeObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_CcollateObjCmd _ANSI_ARGS_((ClientData clientData,
-                                 Tcl_Interp *interp,
-                                 int         objc,
-                                 Tcl_Obj   *CONST objv[]));
+TclX_CcollateObjCmd (ClientData clientData,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_ReplicateObjCmd _ANSI_ARGS_((ClientData clientData,
-                                  Tcl_Interp *interp,
-                                  int         objc,
-                                  Tcl_Obj   *CONST objv[]));
+TclX_ReplicateObjCmd (ClientData clientData,
+                      Tcl_Interp *interp,
+                      int         objc,
+                      Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_TranslitObjCmd _ANSI_ARGS_((ClientData clientData,
-                                 Tcl_Interp *interp,
-                                 int         objc,
-                                 Tcl_Obj   *CONST objv[]));
+TclX_TranslitObjCmd (ClientData clientData,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_CtypeObjCmd _ANSI_ARGS_((ClientData clientData,
-                              Tcl_Interp *interp,
-                              int         objc,
-                              Tcl_Obj   *CONST objv[]));
+TclX_CtypeObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int         objc,
+                  Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_CtokenObjCmd _ANSI_ARGS_((ClientData clientData,
-                               Tcl_Interp *interp,
-                               int         objc,
-                               Tcl_Obj   *CONST objv[]));
+TclX_CtokenObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[]);
 
 static int 
-TclX_CequalObjCmd _ANSI_ARGS_((ClientData clientData,
-                               Tcl_Interp *interp,
-                               int         objc,
-                               Tcl_Obj   *CONST objv[]));
+TclX_CequalObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

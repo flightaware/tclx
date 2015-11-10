@@ -40,39 +40,39 @@ typedef struct {
  * Prototypes of internal functions.
  */
 static int
-IsSetVarCmd _ANSI_ARGS_((char  *command));
+IsSetVarCmd (char  *command);
 
 static void
-OutputPrompt _ANSI_ARGS_((Tcl_Interp *interp,
-                          int         topLevel,
-                          char       *prompt1,
-                          char       *prompt2));
+OutputPrompt (Tcl_Interp *interp,
+              int         topLevel,
+              char       *prompt1,
+              char       *prompt2);
 
 static int
-AsyncSignalErrorHandler _ANSI_ARGS_((Tcl_Interp *interp,
-                                     ClientData  clientData,
-                                     int         background,
-                                     int         signalNum));
+AsyncSignalErrorHandler (Tcl_Interp *interp,
+                         ClientData  clientData,
+                         int         background,
+                         int         signalNum);
 
 
 static void
-AsyncCommandHandler _ANSI_ARGS_((ClientData clientData,
-                                 int        mask));
+AsyncCommandHandler (ClientData clientData,
+                     int        mask);
 
 static int
-SyncSignalErrorHandler _ANSI_ARGS_((Tcl_Interp *interp,
-                                    ClientData  clientData,
-                                    int         background,
-                                    int         signalNum));
+SyncSignalErrorHandler (Tcl_Interp *interp,
+                        ClientData  clientData,
+                        int         background,
+                        int         signalNum);
 
 static void
-AsyncCommandHandlerDelete _ANSI_ARGS_((ClientData clientData));
+AsyncCommandHandlerDelete (ClientData clientData);
 
 static int 
-TclX_CommandloopObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                    Tcl_Interp *interp,
-                                    int objc,
-                                    Tcl_Obj *CONST objv[]));
+TclX_CommandloopObjCmd (ClientData clientData, 
+                        Tcl_Interp *interp,
+                        int objc,
+                        Tcl_Obj *CONST objv[]);
 
 /*-----------------------------------------------------------------------------
  * IsSetVarCmd --

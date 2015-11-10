@@ -29,22 +29,22 @@
 #endif
 
 static int 
-TclX_ExeclObjCmd _ANSI_ARGS_((ClientData clientData,
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_ExeclObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_ForkObjCmd _ANSI_ARGS_((ClientData clientData,
-                             Tcl_Interp *interp,
-                             int objc,
-                             Tcl_Obj *CONST objv[]));
+TclX_ForkObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_WaitObjCmd _ANSI_ARGS_((ClientData clientData,
-                             Tcl_Interp *interp,
-                             int objc,
-                             Tcl_Obj *CONST objv[]));
+TclX_WaitObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

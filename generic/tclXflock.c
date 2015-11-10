@@ -23,23 +23,23 @@
  * Prototypes of internal functions.
  */
 static int
-ParseLockUnlockArgs _ANSI_ARGS_((Tcl_Interp     *interp,
-                                 int             objc,
-                                 Tcl_Obj *CONST  objv[],
-                                 int             argIdx,
-                                 TclX_FlockInfo *lockInfoPtr));
+ParseLockUnlockArgs (Tcl_Interp     *interp,
+                     int             objc,
+                     Tcl_Obj *CONST  objv[],
+                     int             argIdx,
+                     TclX_FlockInfo *lockInfoPtr);
 
 static int
-TclX_FlockObjCmd _ANSI_ARGS_((ClientData clientData, 
-                              Tcl_Interp *interp,
-                              int         objc,
-                              Tcl_Obj    *CONST objv[]));
+TclX_FlockObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int         objc,
+                  Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_FunlockObjCmd _ANSI_ARGS_((ClientData clientData, 
-                             Tcl_Interp *interp,
-                             int         objc,
-                             Tcl_Obj    *CONST objv[]));
+TclX_FunlockObjCmd (ClientData clientData, 
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj    *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

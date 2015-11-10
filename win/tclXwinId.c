@@ -22,20 +22,20 @@
  * Prototypes of internal functions.
  */
 static int
-IdProcess  _ANSI_ARGS_((Tcl_Interp *interp,
+IdProcess  (Tcl_Interp *interp,
 			int objc,
-			Tcl_Obj *CONST objv[]));
+			Tcl_Obj *CONST objv[]);
 
 static int
-IdHost _ANSI_ARGS_((Tcl_Interp *interp,
-		    int objc,
-		    Tcl_Obj *CONST objv[]));
+IdHost (Tcl_Interp *interp,
+		int objc,
+		Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_IdObjCmd _ANSI_ARGS_((ClientData clientData,
-                           Tcl_Interp *interp,
-                           int objc,
-                           Tcl_Obj *CONST objv[]));
+TclX_IdObjCmd (ClientData clientData,
+			   Tcl_Interp *interp,
+			   int objc,
+			   Tcl_Obj *CONST objv[]);
 
 /*-----------------------------------------------------------------------------
  * Tcl_IdCmd --

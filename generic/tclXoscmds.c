@@ -20,46 +20,46 @@
 #include "tclExtdInt.h"
 
 static int 
-TclX_AlarmObjCmd _ANSI_ARGS_((ClientData clientData,
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_AlarmObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_LinkObjCmd _ANSI_ARGS_((ClientData clientData,
-                             Tcl_Interp *interp,
-                             int objc,
-                             Tcl_Obj *CONST objv[]));
+TclX_LinkObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_NiceObjCmd _ANSI_ARGS_((ClientData clientData,
-                             Tcl_Interp *interp,
-                             int objc,
-                             Tcl_Obj *CONST objv[]));
+TclX_NiceObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_SleepObjCmd _ANSI_ARGS_((ClientData clientData,
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_SleepObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_SyncObjCmd _ANSI_ARGS_((ClientData clientData,
-                             Tcl_Interp *interp,
-                             int objc,
-                             Tcl_Obj *CONST objv[]));
+TclX_SyncObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_SystemObjCmd _ANSI_ARGS_((ClientData clientData,
-                               Tcl_Interp *interp,
-                               int objc,
-                               Tcl_Obj *CONST objv[]));
+TclX_SystemObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int objc,
+                   Tcl_Obj *CONST objv[]);
 
 static int 
-TclX_UmaskObjCmd _ANSI_ARGS_((ClientData clientData,
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_UmaskObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

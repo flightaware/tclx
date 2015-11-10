@@ -20,16 +20,16 @@
 #include "tclExtdInt.h"
 
 static int 
-TclX_ChrootObjCmd _ANSI_ARGS_((ClientData clientData,
-                              Tcl_Interp *interp, 
-			      int         objc,
-			      Tcl_Obj     *CONST objv[]));
+TclX_ChrootObjCmd (ClientData clientData,
+                  Tcl_Interp *interp, 
+                  int         objc,
+			      Tcl_Obj     *CONST objv[]);
 
 static int 
-TclX_TimesObjCmd _ANSI_ARGS_((ClientData   clientData,
-                             Tcl_Interp  *interp,
-			     int          objc,
-			     Tcl_Obj      *CONST objv[]));
+TclX_TimesObjCmd (ClientData   clientData,
+                 Tcl_Interp  *interp,
+                 int          objc,
+                 Tcl_Obj      *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

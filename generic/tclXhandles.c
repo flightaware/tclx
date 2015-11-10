@@ -87,27 +87,27 @@ typedef entryHeader_t *entryHeader_pt;
  * Prototypes of internal functions.
  */
 static void
-LinkInNewEntries _ANSI_ARGS_((tblHeader_pt tblHdrPtr,
-                              int          newIdx,
-                              int          numEntries));
+LinkInNewEntries (tblHeader_pt tblHdrPtr,
+                  int          newIdx,
+                  int          numEntries);
 
 static void
-ExpandTable _ANSI_ARGS_((tblHeader_pt tblHdrPtr,
-                         int          neededIdx));
+ExpandTable (tblHeader_pt tblHdrPtr,
+             int          neededIdx);
 
 static entryHeader_pt
-AllocEntry _ANSI_ARGS_((tblHeader_pt  tblHdrPtr,
-                        int          *entryIdxPtr));
+AllocEntry (tblHeader_pt  tblHdrPtr,
+            int          *entryIdxPtr);
 
 static int
-HandleDecodeObj _ANSI_ARGS_((Tcl_Interp   *interp,
-                             tblHeader_pt  tblHdrPtr,
-                             CONST char   *handle));
+HandleDecodeObj (Tcl_Interp   *interp,
+                 tblHeader_pt  tblHdrPtr,
+                 CONST char   *handle);
 
 static int
-HandleDecode _ANSI_ARGS_((Tcl_Interp   *interp,
-                          tblHeader_pt  tblHdrPtr,
-                          CONST char   *handle));
+HandleDecode (Tcl_Interp   *interp,
+              tblHeader_pt  tblHdrPtr,
+              CONST char   *handle);
 
 
 /*=============================================================================

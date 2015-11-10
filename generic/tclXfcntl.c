@@ -65,27 +65,27 @@ static struct {
  * Prototypes of internal functions.
  */
 static int
-XlateFcntlAttr  _ANSI_ARGS_((Tcl_Interp  *interp,
-                             char        *attrName,
-                             int          modify));
+XlateFcntlAttr  (Tcl_Interp  *interp,
+                 char        *attrName,
+                 int          modify);
 
 static int
-GetFcntlAttr _ANSI_ARGS_((Tcl_Interp  *interp,
-                          Tcl_Channel  channel,
-                          int          mode,
-                          int          attrib));
+GetFcntlAttr (Tcl_Interp  *interp,
+              Tcl_Channel  channel,
+              int          mode,
+              int          attrib);
 
 static int
-SetFcntlAttrObj _ANSI_ARGS_((Tcl_Interp  *interp,
-                             Tcl_Channel  channel,
-                             int          attrib,
-                             Tcl_Obj     *valueObj));
+SetFcntlAttrObj (Tcl_Interp  *interp,
+                 Tcl_Channel  channel,
+                 int          attrib,
+                 Tcl_Obj     *valueObj);
 
 static int 
-TclX_FcntlObjCmd _ANSI_ARGS_((ClientData clientData, 
-                              Tcl_Interp *interp,
-                              int objc,
-                              Tcl_Obj *CONST objv[]));
+TclX_FcntlObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

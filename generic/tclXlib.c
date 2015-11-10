@@ -65,81 +65,81 @@ typedef enum {
  * Prototypes of internal functions.
  */
 static int
-EvalFilePart _ANSI_ARGS_((Tcl_Interp  *interp,
-                          char        *fileName,
-                          off_t        offset,
-                          off_t        length));
+EvalFilePart (Tcl_Interp  *interp,
+              char        *fileName,
+              off_t        offset,
+              off_t        length);
 
 static char *
-MakeAbsFile _ANSI_ARGS_((Tcl_Interp  *interp,
-                         char        *fileName,
-                         Tcl_DString *absNamePtr));
+MakeAbsFile (Tcl_Interp  *interp,
+             char        *fileName,
+             Tcl_DString *absNamePtr);
 
 static int
-SetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                  CONST84 char *packageName,
-                                  CONST84 char *fileName,
-                                  off_t       offset,
-                                  unsigned    length));
+SetPackageIndexEntry (Tcl_Interp *interp,
+                      CONST84 char *packageName,
+                      CONST84 char *fileName,
+                      off_t       offset,
+                      unsigned    length);
 
 static int
-GetPackageIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                  char       *packageName,
-                                  char      **fileNamePtr,
-                                  off_t      *offsetPtr,
-                                  unsigned   *lengthPtr));
+GetPackageIndexEntry (Tcl_Interp *interp,
+                      char       *packageName,
+                      char      **fileNamePtr,
+                      off_t      *offsetPtr,
+                      unsigned   *lengthPtr);
 
 static int
-SetProcIndexEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                               CONST84 char *procName,
-                               CONST84 char *package));
+SetProcIndexEntry (Tcl_Interp *interp,
+                   CONST84 char *procName,
+                   CONST84 char *package);
 
 static void
-AddLibIndexErrorInfo _ANSI_ARGS_((Tcl_Interp *interp,
-                                  char       *indexName));
+AddLibIndexErrorInfo (Tcl_Interp *interp,
+                      char       *indexName);
 
 static int
-ProcessIndexFile _ANSI_ARGS_((Tcl_Interp *interp,
-                              char       *tlibFilePath,
-                              char       *tndxFilePath));
+ProcessIndexFile (Tcl_Interp *interp,
+                  char       *tlibFilePath,
+                  char       *tndxFilePath);
 
 static int
-BuildPackageIndex  _ANSI_ARGS_((Tcl_Interp *interp,
-                                char       *tlibFilePath));
+BuildPackageIndex  (Tcl_Interp *interp,
+                    char       *tlibFilePath);
 
 static int
-LoadPackageIndex _ANSI_ARGS_((Tcl_Interp       *interp,
-                              char             *tlibFilePath,
-                              indexNameClass_t  indexNameClass));
+LoadPackageIndex (Tcl_Interp       *interp,
+                  char             *tlibFilePath,
+                  indexNameClass_t  indexNameClass);
 
 static int
-LoadDirIndexCallback _ANSI_ARGS_((Tcl_Interp  *interp,
-                                  char        *dirPath,
-                                  char        *fileName,
-                                  int          caseSensitive,
-                                  ClientData   clientData));
+LoadDirIndexCallback (Tcl_Interp  *interp,
+                      char        *dirPath,
+                      char        *fileName,
+                      int          caseSensitive,
+                      ClientData   clientData);
 
 static int
-LoadDirIndexes _ANSI_ARGS_((Tcl_Interp  *interp,
-                            char        *dirName));
+LoadDirIndexes (Tcl_Interp  *interp,
+                char        *dirName);
 
 static int
-TclX_load_tndxsObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                   Tcl_Interp *interp,
-                                   int         objc,
-                                   Tcl_Obj    *CONST objv[]));
+TclX_load_tndxsObjCmd (ClientData  clientData,
+                       Tcl_Interp *interp,
+                       int         objc,
+                       Tcl_Obj    *CONST objv[]);
                                    
 static int
-TclX_Auto_load_pkgObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                      Tcl_Interp *interp,
-                                      int objc,
-                                      Tcl_Obj *CONST objv[]));
+TclX_Auto_load_pkgObjCmd (ClientData clientData, 
+                          Tcl_Interp *interp,
+                          int objc,
+                          Tcl_Obj *CONST objv[]);
 
 static int
-TclX_LoadlibindexObjCmd _ANSI_ARGS_((ClientData clientData, 
-                                     Tcl_Interp *interp,
-                                     int objc,
-                                     Tcl_Obj *CONST objv[]));
+TclX_LoadlibindexObjCmd (ClientData clientData, 
+                         Tcl_Interp *interp,
+                         int objc,
+                         Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

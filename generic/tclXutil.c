@@ -27,10 +27,10 @@
  * Prototypes of internal functions.
  */
 static int
-ParseTranslationOption _ANSI_ARGS_((char *strValue));
+ParseTranslationOption (char *strValue);
 
 static char *
-FormatTranslationOption _ANSI_ARGS_((int value));
+FormatTranslationOption (int value);
 
 static char *ERRORINFO = "errorInfo";
 static char *ERRORCODE = "errorCode";

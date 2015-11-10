@@ -23,46 +23,46 @@
 */
 
 static int
-TclX_LvarcatObjCmd _ANSI_ARGS_((ClientData   clientData,
-                                Tcl_Interp  *interp,
-                                int          objc,
-                                Tcl_Obj     *CONST objv[]));
+TclX_LvarcatObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int          objc,
+                    Tcl_Obj     *CONST objv[]);
 
 static int
-TclX_LvarpopObjCmd _ANSI_ARGS_((ClientData   clientData,
-                                Tcl_Interp  *interp,
-                                int          objc,
-                                Tcl_Obj    *CONST objv[]));
+TclX_LvarpopObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int          objc,
+                    Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_LvarpushObjCmd _ANSI_ARGS_((ClientData   clientData,
-                                 Tcl_Interp  *interp,
-                                 int          objc,
-                                 Tcl_Obj    *CONST objv[]));
+TclX_LvarpushObjCmd (ClientData   clientData,
+                     Tcl_Interp  *interp,
+                     int          objc,
+                     Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_LemptyObjCmd _ANSI_ARGS_((ClientData   clientData,
-                               Tcl_Interp  *interp,
-                               int          objc,
-                               Tcl_Obj    *CONST objv[]));
+TclX_LemptyObjCmd (ClientData   clientData,
+                   Tcl_Interp  *interp,
+                   int          objc,
+                   Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_LassignObjCmd _ANSI_ARGS_((ClientData   clientData,
-                                Tcl_Interp  *interp,
-                                int          objc,
-                                Tcl_Obj    *CONST objv[]));
+TclX_LassignObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int          objc,
+                    Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_LmatchObjCmd _ANSI_ARGS_((ClientData   clientData,
-                               Tcl_Interp  *interp,
-                               int          objc,
-                               Tcl_Obj    *CONST objv[]));
+TclX_LmatchObjCmd (ClientData   clientData,
+                   Tcl_Interp  *interp,
+                   int          objc,
+                   Tcl_Obj    *CONST objv[]);
 
 static int
-TclX_LcontainObjCmd _ANSI_ARGS_((ClientData   clientData,
-                                 Tcl_Interp  *interp,
-                                 int          objc,
-                                 Tcl_Obj    *CONST objv[]));
+TclX_LcontainObjCmd (ClientData   clientData,
+                     Tcl_Interp  *interp,
+                     int          objc,
+                     Tcl_Obj    *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

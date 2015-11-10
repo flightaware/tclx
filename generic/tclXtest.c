@@ -20,13 +20,13 @@
 #include "tclExtdInt.h"
 
 int
-Tclxtest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+Tclxtest_Init (Tcl_Interp *interp);
 
 int
-TclObjTest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+TclObjTest_Init (Tcl_Interp *interp);
 
 int
-Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+Tcltest_Init (Tcl_Interp *interp);
 
 /*
  * Error handler proc that causes errors to come out in the same format as
@@ -42,16 +42,16 @@ static char errorHandler [] =
  * Prototypes of internal functions.
  */
 static int
-DoTestEval _ANSI_ARGS_((Tcl_Interp  *interp,
-                        char        *levelStr,
-                        char        *command,
-                        Tcl_Obj     *resultList));
+DoTestEval (Tcl_Interp  *interp,
+            char        *levelStr,
+            char        *command,
+            Tcl_Obj     *resultList);
 
 static int
-TclxTestEvalCmd _ANSI_ARGS_((ClientData    clientData,
-                             Tcl_Interp   *interp,
-                             int           argc,
-                             char        **argv));
+TclxTestEvalCmd (ClientData    clientData,
+                 Tcl_Interp   *interp,
+                 int           argc,
+                 char        **argv);
 
 
 /*-----------------------------------------------------------------------------

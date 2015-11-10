@@ -22,19 +22,19 @@ x * that the above copyright notice appear in all copies.  Karl Lehenbauer and
  * Prototypes of internal functions.
  */
 static int
-ReturnGetHostError _ANSI_ARGS_((Tcl_Interp *interp,
-                                char       *host));
+ReturnGetHostError (Tcl_Interp *interp,
+                    char       *host);
 
 static struct hostent *
-InfoGetHost _ANSI_ARGS_((Tcl_Interp *interp,
-                         int         objc,
-                         Tcl_Obj   *CONST objv[]));
+InfoGetHost (Tcl_Interp *interp,
+             int         objc,
+             Tcl_Obj   *CONST objv[]);
 
 static int
-TclX_HostInfoObjCmd _ANSI_ARGS_((ClientData  clientData,
-                                Tcl_Interp *interp,
-                                int         objc,
-                                Tcl_Obj   *CONST objv[]));
+TclX_HostInfoObjCmd (ClientData  clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

@@ -38,76 +38,76 @@ static int confNGroups = NGROUPS;
  * Prototypes of internal functions.
  */
 static int
-UseridToUsernameResult _ANSI_ARGS_((Tcl_Interp *interp,
-                                    int         userId));
+UseridToUsernameResult (Tcl_Interp *interp,
+                        int         userId);
 
 static int
-UsernameToUseridResult _ANSI_ARGS_((Tcl_Interp *interp,
-                                    char       *userName));
+UsernameToUseridResult (Tcl_Interp *interp,
+                        char       *userName);
 
 static int
-GroupidToGroupnameResult _ANSI_ARGS_((Tcl_Interp *interp,
-                                      int         groupId));
+GroupidToGroupnameResult (Tcl_Interp *interp,
+                          int         groupId);
 
 static int
-GroupnameToGroupidResult _ANSI_ARGS_((Tcl_Interp *interp,
-                                      char       *groupName));
+GroupnameToGroupidResult (Tcl_Interp *interp,
+                          char       *groupName);
 
 static int
-IdConvert _ANSI_ARGS_((Tcl_Interp *interp,
-                       int         objc,
-                       Tcl_Obj   *CONST objv[]));
+IdConvert (Tcl_Interp *interp,
+           int         objc,
+           Tcl_Obj   *CONST objv[]);
 
 static int
-IdEffective  _ANSI_ARGS_((Tcl_Interp  *interp,
-                          int          objc,
-                          Tcl_Obj      *CONST objv[]));
+IdEffective  (Tcl_Interp  *interp,
+              int          objc,
+              Tcl_Obj      *CONST objv[]);
 
 static int
-IdProcess  _ANSI_ARGS_((Tcl_Interp    *interp,
-                        int            objc,
-                        Tcl_Obj      *CONST objv[]));
+IdProcess  (Tcl_Interp    *interp,
+            int            objc,
+            Tcl_Obj      *CONST objv[]);
 
 static int
-IdGroupids  _ANSI_ARGS_((Tcl_Interp    *interp,
-                         int            objc,
-                         Tcl_Obj      *CONST objv[],
-                         int         symbolic));
+IdGroupids  (Tcl_Interp    *interp,
+             int            objc,
+             Tcl_Obj      *CONST objv[],
+             int         symbolic);
 
 static int
-IdHost _ANSI_ARGS_((Tcl_Interp    *interp,
-                    int            objc,
-                    Tcl_Obj      *CONST objv[]));
+IdHost (Tcl_Interp    *interp,
+        int            objc,
+        Tcl_Obj      *CONST objv[]);
 
 static int
-GetSetWrongArgs _ANSI_ARGS_((Tcl_Interp    *interp,
-                             Tcl_Obj      *CONST objv[]));
+GetSetWrongArgs (Tcl_Interp    *interp,
+                 Tcl_Obj      *CONST objv[]);
 
 static int
-IdUser _ANSI_ARGS_((Tcl_Interp    *interp,
-                    int            objc,
-                    Tcl_Obj      *CONST objv[]));
+IdUser (Tcl_Interp    *interp,
+        int            objc,
+        Tcl_Obj      *CONST objv[]);
 
 static int
-IdUserId _ANSI_ARGS_((Tcl_Interp    *interp,
-                      int            objc,
-                      Tcl_Obj      *CONST objv[]));
+IdUserId (Tcl_Interp    *interp,
+          int            objc,
+          Tcl_Obj      *CONST objv[]);
 
 static int
-IdGroup _ANSI_ARGS_((Tcl_Interp    *interp,
-                     int            objc,
-                     Tcl_Obj      *CONST objv[]));
+IdGroup (Tcl_Interp    *interp,
+         int            objc,
+         Tcl_Obj      *CONST objv[]);
 
 static int
-IdGroupId _ANSI_ARGS_((Tcl_Interp    *interp,
-                       int            objc,
-                       Tcl_Obj      *CONST objv[]));
+IdGroupId (Tcl_Interp    *interp,
+           int            objc,
+           Tcl_Obj      *CONST objv[]);
 
 static int 
-TclX_IdObjCmd _ANSI_ARGS_((ClientData clientData,
-                           Tcl_Interp *interp,
-                           int objc,
-                           Tcl_Obj *CONST objv[]));
+TclX_IdObjCmd (ClientData clientData,
+               Tcl_Interp *interp,
+               int objc,
+               Tcl_Obj *CONST objv[]);
 
 /*-----------------------------------------------------------------------------
  * TclX_IdObjCmd --

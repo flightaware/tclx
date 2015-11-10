@@ -40,24 +40,24 @@ typedef struct {
  * Prototypes of internal functions.
  */
 static int
-ReadListLine _ANSI_ARGS_((Tcl_Interp  *interp,
-                          ReadData    *dataPtr));
+ReadListLine (Tcl_Interp  *interp,
+              ReadData    *dataPtr);
 
 static int
-ReadListInit _ANSI_ARGS_((Tcl_Interp  *interp,
-                          Tcl_Channel  channel,
-                          ReadData    *dataPtr));
+ReadListInit (Tcl_Interp  *interp,
+              Tcl_Channel  channel,
+              ReadData    *dataPtr);
 
 static int
-ReadListElement _ANSI_ARGS_((Tcl_Interp  *interp,
-                             ReadData    *dataPtr,
-                             Tcl_Obj     *elemObjPtr));
+ReadListElement (Tcl_Interp  *interp,
+                 ReadData    *dataPtr,
+                 Tcl_Obj     *elemObjPtr);
 
 static int 
-TclX_LgetsObjCmd _ANSI_ARGS_((ClientData  clientData, 
-                             Tcl_Interp  *interp, 
-                             int          objc,
-                             Tcl_Obj     *CONST objv[]));
+TclX_LgetsObjCmd (ClientData  clientData, 
+                 Tcl_Interp  *interp, 
+                 int          objc,
+                 Tcl_Obj     *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------

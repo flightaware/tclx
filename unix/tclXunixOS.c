@@ -52,16 +52,16 @@ double ceil ();
  * Prototypes of internal functions.
  */
 static int
-ChannelToFnum _ANSI_ARGS_((Tcl_Channel channel,
-                           int         direction));
+ChannelToFnum (Tcl_Channel channel,
+               int         direction);
 
 static int
-ConvertOwnerGroup _ANSI_ARGS_((Tcl_Interp  *interp,
-                               unsigned     options,
-                               char        *ownerStr,
-                               char        *groupStr,
-                               uid_t       *ownerId,
-                               gid_t       *groupId));
+ConvertOwnerGroup (Tcl_Interp  *interp,
+                   unsigned     options,
+                   char        *ownerStr,
+                   char        *groupStr,
+                   uid_t       *ownerId,
+                   gid_t       *groupId);
 
 
 /*-----------------------------------------------------------------------------

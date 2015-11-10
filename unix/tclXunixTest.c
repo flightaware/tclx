@@ -20,10 +20,10 @@
 #include "tclExtdInt.h"
 
 extern int
-Tcltest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+Tcltest_Init (Tcl_Interp *interp);
 
 extern int
-Tclxtest_Init _ANSI_ARGS_((Tcl_Interp *interp));
+Tclxtest_Init (Tcl_Interp *interp);
 
 /*
  * The following variable is a special hack that insures the tcl
