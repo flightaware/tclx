@@ -16,7 +16,7 @@ While this TclX distribution is tested with Tcl 8.4 and Tk 8.4, it should with T
 
 for the latest release and information.
 
-Extended Tcl was designed and implemented by Karl Lehenbauer (karl@procplace.com) and Mark Diekhans (markd@Kermodei.com), with help in the earliest stages from Peter da Silva (peter@NeoSoft.com).  TclX 8.4 work was done by Jeff Hobbs at ActiveState.
+Extended Tcl was designed and implemented by Karl Lehenbauer and Mark Diekhans, with help in the earliest stages from Peter da Silva.  TclX 8.4 work was done by Jeff Hobbs at ActiveState.
 
 TclX 8.4 differs from its predecessors in that it is based more on the idea of TclX as an extension to Tcl, and not an alternate environment.  There is no TkX and no stand-alone shells are built.
 
@@ -140,6 +140,6 @@ Refer to the above site for bug database and other support forums.
 
 A big thanks to all of the Extended Tcl users from all over the world who have helped us debug problems and given us valuable suggestions.  A special thanks to John Ousterhout, his students at Berkeley, and (more recently) his teams at Sun Microsystems and Scriptics, for Tcl, Tk and all the support they have given us.
 
-Thanks to Michael E. Shorter <mike@globalware.com>, Christopher M. Sedore <cmsedore@zombie.maxwell.syr.edu>,  Philip Chow <pchow@isgtec.com>, and Kirk Benson <benson@healthcare.com> for their initial work on porting TclX to MS Windows.
+Thanks to Michael E. Shorter, Christopher M. Sedore,  Philip Chow, and Kirk Benson for their initial work on porting TclX to MS Windows.
 
-Thanks to Jan Nijtmans <nijtmans@wxs.nl> of Plus Patch fame for helping to get shared library support working for several system.
+Thanks to Jan Nijtmans of Plus Patch fame for helping to get shared library support working for several system.
