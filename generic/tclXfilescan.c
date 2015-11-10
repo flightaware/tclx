@@ -134,9 +134,7 @@ FileScanCleanUp (ClientData  clientData,
  *-----------------------------------------------------------------------------
  */
 static void
-CleanUpContext (scanTablePtr, contextPtr)
-    void_pt        scanTablePtr;
-    scanContext_t *contextPtr;
+CleanUpContext (void_pt scanTablePtr, scanContext_t *contextPtr)
 {
     matchDef_t  *matchPtr, *oldMatchPtr;
 
@@ -163,9 +161,7 @@ CleanUpContext (scanTablePtr, contextPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ScanContextCreate (interp, scanTablePtr)
-    Tcl_Interp  *interp;
-    void_pt      scanTablePtr;
+ScanContextCreate (Tcl_Interp *interp, void_pt scanTablePtr)
 {
     scanContext_t *contextPtr, **tableEntryPtr;
 
@@ -193,10 +189,9 @@ ScanContextCreate (interp, scanTablePtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ScanContextDelete (interp, scanTablePtr, contextHandleObj)
-    Tcl_Interp  *interp;
-    void_pt      scanTablePtr;
-    Tcl_Obj     *contextHandleObj;
+ScanContextDelete (Tcl_Interp *interp,
+                   void_pt scanTablePtr,
+                   Tcl_Obj *contextHandleObj)
 {
     scanContext_t **tableEntryPtr;
     char           *contextHandle;
@@ -223,8 +218,7 @@ ScanContextDelete (interp, scanTablePtr, contextHandleObj)
  *-----------------------------------------------------------------------------
  */
 static void
-CopyFileCloseHandler (clientData)
-    ClientData clientData;
+CopyFileCloseHandler (ClientData clientData)
 {
     ((scanContext_t *) clientData)->copyFileChannel = NULL;
 }
@@ -241,10 +235,9 @@ CopyFileCloseHandler (clientData)
  *-----------------------------------------------------------------------------
  */
 static int
-SetCopyFileObj (interp, contextPtr, fileHandleObj)
-    Tcl_Interp    *interp;
-    scanContext_t *contextPtr;
-    Tcl_Obj       *fileHandleObj;
+SetCopyFileObj (Tcl_Interp *interp,
+                scanContext_t *contextPtr,
+                Tcl_Obj *fileHandleObj)
 {
     Tcl_Channel copyFileChannel;
 
@@ -276,8 +269,7 @@ SetCopyFileObj (interp, contextPtr, fileHandleObj)
  *-----------------------------------------------------------------------------
  */
 static void
-ClearCopyFile (contextPtr)
-    scanContext_t *contextPtr;
+ClearCopyFile (scanContext_t *contextPtr)
 {
     if (contextPtr->copyFileChannel != NULL) {
         Tcl_DeleteCloseHandler (contextPtr->copyFileChannel,
@@ -296,11 +288,10 @@ ClearCopyFile (contextPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ScanContextCopyFile (interp, scanTablePtr, contextHandleObj, fileHandleObj)
-    Tcl_Interp  *interp;
-    void_pt      scanTablePtr;
-    Tcl_Obj     *contextHandleObj;
-    Tcl_Obj     *fileHandleObj;
+ScanContextCopyFile (Tcl_Interp *interp,
+                     void_pt scanTablePtr,
+                     Tcl_Obj *contextHandleObj,
+                     Tcl_Obj *fileHandleObj)
 {
     scanContext_t *contextPtr, **tableEntryPtr;
     char         *contextHandle;
@@ -337,11 +328,10 @@ ScanContextCopyFile (interp, scanTablePtr, contextHandleObj, fileHandleObj)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ScancontextObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_ScancontextObjCmd (ClientData clientData,
+                        Tcl_Interp *interp,
+                        int objc,
+                        Tcl_Obj *CONST objv[])
 {
     char *subCommand;
 
@@ -401,11 +391,9 @@ TclX_ScancontextObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ScanmatchObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_ScanmatchObjCmd (ClientData clientData,
+                      Tcl_Interp *interp,
+                      int objc, Tcl_Obj *CONST objv[])
 {
     scanContext_t  *contextPtr, **tableEntryPtr;
     matchDef_t     *newmatch;
@@ -502,9 +490,7 @@ argError:
  *-----------------------------------------------------------------------------
  */
 static int
-SetMatchInfoVar (interp, scanData)
-    Tcl_Interp *interp;
-    scanData_t *scanData;
+SetMatchInfoVar (Tcl_Interp *interp, scanData_t *scanData)
 {
     static char *MATCHINFO = "matchInfo";
     int idx, start, end;
@@ -626,10 +612,7 @@ SetMatchInfoVar (interp, scanData)
  *-----------------------------------------------------------------------------
  */
 static int
-ScanFile (interp, contextPtr, channel)
-    Tcl_Interp    *interp;
-    scanContext_t *contextPtr;
-    Tcl_Channel    channel;
+ScanFile (Tcl_Interp *interp, scanContext_t *contextPtr, Tcl_Channel channel)
 {
     Tcl_DString lineBuf, uniLineBuf;
     int result, matchedAtLeastOne;
@@ -777,8 +760,7 @@ ScanFile (interp, contextPtr, channel)
  *-----------------------------------------------------------------------------
  */
 static void
-ScanFileCloseHandler (clientData)
-    ClientData clientData;
+ScanFileCloseHandler (ClientData clientData)
 {
     ((scanContext_t *) clientData)->fileOpen = FALSE;
 }
@@ -791,11 +773,10 @@ ScanFileCloseHandler (clientData)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ScanfileObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_ScanfileObjCmd (ClientData clientData,
+                     Tcl_Interp *interp,
+                     int objc,
+                     Tcl_Obj *CONST objv[])
 {
     scanContext_t *contextPtr, **tableEntryPtr;
     Tcl_Obj       *contextHandleObj, *fileHandleObj, *copyFileHandleObj;
@@ -870,9 +851,7 @@ TclX_ScanfileObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static void
-FileScanCleanUp (clientData, interp)
-    ClientData  clientData;
-    Tcl_Interp *interp;
+FileScanCleanUp (ClientData clientData, Tcl_Interp *interp)
 {
     scanContext_t **tableEntryPtr;
     int             walkKey;
@@ -896,8 +875,7 @@ FileScanCleanUp (clientData, interp)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_FilescanInit (interp)
-    Tcl_Interp *interp;
+TclX_FilescanInit (Tcl_Interp *interp)
 {
     void_pt  scanTablePtr;
 
@@ -928,8 +906,5 @@ TclX_FilescanInit (interp)
                           (ClientData) scanTablePtr,
 			  (Tcl_CmdDeleteProc*) NULL);
 }
-
-
-
 
 /* vim: set ts=4 sw=4 sts=4 et : */

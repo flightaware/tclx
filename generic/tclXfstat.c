@@ -90,8 +90,7 @@ TclX_FstatObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static char *
-StrFileType (statBufPtr)
-    struct stat  *statBufPtr;
+StrFileType (struct stat *statBufPtr)
 {
     int idx;
 
@@ -115,10 +114,7 @@ StrFileType (statBufPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-ReturnStatList (interp,ttyDev, statBufPtr)
-    Tcl_Interp   *interp;
-    int           ttyDev;
-    struct stat  *statBufPtr;
+ReturnStatList (Tcl_Interp *interp, int ttyDev, struct stat *statBufPtr)
 {
     Tcl_Obj *keylPtr = TclX_NewKeyedListObj ();
     
@@ -165,11 +161,10 @@ ReturnStatList (interp,ttyDev, statBufPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatArray (interp, ttyDev, statBufPtr, arrayObj)
-    Tcl_Interp   *interp;
-    int           ttyDev;
-    struct stat  *statBufPtr;
-    Tcl_Obj      *arrayObj;
+ReturnStatArray (Tcl_Interp *interp,
+                 int ttyDev,
+                 struct stat *statBufPtr,
+                 Tcl_Obj *arrayObj)
 {
     char *varName = Tcl_GetStringFromObj (arrayObj, NULL);
 
@@ -256,12 +251,11 @@ ReturnStatArray (interp, ttyDev, statBufPtr, arrayObj)
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnStatItem (interp, channel, ttyDev, statBufPtr, itemName)
-    Tcl_Interp   *interp;
-    Tcl_Channel   channel;
-    int           ttyDev;
-    struct stat  *statBufPtr;
-    char         *itemName;
+ReturnStatItem (Tcl_Interp   *interp,
+                Tcl_Channel   channel,
+                int           ttyDev,
+                struct stat  *statBufPtr,
+                char         *itemName)
 {
     Tcl_Obj *objPtr;
 
@@ -318,12 +312,11 @@ ReturnStatItem (interp, channel, ttyDev, statBufPtr, itemName)
  *         fstat fileId ?item?|?stat arrayvar?
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_FstatObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_FstatObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[])
 {
     Tcl_Channel channel;
     struct stat statBuf;
@@ -372,8 +365,7 @@ TclX_FstatObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_FstatInit (interp)
-    Tcl_Interp *interp;
+TclX_FstatInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
                           "fstat",

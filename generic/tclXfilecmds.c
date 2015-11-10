@@ -63,12 +63,11 @@ TclX_ReaddirObjCmd (ClientData clientData,
  *      Standard TCL result.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_PipeObjCmd (clientData, interp, objc, objv)
-     ClientData  clientData;
-     Tcl_Interp *interp;
-     int         objc;
-     Tcl_Obj    *CONST objv[];
+static int 
+TclX_PipeObjCmd (ClientData  clientData,
+                 Tcl_Interp *interp,
+                 int         objc,
+                 Tcl_Obj    *CONST objv[])
 {
     Tcl_Channel   channels [2];
     CONST84 char *channelNames [2];
@@ -119,10 +118,7 @@ TclX_PipeObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TruncateByPath (interp, filePath, newSize)
-    Tcl_Interp  *interp;
-    char        *filePath;
-    off_t        newSize;
+TruncateByPath (Tcl_Interp *interp, char *filePath, off_t newSize)
 {
 #ifndef NO_TRUNCATE
     Tcl_DString  pathBuf;
@@ -161,11 +157,10 @@ TruncateByPath (interp, filePath, newSize)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_FtruncateObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+TclX_FtruncateObjCmd (ClientData clientData,
+                      Tcl_Interp *interp,
+                      int objc,
+                      Tcl_Obj *CONST objv[])
 {
     int           objIdx, fileIds;
     off_t         newSize;
@@ -224,12 +219,11 @@ TclX_FtruncateObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
-    Tcl_Interp  *interp;
-    char        *path;
-    char        *fileName;
-    int          caseSensitive;
-    ClientData   clientData;
+ReadDirCallback (Tcl_Interp *interp,
+                 char *path,
+                 char *fileName,
+                 int caseSensitive,
+                 ClientData clientData)
 {
     Tcl_Obj *fileListObj = (Tcl_Obj *) clientData;
     Tcl_Obj *fileNameObj;
@@ -250,11 +244,10 @@ ReadDirCallback (interp, path, fileName, caseSensitive, clientData)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ReaddirObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_ReaddirObjCmd (ClientData clientData,
+                    Tcl_Interp *interp,
+                    int objc,
+                    Tcl_Obj *CONST objv[])
 {
     Tcl_DString  pathBuf;
     char        *dirPath;
@@ -315,8 +308,7 @@ TclX_ReaddirObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_FilecmdsInit (interp)
-    Tcl_Interp *interp;
+TclX_FilecmdsInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
 			  "pipe",

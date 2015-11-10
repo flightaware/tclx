@@ -64,12 +64,11 @@ TclX_FunlockObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-ParseLockUnlockArgs (interp, objc, objv, argIdx, lockInfoPtr)
-    Tcl_Interp     *interp;
-    int             objc;
-    Tcl_Obj *CONST  objv[];
-    int             argIdx;
-    TclX_FlockInfo *lockInfoPtr;
+ParseLockUnlockArgs (Tcl_Interp     *interp,
+                     int             objc,
+                     Tcl_Obj *CONST  objv[],
+                     int             argIdx,
+                     TclX_FlockInfo *lockInfoPtr)
 {
     lockInfoPtr->start  = 0;
     lockInfoPtr->len    = 0;
@@ -122,11 +121,10 @@ ParseLockUnlockArgs (interp, objc, objv, argIdx, lockInfoPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_FlockObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+TclX_FlockObjCmd (ClientData clientData, 
+                  Tcl_Interp *interp,
+                  int         objc,
+                  Tcl_Obj    *CONST objv[])
 {
     int argIdx;
     TclX_FlockInfo lockInfo;
@@ -207,11 +205,10 @@ TclX_FlockObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_FunlockObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+TclX_FunlockObjCmd (ClientData clientData, 
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj    *CONST objv[])
 {
     TclX_FlockInfo lockInfo;
 
@@ -234,8 +231,7 @@ TclX_FunlockObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_FlockInit (interp)
-    Tcl_Interp *interp;
+TclX_FlockInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
                           "flock",
