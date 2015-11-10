@@ -51,10 +51,9 @@ TclX_DupObjCmd (ClientData   clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-DupChannelOptions (interp, srcChannel, targetChannel)
-    Tcl_Interp  *interp;
-    Tcl_Channel  srcChannel;
-    Tcl_Channel  targetChannel;
+DupChannelOptions (Tcl_Interp *interp,
+                   Tcl_Channel srcChannel,
+                   Tcl_Channel targetChannel)
 {
     Tcl_DString strValues;
     CONST84 char *option, *value, **optArgv = NULL;
@@ -122,10 +121,7 @@ DupChannelOptions (interp, srcChannel, targetChannel)
  *-----------------------------------------------------------------------------
  */
 static Tcl_Channel
-DupFileChannel (interp, srcChannelId, targetChannelId)
-    Tcl_Interp *interp;
-    char       *srcChannelId;
-    char       *targetChannelId;
+DupFileChannel (Tcl_Interp *interp, char *srcChannelId, char *targetChannelId)
 {
     Tcl_Channel srcChannel, newChannel = NULL;
     const Tcl_ChannelType *channelType;
@@ -194,11 +190,10 @@ DupFileChannel (interp, srcChannelId, targetChannelId)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_DupObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+TclX_DupObjCmd (ClientData clientData,
+                Tcl_Interp *interp,
+                int objc,
+                Tcl_Obj *CONST objv[])
 {
     Tcl_Channel newChannel;
     int bindFnum, fnum;
@@ -274,8 +269,7 @@ TclX_DupObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_DupInit (interp)
-    Tcl_Interp *interp;
+TclX_DupInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp, 
 			  "dup",

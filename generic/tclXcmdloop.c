@@ -86,8 +86,7 @@ TclX_CommandloopObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-IsSetVarCmd (command)
-    char  *command;
+IsSetVarCmd (char *command)
 {
     Tcl_Parse tclParse;
     int numWords;
@@ -116,10 +115,7 @@ IsSetVarCmd (command)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_PrintResult (interp, intResult, checkCmd)
-    Tcl_Interp *interp;
-    int         intResult;
-    char       *checkCmd;
+TclX_PrintResult (Tcl_Interp *interp, int intResult, char *checkCmd)
 {
     Tcl_Channel stdoutChan,  stderrChan;
     char *resultStr;
@@ -185,11 +181,7 @@ TclX_PrintResult (interp, intResult, checkCmd)
  *-----------------------------------------------------------------------------
  */
 static void
-OutputPrompt (interp, topLevel, prompt1, prompt2)
-    Tcl_Interp *interp;
-    int         topLevel;
-    char       *prompt1;
-    char       *prompt2;
+OutputPrompt (Tcl_Interp *interp, int topLevel, char *prompt1, char *prompt2)
 {
     char *promptHook;
     char *resultStr;
@@ -275,11 +267,7 @@ OutputPrompt (interp, topLevel, prompt1, prompt2)
  *-----------------------------------------------------------------------------
  */
 static int
-AsyncSignalErrorHandler (interp, clientData, background, signalNum)
-    Tcl_Interp *interp;
-    ClientData  clientData;
-    int         background;
-    int         signalNum;
+AsyncSignalErrorHandler (Tcl_Interp *interp, ClientData clientData, int background, int signalNum)
 {
     if (background & (signalNum == SIGINT)) {
         asyncLoopData_t *dataPtr = (asyncLoopData_t *) clientData;
@@ -314,9 +302,7 @@ AsyncSignalErrorHandler (interp, clientData, background, signalNum)
  *-----------------------------------------------------------------------------
  */
 static void
-AsyncCommandHandler (clientData, mask)
-    ClientData clientData;
-    int        mask;
+AsyncCommandHandler (ClientData clientData, int mask)
 {
     asyncLoopData_t *dataPtr = (asyncLoopData_t *) clientData;
     int code;
@@ -403,8 +389,7 @@ AsyncCommandHandler (clientData, mask)
  *-----------------------------------------------------------------------------
  */
 static void
-AsyncCommandHandlerDelete (clientData)
-    ClientData clientData;
+AsyncCommandHandlerDelete (ClientData clientData)
 {
     asyncLoopData_t *dataPtr = (asyncLoopData_t *) clientData;
 
@@ -464,12 +449,11 @@ AsyncCommandHandlerDelete (clientData)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_AsyncCommandLoop (interp, options, endCommand, prompt1, prompt2)
-    Tcl_Interp *interp;
-    int         options;
-    char       *endCommand;
-    char       *prompt1;
-    char       *prompt2;
+TclX_AsyncCommandLoop (Tcl_Interp *interp,
+                       int options,
+                       char *endCommand,
+                       char *prompt1,
+                       char *prompt2)
 {
     Tcl_Channel stdinChan;
     asyncLoopData_t *dataPtr;
@@ -531,11 +515,7 @@ TclX_AsyncCommandLoop (interp, options, endCommand, prompt1, prompt2)
  *-----------------------------------------------------------------------------
  */
 static int
-SyncSignalErrorHandler (interp, clientData, background, signalNum)
-    Tcl_Interp *interp;
-    ClientData  clientData;
-    int         background;
-    int         signalNum;
+SyncSignalErrorHandler (Tcl_Interp *interp, ClientData clientData, int background, int signalNum)
 {
     if (signalNum == SIGINT) {
         *((int *) clientData) = TRUE;
@@ -565,12 +545,11 @@ SyncSignalErrorHandler (interp, clientData, background, signalNum)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
-    Tcl_Interp *interp;
-    int         options;
-    char       *endCommand;
-    char       *prompt1;
-    char       *prompt2;
+TclX_CommandLoop (Tcl_Interp *interp,
+                  int options,
+                  char *endCommand,
+                  char *prompt1,
+                  char *prompt2)
 {
     Tcl_DString command;
     int result, partial = FALSE, gotSigIntError = FALSE,
@@ -686,11 +665,7 @@ TclX_CommandLoop (interp, options, endCommand, prompt1, prompt2)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CommandloopObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_CommandloopObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     int options = 0, async = FALSE, argIdx, interactive;
     char *argStr,  *endCommand = NULL;
@@ -780,8 +755,7 @@ TclX_CommandloopObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_CmdloopInit (interp)
-    Tcl_Interp *interp;
+TclX_CmdloopInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
                           "commandloop",

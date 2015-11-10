@@ -102,10 +102,7 @@ TclX_FcntlObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-XlateFcntlAttr (interp, attrName, modify)
-    Tcl_Interp  *interp;
-    char        *attrName;
-    int          modify;
+XlateFcntlAttr (Tcl_Interp *interp, char *attrName, int modify)
 {
     char attrNameUp [MAX_ATTR_NAME_LEN];
     int idx;
@@ -156,11 +153,7 @@ XlateFcntlAttr (interp, attrName, modify)
  *-----------------------------------------------------------------------------
  */
 static int
-GetFcntlAttr (interp, channel, mode, attrib)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          mode;
-    int          attrib;
+GetFcntlAttr (Tcl_Interp *interp, Tcl_Channel channel, int mode, int attrib)
 {
     int value, optValue;
 
@@ -232,11 +225,10 @@ GetFcntlAttr (interp, channel, mode, attrib)
  *-----------------------------------------------------------------------------
  */
 static int
-SetFcntlAttrObj (interp, channel, attrib, valueObj)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          attrib;
-    Tcl_Obj     *valueObj;
+SetFcntlAttrObj (Tcl_Interp *interp,
+                 Tcl_Channel channel,
+                 int attrib,
+                 Tcl_Obj *valueObj)
 {
     int value;
 
@@ -279,11 +271,10 @@ SetFcntlAttrObj (interp, channel, attrib, valueObj)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_FcntlObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_FcntlObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[])
 {
     Tcl_Channel  channel;
     int          mode;
@@ -324,8 +315,7 @@ TclX_FcntlObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_FcntlInit (interp)
-    Tcl_Interp *interp;
+TclX_FcntlInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp, 
 			  "fcntl",

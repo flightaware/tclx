@@ -104,9 +104,7 @@ DebugCleanUp (ClientData  clientData,
  *-----------------------------------------------------------------------------
  */
 static void
-TraceDelete (interp, infoPtr)
-    Tcl_Interp   *interp;
-    traceInfo_pt  infoPtr;
+TraceDelete (Tcl_Interp *interp, traceInfo_pt infoPtr)
 {
     if (infoPtr->traceId != NULL) {
         Tcl_DeleteTrace (interp, infoPtr->traceId);
@@ -131,11 +129,7 @@ TraceDelete (interp, infoPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-PrintStr (channel, string, numChars, quoted)
-    Tcl_Channel  channel;
-    CONST84 char *string;
-    int          numChars;
-    int          quoted;
+PrintStr (Tcl_Channel channel, CONST84 char *string, int numChars, int quoted)
 {
     int idx;
 
@@ -163,10 +157,7 @@ PrintStr (channel, string, numChars, quoted)
  *-----------------------------------------------------------------------------
  */
 static void
-PrintArg (channel, argStr, noTruncate)
-    Tcl_Channel  channel;
-    CONST84 char *argStr;
-    int          noTruncate;
+PrintArg (Tcl_Channel channel, CONST84 char *argStr, int noTruncate)
 {
     int idx, argLen, printLen;
     int quoted;
@@ -195,12 +186,11 @@ PrintArg (channel, argStr, noTruncate)
  *-----------------------------------------------------------------------------
  */
 static void
-TraceCode (infoPtr, level, command, argc, argv)
-    traceInfo_pt infoPtr;
-    int          level;
-    char        *command;
-    int          argc;
-    CONST84 char **argv;
+TraceCode (traceInfo_pt infoPtr,
+           int level,
+           char *command,
+           int argc,
+           CONST84 char **argv)
 {
     int idx, printLen;
     char buf [32];
@@ -242,10 +232,7 @@ TraceCode (infoPtr, level, command, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-TraceCallbackErrorHandler (clientData, interp, code)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         code;
+TraceCallbackErrorHandler (ClientData clientData, Tcl_Interp *interp, int code)
 {
     traceInfo_pt infoPtr = (traceInfo_pt) clientData;
 
@@ -284,13 +271,12 @@ TraceCallbackErrorHandler (clientData, interp, code)
  *-----------------------------------------------------------------------------
  */
 static void
-TraceCallBack (interp, infoPtr, level, command, argc, argv)
-    Tcl_Interp   *interp;
-    traceInfo_pt  infoPtr;
-    int           level;
-    char         *command;
-    int           argc;
-    CONST84 char **argv;
+TraceCallBack (Tcl_Interp *interp,
+               traceInfo_pt infoPtr,
+               int level,
+               char *command,
+               int argc,
+               CONST84 char **argv)
 {
     Interp       *iPtr = (Interp *) interp;
     Tcl_DString   callback;
@@ -347,16 +333,14 @@ TraceCallBack (interp, infoPtr, level, command, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static void
-CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData, 
-                 argc, argv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           level;
-    char         *command;
-    Tcl_CmdProc  *cmdProc;
-    ClientData    cmdClientData;
-    int           argc;
-    CONST84 char **argv;
+CmdTraceRoutine (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int level,
+                 char *command,
+                 Tcl_CmdProc *cmdProc,
+                 ClientData cmdClientData,
+                 int argc,
+                 CONST84 char **argv)
 {
     Interp       *iPtr = (Interp *) interp;
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;
@@ -400,11 +384,10 @@ CmdTraceRoutine (clientData, interp, level, command, cmdProc, cmdClientData,
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CmdtraceObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_CmdtraceObjCmd (ClientData clientData,
+                     Tcl_Interp *interp,
+                     int objc,
+                     Tcl_Obj *CONST objv[])
 {
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;
     int idx;
@@ -552,9 +535,7 @@ TclX_CmdtraceObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static void
-DebugCleanUp (clientData, interp)
-    ClientData  clientData;
-    Tcl_Interp *interp;
+DebugCleanUp (ClientData clientData, Tcl_Interp *interp)
 {
     traceInfo_pt infoPtr = (traceInfo_pt) clientData;
 
@@ -569,8 +550,7 @@ DebugCleanUp (clientData, interp)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_DebugInit (interp)
-    Tcl_Interp *interp;
+TclX_DebugInit (Tcl_Interp *interp)
 {
     traceInfo_pt infoPtr;
 
@@ -595,9 +575,5 @@ TclX_DebugInit (interp)
                           (ClientData) infoPtr,
                           (Tcl_CmdDeleteProc*) NULL);
 }
-
-
-
-
 
 /* vim: set ts=4 sw=4 sts=4 et : */

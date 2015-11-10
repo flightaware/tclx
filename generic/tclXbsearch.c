@@ -71,9 +71,7 @@ TclX_BsearchObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-StandardKeyCompare (key, line)
-    char *key;
-    char *line;
+StandardKeyCompare (char *key, char *line)
 {
     int  cmpResult, fieldLen;
     char saveChar;
@@ -102,8 +100,7 @@ StandardKeyCompare (key, line)
  *-----------------------------------------------------------------------------
  */
 static int
-TclProcKeyCompare (searchCBPtr)
-    binSearchCB_t *searchCBPtr;
+TclProcKeyCompare (binSearchCB_t *searchCBPtr)
 {
     CONST84 char *cmdArgv [3];
     char *command, *oldResult;
@@ -161,9 +158,7 @@ TclProcKeyCompare (searchCBPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ReadAndCompare (fileOffset, searchCBPtr)
-    off_t          fileOffset;
-    binSearchCB_t *searchCBPtr;
+ReadAndCompare (off_t fileOffset, binSearchCB_t *searchCBPtr)
 {
     if (Tcl_Seek (searchCBPtr->channel, fileOffset, SEEK_SET) < 0)
         goto posixError;
@@ -249,8 +244,7 @@ ReadAndCompare (fileOffset, searchCBPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-BinSearch (searchCBPtr)
-    binSearchCB_t *searchCBPtr;
+BinSearch (binSearchCB_t *searchCBPtr)
 {
     off_t middle, high, low;
 
@@ -299,11 +293,10 @@ BinSearch (searchCBPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_BsearchObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+TclX_BsearchObjCmd (ClientData clientData,
+                    Tcl_Interp *interp,
+                    int objc,
+                    Tcl_Obj *CONST objv[])
 {
     int status;
     binSearchCB_t searchCB;
@@ -372,8 +365,7 @@ TclX_BsearchObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_BsearchInit (interp)
-    Tcl_Interp *interp;
+TclX_BsearchInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp, 
                           "bsearch",
