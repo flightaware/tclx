@@ -58,10 +58,7 @@ char *tclXWrongArgs = "wrong # args: ";
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToInt (string, base, intPtr)
-    CONST char *string;
-    int         base;
-    int        *intPtr;
+TclX_StrToInt (CONST char *string, int base, int *intPtr)
 {
     char *end, *p;
     int   i;
@@ -118,10 +115,7 @@ TclX_StrToInt (string, base, intPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToUnsigned (string, base, unsignedPtr)
-    CONST char *string;
-    int         base;
-    unsigned   *unsignedPtr;
+TclX_StrToUnsigned (CONST char *string, int base, unsigned *unsignedPtr)
 {
     char *end, *p;
     unsigned i;
@@ -164,10 +158,7 @@ TclX_StrToUnsigned (string, base, unsignedPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToOffset (string, base, offsetPtr)
-    CONST char *string;
-    int         base;
-    off_t      *offsetPtr;
+TclX_StrToOffset (CONST char *string, int base, off_t *offsetPtr)
 {
     char *end, *p;
     off_t i;
@@ -226,9 +217,7 @@ TclX_StrToOffset (string, base, offsetPtr)
  *-----------------------------------------------------------------------------
  */
 char *
-TclX_DownShift (targetStr, sourceStr)
-    char       *targetStr;
-    CONST char *sourceStr;
+TclX_DownShift (char *targetStr, CONST char *sourceStr)
 {
     register char theChar;
 
@@ -263,9 +252,7 @@ TclX_DownShift (targetStr, sourceStr)
  *-----------------------------------------------------------------------------
  */
 char *
-TclX_UpShift (targetStr, sourceStr)
-    char       *targetStr;
-    CONST char *sourceStr;
+TclX_UpShift (char *targetStr, CONST char *sourceStr)
 {
     register char theChar;
 
@@ -287,10 +274,7 @@ TclX_UpShift (targetStr, sourceStr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_GetUnsignedFromObj (interp, objPtr, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *objPtr;
-    unsigned   *valuePtr;
+TclX_GetUnsignedFromObj (Tcl_Interp *interp, Tcl_Obj *objPtr, unsigned *valuePtr)
 {
     int intValue;
     
@@ -312,10 +296,7 @@ TclX_GetUnsignedFromObj (interp, objPtr, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_GetOffsetFromObj (interp, objPtr, offsetPtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *objPtr;
-    off_t      *offsetPtr;
+TclX_GetOffsetFromObj (Tcl_Interp *interp, Tcl_Obj *objPtr, off_t *offsetPtr)
 {
     int intOff;
     
@@ -342,11 +323,10 @@ TclX_GetOffsetFromObj (interp, objPtr, offsetPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_RelativeExpr (interp, exprPtr, stringLen, exprResultPtr)
-    Tcl_Interp  *interp;
-    Tcl_Obj     *exprPtr;
-    int          stringLen;
-    int         *exprResultPtr;
+TclX_RelativeExpr (Tcl_Interp  *interp,
+                   Tcl_Obj     *exprPtr,
+                   int          stringLen,
+                   int         *exprResultPtr)
 {
     char *exprStr, *buf;
     int exprLen, exprStrLen, result;
@@ -405,10 +385,7 @@ TclX_RelativeExpr (interp, exprPtr, stringLen, exprResultPtr)
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclX_GetOpenChannel (interp, handle, chanAccess)
-    Tcl_Interp *interp;
-    char       *handle;
-    int         chanAccess;
+TclX_GetOpenChannel (Tcl_Interp *interp, const char *handle, int chanAccess)
 {
     Tcl_Channel chan;
     int mode;
@@ -447,10 +424,7 @@ TclX_GetOpenChannel (interp, handle, chanAccess)
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclX_GetOpenChannelObj (interp, handleObj, chanAccess)
-    Tcl_Interp *interp;
-    Tcl_Obj    *handleObj;
-    int         chanAccess;
+TclX_GetOpenChannelObj (Tcl_Interp *interp, Tcl_Obj *handleObj, int chanAccess)
 {
     Tcl_Channel  chan;
     int          mode;
@@ -487,8 +461,7 @@ TclX_GetOpenChannelObj (interp, handleObj, chanAccess)
  *   The integer option value.
  *----------------------------------------------------------------------------- */
 static int
-ParseTranslationOption (strValue)
-    char *strValue;
+ParseTranslationOption (char *strValue)
 {
     if (STREQU (strValue, "auto")) {
         return TCLX_TRANSLATE_AUTO;
@@ -520,8 +493,7 @@ ParseTranslationOption (strValue)
  *----------------------------------------------------------------------------
  */
 static char *
-FormatTranslationOption (value)
-    int value;
+FormatTranslationOption (int value)
 {
     switch (value) {
       case TCLX_TRANSLATE_AUTO:
@@ -557,11 +529,10 @@ FormatTranslationOption (value)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_GetChannelOption (interp, channel, option, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         option;
-    int        *valuePtr;
+TclX_GetChannelOption (Tcl_Interp  *interp,
+                       Tcl_Channel  channel,
+                       int          option,
+                       int         *valuePtr)
 {
     char          *strOption;
     Tcl_DString    strValue;
@@ -670,11 +641,10 @@ TclX_GetChannelOption (interp, channel, option, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_SetChannelOption (interp, channel, option, value)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          option;
-    int          value;
+TclX_SetChannelOption (Tcl_Interp *interp,
+                       Tcl_Channel channel,
+                       int         option,
+                       int         value)
 {
     char *strOption, *strValue;
     int readValue, writeValue;
@@ -763,10 +733,7 @@ TclX_SetChannelOption (interp, channel, option, value)
  *-----------------------------------------------------------------------------
  */
 char *
-TclX_JoinPath (path1, path2, joinedPath)
-    char        *path1;
-    char        *path2;
-    Tcl_DString *joinedPath;
+TclX_JoinPath (char *path1, char *path2, Tcl_DString *joinedPath)
 {
     CONST84 char *joinArgv [2];
 
@@ -791,10 +758,7 @@ TclX_JoinPath (path1, path2, joinedPath)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_WrongArgs (interp, commandNameObj, string)
-    Tcl_Interp  *interp;
-    Tcl_Obj     *commandNameObj;
-    char        *string;
+TclX_WrongArgs (Tcl_Interp *interp, Tcl_Obj *commandNameObj, char *string)
 {
     char    *commandName;
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
@@ -867,10 +831,10 @@ TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_IsNullObj (objPtr)
-    Tcl_Obj *objPtr;
+TclX_IsNullObj (Tcl_Obj *objPtr)
 {
-    static Tcl_ObjType *listType = NULL, *stringType = NULL;
+    static const Tcl_ObjType *listType = NULL;
+    static const Tcl_ObjType *stringType = NULL;
     int length;
     
     /*
@@ -909,8 +873,7 @@ TclX_IsNullObj (objPtr)
  *-----------------------------------------------------------------------------
  */
 Tcl_Obj *
-TclX_SaveResultErrorInfo (interp)
-    Tcl_Interp  *interp;
+TclX_SaveResultErrorInfo (Tcl_Interp *interp)
 {
     Tcl_Obj *saveObjv [4];
     Tcl_Obj *listObj;
@@ -950,9 +913,7 @@ TclX_SaveResultErrorInfo (interp)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_RestoreResultErrorInfo (interp, saveObjPtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *saveObjPtr;
+TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
 {
     Tcl_Obj **saveObjv;
     int saveObjc;
@@ -991,13 +952,12 @@ TclX_RestoreResultErrorInfo (interp, saveObjPtr)
  */
 
 int
-TclX_CreateObjCommand (interp, cmdName, proc, clientData, deleteProc, flags)
-    Tcl_Interp*        interp;
-    char*              cmdName;
-    Tcl_ObjCmdProc*    proc;
-    ClientData         clientData;
-    Tcl_CmdDeleteProc* deleteProc;
-    int                flags;
+TclX_CreateObjCommand (Tcl_Interp        *interp,
+                       char              *cmdName,
+                       Tcl_ObjCmdProc    *proc,
+                       ClientData         clientData,
+                       Tcl_CmdDeleteProc *deleteProc,
+                       int                flags)
 {
     Namespace *globalNsPtr = (Namespace *) Tcl_GetGlobalNamespace(interp);
     Namespace *currNsPtr   = (Namespace *) Tcl_GetCurrentNamespace(interp);
@@ -1030,10 +990,7 @@ TclX_CreateObjCommand (interp, cmdName, proc, clientData, deleteProc, flags)
  */
 
 void *
-TclX_StructOffset(nsPtr, offset, offType)
-    void *nsPtr;
-    size_t offset;
-    unsigned int offType;
+TclX_StructOffset(void *nsPtr, size_t offset, unsigned int offType)
 {
     int major, minor, i;
     /*

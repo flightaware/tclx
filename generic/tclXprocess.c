@@ -53,12 +53,11 @@ TclX_WaitObjCmd (ClientData clientData,
  *     fork
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_ForkObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_ForkObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[])
 {
     if (objc != 1)
 	return TclX_WrongArgs (interp, objv [0], "");
@@ -72,12 +71,11 @@ TclX_ForkObjCmd (clientData, interp, objc, objv)
  *     execl ?-argv0 ? prog ?argList?
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_ExeclObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_ExeclObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[])
 {
 #define STATIC_ARG_SIZE   12
     char  *staticArgv [STATIC_ARG_SIZE];
@@ -161,12 +159,11 @@ TclX_ExeclObjCmd (clientData, interp, objc, objv)
  *     wait ?-nohang? ?-untraced? ?-pgroup? ?pid?
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_WaitObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_WaitObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[])
 {
     int idx, options = 0, pgroup = FALSE;
     char *argStr;
@@ -291,8 +288,7 @@ TclX_WaitObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_ProcessInit (interp)
-    Tcl_Interp *interp;
+TclX_ProcessInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
                           "execl",

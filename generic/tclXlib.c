@@ -155,11 +155,10 @@ TclX_LoadlibindexObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-EvalFilePart (interp, fileName, offset, length)
-    Tcl_Interp  *interp;
-    char        *fileName;
-    off_t        offset;
-    off_t        length;
+EvalFilePart (Tcl_Interp  *interp,
+              char        *fileName,
+              off_t        offset,
+              off_t        length)
 {
     Interp *iPtr = (Interp *) interp;
     int result, major, minor;
@@ -282,10 +281,9 @@ EvalFilePart (interp, fileName, offset, length)
  *-----------------------------------------------------------------------------
  */
 static char *
-MakeAbsFile (interp, fileName, absNamePtr)
-    Tcl_Interp  *interp;
-    char        *fileName;
-    Tcl_DString *absNamePtr;
+MakeAbsFile (Tcl_Interp  *interp,
+             char        *fileName,
+             Tcl_DString *absNamePtr)
 {
     char  *curDir;
     Tcl_DString joinBuf, cwdBuffer;
@@ -350,12 +348,11 @@ MakeAbsFile (interp, fileName, absNamePtr)
  *-----------------------------------------------------------------------------
  */
 static int
-SetPackageIndexEntry (interp, packageName, fileName, offset, length)
-     Tcl_Interp *interp;
-     CONST84 char *packageName;
-     CONST84 char *fileName;
-     off_t       offset;
-     unsigned    length;
+SetPackageIndexEntry (Tcl_Interp *interp,
+                      CONST84 char *packageName,
+                      CONST84 char *fileName,
+                      off_t       offset,
+                      unsigned    length)
 {
     Tcl_Obj *pkgDataObjv [3], *pkgDataPtr;
 
@@ -393,12 +390,11 @@ SetPackageIndexEntry (interp, packageName, fileName, offset, length)
  *-----------------------------------------------------------------------------
  */
 static int
-GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
-    Tcl_Interp *interp;
-    char       *packageName;
-    char      **fileNamePtr;
-    off_t       *offsetPtr;
-    unsigned   *lengthPtr;
+GetPackageIndexEntry (Tcl_Interp *interp,
+                      char       *packageName,
+                      char      **fileNamePtr,
+                      off_t      *offsetPtr,
+                      unsigned   *lengthPtr)
 {
     int   pkgDataObjc;
     Tcl_Obj **pkgDataObjv, *pkgDataPtr;
@@ -461,10 +457,9 @@ GetPackageIndexEntry (interp, packageName, fileNamePtr, offsetPtr, lengthPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-SetProcIndexEntry (interp, procName, package)
-    Tcl_Interp *interp;
-    CONST84 char *procName;
-    CONST84 char *package;
+SetProcIndexEntry (Tcl_Interp *interp,
+                   CONST84 char *procName,
+                   CONST84 char *package)
 {
     Tcl_DString  command;
     CONST84 char *result;
@@ -493,9 +488,8 @@ SetProcIndexEntry (interp, procName, package)
  *-----------------------------------------------------------------------------
  */
 static void
-AddLibIndexErrorInfo (interp, indexName)
-    Tcl_Interp *interp;
-    char       *indexName;
+AddLibIndexErrorInfo (Tcl_Interp *interp,
+                      char       *indexName)
 {
     char *msg;
 
@@ -524,10 +518,9 @@ AddLibIndexErrorInfo (interp, indexName)
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
-     Tcl_Interp *interp;
-     char       *tlibFilePath;
-     char       *tndxFilePath;
+ProcessIndexFile (Tcl_Interp *interp,
+                  char       *tlibFilePath,
+                  char       *tndxFilePath)
 {
     Tcl_Channel  indexChannel = NULL;
     Tcl_DString  lineBuffer;
@@ -642,9 +635,7 @@ ProcessIndexFile (interp, tlibFilePath, tndxFilePath)
  *-----------------------------------------------------------------------------
  */
 static int
-BuildPackageIndex (interp, tlibFilePath)
-     Tcl_Interp *interp;
-     char       *tlibFilePath;
+BuildPackageIndex (Tcl_Interp *interp, char *tlibFilePath)
 {
     Tcl_DString  command;
     int          result;
@@ -682,10 +673,9 @@ BuildPackageIndex (interp, tlibFilePath)
  *-----------------------------------------------------------------------------
  */
 static int
-LoadPackageIndex (interp, tlibFilePath, indexNameClass)
-    Tcl_Interp       *interp;
-    char             *tlibFilePath;
-    indexNameClass_t  indexNameClass;
+LoadPackageIndex (Tcl_Interp       *interp,
+                  char             *tlibFilePath,
+                  indexNameClass_t  indexNameClass)
 {
     Tcl_DString tndxFilePath;
 
@@ -751,12 +741,11 @@ LoadPackageIndex (interp, tlibFilePath, indexNameClass)
  *-----------------------------------------------------------------------------
  */
 static int
-LoadDirIndexCallback (interp, dirPath, fileName, caseSensitive, clientData)
-    Tcl_Interp  *interp;
-    char        *dirPath;
-    char        *fileName;
-    int          caseSensitive;
-    ClientData   clientData;
+LoadDirIndexCallback (Tcl_Interp  *interp,
+                      char        *dirPath,
+                      char        *fileName,
+                      int          caseSensitive,
+                      ClientData   clientData)
 {
     int *indexErrorPtr = (int *) clientData;
     int nameLen;
@@ -831,9 +820,7 @@ LoadDirIndexCallback (interp, dirPath, fileName, caseSensitive, clientData)
  *-----------------------------------------------------------------------------
  */
 static int
-LoadDirIndexes (interp, dirName)
-    Tcl_Interp  *interp;
-    char        *dirName;
+LoadDirIndexes (Tcl_Interp *interp, char *dirName)
 {
     int indexError = FALSE;
 
@@ -865,11 +852,10 @@ LoadDirIndexes (interp, dirName)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_load_tndxsObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_load_tndxsObjCmd (ClientData  clientData,
+                       Tcl_Interp *interp,
+                       int         objc,
+                       Tcl_Obj    *CONST objv[])
 {
     char *dirname;
 
@@ -890,11 +876,10 @@ TclX_load_tndxsObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_Auto_load_pkgObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_Auto_load_pkgObjCmd (ClientData clientData, 
+                          Tcl_Interp *interp,
+                          int objc,
+                          Tcl_Obj *CONST objv[])
 {
     char     *fileName;
     off_t     offset;
@@ -927,11 +912,10 @@ TclX_Auto_load_pkgObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_LoadlibindexObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_LoadlibindexObjCmd (ClientData clientData, 
+                         Tcl_Interp *interp,
+                         int objc,
+                         Tcl_Obj *CONST objv[])
 {
     char        *pathName;
     Tcl_DString  pathNameBuf;
@@ -985,8 +969,7 @@ TclX_LoadlibindexObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_LibraryInit (interp)
-    Tcl_Interp *interp;
+TclX_LibraryInit (Tcl_Interp *interp)
 {
     int result;
 

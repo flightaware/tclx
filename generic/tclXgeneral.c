@@ -81,13 +81,11 @@ TclX_Try_EvalObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
-                 appPatchlevel)
-    int   defaultValues;
-    char *appName;
-    char *appLongName;
-    char *appVersion;
-    int   appPatchlevel;
+TclX_SetAppInfo (int defaultValues,
+                 char *appName,
+                 char *appLongName,
+                 char *appVersion,
+                 int appPatchlevel)
 {
     if ((appName != NULL) &&
         ((!defaultValues) || (tclAppName == NULL))) {
@@ -118,11 +116,10 @@ TclX_SetAppInfo (defaultValues, appName, appLongName, appVersion,
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_EchoObjCmd (dummy, interp, objc, objv)
-    ClientData	dummy;
-    Tcl_Interp *interp;
-    int		objc;
-    Tcl_Obj    *CONST objv[];
+TclX_EchoObjCmd (ClientData dummy,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[])
 {
     int	  idx;
     Tcl_Channel channel;
@@ -164,11 +161,10 @@ TclX_EchoObjCmd (dummy, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_InfoxObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_InfoxObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[])
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
     char *optionPtr;
@@ -321,10 +317,7 @@ TclX_InfoxObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-SetLoopCounter (interp, varName, idx)
-    Tcl_Interp *interp;
-    char *varName;
-    int idx;
+SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 {
     Tcl_Obj *iObj, *newVarObj;
 
@@ -357,11 +350,10 @@ SetLoopCounter (interp, varName, idx)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_LoopObjCmd (dummy, interp, objc, objv)
-    ClientData  dummy;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_LoopObjCmd (ClientData dummy,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[])
 {
     int result = TCL_OK;
     long idx, first, limit, incr = 1;
@@ -433,8 +425,7 @@ TclX_LoopObjCmd (dummy, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-GlobalImport (interp)
-    Tcl_Interp *interp;
+GlobalImport (Tcl_Interp *interp)
 {
     static char global [] = "global";
     Tcl_Obj *savedResult;
@@ -490,11 +481,10 @@ GlobalImport (interp)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_Try_EvalObjCmd (dummy, interp, objc, objv)
-    ClientData  dummy;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *CONST objv[];
+TclX_Try_EvalObjCmd (ClientData  dummy,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj *CONST objv[])
 {
     int code, code2;
     int haveFinally;
@@ -561,8 +551,7 @@ TclX_Try_EvalObjCmd (dummy, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_GeneralInit (interp)
-    Tcl_Interp *interp;
+TclX_GeneralInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp, 
                           "echo",
@@ -588,6 +577,5 @@ TclX_GeneralInit (interp)
                          (ClientData) NULL,
                          (Tcl_CmdDeleteProc*) NULL);
 }
-
 
 /* vim: set ts=4 sw=4 sts=4 et : */

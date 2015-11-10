@@ -52,9 +52,7 @@ TclX_HostInfoObjCmd (ClientData  clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-ReturnGetHostError (interp, host)
-    Tcl_Interp *interp;
-    char       *host;
+ReturnGetHostError (Tcl_Interp *interp, char *host)
 {
     char  *errorMsg;
     char  *errorCode;
@@ -104,10 +102,7 @@ ReturnGetHostError (interp, host)
  *-----------------------------------------------------------------------------
  */
 Tcl_Obj *
-TclXGetHostInfo (interp, channel, remoteHost)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         remoteHost;
+TclXGetHostInfo (Tcl_Interp *interp, Tcl_Channel channel, int remoteHost)
 {
     struct sockaddr_in sockaddr;
     struct hostent *hostEntry;
@@ -155,10 +150,7 @@ TclXGetHostInfo (interp, channel, remoteHost)
  *-----------------------------------------------------------------------------
  */
 static struct hostent *
-InfoGetHost (interp, objc, objv)
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+InfoGetHost (Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
     struct hostent *hostEntry;
     struct in_addr address;
@@ -199,11 +191,10 @@ InfoGetHost (interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_HostInfoObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+TclX_HostInfoObjCmd (ClientData  clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[])
 {
     struct hostent *hostEntry;
     struct in_addr  inAddr;
@@ -283,8 +274,7 @@ TclX_HostInfoObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SocketInit (interp)
-    Tcl_Interp *interp;
+TclX_SocketInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp, 
 			  "host_info",

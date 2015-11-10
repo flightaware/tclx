@@ -106,12 +106,11 @@ TclX_CequalObjCmd (ClientData clientData,
  *      Returns the character indexed by  index  (zero  based)  from string. 
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_CindexObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_CindexObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[])
 {
     int strLen, utfLen, idx, numBytes;
     char *str, buf [TCL_UTF_MAX];
@@ -144,12 +143,11 @@ TclX_CindexObjCmd (dummy, interp, objc, objv)
  *      Returns the length of string in characters. 
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_ClengthObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_ClengthObjCmd (ClientData clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[])
 {
     char *str;
     int strLen;
@@ -173,11 +171,10 @@ TclX_ClengthObjCmd (dummy, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CconcatObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+TclX_CconcatObjCmd (ClientData clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[])
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
     int idx, strLen;
@@ -202,12 +199,11 @@ TclX_CconcatObjCmd (dummy, interp, objc, objv)
  *   If clientData is TRUE its the range command, if its FALSE its csubstr.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_CrangeObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_CrangeObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[])
 {
     int strLen, utfLen, first, subLen;
     size_t isRange = (size_t) clientData;
@@ -262,12 +258,11 @@ TclX_CrangeObjCmd (clientData, interp, objc, objv)
  *      Standard Tcl result.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_CcollateObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_CcollateObjCmd (ClientData clientData,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj   *CONST objv[])
 {
     int argIndex, result, local = FALSE;
     char *optionString;
@@ -324,12 +319,11 @@ TclX_CcollateObjCmd (dummy, interp, objc, objv)
  *      Returns string replicated count times.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_ReplicateObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+static int 
+TclX_ReplicateObjCmd (ClientData clientData,
+                      Tcl_Interp *interp,
+                      int         objc,
+                      Tcl_Obj   *CONST objv[])
 {
     Tcl_Obj     *resultPtr = Tcl_GetObjResult (interp);
     long         count;
@@ -361,12 +355,11 @@ TclX_ReplicateObjCmd (dummy, interp, objc, objv)
  * more flexable and includes this functionality.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_CtokenObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_CtokenObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[])
 {
     Tcl_Obj* stringVarObj;
     char* string;
@@ -442,12 +435,11 @@ TclX_CtokenObjCmd (dummy, interp, objc, objv)
  *   "0" or "1".
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_CequalObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_CequalObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int         objc,
+                   Tcl_Obj   *CONST objv[])
 {
     char *string1Ptr;
     int string1Len;
@@ -472,11 +464,11 @@ TclX_CequalObjCmd (dummy, interp, objc, objv)
  * make it work for UniCode.
  *-----------------------------------------------------------------------------
  */
-static int CheckForUniCode(interp, str, strLen, which)
-    Tcl_Interp  *interp;
-    char *str;
-    int strLen;
-    char *which;
+static int
+CheckForUniCode (Tcl_Interp *interp,
+                 char *str,
+                 int strLen,
+                 char *which)
 {
     int idx, nbytes;
     Tcl_UniChar uc;
@@ -507,11 +499,10 @@ static int CheckForUniCode(interp, str, strLen, which)
 #define MAX_EXPANSION 255
 
 static unsigned int
-ExpandString(inStr, inLength, outStr, outLengthPtr)
-    unsigned char *inStr;
-    int            inLength;
-    unsigned char  outStr [];
-    int           *outLengthPtr;
+ExpandString (unsigned char *inStr,
+              int            inLength,
+              unsigned char  outStr [],
+              int           *outLengthPtr)
 {
     int i, j;
     unsigned char *s = inStr;
@@ -542,12 +533,11 @@ ExpandString(inStr, inLength, outStr, outLengthPtr)
  * FIXME:  Does not currently support non-ascii characters.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_TranslitObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+static int 
+TclX_TranslitObjCmd (ClientData clientData,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj   *CONST objv[])
 {
     unsigned char from [MAX_EXPANSION+1];
     int           fromLen;
@@ -658,12 +648,11 @@ TclX_TranslitObjCmd (dummy, interp, objc, objv)
  * FIX: Add check for legal number (can be negative, hex, etc).
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_CtypeObjCmd (dummy, interp, objc, objv)
-    ClientData   dummy;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_CtypeObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int         objc,
+                  Tcl_Obj   *CONST objv[])
 {
     int failIndex = FALSE;
     char *optStr, *class, *charStr;
@@ -896,8 +885,7 @@ TclX_CtypeObjCmd (dummy, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_StringInit (interp)
-    Tcl_Interp *interp;
+TclX_StringInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp, 
 			  "cindex",

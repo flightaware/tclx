@@ -49,8 +49,7 @@ static int	Tclxcmd_Init (Tcl_Interp *interp);
  *-----------------------------------------------------------------------------
  */
 int
-Tclx_Init (interp)
-    Tcl_Interp *interp;
+Tclx_Init (Tcl_Interp *interp)
 {
     if (Tclx_SafeInit(interp) != TCL_OK) {
 	return TCL_ERROR;
@@ -74,8 +73,7 @@ Tclx_Init (interp)
  *-----------------------------------------------------------------------------
  */
 int
-Tclx_SafeInit (interp)
-    Tcl_Interp *interp;
+Tclx_SafeInit (Tcl_Interp *interp)
 {
     if (
 #ifdef USE_TCL_STUBS
@@ -102,8 +100,7 @@ Tclx_SafeInit (interp)
  *-----------------------------------------------------------------------------
  */
 static int
-Tclxcmd_Init (interp)
-    Tcl_Interp *interp;
+Tclxcmd_Init (Tcl_Interp *interp)
 {
     /*
      * These are ok in safe interps.

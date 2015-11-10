@@ -48,21 +48,30 @@
  * Prototypes of internal functions.
  */
 static int	ConvertIntOrDoubleObj (Tcl_Interp *interp,
-				Tcl_Obj *numStrObj, double *valuePtr);
+				                   Tcl_Obj    *numStrObj,
+                                   double     *valuePtr);
 
 static long	ReallyRandom (long my_range);
 
-static int	TclX_MaxObjCmd (ClientData clientData, Tcl_Interp *interp,
-				int objc, Tcl_Obj *CONST objv[]);
+static int	TclX_MaxObjCmd (ClientData clientData,
+                            Tcl_Interp *interp,
+                            int         objc,
+                            Tcl_Obj    *CONST objv[]);
 
-static int	TclX_MinObjCmd (ClientData clientData, Tcl_Interp *interp,
-				int objc, Tcl_Obj *CONST objv[]);
+static int	TclX_MinObjCmd (ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         objc,
+                            Tcl_Obj    *CONST objv[]);
 
-static int	TclX_MinMaxFunc (ClientData clientData, Tcl_Interp *interp,
-				Tcl_Value *args, Tcl_Value *resultPtr);
+static int	TclX_MinMaxFunc (ClientData   clientData,
+                             Tcl_Interp  *interp,
+				             Tcl_Value *args,
+                             Tcl_Value *resultPtr);
 
-static int	TclX_RandomObjCmd (ClientData  clientData, Tcl_Interp *interp,
-				int objc, Tcl_Obj *CONST objv[]);
+static int	TclX_RandomObjCmd (ClientData  clientData,
+                               Tcl_Interp *interp,
+				               int         objc,
+                               Tcl_Obj     *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -79,11 +88,9 @@ static int	TclX_RandomObjCmd (ClientData  clientData, Tcl_Interp *interp,
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-static int
-ConvertIntOrDoubleObj (interp, numStrObj, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *numStrObj;
-    double     *valuePtr;
+static int	ConvertIntOrDoubleObj (Tcl_Interp *interp,
+				                   Tcl_Obj    *numStrObj,
+                                   double     *valuePtr)
 {
 #ifdef TCL_WIDE_INT_TYPE
     Tcl_WideInt wVal;
@@ -116,12 +123,10 @@ ConvertIntOrDoubleObj (interp, numStrObj, valuePtr)
  *      Standard TCL results.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_MaxObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int	TclX_MaxObjCmd (ClientData clientData,
+                            Tcl_Interp *interp,
+                            int         objc,
+                            Tcl_Obj    *CONST objv[])
 {
     double value, maxValue = -MAXDOUBLE;
     int idx, maxIdx = 1;
@@ -150,12 +155,10 @@ TclX_MaxObjCmd (clientData, interp, objc, objv)
  *      Standard TCL results.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_MinObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int	TclX_MinObjCmd (ClientData  clientData,
+                            Tcl_Interp *interp,
+                            int         objc,
+                            Tcl_Obj    *CONST objv[])
 {
     double value, minValue = MAXDOUBLE;
     int idx, minIdx   = 1;
@@ -186,12 +189,10 @@ TclX_MinObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_MinMaxFunc (clientData, interp, args, resultPtr)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    Tcl_Value  *args;
-    Tcl_Value  *resultPtr;
+static int	TclX_MinMaxFunc (ClientData   clientData,
+                             Tcl_Interp  *interp,
+				             Tcl_Value *args,
+                             Tcl_Value *resultPtr)
 {
     size_t isMax = (size_t) clientData;
     Tcl_ValueType t0 = args[0].type;
@@ -255,8 +256,7 @@ TclX_MinMaxFunc (clientData, interp, args, resultPtr)
 #define RANDOM_RANGE 0x7fffffffL
 
 static long 
-ReallyRandom (myRange)
-    long myRange;
+ReallyRandom (long myRange)
 {
     long maxMultiple, rnum;
 
@@ -276,12 +276,10 @@ ReallyRandom (myRange)
  *  Standard TCL results.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_RandomObjCmd (dummy, interp, objc, objv)
-    ClientData  dummy;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int	TclX_RandomObjCmd (ClientData  clientData,
+                               Tcl_Interp *interp,
+				               int         objc,
+                               Tcl_Obj     *CONST objv[])
 {
     long range;
     char *seedString;
@@ -335,8 +333,7 @@ TclX_RandomObjCmd (dummy, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_MathInit (interp)
-    Tcl_Interp *interp;
+TclX_MathInit (Tcl_Interp *interp)
 {
     int major, minor;
     Tcl_ValueType minMaxArgTypes[2];

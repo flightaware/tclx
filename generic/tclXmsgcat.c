@@ -77,9 +77,7 @@ static void_pt msgCatTblPtr = NULL;
  *-----------------------------------------------------------------------------
  */
 static nl_catd
-catopen (name, oflag)
-    char *name;
-    int   oflag;
+catopen (char *name, int oflag)
 {
     return (nl_catd) -1;
 }
@@ -92,10 +90,7 @@ catopen (name, oflag)
  *-----------------------------------------------------------------------------
  */
 static char *
-catgets (catd, set_num, msg_num, defaultStr)
-    nl_catd catd;
-    int     set_num, msg_num;
-    char   *defaultStr;
+catgets (nl_catd catd, int set_num, int msg_num, char *defaultStr)
 {
     return defaultStr;
 }
@@ -107,8 +102,7 @@ catgets (catd, set_num, msg_num, defaultStr)
  *-----------------------------------------------------------------------------
  */
 static int
-catclose (catd)
-    nl_catd catd;
+catclose (nl_catd catd)
 {
     return -1;
 }
@@ -121,10 +115,9 @@ catclose (catd)
  *-----------------------------------------------------------------------------
  */
 static int
-ParseFailOptionObj (interp, optionObj, failPtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *optionObj;
-    int        *failPtr;
+ParseFailOptionObj (Tcl_Interp *interp,
+                    Tcl_Obj    *optionObj,
+                    int        *failPtr)
 {
     char *optionStr;
 
@@ -153,9 +146,8 @@ ParseFailOptionObj (interp, optionObj, failPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-CatOpFailedObj (interp, errorMsg)
-    Tcl_Interp *interp;
-    CONST char *errorMsg;
+CatOpFailedObj (Tcl_Interp *interp,
+                CONST char *errorMsg)
 {
 #ifndef NO_CATGETS
     TclX_AppendObjResult (interp, errorMsg, (char *) NULL);
@@ -177,11 +169,10 @@ CatOpFailedObj (interp, errorMsg)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CatopenObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+TclX_CatopenObjCmd (ClientData  clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[])
 {
     int      fail;
     nl_catd  catDesc;
@@ -218,11 +209,10 @@ TclX_CatopenObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CatgetsObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+TclX_CatgetsObjCmd (ClientData  clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj   *CONST objv[])
 {
     nl_catd   *catDescPtr;
     int       msgSetNum, msgNum;
@@ -274,11 +264,10 @@ TclX_CatgetsObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CatcloseObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+TclX_CatcloseObjCmd (ClientData  clientData,
+                     Tcl_Interp *interp,
+                     int         objc,
+                     Tcl_Obj   *CONST objv[])
 {
     int          fail;
     nl_catd     *catDescPtr;
@@ -333,9 +322,8 @@ TclX_CatcloseObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static void
-MsgCatCleanUp (clientData, interp)
-    ClientData  clientData;
-    Tcl_Interp *interp;
+MsgCatCleanUp (ClientData  clientData,
+               Tcl_Interp *interp)
 {
     nl_catd *catDescPtr;
     int      walkKey;
@@ -362,8 +350,7 @@ MsgCatCleanUp (clientData, interp)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_MsgCatInit (interp)
-    Tcl_Interp *interp;
+TclX_MsgCatInit (Tcl_Interp *interp)
 {
     /*
      * Set up the table.  It is shared between all interpreters, so the use

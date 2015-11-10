@@ -107,14 +107,12 @@ TclX_SelectObjCmd (ClientData clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-ParseSelectFileList (interp, chanAccess, handleList, fileSetPtr,
-                     channelListPtr, maxFileIdPtr)
-    Tcl_Interp    *interp;
-    int            chanAccess;
-    Tcl_Obj       *handleList;
-    fd_set        *fileSetPtr;
-    channelData_t **channelListPtr;
-    int           *maxFileIdPtr;
+ParseSelectFileList (Tcl_Interp     *interp,
+                     int             chanAccess,
+                     Tcl_Obj        *handleList,
+                     fd_set         *fileSetPtr,
+                     channelData_t **channelListPtr,
+                     int            *maxFileIdPtr)
 {
     int handleCnt, idx;
     Tcl_Obj **handleObjv;
@@ -204,10 +202,9 @@ ParseSelectFileList (interp, chanAccess, handleList, fileSetPtr,
  *-----------------------------------------------------------------------------
  */
 static int
-FindPendingData (fileDescCnt, channelList, fileDescSetPtr)
-    int            fileDescCnt;
-    channelData_t *channelList;
-    fd_set        *fileDescSetPtr;
+FindPendingData (int            fileDescCnt,
+                 channelData_t *channelList,
+                 fd_set        *fileDescSetPtr)
 {
     int idx, found = FALSE;
 
@@ -238,10 +235,9 @@ FindPendingData (fileDescCnt, channelList, fileDescSetPtr)
  *-----------------------------------------------------------------------------
  */
 static Tcl_Obj *
-ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList) 
-    fd_set        *fileDescSetPtr;
-    int            fileDescCnt;
-    channelData_t *channelList;
+ReturnSelectedFileList (fd_set        *fileDescSetPtr,
+                        int            fileDescCnt,
+                        channelData_t *channelList)
 {
     int idx, handleCnt;
     Tcl_Obj *fileHandleList = Tcl_NewListObj (0, NULL);
@@ -275,12 +271,11 @@ ReturnSelectedFileList (fileDescSetPtr, fileDescCnt, channelList)
  *     or {} it the timeout expired.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_SelectObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+static int 
+TclX_SelectObjCmd (ClientData clientData, 
+                   Tcl_Interp *interp,
+                   int objc,
+                   Tcl_Obj *CONST objv[])
 {
     static int chanAccess [] = {TCL_READABLE, TCL_WRITABLE, 0};
     int idx;
@@ -411,7 +406,7 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj     *CONST objv[];
+    Tcl_Obj     *CONST objv[]
 {
     Tcl_AppendResult(interp, Tcl_GetString(objv[0]),
 	    " is not available on this OS", (char *) NULL);
@@ -426,8 +421,7 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SelectInit (interp)
-    Tcl_Interp *interp;
+TclX_SelectInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp, 
                           "select",

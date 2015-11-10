@@ -185,8 +185,7 @@ static Tcl_ObjType keyedListType = {
  */
 #ifdef TCLX_DEBUG
 static void
-ValidateKeyedList (keylIntPtr)
-    keylIntObj_t *keylIntPtr;
+ValidateKeyedList (KeylIntObj_t *keylIntPtr)
 {
     int idx;
 
@@ -222,10 +221,7 @@ ValidateKeyedList (keylIntPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ValidateKey (interp, key, keyLen)
-    Tcl_Interp *interp;
-    char *key;
-    int keyLen;
+ValidateKey (Tcl_Interp *interp, char *key, int keyLen)
 {
     if (strlen (key) != (size_t) keyLen) {
 	Tcl_AppendStringsToObj(Tcl_GetObjResult(interp),
@@ -272,8 +268,7 @@ AllocKeyedListIntRep ()
  *-----------------------------------------------------------------------------
  */
 static void
-FreeKeyedListData (keylIntPtr)
-    keylIntObj_t *keylIntPtr;
+FreeKeyedListData (keylIntObj_t *keylIntPtr)
 {
     int idx;
 
@@ -304,9 +299,7 @@ FreeKeyedListData (keylIntPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-EnsureKeyedListSpace (keylIntPtr, newNumEntries)
-    keylIntObj_t *keylIntPtr;
-    int		  newNumEntries;
+EnsureKeyedListSpace (keylIntObj_t *keylIntPtr, int newNumEntries)
 {
     KEYL_REP_ASSERT (keylIntPtr);
 
@@ -337,9 +330,7 @@ EnsureKeyedListSpace (keylIntPtr, newNumEntries)
  *-----------------------------------------------------------------------------
  */
 static void
-DeleteKeyedListEntry (keylIntPtr, entryIdx)
-    keylIntObj_t *keylIntPtr;
-    int		  entryIdx;
+DeleteKeyedListEntry (keylIntObj_t *keylIntPtr, int entryIdx)
 {
     int idx;
 
@@ -397,11 +388,10 @@ DeleteKeyedListEntry (keylIntPtr, entryIdx)
  *-----------------------------------------------------------------------------
  */
 static int
-FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
-    keylIntObj_t *keylIntPtr;
-    char	 *key;
-    int		 *keyLenPtr;
-    char	**nextSubKeyPtr;
+FindKeyedListEntry (keylIntObj_t *keylIntPtr,
+                    char	     *key,
+                    int	     *keyLenPtr,
+                    char	    **nextSubKeyPtr)
 {
     char *keySeparPtr;
     int keyLen, findIdx = -1;
@@ -470,8 +460,7 @@ FindKeyedListEntry (keylIntPtr, key, keyLenPtr, nextSubKeyPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-FreeKeyedListInternalRep (keylPtr)
-    Tcl_Obj *keylPtr;
+FreeKeyedListInternalRep (Tcl_Obj *keylPtr)
 {
     FreeKeyedListData ((keylIntObj_t *) keylPtr->internalRep.otherValuePtr);
 }
@@ -486,9 +475,7 @@ FreeKeyedListInternalRep (keylPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-DupKeyedListInternalRep (srcPtr, copyPtr)
-    Tcl_Obj *srcPtr;
-    Tcl_Obj *copyPtr;
+DupKeyedListInternalRep (Tcl_Obj *srcPtr, Tcl_Obj *copyPtr)
 {
     keylIntObj_t *srcIntPtr =
 	(keylIntObj_t *) srcPtr->internalRep.otherValuePtr;
@@ -548,9 +535,7 @@ DupKeyedListInternalRep (srcPtr, copyPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-SetKeyedListFromAny (interp, objPtr) 
-    Tcl_Interp *interp;
-    Tcl_Obj    *objPtr;
+SetKeyedListFromAny (Tcl_Interp *interp, Tcl_Obj *objPtr) 
 {
     keylIntObj_t *keylIntPtr;
     keylEntry_t *keyEntryPtr;
@@ -634,8 +619,7 @@ SetKeyedListFromAny (interp, objPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-UpdateStringOfKeyedList (keylPtr)
-    Tcl_Obj  *keylPtr;
+UpdateStringOfKeyedList (Tcl_Obj *keylPtr)
 {
 #define UPDATE_STATIC_SIZE 32
     int idx, strLen;
@@ -716,43 +700,43 @@ TclX_NewKeyedListObj ()
  *-----------------------------------------------------------------------------
  */
 int
-TclX_KeyedListGet (interp, keylPtr, key, valuePtrPtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *keylPtr;
-    char       *key;
-    Tcl_Obj   **valuePtrPtr;
+TclX_KeyedListGet (Tcl_Interp *interp,
+                   Tcl_Obj    *keylPtr,
+                   char       *key,
+                   Tcl_Obj   **valuePtrPtr)
 {
     keylIntObj_t *keylIntPtr;
     char *nextSubKey;
     int findIdx;
 
     while (1) {
-	if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
-	    return TCL_ERROR;
-	keylIntPtr = (keylIntObj_t *) keylPtr->internalRep.otherValuePtr;
-	KEYL_REP_ASSERT (keylIntPtr);
+        if (Tcl_ConvertToType (interp, keylPtr, &keyedListType) != TCL_OK)
+            return TCL_ERROR;
 
-	findIdx = FindKeyedListEntry(keylIntPtr, key, NULL, &nextSubKey);
+        keylIntPtr = (keylIntObj_t *) keylPtr->internalRep.otherValuePtr;
+        KEYL_REP_ASSERT (keylIntPtr);
 
-	/*
-	 * If not found, return status.
-	 */
-	if (findIdx < 0) {
-	    *valuePtrPtr = NULL;
-	    return TCL_BREAK;
-	}
+        findIdx = FindKeyedListEntry(keylIntPtr, key, NULL, &nextSubKey);
 
-	/*
-	 * If we are at the last subkey, return the entry, otherwise recurse
-	 * down looking for the entry.
-	 */
-	if (nextSubKey == NULL) {
-	    *valuePtrPtr = keylIntPtr->entries [findIdx].valuePtr;
-	    return TCL_OK;
-	} else {
-	    keylPtr = keylIntPtr->entries [findIdx].valuePtr;
-	    key = nextSubKey;
-	}
+        /*
+         * If not found, return status.
+         */
+        if (findIdx < 0) {
+            *valuePtrPtr = NULL;
+            return TCL_BREAK;
+        }
+
+        /*
+         * If we are at the last subkey, return the entry, otherwise recurse
+         * down looking for the entry.
+         */
+        if (nextSubKey == NULL) {
+            *valuePtrPtr = keylIntPtr->entries [findIdx].valuePtr;
+            return TCL_OK;
+        } else {
+            keylPtr = keylIntPtr->entries [findIdx].valuePtr;
+            key = nextSubKey;
+        }
     }
 }
 
@@ -771,11 +755,10 @@ TclX_KeyedListGet (interp, keylPtr, key, valuePtrPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *keylPtr;
-    char       *key;
-    Tcl_Obj    *valuePtr;
+TclX_KeyedListSet (Tcl_Interp *interp,
+                   Tcl_Obj    *keylPtr,
+                   char       *key,
+                   Tcl_Obj    *valuePtr)
 {
     keylIntObj_t *keylIntPtr;
     keylEntry_t *keyEntryPtr;
@@ -897,10 +880,7 @@ TclX_KeyedListSet (interp, keylPtr, key, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_KeyedListDelete (interp, keylPtr, key)
-    Tcl_Interp *interp;
-    Tcl_Obj    *keylPtr;
-    char       *key;
+TclX_KeyedListDelete (Tcl_Interp *interp, Tcl_Obj *keylPtr, char *key)
 {
     keylIntObj_t *keylIntPtr, *subKeylIntPtr;
     char *nextSubKey;
@@ -971,11 +951,10 @@ TclX_KeyedListDelete (interp, keylPtr, key)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_KeyedListGetKeys (interp, keylPtr, key, listObjPtrPtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *keylPtr;
-    char       *key;
-    Tcl_Obj   **listObjPtrPtr;
+TclX_KeyedListGetKeys (Tcl_Interp *interp,
+                       Tcl_Obj    *keylPtr,
+                       char       *key,
+                       Tcl_Obj   **listObjPtrPtr)
 {
     keylIntObj_t *keylIntPtr;
     Tcl_Obj *listObjPtr;
@@ -1024,11 +1003,10 @@ TclX_KeyedListGetKeys (interp, keylPtr, key, listObjPtrPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_KeylgetObjCmd (clientData, interp, objc, objv)
-    ClientData	 clientData;
-    Tcl_Interp	*interp;
-    int		 objc;
-    Tcl_Obj	*CONST objv[];
+TclX_KeylgetObjCmd (ClientData      clientData,
+                    Tcl_Interp     *interp,
+                    int             objc,
+                    Tcl_Obj *CONST objv[])
 {
     Tcl_Obj *keylPtr, *valuePtr;
     char *key;
@@ -1103,11 +1081,10 @@ TclX_KeylgetObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_KeylsetObjCmd (clientData, interp, objc, objv)
-    ClientData	 clientData;
-    Tcl_Interp	*interp;
-    int		 objc;
-    Tcl_Obj	*CONST objv[];
+TclX_KeylsetObjCmd (ClientData     clientData,
+                    Tcl_Interp    *interp,
+                    int            objc,
+                    Tcl_Obj *CONST objv[])
 {
     Tcl_Obj *keylVarPtr, *newVarObj;
     char *key;
@@ -1163,11 +1140,10 @@ TclX_KeylsetObjCmd (clientData, interp, objc, objv)
  *----------------------------------------------------------------------------
  */
 static int
-TclX_KeyldelObjCmd (clientData, interp, objc, objv)
-    ClientData	 clientData;
-    Tcl_Interp	*interp;
-    int		 objc;
-    Tcl_Obj	*CONST objv[];
+TclX_KeyldelObjCmd (ClientData  clientData,
+                    Tcl_Interp *interp,
+                    int         objc,
+                    Tcl_Obj    *CONST objv[])
 {
     Tcl_Obj *keylVarPtr, *keylPtr;
     char *key;
@@ -1225,11 +1201,10 @@ TclX_KeyldelObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_KeylkeysObjCmd (clientData, interp, objc, objv)
-    ClientData	 clientData;
-    Tcl_Interp	*interp;
-    int		 objc;
-    Tcl_Obj	*CONST objv[];
+TclX_KeylkeysObjCmd (ClientData   clientData,
+                     Tcl_Interp  *interp,
+                     int          objc,
+                     Tcl_Obj     *CONST objv[])
 {
     Tcl_Obj *keylPtr, *listObjPtr;
     char *key;
@@ -1281,8 +1256,7 @@ TclX_KeylkeysObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_KeyedListInit (interp)
-    Tcl_Interp *interp;
+TclX_KeyedListInit (Tcl_Interp *interp)
 {
     Tcl_RegisterObjType (&keyedListType);
 
@@ -1299,6 +1273,4 @@ TclX_KeyedListInit (interp)
 	    (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 }
 
-
-
-/* vim: set ts=4 sw=4 sts=4 et : */
+/* vim: set ts=8 sw=4 sts=4 et : */

@@ -121,10 +121,9 @@ HandleDecode (Tcl_Interp   *interp,
  *-----------------------------------------------------------------------------
  */
 static void
-LinkInNewEntries (tblHdrPtr, newIdx, numEntries)
-    tblHeader_pt tblHdrPtr;
-    int          newIdx;
-    int          numEntries;
+LinkInNewEntries (tblHeader_pt tblHdrPtr,
+                  int          newIdx,
+                  int          numEntries)
 {
     int            entIdx, lastIdx;
     entryHeader_pt entryHdrPtr;
@@ -152,9 +151,8 @@ LinkInNewEntries (tblHdrPtr, newIdx, numEntries)
  *-----------------------------------------------------------------------------
  */
 static void
-ExpandTable (tblHdrPtr, neededIdx)
-    tblHeader_pt tblHdrPtr;
-    int          neededIdx;
+ExpandTable (tblHeader_pt tblHdrPtr,
+             int          neededIdx)
 {
     ubyte_pt oldbodyPtr = tblHdrPtr->bodyPtr;
     int      numNewEntries;
@@ -187,9 +185,8 @@ ExpandTable (tblHdrPtr, neededIdx)
  *-----------------------------------------------------------------------------
  */
 static entryHeader_pt
-AllocEntry (tblHdrPtr, entryIdxPtr)
-    tblHeader_pt  tblHdrPtr;
-    int          *entryIdxPtr;
+AllocEntry (tblHeader_pt  tblHdrPtr,
+            int          *entryIdxPtr)
 {
     int            entryIdx;
     entryHeader_pt entryHdrPtr;
@@ -224,10 +221,7 @@ AllocEntry (tblHdrPtr, entryIdxPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-HandleDecode (interp, tblHdrPtr, handle)
-    Tcl_Interp   *interp;
-    tblHeader_pt  tblHdrPtr;
-    CONST char   *handle;
+HandleDecode (Tcl_Interp *interp, tblHeader_pt tblHdrPtr, CONST char *handle)
 {
     unsigned entryIdx;
 
@@ -259,10 +253,9 @@ HandleDecode (interp, tblHdrPtr, handle)
  *-----------------------------------------------------------------------------
  */
 static int
-HandleDecodeObj (interp, tblHdrPtr, handle)
-    Tcl_Interp   *interp;
-    tblHeader_pt  tblHdrPtr;
-    CONST char   *handle;
+HandleDecodeObj (Tcl_Interp   *interp,
+                 tblHeader_pt  tblHdrPtr,
+                 CONST char   *handle)
 {
     unsigned entryIdx;
 
@@ -291,10 +284,7 @@ HandleDecodeObj (interp, tblHdrPtr, handle)
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleTblInit (handleBase, entrySize, initEntries)
-    CONST char *handleBase;
-    int         entrySize;
-    int         initEntries;
+TclX_HandleTblInit (CONST char *handleBase, int entrySize, int initEntries)
 {
     tblHeader_pt tblHdrPtr;
     int          baseLength = strlen ((char *) handleBase);
@@ -349,9 +339,7 @@ TclX_HandleTblInit (handleBase, entrySize, initEntries)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_HandleTblUseCount (headerPtr, amount)
-    void_pt  headerPtr;
-    int      amount;
+TclX_HandleTblUseCount (void_pt headerPtr, int amount)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
         
@@ -369,8 +357,7 @@ TclX_HandleTblUseCount (headerPtr, amount)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_HandleTblRelease (headerPtr)
-    void_pt headerPtr;
+TclX_HandleTblRelease (void_pt headerPtr)
 {
     tblHeader_pt  tblHdrPtr = (tblHeader_pt) headerPtr;
 
@@ -394,9 +381,7 @@ TclX_HandleTblRelease (headerPtr)
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleAlloc (headerPtr, handlePtr)
-    void_pt   headerPtr;
-    char     *handlePtr;
+TclX_HandleAlloc (void_pt headerPtr, char *handlePtr)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     entryHeader_pt entryHdrPtr;
@@ -422,10 +407,7 @@ TclX_HandleAlloc (headerPtr, handlePtr)
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleXlate (interp, headerPtr, handle)
-    Tcl_Interp *interp;
-    void_pt     headerPtr;
-    CONST char *handle;
+TclX_HandleXlate (Tcl_Interp *interp, void_pt headerPtr, CONST char *handle)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     entryHeader_pt entryHdrPtr;
@@ -459,10 +441,7 @@ TclX_HandleXlate (interp, headerPtr, handle)
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleXlateObj (interp, headerPtr, handleObj)
-    Tcl_Interp *interp;
-    void_pt     headerPtr;
-    Tcl_Obj *handleObj;
+TclX_HandleXlateObj (Tcl_Interp *interp, void_pt headerPtr, Tcl_Obj *handleObj)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     entryHeader_pt entryHdrPtr;
@@ -500,9 +479,7 @@ TclX_HandleXlateObj (interp, headerPtr, handleObj)
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleWalk (headerPtr, walkKeyPtr)
-    void_pt   headerPtr;
-    int      *walkKeyPtr;
+TclX_HandleWalk (void_pt headerPtr, int *walkKeyPtr)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     int            entryIdx;
@@ -537,10 +514,7 @@ TclX_HandleWalk (headerPtr, walkKeyPtr)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_WalkKeyToHandle (headerPtr, walkKey, handlePtr)
-    void_pt   headerPtr;
-    int       walkKey;
-    char     *handlePtr;
+TclX_WalkKeyToHandle (void_pt headerPtr, int walkKey, char *handlePtr)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
 
@@ -558,9 +532,7 @@ TclX_WalkKeyToHandle (headerPtr, walkKey, handlePtr)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_HandleFree (headerPtr, entryPtr)
-    void_pt headerPtr;
-    void_pt entryPtr;
+TclX_HandleFree (void_pt headerPtr, void_pt entryPtr)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     entryHeader_pt entryHdrPtr;
@@ -574,8 +546,5 @@ TclX_HandleFree (headerPtr, entryPtr)
         (((ubyte_pt) entryHdrPtr) - tblHdrPtr->bodyPtr) / tblHdrPtr->entrySize;
     
 }
-
-
-
 
 /* vim: set ts=4 sw=4 sts=4 et : */

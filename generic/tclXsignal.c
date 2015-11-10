@@ -346,8 +346,7 @@ TclX_KillObjCmd (ClientData   clientData,
  *-----------------------------------------------------------------------------
  */
 static CONST84 char *
-GetSignalName (signalNum)
-    int signalNum;
+GetSignalName (int signalNum)
 {
 #ifdef SIGCHLD
     /*
@@ -372,10 +371,7 @@ GetSignalName (signalNum)
  *-----------------------------------------------------------------------------
  */
 static int
-GetSignalState (signalNum, sigProcPtr, restart)
-    int              signalNum;
-    signalProcPtr_t *sigProcPtr;
-    int             *restart;
+GetSignalState (int signalNum, signalProcPtr_t *sigProcPtr, int *restart)
 {
 #ifndef NO_SIGACTION
     struct sigaction currentState;
@@ -421,10 +417,7 @@ GetSignalState (signalNum, sigProcPtr, restart)
  *-----------------------------------------------------------------------------
  */
 static int
-SetSignalState (signalNum, sigFunc, restart)
-    int             signalNum;
-    signalProcPtr_t sigFunc;
-    int             restart;
+SetSignalState (int signalNum, signalProcPtr_t sigFunc, int restart)
 {
 #ifndef NO_SIGACTION
     struct sigaction newState;
@@ -470,10 +463,7 @@ SetSignalState (signalNum, sigFunc, restart)
  *-----------------------------------------------------------------------------
  */
 static int
-BlockSignals (interp, action, signals)
-    Tcl_Interp    *interp;
-    int            action;
-    unsigned char  signals [];
+BlockSignals (Tcl_Interp *interp, int action, unsigned char signals[])
 {
 #ifndef NO_SIGACTION
     int      signalNum;
@@ -514,8 +504,7 @@ BlockSignals (interp, action, signals)
  *-----------------------------------------------------------------------------
  */
 static Tcl_Obj *
-SignalBlocked (signalNum)
-    int signalNum;
+SignalBlocked (int signalNum)
 {
 #ifndef NO_SIGACTION
     sigset_t sigBlockSet;
@@ -544,10 +533,7 @@ SignalBlocked (signalNum)
  *-----------------------------------------------------------------------------
  */
 static int
-SigNameToNum (interp, sigName, sigNumPtr)
-    Tcl_Interp *interp;
-    char       *sigName;
-    int        *sigNumPtr;
+SigNameToNum (Tcl_Interp *interp, char *sigName, int *sigNumPtr)
 {
     char  sigNameUp [SIG_NAME_MAX+1];  /* Upshifted signal name */
     char *sigNamePtr; 
@@ -593,10 +579,7 @@ SigNameToNum (interp, sigName, sigNumPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ParseSignalSpec (interp, signalStr, allowZero)
-    Tcl_Interp *interp;
-    char       *signalStr;
-    int         allowZero;
+ParseSignalSpec (Tcl_Interp *interp, char *signalStr, int allowZero)
 {
     int  signalNum;
 
@@ -626,8 +609,7 @@ ParseSignalSpec (interp, signalStr, allowZero)
  *-----------------------------------------------------------------------------
  */
 static RETSIGTYPE
-SignalTrap (signalNum)
-    int signalNum;
+SignalTrap (int signalNum)
 {
     if (asyncHandler == NULL)
 	return;
@@ -670,10 +652,7 @@ SignalTrap (signalNum)
  *-----------------------------------------------------------------------------
  */
 static int
-FormatTrapCode (interp, signalNum, command)
-    Tcl_Interp  *interp;
-    int          signalNum;
-    Tcl_DString *command;
+FormatTrapCode (Tcl_Interp *interp, int signalNum, Tcl_DString *command)
 {
     char *copyPtr, *scanPtr;
 
@@ -738,9 +717,7 @@ FormatTrapCode (interp, signalNum, command)
  *-----------------------------------------------------------------------------
  */
 static int
-EvalTrapCode (interp, signalNum)
-    Tcl_Interp *interp;
-    int         signalNum;
+EvalTrapCode (Tcl_Interp *interp, int signalNum)
 {
     int          result;
     Tcl_DString  command;
@@ -793,10 +770,7 @@ EvalTrapCode (interp, signalNum)
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessASignal (interp, background, signalNum)
-    Tcl_Interp *interp;
-    int         background;
-    int         signalNum;
+ProcessASignal (Tcl_Interp *interp, int background, int signalNum)
 {
     int result = TCL_OK;
 
@@ -866,10 +840,7 @@ ProcessASignal (interp, background, signalNum)
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessSignals (clientData, interp, cmdResultCode)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         cmdResultCode;
+ProcessSignals (ClientData clientData, Tcl_Interp *interp, int cmdResultCode)
 {
     Tcl_Interp *sigInterp;
     Tcl_Obj    *errStateObjPtr;
@@ -953,10 +924,9 @@ ProcessSignals (clientData, interp, cmdResultCode)
  *-----------------------------------------------------------------------------
  */
 static int
-ParseSignalList (interp, signalListObjPtr, signals)
-    Tcl_Interp    *interp;
-    Tcl_Obj       *signalListObjPtr;
-    unsigned char  signals [MAXSIG];
+ParseSignalList (Tcl_Interp    *interp,
+                 Tcl_Obj       *signalListObjPtr,
+                 unsigned char  signals [MAXSIG])
 {
     Tcl_Obj **signalObjv;
     char     *signalStr;
@@ -1037,12 +1007,11 @@ ParseSignalList (interp, signalListObjPtr, signals)
  *-----------------------------------------------------------------------------
  */
 static int
-SetSignalActions (interp, signals, actionFunc, restart, command)
-    Tcl_Interp      *interp;
-    unsigned char    signals [MAXSIG];
-    signalProcPtr_t  actionFunc;
-    int              restart;
-    char            *command;
+SetSignalActions (Tcl_Interp      *interp,
+                  unsigned char    signals [MAXSIG],
+                  signalProcPtr_t  actionFunc,
+                  int              restart,
+                  char            *command)
 {
     int signalNum;
 
@@ -1082,10 +1051,9 @@ SetSignalActions (interp, signals, actionFunc, restart, command)
  *-----------------------------------------------------------------------------
  */
 static int
-FormatSignalListEntry (interp, signalNum, sigStatesObjPtr)
-    Tcl_Interp *interp;
-    int         signalNum;
-    Tcl_Obj    *sigStatesObjPtr;
+FormatSignalListEntry (Tcl_Interp *interp,
+                       int         signalNum,
+                       Tcl_Obj    *sigStatesObjPtr)
 {
     Tcl_Obj *stateObjv [4], *stateObjPtr;
     signalProcPtr_t  actionFunc;
@@ -1161,10 +1129,9 @@ FormatSignalListEntry (interp, signalNum, sigStatesObjPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ProcessSignalListEntry (interp, signalName, stateObjPtr)
-    Tcl_Interp *interp;
-    char       *signalName;
-    Tcl_Obj    *stateObjPtr;
+ProcessSignalListEntry (Tcl_Interp *interp,
+                        char       *signalName,
+                        Tcl_Obj    *stateObjPtr)
 {
     Tcl_Obj **stateObjv;
     int stateObjc;
@@ -1273,9 +1240,8 @@ ProcessSignalListEntry (interp, signalName, stateObjPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-GetSignalStates (interp, signals)
-    Tcl_Interp    *interp;
-    unsigned char  signals [MAXSIG];
+GetSignalStates (Tcl_Interp    *interp,
+                 unsigned char  signals [MAXSIG])
 {
     int signalNum;
     Tcl_Obj *sigStatesObjPtr;
@@ -1311,9 +1277,7 @@ GetSignalStates (interp, signals)
  *-----------------------------------------------------------------------------
  */
 static int
-SetSignalStates (interp, sigStatesObjPtr)
-    Tcl_Interp *interp;
-    Tcl_Obj    *sigStatesObjPtr;
+SetSignalStates (Tcl_Interp *interp, Tcl_Obj *sigStatesObjPtr)
 {
     Tcl_Obj *keysListObj, **keysObjv, *stateObjPtr;
     int keysObjc, idx;
@@ -1344,11 +1308,10 @@ SetSignalStates (interp, sigStatesObjPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_SignalObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+TclX_SignalObjCmd (ClientData   clientData,
+                   Tcl_Interp  *interp,
+                   int          objc,
+                   Tcl_Obj     *CONST objv[])
 {
     unsigned char signals [MAXSIG];
     char *argStr, *actionStr;
@@ -1485,11 +1448,10 @@ TclX_SignalObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_KillObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj     *CONST objv[];
+TclX_KillObjCmd (ClientData   clientData,
+                 Tcl_Interp  *interp,
+                 int          objc,
+                 Tcl_Obj     *CONST objv[])
 {
     int    signalNum, nextArg, idx, procId, procObjc;
     int    pgroup = FALSE;
@@ -1569,9 +1531,7 @@ TclX_KillObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static void
-SignalCmdCleanUp (clientData, interp)
-    ClientData  clientData;
-    Tcl_Interp *interp;
+SignalCmdCleanUp (ClientData clientData, Tcl_Interp *interp)
 {
     int  idx;
 
@@ -1635,9 +1595,8 @@ TclX_SetupSigInt ()
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SetAppSignalErrorHandler (errorFunc, clientData)
-    TclX_AppSignalErrorHandler errorFunc;
-    ClientData                 clientData;
+TclX_SetAppSignalErrorHandler (TclX_AppSignalErrorHandler errorFunc,
+                               ClientData                 clientData)
 {
     appSigErrorHandler = errorFunc;
     appSigErrorClientData = clientData;
@@ -1649,8 +1608,7 @@ TclX_SetAppSignalErrorHandler (errorFunc, clientData)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SignalInit (interp)
-    Tcl_Interp *interp;
+TclX_SignalInit (Tcl_Interp *interp)
 {
     int		idx;
 

@@ -72,12 +72,11 @@ TclX_UmaskObjCmd (ClientData clientData,
  *
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_AlarmObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_AlarmObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[])
 {
     double seconds;
 
@@ -103,12 +102,11 @@ TclX_AlarmObjCmd (clientData, interp, objc, objv)
  *  Standard TCL results, may return the UNIX system error message.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_LinkObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_LinkObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[])
 {
     char *srcPath, *destPath;
     Tcl_DString  srcPathBuf, destPathBuf;
@@ -173,12 +171,11 @@ TclX_LinkObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_NiceObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_NiceObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[])
 {
     Tcl_Obj    *resultPtr = Tcl_GetObjResult (interp);
     int         priorityIncr, priority;
@@ -223,12 +220,11 @@ TclX_NiceObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_SleepObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_SleepObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[])
 {
     double time;
 
@@ -252,12 +248,11 @@ TclX_SleepObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_SyncObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_SyncObjCmd (ClientData clientData,
+                 Tcl_Interp *interp,
+                 int objc,
+                 Tcl_Obj *CONST objv[])
 {
     Tcl_Channel  channel;
 
@@ -287,12 +282,11 @@ TclX_SyncObjCmd (clientData, interp, objc, objv)
  *      system cmdstr1 ?cmdstr2...?
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_SystemObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_SystemObjCmd (ClientData clientData,
+                   Tcl_Interp *interp,
+                   int objc,
+                   Tcl_Obj *CONST objv[])
 {
     Tcl_Obj *cmdObjPtr;
     char *cmdStr;
@@ -323,12 +317,11 @@ TclX_SystemObjCmd (clientData, interp, objc, objv)
  *
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_UmaskObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj   *CONST objv[];
+static int 
+TclX_UmaskObjCmd (ClientData clientData,
+                  Tcl_Interp *interp,
+                  int objc,
+                  Tcl_Obj *CONST objv[])
 {
     int    mask;
     char  *umaskString;
@@ -366,8 +359,7 @@ TclX_UmaskObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_OsCmdsInit (interp)
-    Tcl_Interp *interp;
+TclX_OsCmdsInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
 			  "alarm",

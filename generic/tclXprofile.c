@@ -180,13 +180,12 @@ ProfMonCleanUp (ClientData  clientData,
  *-----------------------------------------------------------------------------
  */
 static void
-PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
-    profInfo_t *infoPtr;
-    const char *cmdName;
-    int         isProc;
-    int         procLevel;
-    int         scopeLevel;
-    int         evalLevel;
+PushEntry (profInfo_t *infoPtr,
+           const char *cmdName,
+           int         isProc,
+           int         procLevel,
+           int         scopeLevel,
+           int         evalLevel)
 {
     profEntry_t *entryPtr, *scanPtr;
 
@@ -245,9 +244,8 @@ PushEntry (infoPtr, cmdName, isProc, procLevel, scopeLevel, evalLevel)
  *-----------------------------------------------------------------------------
  */
 static void
-RecordData (infoPtr, entryPtr)
-    profInfo_t  *infoPtr;
-    profEntry_t *entryPtr;
+RecordData (profInfo_t  *infoPtr,
+            profEntry_t *entryPtr)
 {
     int idx, newEntry;
     profEntry_t *scanPtr;
@@ -349,8 +347,7 @@ PopEntry (infoPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-UpdateTOSTimes (infoPtr)
-    profInfo_t *infoPtr;
+UpdateTOSTimes (profInfo_t *infoPtr)
 {
     /*
      * Get the current time if we haven't already.
@@ -385,9 +382,7 @@ UpdateTOSTimes (infoPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-ProfCommandEvalSetup (infoPtr, isProcPtr)
-    profInfo_t *infoPtr;
-    int        *isProcPtr;
+ProfCommandEvalSetup (profInfo_t *infoPtr, int *isProcPtr)
 {
     Interp *iPtr = (Interp *) infoPtr->interp;
     Tcl_CmdInfo cmdInfo;
@@ -479,9 +474,7 @@ ProfCommandEvalSetup (infoPtr, isProcPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-ProfCommandEvalFinishup (infoPtr, isProc)
-    profInfo_t *infoPtr;
-    int         isProc;
+ProfCommandEvalFinishup (profInfo_t *infoPtr, int isProc)
 {
     /*
      * If tracing is still running, pop the entry, recording the information.
@@ -511,11 +504,10 @@ ProfCommandEvalFinishup (infoPtr, isProc)
  *-----------------------------------------------------------------------------
  */
 static int
-ProfStrCommandEval (clientData, interp, argc, argv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           argc;
-    CONST84 char **argv;
+ProfStrCommandEval (ClientData    clientData,
+                    Tcl_Interp   *interp,
+                    int           argc,
+                    CONST84 char **argv)
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int isProc, result;
@@ -542,11 +534,10 @@ ProfStrCommandEval (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 static int
-ProfObjCommandEval (clientData, interp, objc, objv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           objc;
-    Tcl_Obj     *CONST objv[];
+ProfObjCommandEval (ClientData    clientData,
+                    Tcl_Interp   *interp,
+                    int           objc,
+                    Tcl_Obj      *CONST objv[])
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int isProc, result;
@@ -567,16 +558,15 @@ ProfObjCommandEval (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static int
-ProfTraceRoutine (clientData, interp, evalLevel, command, cmd,
-                  objc, objv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           evalLevel;
-    const char   *command;
-    Tcl_Command   cmd;
-    int           objc;
-    struct Tcl_Obj * const *objv;
+ProfTraceRoutine (ClientData  clientData,
+                  Tcl_Interp *interp,
+                  int         evalLevel,
+                  const char *command,
+                  Tcl_Command cmd,
+                  int         objc,
+                  Tcl_Obj    *CONST objv[])
 {
+    /* struct Tcl_Obj * const *objv; */
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     Tcl_CmdInfo cmdInfo;
 
@@ -615,8 +605,7 @@ ProfTraceRoutine (clientData, interp, evalLevel, command, cmd,
  *-----------------------------------------------------------------------------
  */
 static void
-CleanDataTable (infoPtr)
-    profInfo_t *infoPtr;
+CleanDataTable (profInfo_t *infoPtr)
 {
     Tcl_HashEntry    *hashEntryPtr;
     Tcl_HashSearch   searchCookie;
@@ -644,9 +633,7 @@ CleanDataTable (infoPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-InitializeProcStack (infoPtr, framePtr)
-    profInfo_t *infoPtr;
-    CallFrame  *framePtr;
+InitializeProcStack (profInfo_t *infoPtr, CallFrame *framePtr)
 {
     if (framePtr == NULL || framePtr->objv == NULL)
         return;
@@ -674,10 +661,7 @@ InitializeProcStack (infoPtr, framePtr)
  *-----------------------------------------------------------------------------
  */
 static void
-TurnOnProfiling (infoPtr, commandMode, evalMode)
-    profInfo_t *infoPtr;
-    int         commandMode;
-    int         evalMode;
+TurnOnProfiling (profInfo_t *infoPtr, int commandMode, int evalMode)
 {
     Interp *iPtr = (Interp *) infoPtr->interp;
     int scopeLevel;
@@ -735,8 +719,7 @@ TurnOnProfiling (infoPtr, commandMode, evalMode)
  *-----------------------------------------------------------------------------
  */
 static void
-DeleteProfTrace (infoPtr)
-    profInfo_t *infoPtr;
+DeleteProfTrace (profInfo_t *infoPtr)
 {
     Tcl_DeleteTrace (infoPtr->interp, infoPtr->traceHandle);
     infoPtr->traceHandle = NULL;
@@ -762,10 +745,7 @@ DeleteProfTrace (infoPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-TurnOffProfiling (interp, infoPtr, varName)
-    Tcl_Interp *interp;
-    profInfo_t *infoPtr;
-    char       *varName;
+TurnOffProfiling (Tcl_Interp *interp, profInfo_t *infoPtr, char *varName)
 {
     Tcl_HashEntry *hashEntryPtr;
     Tcl_HashSearch searchCookie;
@@ -817,11 +797,10 @@ TurnOffProfiling (interp, infoPtr, varName)
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_ProfileObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+TclX_ProfileObjCmd (ClientData   clientData,
+                    Tcl_Interp  *interp,
+                    int          objc,
+                    Tcl_Obj    *CONST objv[])
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int argIdx;
@@ -918,9 +897,7 @@ TclX_ProfileObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 static void
-ProfMonCleanUp (clientData, interp)
-    ClientData  clientData;
-    Tcl_Interp *interp;
+ProfMonCleanUp (ClientData clientData, Tcl_Interp *interp)
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
 
@@ -937,8 +914,7 @@ ProfMonCleanUp (clientData, interp)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_ProfileInit (interp)
-    Tcl_Interp *interp;
+TclX_ProfileInit (Tcl_Interp *interp)
 {
     profInfo_t *infoPtr;
 

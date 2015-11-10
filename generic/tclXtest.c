@@ -68,11 +68,10 @@ TclxTestEvalCmd (ClientData    clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-DoTestEval (interp, levelStr, command, resultList)
-    Tcl_Interp  *interp;
-    char        *levelStr;
-    char        *command;
-    Tcl_Obj     *resultList;
+DoTestEval (Tcl_Interp  *interp,
+            char        *levelStr,
+            char        *command,
+            Tcl_Obj     *resultList)
 {
     Interp *iPtr = (Interp *) interp;
     int code;
@@ -131,11 +130,10 @@ DoTestEval (interp, levelStr, command, resultList)
  *-----------------------------------------------------------------------------
  */
 static int
-TclxTestEvalCmd (clientData, interp, argc, argv)
-    ClientData    clientData;
-    Tcl_Interp   *interp;
-    int           argc;
-    char        **argv;
+TclxTestEvalCmd (ClientData    clientData,
+                 Tcl_Interp   *interp,
+                 int           argc,
+                 char        **argv)
 {
     int idx;
     Tcl_Obj *resultList;
@@ -170,8 +168,7 @@ TclxTestEvalCmd (clientData, interp, argc, argv)
  *-----------------------------------------------------------------------------
  */
 int
-Tclxtest_Init (interp)
-    Tcl_Interp *interp;
+Tclxtest_Init (Tcl_Interp *interp)
 {
     Tcl_CreateCommand (interp, "tclx_test_eval", TclxTestEvalCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);

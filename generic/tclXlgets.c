@@ -75,9 +75,8 @@ TclX_LgetsObjCmd (ClientData  clientData,
  *-----------------------------------------------------------------------------
  */
 static int
-ReadListLine (interp, dataPtr)
-    Tcl_Interp  *interp;
-    ReadData    *dataPtr;
+ReadListLine (Tcl_Interp  *interp,
+              ReadData    *dataPtr)
 {
     /*
      * Read the first line of the list. 
@@ -133,10 +132,9 @@ ReadListLine (interp, dataPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ReadListInit (interp, channel, dataPtr)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    ReadData    *dataPtr;
+ReadListInit (Tcl_Interp  *interp,
+              Tcl_Channel  channel,
+              ReadData    *dataPtr)
 {
     int rstat;
     char *p, *limit;
@@ -181,10 +179,9 @@ ReadListInit (interp, channel, dataPtr)
  *-----------------------------------------------------------------------------
  */
 static int
-ReadListElement (interp, dataPtr, elemObjPtr)
-    Tcl_Interp  *interp;
-    ReadData    *dataPtr;
-    Tcl_Obj     *elemObjPtr;
+ReadListElement (Tcl_Interp  *interp,
+                 ReadData    *dataPtr,
+                 Tcl_Obj     *elemObjPtr)
 {
     register char *p;
     char *cpStart;		/* Points to next byte to copy. */
@@ -408,12 +405,11 @@ ReadListElement (interp, dataPtr, elemObjPtr)
  *      See the user documentation.
  *-----------------------------------------------------------------------------
  */
-static int
-TclX_LgetsObjCmd (clientData, interp, objc, objv)
-    ClientData   clientData;
-    Tcl_Interp  *interp;
-    int          objc;
-    Tcl_Obj    *CONST objv[];
+static int 
+TclX_LgetsObjCmd (ClientData  clientData, 
+                 Tcl_Interp  *interp, 
+                 int          objc,
+                 Tcl_Obj     *CONST objv[])
 {
     Tcl_Channel channel;
     ReadData readData;
@@ -535,8 +531,7 @@ TclX_LgetsObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_LgetsInit (interp)
-    Tcl_Interp *interp;
+TclX_LgetsInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
                           "lgets",
@@ -546,4 +541,4 @@ TclX_LgetsInit (interp)
 }
 
 
-/* vim: set ts=4 sw=4 sts=4 et : */
+/* vim: set ts=8 sw=4 sts=4 et : */
