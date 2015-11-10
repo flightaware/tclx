@@ -870,7 +870,7 @@ int
 TclX_IsNullObj (objPtr)
     Tcl_Obj *objPtr;
 {
-    static const Tcl_ObjType *listType = NULL, *stringType = NULL;
+    static Tcl_ObjType *listType = NULL, *stringType = NULL;
     int length;
     
     /*
@@ -1080,3 +1080,5 @@ TclX_StructOffset(nsPtr, offset, offType)
 #endif
     return (void *)((size_t) nsPtr + offset);
 }
+
+/* vim: set ts=4 sw=4 sts=4 et : */

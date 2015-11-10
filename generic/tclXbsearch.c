@@ -382,3 +382,5 @@ TclX_BsearchInit (interp)
                           (ClientData) NULL,
                           (Tcl_CmdDeleteProc*) NULL);
 }
+
+/* vim: set ts=4 sw=4 sts=4 et : */

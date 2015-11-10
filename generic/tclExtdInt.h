@@ -197,11 +197,11 @@ extern Tcl_Obj *tclXWrongArgsObj;
  * Callback type for walking directories.
  */
 typedef int
-(TclX_WalkDirProc) _ANSI_ARGS_((Tcl_Interp  *interp,
-                                char        *path,
-                                char        *fileName,
-                                int          caseSensitive,
-                                ClientData   clientData));
+(TclX_WalkDirProc) (Tcl_Interp  *interp,
+					char        *path,
+					char        *fileName,
+					int          caseSensitive,
+					ClientData   clientData);
 
 /*
  * Prototypes for utility procedures.
@@ -609,4 +609,4 @@ TclXOSSetCloseOnExec _ANSI_ARGS_((Tcl_Interp *interp,
                                   int         value));
 #endif
 
-
+/* vim: set ts=4 sw=4 sts=4 et : */

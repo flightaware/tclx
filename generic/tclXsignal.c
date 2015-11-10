@@ -177,7 +177,7 @@ static struct {
 #   define RETSIGTYPE void
 #endif
 
-typedef RETSIGTYPE (*signalProcPtr_t) _ANSI_ARGS_((int));
+typedef RETSIGTYPE (*signalProcPtr_t) (int);
 
 
 /*
@@ -237,103 +237,103 @@ static char *signalTrapCmds[MAXSIG];
  * Prototypes of internal functions.
  */
 static CONST84 char *
-GetSignalName _ANSI_ARGS_((int signalNum));
+GetSignalName (int signalNum);
 
 static int
-GetSignalState _ANSI_ARGS_((int              signalNum,
-                            signalProcPtr_t *sigProcPtr,
-                            int             *restart));
+GetSignalState (int              signalNum,
+                signalProcPtr_t *sigProcPtr,
+                int             *restart);
 
 static int
-SetSignalState _ANSI_ARGS_((int             signalNum,
-                            signalProcPtr_t sigFunc,
-                            int             restart));
+SetSignalState (int             signalNum,
+                signalProcPtr_t sigFunc,
+                int             restart);
 
 static int
-BlockSignals _ANSI_ARGS_((Tcl_Interp    *interp,
-                          int            action,
-                          unsigned char  signals [MAXSIG]));
+BlockSignals (Tcl_Interp    *interp,
+              int            action,
+              unsigned char  signals [MAXSIG]);
 
 static Tcl_Obj *
-SignalBlocked _ANSI_ARGS_((int signalNum));
+SignalBlocked (int signalNum);
 
 static int
-SigNameToNum _ANSI_ARGS_((Tcl_Interp *interp,
-                          char       *sigName,
-                          int        *sigNumPtr));
+SigNameToNum (Tcl_Interp *interp,
+              char       *sigName,
+              int        *sigNumPtr);
 
 static int
-ParseSignalSpec _ANSI_ARGS_((Tcl_Interp *interp,
-                             char       *signalStr,
-                             int         allowZero));
+ParseSignalSpec (Tcl_Interp *interp,
+                 char       *signalStr,
+                 int         allowZero);
 
 static RETSIGTYPE
-SignalTrap _ANSI_ARGS_((int signalNum));
+SignalTrap (int signalNum);
 
 static int
-FormatTrapCode  _ANSI_ARGS_((Tcl_Interp  *interp,
-                             int          signalNum,
-                             Tcl_DString *command));
+FormatTrapCode  (Tcl_Interp  *interp,
+                 int          signalNum,
+                 Tcl_DString *command);
 
 static int
-EvalTrapCode _ANSI_ARGS_((Tcl_Interp *interp,
-                          int         signalNum));
+EvalTrapCode (Tcl_Interp *interp,
+              int         signalNum);
 
 static int
-ProcessASignal _ANSI_ARGS_((Tcl_Interp *interp,
-                            int         background,
-                            int         signalNum));
+ProcessASignal (Tcl_Interp *interp,
+                int         background,
+                int         signalNum);
 
 static int
-ProcessSignals _ANSI_ARGS_((ClientData  clientData,
-                            Tcl_Interp *interp,
-                            int         cmdResultCode));
+ProcessSignals (ClientData  clientData,
+                Tcl_Interp *interp,
+                int         cmdResultCode);
 
 static int
-ParseSignalList _ANSI_ARGS_((Tcl_Interp    *interp,
-                             Tcl_Obj       *signalListObjPtr,
-                             unsigned char  signals [MAXSIG]));
+ParseSignalList (Tcl_Interp    *interp,
+                 Tcl_Obj       *signalListObjPtr,
+                 unsigned char  signals [MAXSIG]);
 
 static int
-SetSignalActions _ANSI_ARGS_((Tcl_Interp      *interp,
-                              unsigned char    signals [MAXSIG],
-                              signalProcPtr_t  actionFunc,
-                              int              restart,
-                              char            *command));
+SetSignalActions (Tcl_Interp      *interp,
+                  unsigned char    signals [MAXSIG],
+                  signalProcPtr_t  actionFunc,
+                  int              restart,
+                  char            *command);
 
 static int
-FormatSignalListEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                   int         signalNum,
-                                   Tcl_Obj    *sigStatesObjPtr));
+FormatSignalListEntry (Tcl_Interp *interp,
+                       int         signalNum,
+                       Tcl_Obj    *sigStatesObjPtr);
 
 static int
-ProcessSignalListEntry _ANSI_ARGS_((Tcl_Interp *interp,
-                                    char       *signalName,
-                                    Tcl_Obj    *stateObjPtr));
+ProcessSignalListEntry (Tcl_Interp *interp,
+                        char       *signalName,
+                        Tcl_Obj    *stateObjPtr);
 
 static int
-GetSignalStates _ANSI_ARGS_((Tcl_Interp    *interp,
-                             unsigned char  signals [MAXSIG]));
+GetSignalStates (Tcl_Interp    *interp,
+                 unsigned char  signals [MAXSIG]);
 
 static int
-SetSignalStates _ANSI_ARGS_((Tcl_Interp *interp,
-                             Tcl_Obj    *sigStatesObjPtr));
+SetSignalStates (Tcl_Interp *interp,
+                 Tcl_Obj    *sigStatesObjPtr);
 
 static void
-SignalCmdCleanUp _ANSI_ARGS_((ClientData  clientData,
-                              Tcl_Interp *interp));
+SignalCmdCleanUp (ClientData  clientData,
+                  Tcl_Interp *interp);
 
 static int
-TclX_SignalObjCmd _ANSI_ARGS_((ClientData   clientData,
-                               Tcl_Interp  *interp,
-                               int          objc,
-                               Tcl_Obj     *CONST objv[]));
+TclX_SignalObjCmd (ClientData   clientData,
+                   Tcl_Interp  *interp,
+                   int          objc,
+                   Tcl_Obj     *CONST objv[]);
 
 static int
-TclX_KillObjCmd _ANSI_ARGS_((ClientData   clientData,
-                             Tcl_Interp  *interp,
-                             int          objc,
-                             Tcl_Obj     *CONST objv[]));
+TclX_KillObjCmd (ClientData   clientData,
+                 Tcl_Interp  *interp,
+                 int          objc,
+                 Tcl_Obj     *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -1699,3 +1699,5 @@ TclX_SignalInit (interp)
 }
 
 
+
+/* vim: set ts=4 sw=4 sts=4 et : */

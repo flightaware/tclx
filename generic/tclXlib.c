@@ -1012,3 +1012,5 @@ TclX_LibraryInit (interp)
     Tcl_ResetResult (interp);
     return TCL_OK;
 }
+
+/* vim: set ts=4 sw=4 sts=4 et : */

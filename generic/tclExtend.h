@@ -190,3 +190,5 @@ EXTERN int	TclX_AsyncCommandLoop _ANSI_ARGS_((Tcl_Interp *interp,
 #define TCL_STORAGE_CLASS DLLIMPORT
 
 #endif
+
+/* vim: set ts=4 sw=4 sts=4 et : */
