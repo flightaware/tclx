@@ -109,6 +109,7 @@ Tclxcmd_Init (Tcl_Interp *interp)
 	    PACKAGE_VERSION, TCLX_PATCHLEVEL);
 
     TclX_BsearchInit (interp);
+	TclX_CoalesceInit (interp);
     TclX_FstatInit (interp);
     TclX_FlockInit (interp);
     TclX_FilescanInit (interp);

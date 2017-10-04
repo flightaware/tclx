@@ -5434,7 +5434,8 @@ done
 
 
     vars="
-	tclXbsearch.c tclXchmod.c   tclXcmdloop.c  tclXdebug.c
+	tclXbsearch.c tclXchmod.c   tclXcmdloop.c  tclXcoalesce.c
+	tclXdebug.c
 	tclXdup.c     tclXfcntl.c   tclXfilecmds.c tclXfilescan.c
 	tclXflock.c   tclXfstat.c   tclXgeneral.c  tclXhandles.c
 	tclXinit.c    tclXkeylist.c tclXlib.c      tclXlist.c
