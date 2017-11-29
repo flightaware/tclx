@@ -73,12 +73,14 @@ TclX_ChannelFdObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
 
 	if (channelName) {
 		channel = Tcl_GetChannel (interp, channelName, NULL);
-		fd = ChannelToFd(channel, 0);
+        if (channel) {
+		    fd = ChannelToFd(channel, 0);
 
-		if (fd != -1) {
-			Tcl_SetObjResult (interp, Tcl_NewIntObj(fd)); 
-			return TCL_OK;
-		}
+		    if (fd != -1) {
+			    Tcl_SetObjResult (interp, Tcl_NewIntObj(fd));
+			    return TCL_OK;
+		    }
+        }
 	}
 
 	Tcl_SetResult(interp, "failed to get file descriptor from channel", TCL_STATIC);
