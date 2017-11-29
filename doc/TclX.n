@@ -1090,6 +1090,19 @@ This command does not work on files containing binary data (bytes of zero).
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+'\"@help: tcl/files/channelfd
+'\"@brief: Get unix fd from TCL channel
+.TP
+\fBchannelfd \fIchannel\fR
+.br
+Get the unix file descriptor, an integer, for \fIchannel\fR using the Tcl_GetChannelHandle API.
+On any error the return value -1.
+.sp
+The \fBchannelfd\fR command is not available on \fBWindows\fR.
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
 '\"@help: tcl/files/chmod
 '\"@brief: Set file permissions.
 .TP
