@@ -20,6 +20,7 @@ _$*
 *.o
 *.obj
 *.so
+*.dylib
 *.exe
 *.Z
 *.elc
