@@ -323,9 +323,6 @@ extern void
 TclX_CoalesceInit (Tcl_Interp *interp);
 
 extern void
-TclX_ExistsInit (Tcl_Interp *interp);
-
-extern void
 TclX_DebugInit (Tcl_Interp *interp);
 
 extern void

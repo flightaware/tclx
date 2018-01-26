@@ -3,7 +3,7 @@
  *
  *  coalesce Tcl commands.
  *-----------------------------------------------------------------------------
- * Copyright 2017 - 2018 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 2017 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -19,7 +19,7 @@
 
 /*-----------------------------------------------------------------------------
  * TclX_CoalesceObjCmd --
- *     Implements the TCL coalesce command:
+ *     Implements the TCL chmod command:
  *     coalesce var ?var...? defaultValue
  *
  * Results:
