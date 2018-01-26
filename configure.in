@@ -45,7 +45,7 @@ TEA_ADD_SOURCES([
 	tclXinit.c    tclXkeylist.c tclXlib.c      tclXlist.c
 	tclXmath.c    tclXmsgcat.c  tclXprocess.c  tclXprofile.c
 	tclXselect.c  tclXsignal.c  tclXstring.c   tclXsocket.c
-	tclXutil.c    tclXoscmds.c  tclXlgets.c
+	tclXutil.c    tclXoscmds.c  tclXlgets.c    tclXchannelfd.c
 ])
 TEA_ADD_HEADERS([generic/tclExtend.h])
 TEA_ADD_INCLUDES([-I\"`${CYGPATH} ${srcdir}/generic`\"])

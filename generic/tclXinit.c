@@ -122,6 +122,7 @@ Tclxcmd_Init (Tcl_Interp *interp)
     TclX_ProfileInit (interp);
     TclX_SelectInit (interp);
     TclX_StringInit (interp);
+    TclX_ChannelFdInit(interp);
 
     if (!Tcl_IsSafe(interp)) {
 	/*
