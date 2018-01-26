@@ -63,6 +63,12 @@ TclX_CoalesceInit (Tcl_Interp *interp)
 			  TclX_CoalesceObjCmd,
               (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_CreateObjCommand (interp,
+			  "tcl::mathfunc::coalesce",
+			  TclX_CoalesceObjCmd,
+              (ClientData) NULL,
+			  (Tcl_CmdDeleteProc*) NULL);
 }
 
 /* vim: set ts=4 sw=4 sts=4 et : */
