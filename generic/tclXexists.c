@@ -1,9 +1,9 @@
 /*
- * tclXcoalesce.c --
+ * tclXexists.c --
  *
- *  coalesce Tcl commands.
+ *  "exists" Tcl command and math function.
  *-----------------------------------------------------------------------------
- * Copyright 2017 - 2018 Karl Lehenbauer and Mark Diekhans.
+ * Copyright 2018 Karl Lehenbauer and Mark Diekhans.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation for any purpose and without fee is hereby granted, provided
@@ -18,55 +18,45 @@
 
 
 /*-----------------------------------------------------------------------------
- * TclX_CoalesceObjCmd --
- *     Implements the TCL coalesce command:
- *     coalesce var ?var...? defaultValue
+ * TclX_ExistsObjCmd --
+ *     Implements the TCL exists command:
+ *     exists var
  *
  * Results:
- *  The value of the first existing variable is returned.
- *  If no variables exist, the default value is returned.
+ *  true is returned if the variable exists, else false.
  *
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CoalesceObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
+TclX_ExistsObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
 {
-    int i;
-    Tcl_Obj *val;
-
-    if (objc < 3) {
-        return TclX_WrongArgs (interp, objv [0], "var ?var...? defaultValue");
+    if (objc != 2) {
+        return TclX_WrongArgs (interp, objv [0], "var");
     }
 
-    for (i = 1; i < objc - 1; i++) {
-        if ((val = Tcl_ObjGetVar2 (interp, objv [i], NULL, 0)) != NULL) {
-            Tcl_SetObjResult (interp, val);
-            return TCL_OK;
-        }
-    }
-
-    Tcl_SetObjResult (interp, objv[objc - 1]);
+    Tcl_SetObjResult (interp, Tcl_NewBooleanObj (Tcl_ObjGetVar2 (interp, objv[1], NULL, 0) != NULL));
     return TCL_OK;
 }
 
+
 
 /*-----------------------------------------------------------------------------
- * TclX_CoalesceInit --
- *     Initialize the coalesce command.
+ * TclX_ExistsInit --
+ *     Initialize the exists command.
  *-----------------------------------------------------------------------------
  */
 void
-TclX_CoalesceInit (Tcl_Interp *interp)
+TclX_ExistsInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
-			  "coalesce",
-			  TclX_CoalesceObjCmd,
+			  "exists",
+			  TclX_ExistsObjCmd,
               (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 
     Tcl_CreateObjCommand (interp,
-			  "tcl::mathfunc::coalesce",
-			  TclX_CoalesceObjCmd,
+			  "tcl::mathfunc::exists",
+			  TclX_ExistsObjCmd,
               (ClientData) NULL,
 			  (Tcl_CmdDeleteProc*) NULL);
 }

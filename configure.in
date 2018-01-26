@@ -39,7 +39,7 @@ TEA_SETUP_COMPILER
 
 TEA_ADD_SOURCES([
 	tclXbsearch.c tclXchmod.c   tclXcmdloop.c  tclXcoalesce.c
-	tclXdebug.c
+	tclXdebug.c   tclXexists.c
 	tclXdup.c     tclXfcntl.c   tclXfilecmds.c tclXfilescan.c
 	tclXflock.c   tclXfstat.c   tclXgeneral.c  tclXhandles.c
 	tclXinit.c    tclXkeylist.c tclXlib.c      tclXlist.c
