@@ -5440,7 +5440,7 @@ done
 	tclXinit.c    tclXkeylist.c tclXlib.c      tclXlist.c
 	tclXmath.c    tclXmsgcat.c  tclXprocess.c  tclXprofile.c
 	tclXselect.c  tclXsignal.c  tclXstring.c   tclXsocket.c
-	tclXutil.c    tclXoscmds.c  tclXlgets.c
+	tclXutil.c    tclXoscmds.c  tclXlgets.c    tclXchannelfd.c
 "
     for i in $vars; do
 	case $i in
