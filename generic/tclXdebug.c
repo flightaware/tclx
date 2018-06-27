@@ -47,13 +47,13 @@ TraceDelete (Tcl_Interp   *interp,
 
 static void
 PrintStr (Tcl_Channel  channel,
-          CONST84 char *string,
+          const char *string,
           int          numChars,
           int          quoted);
 
 static void
 PrintArg (Tcl_Channel  channel,
-          CONST84 char *argStr,
+          const char *argStr,
           int          noTruncate);
 
 static void
@@ -61,7 +61,7 @@ TraceCode  (traceInfo_pt infoPtr,
             int          level,
             char        *command,
             int          argc,
-            CONST84 char **argv);
+            const char **argv);
 
 static int
 TraceCallbackErrorHandler (ClientData  clientData,
@@ -74,7 +74,7 @@ TraceCallBack (Tcl_Interp   *interp,
                int           level,
                char         *command,
                int           argc,
-               CONST84 char **argv);
+               const char **argv);
 
 static void
 CmdTraceRoutine (ClientData    clientData,
@@ -84,7 +84,7 @@ CmdTraceRoutine (ClientData    clientData,
                  Tcl_CmdProc  *cmdProc,
                  ClientData    cmdClientData,
                  int           argc,
-                 CONST84 char **argv);
+                 const char **argv);
 
 static int
 TclX_CmdtraceObjCmd (ClientData clientData, 
@@ -129,7 +129,7 @@ TraceDelete (Tcl_Interp *interp, traceInfo_pt infoPtr)
  *-----------------------------------------------------------------------------
  */
 static void
-PrintStr (Tcl_Channel channel, CONST84 char *string, int numChars, int quoted)
+PrintStr (Tcl_Channel channel, const char *string, int numChars, int quoted)
 {
     int idx;
 
@@ -157,7 +157,7 @@ PrintStr (Tcl_Channel channel, CONST84 char *string, int numChars, int quoted)
  *-----------------------------------------------------------------------------
  */
 static void
-PrintArg (Tcl_Channel channel, CONST84 char *argStr, int noTruncate)
+PrintArg (Tcl_Channel channel, const char *argStr, int noTruncate)
 {
     int idx, argLen, printLen;
     int quoted;
@@ -190,7 +190,7 @@ TraceCode (traceInfo_pt infoPtr,
            int level,
            char *command,
            int argc,
-           CONST84 char **argv)
+           const char **argv)
 {
     int idx, printLen;
     char buf [32];
@@ -208,7 +208,7 @@ TraceCode (traceInfo_pt infoPtr,
         if ((!infoPtr->noTruncate) && (printLen > CMD_TRUNCATE_SIZE))
             printLen = CMD_TRUNCATE_SIZE;
 
-        PrintStr (infoPtr->channel, (CONST84 char *) command, printLen, FALSE);
+        PrintStr (infoPtr->channel, (const char *) command, printLen, FALSE);
       } else {
           for (idx = 0; idx < argc; idx++) {
               if (idx > 0)
@@ -276,7 +276,7 @@ TraceCallBack (Tcl_Interp *interp,
                int level,
                char *command,
                int argc,
-               CONST84 char **argv)
+               const char **argv)
 {
     Interp       *iPtr = (Interp *) interp;
     Tcl_DString   callback;
@@ -340,7 +340,7 @@ CmdTraceRoutine (ClientData clientData,
                  Tcl_CmdProc *cmdProc,
                  ClientData cmdClientData,
                  int argc,
-                 CONST84 char **argv)
+                 const char **argv)
 {
     Interp       *iPtr = (Interp *) interp;
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;

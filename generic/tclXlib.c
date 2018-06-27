@@ -77,8 +77,8 @@ MakeAbsFile (Tcl_Interp  *interp,
 
 static int
 SetPackageIndexEntry (Tcl_Interp *interp,
-                      CONST84 char *packageName,
-                      CONST84 char *fileName,
+                      const char *packageName,
+                      const char *fileName,
                       off_t       offset,
                       unsigned    length);
 
@@ -91,8 +91,8 @@ GetPackageIndexEntry (Tcl_Interp *interp,
 
 static int
 SetProcIndexEntry (Tcl_Interp *interp,
-                   CONST84 char *procName,
-                   CONST84 char *package);
+                   const char *procName,
+                   const char *package);
 
 static void
 AddLibIndexErrorInfo (Tcl_Interp *interp,
@@ -349,8 +349,8 @@ MakeAbsFile (Tcl_Interp  *interp,
  */
 static int
 SetPackageIndexEntry (Tcl_Interp *interp,
-                      CONST84 char *packageName,
-                      CONST84 char *fileName,
+                      const char *packageName,
+                      const char *fileName,
                       off_t       offset,
                       unsigned    length)
 {
@@ -458,11 +458,11 @@ GetPackageIndexEntry (Tcl_Interp *interp,
  */
 static int
 SetProcIndexEntry (Tcl_Interp *interp,
-                   CONST84 char *procName,
-                   CONST84 char *package)
+                   const char *procName,
+                   const char *package)
 {
     Tcl_DString  command;
-    CONST84 char *result;
+    const char *result;
 
     Tcl_DStringInit (&command);
     Tcl_DStringAppendElement (&command, "auto_load_pkg");
@@ -525,7 +525,7 @@ ProcessIndexFile (Tcl_Interp *interp,
     Tcl_Channel  indexChannel = NULL;
     Tcl_DString  lineBuffer;
     int          lineArgc, idx, result, tmpNum;
-    CONST84 char **lineArgv = NULL;
+    const char **lineArgv = NULL;
     off_t        offset;
     unsigned     length;
 
