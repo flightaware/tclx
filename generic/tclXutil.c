@@ -735,7 +735,7 @@ TclX_SetChannelOption (Tcl_Interp *interp,
 char *
 TclX_JoinPath (char *path1, char *path2, Tcl_DString *joinedPath)
 {
-    CONST84 char *joinArgv [2];
+    const char *joinArgv [2];
 
     joinArgv [0] = path1;
     joinArgv [1] = path2;

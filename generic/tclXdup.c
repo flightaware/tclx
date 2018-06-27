@@ -56,7 +56,7 @@ DupChannelOptions (Tcl_Interp *interp,
                    Tcl_Channel targetChannel)
 {
     Tcl_DString strValues;
-    CONST84 char *option, *value, **optArgv = NULL;
+    const char *option, *value, **optArgv = NULL;
     int optArgc, idx;
 
     Tcl_DStringInit (&strValues);

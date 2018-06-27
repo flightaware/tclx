@@ -208,7 +208,7 @@ TclX_CrangeObjCmd (ClientData clientData,
     int strLen, utfLen, first, subLen;
     size_t isRange = (size_t) clientData;
     char *str;
-    CONST84 char *start, *end;
+    const char *start, *end;
 
     if (objc != 4) {
         if (isRange)

@@ -102,7 +102,7 @@ StandardKeyCompare (char *key, char *line)
 static int
 TclProcKeyCompare (binSearchCB_t *searchCBPtr)
 {
-    CONST84 char *cmdArgv [3];
+    const char *cmdArgv [3];
     char *command, *oldResult;
     int   result;
 

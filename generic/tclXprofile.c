@@ -120,7 +120,7 @@ static int
 ProfStrCommandEval (ClientData    clientData,
                     Tcl_Interp   *interp,
                     int           argc,
-                    CONST84 char **argv);
+                    const char **argv);
 
 static int
 ProfObjCommandEval (ClientData    clientData,
@@ -271,7 +271,7 @@ RecordData (profInfo_t  *infoPtr,
             stackArgv [idx++] = scanPtr->cmdName;
         }
     }
-    stackListPtr = Tcl_Merge (idx, (CONST84 char **) stackArgv);
+    stackListPtr = Tcl_Merge (idx, (const char **) stackArgv);
     ckfree ((char *) stackArgv);
 
     /*
@@ -507,7 +507,7 @@ static int
 ProfStrCommandEval (ClientData    clientData,
                     Tcl_Interp   *interp,
                     int           argc,
-                    CONST84 char **argv)
+                    const char **argv)
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int isProc, result;
@@ -750,7 +750,7 @@ TurnOffProfiling (Tcl_Interp *interp, profInfo_t *infoPtr, char *varName)
     Tcl_HashEntry *hashEntryPtr;
     Tcl_HashSearch searchCookie;
     profDataEntry_t *dataEntryPtr;
-    CONST84 char *dataArgv [3];
+    const char *dataArgv [3];
     char countBuf [32], realTimeBuf [32], cpuTimeBuf [32], *dataListPtr;
 
     DeleteProfTrace (infoPtr);
