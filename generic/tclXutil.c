@@ -932,6 +932,9 @@ TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
     Tcl_SetVar2Ex(interp, ERRORCODE, NULL, saveObjv[2], TCL_GLOBAL_ONLY);
     Tcl_SetVar2Ex(interp, ERRORINFO, NULL, saveObjv[1], TCL_GLOBAL_ONLY);
 
+    Tcl_ResetResult(interp);
+    Tcl_AppendObjToErrorInfo(interp, saveObjv[1]);
+    Tcl_SetObjErrorCode(interp, saveObjv[2]);
     Tcl_SetObjResult (interp, saveObjv[0]);
 
     ((Interp *)interp)->flags |= flags;
