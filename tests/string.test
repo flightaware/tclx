@@ -46,11 +46,9 @@ Test string-1.6 {cindex tests} {
     cindex ABCDEFG len-3
 } 0 {E}
 
-Test string-1.7 {cindex tests} {
+tcltest::test string-1.7 {cindex tests} -body {
     cindex ABCDEFG lenx-3
-} 1 "syntax error in expression \"7x-3\"[expr {
-    ($tcl_version>8.3) ? ": extra tokens at end of expression" : ""
-}]"
+} -returnCodes 1 -match glob -result "*in expression \"7x-3\"*"
 
 Test string-1.8 {cindex tests} {
     cindex ABCDEFG
@@ -142,12 +140,10 @@ Test string-3.7 {crange tests} {
     crange ABCD len-3 end-1
 } 0 {BC}
 
-Test string-3.8 {crange tests} {
+tcltest::test string-3.8 {crange tests} -body {
     # 8.4+ enhanced the error return from expressions
     crange ABCD lenx-3 end-1
-}  1 "syntax error in expression \"4x-3\"[expr {
-    ($tcl_version>8.3) ? ": extra tokens at end of expression" : ""
-}]"
+}  -returnCodes 1 -match glob -result "*in expression \"4x-3\"*"
 
 Test string-3.9 {crange tests} {
     set text .tex
