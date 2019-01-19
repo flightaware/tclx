@@ -37,7 +37,7 @@ if {[llength $::tcltest::matchFiles] > 0} {
 set timeCmd {clock format [clock seconds]}
 puts stdout "Tests began at [eval $timeCmd]"
 
-package require Tclx 8.4
+package require Tclx 8.6
 
 # source each of the specified tests
 foreach file [lsort [::tcltest::getMatchingFiles]] {
