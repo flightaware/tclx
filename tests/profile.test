@@ -164,7 +164,7 @@ proc listRemovePrecomp {args} {
 # Test of normal procedure calls.
 #
 proc ProcA2 {} {ProcB2; set j 1; incr j; set k 1}
-proc ProcB2 {} {ProcC2; concat a b; ProcC2; list a b; list c d}
+proc ProcB2 {} {ProcC2; join a b; ProcC2; list a b; list c d}
 proc ProcC2 {} {expr 1+1}
 
 test profile-2.1 {profile count tests} {
@@ -186,7 +186,7 @@ test profile-2.2 {profile count tests} {
 	{{::ProcA2 <global>} 1} \
 	{{::ProcB2 ::ProcA2 <global>} 1} \
 	{{::ProcC2 ::ProcB2 ::ProcA2 <global>} 2} \
-	{{::concat ::ProcB2 ::ProcA2 <global>} 1} \
+	{{::join ::ProcB2 ::ProcA2 <global>} 1} \
 	{{::list ::ProcB2 ::ProcA2 <global>} 2} \
 	{{::profile <global>} 1}]
 
@@ -209,7 +209,7 @@ test profile-2.4 {profile count tests} {
 	{{::ProcA2 <global>} 1} \
 	{{::ProcB2 ::ProcA2 <global>} 1} \
 	{{::ProcC2 ::ProcB2 ::ProcA2 <global>} 2} \
-	{{::concat ::ProcB2 ::ProcA2 <global>} 1} \
+	{{::join ::ProcB2 ::ProcA2 <global>} 1} \
 	{{::list ::ProcB2 ::ProcA2 <global>} 2} \
 	{{::profile <global>} 1}]
 
@@ -220,7 +220,7 @@ test profile-2.4 {profile count tests} {
 proc ProcA3 {} {ProcB3}
 proc ProcB3 {} {ProcC3}
 proc ProcC3 {} {uplevel ProcD3; ProcD3}
-proc ProcD3 {} {set a 1; incr a; concat a b}
+proc ProcD3 {} {set a 1; incr a; join a b}
 
 test profile-3.1 {profile count tests} {
     profile on
@@ -245,8 +245,8 @@ test profile-3.2 {profile count tests} {
 	{{::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::ProcD3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
-	{{::concat ::ProcD3 ::ProcB3 ::ProcA3 <global>} 1} \
-	{{::concat ::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
+	{{::join ::ProcD3 ::ProcB3 ::ProcA3 <global>} 1} \
+	{{::join ::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::profile <global>} 1} \
 	{{::uplevel ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1}]
 
@@ -272,8 +272,8 @@ test profile-3.4 {profile count tests} {
 	{{::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::ProcD3 ::uplevel ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
-	{{::concat ::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
-	{{::concat ::ProcD3 ::uplevel ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
+	{{::join ::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
+	{{::join ::ProcD3 ::uplevel ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::profile <global>} 1} \
 	{{::uplevel ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1}]
 
@@ -349,7 +349,7 @@ proc ProcC5a {} {ProcD5}
 proc ProcC5b {} {ProcD5}
 proc ProcC5c {} {ProcD5}
 proc ProcC5d {} {ProcD5}
-proc ProcD5 {} {concat a b; list c d}
+proc ProcD5 {} {join a b; list c d}
 
 test profile-5.1 {profile count tests} {tclx_test_eval} {
     profile on
@@ -384,10 +384,10 @@ test profile-5.2 {profile count tests} {tclx_test_eval} {
 	{{::ProcD5 ::ProcC5b <global>} 1} \
 	{{::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
 	{{::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5b <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5b <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5d ::ProcA5 <global>} 1} \
 	{{::list ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
 	{{::list ::ProcD5 ::ProcC5b <global>} 1} \
 	{{::list ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
@@ -428,10 +428,10 @@ test profile-5.4 {profile count tests} {tclx_test_eval} {
 	{{::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
 	{{::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
 	{{::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
-	{{::concat ::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
+	{{::join ::ProcD5 ::ProcC5d ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
 	{{::list ::ProcD5 ::ProcC5a ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
 	{{::list ::ProcD5 ::ProcC5b ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
 	{{::list ::ProcD5 ::ProcC5c ::tclx_test_eval ::ProcB5 ::ProcA5 <global>} 1} \
@@ -703,7 +703,7 @@ EatTime                           4        800         10
 #
 namespace eval Prof {
     proc NSProcA2 {} {NSProcB2; set j 1; incr j; set k 1}
-    proc NSProcB2 {} {NSProcC2; concat a b; NSProcC2; list a b; list c d}
+    proc NSProcB2 {} {NSProcC2; join a b; NSProcC2; list a b; list c d}
     proc NSProcC2 {} {expr 1+1}
 }
 
@@ -726,7 +726,7 @@ test profile-12.2 {profile namespace tests} {
 	{{::Prof::NSProcA2 <global>} 1} \
 	{{::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 1} \
 	{{::Prof::NSProcC2 ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 2} \
-	{{::concat ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 1} \
+	{{::join ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 1} \
 	{{::list ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 2} \
 	{{::profile <global>} 1}]
 
@@ -749,7 +749,7 @@ test profile-12.4 {profile namespace tests} {
 	{{::Prof::NSProcA2 <global>} 1} \
 	{{::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 1} \
 	{{::Prof::NSProcC2 ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 2} \
-	{{::concat ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 1} \
+	{{::join ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 1} \
 	{{::list ::Prof::NSProcB2 ::Prof::NSProcA2 <global>} 2} \
 	{{::profile <global>} 1}]
 
