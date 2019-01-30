@@ -420,10 +420,20 @@ ProfCommandEvalSetup (profInfo_t *infoPtr, int *isProcPtr)
     /*
      * Determine current proc and var levels.
      */
-    procLevel = 0;
-    for (framePtr = iPtr->framePtr; framePtr != NULL; framePtr =
-             framePtr->callerPtr) {
-        procLevel++;
+    if(0){
+      procLevel = 0;
+      for (framePtr = iPtr->framePtr; framePtr != NULL; framePtr =
+               framePtr->callerPtr) {
+          procLevel++;
+      }
+    }else{
+      /*
+       * Use the level value passed in by Tcl_Interp through ProfTraceRoutine.
+       *   Ref: Tcl_CmdObjTraceProc(ClientData, Tcl_Interp*, int level, ...)
+       * The value calcuated from iPtr->framePtr chain may be smaller.
+       * And will cause issue when checking (infoPtr->stackPtr->procLevel > procLevel).
+       */
+      procLevel = infoPtr->evalLevel;
     }
     scopeLevel = (iPtr->varFramePtr == NULL) ? 0 : iPtr->varFramePtr->level;
 
