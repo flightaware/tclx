@@ -205,6 +205,7 @@ GetFcntlAttr (Tcl_Interp *interp, Tcl_Channel channel, int mode, int attrib)
         break;
       default:
         panic ("bug in fcntl get attrib");
+        value = 0; /* suppress compiler warning for initialized value */
     }
 
     Tcl_SetIntObj (Tcl_GetObjResult (interp), value != 0);

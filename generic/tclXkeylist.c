@@ -356,7 +356,7 @@ DeleteKeyedListEntry (keylIntObj_t *keylIntPtr, int entryIdx)
 	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
 	    nidx = (int) Tcl_GetHashValue(entryPtr);
 	    if (nidx > entryIdx) {
-		Tcl_SetHashValue(entryPtr, (ClientData) (nidx - 1));
+		Tcl_SetHashValue(entryPtr, (ClientData) (uintptr_t) (nidx - 1));
 	    }
 	}
     }
@@ -593,7 +593,7 @@ SetKeyedListFromAny (Tcl_Interp *interp, Tcl_Obj *objPtr)
 #ifndef NO_KEYLIST_HASH_TABLE
 	entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
 		keyEntryPtr->key, &dummy);
-	Tcl_SetHashValue(entryPtr, (ClientData) idx);
+	Tcl_SetHashValue(entryPtr, (ClientData) (uintptr_t) idx);
 #endif
 
 	keylIntPtr->numEntries++;
@@ -804,7 +804,7 @@ TclX_KeyedListSet (Tcl_Interp *interp,
 	    }
 	    entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
 		    keyEntryPtr->key, &dummy);
-	    Tcl_SetHashValue(entryPtr, (ClientData) findIdx);
+	    Tcl_SetHashValue(entryPtr, (ClientData) (uintptr_t) findIdx);
 #endif
 	    Tcl_InvalidateStringRep (keylPtr);
 
@@ -854,7 +854,7 @@ TclX_KeyedListSet (Tcl_Interp *interp,
 	    }
 	    entryPtr = Tcl_CreateHashEntry(keylIntPtr->hashTbl,
 		    keyEntryPtr->key, &dummy);
-	    Tcl_SetHashValue(entryPtr, (ClientData) findIdx);
+	    Tcl_SetHashValue(entryPtr, (ClientData) (uintptr_t) findIdx);
 #endif
 	    Tcl_InvalidateStringRep (keylPtr);
 	}

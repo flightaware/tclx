@@ -90,7 +90,7 @@ BindFileHandles (Tcl_Interp *interp, unsigned options, int socketFD)
 {
     Tcl_Channel channel;
 
-    channel = Tcl_MakeTcpClientChannel ((ClientData) socketFD);
+    channel = Tcl_MakeTcpClientChannel ((ClientData) (uintptr_t)socketFD);
     Tcl_RegisterChannel (interp, channel);
 
     if (options & SERVER_NOBUF) {
@@ -219,7 +219,7 @@ TclX_ServerCreateCmd (ClientData clientData,
     if (listen (socketFD, backlog) < 0)
         goto unixError;
 
-    channel = Tcl_MakeTcpClientChannel ((ClientData) socketFD);
+    channel = Tcl_MakeTcpClientChannel ((ClientData) (uintptr_t) socketFD);
     Tcl_RegisterChannel (interp, channel);
 
     TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), (char *) NULL);
