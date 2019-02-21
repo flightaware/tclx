@@ -120,7 +120,7 @@ static int
 ProfStrCommandEval (ClientData    clientData,
                     Tcl_Interp   *interp,
                     int           argc,
-                    CONST84 char **argv);
+                    const char **argv);
 
 static int
 ProfObjCommandEval (ClientData    clientData,
@@ -271,7 +271,7 @@ RecordData (profInfo_t  *infoPtr,
             stackArgv [idx++] = scanPtr->cmdName;
         }
     }
-    stackListPtr = Tcl_Merge (idx, (CONST84 char **) stackArgv);
+    stackListPtr = Tcl_Merge (idx, (const char **) stackArgv);
     ckfree ((char *) stackArgv);
 
     /*
@@ -418,13 +418,12 @@ ProfCommandEvalSetup (profInfo_t *infoPtr, int *isProcPtr)
     fullCmdName = Tcl_GetStringFromObj (fullCmdNamePtr, NULL);
 
     /*
-     * Determine current proc and var levels.
+     * Use the level value passed in by Tcl_Interp through ProfTraceRoutine.
+     *   Ref: Tcl_CmdObjTraceProc(ClientData, Tcl_Interp*, int level, ...)
+     * The value calcuated from iPtr->framePtr chain may be smaller.
+     * And will cause issue when checking (infoPtr->stackPtr->procLevel > procLevel).
      */
-    procLevel = 0;
-    for (framePtr = iPtr->framePtr; framePtr != NULL; framePtr =
-             framePtr->callerPtr) {
-        procLevel++;
-    }
+    procLevel = infoPtr->evalLevel;
     scopeLevel = (iPtr->varFramePtr == NULL) ? 0 : iPtr->varFramePtr->level;
 
     /* 
@@ -507,7 +506,7 @@ static int
 ProfStrCommandEval (ClientData    clientData,
                     Tcl_Interp   *interp,
                     int           argc,
-                    CONST84 char **argv)
+                    const char **argv)
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int isProc, result;
@@ -750,7 +749,7 @@ TurnOffProfiling (Tcl_Interp *interp, profInfo_t *infoPtr, char *varName)
     Tcl_HashEntry *hashEntryPtr;
     Tcl_HashSearch searchCookie;
     profDataEntry_t *dataEntryPtr;
-    CONST84 char *dataArgv [3];
+    const char *dataArgv [3];
     char countBuf [32], realTimeBuf [32], cpuTimeBuf [32], *dataListPtr;
 
     DeleteProfTrace (infoPtr);

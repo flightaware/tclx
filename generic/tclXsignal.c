@@ -236,7 +236,7 @@ static char *signalTrapCmds[MAXSIG];
 /*
  * Prototypes of internal functions.
  */
-static CONST84 char *
+static const char *
 GetSignalName (int signalNum);
 
 static int
@@ -345,7 +345,7 @@ TclX_KillObjCmd (ClientData   clientData,
  *   Static signal name.
  *-----------------------------------------------------------------------------
  */
-static CONST84 char *
+static const char *
 GetSignalName (int signalNum)
 {
 #ifdef SIGCHLD
@@ -779,7 +779,7 @@ ProcessASignal (Tcl_Interp *interp, int background, int signalNum)
      * If evaluating code, call it for each time the signal occured.
      */
     if (signalTrapCmds [signalNum] == NULL) {
-        CONST84 char *signalName = GetSignalName (signalNum);
+        const char *signalName = GetSignalName (signalNum);
 
         signalsReceived [signalNum] = 0;
         Tcl_SetErrorCode (interp, "POSIX", "SIG", signalName, (char*) NULL);

@@ -18,6 +18,8 @@ set ::tcltest::testsDirectory [file dir [info script]]
 
 # We need to ensure that the testsDirectory is absolute
 ::tcltest::normalizePath ::tcltest::testsDirectory
+::tcltest::configure -testdir [file dirname [file normalize [info script]]]
+::tcltest::configure {*}$argv
 
 puts stdout "Tests running in interp:       [info nameofexecutable]"
 puts stdout "Tests running with pwd:        [pwd]"
@@ -39,31 +41,34 @@ if {[llength $::tcltest::matchFiles] > 0} {
 set timeCmd {clock format [clock seconds]}
 puts stdout "Tests began at [eval $timeCmd]"
 
-package require Tclx 8.4
+package require Tclx 8.6
+
+
+# Hook to determine if any of the tests failed. Then we can exit with
+# proper exit code: 0=all passed, 1=one or more failed
+proc tcltest::cleanupTestsHook {} {
+	variable numTests
+	set ::exitCode [expr {$numTests(Failed) > 0}]
+}
+
 
 # source each of the specified tests
 foreach file [lsort [::tcltest::getMatchingFiles]] {
-    set tail [file tail $file]
-    puts stdout $tail
-    if {[catch {source $file} msg]} {
-	puts stdout $msg
-    }
+	set tail [file tail $file]
+	puts stdout $tail
+	if {[catch {source $file} msg]} {
+		puts stdout $msg
+	}
 }
+# TODO: convert above to use ::tcltest::runAllTests?s
 
 # cleanup
 puts stdout "\nTests ended at [eval $timeCmd]"
 ::tcltest::cleanupTests 1
-return
 
-if 0 {
-    proc eq {a b} { cequal $a $b }
-    proc eq1 {a b} { string equal $a $b }
-    proc eq2 {a b} { foo $a $b}
-    interp alias {} foo {} string equal
-    set a [string repeat a 50]b
-    set b [string repeat a 50]b
-    set c [string repeat a 50]c
-    eq $a $b
-    eq1 $a $b
-    eq2 $a $b
+if {$exitCode == 1} {
+	puts "====== FAIL ====="
+	exit $exitCode
+} else {
+	puts "====== SUCCESS ====="
 }

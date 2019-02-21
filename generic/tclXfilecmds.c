@@ -70,7 +70,7 @@ TclX_PipeObjCmd (ClientData  clientData,
                  Tcl_Obj    *CONST objv[])
 {
     Tcl_Channel   channels [2];
-    CONST84 char *channelNames [2];
+    const char *channelNames [2];
 
     if (!((objc == 1) || (objc == 3)))
 	return TclX_WrongArgs (interp, objv [0], "?fileId_var_r fileId_var_w?");

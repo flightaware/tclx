@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/flightaware/tclx.svg?branch=master)](https://travis-ci.org/flightaware/tclx)
+
 # Extended Tcl (TclX)
 
 ## Introduction

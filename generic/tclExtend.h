@@ -31,10 +31,6 @@
 # define TCL_STORAGE_CLASS DLLEXPORT
 #endif
 
-#ifndef CONST84
-#  define CONST84
-#endif
-
 /*
  * The TCLX_DEBUG flag turns on asserts etc.  Its an internal flag, however
  * its normally true for alpha and beta release and false for final releases,
