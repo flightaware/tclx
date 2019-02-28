@@ -122,9 +122,9 @@ TclXOSDupChannel(Tcl_Interp *interp, Tcl_Channel srcChannel, int mode, char *tar
     }
     
     if (STREQU (channelType->typeName, "tcp")) {
-        newChannel = Tcl_MakeTcpClientChannel ((ClientData) newFileNum);
+        newChannel = Tcl_MakeTcpClientChannel ((ClientData) (uintptr_t) newFileNum);
     } else {
-        newChannel = Tcl_MakeFileChannel ((ClientData) newFileNum,
+        newChannel = Tcl_MakeFileChannel ((ClientData) (uintptr_t) newFileNum,
                                           mode);
     }
     return newChannel;
@@ -217,9 +217,9 @@ TclXOSBindOpenFile(Tcl_Interp *interp, int fileNum)
     Tcl_ResetResult (interp);
 
     if (isSocket) {
-        channel = Tcl_MakeTcpClientChannel ((ClientData) fileNum);
+        channel = Tcl_MakeTcpClientChannel ((ClientData) (uintptr_t) fileNum);
     } else {
-        channel = Tcl_MakeFileChannel ((ClientData) fileNum,
+        channel = Tcl_MakeFileChannel ((ClientData) (uintptr_t) fileNum,
                                        mode);
     }
     Tcl_RegisterChannel (interp, channel);

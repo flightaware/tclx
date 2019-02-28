@@ -149,6 +149,21 @@ progress.
 '\"@:This command is provided by Extended Tcl.
 '\"@endhelp
 '
+'\"@help: tcl/general/coalesce
+'\"@brief: Return the first named variable that exists, or the default value.
+.TP
+\fBcoalesce\fR ?\fI-default value?\fR \fIvar\fR ?\fIvar...\fR?
+.IP
+Iterate through one or more specified variable names. The first variable
+found that actually exists, return the value of that variable.
+If none of the variable names are found to exist, return the default value.
+If none of the variables exist and the default value wasn't specified
+using \fI-default\fR, returns the empty string.
+.RE
+'\"@:
+'\"@:This command is provided by Extended Tcl.
+'\"@endhelp
+'
 '\"@help: tcl/files/echo
 '\"@brief: Echo one or more strings to stdout, followed by a newline.
 .TP

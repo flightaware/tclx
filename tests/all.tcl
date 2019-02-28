@@ -6,6 +6,8 @@
 #
 # RCS: @(#) $Id: all.tcl,v 1.2 2002/03/29 05:06:52 hobbs Exp $
 
+package require Tclx
+
 if {[lsearch [namespace children] ::tcltest] == -1} {
     package require tcltest
     namespace import ::tcltest::*

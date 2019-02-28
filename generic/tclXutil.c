@@ -917,7 +917,7 @@ TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
 {
     Tcl_Obj **saveObjv;
     int saveObjc;
-    long flags;
+    long flags = 0;
 
     if ((Tcl_ListObjGetElements (NULL, saveObjPtr, &saveObjc,
                                  &saveObjv) != TCL_OK) ||

@@ -233,11 +233,11 @@ TclXOSpipe (Tcl_Interp *interp, Tcl_Channel *channels)
                               Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
-    channels [0] = Tcl_MakeFileChannel ((ClientData) fileNums [0],
+    channels [0] = Tcl_MakeFileChannel ((ClientData) (uintptr_t) fileNums [0],
                                         TCL_READABLE);
     Tcl_RegisterChannel (interp, channels [0]);
 
-    channels [1] = Tcl_MakeFileChannel ((ClientData) fileNums [1],
+    channels [1] = Tcl_MakeFileChannel ((ClientData) (uintptr_t) fileNums [1],
                                         TCL_WRITABLE);
     Tcl_RegisterChannel (interp, channels [1]);
 

@@ -386,7 +386,6 @@ ProfCommandEvalSetup (profInfo_t *infoPtr, int *isProcPtr)
 {
     Interp *iPtr = (Interp *) infoPtr->interp;
     Tcl_CmdInfo cmdInfo;
-    CallFrame *framePtr;
     int procLevel, scopeLevel, isProc;
     Tcl_Obj *fullCmdNamePtr;
     const char *fullCmdName;

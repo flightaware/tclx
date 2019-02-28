@@ -320,6 +320,9 @@ extern void
 TclX_CmdloopInit (Tcl_Interp *interp);
 
 extern void
+TclX_CoalesceInit (Tcl_Interp *interp);
+
+extern void
 TclX_DebugInit (Tcl_Interp *interp);
 
 extern void
@@ -608,6 +611,9 @@ int
 TclXOSSetCloseOnExec (Tcl_Interp *interp,
                       Tcl_Channel channel,
                       int         value);
+
+void
+TclX_ChannelFdInit (Tcl_Interp *interp);
 #endif
 
 /* vim: set ts=4 sw=4 sts=4 et : */
