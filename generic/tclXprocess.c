@@ -237,6 +237,7 @@ TclX_WaitObjCmd (ClientData clientData,
     returnedPid = (pid_t) TCLX_WAITPID (pid, (int *) (&status), options);
 
     if (returnedPid < 0) {
+        Tcl_SetErrno(errno);
         TclX_AppendObjResult (interp, "wait for process failed: ",
                               Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
