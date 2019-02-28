@@ -19,8 +19,8 @@
 
 /*-----------------------------------------------------------------------------
  * TclX_CoalesceObjCmd --
- *     Implements the TCL chmod command:
- *     coalesce var ?var...? defaultValue
+ *     Implements the TCL coalesce command:
+ *     coalesce ?-default value? var ?var...?
  *
  * Results:
  *  The value of the first existing variable is returned.
