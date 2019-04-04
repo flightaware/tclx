@@ -513,10 +513,6 @@ BlockSignals (Tcl_Interp *interp, int action, unsigned char signals[])
         return TCL_ERROR;
     }
 
-#ifdef USE_SIGNAL_THREAD
-    StopSignalThread();
-    InitSignalThread();
-#endif /* USE_SIGNAL_THREAD */
     return TCL_OK;
 #else
     TclX_AppendObjResult (interp,
@@ -673,8 +669,7 @@ StopSignalThread ()
 /*-----------------------------------------------------------------------------
  * SignalThread --
  *
- *   Signal-handling thread on MT-enabled Tcl. Restarted each time the signal
- *   mask is set.
+ *   Signal-handling thread on MT-enabled Tcl.
  *-----------------------------------------------------------------------------
  */
 static Tcl_ThreadCreateType
@@ -687,19 +682,17 @@ SignalThread (ClientData clientData)
     int restart;
 
     /*
-     * Wait for all signals. As a new thread inherits a copy of its creator's
-     * signal mask, only blocked signals will be caught in practice.
+     * Block & wait for all signals.
      */
     sigfillset(&sigset);
+    pthread_sigmask(SIG_SETMASK, &sigset, NULL);
     for (;;) {
         sigwait(&sigset, &signum);
 
         /*
          * Check that the signal hander is ours (SignalTrap), if not this means
          * that we got this signal directly on this thread and not from
-         * SignalTrap. This shouldn't happen because our signal mask and
-         * handlers are supposed to be in sync, but forward the signal back to
-         * the main thread anyway.
+         * SignalTrap. Forward the signal back to the main thread.
          */
         if (GetSignalState(signum, &actionFunc, &restart) == TCL_ERROR
                 || actionFunc != SignalTrap) {
