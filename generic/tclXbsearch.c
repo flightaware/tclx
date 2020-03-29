@@ -52,7 +52,7 @@ static int
 TclX_BsearchObjCmd (ClientData clientData, 
                     Tcl_Interp *interp,
                     int objc,
-                    Tcl_Obj *CONST objv[]);
+                    Tcl_Obj *const objv[]);
 
 /*-----------------------------------------------------------------------------
  *
@@ -296,7 +296,7 @@ static int
 TclX_BsearchObjCmd (ClientData clientData,
                     Tcl_Interp *interp,
                     int objc,
-                    Tcl_Obj *CONST objv[])
+                    Tcl_Obj *const objv[])
 {
     int status;
     binSearchCB_t searchCB;
