@@ -74,7 +74,7 @@ static int
 TclX_FstatObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
                   int objc,
-                  Tcl_Obj *CONST objv[]);
+                  Tcl_Obj *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -316,7 +316,7 @@ static int
 TclX_FstatObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
                   int objc,
-                  Tcl_Obj *CONST objv[])
+                  Tcl_Obj *const objv[])
 {
     Tcl_Channel channel;
     struct stat statBuf;

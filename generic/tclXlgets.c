@@ -57,7 +57,7 @@ static int
 TclX_LgetsObjCmd (ClientData  clientData, 
                  Tcl_Interp  *interp, 
                  int          objc,
-                 Tcl_Obj     *CONST objv[]);
+                 Tcl_Obj     *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -409,7 +409,7 @@ static int
 TclX_LgetsObjCmd (ClientData  clientData, 
                  Tcl_Interp  *interp, 
                  int          objc,
-                 Tcl_Obj     *CONST objv[])
+                 Tcl_Obj     *const objv[])
 {
     Tcl_Channel channel;
     ReadData readData;

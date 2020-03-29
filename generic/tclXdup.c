@@ -34,7 +34,7 @@ static int
 TclX_DupObjCmd (ClientData   clientData,
                 Tcl_Interp  *interp,
                 int          objc,
-                Tcl_Obj     *CONST objv[]);
+                Tcl_Obj     *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -193,7 +193,7 @@ static int
 TclX_DupObjCmd (ClientData clientData,
                 Tcl_Interp *interp,
                 int objc,
-                Tcl_Obj *CONST objv[])
+                Tcl_Obj *const objv[])
 {
     Tcl_Channel newChannel;
     int bindFnum, fnum;

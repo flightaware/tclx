@@ -52,7 +52,7 @@
  * Value returned by Tcl_SignalId when an invalid signal is passed in.
  * Pointer is used as a quick check of a valid signal number.
  */
-static CONST char *unknownSignalIdMsg;
+static const char *unknownSignalIdMsg;
 
 /*
  * Signal name table maps name to number.  Note, it is possible to have
@@ -327,13 +327,13 @@ static int
 TclX_SignalObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj     *CONST objv[]);
+                   Tcl_Obj     *const objv[]);
 
 static int
 TclX_KillObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
                  int          objc,
-                 Tcl_Obj     *CONST objv[]);
+                 Tcl_Obj     *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -1311,7 +1311,7 @@ static int
 TclX_SignalObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj     *CONST objv[])
+                   Tcl_Obj     *const objv[])
 {
     unsigned char signals [MAXSIG];
     char *argStr, *actionStr;
@@ -1451,7 +1451,7 @@ static int
 TclX_KillObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
                  int          objc,
-                 Tcl_Obj     *CONST objv[])
+                 Tcl_Obj     *const objv[])
 {
     int    signalNum, nextArg, idx, procId, procObjc;
     int    pgroup = FALSE;

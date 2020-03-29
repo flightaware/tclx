@@ -126,7 +126,7 @@ static int
 ProfObjCommandEval (ClientData    clientData,
                     Tcl_Interp   *interp,
                     int           objc,
-                    Tcl_Obj      *CONST objv[]);
+                    Tcl_Obj      *const objv[]);
 
 static Tcl_CmdObjTraceProc ProfTraceRoutine;
 
@@ -154,7 +154,7 @@ static int
 TclX_ProfileObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj    *CONST objv[]);
+                    Tcl_Obj    *const objv[]);
 
 static void
 ProfMonCleanUp (ClientData  clientData,
@@ -535,7 +535,7 @@ static int
 ProfObjCommandEval (ClientData    clientData,
                     Tcl_Interp   *interp,
                     int           objc,
-                    Tcl_Obj      *CONST objv[])
+                    Tcl_Obj      *const objv[])
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int isProc, result;
@@ -562,7 +562,7 @@ ProfTraceRoutine (ClientData  clientData,
                   const char *command,
                   Tcl_Command cmd,
                   int         objc,
-                  Tcl_Obj    *CONST objv[])
+                  Tcl_Obj    *const objv[])
 {
     /* struct Tcl_Obj * const *objv; */
     profInfo_t *infoPtr = (profInfo_t *) clientData;
@@ -802,7 +802,7 @@ static int
 TclX_ProfileObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj    *CONST objv[])
+                    Tcl_Obj    *const objv[])
 {
     profInfo_t *infoPtr = (profInfo_t *) clientData;
     int argIdx;

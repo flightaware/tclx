@@ -32,19 +32,19 @@ static int
 TclX_ExeclObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
                   int objc,
-                  Tcl_Obj *CONST objv[]);
+                  Tcl_Obj *const objv[]);
 
 static int 
 TclX_ForkObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
                  int objc,
-                 Tcl_Obj *CONST objv[]);
+                 Tcl_Obj *const objv[]);
 
 static int 
 TclX_WaitObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
                  int objc,
-                 Tcl_Obj *CONST objv[]);
+                 Tcl_Obj *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -57,7 +57,7 @@ static int
 TclX_ForkObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
                  int objc,
-                 Tcl_Obj *CONST objv[])
+                 Tcl_Obj *const objv[])
 {
     if (objc != 1)
 	return TclX_WrongArgs (interp, objv [0], "");
@@ -75,7 +75,7 @@ static int
 TclX_ExeclObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
                   int objc,
-                  Tcl_Obj *CONST objv[])
+                  Tcl_Obj *const objv[])
 {
 #define STATIC_ARG_SIZE   12
     char  *staticArgv [STATIC_ARG_SIZE];
@@ -163,7 +163,7 @@ static int
 TclX_WaitObjCmd (ClientData clientData,
                  Tcl_Interp *interp,
                  int objc,
-                 Tcl_Obj *CONST objv[])
+                 Tcl_Obj *const objv[])
 {
     int idx, options = 0, pgroup = FALSE;
     char *argStr;
