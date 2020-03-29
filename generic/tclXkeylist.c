@@ -144,25 +144,25 @@ static int
 TclX_KeylgetObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int	     objc,
-                    Tcl_Obj	    *CONST objv[]);
+                    Tcl_Obj	    *const objv[]);
 
 static int
 TclX_KeylsetObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int	     objc,
-                    Tcl_Obj	    *CONST objv[]);
+                    Tcl_Obj	    *const objv[]);
 
 static int 
 TclX_KeyldelObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int	     objc,
-                    Tcl_Obj	    *CONST objv[]);
+                    Tcl_Obj	    *const objv[]);
 
 static int 
 TclX_KeylkeysObjCmd (ClientData   clientData,
                      Tcl_Interp  *interp,
                      int	      objc,
-                     Tcl_Obj     *CONST objv[]);
+                     Tcl_Obj     *const objv[]);
 
 /*
  * Type definition.
@@ -1006,7 +1006,7 @@ static int
 TclX_KeylgetObjCmd (ClientData      clientData,
                     Tcl_Interp     *interp,
                     int             objc,
-                    Tcl_Obj *CONST objv[])
+                    Tcl_Obj *const objv[])
 {
     Tcl_Obj *keylPtr, *valuePtr;
     char *key;
@@ -1084,7 +1084,7 @@ static int
 TclX_KeylsetObjCmd (ClientData     clientData,
                     Tcl_Interp    *interp,
                     int            objc,
-                    Tcl_Obj *CONST objv[])
+                    Tcl_Obj *const objv[])
 {
     Tcl_Obj *keylVarPtr, *newVarObj;
     char *key;
@@ -1143,7 +1143,7 @@ static int
 TclX_KeyldelObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj    *CONST objv[])
+                    Tcl_Obj    *const objv[])
 {
     Tcl_Obj *keylVarPtr, *keylPtr;
     char *key;
@@ -1204,7 +1204,7 @@ static int
 TclX_KeylkeysObjCmd (ClientData   clientData,
                      Tcl_Interp  *interp,
                      int          objc,
-                     Tcl_Obj     *CONST objv[])
+                     Tcl_Obj     *const objv[])
 {
     Tcl_Obj *keylPtr, *listObjPtr;
     char *key;

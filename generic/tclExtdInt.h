@@ -244,7 +244,7 @@ TclX_StructOffset (void *nsPtr, size_t offset,
 #define TclX_WriteNL(channel) (Tcl_Write (channel, "\n", 1))
 
 extern int
-TclX_StrToOffset (CONST char *string,
+TclX_StrToOffset (const char *string,
                   int         base,
                   off_t      *offsetPtr);
 

@@ -25,7 +25,7 @@
 static int
 ParseLockUnlockArgs (Tcl_Interp     *interp,
                      int             objc,
-                     Tcl_Obj *CONST  objv[],
+                     Tcl_Obj *const  objv[],
                      int             argIdx,
                      TclX_FlockInfo *lockInfoPtr);
 
@@ -33,13 +33,13 @@ static int
 TclX_FlockObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
                   int         objc,
-                  Tcl_Obj    *CONST objv[]);
+                  Tcl_Obj    *const objv[]);
 
 static int
 TclX_FunlockObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
                      int         objc,
-                     Tcl_Obj    *CONST objv[]);
+                     Tcl_Obj    *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ TclX_FunlockObjCmd (ClientData clientData,
 static int
 ParseLockUnlockArgs (Tcl_Interp     *interp,
                      int             objc,
-                     Tcl_Obj *CONST  objv[],
+                     Tcl_Obj *const  objv[],
                      int             argIdx,
                      TclX_FlockInfo *lockInfoPtr)
 {
@@ -124,7 +124,7 @@ static int
 TclX_FlockObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
                   int         objc,
-                  Tcl_Obj    *CONST objv[])
+                  Tcl_Obj    *const objv[])
 {
     int argIdx;
     TclX_FlockInfo lockInfo;
@@ -208,7 +208,7 @@ static int
 TclX_FunlockObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
                      int         objc,
-                     Tcl_Obj    *CONST objv[])
+                     Tcl_Obj    *const objv[])
 {
     TclX_FlockInfo lockInfo;
 
