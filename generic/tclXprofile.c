@@ -571,6 +571,10 @@ ProfTraceRoutine (ClientData  clientData,
     if (cmd == NULL)
         panic (PROF_PANIC, 4);
 
+    //TIP #571: We don' want to profile the tailcall itself. As it can only be called in a procedure/lambda context
+    if ( ! strcmp((*objv)->bytes, "tailcall") ) {
+        return TCL_OK;
+    }
     /*
      * Save current state information.
      */
