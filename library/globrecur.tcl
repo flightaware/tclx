@@ -76,7 +76,7 @@ proc for_recursive_glob {var dirlist globlist cmd {depth 1}} {
             return -code $code $result
         }
 
-        foreach file [readdir $dir] {
+        foreach file [lsort [readdir $dir]] {
             set file [file join $dir $file]
             if [file isdirectory $file] {
                 set fileTail [file tail $file]
