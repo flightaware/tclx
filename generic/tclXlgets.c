@@ -282,8 +282,7 @@ ReadListElement (Tcl_Interp  *interp,
 
 	    case '\\': {
 		char bsChar;
-
-                bsChar = Tcl_Backslash(p, &numChars);
+                Tcl_UtfBackslash(p, &numChars, &bsChar);
                 if (openBraces > 0) {
                     p += (numChars - 1);  /* Advanced again at end of loop */
                 } else {

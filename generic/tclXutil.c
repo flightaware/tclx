@@ -791,14 +791,13 @@ TclX_WrongArgs (Tcl_Interp *interp, Tcl_Obj *commandNameObj, char *string)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
+TclX_AppendObjResult (Tcl_Interp *interp, ...)
 {
-    Tcl_Interp *interp;
     Tcl_Obj *resultPtr;
     va_list argList;
     char *string;
 
-    interp = TCL_VARARGS_START (Tcl_Interp *, arg1, argList);
+    va_start(argList, interp);
     resultPtr = Tcl_GetObjResult (interp);
 
     if (Tcl_IsShared(resultPtr)) {
@@ -806,7 +805,6 @@ TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
         Tcl_SetObjResult(interp, resultPtr);
     }
 
-    TCL_VARARGS_START(Tcl_Interp *,arg1,argList);
     while (1) {
         string = va_arg(argList, char *);
         if (string == NULL) {

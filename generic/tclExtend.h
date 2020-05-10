@@ -52,6 +52,11 @@ typedef void *void_pt;
 #define TCLX_CMDL_INTERACTIVE	(1<<0)
 #define TCLX_CMDL_EXIT_ON_EOF	(1<<1)
 
+#define CONST const
+#define TCL_PARSE_PART1 0
+#define VOID void
+#define panic Tcl_Panic
+
 /*
  * Application signal error handler.  Called after normal signal processing,
  * when a signal results in an error.	Its main purpose in life is to allow
@@ -97,7 +102,7 @@ EXTERN void	TclX_SplitWinCmdLine (int *argcPtr, char ***argvPtr);
 /*
  * Exported utility functions.
  */
-EXTERN void	TclX_AppendObjResult TCL_VARARGS_DEF(Tcl_Interp *, interpArg);
+EXTERN void	TclX_AppendObjResult (Tcl_Interp *, ...);
 
 EXTERN char *	TclX_DownShift (char *targetStr, CONST char *sourceStr);
 

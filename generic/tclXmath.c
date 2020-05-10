@@ -63,11 +63,6 @@ static int	TclX_MinObjCmd (ClientData  clientData,
                             int         objc,
                             Tcl_Obj    *CONST objv[]);
 
-static int	TclX_MinMaxFunc (ClientData   clientData,
-                             Tcl_Interp  *interp,
-				             Tcl_Value *args,
-                             Tcl_Value *resultPtr);
-
 static int	TclX_RandomObjCmd (ClientData  clientData,
                                Tcl_Interp *interp,
 				               int         objc,
@@ -179,75 +174,6 @@ static int	TclX_MinObjCmd (ClientData  clientData,
 }
 
 /*-----------------------------------------------------------------------------
- *
- * TclX_MaxFunc --
- *      Implements the Tcl max math function
- *        expr max(num1, num2)
- *
- * Results:
- *      Standard TCL results.
- *
- *-----------------------------------------------------------------------------
- */
-static int	TclX_MinMaxFunc (ClientData   clientData,
-                             Tcl_Interp  *interp,
-				             Tcl_Value *args,
-                             Tcl_Value *resultPtr)
-{
-    size_t isMax = (size_t) clientData;
-    Tcl_ValueType t0 = args[0].type;
-    Tcl_ValueType t1 = args[1].type;
-
-    if ((t1 == TCL_DOUBLE) || (t0 == TCL_DOUBLE)) {
-	double d0, d1;
-	/*
-	 * Compare as doubles.
-	 */
-	GET_DOUBLE_VALUE(d0, args[0], t0);
-	GET_DOUBLE_VALUE(d1, args[1], t1);
-
-        resultPtr->type = TCL_DOUBLE;
-	if (isMax) {
-	    resultPtr->doubleValue = (d0 < d1) ? d1 : d0;
-	} else {
-	    resultPtr->doubleValue = (d0 > d1) ? d1 : d0;
-	}
-#ifdef TCL_WIDE_INT_TYPE
-    } else if ((t1 == TCL_WIDE_INT) || (t0 == TCL_WIDE_INT)) {
-	Tcl_WideInt w0, w1;
-	/*
-	 * Compare as wide ints (neither are doubles)
-	 */
-	w0 = (t0 == TCL_INT) ? Tcl_LongAsWide(args[0].intValue) :
-	    args[0].wideValue;
-	w1 = (t1 == TCL_INT) ? Tcl_LongAsWide(args[1].intValue) :
-	    args[1].wideValue;
-
-        resultPtr->type = TCL_WIDE_INT;
-	if (isMax) {
-	    resultPtr->wideValue = (w0 < w1) ? w1 : w0;
-	} else {
-	    resultPtr->wideValue = (w0 > w1) ? w1 : w0;
-	}
-#endif
-    } else {
-	/*
-	 * Compare as ints.
-	 */
-	long i0 = args[0].intValue;
-	long i1 = args[1].intValue;
-
-        resultPtr->type = TCL_INT;
-	if (isMax) {
-	    resultPtr->intValue = (i0 < i1) ? i1 : i0;
-	} else {
-	    resultPtr->intValue = (i0 > i1) ? i1 : i0;
-	}
-    }
-    return TCL_OK;
-}
-
-/*-----------------------------------------------------------------------------
  * ReallyRandom --
  *     Insure a good random return for a range, unlike an arbitrary
  *     random() % n, thanks to Ken Arnold, Unix Review, October 1987.
@@ -336,10 +262,6 @@ void
 TclX_MathInit (Tcl_Interp *interp)
 {
     int major, minor;
-    Tcl_ValueType minMaxArgTypes[2];
-
-    minMaxArgTypes[0] = TCL_EITHER;
-    minMaxArgTypes[1] = TCL_EITHER;
 
     Tcl_CreateObjCommand (interp, "max", TclX_MaxObjCmd,
 	    (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
@@ -350,17 +272,6 @@ TclX_MathInit (Tcl_Interp *interp)
     Tcl_CreateObjCommand (interp, "random", TclX_RandomObjCmd,
 	    (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
 
-    /*
-     * Tcl 8.5 added core min/max expr functions
-     */
-    Tcl_GetVersion(&major, &minor, NULL, NULL);
-    if ((major == 8) && (minor <= 4)) {
-	Tcl_CreateMathFunc(interp, "max", 2, minMaxArgTypes,
-		TclX_MinMaxFunc, (ClientData) 1 /* IS_MAX */);
-
-	Tcl_CreateMathFunc (interp, "min", 2, minMaxArgTypes,
-		TclX_MinMaxFunc, (ClientData) 0 /* IS_MIN */);
-    }
 }
 
 

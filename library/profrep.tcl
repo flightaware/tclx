@@ -70,7 +70,7 @@ namespace eval TclXProfRep {
     proc sort {profDataVar sortKey} {
         upvar $profDataVar profData
 
-        case $sortKey {
+        switch $sortKey {
             {calls} {set keyIndex 0}
             {real}  {set keyIndex 1}
             {cpu}   {set keyIndex 2}

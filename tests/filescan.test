@@ -31,7 +31,7 @@ proc IncrName {Name args} {
     set Begin [csubstr $Name 0 $Last]
     set Digit [cindex $Name $Last]
     set Recurse 0
-    case $Digit in {
+    switch $Digit in {
         {9}     {set Digit A}
         {Z}     {if {$Upper} {set Recurse 1} else {set Digit a}}
         {z}     {set Recurse 1}
@@ -146,7 +146,7 @@ foreach scanInfo $scanList {
     set key [keylget scanInfo key]
     set matchType [keylget scanInfo matchType]
     set cmd "global matchInfo; ValMatch [list $scanInfo] 1.1" 
-    case $matchType in {
+    switch $matchType in {
       {0} {scanmatch -nocase $testCH [string toupper $key] $cmd}
       {1} {scanmatch $testCH ^$key  $cmd}
       {2} {scanmatch $testCH $key\$ $cmd}
