@@ -87,12 +87,12 @@ TclX_PipeObjCmd (ClientData  clientData,
                               channelNames [1], (char *) NULL);
     } else {
         if (Tcl_ObjSetVar2(interp, objv[1], NULL, Tcl_NewStringObj(channelNames [0], -1),
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL)
+                           TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
 
         if (Tcl_ObjSetVar2(interp, objv[2], NULL,
                            Tcl_NewStringObj(channelNames [1], -1),
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL)
+                           TCL_LEAVE_ERR_MSG) == NULL)
             goto errorExit;
     }
 

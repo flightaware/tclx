@@ -379,7 +379,7 @@ TclX_CtokenObjCmd (ClientData clientData,
     }
     
     stringVarObj = Tcl_ObjGetVar2(interp, objv[1], NULL,
-                                  TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1);
+                                  TCL_LEAVE_ERR_MSG);
     if (stringVarObj == NULL) {
         return TCL_ERROR;
     }
@@ -416,7 +416,7 @@ TclX_CtokenObjCmd (ClientData clientData,
                                       strByteLen-strByteIdx);
     if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv[1], NULL), NULL,
                       newVarValueObj,
-                      TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1) == NULL) {
+                      TCL_LEAVE_ERR_MSG) == NULL) {
         Tcl_DStringFree (&token);
         Tcl_DecrRefCount (newVarValueObj);
         return TCL_ERROR;
@@ -853,7 +853,7 @@ TclX_CtypeObjCmd (ClientData clientData,
             Tcl_Obj *iObj = Tcl_NewIntObj (idx);
 
             if (Tcl_SetVar2Ex(interp, failVar, NULL, 
-                              iObj, TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1) == NULL) {
+                              iObj, TCL_LEAVE_ERR_MSG) == NULL) {
                 Tcl_DecrRefCount (iObj);
                 return TCL_ERROR;
             }

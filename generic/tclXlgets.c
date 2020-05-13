@@ -469,7 +469,7 @@ TclX_LgetsObjCmd (ClientData  clientData,
         int resultLen;
 
         if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+                           TCL_LEAVE_ERR_MSG) == NULL) {
             goto errorExit;
         }
 
@@ -511,7 +511,7 @@ TclX_LgetsObjCmd (ClientData  clientData,
          * FIX: Need functions to save/restore error state.
          */
         if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) != NULL) {
+                           TCL_LEAVE_ERR_MSG) != NULL) {
             Tcl_SetObjResult (interp, saveResult);  /* Restore old message */
         }
         Tcl_DecrRefCount (saveResult);

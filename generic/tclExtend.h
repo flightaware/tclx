@@ -53,7 +53,6 @@ typedef void *void_pt;
 #define TCLX_CMDL_EXIT_ON_EOF	(1<<1)
 
 #define CONST const
-#define TCL_PARSE_PART1 0
 #define VOID void
 #define panic Tcl_Panic
 
