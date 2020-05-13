@@ -35,7 +35,8 @@ if [cequal $tcl_platform(platform) windows] {
  
 proc GetMode {filename} {
     file stat $filename stat
-    return [format "%o" [expr {$stat(mode) & 07777}]]
+    # 4095 is decimal represenation of octal 07777
+    return [format "%o" [expr {$stat(mode) & 4095}]]
 }
 
 #-----------------------------------------------------------------------------

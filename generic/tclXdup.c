@@ -208,18 +208,11 @@ TclX_DupObjCmd (ClientData clientData,
      * If a number is supplied, bind it to a file handle rather than doing
      * a dup.
      */
-    if (objv [1]->typePtr == Tcl_GetObjType ("int")) {
-        bindFnum = TRUE;
-    } else {
-        srcChannelId = Tcl_GetStringFromObj (objv [1], NULL);
-        if (ISDIGIT (srcChannelId [0])) {
-            if (Tcl_ConvertToType (interp, objv [1],
-                                   Tcl_GetObjType ("int")) != TCL_OK)
-                goto badFnum;
+
+    bindFnum = FALSE;
+    srcChannelId = Tcl_GetStringFromObj (objv [1], NULL);
+    if (ISDIGIT (srcChannelId [0])) {
             bindFnum = TRUE;
-        } else {
-            bindFnum = FALSE;
-        }
     }
     if (bindFnum) {
         if (objc != 2)

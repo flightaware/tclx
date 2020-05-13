@@ -44,7 +44,7 @@ if [cequal $tcl_platform(platform) windows] {
 test fstat-1.2 {array return} {
     catch {unset stat}
     fstat $gorpFH stat stat
-    list $stat(nlink) $stat(size) [expr $stat(mode)&0777] $stat(type) \
+    list $stat(nlink) $stat(size) [expr $stat(mode)&511] $stat(type) \
 	    $stat(tty)
 } $expect
 
@@ -74,7 +74,7 @@ if [cequal $tcl_platform(platform) windows] {
 test fstat-2.2 {keyed list returns} {
     set stat [fstat $gorpFH]
     list [keylget stat nlink] [keylget stat size] \
-         [expr [keylget stat mode ]&0777] [keylget stat type]
+         [expr [keylget stat mode ]&511] [keylget stat type]
 } $expect
 
 if [cequal $tcl_platform(platform) windows] {

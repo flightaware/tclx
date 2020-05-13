@@ -333,7 +333,7 @@ TclX_RelativeExpr (Tcl_Interp  *interp,
     long longResult;
     char staticBuf [32];
 
-    if (exprPtr->typePtr == Tcl_GetObjType ("int")) {
+    if (exprPtr != NULL && exprPtr->typePtr != NULL && exprPtr->typePtr == Tcl_GetObjType ("int")) {
         if (Tcl_GetIntFromObj (interp, exprPtr, exprResultPtr) != TCL_OK)
             return TCL_ERROR;
         return TCL_OK;

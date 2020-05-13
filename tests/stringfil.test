@@ -47,7 +47,7 @@ Test stringfile-2.3 {read_file command} {
 } 0 [crange $stringfileTestVar 0 2]
 
 Test stringfile-2.4 {read_file command} {
-    read_file STRINGFIL.DAT nonewline
+    read_file -nonewline STRINGFIL.DAT 
 } 0 $stringfileTestVar
 
 TestRemove STRINGFIL.DAT

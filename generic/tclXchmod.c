@@ -313,7 +313,6 @@ TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
     Tcl_Obj     **fileObjv;
     char         *fileIdsString;
     char         *modeString;
-    int          modeBits;
 
     /*
      * Options are not parsable just looking for "-", since modes can
@@ -334,10 +333,7 @@ TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 
     modeString = Tcl_GetStringFromObj (objv [objIdx], NULL);
     if (ISDIGIT (modeString[0])) {
-        if (Tcl_GetIntFromObj (interp, objv [objIdx], &modeBits) 
-	  != TCL_OK)
-            return TCL_ERROR;
-	modeInfo.absMode = modeBits;
+	    modeInfo.absMode = strtol(modeString, 0, 0);
         modeInfo.symMode = NULL;
     } else {
         modeInfo.symMode = modeString;
