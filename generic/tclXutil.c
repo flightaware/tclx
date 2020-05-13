@@ -58,7 +58,7 @@ char *tclXWrongArgs = "wrong # args: ";
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToInt (const char *string, int base, int *intPtr)
+TclX_StrToInt (CONST char *string, int base, int *intPtr)
 {
     char *end, *p;
     int   i;
@@ -115,7 +115,7 @@ TclX_StrToInt (const char *string, int base, int *intPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToUnsigned (const char *string, int base, unsigned *unsignedPtr)
+TclX_StrToUnsigned (CONST char *string, int base, unsigned *unsignedPtr)
 {
     char *end, *p;
     unsigned i;
@@ -158,7 +158,7 @@ TclX_StrToUnsigned (const char *string, int base, unsigned *unsignedPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToOffset (const char *string, int base, off_t *offsetPtr)
+TclX_StrToOffset (CONST char *string, int base, off_t *offsetPtr)
 {
     char *end, *p;
     off_t i;
@@ -217,7 +217,7 @@ TclX_StrToOffset (const char *string, int base, off_t *offsetPtr)
  *-----------------------------------------------------------------------------
  */
 char *
-TclX_DownShift (char *targetStr, const char *sourceStr)
+TclX_DownShift (char *targetStr, CONST char *sourceStr)
 {
     register char theChar;
 
@@ -252,7 +252,7 @@ TclX_DownShift (char *targetStr, const char *sourceStr)
  *-----------------------------------------------------------------------------
  */
 char *
-TclX_UpShift (char *targetStr, const char *sourceStr)
+TclX_UpShift (char *targetStr, CONST char *sourceStr)
 {
     register char theChar;
 
@@ -476,7 +476,7 @@ ParseTranslationOption (char *strValue)
     } else if (STREQU (strValue, "platform")) {
         return TCLX_TRANSLATE_PLATFORM;
     }
-    Tcl_Panic ("ParseTranslationOption bug");
+    panic ("ParseTranslationOption bug");
     return TCL_ERROR;  /* Not reached */
 }
 
@@ -507,7 +507,7 @@ FormatTranslationOption (int value)
       case TCLX_TRANSLATE_PLATFORM:
         return "platform";
       default:
-        Tcl_Panic ("FormatTranslationOption bug");
+        panic ("FormatTranslationOption bug");
     }
     return NULL;  /* Not reached */
 }
@@ -620,7 +620,7 @@ TclX_GetChannelOption (Tcl_Interp  *interp,
     return TCL_OK;
 
   fatalError:
-    Tcl_Panic ("TclX_GetChannelOption bug");  /* FIX: return error. */
+    panic ("TclX_GetChannelOption bug");  /* FIX: return error. */
     return 0;  /* Not reached */
 }
 
@@ -715,7 +715,7 @@ TclX_SetChannelOption (Tcl_Interp *interp,
     return Tcl_SetChannelOption (interp, channel, strOption, strValue);
 
   fatalError:
-    Tcl_Panic ("TclX_SetChannelOption bug");
+    panic ("TclX_SetChannelOption bug");
     return TCL_ERROR;  /* Not reached */
 }
 
@@ -924,7 +924,7 @@ TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
 	/*
 	 * This should never happen
 	 */
-        Tcl_Panic ("invalid TclX result save object");
+        panic ("invalid TclX result save object");
     }
 
     Tcl_SetVar2Ex(interp, ERRORCODE, NULL, saveObjv[2], TCL_GLOBAL_ONLY);

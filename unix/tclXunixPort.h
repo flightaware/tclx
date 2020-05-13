@@ -38,7 +38,7 @@ extern int h_errno;
 #endif
 
 #ifdef __APPLE__
-# undef Tcl_Panic
+# undef panic
 #endif
 
 /*

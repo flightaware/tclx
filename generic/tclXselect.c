@@ -80,7 +80,7 @@ static int
 TclX_SelectObjCmd (ClientData clientData, 
                    Tcl_Interp *interp,
                    int objc,
-                   Tcl_Obj *const objv[]);
+                   Tcl_Obj *CONST objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -275,7 +275,7 @@ static int
 TclX_SelectObjCmd (ClientData clientData, 
                    Tcl_Interp *interp,
                    int objc,
-                   Tcl_Obj *const objv[])
+                   Tcl_Obj *CONST objv[])
 {
     static int chanAccess [] = {TCL_READABLE, TCL_WRITABLE, 0};
     int idx;
@@ -406,7 +406,7 @@ TclX_SelectObjCmd (clientData, interp, objc, objv)
     ClientData   clientData;
     Tcl_Interp  *interp;
     int          objc;
-    Tcl_Obj     *const objv[]
+    Tcl_Obj     *CONST objv[]
 {
     Tcl_AppendResult(interp, Tcl_GetString(objv[0]),
 	    " is not available on this OS", (char *) NULL);

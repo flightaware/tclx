@@ -102,12 +102,12 @@ AllocEntry (tblHeader_pt  tblHdrPtr,
 static int
 HandleDecodeObj (Tcl_Interp   *interp,
                  tblHeader_pt  tblHdrPtr,
-                 const char   *handle);
+                 CONST char   *handle);
 
 static int
 HandleDecode (Tcl_Interp   *interp,
               tblHeader_pt  tblHdrPtr,
-              const char   *handle);
+              CONST char   *handle);
 
 
 /*=============================================================================
@@ -221,7 +221,7 @@ AllocEntry (tblHeader_pt  tblHdrPtr,
  *-----------------------------------------------------------------------------
  */
 static int
-HandleDecode (Tcl_Interp *interp, tblHeader_pt tblHdrPtr, const char *handle)
+HandleDecode (Tcl_Interp *interp, tblHeader_pt tblHdrPtr, CONST char *handle)
 {
     unsigned entryIdx;
 
@@ -255,7 +255,7 @@ HandleDecode (Tcl_Interp *interp, tblHeader_pt tblHdrPtr, const char *handle)
 static int
 HandleDecodeObj (Tcl_Interp   *interp,
                  tblHeader_pt  tblHdrPtr,
-                 const char   *handle)
+                 CONST char   *handle)
 {
     unsigned entryIdx;
 
@@ -284,7 +284,7 @@ HandleDecodeObj (Tcl_Interp   *interp,
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleTblInit (const char *handleBase, int entrySize, int initEntries)
+TclX_HandleTblInit (CONST char *handleBase, int entrySize, int initEntries)
 {
     tblHeader_pt tblHdrPtr;
     int          baseLength = strlen ((char *) handleBase);
@@ -407,7 +407,7 @@ TclX_HandleAlloc (void_pt headerPtr, char *handlePtr)
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleXlate (Tcl_Interp *interp, void_pt headerPtr, const char *handle)
+TclX_HandleXlate (Tcl_Interp *interp, void_pt headerPtr, CONST char *handle)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     entryHeader_pt entryHdrPtr;
@@ -539,7 +539,7 @@ TclX_HandleFree (void_pt headerPtr, void_pt entryPtr)
 
     entryHdrPtr = HEADER_AREA (entryPtr);
     if (entryHdrPtr->freeLink != ALLOCATED_IDX)
-        Tcl_Panic ("Tcl_HandleFree: entry not allocated %x\n", entryHdrPtr);
+        panic ("Tcl_HandleFree: entry not allocated %x\n", entryHdrPtr);
 
     entryHdrPtr->freeLink = tblHdrPtr->freeHeadIdx;
     tblHdrPtr->freeHeadIdx =

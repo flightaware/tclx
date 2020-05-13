@@ -36,25 +36,25 @@ ParseFailOptionObj (Tcl_Interp *interp,
 
 static int
 CatOpFailedObj (Tcl_Interp *interp,
-                const char *errorMsg);
+                CONST char *errorMsg);
 
 static int
 TclX_CatopenObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj   *const objv[]);
+                    Tcl_Obj   *CONST objv[]);
 
 static int
 TclX_CatgetsObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj   *const objv[]);
+                    Tcl_Obj   *CONST objv[]);
 
 static int
 TclX_CatcloseObjCmd (ClientData  clientData,
                      Tcl_Interp *interp,
                      int         objc,
-                     Tcl_Obj   *const objv[]);
+                     Tcl_Obj   *CONST objv[]);
 
 static void
 MsgCatCleanUp (ClientData  clientData,
@@ -147,7 +147,7 @@ ParseFailOptionObj (Tcl_Interp *interp,
  */
 static int
 CatOpFailedObj (Tcl_Interp *interp,
-                const char *errorMsg)
+                CONST char *errorMsg)
 {
 #ifndef NO_CATGETS
     TclX_AppendObjResult (interp, errorMsg, (char *) NULL);
@@ -172,7 +172,7 @@ static int
 TclX_CatopenObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj   *const objv[])
+                    Tcl_Obj   *CONST objv[])
 {
     int      fail;
     nl_catd  catDesc;
@@ -212,7 +212,7 @@ static int
 TclX_CatgetsObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj   *const objv[])
+                    Tcl_Obj   *CONST objv[])
 {
     nl_catd   *catDescPtr;
     int       msgSetNum, msgNum;
@@ -267,7 +267,7 @@ static int
 TclX_CatcloseObjCmd (ClientData  clientData,
                      Tcl_Interp *interp,
                      int         objc,
-                     Tcl_Obj   *const objv[])
+                     Tcl_Obj   *CONST objv[])
 {
     int          fail;
     nl_catd     *catDescPtr;

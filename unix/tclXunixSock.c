@@ -142,7 +142,7 @@ TclX_ServerCreateCmd (ClientData clientData,
     /*
      * Parse arguments.
      */
-    bzero ((void *) &local, sizeof (local));
+    bzero ((VOID *) &local, sizeof (local));
     local.sin_family = AF_INET;
     local.sin_addr.s_addr = INADDR_ANY;
     nextArg = 1;
@@ -298,7 +298,7 @@ TclX_ServerAcceptCmd (ClientData clientData,
     /*
      * Accept a socket connection on the socket created by server_create.
      */
-    bzero ((void *) &connectSocket, sizeof (connectSocket));
+    bzero ((VOID *) &connectSocket, sizeof (connectSocket));
 
     channel = TclX_GetOpenChannel (interp, argv [nextArg], 0);
     if (channel == NULL)

@@ -60,7 +60,7 @@ ChannelToFd (Tcl_Channel 		channel,
 }
 
 static int
-TclX_ChannelFdObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj*const objv[])
+TclX_ChannelFdObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj*CONST objv[])
 {
 	const char          *channelName;
 	Tcl_Channel	     channel;

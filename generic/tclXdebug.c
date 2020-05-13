@@ -90,7 +90,7 @@ static int
 TclX_CmdtraceObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
                      int objc,
-                     Tcl_Obj *const objv[]);
+                     Tcl_Obj *CONST objv[]);
 
 static void
 DebugCleanUp (ClientData  clientData,
@@ -387,7 +387,7 @@ static int
 TclX_CmdtraceObjCmd (ClientData clientData,
                      Tcl_Interp *interp,
                      int objc,
-                     Tcl_Obj *const objv[])
+                     Tcl_Obj *CONST objv[])
 {
     traceInfo_pt  infoPtr = (traceInfo_pt) clientData;
     int idx;
