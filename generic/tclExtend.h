@@ -52,11 +52,6 @@ typedef void *void_pt;
 #define TCLX_CMDL_INTERACTIVE	(1<<0)
 #define TCLX_CMDL_EXIT_ON_EOF	(1<<1)
 
-#define CONST const
-#define TCL_PARSE_PART1 0
-#define VOID void
-#define panic Tcl_Panic
-
 /*
  * Application signal error handler.  Called after normal signal processing,
  * when a signal results in an error.	Its main purpose in life is to allow
@@ -104,16 +99,16 @@ EXTERN void	TclX_SplitWinCmdLine (int *argcPtr, char ***argvPtr);
  */
 EXTERN void	TclX_AppendObjResult (Tcl_Interp *, ...);
 
-EXTERN char *	TclX_DownShift (char *targetStr, CONST char *sourceStr);
+EXTERN char *	TclX_DownShift (char *targetStr, const char *sourceStr);
 
-EXTERN int	TclX_StrToInt (CONST char *string, int base, int *intPtr);
+EXTERN int	TclX_StrToInt (const char *string, int base, int *intPtr);
 
-EXTERN int	TclX_StrToUnsigned (CONST char *string,
+EXTERN int	TclX_StrToUnsigned (const char *string,
                                 int	    base,
                                 unsigned   *unsignedPtr);
 
 EXTERN char *	TclX_UpShift (char	     *targetStr,
-                              CONST char *sourceStr);
+                              const char *sourceStr);
 
 /*
  * Exported keyed list object manipulation functions.
@@ -148,7 +143,7 @@ EXTERN void_pt	TclX_HandleAlloc (void_pt	headerPtr,
 EXTERN void	TclX_HandleFree (void_pt  headerPtr,
                              void_pt  entryPtr);
 
-EXTERN void_pt	TclX_HandleTblInit (CONST char *handleBase,
+EXTERN void_pt	TclX_HandleTblInit (const char *handleBase,
                                     int	    entrySize,
                                     int	    initEntries);
 
@@ -166,7 +161,7 @@ EXTERN void	TclX_WalkKeyToHandle (void_pt   headerPtr,
 
 EXTERN void_pt	TclX_HandleXlate (Tcl_Interp  *interp,
                                   void_pt	  headerPtr,
-                                  CONST  char *handle);
+                                  const  char *handle);
 
 EXTERN void_pt	TclX_HandleXlateObj (Tcl_Interp    *interp,
                                      void_pt	       headerPtr,

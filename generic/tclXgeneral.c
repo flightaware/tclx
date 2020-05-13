@@ -33,19 +33,19 @@ static int
 TclX_EchoObjCmd (ClientData clientData, 
                  Tcl_Interp *interp,
                  int         objc,
-                 Tcl_Obj    *CONST objv[]);
+                 Tcl_Obj    *const objv[]);
 
 static int 
 TclX_InfoxObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
                   int         objc,
-                  Tcl_Obj    *CONST objv[]);
+                  Tcl_Obj    *const objv[]);
 
 static int 
 TclX_LoopObjCmd (ClientData clientData, 
                  Tcl_Interp *interp,
                  int         objc,
-                 Tcl_Obj    *CONST objv[]);
+                 Tcl_Obj    *const objv[]);
 
 static int
 SetLoopCounter (Tcl_Interp *interp,
@@ -59,7 +59,7 @@ static int
 TclX_Try_EvalObjCmd (ClientData clientData, 
                      Tcl_Interp *interp,
                      int         objc,
-                     Tcl_Obj    *CONST objv[]);
+                     Tcl_Obj    *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -119,7 +119,7 @@ static int
 TclX_EchoObjCmd (ClientData dummy,
                  Tcl_Interp *interp,
                  int objc,
-                 Tcl_Obj *CONST objv[])
+                 Tcl_Obj *const objv[])
 {
     int	  idx;
     Tcl_Channel channel;
@@ -164,7 +164,7 @@ static int
 TclX_InfoxObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
                   int objc,
-                  Tcl_Obj *CONST objv[])
+                  Tcl_Obj *const objv[])
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
     char *optionPtr;
@@ -321,7 +321,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 {
     Tcl_Obj *iObj, *newVarObj;
 
-    iObj = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
+    iObj = Tcl_GetVar2Ex(interp, varName, NULL, 0);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
 	iObj = newVarObj = Tcl_NewLongObj (idx);
     } else {
@@ -330,7 +330,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 
     Tcl_SetLongObj (iObj, idx);
     if (Tcl_SetVar2Ex(interp, varName, NULL, iObj,
-	    TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+	    TCL_LEAVE_ERR_MSG) == NULL) {
 	if (newVarObj != NULL) {
 	    Tcl_DecrRefCount (newVarObj);
 	}
@@ -353,7 +353,7 @@ static int
 TclX_LoopObjCmd (ClientData dummy,
                  Tcl_Interp *interp,
                  int objc,
-                 Tcl_Obj *CONST objv[])
+                 Tcl_Obj *const objv[])
 {
     int result = TCL_OK;
     long idx, first, limit, incr = 1;
@@ -484,7 +484,7 @@ static int
 TclX_Try_EvalObjCmd (ClientData  dummy,
                      Tcl_Interp *interp,
                      int         objc,
-                     Tcl_Obj *CONST objv[])
+                     Tcl_Obj *const objv[])
 {
     int code, code2;
     int haveFinally;

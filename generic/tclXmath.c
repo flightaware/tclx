@@ -56,17 +56,17 @@ static long	ReallyRandom (long my_range);
 static int	TclX_MaxObjCmd (ClientData clientData,
                             Tcl_Interp *interp,
                             int         objc,
-                            Tcl_Obj    *CONST objv[]);
+                            Tcl_Obj    *const objv[]);
 
 static int	TclX_MinObjCmd (ClientData  clientData,
                             Tcl_Interp *interp,
                             int         objc,
-                            Tcl_Obj    *CONST objv[]);
+                            Tcl_Obj    *const objv[]);
 
 static int	TclX_RandomObjCmd (ClientData  clientData,
                                Tcl_Interp *interp,
 				               int         objc,
-                               Tcl_Obj     *CONST objv[]);
+                               Tcl_Obj     *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ static int	ConvertIntOrDoubleObj (Tcl_Interp *interp,
 static int	TclX_MaxObjCmd (ClientData clientData,
                             Tcl_Interp *interp,
                             int         objc,
-                            Tcl_Obj    *CONST objv[])
+                            Tcl_Obj    *const objv[])
 {
     double value, maxValue = -MAXDOUBLE;
     int idx, maxIdx = 1;
@@ -153,7 +153,7 @@ static int	TclX_MaxObjCmd (ClientData clientData,
 static int	TclX_MinObjCmd (ClientData  clientData,
                             Tcl_Interp *interp,
                             int         objc,
-                            Tcl_Obj    *CONST objv[])
+                            Tcl_Obj    *const objv[])
 {
     double value, minValue = MAXDOUBLE;
     int idx, minIdx   = 1;
@@ -205,7 +205,7 @@ ReallyRandom (long myRange)
 static int	TclX_RandomObjCmd (ClientData  clientData,
                                Tcl_Interp *interp,
 				               int         objc,
-                               Tcl_Obj     *CONST objv[])
+                               Tcl_Obj     *const objv[])
 {
     long range;
     char *seedString;

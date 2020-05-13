@@ -47,7 +47,7 @@
  */
 #ifdef TCLX_DEBUG
 #   define TclX_Assert(expr) ((expr) ? (void)0 : \
-                              panic("TclX assertion failure: %s:%d \"%s\"\n",\
+                              Tcl_Panic("TclX assertion failure: %s:%d \"%s\"\n",\
                                     __FILE__, __LINE__, "expr"))
 #else
 #   define TclX_Assert(expr)
@@ -244,7 +244,7 @@ TclX_StructOffset (void *nsPtr, size_t offset,
 #define TclX_WriteNL(channel) (Tcl_Write (channel, "\n", 1))
 
 extern int
-TclX_StrToOffset (CONST char *string,
+TclX_StrToOffset (const char *string,
                   int         base,
                   off_t      *offsetPtr);
 

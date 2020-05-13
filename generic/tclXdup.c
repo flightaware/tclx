@@ -34,7 +34,7 @@ static int
 TclX_DupObjCmd (ClientData   clientData,
                 Tcl_Interp  *interp,
                 int          objc,
-                Tcl_Obj     *CONST objv[]);
+                Tcl_Obj     *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ DupChannelOptions (Tcl_Interp *interp,
         goto errorExit;
     }
     if ((optArgc % 2) != 0) {
-        panic("channel didn't return keyword/value pairs");
+        Tcl_Panic("channel didn't return keyword/value pairs");
     }
 
     for (idx = 0; idx < optArgc; idx += 2) {
@@ -193,7 +193,7 @@ static int
 TclX_DupObjCmd (ClientData clientData,
                 Tcl_Interp *interp,
                 int objc,
-                Tcl_Obj *CONST objv[])
+                Tcl_Obj *const objv[])
 {
     Tcl_Channel newChannel;
     int bindFnum, fnum;

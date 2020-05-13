@@ -28,13 +28,13 @@ ReturnGetHostError (Tcl_Interp *interp,
 static struct hostent *
 InfoGetHost (Tcl_Interp *interp,
              int         objc,
-             Tcl_Obj   *CONST objv[]);
+             Tcl_Obj   *const objv[]);
 
 static int
 TclX_HostInfoObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj   *CONST objv[]);
+                    Tcl_Obj   *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -106,7 +106,7 @@ TclXGetHostInfo (Tcl_Interp *interp, Tcl_Channel channel, int remoteHost)
 {
     struct sockaddr_in sockaddr;
     struct hostent *hostEntry;
-    CONST char *hostName;
+    const char *hostName;
     Tcl_Obj *listObjv [3];
 
     if (remoteHost) {
@@ -150,7 +150,7 @@ TclXGetHostInfo (Tcl_Interp *interp, Tcl_Channel channel, int remoteHost)
  *-----------------------------------------------------------------------------
  */
 static struct hostent *
-InfoGetHost (Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
+InfoGetHost (Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     struct hostent *hostEntry;
     struct in_addr address;
@@ -194,7 +194,7 @@ static int
 TclX_HostInfoObjCmd (ClientData  clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj   *CONST objv[])
+                    Tcl_Obj   *const objv[])
 {
     struct hostent *hostEntry;
     struct in_addr  inAddr;
@@ -215,8 +215,8 @@ TclX_HostInfoObjCmd (ClientData  clientData,
             return TCL_ERROR;
 
         for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy ((VOID *) hostEntry->h_addr_list [idx],
-                   (VOID *) &inAddr,
+            bcopy ((void *) hostEntry->h_addr_list [idx],
+                   (void *) &inAddr,
                    hostEntry->h_length);
 
 	    listObj = Tcl_NewStringObj (inet_ntoa (inAddr), -1);
@@ -231,8 +231,8 @@ TclX_HostInfoObjCmd (ClientData  clientData,
             return TCL_ERROR;
 
         for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy ((VOID *) hostEntry->h_addr_list [idx],
-                   (VOID *) &inAddr,
+            bcopy ((void *) hostEntry->h_addr_list [idx],
+                   (void *) &inAddr,
                    hostEntry->h_length);
 	    listObj = Tcl_NewStringObj ((char *) hostEntry->h_name, -1);
 	    Tcl_ListObjAppendElement (interp, resultPtr, listObj);

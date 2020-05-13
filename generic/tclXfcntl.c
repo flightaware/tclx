@@ -85,7 +85,7 @@ static int
 TclX_FcntlObjCmd (ClientData clientData, 
                   Tcl_Interp *interp,
                   int objc,
-                  Tcl_Obj *CONST objv[]);
+                  Tcl_Obj *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -204,7 +204,7 @@ GetFcntlAttr (Tcl_Interp *interp, Tcl_Channel channel, int mode, int attrib)
             return TCL_ERROR;
         break;
       default:
-        panic ("bug in fcntl get attrib");
+        Tcl_Panic ("bug in fcntl get attrib");
         value = 0; /* suppress compiler warning for initialized value */
     }
 
@@ -260,7 +260,7 @@ SetFcntlAttrObj (Tcl_Interp *interp,
       case ATTR_KEEPALIVE:
         return TclXOSsetsockopt (interp, channel, SO_KEEPALIVE, value);
       default:
-        panic ("buf in fcntl set attrib");
+        Tcl_Panic ("buf in fcntl set attrib");
     }
     return TCL_ERROR;  /* Should never be reached */
 }
@@ -275,7 +275,7 @@ static int
 TclX_FcntlObjCmd (ClientData clientData,
                   Tcl_Interp *interp,
                   int objc,
-                  Tcl_Obj *CONST objv[])
+                  Tcl_Obj *const objv[])
 {
     Tcl_Channel  channel;
     int          mode;
