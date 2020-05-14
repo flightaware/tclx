@@ -22,7 +22,7 @@ namespace eval ::tclx {
 	arrayprocs.tcl	1
 	autoload.tcl	0
 	buildhelp.tcl	0
-	buildidx.tcl	0
+	buildidx.tcl	1
 	compat.tcl	1
 	convlib.tcl	1
 	edprocs.tcl	1

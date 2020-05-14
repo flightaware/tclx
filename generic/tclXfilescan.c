@@ -641,12 +641,7 @@ ScanFile (Tcl_Interp *interp, scanContext_t *contextPtr, Tcl_Channel channel)
 
         data.offset = (off_t) Tcl_Tell (channel);
         Tcl_DStringSetLength (&lineBuf, 0);
-        if (Tcl_Gets (channel, &lineBuf) < 0 || lineBuf.length == 0) {
-            if (Tcl_Eof (channel) || Tcl_InputBlocked (channel))
-                goto scanExit;
-            Tcl_SetStringObj (Tcl_GetObjResult (interp),
-                              Tcl_PosixError (interp), -1);
-            result = TCL_ERROR;
+        if (Tcl_Gets (channel, &lineBuf) < 0 || Tcl_Eof (channel) || Tcl_InputBlocked (channel) ) {
             goto scanExit;
         }
 

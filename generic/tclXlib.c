@@ -546,7 +546,7 @@ ProcessIndexFile (Tcl_Interp *interp,
 
         if ((Tcl_SplitList (interp, lineBuffer.string, &lineArgc,
                             &lineArgv) != TCL_OK) || (lineArgc < 4))
-            goto formatError;
+            goto reachedEOF;
         
         /*
          * lineArgv [0] is the package name.
