@@ -620,7 +620,7 @@ TclX_GetChannelOption (Tcl_Interp  *interp,
     return TCL_OK;
 
   fatalError:
-    panic ("TclX_GetChannelOption bug");  /* FIX: return error. */
+    Tcl_Panic ("TclX_GetChannelOption bug");  /* FIX: return error. */
     return 0;  /* Not reached */
 }
 
