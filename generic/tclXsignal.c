@@ -1540,7 +1540,7 @@ SignalCmdCleanUp (ClientData clientData, Tcl_Interp *interp)
             break;
     }
     if (idx == numInterps)
-        panic ("signal interp lost");
+        Tcl_Panic ("signal interp lost");
 
     interpTable [idx] = interpTable [--numInterps];
 

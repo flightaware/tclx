@@ -228,7 +228,7 @@ PushEntry (profInfo_t *infoPtr,
          * Only global level can be NULL.
          */
         if (scanPtr == NULL)
-            panic (PROF_PANIC, 1);
+            Tcl_Panic (PROF_PANIC, 1);
     }
     entryPtr->prevScopePtr = scanPtr;
     infoPtr->scopeChainPtr = entryPtr;

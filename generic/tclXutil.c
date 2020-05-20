@@ -476,7 +476,7 @@ ParseTranslationOption (char *strValue)
     } else if (STREQU (strValue, "platform")) {
         return TCLX_TRANSLATE_PLATFORM;
     }
-    panic ("ParseTranslationOption bug");
+    Tcl_Panic ("ParseTranslationOption bug");
     return TCL_ERROR;  /* Not reached */
 }
 

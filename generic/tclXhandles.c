@@ -539,7 +539,7 @@ TclX_HandleFree (void_pt headerPtr, void_pt entryPtr)
 
     entryHdrPtr = HEADER_AREA (entryPtr);
     if (entryHdrPtr->freeLink != ALLOCATED_IDX)
-        panic ("Tcl_HandleFree: entry not allocated %x\n", entryHdrPtr->freeLink);
+        Tcl_Panic ("Tcl_HandleFree: entry not allocated %x\n", entryHdrPtr->freeLink);
 
     entryHdrPtr->freeLink = tblHdrPtr->freeHeadIdx;
     tblHdrPtr->freeHeadIdx =
