@@ -113,7 +113,7 @@ ChannelToFnum (Tcl_Channel channel, int direction)
             return -1;
 	}
     }
-    return (int) handle;
+    return (uintptr_t) handle;
 }
 
 /*-----------------------------------------------------------------------------
@@ -919,7 +919,7 @@ int
 TclXOSgetsockname (Tcl_Interp *interp, Tcl_Channel channel, void *sockaddr, int sockaddrSize)
 {
     if (getsockname (ChannelToFnum (channel, 0),
-		(struct sockaddr *) sockaddr, &sockaddrSize) < 0) {
+		(struct sockaddr *) sockaddr, (socklen_t *__restrict) &sockaddrSize) < 0) {
 	TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
 		Tcl_PosixError (interp), (char *) NULL);
 	return TCL_ERROR;
@@ -946,7 +946,7 @@ TclXOSgetsockopt (Tcl_Interp *interp, Tcl_Channel channel, int option, socklen_t
     int valueLen = sizeof (*valuePtr);
 
     if (getsockopt (ChannelToFnum (channel, 0), SOL_SOCKET, option, 
-		(void*) valuePtr, &valueLen) != 0) {
+		(void*) valuePtr, (socklen_t *__restrict) &valueLen) != 0) {
 	TclX_AppendObjResult (interp, Tcl_GetChannelName (channel), ": ",
 		Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
@@ -1385,7 +1385,7 @@ TclXOSGetSelectFnum (Tcl_Interp *interp, Tcl_Channel channel, int direction, int
                               (char *) NULL);
         return TCL_ERROR;
     }
-    *fnumPtr = (int) handle;
+    *fnumPtr = (uintptr_t) handle;
     return TCL_OK;
 }
 

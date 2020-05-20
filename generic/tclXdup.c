@@ -238,14 +238,6 @@ TclX_DupObjCmd (ClientData clientData,
                       Tcl_GetChannelName (newChannel), -1);
     return TCL_OK;
 
-  badFnum:
-    Tcl_ResetResult (interp);
-    TclX_AppendObjResult (interp, "invalid integer file number \"",
-                          Tcl_GetStringFromObj (objv [1], NULL),
-                          "\", expected unsigned integer or Tcl file id",
-                          (char *) NULL);
-    return TCL_ERROR;
-
   bind2ndArg:
     TclX_AppendObjResult (interp, "the second argument, targetChannelId, ",
                           "is not allow when binding a file number to ",

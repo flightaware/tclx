@@ -86,7 +86,7 @@ TclXOSDupChannel(Tcl_Interp *interp, Tcl_Channel srcChannel, int mode, char *tar
     } else {
         Tcl_GetChannelHandle (srcChannel, TCL_WRITABLE, &handle);
     }
-    srcFileNum = (int) handle;
+    srcFileNum = (uintptr_t) handle;
     channelType = Tcl_GetChannelType (srcChannel);
 
     /*

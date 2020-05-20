@@ -261,7 +261,6 @@ static int	TclX_RandomObjCmd (ClientData  clientData,
 void
 TclX_MathInit (Tcl_Interp *interp)
 {
-    int major, minor;
 
     Tcl_CreateObjCommand (interp, "max", TclX_MaxObjCmd,
 	    (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
