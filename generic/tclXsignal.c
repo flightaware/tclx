@@ -682,7 +682,7 @@ FormatTrapCode (Tcl_Interp *interp, int signalNum, Tcl_DString *command)
         scanPtr += 2;
         copyPtr = scanPtr;
     }
-    Tcl_DStringAppend (command, copyPtr, copyPtr - scanPtr);
+    Tcl_DStringAppend (command, copyPtr, -1);
 
     return TCL_OK;
 
@@ -1540,7 +1540,7 @@ SignalCmdCleanUp (ClientData clientData, Tcl_Interp *interp)
             break;
     }
     if (idx == numInterps)
-        panic ("signal interp lost");
+        Tcl_Panic ("signal interp lost");
 
     interpTable [idx] = interpTable [--numInterps];
 

@@ -168,7 +168,7 @@ ReadAndCompare (off_t fileOffset, binSearchCB_t *searchCBPtr)
      * one.
      */
     if (fileOffset != 0) {
-        if (Tcl_Gets (searchCBPtr->channel, &searchCBPtr->lineBuf) < 0) {
+        if (Tcl_Gets (searchCBPtr->channel, &searchCBPtr->lineBuf) <= 0) {
             if (Tcl_Eof (searchCBPtr->channel) ||
                 Tcl_InputBlocked (searchCBPtr->channel)) {
                 TclX_AppendObjResult (searchCBPtr->interp,
@@ -197,7 +197,7 @@ ReadAndCompare (off_t fileOffset, binSearchCB_t *searchCBPtr)
      * Read the line. Only compare if EOF was not hit, otherwise, treat as if
      * we went above the key we are looking for.
      */
-    if (Tcl_Gets (searchCBPtr->channel, &searchCBPtr->lineBuf) < 0) {
+    if (Tcl_Gets (searchCBPtr->channel, &searchCBPtr->lineBuf) <= 0) {
         if (Tcl_Eof (searchCBPtr->channel) ||
             Tcl_InputBlocked (searchCBPtr->channel)) {
             searchCBPtr->cmpResult = -1;
@@ -343,7 +343,7 @@ TclX_BsearchObjCmd (ClientData clientData,
         valPtr = Tcl_NewStringObj (Tcl_DStringValue (&searchCB.lineBuf),
                                    -1);
         if (Tcl_ObjSetVar2(interp, objv[3], NULL, valPtr,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+                           TCL_LEAVE_ERR_MSG) == NULL) {
             Tcl_DecrRefCount (valPtr);
             goto errorExit;
         }

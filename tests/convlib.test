@@ -70,6 +70,7 @@ Test convlib-1.2 {Convert library tests} {
     list [file exists convlib.tmp/tmp.tlib] [file exists convlib.tmp/tmp.tndx]
 } 0 {1 1}
 
+
 loadlibindex convlib.tmp/tmp.tlib
 LibValidate convlib-1.3 {Convert library tests}
 

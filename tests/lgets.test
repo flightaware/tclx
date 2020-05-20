@@ -60,7 +60,7 @@ test lgets-1.6 {lgets command with long line} {
 
 test lgets-1.7 {lgets command with EOF in list element} {
     set f [open test2.tmp w]
-    puts $f "Test1  \{Test2 " nonewline
+    puts -nonewline $f "Test1  \{Test2 " 
     close $f
     set f [open test2.tmp]
     list [catch {lgets $f} msg] $msg
@@ -70,7 +70,7 @@ catch {close $f}
 
 test lgets-1.8 {lgets command with EOF in list} {
     set f [open test2.tmp w]
-    puts $f "Test1\nTest2" nonewline
+    puts -nonewline $f "Test1\nTest2" 
     close $f
     set f [open test2.tmp]
     set x {}

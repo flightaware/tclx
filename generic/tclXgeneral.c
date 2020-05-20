@@ -321,7 +321,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 {
     Tcl_Obj *iObj, *newVarObj;
 
-    iObj = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
+    iObj = Tcl_GetVar2Ex(interp, varName, NULL, 0);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
 	iObj = newVarObj = Tcl_NewLongObj (idx);
     } else {
@@ -330,7 +330,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 
     Tcl_SetLongObj (iObj, idx);
     if (Tcl_SetVar2Ex(interp, varName, NULL, iObj,
-	    TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+	    TCL_LEAVE_ERR_MSG) == NULL) {
 	if (newVarObj != NULL) {
 	    Tcl_DecrRefCount (newVarObj);
 	}

@@ -75,7 +75,7 @@ DupChannelOptions (Tcl_Interp *interp,
         goto errorExit;
     }
     if ((optArgc % 2) != 0) {
-        panic("channel didn't return keyword/value pairs");
+        Tcl_Panic("channel didn't return keyword/value pairs");
     }
 
     for (idx = 0; idx < optArgc; idx += 2) {
@@ -208,18 +208,11 @@ TclX_DupObjCmd (ClientData clientData,
      * If a number is supplied, bind it to a file handle rather than doing
      * a dup.
      */
-    if (objv [1]->typePtr == Tcl_GetObjType ("int")) {
-        bindFnum = TRUE;
-    } else {
-        srcChannelId = Tcl_GetStringFromObj (objv [1], NULL);
-        if (ISDIGIT (srcChannelId [0])) {
-            if (Tcl_ConvertToType (interp, objv [1],
-                                   Tcl_GetObjType ("int")) != TCL_OK)
-                goto badFnum;
+
+    bindFnum = FALSE;
+    srcChannelId = Tcl_GetStringFromObj (objv [1], NULL);
+    if (ISDIGIT (srcChannelId [0])) {
             bindFnum = TRUE;
-        } else {
-            bindFnum = FALSE;
-        }
     }
     if (bindFnum) {
         if (objc != 2)
@@ -244,14 +237,6 @@ TclX_DupObjCmd (ClientData clientData,
     Tcl_SetStringObj (Tcl_GetObjResult (interp),
                       Tcl_GetChannelName (newChannel), -1);
     return TCL_OK;
-
-  badFnum:
-    Tcl_ResetResult (interp);
-    TclX_AppendObjResult (interp, "invalid integer file number \"",
-                          Tcl_GetStringFromObj (objv [1], NULL),
-                          "\", expected unsigned integer or Tcl file id",
-                          (char *) NULL);
-    return TCL_ERROR;
 
   bind2ndArg:
     TclX_AppendObjResult (interp, "the second argument, targetChannelId, ",

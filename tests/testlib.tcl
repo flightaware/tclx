@@ -25,7 +25,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
     package require tcltest
     namespace import ::tcltest::*
 }
-package require Tclx 8.4
+package require Tclx
 
 foreach need {
     fchown fchmod flock fsync ftruncate msgcats posix_signals symlink

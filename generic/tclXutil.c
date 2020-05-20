@@ -333,7 +333,7 @@ TclX_RelativeExpr (Tcl_Interp  *interp,
     long longResult;
     char staticBuf [32];
 
-    if (exprPtr->typePtr == Tcl_GetObjType ("int")) {
+    if (exprPtr != NULL && exprPtr->typePtr != NULL && exprPtr->typePtr == Tcl_GetObjType ("int")) {
         if (Tcl_GetIntFromObj (interp, exprPtr, exprResultPtr) != TCL_OK)
             return TCL_ERROR;
         return TCL_OK;
@@ -476,7 +476,7 @@ ParseTranslationOption (char *strValue)
     } else if (STREQU (strValue, "platform")) {
         return TCLX_TRANSLATE_PLATFORM;
     }
-    panic ("ParseTranslationOption bug");
+    Tcl_Panic ("ParseTranslationOption bug");
     return TCL_ERROR;  /* Not reached */
 }
 
@@ -507,7 +507,7 @@ FormatTranslationOption (int value)
       case TCLX_TRANSLATE_PLATFORM:
         return "platform";
       default:
-        panic ("FormatTranslationOption bug");
+        Tcl_Panic ("FormatTranslationOption bug");
     }
     return NULL;  /* Not reached */
 }
@@ -620,7 +620,7 @@ TclX_GetChannelOption (Tcl_Interp  *interp,
     return TCL_OK;
 
   fatalError:
-    panic ("TclX_GetChannelOption bug");  /* FIX: return error. */
+    Tcl_Panic ("TclX_GetChannelOption bug");  /* FIX: return error. */
     return 0;  /* Not reached */
 }
 
@@ -791,14 +791,13 @@ TclX_WrongArgs (Tcl_Interp *interp, Tcl_Obj *commandNameObj, char *string)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
+TclX_AppendObjResult (Tcl_Interp *interp, ...)
 {
-    Tcl_Interp *interp;
     Tcl_Obj *resultPtr;
     va_list argList;
     char *string;
 
-    interp = TCL_VARARGS_START (Tcl_Interp *, arg1, argList);
+    va_start(argList, interp);
     resultPtr = Tcl_GetObjResult (interp);
 
     if (Tcl_IsShared(resultPtr)) {
@@ -806,7 +805,6 @@ TclX_AppendObjResult TCL_VARARGS_DEF (Tcl_Interp *, arg1)
         Tcl_SetObjResult(interp, resultPtr);
     }
 
-    TCL_VARARGS_START(Tcl_Interp *,arg1,argList);
     while (1) {
         string = va_arg(argList, char *);
         if (string == NULL) {

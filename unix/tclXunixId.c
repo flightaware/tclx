@@ -444,9 +444,9 @@ IdHost (Tcl_Interp *interp, int objc, Tcl_Obj*CONST objv[])
 #endif
     char hostNameBuf[MAXHOSTNAMELEN];
 
-    if (objc != 2)
+    if (objc != 2) {
         return TclX_WrongArgs (interp, objv [0], "host");
-
+    }
 	if (gethostname (hostNameBuf, MAXHOSTNAMELEN) < 0) {
             TclX_AppendObjResult (interp, Tcl_PosixError (interp),
                                   (char *) NULL);
