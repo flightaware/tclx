@@ -434,7 +434,7 @@ ProfCommandEvalSetup (profInfo_t *infoPtr, int *isProcPtr)
         UpdateTOSTimes (infoPtr);
         do {
             if (infoPtr->stackPtr->evalLevel != UNKNOWN_LEVEL) 
-                panic (PROF_PANIC, 2);  /* Not an initial entry */
+                Tcl_Panic (PROF_PANIC, 2);  /* Not an initial entry */
             PopEntry (infoPtr);
         } while (infoPtr->stackPtr->procLevel > procLevel);
     }

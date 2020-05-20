@@ -195,7 +195,7 @@ TclX_ServerCreateCmd (ClientData clientData,
      */
     if (getReserved) {
         int port;
-        if (rresvport_af (&port, local.sin_family) < 0)
+        if (rresvport (&port) < 0)
             goto unixError;
         local.sin_port = port;
     }

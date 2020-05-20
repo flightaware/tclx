@@ -507,7 +507,7 @@ FormatTranslationOption (int value)
       case TCLX_TRANSLATE_PLATFORM:
         return "platform";
       default:
-        panic ("FormatTranslationOption bug");
+        Tcl_Panic ("FormatTranslationOption bug");
     }
     return NULL;  /* Not reached */
 }

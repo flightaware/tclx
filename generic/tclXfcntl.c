@@ -260,7 +260,7 @@ SetFcntlAttrObj (Tcl_Interp *interp,
       case ATTR_KEEPALIVE:
         return TclXOSsetsockopt (interp, channel, SO_KEEPALIVE, value);
       default:
-        panic ("buf in fcntl set attrib");
+        Tcl_Panic ("buf in fcntl set attrib");
     }
     return TCL_ERROR;  /* Should never be reached */
 }
