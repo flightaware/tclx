@@ -401,7 +401,7 @@ TclXOSsystem (Tcl_Interp *interp, char *command, int *exitCode)
     if (pid == 0) {
         close (errPipes [0]);
         execl ("/bin/sh", "sh", "-c", command, (char *) NULL);
-        write (errPipes [1], &errno, sizeof (errno));
+        if (write (errPipes [1], &errno, sizeof (errno)) == 0) {}
         _exit (127);
     }
 

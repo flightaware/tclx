@@ -336,6 +336,7 @@ TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 	    modeInfo.absMode = strtol(modeString, 0, 0);
         modeInfo.symMode = NULL;
     } else {
+        modeInfo.absMode = 0;
         modeInfo.symMode = modeString;
     }
 

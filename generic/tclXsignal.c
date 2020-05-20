@@ -682,7 +682,7 @@ FormatTrapCode (Tcl_Interp *interp, int signalNum, Tcl_DString *command)
         scanPtr += 2;
         copyPtr = scanPtr;
     }
-    Tcl_DStringAppend (command, copyPtr, ((size_t)-1));
+    Tcl_DStringAppend (command, copyPtr, -1);
 
     return TCL_OK;
 
