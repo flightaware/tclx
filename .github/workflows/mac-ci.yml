@@ -26,7 +26,6 @@ jobs:
       run: |       
         autoreconf -vi
         ./configure --with-tcl=/usr/local/opt/tcl-tk/lib --prefix=/usr/local        
-        sh -c "cd /private/tmp; du -a tcl-tk*"
     - name: make
       run: |
         make
