@@ -24,8 +24,13 @@ jobs:
         sudo ln -sf /usr/local/opt/tcl-tk/bin/tclsh8.6 /usr/local/bin/tclsh8.6
     - name: configure
       run: |       
+        echo ======== /private/tmp ========
+        ls /private/tmp
+        sleep 10
         autoreconf -vi
+        sleep 10
         ./configure --with-tcl=/usr/local/opt/tcl-tk/lib --prefix=/usr/local        
+        echo ======== /private/tmp ========
         ls /private/tmp
     - name: make
       run: |
