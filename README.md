@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/flightaware/tclx.svg?branch=master)](https://travis-ci.org/flightaware/tclx)
+![Linux CI](https://github.com/flightaware/tclx/workflows/Linux%20CI/badge.svg)
+![Mac CI](https://github.com/flightaware/tclx/workflows/Mac%20CI/badge.svg)
 
 # Extended Tcl (TclX)
 
