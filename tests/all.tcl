@@ -21,6 +21,11 @@ set ::tcltest::testsDirectory [file dir [info script]]
 ::tcltest::configure -testdir [file dirname [file normalize [info script]]]
 ::tcltest::configure {*}$argv
 
+# Skip these tests on Mac until we get the tclx signals fix in 8.7
+if {$::tcl_platform(os) eq "Darwin"} {
+       lappend ::tclTest::skipFiles pipe.test process.test signal.test
+}
+
 puts stdout "Tests running in interp:       [info nameofexecutable]"
 puts stdout "Tests running with pwd:        [pwd]"
 puts stdout "Tests running in working dir:  $::tcltest::testsDirectory"
