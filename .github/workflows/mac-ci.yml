@@ -33,7 +33,7 @@ jobs:
     - name: make
       run: make
     - name: test
-      run: make test
+      run: SKIPFILES="pipe.test process.test signal.test" make test
     - name: install
       run: sudo make install
 
