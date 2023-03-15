@@ -20,6 +20,9 @@
 
 #include "tclExtdInt.h"
 
+#include <stdint.h>
+#include <inttypes.h>
+
 /*
  * Variable set to contain the alignment factor (in bytes) for this machine.
  * It is set on the first table initialization.
@@ -539,7 +542,7 @@ TclX_HandleFree (void_pt headerPtr, void_pt entryPtr)
 
     entryHdrPtr = HEADER_AREA (entryPtr);
     if (entryHdrPtr->freeLink != ALLOCATED_IDX)
-        Tcl_Panic ("Tcl_HandleFree: entry not allocated %x\n", entryHdrPtr);
+        Tcl_Panic ("Tcl_HandleFree: entry not allocated %" PRIxPTR "\n", entryHdrPtr);
 
     entryHdrPtr->freeLink = tblHdrPtr->freeHeadIdx;
     tblHdrPtr->freeHeadIdx =
