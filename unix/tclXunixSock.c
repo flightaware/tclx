@@ -194,10 +194,12 @@ TclX_ServerCreateCmd (ClientData clientData,
      * Allocate a reserved port if requested.
      */
     if (getReserved) {
+#ifdef HAVE_RRESVPORT
         int port;
         if (rresvport (&port) < 0)
             goto unixError;
         local.sin_port = port;
+#endif
     }
 
     /*

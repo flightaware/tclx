@@ -254,6 +254,7 @@ main() {
     
     AC_CHECK_FUNC(inet_aton, , [AC_DEFINE(NO_INET_ATON)])
     AC_CHECK_FUNC(gethostname, , [AC_DEFINE(NO_GETHOSTNAME)])
+    AC_CHECK_FUNCS([rresvport])
     
     #-------------------------------------------------------------------------
     # Check for additional libraries the Tcl/Tk does not check for.
