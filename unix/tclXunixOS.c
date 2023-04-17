@@ -99,7 +99,7 @@ TclXNotAvailableError (Tcl_Interp *interp, char *funcName)
  * call and let the system calls generate an error when -1 is returned.
  *-----------------------------------------------------------------------------
  */
-static intptr_t
+static int
 ChannelToFnum (Tcl_Channel channel, int direction)
 {
     ClientData handle;
@@ -114,7 +114,7 @@ ChannelToFnum (Tcl_Channel channel, int direction)
             return -1;
 	}
     }
-    return (intptr_t) handle;
+    return (int) handle;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1375,7 +1375,7 @@ TclXOSFChangeOwnGrp (Tcl_Interp *interp, unsigned options, char *ownerStr, char 
  *   TCL_OK or TCL_ERROR.
  *-----------------------------------------------------------------------------
  */
-intptr_t
+int
 TclXOSGetSelectFnum (Tcl_Interp *interp, Tcl_Channel channel, int direction, int *fnumPtr)
 {
     ClientData handle;
@@ -1387,7 +1387,7 @@ TclXOSGetSelectFnum (Tcl_Interp *interp, Tcl_Channel channel, int direction, int
                               (char *) NULL);
         return TCL_ERROR;
     }
-    *fnumPtr = (intptr_t) handle;
+    *fnumPtr = (int) handle;
     return TCL_OK;
 }
 

@@ -76,7 +76,7 @@ TclXOSDupChannel(Tcl_Interp *interp, Tcl_Channel srcChannel, int mode, char *tar
     ClientData handle;
     const Tcl_ChannelType *channelType;
     Tcl_Channel newChannel = NULL;
-    intptr_t srcFileNum;
+    int srcFileNum;
     int newFileNum = -1;
 
     /*
@@ -88,7 +88,7 @@ TclXOSDupChannel(Tcl_Interp *interp, Tcl_Channel srcChannel, int mode, char *tar
     } else {
         Tcl_GetChannelHandle (srcChannel, TCL_WRITABLE, &handle);
     }
-    srcFileNum = (intptr_t) handle;
+    srcFileNum = (int) handle;
     channelType = Tcl_GetChannelType (srcChannel);
 
     /*

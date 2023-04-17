@@ -339,7 +339,7 @@ DeleteKeyedListEntry (keylIntObj_t *keylIntPtr, int entryIdx)
     if (keylIntPtr->hashTbl != NULL) {
 	Tcl_HashEntry *entryPtr;
 	Tcl_HashSearch search;
-	intptr_t nidx;
+	int nidx;
 
 	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl,
 		keylIntPtr->entries [entryIdx].key);
@@ -355,7 +355,7 @@ DeleteKeyedListEntry (keylIntObj_t *keylIntPtr, int entryIdx)
 	 */
 	for (entryPtr = Tcl_FirstHashEntry(keylIntPtr->hashTbl, &search);
 	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
-	    nidx = (intptr_t) Tcl_GetHashValue(entryPtr);
+	    nidx = (int) Tcl_GetHashValue(entryPtr);
 	    if (nidx > entryIdx) {
 		Tcl_SetHashValue(entryPtr, (ClientData) (uintptr_t) (nidx - 1));
 	    }
@@ -396,7 +396,7 @@ FindKeyedListEntry (keylIntObj_t *keylIntPtr,
 {
     char *keySeparPtr;
     int keyLen
-    intptr_t findIdx = -1;
+    int findIdx = -1;
 
     keySeparPtr = strchr (key, '.');
     if (keySeparPtr != NULL) {
@@ -418,7 +418,7 @@ FindKeyedListEntry (keylIntObj_t *keylIntPtr,
 	}
 	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl, key);
 	if (entryPtr != NULL) {
-	    findIdx = (intptr_t) Tcl_GetHashValue(entryPtr);
+	    findIdx = (int) Tcl_GetHashValue(entryPtr);
 	}
 	if (keySeparPtr != NULL) {
 	    key[keyLen] = tmp;
