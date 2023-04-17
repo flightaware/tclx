@@ -22,7 +22,7 @@
  */
 
 #include "tclExtdInt.h"
-#include <stdint.h>
+// #include <stdint.h>
 
 #ifndef NO_GETPRIORITY
 #include <sys/resource.h>

@@ -17,7 +17,7 @@
  */
 
 #include "tclExtdInt.h"
-#include <stdint.h>
+// #include <stdint.h>
 
 /*
  * Keyed lists are stored as arrays recursively defined objects.  The data
