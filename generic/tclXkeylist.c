@@ -395,7 +395,7 @@ FindKeyedListEntry (keylIntObj_t *keylIntPtr,
                     char	    **nextSubKeyPtr)
 {
     char *keySeparPtr;
-    int keyLen
+    int keyLen;
     int findIdx = -1;
 
     keySeparPtr = strchr (key, '.');
