@@ -463,7 +463,7 @@ SetSignalState (int signalNum, signalProcPtr_t sigFunc, int restart)
  *-----------------------------------------------------------------------------
  */
 static int
-BlockSignals (Tcl_Interp *interp, int action, unsigned char signals[])
+BlockSignals (Tcl_Interp *interp, int action, unsigned char signals[MAXSIG])
 {
 #ifndef NO_SIGACTION
     int      signalNum;

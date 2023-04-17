@@ -17,7 +17,7 @@
  */
 
 #include "tclExtdInt.h"
-// #include <stdint.h>
+#include <stdint.h>
 
 /*
  * Keyed lists are stored as arrays recursively defined objects.  The data
@@ -339,7 +339,7 @@ DeleteKeyedListEntry (keylIntObj_t *keylIntPtr, int entryIdx)
     if (keylIntPtr->hashTbl != NULL) {
 	Tcl_HashEntry *entryPtr;
 	Tcl_HashSearch search;
-	int nidx;
+	intptr_t nidx;
 
 	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl,
 		keylIntPtr->entries [entryIdx].key);
@@ -355,7 +355,7 @@ DeleteKeyedListEntry (keylIntObj_t *keylIntPtr, int entryIdx)
 	 */
 	for (entryPtr = Tcl_FirstHashEntry(keylIntPtr->hashTbl, &search);
 	     entryPtr != NULL; entryPtr = Tcl_NextHashEntry(&search)) {
-	    nidx = (int) Tcl_GetHashValue(entryPtr);
+	    nidx = (intptr_t) Tcl_GetHashValue(entryPtr);
 	    if (nidx > entryIdx) {
 		Tcl_SetHashValue(entryPtr, (ClientData) (uintptr_t) (nidx - 1));
 	    }
@@ -396,7 +396,7 @@ FindKeyedListEntry (keylIntObj_t *keylIntPtr,
 {
     char *keySeparPtr;
     int keyLen;
-    int findIdx = -1;
+    intptr_t findIdx = -1;
 
     keySeparPtr = strchr (key, '.');
     if (keySeparPtr != NULL) {
@@ -418,7 +418,7 @@ FindKeyedListEntry (keylIntObj_t *keylIntPtr,
 	}
 	entryPtr = Tcl_FindHashEntry(keylIntPtr->hashTbl, key);
 	if (entryPtr != NULL) {
-	    findIdx = (int) Tcl_GetHashValue(entryPtr);
+	    findIdx = (intptr_t) Tcl_GetHashValue(entryPtr);
 	}
 	if (keySeparPtr != NULL) {
 	    key[keyLen] = tmp;

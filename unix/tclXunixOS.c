@@ -22,7 +22,7 @@
  */
 
 #include "tclExtdInt.h"
-// #include <stdint.h>
+#include <stdint.h>
 
 #ifndef NO_GETPRIORITY
 #include <sys/resource.h>
@@ -114,7 +114,7 @@ ChannelToFnum (Tcl_Channel channel, int direction)
             return -1;
 	}
     }
-    return (int) handle;
+    return (intptr_t) handle;
 }
 
 /*-----------------------------------------------------------------------------
@@ -1387,7 +1387,7 @@ TclXOSGetSelectFnum (Tcl_Interp *interp, Tcl_Channel channel, int direction, int
                               (char *) NULL);
         return TCL_ERROR;
     }
-    *fnumPtr = (int) handle;
+    *fnumPtr = (intptr_t) handle;
     return TCL_OK;
 }
 
