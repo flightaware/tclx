@@ -13,7 +13,7 @@ TclX is upwardly compatible with Tcl.  You take the Extended Tcl package, add it
 
 Extended Tcl runs on most Unix-like systems and Windows.
 
-While this TclX distribution is tested with Tcl 8.4 and Tk 8.4, it should with Tcl 8.3+.  Please check the Extended Tcl homepage at
+While this TclX distribution is tested with Tcl 8.6 and Tk 8.4, it should work with Tcl 8.3+.  Please check the Extended Tcl homepage at
 
     http://tclx.sourceforge.net/
 
