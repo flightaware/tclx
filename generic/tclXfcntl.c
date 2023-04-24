@@ -200,8 +200,12 @@ GetFcntlAttr (Tcl_Interp *interp, Tcl_Channel channel, int mode, int attrib)
         value = (optValue == TCLX_BUFFERING_LINE);
         break;
       case ATTR_KEEPALIVE:
-        if (TclXOSgetsockopt (interp, channel, SO_KEEPALIVE, &value) != TCL_OK)
+        {
+        socklen_t len;
+        if (TclXOSgetsockopt (interp, channel, SO_KEEPALIVE, &len) != TCL_OK)
             return TCL_ERROR;
+        value = len;
+        }
         break;
       default:
         Tcl_Panic ("bug in fcntl get attrib");
