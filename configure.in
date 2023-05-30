@@ -6,7 +6,7 @@ dnl	to configure the system for the local environment.
 # RCS: @(#) $Id: configure.in,v 1.17 2006/01/26 00:30:54 hobbs Exp $
 
 AC_INIT([tclx], [8.6])
-FULL_VERSION="8.6.1"
+FULL_VERSION="8.6.2"
 
 TEA_INIT([3.9])
 
