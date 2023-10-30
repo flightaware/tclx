@@ -38,18 +38,6 @@
 #endif
 
 /*
- * Cheat a little to avoid configure checking for floor and ceil being
- * This breaks with GNU libc headers...really should check with autoconf.
- */
-#ifndef __GNU_LIBRARY__
-extern
-double floor ();
-
-extern
-double ceil ();
-#endif
-
-/*
  * Prototypes of internal functions.
  */
 static int
