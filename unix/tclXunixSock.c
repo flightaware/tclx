@@ -358,7 +358,7 @@ TclX_ServerInit (Tcl_Interp *interp)
     Tcl_CreateCommand (interp, "server_accept", TclX_ServerAcceptCmd,
                        (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
     Tcl_CreateCommand (interp, "server_create", TclX_ServerCreateCmd,
-                       (ClientData) NULL, (void (*)()) NULL);
+                       (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
 }
 
 /* vim: set ts=4 sw=4 sts=4 et : */

@@ -320,8 +320,7 @@ RecordData (profInfo_t  *infoPtr,
  *-----------------------------------------------------------------------------
  */
 static void
-PopEntry (infoPtr)
-    profInfo_t *infoPtr;
+PopEntry (profInfo_t *infoPtr)
 {
     profEntry_t *entryPtr = infoPtr->stackPtr;
 

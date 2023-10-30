@@ -366,9 +366,8 @@ TclXOSincrpriority (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSpipe (interp, channels)
-    Tcl_Interp  *interp;
-    Tcl_Channel *channels;
+TclXOSpipe (Tcl_Interp  *interp,
+            Tcl_Channel *channels)
 {
     HANDLE readHandle, writeHandle;
     SECURITY_ATTRIBUTES sec;
@@ -437,7 +436,7 @@ TclXOSsleep (unsigned seconds)
  *-----------------------------------------------------------------------------
  */
 void
-TclXOSsync ()
+TclXOSsync (void)
 {
     _flushall ();
 }
@@ -1168,11 +1167,10 @@ TclXOSgetsockname (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSgetsockopt (interp, channel, option, valuePtr)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          option;
-    int         *valuePtr;
+TclXOSgetsockopt (Tcl_Interp  *interp,
+                  Tcl_Channel  channel,
+                  int          option,
+                  int         *valuePtr)
 {
     int valueLen = sizeof (*valuePtr);
     SOCKET sock;
@@ -1204,11 +1202,10 @@ TclXOSgetsockopt (interp, channel, option, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSsetsockopt (interp, channel, option, value)
-    Tcl_Interp  *interp;
-    Tcl_Channel  channel;
-    int          option;
-    int          value;
+TclXOSsetsockopt (Tcl_Interp  *interp,
+                  Tcl_Channel  channel,
+                  int          option,
+                  int          value)
 {
     int valueLen = sizeof (value);
     SOCKET sock;
@@ -1239,10 +1236,9 @@ TclXOSsetsockopt (interp, channel, option, value)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSchmod (interp, fileName, mode)
-    Tcl_Interp *interp;
-    char       *fileName;
-    int         mode;
+TclXOSchmod (Tcl_Interp *interp,
+             char       *fileName,
+             int         mode)
 {
 #if 0
     /*FIX:*/
@@ -1273,11 +1269,10 @@ TclXOSchmod (interp, fileName, mode)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSfchmod (interp, channel, mode, funcName)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         mode;
-    char       *funcName;
+TclXOSfchmod (Tcl_Interp *interp,
+              Tcl_Channel channel,
+              int         mode,
+              char       *funcName)
 {
 #if 0
   FIX:
@@ -1315,13 +1310,12 @@ TclXOSfchmod (interp, channel, mode, funcName)
  */
 
 int
-TclXOSChangeOwnGrpObj (interp, options, ownerStr, groupStr, files, funcName)
-    Tcl_Interp  *interp;
-    unsigned     options;
-    char        *ownerStr;
-    char        *groupStr;
-    Tcl_Obj	*files;
-    char       *funcName;
+TclXOSChangeOwnGrpObj (Tcl_Interp *interp,
+                       unsigned    options,
+                       char       *ownerStr,
+                       char       *groupStr,
+                       Tcl_Obj	  *files,
+                       char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -1348,13 +1342,12 @@ TclXOSChangeOwnGrpObj (interp, options, ownerStr, groupStr, files, funcName)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFChangeOwnGrpObj (interp, options, ownerStr, groupStr, channelIds, funcName)
-    Tcl_Interp *interp;
-    unsigned    options;
-    char       *ownerStr;
-    char       *groupStr;
-    Tcl_Obj    *channelIds;
-    char       *funcName;
+TclXOSFChangeOwnGrpObj (Tcl_Interp *interp,
+                        unsigned    options,
+                        char       *ownerStr,
+                        char       *groupStr,
+                        Tcl_Obj    *channelIds,
+                        char       *funcName)
 {
     return TclXNotAvailableError (interp, funcName);
 }
@@ -1410,7 +1403,7 @@ TclXOSGetSelectFnum (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSHaveFlock ()
+TclXOSHaveFlock (void)
 {
     OVERLAPPED start;
 
@@ -1547,9 +1540,8 @@ LockUnlockSetup (Tcl_Interp     *interp,
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFlock (interp, lockInfoPtr)
-    Tcl_Interp     *interp;
-    TclX_FlockInfo *lockInfoPtr;
+TclXOSFlock (Tcl_Interp     *interp,
+             TclX_FlockInfo *lockInfoPtr)
 {
     HANDLE handle;
     DWORD flags, lengthHigh, lengthLow;
@@ -1609,9 +1601,8 @@ TclXOSFlock (interp, lockInfoPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSFunlock (interp, lockInfoPtr)
-    Tcl_Interp     *interp;
-    TclX_FlockInfo *lockInfoPtr;
+TclXOSFunlock (Tcl_Interp     *interp,
+               TclX_FlockInfo *lockInfoPtr)
 {
     HANDLE handle;
     DWORD lengthHigh, lengthLow;
@@ -1659,10 +1650,9 @@ TclXOSFunlock (interp, lockInfoPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetAppend (interp, channel, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int        *valuePtr;
+TclXOSGetAppend (Tcl_Interp *interp,
+                 Tcl_Channel channel,
+                 int        *valuePtr)
 {
     return TclXNotAvailableError (interp,
                                   "append mode");
@@ -1682,10 +1672,9 @@ TclXOSGetAppend (interp, channel, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSSetAppend (interp, channel, value)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         value;
+TclXOSSetAppend (Tcl_Interp *interp,
+                 Tcl_Channel channel,
+                 int         value)
 {
     return TclXNotAvailableError (interp,
                                   "append mode");
@@ -1705,10 +1694,9 @@ TclXOSSetAppend (interp, channel, value)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSGetCloseOnExec (interp, channel, valuePtr)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int        *valuePtr;
+TclXOSGetCloseOnExec (Tcl_Interp *interp,
+                      Tcl_Channel channel,
+                      int        *valuePtr)
 {
     HANDLE handle;
     tclXwinFileType type;
@@ -1756,10 +1744,9 @@ TclXOSGetCloseOnExec (interp, channel, valuePtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSSetCloseOnExec (interp, channel, value)
-    Tcl_Interp *interp;
-    Tcl_Channel channel;
-    int         value;
+TclXOSSetCloseOnExec (Tcl_Interp *interp,
+                      Tcl_Channel channel,
+                      int         value)
 {
     HANDLE handle;
     tclXwinFileType type;

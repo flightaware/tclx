@@ -1572,7 +1572,7 @@ SignalCmdCleanUp (ClientData clientData, Tcl_Interp *interp)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SetupSigInt ()
+TclX_SetupSigInt (void)
 {
     signalProcPtr_t  actionFunc;
     int restart;

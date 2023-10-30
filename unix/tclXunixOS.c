@@ -319,7 +319,7 @@ TclXOSsleep (unsigned seconds)
  *-----------------------------------------------------------------------------
  */
 void
-TclXOSsync ()
+TclXOSsync (void)
 {
     sync ();
 }
@@ -1399,7 +1399,7 @@ TclXOSGetSelectFnum (Tcl_Interp *interp, Tcl_Channel channel, int direction, int
  *-----------------------------------------------------------------------------
  */
 int
-TclXOSHaveFlock ()
+TclXOSHaveFlock (void)
 {
 #ifdef F_SETLKW
     return TRUE;

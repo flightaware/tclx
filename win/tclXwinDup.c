@@ -74,11 +74,10 @@ ConvertChannelName (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
-    Tcl_Interp *interp;
-    Tcl_Channel srcChannel;
-    int         mode;
-    char       *targetChannelId;
+TclXOSDupChannel (Tcl_Interp *interp,
+                  Tcl_Channel srcChannel,
+                  int         mode,
+                  char       *targetChannelId)
 {
     Tcl_Channel newChannel = NULL;
     int direction;
@@ -175,9 +174,8 @@ TclXOSDupChannel (interp, srcChannel, mode, targetChannelId)
  *-----------------------------------------------------------------------------
  */
 Tcl_Channel
-TclXOSBindOpenFile (interp, fileNum)
-    Tcl_Interp *interp;
-    int         fileNum;
+TclXOSBindOpenFile (Tcl_Interp *interp,
+                    int         fileNum)
 {
     HANDLE fileHandle;
     int mode, isSocket;
