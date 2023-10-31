@@ -1494,7 +1494,8 @@ TclXOSFunlock (Tcl_Interp *interp, TclX_FlockInfo *lockInfoPtr)
     if (stat < 0) {
         TclX_AppendObjResult (interp, "lock of \"",
                               Tcl_GetChannelName (lockInfoPtr->channel),
-                              "\" failed: ", Tcl_PosixError (interp));
+                              "\" failed: ", Tcl_PosixError (interp),
+                              (char *) NULL);
         return TCL_ERROR;
     }
 
