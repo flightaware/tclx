@@ -97,6 +97,10 @@ EXTERN void	TclX_SplitWinCmdLine (int *argcPtr, char ***argvPtr);
 /*
  * Exported utility functions.
  */
+
+#if defined(__GNUC__) && __GNUC__ >= 4
+__attribute__((sentinel))
+#endif
 EXTERN void	TclX_AppendObjResult TCL_VARARGS_DEF(Tcl_Interp *, interpArg);
 
 EXTERN char *	TclX_DownShift (char *targetStr, CONST char *sourceStr);
