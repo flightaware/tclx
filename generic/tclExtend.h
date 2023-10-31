@@ -97,7 +97,7 @@ EXTERN void	TclX_SplitWinCmdLine (int *argcPtr, char ***argvPtr);
 /*
  * Exported utility functions.
  */
-EXTERN void	TclX_AppendObjResult TCL_VARARGS_DEF(Tcl_Interp *, interpArg);
+EXTERN void	TclX_AppendObjResult (Tcl_Interp *interp, ...);
 
 EXTERN char *	TclX_DownShift (char *targetStr, CONST char *sourceStr);
 
