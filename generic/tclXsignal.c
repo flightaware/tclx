@@ -485,7 +485,7 @@ BlockSignals (Tcl_Interp *interp, int action, unsigned char signals[MAXSIG])
 #else
     TclX_AppendObjResult (interp,
                           "Posix signals are not available on this system, ",
-                          "can not block signals");
+                          "can not block signals", (char *) NULL);
     return TCL_ERROR;
 #endif
 }
