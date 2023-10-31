@@ -1328,7 +1328,7 @@ TclX_SignalObjCmd (ClientData   clientData,
             restart = TRUE;
         } else {
             TclX_AppendObjResult(interp, "invalid option \"", argStr,
-                                 "\", expected -restart", NULL);
+                                 "\", expected -restart", (char *) NULL);
             return TCL_ERROR;
         }
         firstArg++;
@@ -1342,7 +1342,7 @@ TclX_SignalObjCmd (ClientData   clientData,
 #ifdef NO_SIG_RESTART
     if (restart) {
         TclX_AppendObjResult(interp, "restarting of system calls from signals is not available on this system",
-                             NULL);
+                             (char *) NULL);
         return TCL_ERROR;
     }
 #endif
