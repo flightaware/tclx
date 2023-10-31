@@ -787,7 +787,7 @@ TclX_WrongArgs (Tcl_Interp *interp, Tcl_Obj *commandNameObj, char *string)
  *
  * Parameters:
  *   o interp - Interpreter to set the result in.
- *   o args - Strings to append, terminated by a NULL.
+ *   o args - Strings to append, terminated by (char *)NULL.
  *-----------------------------------------------------------------------------
  */
 void
