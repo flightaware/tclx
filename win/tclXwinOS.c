@@ -1075,7 +1075,7 @@ TclXOSexecl (Tcl_Interp *interp,
  */
 int
 TclXOSInetAtoN (Tcl_Interp     *interp,
-                char           *strAddress,
+                const char     *strAddress,
                 struct in_addr *inAddress)
 {
     inAddress->s_addr = inet_addr (strAddress);
