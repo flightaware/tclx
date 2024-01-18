@@ -49,7 +49,7 @@
 
 #include <stdio.h>
 
-long random();
+long random(void);
 
 typedef unsigned int u_int;
 
@@ -243,10 +243,10 @@ srandom(x)
  * Returns a pointer to the old state.
  */
 char *
-initstate(seed, arg_state, n)
-	u_int seed;			/* seed for R.N.G. */
-	char *arg_state;		/* pointer to state array */
-	int n;				/* # bytes of state info */
+initstate(
+	u_int seed,			/* seed for R.N.G. */
+	char *arg_state,		/* pointer to state array */
+	int n)				/* # bytes of state info */
 {
 	register char *ostate = (char *)(&state[-1]);
 
@@ -306,8 +306,7 @@ initstate(seed, arg_state, n)
  * Returns a pointer to the old state information.
  */
 char *
-setstate(arg_state)
-	char *arg_state;
+setstate(char *arg_state)
 {
 	register long *new_state = (long *)arg_state;
 	register int type = new_state[0] % MAX_TYPES;
@@ -359,7 +358,7 @@ setstate(arg_state)
  * Returns a 31-bit random number.
  */
 long
-random()
+random(void)
 {
 	long i;
 

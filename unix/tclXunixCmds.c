@@ -106,8 +106,7 @@ TclX_TimesObjCmd (ClientData   clientData,
  *-----------------------------------------------------------------------------
  */
 void
-TclX_PlatformCmdsInit (interp)
-    Tcl_Interp *interp;
+TclX_PlatformCmdsInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
 			  "chroot",

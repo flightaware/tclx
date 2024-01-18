@@ -33,9 +33,8 @@
  *-----------------------------------------------------------------------------
  */
 void
-TclX_SplitWinCmdLine (argcPtr, argvPtr)
-    int    *argcPtr;
-    char ***argvPtr;
+TclX_SplitWinCmdLine (int    *argcPtr;
+                      char ***argvPtr;
 {
     char   *args = GetCommandLine ();
     char **argvlist, *p;

@@ -54,10 +54,9 @@ TclX_IdObjCmd (ClientData clientData,
  * id process
  */
 static int
-IdProcess (interp, objc, objv)
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *const objv[];
+IdProcess (Tcl_Interp *interp,
+           int         objc,
+           Tcl_Obj    *const objv[])
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
 
@@ -74,10 +73,9 @@ IdProcess (interp, objc, objv)
  * id host
  */
 static int
-IdHost (interp, objc, objv)
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *const objv[];
+IdHost (Tcl_Interp *interp,
+        int         objc,
+        Tcl_Obj    *const objv[])
 {
     char hostName [TCL_RESULT_SIZE];
 
@@ -96,11 +94,10 @@ IdHost (interp, objc, objv)
 }
 
 static int
-TclX_IdObjCmd (clientData, interp, objc, objv)
-    ClientData  clientData;
-    Tcl_Interp *interp;
-    int         objc;
-    Tcl_Obj    *const objv[];
+TclX_IdObjCmd (ClientData  clientData,
+               Tcl_Interp *interp,
+               int         objc,
+               Tcl_Obj    *const objv[])
 {
     char *optionPtr;
 
@@ -139,8 +136,7 @@ TclX_IdObjCmd (clientData, interp, objc, objv)
  *-----------------------------------------------------------------------------
  */
 void
-TclX_IdInit (interp)
-    Tcl_Interp *interp;
+TclX_IdInit (Tcl_Interp *interp)
 {
     Tcl_CreateObjCommand (interp,
 			  "id",

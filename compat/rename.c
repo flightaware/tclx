@@ -6,8 +6,9 @@
  *
  */
 
-int rename(from,to)
-register char *from, *to;
+int rename(
+register char *from,
+register char *to)
 {
     (void) unlink(to);
     if (link(from, to) < 0)
