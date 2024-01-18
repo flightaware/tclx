@@ -101,7 +101,7 @@ EXTERN void	TclX_SplitWinCmdLine (int *argcPtr, char ***argvPtr);
 #if defined(__GNUC__) && __GNUC__ >= 4
 __attribute__((sentinel))
 #endif
-EXTERN void	TclX_AppendObjResult TCL_VARARGS_DEF(Tcl_Interp *, interpArg);
+EXTERN void	TclX_AppendObjResult (Tcl_Interp *interp, ...);
 
 EXTERN char *	TclX_DownShift (char *targetStr, const char *sourceStr);
 
