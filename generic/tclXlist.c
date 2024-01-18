@@ -26,43 +26,43 @@ static int
 TclX_LvarcatObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj     *CONST objv[]);
+                    Tcl_Obj     *const objv[]);
 
 static int
 TclX_LvarpopObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj    *CONST objv[]);
+                    Tcl_Obj    *const objv[]);
 
 static int
 TclX_LvarpushObjCmd (ClientData   clientData,
                      Tcl_Interp  *interp,
                      int          objc,
-                     Tcl_Obj    *CONST objv[]);
+                     Tcl_Obj    *const objv[]);
 
 static int
 TclX_LemptyObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj    *CONST objv[]);
+                   Tcl_Obj    *const objv[]);
 
 static int
 TclX_LassignObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj    *CONST objv[]);
+                    Tcl_Obj    *const objv[]);
 
 static int
 TclX_LmatchObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj    *CONST objv[]);
+                   Tcl_Obj    *const objv[]);
 
 static int
 TclX_LcontainObjCmd (ClientData   clientData,
                      Tcl_Interp  *interp,
                      int          objc,
-                     Tcl_Obj    *CONST objv[]);
+                     Tcl_Obj    *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ static int
 TclX_LvarcatObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj     *CONST objv[])
+                    Tcl_Obj     *const objv[])
 {
     Tcl_Obj *varObjPtr, *newObjPtr;
     int catObjc, idx, argIdx;
@@ -138,7 +138,7 @@ static int
 TclX_LvarpopObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj    *CONST objv[])
+                    Tcl_Obj    *const objv[])
 {
     Tcl_Obj *listVarPtr, *newVarObj, *returnElemPtr = NULL;
     int listIdx, listLen;
@@ -233,7 +233,7 @@ static int
 TclX_LvarpushObjCmd (ClientData   clientData,
                      Tcl_Interp  *interp,
                      int          objc,
-                     Tcl_Obj    *CONST objv[])
+                     Tcl_Obj    *const objv[])
 {
     Tcl_Obj *listVarPtr, *newVarObj;
     int listIdx, listLen;
@@ -304,7 +304,7 @@ static int
 TclX_LemptyObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj    *CONST objv[])
+                   Tcl_Obj    *const objv[])
 {
     int length;
 
@@ -343,7 +343,7 @@ static int
 TclX_LassignObjCmd (ClientData   clientData,
                     Tcl_Interp  *interp,
                     int          objc,
-                    Tcl_Obj    *CONST objv[])
+                    Tcl_Obj    *const objv[])
 {
     int listObjc, listIdx, idx, remaining;
     Tcl_Obj **listObjv, *elemPtr, *remainingObjPtr;
@@ -405,7 +405,7 @@ static int
 TclX_LmatchObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj    *CONST objv[])
+                   Tcl_Obj    *const objv[])
 {
 #define EXACT   0
 #define GLOB    1
@@ -502,7 +502,7 @@ static int
 TclX_LcontainObjCmd (ClientData   clientData,
                      Tcl_Interp  *interp,
                      int          objc,
-                     Tcl_Obj    *CONST objv[])
+                     Tcl_Obj    *const objv[])
 {
     int listObjc, idx;
     Tcl_Obj **listObjv;

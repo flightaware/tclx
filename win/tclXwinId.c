@@ -24,18 +24,18 @@
 static int
 IdProcess  (Tcl_Interp *interp,
 			int objc,
-			Tcl_Obj *CONST objv[]);
+			Tcl_Obj *const objv[]);
 
 static int
 IdHost (Tcl_Interp *interp,
 		int objc,
-		Tcl_Obj *CONST objv[]);
+		Tcl_Obj *const objv[]);
 
 static int 
 TclX_IdObjCmd (ClientData clientData,
 			   Tcl_Interp *interp,
 			   int objc,
-			   Tcl_Obj *CONST objv[]);
+			   Tcl_Obj *const objv[]);
 
 /*-----------------------------------------------------------------------------
  * Tcl_IdCmd --
@@ -56,7 +56,7 @@ TclX_IdObjCmd (ClientData clientData,
 static int
 IdProcess (Tcl_Interp *interp,
            int         objc,
-           Tcl_Obj    *CONST objv[])
+           Tcl_Obj    *const objv[])
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
 
@@ -75,7 +75,7 @@ IdProcess (Tcl_Interp *interp,
 static int
 IdHost (Tcl_Interp *interp,
         int         objc,
-        Tcl_Obj    *CONST objv[])
+        Tcl_Obj    *const objv[])
 {
     char hostName [TCL_RESULT_SIZE];
 
@@ -97,7 +97,7 @@ static int
 TclX_IdObjCmd (ClientData  clientData,
                Tcl_Interp *interp,
                int         objc,
-               Tcl_Obj    *CONST objv[])
+               Tcl_Obj    *const objv[])
 {
     char *optionPtr;
 

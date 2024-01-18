@@ -102,12 +102,12 @@ AllocEntry (tblHeader_pt  tblHdrPtr,
 static int
 HandleDecodeObj (Tcl_Interp   *interp,
                  tblHeader_pt  tblHdrPtr,
-                 CONST char   *handle);
+                 const char   *handle);
 
 static int
 HandleDecode (Tcl_Interp   *interp,
               tblHeader_pt  tblHdrPtr,
-              CONST char   *handle);
+              const char   *handle);
 
 
 /*=============================================================================
@@ -221,7 +221,7 @@ AllocEntry (tblHeader_pt  tblHdrPtr,
  *-----------------------------------------------------------------------------
  */
 static int
-HandleDecode (Tcl_Interp *interp, tblHeader_pt tblHdrPtr, CONST char *handle)
+HandleDecode (Tcl_Interp *interp, tblHeader_pt tblHdrPtr, const char *handle)
 {
     unsigned entryIdx;
 
@@ -255,7 +255,7 @@ HandleDecode (Tcl_Interp *interp, tblHeader_pt tblHdrPtr, CONST char *handle)
 static int
 HandleDecodeObj (Tcl_Interp   *interp,
                  tblHeader_pt  tblHdrPtr,
-                 CONST char   *handle)
+                 const char   *handle)
 {
     unsigned entryIdx;
 
@@ -284,7 +284,7 @@ HandleDecodeObj (Tcl_Interp   *interp,
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleTblInit (CONST char *handleBase, int entrySize, int initEntries)
+TclX_HandleTblInit (const char *handleBase, int entrySize, int initEntries)
 {
     tblHeader_pt tblHdrPtr;
     int          baseLength = strlen ((char *) handleBase);
@@ -407,7 +407,7 @@ TclX_HandleAlloc (void_pt headerPtr, char *handlePtr)
  *-----------------------------------------------------------------------------
  */
 void_pt
-TclX_HandleXlate (Tcl_Interp *interp, void_pt headerPtr, CONST char *handle)
+TclX_HandleXlate (Tcl_Interp *interp, void_pt headerPtr, const char *handle)
 {
     tblHeader_pt   tblHdrPtr = (tblHeader_pt)headerPtr;
     entryHeader_pt entryHdrPtr;

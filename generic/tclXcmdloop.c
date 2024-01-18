@@ -72,7 +72,7 @@ static int
 TclX_CommandloopObjCmd (ClientData clientData, 
                         Tcl_Interp *interp,
                         int objc,
-                        Tcl_Obj *CONST objv[]);
+                        Tcl_Obj *const objv[]);
 
 /*-----------------------------------------------------------------------------
  * IsSetVarCmd --
@@ -665,7 +665,7 @@ TclX_CommandLoop (Tcl_Interp *interp,
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CommandloopObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
+TclX_CommandloopObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     int options = 0, async = FALSE, argIdx, interactive;
     char *argStr,  *endCommand = NULL;
