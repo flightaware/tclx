@@ -39,19 +39,19 @@ static int
 TclX_PipeObjCmd (ClientData  clientData,
                  Tcl_Interp *interp,
                  int         objc,
-                 Tcl_Obj    *CONST objv[]);
+                 Tcl_Obj    *const objv[]);
 
 static int
 TclX_FtruncateObjCmd (ClientData  clientData, 
                       Tcl_Interp *interp, 
                       int         objc,
-                      Tcl_Obj    *CONST objv[]);
+                      Tcl_Obj    *const objv[]);
 
 static int
 TclX_ReaddirObjCmd (ClientData clientData,
                     Tcl_Interp *interp,
                     int         objc,
-                    Tcl_Obj    *CONST objv[]);
+                    Tcl_Obj    *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -67,7 +67,7 @@ static int
 TclX_PipeObjCmd (ClientData  clientData,
                  Tcl_Interp *interp,
                  int         objc,
-                 Tcl_Obj    *CONST objv[])
+                 Tcl_Obj    *const objv[])
 {
     Tcl_Channel   channels [2];
     const char *channelNames [2];
@@ -160,7 +160,7 @@ static int
 TclX_FtruncateObjCmd (ClientData clientData,
                       Tcl_Interp *interp,
                       int objc,
-                      Tcl_Obj *CONST objv[])
+                      Tcl_Obj *const objv[])
 {
     int           objIdx, fileIds;
     off_t         newSize;
@@ -247,7 +247,7 @@ static int
 TclX_ReaddirObjCmd (ClientData clientData,
                     Tcl_Interp *interp,
                     int objc,
-                    Tcl_Obj *CONST objv[])
+                    Tcl_Obj *const objv[])
 {
     Tcl_DString  pathBuf;
     char        *dirPath;

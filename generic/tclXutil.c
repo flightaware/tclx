@@ -58,7 +58,7 @@ char *tclXWrongArgs = "wrong # args: ";
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToInt (CONST char *string, int base, int *intPtr)
+TclX_StrToInt (const char *string, int base, int *intPtr)
 {
     char *end, *p;
     int   i;
@@ -115,7 +115,7 @@ TclX_StrToInt (CONST char *string, int base, int *intPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToUnsigned (CONST char *string, int base, unsigned *unsignedPtr)
+TclX_StrToUnsigned (const char *string, int base, unsigned *unsignedPtr)
 {
     char *end, *p;
     unsigned i;
@@ -158,7 +158,7 @@ TclX_StrToUnsigned (CONST char *string, int base, unsigned *unsignedPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_StrToOffset (CONST char *string, int base, off_t *offsetPtr)
+TclX_StrToOffset (const char *string, int base, off_t *offsetPtr)
 {
     char *end, *p;
     off_t i;
@@ -217,7 +217,7 @@ TclX_StrToOffset (CONST char *string, int base, off_t *offsetPtr)
  *-----------------------------------------------------------------------------
  */
 char *
-TclX_DownShift (char *targetStr, CONST char *sourceStr)
+TclX_DownShift (char *targetStr, const char *sourceStr)
 {
     register char theChar;
 
@@ -252,7 +252,7 @@ TclX_DownShift (char *targetStr, CONST char *sourceStr)
  *-----------------------------------------------------------------------------
  */
 char *
-TclX_UpShift (char *targetStr, CONST char *sourceStr)
+TclX_UpShift (char *targetStr, const char *sourceStr)
 {
     register char theChar;
 
@@ -787,7 +787,7 @@ TclX_WrongArgs (Tcl_Interp *interp, Tcl_Obj *commandNameObj, char *string)
  *
  * Parameters:
  *   o interp - Interpreter to set the result in.
- *   o args - Strings to append, terminated by a NULL.
+ *   o args - Strings to append, terminated by (char *)NULL.
  *-----------------------------------------------------------------------------
  */
 void

@@ -29,7 +29,7 @@
  *-----------------------------------------------------------------------------
  */
 static int
-TclX_CoalesceObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *CONST objv[])
+TclX_CoalesceObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
     int i;
     Tcl_Obj *val;

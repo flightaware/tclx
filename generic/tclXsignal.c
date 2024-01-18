@@ -52,7 +52,7 @@
  * Value returned by Tcl_SignalId when an invalid signal is passed in.
  * Pointer is used as a quick check of a valid signal number.
  */
-static CONST char *unknownSignalIdMsg;
+static const char *unknownSignalIdMsg;
 
 /*
  * Signal name table maps name to number.  Note, it is possible to have
@@ -327,13 +327,13 @@ static int
 TclX_SignalObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj     *CONST objv[]);
+                   Tcl_Obj     *const objv[]);
 
 static int
 TclX_KillObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
                  int          objc,
-                 Tcl_Obj     *CONST objv[]);
+                 Tcl_Obj     *const objv[]);
 
 
 /*-----------------------------------------------------------------------------
@@ -485,7 +485,7 @@ BlockSignals (Tcl_Interp *interp, int action, unsigned char signals[MAXSIG])
 #else
     TclX_AppendObjResult (interp,
                           "Posix signals are not available on this system, ",
-                          "can not block signals");
+                          "can not block signals", (char *) NULL);
     return TCL_ERROR;
 #endif
 }
@@ -1311,7 +1311,7 @@ static int
 TclX_SignalObjCmd (ClientData   clientData,
                    Tcl_Interp  *interp,
                    int          objc,
-                   Tcl_Obj     *CONST objv[])
+                   Tcl_Obj     *const objv[])
 {
     unsigned char signals [MAXSIG];
     char *argStr, *actionStr;
@@ -1328,7 +1328,7 @@ TclX_SignalObjCmd (ClientData   clientData,
             restart = TRUE;
         } else {
             TclX_AppendObjResult(interp, "invalid option \"", argStr,
-                                 "\", expected -restart", NULL);
+                                 "\", expected -restart", (char *) NULL);
             return TCL_ERROR;
         }
         firstArg++;
@@ -1342,7 +1342,7 @@ TclX_SignalObjCmd (ClientData   clientData,
 #ifdef NO_SIG_RESTART
     if (restart) {
         TclX_AppendObjResult(interp, "restarting of system calls from signals is not available on this system",
-                             NULL);
+                             (char *) NULL);
         return TCL_ERROR;
     }
 #endif
@@ -1451,7 +1451,7 @@ static int
 TclX_KillObjCmd (ClientData   clientData,
                  Tcl_Interp  *interp,
                  int          objc,
-                 Tcl_Obj     *CONST objv[])
+                 Tcl_Obj     *const objv[])
 {
     int    signalNum, nextArg, idx, procId, procObjc;
     int    pgroup = FALSE;
