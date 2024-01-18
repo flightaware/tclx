@@ -1,5 +1,5 @@
-![Linux CI](https://github.com/flightaware/tclx/workflows/Linux%20CI/badge.svg)
-![Mac CI](https://github.com/flightaware/tclx/workflows/Mac%20CI/badge.svg)
+[![Linux CI](https://github.com/flightaware/tclx/actions/workflows/linux-ci.yml/badge.svg)](https://github.com/flightaware/tclx/actions/workflows/linux-ci.yml)
+[![Mac CI](https://github.com/flightaware/tclx/actions/workflows/mac-ci.yml/badge.svg)](https://github.com/flightaware/tclx/actions/workflows/mac-ci.yml)
 
 # Extended Tcl (TclX)
 
