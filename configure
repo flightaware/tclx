@@ -2342,7 +2342,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-FULL_VERSION="8.6.2"
+FULL_VERSION="8.6.3"
 
 
     # TEA extensions pass this us the version of TEA they think they
