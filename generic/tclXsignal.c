@@ -208,6 +208,22 @@ static char *SIGACT_ERROR   = "error";
 static char *SIGACT_TRAP    = "trap";
 static char *SIGACT_UNKNOWN = "unknown";
 
+/*
+ * Global signal state, mutex-protected on MT-enabled Tcl.
+ *
+ * On multithreaded Unix we use a dedicated thread for signal processing in
+ * order to avoid deadlocking and signal-unsafe calls in Tcl_AsyncMark:
+ *
+ * - The signal-handling thread waits for all incoming signals using sigwait()
+ *   and calls Tcl_AsyncMark() safely each times it wakes up.
+ * - Signal handlers called outside of the signal-handling thread forward
+ *   trapped signals to this thread using pthread_kill().
+ */
+#if defined(TCL_THREADS) && !(defined(__WIN32__) || defined(_WIN32))
+#define USE_SIGNAL_THREAD
+static Tcl_ThreadId     signalThread = NULL; 
+#endif
+static Tcl_Mutex        signalMutex = NULL;
 static Tcl_Interp	**interpTable = NULL;
 static Tcl_AsyncHandler asyncHandler = NULL;
 static int              interpTableSize  = 0;
@@ -266,6 +282,18 @@ static int
 ParseSignalSpec (Tcl_Interp *interp,
                  char       *signalStr,
                  int         allowZero);
+
+#ifdef USE_SIGNAL_THREAD
+static void
+InitSignalThread ();
+static void
+StopSignalThread ();
+static Tcl_ThreadCreateType
+SignalThread (ClientData clientData);
+#endif /* USE_SIGNAL_THREAD */
+
+static void
+SignalReceived (int signalNum);
 
 static RETSIGTYPE
 SignalTrap (int signalNum);
@@ -476,7 +504,11 @@ BlockSignals (Tcl_Interp *interp, int action, unsigned char signals[MAXSIG])
             sigaddset (&sigBlockSet, signalNum);
     }
 
+#ifdef USE_SIGNAL_THREAD
+    if (pthread_sigmask (action, &sigBlockSet, NULL)) {
+#else
     if (sigprocmask (action, &sigBlockSet, NULL)) {
+#endif /* USE_SIGNAL_THREAD */
         TclX_AppendObjResult (interp, Tcl_PosixError (interp), (char *) NULL);
         return TCL_ERROR;
     }
@@ -509,7 +541,11 @@ SignalBlocked (int signalNum)
 #ifndef NO_SIGACTION
     sigset_t sigBlockSet;
 
+#ifdef USE_SIGNAL_THREAD
+    if (pthread_sigmask (SIG_BLOCK, NULL, &sigBlockSet)) {
+#else
     if (sigprocmask (SIG_BLOCK, NULL, &sigBlockSet)) {
+#endif /* USE_SIGNAL_THREAD */
         return NULL;
     }
     return Tcl_NewBooleanObj (sigismember (&sigBlockSet, signalNum));
@@ -599,20 +635,96 @@ ParseSignalSpec (Tcl_Interp *interp, char *signalStr, int allowZero)
         return -1;
     return signalNum;
 }
-
+
+#ifdef USE_SIGNAL_THREAD
 /*-----------------------------------------------------------------------------
- * SignalTrap --
+ * InitSignalThread --
+ *
+ *   Initialize the signal-handling thread on MT-enabled Tcl.
+ *-----------------------------------------------------------------------------
+ */
+static void
+InitSignalThread ()
+{
+    if (Tcl_CreateThread(&signalThread, SignalThread, 
+            (ClientData)Tcl_GetCurrentThread(), TCL_THREAD_STACK_DEFAULT, 
+            TCL_THREAD_JOINABLE) != TCL_OK)
+        panic ("Cannot create thread");
+    pthread_atfork(NULL, NULL, InitSignalThread);    
+}
+
+/*-----------------------------------------------------------------------------
+ * StopSignalThread --
+ *
+ *   Stop the signal-handling thread on MT-enabled Tcl.
+ *-----------------------------------------------------------------------------
+ */
+static void
+StopSignalThread ()
+{
+    pthread_cancel((pthread_t)signalThread);
+    pthread_join((pthread_t)signalThread, NULL);
+}
+
+/*-----------------------------------------------------------------------------
+ * SignalThread --
+ *
+ *   Signal-handling thread on MT-enabled Tcl.
+ *-----------------------------------------------------------------------------
+ */
+static Tcl_ThreadCreateType
+SignalThread (ClientData clientData)
+{
+    Tcl_ThreadId mainThread = (Tcl_ThreadId)clientData; 
+    sigset_t sigset;
+    int signum;
+    signalProcPtr_t  actionFunc;
+    int restart;
+
+    /*
+     * Block & wait for all signals.
+     */
+    sigfillset(&sigset);
+    pthread_sigmask(SIG_SETMASK, &sigset, NULL);
+    for (;;) {
+        sigwait(&sigset, &signum);
+
+        /*
+         * Check that the signal hander is ours (SignalTrap), if not this means
+         * that we got this signal directly on this thread and not from
+         * SignalTrap. Forward the signal back to the main thread.
+         */
+        if (GetSignalState(signum, &actionFunc, &restart) == TCL_ERROR
+                || actionFunc != SignalTrap) {
+            pthread_kill((pthread_t)mainThread, signum);
+            continue;
+        }
+
+        /*
+         * Process signal safely.
+         */
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        SignalReceived(signum);
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    }
+    
+    TCL_THREAD_CREATE_RETURN;
+}
+#endif /* USE_SIGNAL_THREAD */
+
+/*-----------------------------------------------------------------------------
+ * SignalReceived --
  *
  *   Trap handler for UNIX signals.  Sets tells all registered interpreters
  * that a trap has occured and saves the trap info.  The first interpreter to
  * call it's async signal handler will process all pending signals.
  *-----------------------------------------------------------------------------
  */
-static RETSIGTYPE
-SignalTrap (int signalNum)
+static void
+SignalReceived (int signalNum)
 {
-    if (asyncHandler == NULL)
-	return;
+    /* MT: called from signal-handling thread. */
+
     /*
      * Record the count of the number of this type of signal that has occured
      * and tell all the interpreters to call the async handler when safe.
@@ -620,6 +732,27 @@ SignalTrap (int signalNum)
     signalsReceived [signalNum]++;
 
     Tcl_AsyncMark (asyncHandler);
+}
+
+/*-----------------------------------------------------------------------------
+ * SignalTrap --
+ *
+ *   Trap handler for UNIX signals. On MT-enabled Tcl, forward the signal to
+ * a dedicated thread. On MT-disabled Tcl, process the signal directly.
+ *-----------------------------------------------------------------------------
+ */
+static RETSIGTYPE
+SignalTrap (int signalNum)
+{
+#ifdef USE_SIGNAL_THREAD
+    if (Tcl_GetCurrentThread() != signalThread) {
+        pthread_kill((pthread_t)signalThread, signalNum);
+    }
+#else
+    if (asyncHandler == NULL)
+       return;
+    SignalReceived(signalNum);
+#endif /* USE_SIGNAL_THREAD */
 
 #ifdef NO_SIGACTION
     /*
@@ -846,10 +979,13 @@ ProcessSignals (ClientData clientData, Tcl_Interp *interp, int cmdResultCode)
     Tcl_Obj    *errStateObjPtr;
     int         signalNum, result;
 
+    /* MT: called from first initialized thread. */
+
     /*
      * Get the interpreter if it wasn't supplied, if none is available,
      * bail out.
      */
+    Tcl_MutexLock(&signalMutex);
     if (interp == NULL) {
         if (numInterps == 0)
             return cmdResultCode;
@@ -857,6 +993,7 @@ ProcessSignals (ClientData clientData, Tcl_Interp *interp, int cmdResultCode)
     } else {
         sigInterp = interp;
     }
+    Tcl_MutexUnlock(&signalMutex);
 
     errStateObjPtr = TclX_SaveResultErrorInfo (sigInterp);
 
@@ -1535,6 +1672,8 @@ SignalCmdCleanUp (ClientData clientData, Tcl_Interp *interp)
 {
     int  idx;
 
+    Tcl_MutexLock(&signalMutex);
+
     for (idx = 0; idx < numInterps; idx++) {
         if (interpTable [idx] == interp)
             break;
@@ -1561,6 +1700,8 @@ SignalCmdCleanUp (ClientData clientData, Tcl_Interp *interp)
             }
         }
     }
+
+    Tcl_MutexUnlock(&signalMutex);
 }
 
 /*-----------------------------------------------------------------------------
@@ -1612,6 +1753,8 @@ TclX_SignalInit (Tcl_Interp *interp)
 {
     int		idx;
 
+    Tcl_MutexLock(&signalMutex);
+
     /*
      * If this is the first interpreter, set everything up.
      */
@@ -1648,12 +1791,23 @@ TclX_SignalInit (Tcl_Interp *interp)
     interpTable [numInterps] = interp;
     numInterps++;
 
+#ifdef USE_SIGNAL_THREAD
+    /*
+     * Start signal-handling thread.
+     */
+    if (signalThread == NULL) {
+        InitSignalThread();
+    }
+#endif /* USE_SIGNAL_THREAD */
+
     Tcl_CallWhenDeleted (interp, SignalCmdCleanUp, (ClientData) NULL);
 
     Tcl_CreateObjCommand (interp, "signal", TclX_SignalObjCmd,
                           (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
     Tcl_CreateObjCommand (interp, "kill", TclX_KillObjCmd,
                           (ClientData) NULL, (Tcl_CmdDeleteProc*) NULL);
+
+    Tcl_MutexUnlock(&signalMutex);
 }
 
 
