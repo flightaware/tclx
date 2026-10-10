@@ -101,7 +101,7 @@ proc FilterProfStack stack {
     # If "Test" is at the top, throw this out, or we end up with two
     # global.
     if {[cequal [lindex $stack 0] Test]
-	|| [regexp {::tcltest::(Eval|RunTest)} [lindex $stack 0]]} {
+	|| [regexp {tcltest::(Eval|RunTest|TestOnce)} [lindex $stack 0]]} {
 	return {}
     }
     #puts "PROCESS [info level 0]"
@@ -118,7 +118,7 @@ proc FilterProfStack stack {
 	    #puts "APPEND IN GLOBAL"
 	} elseif {!$foundTest} {
 	    if {[cequal $elem test]
-		|| [regexp {::tcltest::(Eval|RunTest)} $elem]} {
+		|| [regexp {tcltest::(Eval|RunTest|TestOnce)} $elem]} {
 		set foundTest 1
 	    } else {
 		lappend newStack $elem
@@ -234,7 +234,7 @@ test profile-3.1 {profile count tests} {
 	{{::ProcD3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 1}]
 
-if {[package vsatisfies [package require Tcl] 9-]} {
+if {[package vsatisfies [package require Tcl] 9.1-]} {
     set profile_3_2_expected [list \
         {<global> 1} \
         {<global> 1} \
@@ -279,7 +279,7 @@ test profile-3.3 {profile count tests} {
 	{{::ProcC3 ::ProcB3 ::ProcA3 <global>} 1} \
 	{{::ProcD3 ::ProcC3 ::ProcB3 ::ProcA3 <global>} 2}]
 
-if {[package vsatisfies [package require Tcl] 9-]} {
+if {[package vsatisfies [package require Tcl] 9.1-]} {
     set profile_3_4_expected [list \
         {<global> 1} \
         {<global> 1} \
