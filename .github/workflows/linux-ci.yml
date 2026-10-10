@@ -7,11 +7,22 @@ on:
     branches: [master]
 jobs:
   build:
+    name: Tcl ${{ matrix.tcl }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tcl: 8.6.18
+            ref: core-8-6-18
+          - tcl: 9.0.4
+            ref: core-9-0-4
+          - tcl: 9.1.0
+            ref: core-9-1-0
     env:
-      EXPECTED_TCL_VERSION: 9.1a1
+      EXPECTED_TCL_VERSION: ${{ matrix.tcl }}
       TCL_REPO: https://github.com/tcltk/tcl.git
-      TCL_REF: core-9-1-a1
+      TCL_REF: ${{ matrix.ref }}
       TCL_PREFIX: /usr/local
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +45,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 \
             --slave /usr/bin/g++ g++ /usr/bin/g++-11 \
             --slave /usr/bin/gcov gcov /usr/bin/gcov-11
-      - name: Build Tcl 9.1a1
+      - name: Build Tcl ${{ matrix.tcl }}
         run: |
           set -eux
 
@@ -54,10 +65,7 @@ jobs:
             \( -name 'tclConfig.sh' -o -name 'tclsh*' -o -name 'libtcl*' -o -name 'tclInt.h' \) \
             -print
 
-          TCL_CONFIG="$(find "$TCL_PREFIX/lib" -path '*9.1*' -name 'tclConfig.sh' -print -quit)"
-          if [ -z "$TCL_CONFIG" ]; then
-            TCL_CONFIG="$(find "$TCL_PREFIX/lib" -name 'tclConfig.sh' -print -quit)"
-          fi
+          TCL_CONFIG="$(find "$TCL_PREFIX/lib" -name 'tclConfig.sh' -print -quit)"
 
           if [ -z "$TCL_CONFIG" ]; then
             echo "Could not find tclConfig.sh under $TCL_PREFIX/lib"
@@ -76,10 +84,8 @@ jobs:
             exit 1
           fi
 
-          if [ -x "$TCL_PREFIX/bin/tclsh9.1" ]; then
-            TCLSH="$TCL_PREFIX/bin/tclsh9.1"
-          elif [ -x "$TCL_PREFIX/bin/tclsh9.0" ]; then
-            TCLSH="$TCL_PREFIX/bin/tclsh9.0"
+          if [ -x "$TCL_PREFIX/bin/tclsh$TCL_VERSION" ]; then
+            TCLSH="$TCL_PREFIX/bin/tclsh$TCL_VERSION"
           elif [ -x "$TCL_PREFIX/bin/tclsh" ]; then
             TCLSH="$TCL_PREFIX/bin/tclsh"
           else
@@ -128,7 +134,7 @@ jobs:
           puts [join [info loaded] "\n"]
 
           assert_equal cindex    [cindex "abcdef" 2]              c
-          assert_equal clength   [clength "héllo"]                5
+          assert_equal clength   [clength "h\u00e9llo"]           5
           assert_equal csubstr   [csubstr "abcdef" 1 3]           bcd
           assert_equal replicate [replicate "xy" 3]               xyxyxy
           assert_equal translit  [translit "abc" "ABC" "aabbcc"]  AABBCC
