@@ -39,27 +39,24 @@ proc DoStuff3 {} {DoStuff2}
 proc DoStuff4 {} {DoStuff3}
 
 #
-# Proc to retrieve the output of a trace.  It determines the level of the first
-# line.  This is used to strip off level number and identation from each line.
-# so that all lines will be indented the same amount.  It also closes the
-# trace file.
+# Proc to retrieve the output of a trace and close the trace file. Each
+# line is indented by its level relative to the first line because the
+# trace stops indenting at level 20 and tcltest versions run tests at
+# different depths.
 
 proc GetTrace {cmdtraceFH} {
     set result {}
-    seek $cmdtraceFH 0 start
-    if {([gets $cmdtraceFH line] < 2) ||
-            ([scan $line "%d" level] != 1)} {
-        error "*Incorrect format for first line of the trace*"
-    }
-    set nuke [expr ($level*2)+3]
+    set baseLevel {}
     seek $cmdtraceFH 0 start
     while {[gets $cmdtraceFH line] >= 0} {
-        set linelen [clength $line]
-        if {$linelen == 0} {
+        if {[clength $line] == 0} {
             continue}
-        if {$linelen < $nuke} {
+        if {![regexp {^ *([0-9]+): +(.*)$} $line {} level text]} {
             error "invalid trace line: `$line'"}
-        append result "[crange $line $nuke end]\n"
+        if {$baseLevel eq {}} {
+            set baseLevel $level}
+        append result [string repeat "  " [expr {$level - $baseLevel}]] \
+            $text "\n"
     }
     close $cmdtraceFH
     return $result
