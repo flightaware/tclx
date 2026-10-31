@@ -1,0 +1,32 @@
+#
+# version.test
+#
+# Tests for the TclX package version.
+#------------------------------------------------------------------------------
+# Copyright 2026 Zoltán Kéri.
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation for any purpose and without fee is hereby granted, provided
+# that the above copyright notice appear in all copies.  Zoltán Kéri makes
+# no representations about the suitability of this software for any
+# purpose.  It is provided "as is" without express or implied warranty.
+#------------------------------------------------------------------------------
+#
+
+package require Tclx
+if {[cequal [info procs Test] {}]} {
+    source [file join [file dirname [info script]] testlib.tcl]
+}
+
+# These check that the TclX package version stays fixed at the current
+# release regardless of which Tcl core built it. Bump the expected
+# version here alongside the AC_INIT version argument in configure.in
+# when releasing a new TclX version.
+
+Test version-1.1 {package version is fixed across Tcl core versions} {
+    package require Tclx
+} 0 {9.0}
+
+Test version-1.2 {infox version reports both TclX and Tcl versions} {
+    string match {9.0.0 for Tcl *} [infox version]
+} 0 {1}

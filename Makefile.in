@@ -109,6 +109,7 @@ INSTALL_SCRIPT	= @INSTALL_SCRIPT@
 
 PACKAGE_NAME	= @PACKAGE_NAME@
 PACKAGE_VERSION	= @PACKAGE_VERSION@
+TCLX_PACKAGE_VERSION	= @TCLX_PACKAGE_VERSION@
 CC		= @CC@
 CFLAGS_DEFAULT	= @CFLAGS_DEFAULT@
 CFLAGS_WARNING	= @CFLAGS_WARNING@
@@ -263,7 +264,7 @@ $(PKG_LIB_FILE): $(PKG_OBJECTS)
 	$(RANLIB) $(PKG_LIB_FILE)
 
 pkgIndex.tcl:
-	(echo 'package ifneeded Tclx $(PACKAGE_VERSION) \
+	(echo 'package ifneeded Tclx $(TCLX_PACKAGE_VERSION) \
 		[list load [file join $$dir $(PKG_LIB_FILE)] Tclx]'\
 	) > pkgIndex.tcl
 

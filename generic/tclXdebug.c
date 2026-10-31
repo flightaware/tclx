@@ -304,8 +304,9 @@ TraceCallBack (Tcl_Interp *interp,
     sprintf (numBuf, "%d", level);
     Tcl_DStringAppendElement (&callback, numBuf);
 
-    sprintf (numBuf, "%d",  ((iPtr->varFramePtr == NULL) ? 0 : 
-             iPtr->varFramePtr->level));
+    sprintf (numBuf, "%" TCL_SIZE_MODIFIER "d",
+             (Tcl_Size) ((iPtr->varFramePtr == NULL) ? 0 :
+                         iPtr->varFramePtr->level));
     Tcl_DStringAppendElement (&callback, numBuf);
 
     saveObjPtr = TclX_SaveResultErrorInfo (interp);

@@ -17,6 +17,8 @@
  */
 
 #include "tclExtdInt.h"
+#include <ctype.h>
+#include <stdio.h>
 
 #ifndef _tolower
 #  define _tolower tolower
@@ -323,52 +325,75 @@ TclX_GetOffsetFromObj (Tcl_Interp *interp, Tcl_Obj *objPtr, off_t *offsetPtr)
  *-----------------------------------------------------------------------------
  */
 int
-TclX_RelativeExpr (Tcl_Interp  *interp,
-                   Tcl_Obj     *exprPtr,
-                   int          stringLen,
-                   int         *exprResultPtr)
+TclX_RelativeExpr (Tcl_Interp *interp, Tcl_Obj *exprPtr, int baseValue, int *resultPtr)
 {
-    char *exprStr, *buf;
-    int exprLen, exprStrLen, result;
-    long longResult;
-    char staticBuf [32];
+    Tcl_Size exprLen;
+    const char *exprStr;
+    Tcl_DString ds;
+    Tcl_Obj *exprObj;
+    Tcl_Obj *valueObj = NULL;
+    int result;
+    Tcl_Size i;
 
-    if (exprPtr->typePtr == Tcl_GetObjType ("int")) {
-        if (Tcl_GetIntFromObj (interp, exprPtr, exprResultPtr) != TCL_OK)
-            return TCL_ERROR;
-        return TCL_OK;
-    }
+    /*
+     * TclX historical index syntax is expression-based:
+     *
+     *     3*2
+     *     500-1
+     *     len-3
+     *     end-1
+     *     len
+     *     end
+     *
+     * Tcl 9's Tcl_GetIntForIndex is stricter, so build the old TclX
+     * expression explicitly, replacing "len" with baseValue and "end"
+     * with baseValue - 1, then evaluate the expression.
+     */
+    exprStr = Tcl_GetStringFromObj(exprPtr, &exprLen);
 
-    exprStr = Tcl_GetStringFromObj (exprPtr, &exprStrLen);
+    Tcl_DStringInit(&ds);
 
-    if (!(STRNEQU (exprStr, "end", 3) ||
-          STRNEQU (exprStr, "len", 3))) {
-        if (Tcl_ExprLong (interp, exprStr, &longResult) != TCL_OK) {
-            return TCL_ERROR;
+    for (i = 0; i < exprLen; ) {
+        if ((i + 3 <= exprLen) &&
+            (strncmp(exprStr + i, "len", 3) == 0)) {
+            char numBuf[64];
+
+            snprintf(numBuf, sizeof(numBuf), "%d", baseValue);
+            Tcl_DStringAppend(&ds, numBuf, -1);
+            i += 3;
+            continue;
         }
-        *exprResultPtr = longResult;
-        return TCL_OK;
+
+        if ((i + 3 <= exprLen) &&
+            (strncmp(exprStr + i, "end", 3) == 0)) {
+            char numBuf[64];
+
+            snprintf(numBuf, sizeof(numBuf), "%d", baseValue - 1);
+            Tcl_DStringAppend(&ds, numBuf, -1);
+            i += 3;
+            continue;
+        }
+
+        Tcl_DStringAppend(&ds, exprStr + i, 1);
+        i++;
     }
 
-    sprintf (staticBuf, "%d",
-             stringLen - ((exprStr [0] == 'e') ? 1 : 0));
-    exprLen = strlen (staticBuf) + exprStrLen - 2;
+    exprObj = Tcl_NewStringObj(Tcl_DStringValue(&ds), Tcl_DStringLength(&ds));
+    Tcl_IncrRefCount(exprObj);
 
-    buf = staticBuf;
-    if (exprLen > sizeof (staticBuf)) {
-        buf = (char *) ckalloc (exprLen);
-        strcpy (buf, staticBuf);
+    result = Tcl_ExprObj(interp, exprObj, &valueObj);
+    Tcl_DecrRefCount(exprObj);
+
+    if (result == TCL_OK) {
+        result = Tcl_GetIntFromObj(interp, valueObj, resultPtr);
+        Tcl_DecrRefCount(valueObj);
     }
-    strcat (buf, exprStr + 3);
 
-    result = Tcl_ExprLong (interp, buf, &longResult);
-
-    if (buf != staticBuf)
-        ckfree (buf);
-    if (result == TCL_OK)
-        *exprResultPtr = longResult;
+    Tcl_DStringFree(&ds);
     return result;
 }
+
+
 
 /*-----------------------------------------------------------------------------
  * TclX_GetOpenChannel --
@@ -762,7 +787,7 @@ TclX_WrongArgs (Tcl_Interp *interp, Tcl_Obj *commandNameObj, char *string)
 {
     char    *commandName;
     Tcl_Obj *resultPtr = Tcl_GetObjResult (interp);
-    int      commandLength;
+    Tcl_Size commandLength;
 
     commandName = Tcl_GetStringFromObj (commandNameObj, &commandLength);
 
@@ -833,7 +858,7 @@ TclX_IsNullObj (Tcl_Obj *objPtr)
 {
     static const Tcl_ObjType *listType = NULL;
     static const Tcl_ObjType *stringType = NULL;
-    int length;
+    Tcl_Size length;
     
     /*
      * Only get types once, as they must be static.
@@ -914,7 +939,7 @@ void
 TclX_RestoreResultErrorInfo (Tcl_Interp *interp, Tcl_Obj *saveObjPtr)
 {
     Tcl_Obj **saveObjv;
-    int saveObjc;
+    Tcl_Size saveObjc;
     long flags = 0;
 
     if ((Tcl_ListObjGetElements (NULL, saveObjPtr, &saveObjc,

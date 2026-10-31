@@ -5,14 +5,11 @@ dnl	to configure the system for the local environment.
 #
 # RCS: @(#) $Id: configure.in,v 1.17 2006/01/26 00:30:54 hobbs Exp $
 
-AC_INIT([tclx], [8.6])
-FULL_VERSION="8.6.3"
+AC_INIT([tclx], [9.0])
 
 TEA_INIT([3.9])
 
 AC_CONFIG_AUX_DIR(tclconfig)
-
-AC_DEFINE_UNQUOTED(FULL_VERSION, "${FULL_VERSION}")
 
 #--------------------------------------------------------------------
 # Load the tclConfig.sh file
@@ -20,6 +17,38 @@ AC_DEFINE_UNQUOTED(FULL_VERSION, "${FULL_VERSION}")
 
 TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
+
+#-----------------------------------------------------------------------
+# AC_INIT above sets PACKAGE_VERSION to the TclX release version; bump
+# it there for a new release.  Capture that value as
+# TCLX_PACKAGE_VERSION before reassigning PACKAGE_VERSION below to
+# track the detected Tcl version instead, which TEA uses to name the
+# generated shared library and package directory, so libtclx8.6.so and
+# libtclx9.1.so stay distinct and coexist on disk.
+#
+# The runtime script library search locates that same package directory
+# by name, so TCLX_LIB_DIR_VERSION carries the value PACKAGE_VERSION
+# ends up with rather than the TclX release version.
+#-----------------------------------------------------------------------
+
+TCLX_PACKAGE_VERSION="${PACKAGE_VERSION}"
+
+PACKAGE_VERSION="${TCL_VERSION}"
+PACKAGE_STRING="${PACKAGE_NAME} ${PACKAGE_VERSION}"
+FULL_VERSION="${TCLX_PACKAGE_VERSION}.0"
+
+AC_SUBST(PACKAGE_VERSION)
+AC_SUBST(PACKAGE_STRING)
+AC_SUBST(TCLX_PACKAGE_VERSION)
+AC_SUBST(FULL_VERSION)
+
+AC_DEFINE_UNQUOTED(TCLX_PACKAGE_VERSION, "${TCLX_PACKAGE_VERSION}",
+                   [Define to the TclX package version.])
+AC_DEFINE_UNQUOTED(TCLX_LIB_DIR_VERSION, "${PACKAGE_VERSION}",
+                   [Define to the version suffix of the installed TclX
+                    script library directory.])
+AC_DEFINE_UNQUOTED(FULL_VERSION, "${FULL_VERSION}",
+                   [Define to the full TclX version.])
 
 #-----------------------------------------------------------------------
 # Handle the --prefix=... option by defaulting to what Tcl gave.
@@ -151,15 +180,15 @@ if test "${TEA_PLATFORM}" = "unix" ; then
     #-------------------------------------------------------------------------
     # Check for system header files.
     #-------------------------------------------------------------------------
-    
+
     AC_CHECK_HEADER(sys/select.h, [AC_DEFINE(HAVE_SYS_SELECT_H)], )
-    
+
     #-------------------------------------------------------------------------
     # What type do signals return?
     #-------------------------------------------------------------------------
-    
+
     AC_TYPE_SIGNAL
-    
+
     #-------------------------------------------------------------------------
     #       Find out all about time handling differences.
     #-------------------------------------------------------------------------
@@ -176,7 +205,7 @@ if test "${TEA_PLATFORM}" = "unix" ; then
 
     AC_MSG_CHECKING([union wait])
     AC_CACHE_VAL(tcl_cv_union_wait,
-	AC_TRY_LINK([#include <sys/types.h> 
+	AC_TRY_LINK([#include <sys/types.h>
 #include <sys/wait.h>], [
 union wait x;
 WIFEXITED(x);	/* Generates compiler error if WIFEXITED uses an int. */
@@ -190,7 +219,7 @@ WIFEXITED(x);	/* Generates compiler error if WIFEXITED uses an int. */
     # Test to see if "times" returns a status or the amount of elapsed real
     # time.
     #-------------------------------------------------------------------------
-    
+
     AC_MSG_CHECKING(checking to see what 'times' returns)
     AC_TRY_RUN([
 #include <stdlib.h>
@@ -207,32 +236,32 @@ int main(void) {
        [AC_MSG_RESULT(a status)
     	AC_DEFINE(TIMES_RETS_STATUS)],
        [AC_MSG_ERROR(cross-compiling not supported)])
-    
+
     #-------------------------------------------------------------------------
     # Check for missing typedefs.
     #-------------------------------------------------------------------------
-    
+
     #AC_CHECK_TYPE(clock_t, long)
     AC_CHECK_TYPE(time_t, long)
     AC_TYPE_OFF_T
-    
+
     #-------------------------------------------------------------------------
     # Older SCO systems don't have ftruncate, but have chsize in libx.  Newer
     # versions have both.  Only check for chsize in libx if we don't have
     # truncate.
     #-------------------------------------------------------------------------
-    
+
     AC_CHECK_FUNC(ftruncate, ,
     	    [AC_DEFINE(NO_FTRUNCATE)
     	     AC_CHECK_LIB(x, chsize,
     		    [AC_DEFINE(HAVE_CHSIZE)
     		     TEA_ADD_LIBS([-lx])])])
-    
+
     #-------------------------------------------------------------------------
     # Check for various Unix or library functions that can be used by TclX.
     # These must be after the library checks.
     #-------------------------------------------------------------------------
-    
+
     AC_CHECK_FUNC(select, , [AC_DEFINE(NO_SELECT)])
     AC_CHECK_FUNC(setitimer, , [AC_DEFINE(NO_SETITIMER)])
     AC_CHECK_FUNC(sigaction, , [AC_DEFINE(NO_SIGACTION)])
@@ -248,27 +277,27 @@ int main(void) {
     AC_CHECK_FUNC(truncate, , [AC_DEFINE(NO_TRUNCATE)])
     AC_CHECK_FUNC(waitpid, , [AC_DEFINE(NO_WAITPID)])
     AC_CHECK_FUNC(sysconf, , [AC_DEFINE(NO_SYSCONF)])
-    
+
     #-------------------------------------------------------------------------
     # Test for socket related functions.
     #-------------------------------------------------------------------------
-    
+
     AC_CHECK_FUNC(inet_aton, , [AC_DEFINE(NO_INET_ATON)])
     AC_CHECK_FUNC(gethostname, , [AC_DEFINE(NO_GETHOSTNAME)])
     AC_CHECK_FUNCS([rresvport])
-    
+
     #-------------------------------------------------------------------------
     # Check for additional libraries the Tcl/Tk does not check for.
     #-------------------------------------------------------------------------
-    
+
     # This is needed for DEC Alphas
     AC_CHECK_LIB(dnet_stub, main, [TEA_ADD_LIBS([-ldnet_stub])])
-    
+
     #-------------------------------------------------------------------------
     # Check for catgets.  Not the some systems (NetBSD 1.0) have catclose
     # declared as type void rather than type int.
     #-------------------------------------------------------------------------
-    
+
     AC_CHECK_FUNC(catgets,
     	[AC_MSG_CHECKING([catclose return value])
     	 AC_TRY_COMPILE([#include <stdlib.h>

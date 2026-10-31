@@ -32,6 +32,15 @@
 #endif
 
 /*
+ * Tcl_Size was introduced in Tcl 9.  TclX still supports building against
+ * Tcl 8.6, where Tcl object and list sizes are int-sized.
+ */
+#ifndef TCL_SIZE_MAX
+typedef int Tcl_Size;
+#define TCL_SIZE_MODIFIER ""
+#endif
+
+/*
  * Internal interp flags compatibility - removed in Tcl 8.5 sources.
  */
 #ifndef ERR_IN_PROGRESS

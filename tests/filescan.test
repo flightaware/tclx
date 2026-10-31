@@ -31,7 +31,7 @@ proc IncrName {Name args} {
     set Begin [csubstr $Name 0 $Last]
     set Digit [cindex $Name $Last]
     set Recurse 0
-    case $Digit in {
+    switch -- $Digit {
         {9}     {set Digit A}
         {Z}     {if {$Upper} {set Recurse 1} else {set Digit a}}
         {z}     {set Recurse 1}
@@ -146,7 +146,7 @@ foreach scanInfo $scanList {
     set key [keylget scanInfo key]
     set matchType [keylget scanInfo matchType]
     set cmd "global matchInfo; ValMatch [list $scanInfo] 1.1" 
-    case $matchType in {
+    switch -- $matchType {
       {0} {scanmatch -nocase $testCH [string toupper $key] $cmd}
       {1} {scanmatch $testCH ^$key  $cmd}
       {2} {scanmatch $testCH $key\$ $cmd}
@@ -401,9 +401,16 @@ scancontext delete $testCH
 
 set testCH [scancontext create]
 
+#
+# Tcl 9 reworded the regular expression compilation error.  scanmatch
+# passes the message through from the same interpreter routine regexp
+# uses, so take the expected text from there instead of hard coding it.
+#
+catch {regexp {a[} {}} badRegExpMsg
+
 Test filescan-7.1 {filescan tests} {
     scanmatch $testCH {a[} {}
-} 1 {couldn't compile regular expression pattern: brackets [] not balanced}
+} 1 $badRegExpMsg
 
 #
 # Test the copy file manipulation by sorting a file of numbered lines into two

@@ -114,7 +114,8 @@ ParseSelectFileList (Tcl_Interp     *interp,
                      channelData_t **channelListPtr,
                      int            *maxFileIdPtr)
 {
-    int handleCnt, idx;
+    int idx;
+    Tcl_Size handleCnt;
     Tcl_Obj **handleObjv;
     channelData_t *channelList;
 
@@ -239,7 +240,8 @@ ReturnSelectedFileList (fd_set        *fileDescSetPtr,
                         int            fileDescCnt,
                         channelData_t *channelList)
 {
-    int idx, handleCnt;
+    int idx;
+    Tcl_Size handleCnt;
     Tcl_Obj *fileHandleList = Tcl_NewListObj (0, NULL);
 
     handleCnt = 0;

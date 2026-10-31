@@ -18,6 +18,12 @@
 
 #include "tclExtdInt.h"
 
+#if TCL_MAJOR_VERSION >= 9
+  #define TCLX_MIN_TCL_VERSION "9.0"
+#else
+  #define TCLX_MIN_TCL_VERSION "8.0"
+#endif
+
 /*
  * Tcl procedure to search for an init for TclX startup file.  
  */
@@ -29,7 +35,7 @@ static char initScript[] = "if {[info proc ::tclx::Init]==\"\"} {\n\
 "    source -rsrc tclx.tcl\n"
 #else
 "    global tclx_library\n\
-    tcl_findLibrary tclx " PACKAGE_VERSION " " FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
+    tcl_findLibrary tclx " TCLX_LIB_DIR_VERSION " " FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
 #endif
 "  }\n\
 }\n\
@@ -77,12 +83,12 @@ Tclx_SafeInit (Tcl_Interp *interp)
 {
     if (
 #ifdef USE_TCL_STUBS
-	(Tcl_InitStubs(interp, "8.0", 0) == NULL)
+	(Tcl_InitStubs(interp, TCLX_MIN_TCL_VERSION, 0) == NULL)
 #else
-	(Tcl_PkgRequire(interp, "Tcl", "8.0", 0) == NULL)
+	(Tcl_PkgRequire(interp, "Tcl", TCLX_MIN_TCL_VERSION, 0) == NULL)
 #endif
 	|| (Tclxcmd_Init(interp) != TCL_OK)
-	|| (Tcl_PkgProvide(interp, "Tclx", PACKAGE_VERSION) != TCL_OK)
+	|| (Tcl_PkgProvide(interp, "Tclx", TCLX_PACKAGE_VERSION) != TCL_OK)
 	) {
 	Tcl_AddErrorInfo (interp, "\n    (in TclX_SafeInit)");
 	return TCL_ERROR;
@@ -106,7 +112,7 @@ Tclxcmd_Init (Tcl_Interp *interp)
      * These are ok in safe interps.
      */
     TclX_SetAppInfo(TRUE, "TclX", "Extended Tcl",
-	    PACKAGE_VERSION, TCLX_PATCHLEVEL);
+	    TCLX_PACKAGE_VERSION, TCLX_PATCHLEVEL);
 
     TclX_BsearchInit (interp);
 	TclX_CoalesceInit (interp);

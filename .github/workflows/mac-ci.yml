@@ -1,44 +1,136 @@
 name: Mac CI
-
 on:
+  workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
-
 jobs:
   build:
-
+    name: Tcl ${{ matrix.tcl }}
     runs-on: macos-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tcl: 8.6.18
+            ref: core-8-6-18
+          - tcl: 9.0.4
+            ref: core-9-0-4
+          - tcl: 9.1.0
+            ref: core-9-1-0
+    env:
+      EXPECTED_TCL_VERSION: ${{ matrix.tcl }}
+      TCL_REPO: https://github.com/tcltk/tcl.git
+      TCL_REF: ${{ matrix.ref }}
+      TCL_PREFIX: /usr/local
     steps:
-    - uses: actions/checkout@v2
-    - name: Build dependencies
-      # Building tcl to make sure we get tclInt.h
-      run: |
-        sudo mkdir -p /usr/local/src/git
-        sudo chown `id -un` /usr/local/src/git
-        cd /usr/local/src/git
-        git clone https://github.com/tcltk/tcl.git
-        cd tcl
-        git checkout core-8-6-branch
-        cd unix
-        ./configure
-        make
-        sudo make install
-    - name: configure
-      run: |
-        autoreconf -vi
-        ./configure --with-tcl=/usr/local/lib --prefix=/usr/local
-    - name: make
-      run: make
-    - name: test
-      # These tests fail on Mac *only* in the Github Actions containers, and this
-      # cannot be reproduced in a workable test environment. It may be related to
-      # the general signal handling issues with multithreaded TclX. Try re-enabling
-      # when on Tcl(x) 8.7 where the problem should be fixed.
-      continue-on-error: true
-      run: SKIPFILES="pipe.test process.test signal.test" make test
-    - name: install
-      run: sudo make install
+      - uses: actions/checkout@v4
+      - name: Build Tcl ${{ matrix.tcl }}
+        # Building Tcl to make sure we get tclInt.h
+        run: |
+          set -eux
 
+          cd "$RUNNER_TEMP"
+          git clone --depth 1 --branch "$TCL_REF" "$TCL_REPO" tcl-src
+
+          cd tcl-src/unix
+          ./configure --prefix="$TCL_PREFIX"
+          make -j"$(sysctl -n hw.ncpu)"
+          sudo make install
+      - name: Locate Tcl installation
+        run: |
+          set -eux
+
+          echo "Installed Tcl-related files:"
+          find "$TCL_PREFIX" \
+            \( -name 'tclConfig.sh' -o -name 'tclsh*' -o -name 'libtcl*' -o -name 'tclInt.h' \) \
+            -print
+
+          TCL_CONFIG="$(find "$TCL_PREFIX/lib" -name 'tclConfig.sh' -print -quit)"
+
+          if [ -z "$TCL_CONFIG" ]; then
+            echo "Could not find tclConfig.sh under $TCL_PREFIX/lib"
+            exit 1
+          fi
+
+          TCL_CONFIG_DIR="$(dirname "$TCL_CONFIG")"
+
+          # shellcheck source=/dev/null
+          . "$TCL_CONFIG"
+
+          TCL_CONFIG_VERSION="${TCL_VERSION:-}${TCL_PATCH_LEVEL:-}"
+
+          if [ "$TCL_CONFIG_VERSION" != "$EXPECTED_TCL_VERSION" ]; then
+            echo "Expected tclConfig.sh version $EXPECTED_TCL_VERSION, got ${TCL_CONFIG_VERSION:-unset}"
+            exit 1
+          fi
+
+          if [ -x "$TCL_PREFIX/bin/tclsh$TCL_VERSION" ]; then
+            TCLSH="$TCL_PREFIX/bin/tclsh$TCL_VERSION"
+          elif [ -x "$TCL_PREFIX/bin/tclsh" ]; then
+            TCLSH="$TCL_PREFIX/bin/tclsh"
+          else
+            echo "Could not find installed Tcl shell under $TCL_PREFIX/bin"
+            exit 1
+          fi
+
+          {
+            echo "TCL_CONFIG=$TCL_CONFIG"
+            echo "TCL_CONFIG_DIR=$TCL_CONFIG_DIR"
+            echo "TCLSH=$TCLSH"
+          } >> "$GITHUB_ENV"
+
+          "$TCLSH" <<'EOF'
+          puts [info patchlevel]
+          EOF
+
+          "$TCLSH" <<EOF | grep "^$EXPECTED_TCL_VERSION$"
+          puts [info patchlevel]
+          EOF
+      - name: configure
+        run: |
+          set -eux
+
+          ./configure --with-tcl="$TCL_CONFIG_DIR" --prefix=/usr/local
+      - name: make
+        run: |
+          set -eux
+          make
+      - name: smoke test built TclX library
+        run: |
+          set -eux
+
+          TCLLIBPATH="$PWD" TCLX_LIBRARY="$PWD/library" "$TCLSH" <<'EOF'
+          proc assert_equal {name actual expected} {
+              if {$actual ne $expected} {
+                  error "$name: expected <$expected>, got <$actual>"
+              }
+          }
+
+          puts "Tcl: [info patchlevel]"
+          puts "TclX package: [package require Tclx]"
+          puts "TclX runtime: [infox version]"
+          puts "Loaded:"
+          puts [join [info loaded] "\n"]
+
+          assert_equal cindex    [cindex "abcdef" 2]              c
+          assert_equal clength   [clength "h\u00e9llo"]           5
+          assert_equal csubstr   [csubstr "abcdef" 1 3]           bcd
+          assert_equal replicate [replicate "xy" 3]               xyxyxy
+          assert_equal translit  [translit "abc" "ABC" "aabbcc"]  AABBCC
+          assert_equal ctype     [ctype digit "12345"]            1
+
+          puts "OK"
+          EOF
+      - name: test
+        # These tests fail on Mac *only* in the Github Actions containers, and this
+        # cannot be reproduced in a workable test environment. It may be related to
+        # the general signal handling issues with multithreaded TclX.
+        continue-on-error: true
+        run: |
+          set -eux
+          SKIPFILES="pipe.test process.test signal.test" make test
+      - name: install
+        run: |
+          set -eux
+          sudo make install

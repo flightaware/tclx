@@ -49,7 +49,7 @@ TclX_ChrootObjCmd (ClientData clientData,
 			      Tcl_Obj     *const objv[])
 {
     char   *chrootString;
-    int     chrootStrLen;
+    Tcl_Size chrootStrLen;
 
     if (objc != 2)
 	return TclX_WrongArgs (interp, objv [0], "path");

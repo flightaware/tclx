@@ -396,7 +396,7 @@ GetPackageIndexEntry (Tcl_Interp *interp,
                       off_t      *offsetPtr,
                       unsigned   *lengthPtr)
 {
-    int   pkgDataObjc;
+    Tcl_Size pkgDataObjc;
     Tcl_Obj **pkgDataObjv, *pkgDataPtr;
    
     /*
@@ -524,7 +524,8 @@ ProcessIndexFile (Tcl_Interp *interp,
 {
     Tcl_Channel  indexChannel = NULL;
     Tcl_DString  lineBuffer;
-    int          lineArgc, idx, result, tmpNum;
+    int idx, result, tmpNum;
+    Tcl_Size lineArgc;
     const char **lineArgv = NULL;
     off_t        offset;
     unsigned     length;

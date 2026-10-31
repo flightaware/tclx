@@ -57,7 +57,11 @@ namespace eval TclX {
                 set allOK 0
                 continue
             }
-            set filePath [lindex $auto_index($procName) 1]
+            set sourceCmd $auto_index($procName)
+            set filePath [lindex $sourceCmd 1]
+            if {$filePath eq "-encoding"} {
+                set filePath [lindex $sourceCmd 3]
+            }
             set fileName [file tail $filePath] 
             if {[lsearch $ignore $fileName] >= 0} continue
             
@@ -74,6 +78,8 @@ namespace eval TclX {
 # convert_lib:
 # Convert a tclIndex library to a .tlib. ignore any files in the ignore
 # list
+
+
 
 proc convert_lib {tclIndex packageLib {ignore {}}} {
     if {[file tail $tclIndex] != "tclIndex"} {
@@ -102,6 +108,20 @@ proc convert_lib {tclIndex packageLib {ignore {}}} {
         close $srcFH
     }
     close $libFH
+    if {![llength [info commands buildpackageindex]]} {
+        set buildidx [file join [file dirname [info script]] buildidx.tcl]
+        if {![file readable $buildidx] && [info exists ::tclx_library]} {
+            set buildidx [file join $::tclx_library buildidx.tcl]
+        }
+        source $buildidx
+    }
+    if {![llength [info commands buildpackageindex]]} {
+        set buildidx [file join [file dirname [info script]] buildidx.tcl]
+        if {![file readable $buildidx] && [info exists ::tclx_library]} {
+            set buildidx [file join $::tclx_library buildidx.tcl]
+        }
+        source $buildidx
+    }
     buildpackageindex $packageLib
     if !$allOK {
         error "*** Not all entries converted, but library generated"

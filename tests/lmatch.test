@@ -41,9 +41,17 @@ Test lmatch-2.2.1 {search modes} {
     lmatch -exact [list a\0A a b\0a a\0A] a\0A
 } 0 [list a\0A  a\0A]
 
+if {[package vsatisfies [package require Tcl] 9-]} {
+    set lmatch_bad_regexp_expected \
+        {cannot compile regular expression pattern: invalid quantifier operand}
+} else {
+    set lmatch_bad_regexp_expected \
+        {couldn't compile regular expression pattern: quantifier operand invalid}
+}
+
 Test lmatch-2.3 {search modes} {
     lmatch -regexp {xyz bbcc *bc*} *bc*
-} 1 {couldn't compile regular expression pattern: quantifier operand invalid}
+} 1 $lmatch_bad_regexp_expected
 
 Test lmatch-2.4 {search modes} {
     lmatch -regexp {b.x ^bc xy bcx bca} ^bc

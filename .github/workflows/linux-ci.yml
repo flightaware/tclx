@@ -1,34 +1,152 @@
 name: Linux CI
-
 on:
+  workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
-
 jobs:
   build:
-
+    name: Tcl ${{ matrix.tcl }}
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tcl: 8.6.18
+            ref: core-8-6-18
+          - tcl: 9.0.4
+            ref: core-9-0-4
+          - tcl: 9.1.0
+            ref: core-9-1-0
+    env:
+      EXPECTED_TCL_VERSION: ${{ matrix.tcl }}
+      TCL_REPO: https://github.com/tcltk/tcl.git
+      TCL_REF: ${{ matrix.ref }}
+      TCL_PREFIX: /usr/local
     steps:
-    - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: |
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-        sudo apt-get update -qq
-        sudo apt-get install -y gcc-11 g++-11
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-11
-        sudo apt-get install -y tcl8.6-dev
-    - name: configure
-      run: |
-        autoreconf -vi
-        ./configure --with-tcl=/usr/lib/tcl8.6
-    - name: make
-      run: make
-    - name: check unit tests
-      continue-on-error: true
-      run: make test
-    - name: install
-      run: sudo make install
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          set -eux
 
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            gcc-11 \
+            g++-11 \
+            build-essential \
+            git \
+            ca-certificates \
+            autoconf \
+            automake \
+            libtool \
+            make
+
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 110 \
+            --slave /usr/bin/g++ g++ /usr/bin/g++-11 \
+            --slave /usr/bin/gcov gcov /usr/bin/gcov-11
+      - name: Build Tcl ${{ matrix.tcl }}
+        run: |
+          set -eux
+
+          git clone --depth 1 --branch "$TCL_REF" "$TCL_REPO" tcl-src
+
+          cd tcl-src/unix
+          ./configure --prefix="$TCL_PREFIX"
+          make -j"$(nproc)"
+          sudo make install
+          sudo ldconfig
+      - name: Locate Tcl installation
+        run: |
+          set -eux
+
+          echo "Installed Tcl-related files:"
+          find "$TCL_PREFIX" \
+            \( -name 'tclConfig.sh' -o -name 'tclsh*' -o -name 'libtcl*' -o -name 'tclInt.h' \) \
+            -print
+
+          TCL_CONFIG="$(find "$TCL_PREFIX/lib" -name 'tclConfig.sh' -print -quit)"
+
+          if [ -z "$TCL_CONFIG" ]; then
+            echo "Could not find tclConfig.sh under $TCL_PREFIX/lib"
+            exit 1
+          fi
+
+          TCL_CONFIG_DIR="$(dirname "$TCL_CONFIG")"
+
+          # shellcheck source=/dev/null
+          . "$TCL_CONFIG"
+
+          TCL_CONFIG_VERSION="${TCL_VERSION:-}${TCL_PATCH_LEVEL:-}"
+
+          if [ "$TCL_CONFIG_VERSION" != "$EXPECTED_TCL_VERSION" ]; then
+            echo "Expected tclConfig.sh version $EXPECTED_TCL_VERSION, got ${TCL_CONFIG_VERSION:-unset}"
+            exit 1
+          fi
+
+          if [ -x "$TCL_PREFIX/bin/tclsh$TCL_VERSION" ]; then
+            TCLSH="$TCL_PREFIX/bin/tclsh$TCL_VERSION"
+          elif [ -x "$TCL_PREFIX/bin/tclsh" ]; then
+            TCLSH="$TCL_PREFIX/bin/tclsh"
+          else
+            echo "Could not find installed Tcl shell under $TCL_PREFIX/bin"
+            exit 1
+          fi
+
+          {
+            echo "TCL_CONFIG=$TCL_CONFIG"
+            echo "TCL_CONFIG_DIR=$TCL_CONFIG_DIR"
+            echo "TCLSH=$TCLSH"
+          } >> "$GITHUB_ENV"
+
+          "$TCLSH" <<'EOF'
+          puts [info patchlevel]
+          EOF
+
+          "$TCLSH" <<EOF | grep "^$EXPECTED_TCL_VERSION$"
+          puts [info patchlevel]
+          EOF
+      - name: configure
+        run: |
+          set -eux
+
+          autoreconf -vi
+          ./configure --with-tcl="$TCL_CONFIG_DIR"
+      - name: make
+        run: |
+          set -eux
+          make
+      - name: smoke test built TclX library
+        run: |
+          set -eux
+
+          TCLLIBPATH="$PWD" TCLX_LIBRARY="$PWD/library" "$TCLSH" <<'EOF'
+          proc assert_equal {name actual expected} {
+              if {$actual ne $expected} {
+                  error "$name: expected <$expected>, got <$actual>"
+              }
+          }
+
+          puts "Tcl: [info patchlevel]"
+          puts "TclX package: [package require Tclx]"
+          puts "TclX runtime: [infox version]"
+          puts "Loaded:"
+          puts [join [info loaded] "\n"]
+
+          assert_equal cindex    [cindex "abcdef" 2]              c
+          assert_equal clength   [clength "h\u00e9llo"]           5
+          assert_equal csubstr   [csubstr "abcdef" 1 3]           bcd
+          assert_equal replicate [replicate "xy" 3]               xyxyxy
+          assert_equal translit  [translit "abc" "ABC" "aabbcc"]  AABBCC
+          assert_equal ctype     [ctype digit "12345"]            1
+
+          puts "OK"
+          EOF
+      - name: check unit tests
+        continue-on-error: true
+        run: |
+          set -eux
+          make test
+      - name: install
+        run: |
+          set -eux
+          sudo make install
