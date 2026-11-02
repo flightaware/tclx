@@ -88,7 +88,7 @@ Tclx_SafeInit (Tcl_Interp *interp)
 	(Tcl_PkgRequire(interp, "Tcl", TCLX_MIN_TCL_VERSION, 0) == NULL)
 #endif
 	|| (Tclxcmd_Init(interp) != TCL_OK)
-	|| (Tcl_PkgProvide(interp, "Tclx", TCLX_PACKAGE_VERSION) != TCL_OK)
+	|| (Tcl_PkgProvide(interp, "Tclx", PACKAGE_VERSION) != TCL_OK)
 	) {
 	Tcl_AddErrorInfo (interp, "\n    (in TclX_SafeInit)");
 	return TCL_ERROR;
@@ -112,7 +112,7 @@ Tclxcmd_Init (Tcl_Interp *interp)
      * These are ok in safe interps.
      */
     TclX_SetAppInfo(TRUE, "TclX", "Extended Tcl",
-	    TCLX_PACKAGE_VERSION, TCLX_PATCHLEVEL);
+	    PACKAGE_VERSION, TCLX_PATCHLEVEL);
 
     TclX_BsearchInit (interp);
 	TclX_CoalesceInit (interp);

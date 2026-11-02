@@ -6,8 +6,11 @@ dnl	to configure the system for the local environment.
 # RCS: @(#) $Id: configure.in,v 1.17 2006/01/26 00:30:54 hobbs Exp $
 
 AC_INIT([tclx], [9.0])
+FULL_VERSION="9.0.0"
 
 TEA_INIT([3.9])
+
+AC_DEFINE_UNQUOTED(FULL_VERSION, "${FULL_VERSION}")
 
 AC_CONFIG_AUX_DIR(tclconfig)
 
@@ -17,38 +20,6 @@ AC_CONFIG_AUX_DIR(tclconfig)
 
 TEA_PATH_TCLCONFIG
 TEA_LOAD_TCLCONFIG
-
-#-----------------------------------------------------------------------
-# AC_INIT above sets PACKAGE_VERSION to the TclX release version; bump
-# it there for a new release.  Capture that value as
-# TCLX_PACKAGE_VERSION before reassigning PACKAGE_VERSION below to
-# track the detected Tcl version instead, which TEA uses to name the
-# generated shared library and package directory, so libtclx8.6.so and
-# libtclx9.1.so stay distinct and coexist on disk.
-#
-# The runtime script library search locates that same package directory
-# by name, so TCLX_LIB_DIR_VERSION carries the value PACKAGE_VERSION
-# ends up with rather than the TclX release version.
-#-----------------------------------------------------------------------
-
-TCLX_PACKAGE_VERSION="${PACKAGE_VERSION}"
-
-PACKAGE_VERSION="${TCL_VERSION}"
-PACKAGE_STRING="${PACKAGE_NAME} ${PACKAGE_VERSION}"
-FULL_VERSION="${TCLX_PACKAGE_VERSION}.0"
-
-AC_SUBST(PACKAGE_VERSION)
-AC_SUBST(PACKAGE_STRING)
-AC_SUBST(TCLX_PACKAGE_VERSION)
-AC_SUBST(FULL_VERSION)
-
-AC_DEFINE_UNQUOTED(TCLX_PACKAGE_VERSION, "${TCLX_PACKAGE_VERSION}",
-                   [Define to the TclX package version.])
-AC_DEFINE_UNQUOTED(TCLX_LIB_DIR_VERSION, "${PACKAGE_VERSION}",
-                   [Define to the version suffix of the installed TclX
-                    script library directory.])
-AC_DEFINE_UNQUOTED(FULL_VERSION, "${FULL_VERSION}",
-                   [Define to the full TclX version.])
 
 #-----------------------------------------------------------------------
 # Handle the --prefix=... option by defaulting to what Tcl gave.
