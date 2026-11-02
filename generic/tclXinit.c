@@ -35,7 +35,7 @@ static char initScript[] = "if {[info proc ::tclx::Init]==\"\"} {\n\
 "    source -rsrc tclx.tcl\n"
 #else
 "    global tclx_library\n\
-    tcl_findLibrary tclx " TCLX_LIB_DIR_VERSION " " FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
+    tcl_findLibrary tclx " PACKAGE_VERSION " " FULL_VERSION " tclx.tcl TCLX_LIBRARY tclx_library\n"
 #endif
 "  }\n\
 }\n\
