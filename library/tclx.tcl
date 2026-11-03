@@ -5,13 +5,12 @@
 #-----------------------------------------------------------------------------
 
 namespace eval ::tclx {
-    global auto_path auto_index tclx_library
-    if {[info exists tclx_library] && [string length $tclx_library]} {
-	set auto_index(buildpackageindex) \
-		{source [file join $tclx_library buildidx.tcl]}
-	if {![info exists auto_path] ||
-	    [lsearch -exact $auto_path $tclx_library] == -1} {
-	    lappend auto_path $tclx_library
+    if {[info exists ::tclx_library] && [string length $::tclx_library]} {
+	set ::auto_index(buildpackageindex) \
+		{source [file join $::tclx_library buildidx.tcl]}
+	if {![info exists ::auto_path] ||
+	    [lsearch -exact $::auto_path $::tclx_library] == -1} {
+	    lappend ::auto_path $::tclx_library
 	}
     }
 

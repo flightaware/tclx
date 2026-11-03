@@ -930,7 +930,8 @@ ParseSignalList (Tcl_Interp    *interp,
 {
     Tcl_Obj **signalObjv;
     char     *signalStr;
-    int       signalObjc, signalNum, idx;
+    int signalNum, idx;
+    Tcl_Size signalObjc;
 
     if (Tcl_ListObjGetElements (interp, signalListObjPtr,
                                 &signalObjc, &signalObjv) != TCL_OK)
@@ -1134,7 +1135,7 @@ ProcessSignalListEntry (Tcl_Interp *interp,
                         Tcl_Obj    *stateObjPtr)
 {
     Tcl_Obj **stateObjv;
-    int stateObjc;
+    Tcl_Size stateObjc;
     char *actionStr, *cmdStr;
     int signalNum, blocked;
     signalProcPtr_t  actionFunc = NULL;
@@ -1280,7 +1281,8 @@ static int
 SetSignalStates (Tcl_Interp *interp, Tcl_Obj *sigStatesObjPtr)
 {
     Tcl_Obj *keysListObj, **keysObjv, *stateObjPtr;
-    int keysObjc, idx;
+    int idx;
+    Tcl_Size keysObjc;
     char *signalName;
 
     if (TclX_KeyedListGetKeys (interp, sigStatesObjPtr, NULL,
@@ -1453,7 +1455,8 @@ TclX_KillObjCmd (ClientData   clientData,
                  int          objc,
                  Tcl_Obj     *const objv[])
 {
-    int    signalNum, nextArg, idx, procId, procObjc;
+    int signalNum, nextArg, idx, procId;
+    Tcl_Size procObjc;
     int    pgroup = FALSE;
     char  *cmdStr, *argStr;
     Tcl_Obj **procObjv;

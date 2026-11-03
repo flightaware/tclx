@@ -30,6 +30,17 @@ Test init-1.0 {safe interp with TclX} {
     lsort $xcmds
 } 0 {keyldel keylget keylkeys keylset}
 
+Test init-1.1 {library directory and buildpackageindex set up on load} {
+    set i [interp create]
+    set r [interp eval $i {
+        package require Tclx
+        list [expr {[lsearch -exact $auto_path $tclx_library] >= 0}] \
+            [auto_load buildpackageindex]
+    }]
+    interp delete $i
+    set r
+} 0 {1 1}
+
 # cleanup
 ::tcltest::cleanupTests
 return

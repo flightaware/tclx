@@ -183,6 +183,7 @@ ReadListElement (Tcl_Interp  *interp,
                  ReadData    *dataPtr,
                  Tcl_Obj     *elemObjPtr)
 {
+    char bsBuf[TCL_UTF_MAX];
     register char *p;
     char *cpStart;		/* Points to next byte to copy. */
     char *limit;		/* Points just after list's last byte. */
@@ -283,7 +284,8 @@ ReadListElement (Tcl_Interp  *interp,
 	    case '\\': {
 		char bsChar;
 
-                bsChar = Tcl_Backslash(p, &numChars);
+                Tcl_UtfBackslash(p, &numChars, bsBuf);
+                bsChar = ((unsigned char) bsBuf[0]);
                 if (openBraces > 0) {
                     p += (numChars - 1);  /* Advanced again at end of loop */
                 } else {
@@ -470,7 +472,7 @@ TclX_LgetsObjCmd (ClientData  clientData,
         int resultLen;
 
         if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+                           TCL_LEAVE_ERR_MSG) == NULL) {
             goto errorExit;
         }
 
@@ -512,7 +514,7 @@ TclX_LgetsObjCmd (ClientData  clientData,
          * FIX: Need functions to save/restore error state.
          */
         if (Tcl_ObjSetVar2(interp, objv[2], NULL, dataObj,
-                           TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) != NULL) {
+                           TCL_LEAVE_ERR_MSG) != NULL) {
             Tcl_SetObjResult (interp, saveResult);  /* Restore old message */
         }
         Tcl_DecrRefCount (saveResult);

@@ -125,7 +125,7 @@ TclX_EchoObjCmd (ClientData dummy,
     Tcl_Channel channel;
 #ifndef TCL_UTF_MAX
     char *stringPtr;
-    int stringPtrLen;
+    Tcl_Size stringPtrLen;
 #endif
 
     channel = TclX_GetOpenChannel (interp, "stdout", TCL_WRITABLE);
@@ -181,7 +181,22 @@ TclX_InfoxObjCmd (ClientData clientData,
 
     if (STREQU ("version", optionPtr)) {
         if (tclxVersion != NULL) {
-            Tcl_SetStringObj (resultPtr, tclxVersion, -1);
+            const char *tclPatchLevel;
+            Tcl_DString versionStr;
+
+            Tcl_DStringInit (&versionStr);
+            Tcl_DStringAppend (&versionStr, tclxVersion, -1);
+
+            tclPatchLevel = Tcl_GetVar (interp, "tcl_patchLevel",
+                                        TCL_GLOBAL_ONLY);
+            if (tclPatchLevel != NULL) {
+                Tcl_DStringAppend (&versionStr, " for Tcl ", -1);
+                Tcl_DStringAppend (&versionStr, tclPatchLevel, -1);
+            }
+
+            Tcl_SetStringObj (resultPtr, Tcl_DStringValue (&versionStr),
+                              Tcl_DStringLength (&versionStr));
+            Tcl_DStringFree (&versionStr);
         }
         return TCL_OK;
     }
@@ -321,7 +336,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 {
     Tcl_Obj *iObj, *newVarObj;
 
-    iObj = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
+    iObj = Tcl_GetVar2Ex(interp, varName, NULL, 0);
     if ((iObj == NULL) || (Tcl_IsShared (iObj))) {
 	iObj = newVarObj = Tcl_NewLongObj (idx);
     } else {
@@ -330,7 +345,7 @@ SetLoopCounter (Tcl_Interp *interp, char *varName, int idx)
 
     Tcl_SetLongObj (iObj, idx);
     if (Tcl_SetVar2Ex(interp, varName, NULL, iObj,
-	    TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+	    0|TCL_LEAVE_ERR_MSG) == NULL) {
 	if (newVarObj != NULL) {
 	    Tcl_DecrRefCount (newVarObj);
 	}

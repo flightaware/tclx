@@ -20,19 +20,18 @@
 
 #include "tclExtdInt.h"
 
-
 /*
  * Prototypes of internal functions.
  */
 static int
 CheckForUniCode (Tcl_Interp *interp,
                  char *str,
-                 int strLen,
+                 Tcl_Size strLen,
                  char *which);
 
 static unsigned int
 ExpandString (unsigned char *inStr,
-              int            inLength,
+              Tcl_Size       inLength,
               unsigned char  outStr [],
               int           *outLengthPtr);
 
@@ -112,7 +111,8 @@ TclX_CindexObjCmd (ClientData clientData,
                    int         objc,
                    Tcl_Obj   *const objv[])
 {
-    int strLen, utfLen, idx, numBytes;
+    int utfLen, idx, numBytes;
+    Tcl_Size strLen;
     char *str, buf [TCL_UTF_MAX];
 
     if (objc != 3)
@@ -150,7 +150,7 @@ TclX_ClengthObjCmd (ClientData clientData,
                     Tcl_Obj   *const objv[])
 {
     char *str;
-    int strLen;
+    Tcl_Size strLen;
 
     if (objc != 2)
         return TclX_WrongArgs (interp, objv[0], "string");
@@ -177,7 +177,8 @@ TclX_CconcatObjCmd (ClientData clientData,
                     Tcl_Obj   *const objv[])
 {
     Tcl_Obj *resultPtr = Tcl_GetObjResult(interp);
-    int idx, strLen;
+    int idx;
+    Tcl_Size strLen;
     char *str;
 
     for (idx = 1; idx < objc; idx++) {
@@ -205,7 +206,8 @@ TclX_CrangeObjCmd (ClientData clientData,
                    int         objc,
                    Tcl_Obj   *const objv[])
 {
-    int strLen, utfLen, first, subLen;
+    int utfLen, first, subLen;
+    Tcl_Size strLen;
     size_t isRange = (size_t) clientData;
     char *str;
     const char *start, *end;
@@ -267,9 +269,9 @@ TclX_CcollateObjCmd (ClientData clientData,
     int argIndex, result, local = FALSE;
     char *optionString;
     char *string1;
-    int string1Len;
+    Tcl_Size string1Len;
     char *string2;
-    int string2Len;
+    Tcl_Size string2Len;
 
     /*FIX: Not utf clean (FIXUTF), can it ever be... */
     if ((objc < 3) || (objc > 4))
@@ -329,7 +331,7 @@ TclX_ReplicateObjCmd (ClientData clientData,
     long         count;
     long         repCount;
     char        *stringPtr;
-    int          stringLength;
+    Tcl_Size stringLength;
 
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "string countExpr");
@@ -363,10 +365,10 @@ TclX_CtokenObjCmd (ClientData clientData,
 {
     Tcl_Obj* stringVarObj;
     char* string;
-    int strByteLen;
+    Tcl_Size strByteLen;
     int strByteIdx;
     char* separators;
-    int separatorsLen;
+    Tcl_Size separatorsLen;
     int tokenByteIdx;
     int tokenByteLen;
     Tcl_DString token;
@@ -379,7 +381,7 @@ TclX_CtokenObjCmd (ClientData clientData,
     }
     
     stringVarObj = Tcl_ObjGetVar2(interp, objv[1], NULL,
-                                  TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1);
+                                  TCL_LEAVE_ERR_MSG);
     if (stringVarObj == NULL) {
         return TCL_ERROR;
     }
@@ -416,7 +418,7 @@ TclX_CtokenObjCmd (ClientData clientData,
                                       strByteLen-strByteIdx);
     if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv[1], NULL), NULL,
                       newVarValueObj,
-                      TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1) == NULL) {
+                      TCL_LEAVE_ERR_MSG) == NULL) {
         Tcl_DStringFree (&token);
         Tcl_DecrRefCount (newVarValueObj);
         return TCL_ERROR;
@@ -442,9 +444,9 @@ TclX_CequalObjCmd (ClientData clientData,
                    Tcl_Obj   *const objv[])
 {
     char *string1Ptr;
-    int string1Len;
+    Tcl_Size string1Len;
     char *string2Ptr;
-    int string2Len;
+    Tcl_Size string2Len;
 
     if (objc != 3)
         return TclX_WrongArgs (interp, objv[0], "string1 string2");
@@ -467,7 +469,7 @@ TclX_CequalObjCmd (ClientData clientData,
 static int
 CheckForUniCode (Tcl_Interp *interp,
                  char *str,
-                 int strLen,
+                 Tcl_Size strLen,
                  char *which)
 {
     int idx, nbytes;
@@ -500,7 +502,7 @@ CheckForUniCode (Tcl_Interp *interp,
 
 static unsigned int
 ExpandString (unsigned char *inStr,
-              int            inLength,
+              Tcl_Size      inLength,
               unsigned char  outStr [],
               int           *outLengthPtr)
 {
@@ -546,12 +548,12 @@ TclX_TranslitObjCmd (ClientData clientData,
     short         map [MAX_EXPANSION+1];
     unsigned char *s;
     char          *fromString;
-    int            fromStringLen;
+    Tcl_Size fromStringLen;
     char          *toString;
-    int            toStringLen;
+    Tcl_Size toStringLen;
     Tcl_Obj       *transStringObj;
     char          *transString;
-    int            transStringLen;
+    Tcl_Size transStringLen;
     int            idx;
     int            stringIndex;
 
@@ -656,7 +658,8 @@ TclX_CtypeObjCmd (ClientData clientData,
 {
     int failIndex = FALSE;
     char *optStr, *class, *charStr;
-    int charStrLen, cnt, idx;
+    int cnt, idx;
+    Tcl_Size charStrLen;
     char *failVar = NULL;
     Tcl_Obj *classObj, *stringObj;
     int number;
@@ -853,7 +856,7 @@ TclX_CtypeObjCmd (ClientData clientData,
             Tcl_Obj *iObj = Tcl_NewIntObj (idx);
 
             if (Tcl_SetVar2Ex(interp, failVar, NULL, 
-                              iObj, TCL_LEAVE_ERR_MSG|TCL_PARSE_PART1) == NULL) {
+                              iObj, TCL_LEAVE_ERR_MSG) == NULL) {
                 Tcl_DecrRefCount (iObj);
                 return TCL_ERROR;
             }
