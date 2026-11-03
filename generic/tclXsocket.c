@@ -215,8 +215,8 @@ TclX_HostInfoObjCmd (ClientData  clientData,
             return TCL_ERROR;
 
         for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy ((VOID *) hostEntry->h_addr_list [idx],
-                   (VOID *) &inAddr,
+            bcopy ((void *) hostEntry->h_addr_list [idx],
+                   (void *) &inAddr,
                    hostEntry->h_length);
 
 	    listObj = Tcl_NewStringObj (inet_ntoa (inAddr), -1);
@@ -231,8 +231,8 @@ TclX_HostInfoObjCmd (ClientData  clientData,
             return TCL_ERROR;
 
         for (idx = 0; hostEntry->h_addr_list [idx] != NULL; idx++) {
-            bcopy ((VOID *) hostEntry->h_addr_list [idx],
-                   (VOID *) &inAddr,
+            bcopy ((void *) hostEntry->h_addr_list [idx],
+                   (void *) &inAddr,
                    hostEntry->h_length);
 	    listObj = Tcl_NewStringObj ((char *) hostEntry->h_name, -1);
 	    Tcl_ListObjAppendElement (interp, resultPtr, listObj);

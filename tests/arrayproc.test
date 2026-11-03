@@ -21,7 +21,7 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
     namespace import ::tcltest::*
 }
 
-package require Tclx 8.4
+package require Tclx
 
 set testArray(foo) bar
 set testArray(snap) frammistan

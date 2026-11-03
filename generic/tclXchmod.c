@@ -17,6 +17,48 @@
  */
 
 #include "tclExtdInt.h"
+#include <errno.h>
+
+/*
+ * Parse chmod absolute modes.
+ *
+ * Tcl 9 integer parsing no longer treats leading-zero strings as old-style
+ * octal in the same way TclX historically expected for chmod modes.
+ *
+ * Preserve TclX chmod semantics:
+ *   0101  -> octal
+ *   0777  -> octal
+ *   04111 -> octal
+ *   511   -> decimal
+ *   438   -> decimal
+ */
+static int
+ParseModeObj(Tcl_Interp *interp, Tcl_Obj *objPtr, int *modePtr)
+{
+    const char *str;
+    char *endPtr;
+    Tcl_Size len;
+    long value;
+    int base = 10;
+
+    str = Tcl_GetStringFromObj(objPtr, &len);
+
+    if ((len > 1) && (str[0] == '0')) {
+        base = 8;
+    }
+
+    errno = 0;
+    value = strtol(str, &endPtr, base);
+
+    if ((errno != 0) || (endPtr == str) || (*endPtr != '\0') || (value < 0)) {
+        TclX_AppendObjResult(interp, "invalid file mode \"", str, "\"", NULL);
+        return TCL_ERROR;
+    }
+
+    *modePtr = (int) value;
+    return TCL_OK;
+}
+
 
 /*
  * Type used for returning parsed mode informtion.
@@ -308,8 +350,9 @@ ChmodFileIdObj (Tcl_Interp *interp, modeInfo_t modeInfo, Tcl_Obj *fileIdObj)
 static int
 TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    int           objIdx, idx, fileObjc, fileIds, result;
-    modeInfo_t    modeInfo;
+    Tcl_Size fileObjc;
+    int           objIdx, idx, fileIds, result;
+    modeInfo_t    modeInfo = {NULL, 0};
     Tcl_Obj     **fileObjv;
     char         *fileIdsString;
     char         *modeString;
@@ -334,8 +377,7 @@ TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 
     modeString = Tcl_GetStringFromObj (objv [objIdx], NULL);
     if (ISDIGIT (modeString[0])) {
-        if (Tcl_GetIntFromObj (interp, objv [objIdx], &modeBits) 
-	  != TCL_OK)
+        if (ParseModeObj(interp, objv[objIdx], &modeBits) != TCL_OK)
             return TCL_ERROR;
 	modeInfo.absMode = modeBits;
         modeInfo.symMode = NULL;
@@ -373,12 +415,13 @@ TclX_ChmodObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 static int
 TclX_ChownObjCmd (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-    int        objIdx, ownerObjc, fileIds;
+    Tcl_Size ownerObjc;
+    Tcl_Size groupStrLen;
+    int        objIdx, fileIds;
     Tcl_Obj  **ownerObjv = NULL;
     unsigned   options;
     char      *fileIdsSwitch;
     char      *owner, *group;
-    int        groupStrLen;
 
 
     /*

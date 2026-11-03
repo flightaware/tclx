@@ -82,7 +82,7 @@ TclX_ExeclObjCmd (ClientData clientData,
     char **argList = staticArgv;
     int nextArg = 1;
     char *argStr;
-    int argObjc;
+    Tcl_Size argObjc;
     Tcl_Obj **argObjv;
     char *path, *argv0 = NULL;
     int idx, status;

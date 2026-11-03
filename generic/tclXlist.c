@@ -92,7 +92,7 @@ TclX_LvarcatObjCmd (ClientData   clientData,
      * Get the variable that we are going to update.  Include it if it
      * exists.
      */
-    varObjPtr = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
+    varObjPtr = Tcl_GetVar2Ex(interp, varName, NULL, 0);
 
     if (varObjPtr != NULL) {
         catObjc = objc - 1;
@@ -120,7 +120,7 @@ TclX_LvarcatObjCmd (ClientData   clientData,
         ckfree ((char *) catObjv);
 
     if (Tcl_SetVar2Ex(interp, varName, NULL, newObjPtr,
-                      TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+                      TCL_LEAVE_ERR_MSG) == NULL) {
         Tcl_DecrRefCount (newObjPtr);
         return TCL_ERROR;
     }
@@ -141,7 +141,8 @@ TclX_LvarpopObjCmd (ClientData   clientData,
                     Tcl_Obj    *const objv[])
 {
     Tcl_Obj *listVarPtr, *newVarObj, *returnElemPtr = NULL;
-    int listIdx, listLen;
+    int listIdx;
+    Tcl_Size listLen;
     char *varName;
 
     if ((objc < 2) || (objc > 4)) {
@@ -150,7 +151,7 @@ TclX_LvarpopObjCmd (ClientData   clientData,
     varName = Tcl_GetStringFromObj (objv [1], NULL);
 
     listVarPtr = Tcl_GetVar2Ex(interp, varName, NULL, 
-                               TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG);
+                               TCL_LEAVE_ERR_MSG);
     if (listVarPtr == NULL) {
         return TCL_ERROR;
     }
@@ -201,7 +202,7 @@ TclX_LvarpopObjCmd (ClientData   clientData,
      * Update variable.
      */
     if (Tcl_SetVar2Ex(interp, varName, NULL, listVarPtr,
-                      TCL_PARSE_PART1|TCL_LEAVE_ERR_MSG) == NULL) {
+                      TCL_LEAVE_ERR_MSG) == NULL) {
         goto errorExit;
     }
 
@@ -236,7 +237,8 @@ TclX_LvarpushObjCmd (ClientData   clientData,
                      Tcl_Obj    *const objv[])
 {
     Tcl_Obj *listVarPtr, *newVarObj;
-    int listIdx, listLen;
+    int listIdx;
+    Tcl_Size listLen;
     char *varName;
 
     if ((objc < 3) || (objc > 4)) {
@@ -244,7 +246,7 @@ TclX_LvarpushObjCmd (ClientData   clientData,
     }
     varName = Tcl_GetStringFromObj (objv [1], NULL);
 
-    listVarPtr = Tcl_GetVar2Ex(interp, varName, NULL, TCL_PARSE_PART1);
+    listVarPtr = Tcl_GetVar2Ex(interp, varName, NULL, 0);
     if ((listVarPtr == NULL) || (Tcl_IsShared (listVarPtr))) {
         if (listVarPtr == NULL) {
             listVarPtr = Tcl_NewListObj (0, NULL);
@@ -282,7 +284,7 @@ TclX_LvarpushObjCmd (ClientData   clientData,
         goto errorExit;
 
     if (Tcl_SetVar2Ex(interp, varName, NULL, listVarPtr,
-                      TCL_PARSE_PART1| TCL_LEAVE_ERR_MSG) == NULL) {
+                      TCL_LEAVE_ERR_MSG) == NULL) {
         goto errorExit;
     }
     return TCL_OK;
@@ -306,7 +308,7 @@ TclX_LemptyObjCmd (ClientData   clientData,
                    int          objc,
                    Tcl_Obj    *const objv[])
 {
-    int length;
+    Tcl_Size length;
 
     if (objc != 2) {
         return TclX_WrongArgs (interp, objv [0], "list");
@@ -345,7 +347,8 @@ TclX_LassignObjCmd (ClientData   clientData,
                     int          objc,
                     Tcl_Obj    *const objv[])
 {
-    int listObjc, listIdx, idx, remaining;
+    int listIdx, idx, remaining;
+    Tcl_Size listObjc;
     Tcl_Obj **listObjv, *elemPtr, *remainingObjPtr;
     Tcl_Obj *nullObjPtr = NULL;
 
@@ -372,7 +375,7 @@ TclX_LassignObjCmd (ClientData   clientData,
             elemPtr = nullObjPtr;
         }
         if (Tcl_SetVar2Ex(interp, Tcl_GetStringFromObj(objv [idx], NULL), NULL,
-                          elemPtr, TCL_PARSE_PART1 | TCL_LEAVE_ERR_MSG) == NULL)
+                          elemPtr, TCL_LEAVE_ERR_MSG) == NULL)
             goto error_exit;
     }
 
@@ -410,7 +413,10 @@ TclX_LmatchObjCmd (ClientData   clientData,
 #define EXACT   0
 #define GLOB    1
 #define REGEXP  2
-    int listObjc, idx, match, mode, patternLen, valueLen;
+    int idx, match, mode;
+    Tcl_Size valueLen;
+    Tcl_Size patternLen;
+    Tcl_Size listObjc;
     char *modeStr, *patternStr, *valueStr;
     Tcl_Obj **listObjv, *matchedListPtr = NULL;
 
@@ -504,10 +510,12 @@ TclX_LcontainObjCmd (ClientData   clientData,
                      int          objc,
                      Tcl_Obj    *const objv[])
 {
-    int listObjc, idx;
+    int idx;
+    Tcl_Size listObjc;
     Tcl_Obj **listObjv;
     char *elementStr, *checkStr;
-    int elementLen, checkLen;
+    Tcl_Size elementLen;
+    Tcl_Size checkLen;
 
     if (objc != 3) {
         return TclX_WrongArgs (interp, objv [0], "list element");
