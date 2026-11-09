@@ -3,10 +3,6 @@
 
 # Extended Tcl (TclX)
 
-## Note
-
-This branch is forked from the final Tcl8 release v8.6.3
-
 ## Introduction
 
 Extended Tcl (TclX), is an extension to Tcl, the Tool Command Language invented by Dr. John Ousterhout.  Tcl is a powerful, yet simple embeddable programming language.  Extended Tcl is oriented towards system programming tasks and large application development.  TclX provides additional interfaces to the operating system, and adds many new programming constructs, text manipulation tools, and debugging tools.
