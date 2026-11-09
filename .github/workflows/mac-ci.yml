@@ -25,6 +25,10 @@ jobs:
       TCL_PREFIX: /usr/local
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install autoconf
       - name: Build Tcl ${{ matrix.tcl }}
         # Building Tcl to make sure we get tclInt.h
         run: |
