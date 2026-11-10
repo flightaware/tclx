@@ -18,6 +18,12 @@
 
 #include "tclExtdInt.h"
 
+#if TCL_MAJOR_VERSION >= 9
+  #define TCLX_MIN_TCL_VERSION "9.0"
+#else
+  #define TCLX_MIN_TCL_VERSION "8.0"
+#endif
+
 /*
  * Tcl procedure to search for an init for TclX startup file.  
  */
@@ -77,9 +83,9 @@ Tclx_SafeInit (Tcl_Interp *interp)
 {
     if (
 #ifdef USE_TCL_STUBS
-	(Tcl_InitStubs(interp, "8.0", 0) == NULL)
+	(Tcl_InitStubs(interp, TCLX_MIN_TCL_VERSION, 0) == NULL)
 #else
-	(Tcl_PkgRequire(interp, "Tcl", "8.0", 0) == NULL)
+	(Tcl_PkgRequire(interp, "Tcl", TCLX_MIN_TCL_VERSION, 0) == NULL)
 #endif
 	|| (Tclxcmd_Init(interp) != TCL_OK)
 	|| (Tcl_PkgProvide(interp, "Tclx", PACKAGE_VERSION) != TCL_OK)
